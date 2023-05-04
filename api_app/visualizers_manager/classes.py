@@ -234,7 +234,7 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
         return result
 
 
-class VisualizableLevel:
+class VisualizablePage:
     def __init__(self):
         self._levels = {}
 
@@ -264,7 +264,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
 
-    Level = VisualizableLevel
+    Page = VisualizablePage
 
     @classmethod
     @property
@@ -297,15 +297,39 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
             f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
         )
 
-    def before_run(self, *args, **kwargs):
+    def before_run(self):
+        super().before_run()
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
-    def after_run(self):
-        if not isinstance(self.report.report, list):
+    def after_run_success(self, content):
+
+        if not isinstance(content, list):
             raise VisualizerRunException(
                 f"Report has not correct type: {type(self.report.report)}"
             )
+        for elem in content:
+            if not isinstance(elem, list):
+                raise VisualizerRunException(
+                    f"Report Page has not correct type: {type(elem)}"
+                )
+        super().after_run_success(content)
+        for i, page in enumerate(content):
+            if i == 0:
+                report = self.report
+            else:
+                report = self.copy_report()
+            report.report = page
+            report.save(update_fields=["report"])
+
+    def after_run(self):
+        super().after_run()
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
+
+    def copy_report(self) -> VisualizerReport:
+        report = self.report
+        report.pk = None
+        report.save()
+        return report
 
     def analyzer_reports(self) -> QuerySet:
         from api_app.analyzers_manager.models import AnalyzerReport

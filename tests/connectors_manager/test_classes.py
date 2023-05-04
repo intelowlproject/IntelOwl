@@ -8,6 +8,7 @@ from kombu import uuid
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.exceptions import ConnectorRunException
 from api_app.connectors_manager.models import ConnectorConfig
+from api_app.core.models import Parameter
 from api_app.models import Job, PluginConfig
 from tests import CustomTestCase
 
@@ -24,7 +25,7 @@ class ConnectorTestCase(CustomTestCase):
                 return {}
 
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test")
+            MockUpConnector.health_check("test", self.user)
 
         cc = ConnectorConfig.objects.create(
             name="test",
@@ -32,36 +33,31 @@ class ConnectorTestCase(CustomTestCase):
             description="test",
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
-            params={},
             maximum_tlp="CLEAR",
         )
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test")
+            MockUpConnector.health_check("test", self.user)
         cc.disabled = False
-        cc.secrets = {
-            "url_key_name": {
-                "env_var_key": "TEST_NOT_PRESENT_KEY",
-                "type": "str",
-                "description": "env_var_key",
-                "required": True,
-            }
-        }
+        param = Parameter.objects.create(
+            connector_config=cc,
+            name="url_key_name",
+            type="str",
+            is_secret=True,
+            required=True,
+        )
         cc.save()
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test")
+            MockUpConnector.health_check("test", self.user)
         pc = PluginConfig.objects.create(
-            type="2",
-            config_type="2",
-            attribute="url_key_name",
             value="https://intelowl.com",
-            organization=None,
             owner=self.user,
-            plugin_name="test",
+            parameter=param,
         )
         with patch("requests.head"):
-            result = MockUpConnector.health_check("test")
+            result = MockUpConnector.health_check("test", self.user)
         self.assertTrue(result)
         cc.delete()
+        param.delete()
         pc.delete()
 
     def test_before_run(self):
@@ -80,7 +76,6 @@ class ConnectorTestCase(CustomTestCase):
             description="test",
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
-            params={},
             maximum_tlp="CLEAR",
             run_on_failure=False,
         )
@@ -104,6 +99,7 @@ class ConnectorTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             status="reported_without_fails",
+            user=self.superuser,
         )
 
         subclasses = Connector.all_subclasses()
@@ -112,6 +108,7 @@ class ConnectorTestCase(CustomTestCase):
             for config in ConnectorConfig.objects.filter(
                 python_module=subclass.python_module
             ):
+                job.connectors_to_execute.set([config])
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
                 print(

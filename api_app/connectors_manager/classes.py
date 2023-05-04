@@ -8,7 +8,9 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
+from certego_saas.apps.user.models import User
 
+from ..core.models import Parameter
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorConfig, ConnectorReport
 
@@ -55,6 +57,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         )
 
     def before_run(self, *args, **kwargs):
+        super().before_run()
         logger.info(f"STARTED connector: {self.__repr__()}")
         self._config: ConnectorConfig
         if self._job.status not in [
@@ -77,10 +80,11 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
                 )
 
     def after_run(self):
+        super().after_run()
         logger.info(f"FINISHED connector: {self.__repr__()}")
 
     @classmethod
-    def health_check(cls, connector_name: str) -> Optional[bool]:
+    def health_check(cls, connector_name: str, user: User) -> Optional[bool]:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
@@ -89,21 +93,33 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
         for cc in ccs:
             cc: ConnectorConfig
-            if cc.is_runnable():
-                url = cc.read_secrets().get("url_key_name", None)
-                if url and url.startswith("http"):
-                    if settings.STAGE_CI:
-                        return True
+            if cc.is_runnable(user):
+                logger.info(
+                    f"Found connector runnable {cc.name} for user {user.username}"
+                )
+                param: Parameter = cc.parameters.filter(name__startswith="url").first()
+                logger.info(f"Url retrieved to verify is {param.name}")
+                if param:
                     try:
-                        requests.head(url, timeout=10)
-                    except requests.exceptions.ConnectionError:
-                        health_status = False
-                    except requests.exceptions.Timeout:
-                        health_status = False
+                        plugin_config = param.get_first_value(user)
+                    except RuntimeError:
+                        continue
                     else:
-                        health_status = True
+                        url = plugin_config.value
+                        if url.startswith("http"):
+                            logger.info(f"Checking url {url} for connector {cc.name}")
+                            if settings.STAGE_CI:
+                                return True
+                            try:
+                                requests.head(url, timeout=10)
+                            except requests.exceptions.ConnectionError:
+                                health_status = False
+                            except requests.exceptions.Timeout:
+                                health_status = False
+                            else:
+                                health_status = True
 
-                    return health_status
+                            return health_status
         raise ConnectorRunException(
             f"Unable to find configured connector {connector_name}"
         )

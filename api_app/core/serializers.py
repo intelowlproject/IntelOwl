@@ -2,28 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import List, Optional, TypedDict
+from collections import defaultdict
 
+from django.db.models import OuterRef, Subquery
 from rest_framework import serializers as rfs
 
-from api_app.core.models import AbstractConfig, AbstractReport
-from intel_owl.consts import PARAM_DATATYPE_CHOICES
+from api_app.core.models import AbstractReport, Parameter
 
 logger = logging.getLogger(__name__)
-
-
-class ConfigVerificationType(TypedDict):
-    configured: bool
-    error_message: Optional[str]
-    missing_secrets: List[str]
-
-
-class BaseField(rfs.Field):
-    def to_representation(self, value):
-        return value
-
-    def to_internal_value(self, data):
-        return data
 
 
 class _ConfigSerializer(rfs.Serializer):
@@ -35,63 +21,175 @@ class _ConfigSerializer(rfs.Serializer):
     soft_time_limit = rfs.IntegerField(required=True)
 
 
-class _TypeSerializer(rfs.Serializer):
-    type = rfs.ChoiceField(choices=list(PARAM_DATATYPE_CHOICES.keys()))
-    description = rfs.CharField(allow_blank=True, required=True, max_length=512)
-    default = BaseField(required=False)
+class ParamListSerializer(rfs.ListSerializer):
+    @property
+    def data(self):
+        # this is to return a dict instead of a list
+        return super(rfs.ListSerializer, self).data
 
-    def validate(self, attrs):
-        if "default" in attrs:
-            default_type = type(attrs["default"]).__name__
-            expected_type = attrs["type"]
-            if default_type != expected_type:
-                raise rfs.ValidationError(
-                    f"Invalid default type. {default_type} != {expected_type}"
+    def to_representation(self, data):
+        result = super().to_representation(data)
+        return {elem.pop("name"): elem for elem in result}
+
+
+class ParameterCompleteSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Parameter
+        fields = rfs.ALL_FIELDS
+
+
+class ParameterSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Parameter
+        fields = ["name", "type", "description", "required"]
+        list_serializer_class = ParamListSerializer
+
+
+class AbstractListConfigSerializer(rfs.ListSerializer):
+
+    plugins = rfs.PrimaryKeyRelatedField(read_only=True)
+
+    def to_representation(self, data):
+        from api_app.models import PluginConfig
+
+        plugins = self.child.Meta.model.objects.filter(
+            pk__in=[plugin.pk for plugin in data]
+        )
+        user = self.context["request"].user
+        enabled_plugins = plugins.filter(disabled=False)
+
+        # get the values for that configurations
+        configurations = PluginConfig.visible_for_user(user).filter(
+            **{f"parameter__{self.child.Meta.model.snake_case_name}__pk__in": plugins}
+        )
+        # value for owner
+        subquery_owner = Subquery(
+            configurations.filter(
+                parameter=OuterRef("pk"), owner=user, for_organization=False
+            ).values("value")[:1]
+        )
+        # value for default
+        subquery_default = Subquery(
+            configurations.filter(parameter=OuterRef("pk"))
+            .filter(owner__isnull=True)
+            .values("value")[:1]
+        )
+        # value for org
+        if user and user.has_membership():
+            subquery_org = Subquery(
+                configurations.filter(parameter=OuterRef("pk"))
+                .filter(for_organization=True, owner=user.membership.organization.owner)
+                .values("value")[:1]
+            )
+            logger.debug("Excluding plugins disabled in organization")
+            enabled_plugins = enabled_plugins.exclude(
+                disabled_in_organizations=user.membership.organization.pk
+            )
+        else:
+            from django.db.models import Value
+
+            logger.debug(
+                f"User {user.username} is not a member of an organization,"
+                f"meaning that there are no disabled plugins"
+            )
+            subquery_org = Value(False)
+        # annotate if the params are configured or not with the subquery
+        params = (
+            Parameter.objects.filter(
+                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
+            )
+            .prefetch_related(self.child.Meta.model.snake_case_name)
+            .annotate(
+                value_owner=subquery_owner,
+                value_default=subquery_default,
+                value_organization=subquery_org,
+            )
+        )
+        parsed = defaultdict(list)
+        # populate the result for every plugin (even the ones without parameters)
+        # parsed[plugin]= [parameter1]
+        for parameter in params:
+            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
+                parameter
+            )
+        logger.debug(
+            ", ".join(
+                [
+                    f"plugin {key} has {len(values)} parameters"
+                    for key, values in parsed.items()
+                ]
+            )
+        )
+        result = []
+        # we can finally construct our result
+        for plugin in plugins:
+            plugin_representation = self.child.to_representation(plugin)
+            plugin_representation["params"] = {}
+            plugin_representation["secrets"] = {}
+            total_parameter = len(parsed[plugin])
+            parameter_required_not_configured = []
+            for param in parsed[plugin]:
+                # the priority order is
+                # 1 owner
+                # 2 organization
+                # 3 default
+                value = (
+                    param.value_owner or param.value_organization or param.value_default
                 )
-        return super().validate(attrs)
+                if param.required and not bool(value):
+                    parameter_required_not_configured.append(param.name)
+                param_representation = ParameterSerializer(param).data
+                if param.is_secret and value == param.value_organization:
+                    value = "redacted"
+                logger.debug(
+                    f"Parameter {param.name} for plugin {plugin.name} "
+                    f"has value {value} for user {user.username}"
+                )
+                param_representation["value"] = value
+                param_representation.pop("name")
+                if param.is_secret:
+                    plugin_representation["secrets"][param.name] = param_representation
+                else:
+                    plugin_representation["params"][param.name] = param_representation
+            if not parameter_required_not_configured:
+                logger.debug(f"Plugin {plugin.name} is configured")
+                configured = True
+                details = "Ready to use!"
+            else:
+                logger.debug(f"Plugin {plugin.name} is not configured")
+                details = (
+                    f"{', '.join(parameter_required_not_configured)} "
+                    "secret"
+                    f"{'' if len(parameter_required_not_configured) == 1 else 's'}"
+                    " not set;"
+                    f" ({total_parameter - len(parameter_required_not_configured)} "
+                    f"of {total_parameter} satisfied)"
+                )
+                configured = False
+            if plugin in enabled_plugins:
+                logger.debug(f"Plugin {plugin.name} is disabled")
+                disabled = False
+            else:
+                logger.debug(f"Plugin {plugin.name} is enabled")
+                disabled = True
+            plugin_representation["disabled"] = disabled
+            plugin_representation["verification"] = {
+                "configured": configured,
+                "details": details,
+                "missing_secrets": parameter_required_not_configured,
+            }
+            result.append(plugin_representation)
 
-
-class _ParamSerializer(_TypeSerializer):
-    """
-    To validate `params` attr.
-    """
-
-    default = BaseField(required=True)
-
-
-class _SecretSerializer(_TypeSerializer):
-    """
-    To validate `secrets` attr.
-    """
-
-    required = rfs.BooleanField(required=True)
+        return result
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):
 
-    secrets = rfs.DictField(
-        child=_SecretSerializer(required=True), required=False, allow_empty=True
-    )
-    params = rfs.DictField(
-        child=_ParamSerializer(required=True), required=False, allow_empty=True
-    )
     config = _ConfigSerializer(required=True)
+    parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        fields = rfs.ALL_FIELDS
-
-    def to_representation(self, instance: AbstractConfig):
-        user = self.context["request"].user
-        result = super().to_representation(instance)
-        result["verification"] = instance.get_verification(user)
-        params_values = instance.read_params(user)
-        for param, param_dict in result["params"].items():
-            try:
-                param_dict["value"] = params_values[param]
-            except KeyError:
-                param_dict["value"] = None
-        result["disabled"] = not instance.is_runnable(user)
-        return result
+        exclude = ["disabled_in_organizations"]
 
     def to_internal_value(self, data):
         raise NotImplementedError()
@@ -116,7 +214,7 @@ class AbstractReportSerializer(rfs.ModelSerializer):
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
-        data["type"] = instance.config.plugin_type.label.lower()
+        data["type"] = instance.__class__.__name__.replace("Report", "").lower()
         return data
 
     def to_internal_value(self, data):

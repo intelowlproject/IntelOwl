@@ -300,16 +300,6 @@ export function PluginData({
                                           ...configuration,
                                           ...additionalEntryData,
                                         };
-                                        if (
-                                          plugins[newConfiguration.plugin_name]
-                                            .params[newConfiguration.attribute]
-                                            ?.type === "str"
-                                        ) {
-                                          newConfiguration.value =
-                                            JSON.stringify(
-                                              newConfiguration.value
-                                            );
-                                        }
                                         if (newConfiguration.create)
                                           createCustomConfig(
                                             newConfiguration
@@ -326,7 +316,7 @@ export function PluginData({
                                           });
                                         else
                                           updateCustomConfig(
-                                            newConfiguration,
+                                            newConfiguration.value,
                                             newConfiguration.id
                                           ).then(() => {
                                             setFieldValue(

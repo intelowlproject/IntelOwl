@@ -29,10 +29,11 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     relationships_to_request: list
     relationships_elements: int
     url_sub_path: str
+    _api_key_name: str
 
     @property
     def headers(self) -> dict:
-        return {"x-apikey": self._secrets["api_key_name"]}
+        return {"x-apikey": self._api_key_name}
 
     def _get_relationship_limit(self, relationship):
         # by default, just extract the first element

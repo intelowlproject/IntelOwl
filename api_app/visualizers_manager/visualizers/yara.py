@@ -26,7 +26,7 @@ class Yara(Visualizer):
             for match in matches
             if match.get("match", None)
         ]
-        levels = self.Level()
+        page1 = self.Page()
         h1 = self.HList(
             value=[
                 self.Title(
@@ -39,7 +39,7 @@ class Yara(Visualizer):
             ]
         )
         logger.debug(h1.to_dict())
-        levels.add_level(level=1, horizontal_list=h1)
+        page1.add_level(level=1, horizontal_list=h1)
         h2 = self.HList(
             value=[
                 self.Title(
@@ -53,9 +53,12 @@ class Yara(Visualizer):
             ]
         )
         logger.debug(h2.to_dict())
-        levels.add_level(level=2, horizontal_list=h2)
-        logger.debug(levels)
-        return levels.to_dict()
+        page2 = self.Page()
+        page2.add_level(level=1, horizontal_list=h1)
+        page2.add_level(level=2, horizontal_list=h2)
+        logger.debug(page1)
+        logger.debug(page2)
+        return [page1.to_dict(), page2.to_dict()]
 
     @classmethod
     def _monkeypatch(cls):

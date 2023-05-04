@@ -10,3 +10,12 @@ class Status(models.TextChoices):
     RUNNING = "RUNNING"
     SUCCESS = "SUCCESS"
     KILLED = "KILLED"
+
+
+class ParamTypes(models.TextChoices):
+    INT = "int"
+    FLOAT = "float"
+    STR = "str"
+    BOOL = "bool"
+    LIST = "list"
+    DICT = "dict"

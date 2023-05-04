@@ -100,6 +100,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                     if jobs.exists():
                         found_one = True
                     for job in jobs:
+                        job.analyzers_to_execute.set([config])
                         print(
                             "\t\t"
                             f"Testing {job.file_name} with mimetype {mimetype}"
@@ -119,6 +120,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                                 f"{mimetype} failed {e}"
                             )
                         finally:
+                            del sub
                             signal.alarm(0)
                 if not found_one:
                     self.fail(
@@ -148,30 +150,34 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         self.assertEqual(oa.observable_classification, "domain")
         job.delete()
 
-    @staticmethod
-    def _create_jobs():
+    def _create_jobs(self):
         Job.objects.create(
+            user=self.superuser,
             observable_name="test.com",
             observable_classification="domain",
             status="reported_without_fails",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="8.8.8.8",
             observable_classification="ip",
             status="reported_without_fails",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="https://www.honeynet.org/projects/active/intel-owl/",
             observable_classification="url",
             status="reported_without_fails",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="3edd95917241e9ef9bbfc805c2c5aff3",
             observable_classification="hash",
             status="reported_without_fails",
             md5="3edd95917241e9ef9bbfc805c2c5aff3",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="test@intelowl.com",
             observable_classification="generic",
             status="reported_without_fails",
@@ -202,6 +208,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                     job = Job.objects.get(
                         observable_classification=observable_supported
                     )
+                    job.analyzers_to_execute.set([config])
                     sub = subclass(
                         config, job.pk, runtime_configuration={}, task_id=uuid()
                     )

@@ -8,6 +8,8 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.core.models import Parameter
 from api_app.models import Comment, Job, PluginConfig, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -31,16 +33,19 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         self.assertFalse(content)
-
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="api_key_name",
+            analyzer_config=AnalyzerConfig.objects.get(name="AbuseIPDB"),
+            required=True,
+            type="str",
+        )
         # if the user is owner of an org, he should get the org secret
         pc = PluginConfig(
-            type="1",
-            config_type="2",
-            attribute="api_key_name",
             value="supersecret",
-            organization=org,
+            for_organization=True,
             owner=self.user,
-            plugin_name="AbuseIPDB",
+            parameter=param,
         )
         pc.clean()
         pc.save()
@@ -49,24 +54,21 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         first_item = content[0]
-        self.assertEqual(first_item["value"], '"supersecret"')
+        self.assertEqual(first_item["value"], "supersecret")
 
         # second personal item
         secret_owner = PluginConfig(
-            type="1",
-            config_type="2",
-            attribute="api_key_name",
             value="supersecret_user_only",
-            organization=None,
+            for_organization=False,
             owner=self.user,
-            plugin_name="AbuseIPDB",
+            parameter=param,
         )
         secret_owner.save()
         response = self.client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
         second_item = content[1]
-        self.assertEqual(second_item["value"], '"supersecret_user_only"')
+        self.assertEqual(second_item["value"], "supersecret_user_only")
 
         # if a standard user who does not belong to any org tries to get a secret,
         # they should not find anything
@@ -90,43 +92,44 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         first_item = content[0]
-        self.assertEqual(first_item["value"], '"redacted"')
+        self.assertEqual(first_item["value"], "redacted")
         secret_owner.refresh_from_db()
         self.assertEqual(secret_owner.value, "supersecret_user_only")
 
         # third superuser secret
         secret_owner = PluginConfig(
-            type="1",
-            config_type="2",
-            attribute="api_key_name",
             value="supersecret_low_privilege",
-            organization=None,
+            for_organization=False,
             owner=self.standard_user,
-            plugin_name="AbuseIPDB",
+            parameter=param,
         )
         secret_owner.save()
         response = self.standard_user_client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
         second_item = content[1]
-        self.assertEqual(second_item["value"], '"supersecret_low_privilege"')
-
+        self.assertEqual(second_item["value"], "supersecret_low_privilege")
+        param2 = Parameter.objects.create(
+            is_secret=True,
+            name="api_key_name",
+            analyzer_config=AnalyzerConfig.objects.get(name="Auth0"),
+            required=True,
+        )
         # if there are 2 secrets for different services, the user should get them both
         secret_owner = PluginConfig(
-            type="1",
-            config_type="2",
-            attribute="api_key_name",
             value="supersecret_low_privilege_third",
-            organization=None,
+            for_organization=False,
             owner=self.standard_user,
-            plugin_name="Auth0",
+            parameter=param2,
         )
         secret_owner.save()
         response = self.standard_user_client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
         third_item = content[2]
-        self.assertEqual(third_item["value"], '"supersecret_low_privilege_third"')
+        self.assertEqual(third_item["value"], "supersecret_low_privilege_third")
+        param2.delete()
+        param.delete()
 
 
 class CommentViewSetTestCase(CustomAPITestCase):

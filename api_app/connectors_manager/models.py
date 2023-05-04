@@ -7,13 +7,15 @@ from django.db import models
 from api_app.choices import TLP
 from api_app.connectors_manager.exceptions import ConnectorConfigurationException
 from api_app.core.models import AbstractConfig, AbstractReport
-from api_app.models import PluginConfig
 
 
 class ConnectorReport(AbstractReport):
     config = models.ForeignKey(
         "ConnectorConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
+
+    class Meta:
+        unique_together = [("config", "job")]
 
 
 class ConnectorConfig(AbstractConfig):
@@ -24,8 +26,8 @@ class ConnectorConfig(AbstractConfig):
 
     @classmethod
     @property
-    def plugin_type(cls) -> models.TextChoices:
-        return PluginConfig.PluginType.CONNECTOR
+    def plugin_type(cls) -> str:
+        return "2"
 
     @property
     def python_base_path(self) -> str:

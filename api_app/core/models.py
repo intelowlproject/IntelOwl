@@ -3,18 +3,18 @@
 import logging
 from typing import Any, Dict, Type
 
-from cache_memoize import cache_memoize
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Manager, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from kombu import uuid
 
-from api_app.core.choices import Status
-from api_app.validators import validate_config, validate_params, validate_secrets
+from api_app.core.choices import ParamTypes, Status
+from api_app.validators import validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
@@ -43,7 +43,6 @@ class AbstractReport(models.Model):
 
     class Meta:
         abstract = True
-        unique_together = [("config", "job")]
 
     @classmethod
     @property
@@ -67,11 +66,6 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
-    def update_status(self, status: str, save=True):
-        self.status = status
-        if save:
-            self.save(update_fields=["status"])
-
     def append_error(self, err_msg: str, save=True):
         self.errors.append(err_msg)
         if save:
@@ -84,7 +78,116 @@ def config_default():
     return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
 
 
+class Parameter(models.Model):
+    name = models.CharField(null=False, blank=False, max_length=50)
+    type = models.CharField(
+        choices=ParamTypes.choices, max_length=10, null=False, blank=False
+    )
+    description = models.TextField(blank=True, default="")
+    is_secret = models.BooleanField(null=False)
+    required = models.BooleanField(null=False)
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        unique_together = [
+            ("name", "analyzer_config", "connector_config", "visualizer_config")
+        ]
+        indexes = [
+            models.Index(fields=["analyzer_config", "is_secret"]),
+            models.Index(fields=["connector_config", "is_secret"]),
+            models.Index(fields=["visualizer_config", "is_secret"]),
+        ]
+
+    def clean_config(self):
+        count_configs = (
+            bool(self.analyzer_config)
+            + bool(self.connector_config)
+            + bool(self.visualizer_config)
+        )
+
+        if count_configs > 1:
+            msg = (
+                "You can't have the same parameter on more than one"
+                " configuration at the time"
+            )
+            logger.error(msg)
+            raise ValidationError(msg)
+        elif count_configs == 0:
+            msg = "The parameter must be set to at least a configuration"
+            logger.error(msg)
+            raise ValidationError(msg)
+
+    def clean(self) -> None:
+        super().clean()
+        self.clean_config()
+
+    @cached_property
+    def config(self):
+        return self.analyzer_config or self.connector_config or self.visualizer_config
+
+    def values_for_user(self, user: User = None) -> QuerySet:
+        from api_app.models import PluginConfig
+
+        return PluginConfig.visible_for_user(user).filter(parameter=self)
+
+    def get_first_value(self, user: User):
+        from api_app.models import PluginConfig
+
+        # priority for value retrieved
+        # 1 - Owner
+        # 2 - Organization
+        # 3 - Default
+        qs = self.values_for_user(user)
+        try:
+            result = qs.get(owner=user)
+            logger.info(f"Retrieved {result.value=} owned by the user")
+            return result
+        except PluginConfig.DoesNotExist:
+            if user.has_membership():
+                try:
+                    result = qs.get(
+                        for_organization=True,
+                        owner=user.membership.organization.owner,
+                    )
+                    logger.info(f"Retrieved {result.value=} owned by the organization")
+                    return result
+                except PluginConfig.DoesNotExist:
+                    ...
+            try:
+                result = qs.get(owner__isnull=True)
+                logger.info(f"Retrieved {result.value=}, default value")
+                return result
+            except PluginConfig.DoesNotExist:
+                raise RuntimeError(
+                    "Unable to find a valid value for parameter"
+                    f" {self.name} for configuration {self.config.name}"
+                )
+
+
 class AbstractConfig(models.Model):
+
+    parameters: Manager
+
     name = models.CharField(max_length=50, null=False, unique=True, primary_key=True)
     python_module = models.CharField(null=False, max_length=120, db_index=True)
     description = models.TextField(null=False)
@@ -95,8 +198,6 @@ class AbstractConfig(models.Model):
         default=config_default,
         validators=[validate_config],
     )
-    secrets = models.JSONField(blank=True, default=dict, validators=[validate_secrets])
-    params = models.JSONField(blank=True, default=dict, validators=[validate_params])
     disabled_in_organizations = models.ManyToManyField(
         Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
@@ -109,7 +210,16 @@ class AbstractConfig(models.Model):
 
     @classmethod
     @property
-    def plugin_type(cls) -> models.TextChoices:
+    def snake_case_name(cls) -> str:
+        import re
+
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
+
+    @classmethod
+    @property
+    def plugin_type(cls) -> str:
+        # retro compatibility
+
         raise NotImplementedError()
 
     @property
@@ -139,59 +249,37 @@ class AbstractConfig(models.Model):
         self.clean_python_module()
         self.clean_config_queue()
 
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 7,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
-        f"-{s.name}"
-        f"-{user.username if user else ''}",
-    )
-    def get_verification(self, user: User = None):
-        from api_app.models import PluginConfig
+    @property
+    def options(self):
+        return self.parameters.filter(is_secret=False)
 
-        missing_secrets = []
-        configured = True
-        for secret, value in self.secrets.items():
-            if (
-                not PluginConfig.visible_for_user(user)
-                .filter(
-                    attribute=secret,
-                    type=self.plugin_type,
-                    plugin_name=self.name,
-                )
-                .exists()
-            ):
-                missing_secrets.append(secret)
-                if value["required"]:
-                    configured = False
+    @property
+    def secrets(self):
+        return self.parameters.filter(is_secret=True)
 
-        num_missing_secrets = len(missing_secrets)
-        num_total_secrets = len(self.secrets.keys())
-        if missing_secrets:
-            details = (
-                f"{', '.join(missing_secrets)} "
-                f"{'facultative' if configured else ''} "
-                f"secret{''if len(missing_secrets) == 1 else 's'} not set;"
-                f" ({num_total_secrets - num_missing_secrets} "
-                f"of {num_total_secrets} satisfied)"
-            )
-        else:
-            details = "Ready to use!"
-        return {
-            "configured": configured,
-            "details": details,
-            "missing_secrets": missing_secrets,
-        }
+    @property
+    def required_parameters(self) -> QuerySet:
+        return self.parameters.filter(required=True)
 
-    def is_runnable(self, user: User = None):
-        configured = self.get_verification(user)["configured"]
+    def _is_configured(self, user: User = None) -> bool:
+        for param in self.required_parameters:
+            param: Parameter
+            if not param.values_for_user(user).exists():
+                return False
+        return True
+
+    def _is_disabled_in_org(self, user: User = None):
         if user and user.has_membership():
-            disabled_by_org = self.disabled_in_organizations.filter(
+            return self.disabled_in_organizations.filter(
                 pk=user.membership.organization.pk
             ).exists()
-        else:
-            disabled_by_org = False
-        logger.debug(f"{configured=}, {disabled_by_org=}, {self.disabled=}")
-        return configured and not disabled_by_org and not self.disabled
+        return False
+
+    def is_runnable(self, user: User = None):
+        configured = self._is_configured(user)
+        disabled_in_org = self._is_disabled_in_org(user)
+        logger.debug(f"{configured=}, {disabled_in_org=}, {self.disabled=}")
+        return configured and not disabled_in_org and not self.disabled
 
     @cached_property
     def queue(self):
@@ -221,66 +309,18 @@ class AbstractConfig(models.Model):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def _read_plugin_config(
-        self,
-        config_type: str,
-        user: User = None,
-    ):
-        from api_app.models import PluginConfig
-
-        config = {}
-        if config_type == PluginConfig.ConfigType.PARAMETER:
-            attr = self.params
-        elif config_type == PluginConfig.ConfigType.SECRET:
-            attr = self.secrets
-        else:
-            raise TypeError(f"Unable to retrieve config type {config_type}")
-        for key, secret_config in attr.items():
-            pcs = PluginConfig.visible_for_user(user).filter(
-                attribute=key,
-                type=self.plugin_type,
-                plugin_name=self.name,
-                config_type=config_type,
-            )
-            if pcs.count() > 1 and user:
-                # I have both a secret from the org and the user, priority to the user
-                value = pcs.get(owner=user, organization__isnull=True).value
-            elif pcs.count() == 1:
-                value = pcs.first().value
-            elif "default" in secret_config:
-                value = secret_config["default"]
-            elif "required" in secret_config and secret_config["required"]:
-                raise self.config_exception(
-                    f"{self.name}:"
-                    f" {PluginConfig.ConfigType(config_type).label}"
-                    f" {key} is missing"
-                )
+    def read_params(self, job) -> Dict[Parameter, Any]:
+        # priority
+        # 1 - Runtime config
+        # 2 - Value inside the db
+        result = {}
+        for param in self.parameters.all():
+            param: Parameter
+            if param.name in job.get_config_runtime_configuration(self):
+                result[param] = job.get_config_runtime_configuration(self)[param.name]
             else:
-                continue
-            config[key] = value
-        return config
-
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 7,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
-        f"-{s.name}"
-        f"-{user.username if user else ''}",
-    )
-    def read_secrets(self, user: User = None) -> Dict[str, Any]:
-        from api_app.models import PluginConfig
-
-        return self._read_plugin_config(PluginConfig.ConfigType.SECRET, user)
-
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 7,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
-        f"-{s.name}"
-        f"-{user.username if user else ''}",
-    )
-    def read_params(self, user: User = None) -> Dict[str, Any]:
-        from api_app.models import PluginConfig
-
-        return self._read_plugin_config(PluginConfig.ConfigType.PARAMETER, user)
+                result[param] = param.get_first_value(job.user).value
+        return result
 
     def get_signature(self, job):
         from api_app.models import Job

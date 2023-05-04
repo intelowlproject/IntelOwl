@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     # auth
     "rest_email_auth",
     "drf_recaptcha",
+    # performance debugging
+    "silk",
 ]
-
 
 from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]

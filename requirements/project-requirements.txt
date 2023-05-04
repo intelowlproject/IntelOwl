@@ -10,6 +10,7 @@ django-celery-results==2.5.0
 django-ses == 3.4.0
 django-iam-dbauth==0.1.4
 django-prettyjson==0.4.1
+django-silk==5.0.3
 jsonschema==4.17.3
 # django rest framework libs
 Authlib==1.2.0

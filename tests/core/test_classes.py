@@ -24,8 +24,6 @@ class PluginTestCase(CustomTestCase):
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            params={},
-            secrets={},
             run_on_failure=False,
         )
 

@@ -18,6 +18,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
+from api_app.core.models import Parameter
 from api_app.models import PluginConfig
 from tests.mock_utils import if_mock_connections, patch
 
@@ -27,13 +28,16 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
+
+    _api_key_name: str
+
     def run(self):
         maxmind_final_result = {}
         for db in db_names:
             try:
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
-                    self._update_db(db, self._secrets["api_key_name"])
+                    self._update_db(db, self._api_key_name)
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(
                         "database location does not exist"
@@ -61,10 +65,9 @@ class Maxmind(classes.ObservableAnalyzer):
             python_module=cls.python_module, disabled=False
         ):
             for plugin in PluginConfig.objects.filter(
-                plugin_name=config.name,
-                type=PluginConfig.PluginType.ANALYZER,
-                config_type=PluginConfig.ConfigType.SECRET,
-                attribute="api_key_name",
+                param=Parameter.objects.get(
+                    analyzer_config=config, name="api_key_name", is_secret=True
+                ),
             ):
                 if plugin.value:
                     return plugin.value

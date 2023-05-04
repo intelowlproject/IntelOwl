@@ -53,8 +53,6 @@ class PlaybookViewTestCase(CustomAPITestCase):
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            params={},
-            secrets={},
             type="observable",
             observable_supported=["ip"],
         )

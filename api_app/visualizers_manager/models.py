@@ -15,7 +15,7 @@ class VisualizerReport(AbstractReport):
     config = models.ForeignKey(
         "VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
-    report = models.JSONField(default=dict, validators=[validate_report])
+    report = models.JSONField(default=list, validators=[validate_report])
 
 
 class VisualizerConfig(AbstractConfig):
@@ -29,9 +29,7 @@ class VisualizerConfig(AbstractConfig):
     @classmethod
     @property
     def plugin_type(cls) -> str:
-        from api_app.models import PluginConfig
-
-        return PluginConfig.PluginType.VISUALIZER
+        return "3"
 
     @property
     def python_base_path(self) -> str:

@@ -6,7 +6,7 @@ import logging
 import os
 import zipfile
 from pathlib import PosixPath
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import git
@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.core.models import Parameter
 from api_app.models import PluginConfig
 from intel_owl.settings._util import set_permissions
 
@@ -312,34 +313,35 @@ class YaraScan(FileAnalyzer):
     _private_repositories: dict
     local_rules: str
 
+    def _get_owner_and_key(self, url: str) -> Tuple[Union[str, None], Union[str, None]]:
+        if url in self._private_repositories:
+            valid_value: PluginConfig = Parameter.objects.get(
+                analyzer_config=self._config,
+                is_secret=True,
+                name="private_repositories",
+            ).get_first_value()
+            if valid_value.for_organization:
+                if self._job.user.has_membership():
+                    owner = (
+                        f"{self._job.user.membership.organization.name}"
+                        f".{self._job.user.membership.organization.owner}"
+                    )
+                else:
+                    raise AnalyzerRunException(f"Unable to find repository {url}")
+            else:
+                owner = self._job.user.username
+            key = self._private_repositories[url]
+        else:
+            owner = None
+            key = None
+        return owner, key
+
     def run(self):
         if not self.repositories:
             raise AnalyzerRunException("There are no yara rules selected")
         storage = YaraStorage()
         for url in self.repositories:
-            if url in self._private_repositories:
-                try:
-                    PluginConfig.objects.get(
-                        plugin_name=self.analyzer_name,
-                        type=PluginConfig.PluginType.ANALYZER,
-                        config_type=PluginConfig.ConfigType.SECRET,
-                        attribute="private_repositories",
-                        owner=self._job.user,
-                    )
-                except PluginConfig.DoesNotExist:
-                    if self._job.user.has_membership():
-                        owner = (
-                            f"{self._job.user.membership.organization.name}"
-                            f".{self._job.user.membership.organization.owner}"
-                        )
-                    else:
-                        raise AnalyzerRunException(f"Unable to find repository {url}")
-                else:
-                    owner = self._job.user.username
-                key = self._private_repositories[url]
-            else:
-                owner = None
-                key = None
+            owner, key = self._get_owner_and_key(url)
             storage.add_repo(url, owner, key)
         if self.local_rules:
             path: PosixPath = (
@@ -366,20 +368,14 @@ class YaraScan(FileAnalyzer):
         for config in AnalyzerConfig.objects.filter(
             python_module=cls.python_module, disabled=False
         ):
-            new_urls = config.params["repositories"]["default"]
-            logger.info(f"Adding default configuration urls {new_urls}")
-            for url in new_urls:
-                storage.add_repo(url)
-
-            for plugin in PluginConfig.objects.filter(
-                plugin_name=config.name,
-                type=PluginConfig.PluginType.ANALYZER,
-                config_type=PluginConfig.ConfigType.SECRET,
-                attribute="private_repositories",
-            ):
+            for plugin in config.parameters.get(
+                name="private_repositories"
+            ).values_for_user():
+                if not plugin.value:
+                    continue
                 owner = (
                     f"{plugin.organization.name}.{plugin.organization.owner}"
-                    if plugin.organization
+                    if plugin.for_organization
                     else plugin.owner.username
                 )
                 for url, ssh_key in plugin.value.items():
@@ -387,12 +383,7 @@ class YaraScan(FileAnalyzer):
                     storage.add_repo(url, owner, ssh_key)
 
             # we are downloading even custom signatures for each analyzer
-            for plugin in PluginConfig.objects.filter(
-                plugin_name=config.name,
-                type=PluginConfig.PluginType.ANALYZER,
-                config_type=PluginConfig.ConfigType.PARAMETER,
-                attribute="repositories",
-            ):
+            for plugin in config.parameters.get(name="repositories").values_for_user():
                 new_urls = plugin.value
                 logger.info(f"Adding personal urls {new_urls}")
                 for url in new_urls:

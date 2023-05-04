@@ -11,8 +11,10 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
+from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+from ..core.models import AbstractConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from .models import AnalyzerConfig, AnalyzerReport
@@ -89,21 +91,22 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             return None
         if isinstance(result, dict):
             for key, values in result.items():
-                result[key] = self._validate_result(values, level=level + 1)
+                result[key] = self._validate_result(
+                    values, level=level + 1, max_recursion=max_recursion
+                )
         elif isinstance(result, list):
             for i, _ in enumerate(result):
-                result[i] = self._validate_result(result[i], level=level + 1)
+                result[i] = self._validate_result(
+                    result[i], level=level + 1, max_recursion=max_recursion
+                )
         elif isinstance(result, str):
             return result.replace("\u0000", "")
         elif isinstance(result, int) and result > 9223372036854775807:  # max int 8bytes
             result = 9223372036854775807
         return result
 
-    def before_run(self, *args, **kwargs):
-        self.report.update_status(status=self.report.Status.RUNNING.value)
-
-    def after_run(self):
-        self.report.report = self._validate_result(self.report.report)
+    def after_run_success(self, content):
+        super().after_run_success(self._validate_result(content, max_recursion=15))
 
     @classmethod
     def update(cls) -> bool:
@@ -124,14 +127,17 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     observable_name: str
     observable_classification: str
 
-    @classmethod
-    @property
-    def python_base_path(cls):
-        return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        runtime_configuration: dict,
+        task_id: int,
+        **kwargs,
+    ):
+        super().__init__(config, job_id, runtime_configuration, task_id, **kwargs)
 
-    def __post__init__(self):
         self._config: AnalyzerConfig
-        # check if we should run the hash instead of the binary
         if self._job.is_sample and self._config.run_hash:
             self.observable_classification = ObservableTypes.HASH
             # check which kind of hash the analyzer needs
@@ -143,7 +149,11 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         else:
             self.observable_name = self._job.observable_name
             self.observable_classification = self._job.observable_classification
-        return super().__post__init__()
+
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)
@@ -172,6 +182,23 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     filename: str
     file_mimetype: str
 
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        runtime_configuration: dict,
+        task_id: int,
+        **kwargs,
+    ):
+        super().__init__(config, job_id, runtime_configuration, task_id, **kwargs)
+        self.md5 = self._job.md5
+        self.filename = self._job.file_name
+        # this is updated in the filepath property, like a cache decorator.
+        # if the filepath is requested, it means that the analyzer downloads...
+        # ...the file from AWS because it requires a path and it needs to be deleted
+        self.__filepath = None
+        self.file_mimetype = self._job.file_mimetype
+
     @classmethod
     @property
     def python_base_path(cls):
@@ -188,16 +215,6 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 file=self._job.file, analyzer=self.analyzer_name
             )
         return self.__filepath
-
-    def __post__init__(self):
-        self.md5 = self._job.md5
-        self.filename = self._job.file_name
-        # this is updated in the filepath property, like a cache decorator.
-        # if the filepath is requested, it means that the analyzer downloads...
-        # ...the file from AWS because it requires a path and it needs to be deleted
-        self.__filepath = None
-        self.file_mimetype = self._job.file_mimetype
-        return super().__post__init__()
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)
@@ -459,7 +476,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.start = mock_fn(self.start)
 
     @classmethod
-    def health_check(cls, analyzer_name: str) -> bool:
+    def health_check(cls, analyzer_name: str, user: User) -> bool:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """

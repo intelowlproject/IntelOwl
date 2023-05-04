@@ -58,7 +58,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
-        report.update_status(AbstractReport.Status.KILLED)
+        report.status = AbstractReport.Status.KILLED
+        report.save(update_fields=["status"])
 
     def perform_retry(self, report: AbstractReport):
         raise NotImplementedError()
@@ -150,7 +151,7 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
             if not hasattr(class_, "health_check") or not callable(class_.health_check):
                 raise NotImplementedError()
             try:
-                health_status = class_.health_check(obj.name)
+                health_status = class_.health_check(obj.name, request.user)
             except Exception as e:
                 raise ValidationError({"detail": str(e)})
         except NotImplementedError:

@@ -1,9 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer, AbstractReportSerializer
+from api_app.core.serializers import (
+    AbstractConfigSerializer,
+    AbstractListConfigSerializer,
+    AbstractReportSerializer,
+)
 
 from .models import AnalyzerConfig, AnalyzerReport
 
@@ -21,4 +24,5 @@ class AnalyzerReportSerializer(AbstractReportSerializer):
 class AnalyzerConfigSerializer(AbstractConfigSerializer):
     class Meta:
         model = AnalyzerConfig
-        fields = rfs.ALL_FIELDS
+        exclude = ["disabled_in_organizations"]
+        list_serializer_class = AbstractListConfigSerializer

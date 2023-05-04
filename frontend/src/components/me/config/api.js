@@ -26,7 +26,7 @@ async function updateCustomConfig(value, id) {
   console.debug("updateCustomConfig - value:");
   console.debug(value);
   try {
-    const resp = await axios.patch(`${PLUGIN_CONFIG_URI}/${id}`, {value});
+    const resp = await axios.patch(`${PLUGIN_CONFIG_URI}/${id}`, { value });
     addToast("Data updated successfully", null, "success", true);
     return resp;
   } catch (e) {

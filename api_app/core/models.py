@@ -126,14 +126,16 @@ class Parameter(models.Model):
         )
 
         if count_configs > 1:
-            raise ValidationError(
+            msg = (
                 "You can't have the same parameter on more than one"
                 " configuration at the time"
             )
+            logger.error(msg)
+            raise ValidationError(msg)
         elif count_configs == 0:
-            raise ValidationError(
-                "The parameter must be set to at least a configuration"
-            )
+            msg = "The parameter must be set to at least a configuration"
+            logger.error(msg)
+            raise ValidationError(msg)
 
     def clean(self) -> None:
         super().clean()
@@ -157,18 +159,24 @@ class Parameter(models.Model):
         # 3 - Default
         qs = self.values_for_user(user)
         try:
-            return qs.get(owner=user)
+            result = qs.get(owner=user)
+            logger.info(f"Retrieved {result.value=} owned by the user")
+            return result
         except PluginConfig.DoesNotExist:
             if user.has_membership():
                 try:
-                    return qs.get(
+                    result = qs.get(
                         for_organization=True,
                         owner=user.membership.organization.owner,
                     )
+                    logger.info(f"Retrieved {result.value=} owned by the organization")
+                    return result
                 except PluginConfig.DoesNotExist:
                     ...
             try:
-                return qs.get(owner__isnull=True)
+                result = qs.get(owner__isnull=True)
+                logger.info(f"Retrieved {result.value=}, default value")
+                return result
             except PluginConfig.DoesNotExist:
                 raise RuntimeError(
                     "Unable to find a valid value for parameter"

@@ -94,15 +94,20 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         for cc in ccs:
             cc: ConnectorConfig
             if cc.is_runnable(user):
+                logger.info(
+                    f"Found connector runnable {cc.name} for user {user.username}"
+                )
                 param: Parameter = cc.parameters.filter(name__startswith="url").first()
+                logger.info(f"Url retrieved to verify is {param.name}")
                 if param:
                     try:
                         plugin_config = param.get_first_value(user)
                     except RuntimeError:
-                        return False
+                        continue
                     else:
                         url = plugin_config.value
                         if url.startswith("http"):
+                            logger.info(f"Checking url {url} for connector {cc.name}")
                             if settings.STAGE_CI:
                                 return True
                             try:

@@ -81,12 +81,17 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 .filter(for_organization=True, owner=user.membership.organization.owner)
                 .values("value")[:1]
             )
+            logger.debug("Excluding plugins disabled in organization")
             enabled_plugins = enabled_plugins.exclude(
                 disabled_in_organizations=user.membership.organization.pk
             )
         else:
             from django.db.models import Value
 
+            logger.debug(
+                f"User {user.username} is not a member of an organization,"
+                f"meaning that there are no disabled plugins"
+            )
             subquery_org = Value(False)
         # annotate if the params are configured or not with the subquery
         params = (
@@ -107,7 +112,14 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
             parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
                 parameter
             )
-
+        logger.debug(
+            ", ".join(
+                list(
+                    f"plugin {key} has {len(values)} parameters"
+                    for key, values in parsed.items()
+                )
+            )
+        )
         result = []
         # we can finally construct our result
         for plugin in plugins:
@@ -129,6 +141,10 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 param_representation = ParameterSerializer(param).data
                 if param.is_secret and value == param.value_organization:
                     value = "redacted"
+                logger.debug(
+                    f"Parameter {param.name} for plugin {plugin.name} "
+                    f"has value {value} for user {user.username}"
+                )
                 param_representation["value"] = value
                 param_representation.pop("name")
                 if param.is_secret:
@@ -136,9 +152,11 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 else:
                     plugin_representation["params"][param.name] = param_representation
             if not parameter_required_not_configured:
+                logger.debug(f"Plugin {plugin.name} is configured")
                 configured = True
                 details = "Ready to use!"
             else:
+                logger.debug(f"Plugin {plugin.name} is not configured")
                 details = (
                     f"{', '.join(parameter_required_not_configured)} "
                     "secret"
@@ -149,8 +167,10 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 )
                 configured = False
             if plugin in enabled_plugins:
+                logger.debug(f"Plugin {plugin.name} is disabled")
                 disabled = False
             else:
+                logger.debug(f"Plugin {plugin.name} is enabled")
                 disabled = True
             plugin_representation["disabled"] = disabled
             plugin_representation["verification"] = {

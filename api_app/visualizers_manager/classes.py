@@ -301,17 +301,12 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         super().before_run()
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
-    @property
-    def reports(self):
-        return self.report_model.objects.filter(job=self._job, config=self._config)
-
     def after_run(self):
         super().after_run()
-        for report in self.reports:
-            if not isinstance(report.report, list):
-                raise VisualizerRunException(
-                    f"Report has not correct type: {type(report.report)}"
-                )
+        if not isinstance(self.report.report, list):
+            raise VisualizerRunException(
+                f"Report has not correct type: {type(self.report.report)}"
+            )
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
 
     def analyzer_reports(self) -> QuerySet:

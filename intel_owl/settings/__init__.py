@@ -42,9 +42,7 @@ INSTALLED_APPS = [
     "rest_email_auth",
     "drf_recaptcha",
     # performance debugging
-    "silk",
 ]
-
 
 from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]
@@ -62,3 +60,6 @@ from .mail import *  # lgtm [py/polluting-import]
 from .rest import *  # lgtm [py/polluting-import]
 from .security import *  # lgtm [py/polluting-import]
 from .storage import *  # lgtm [py/polluting-import]
+
+if STAGE_STAGING or STAGE_LOCAL:
+    INSTALLED_APPS.append("silk")

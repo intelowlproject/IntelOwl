@@ -19,5 +19,5 @@ urlpatterns = [
     re_path(r"^(?!api|silk)$", render_reactapp),
     re_path(r"^(?!api|silk)(?:.*)/?$", render_reactapp),
 ]
-if settings.DEBUG:
+if settings.STAGE_STAGING or settings.STAGE_LOCAL:
     urlpatterns.append(path("silk/", include("silk.urls"), name="silk"))

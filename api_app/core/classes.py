@@ -104,7 +104,7 @@ class Plugin(metaclass=ABCMeta):
         function called after run function.
         """
         self.report.end_time = timezone.now()
-        self.report.save(update_fields=["end_time"])
+        self.report.save()
 
     def after_run_success(self, content):
         self.report.report = content

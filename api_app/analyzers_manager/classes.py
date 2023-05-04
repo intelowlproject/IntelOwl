@@ -91,10 +91,14 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             return None
         if isinstance(result, dict):
             for key, values in result.items():
-                result[key] = self._validate_result(values, level=level + 1, max_recursion=max_recursion)
+                result[key] = self._validate_result(
+                    values, level=level + 1, max_recursion=max_recursion
+                )
         elif isinstance(result, list):
             for i, _ in enumerate(result):
-                result[i] = self._validate_result(result[i], level=level + 1, max_recursion=max_recursion)
+                result[i] = self._validate_result(
+                    result[i], level=level + 1, max_recursion=max_recursion
+                )
         elif isinstance(result, str):
             return result.replace("\u0000", "")
         elif isinstance(result, int) and result > 9223372036854775807:  # max int 8bytes
@@ -102,8 +106,9 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return result
 
     def after_run_success(self, content):
-        content = self._validate_result(content, max_recursion=30)
-        return super().after_run_success(content)
+        return super().after_run_success(
+            self._validate_result(content, max_recursion=15)
+        )
 
     @classmethod
     def update(cls) -> bool:

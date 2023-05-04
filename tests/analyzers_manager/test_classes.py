@@ -120,6 +120,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                                 f"{mimetype} failed {e}"
                             )
                         finally:
+                            del sub
                             signal.alarm(0)
                 if not found_one:
                     self.fail(

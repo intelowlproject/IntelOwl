@@ -57,6 +57,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         )
 
     def before_run(self, *args, **kwargs):
+        super().before_run()
         logger.info(f"STARTED connector: {self.__repr__()}")
         self._config: ConnectorConfig
         if self._job.status not in [
@@ -79,6 +80,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
                 )
 
     def after_run(self):
+        super().after_run()
         logger.info(f"FINISHED connector: {self.__repr__()}")
 
     @classmethod

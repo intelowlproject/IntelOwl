@@ -283,11 +283,6 @@ class Job(models.Model):
         td = self.finished_analysis_time - self.received_request_time
         return round(td.total_seconds(), 2)
 
-    def update_status(self, status: str, save=True):
-        self.status = status
-        if save:
-            self.save(update_fields=["status"])
-
     def append_error(self, err_msg: str, save=True):
         self.errors.append(err_msg)
         if save:

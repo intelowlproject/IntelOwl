@@ -12,7 +12,7 @@ import {
 } from "../constants/api";
 
 async function downloadAllPlugin(pluginUrl) {
-  const pageSize = 20;
+  const pageSize = 70;
   let pluginList = [];
   // we need to request the first chunk to know how many chunks are available
   const resp = await axios.get(pluginUrl, {

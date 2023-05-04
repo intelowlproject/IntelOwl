@@ -297,14 +297,21 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
             f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
         )
 
-    def before_run(self, *args, **kwargs):
+    def before_run(self):
+        super().before_run()
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
+    @property
+    def reports(self):
+        return self.report_model.objects.filter(job=self._job, config=self._config)
+
     def after_run(self):
-        if not isinstance(self.report.report, list):
-            raise VisualizerRunException(
-                f"Report has not correct type: {type(self.report.report)}"
-            )
+        super().after_run()
+        for report in self.reports:
+            if not isinstance(report.report, list):
+                raise VisualizerRunException(
+                    f"Report has not correct type: {type(report.report)}"
+                )
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
 
     def analyzer_reports(self) -> QuerySet:

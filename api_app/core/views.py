@@ -58,7 +58,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
-        report.update_status(AbstractReport.Status.KILLED)
+        report.status = AbstractReport.Status.KILLED
+        report.save(update_fields=["status"])
 
     def perform_retry(self, report: AbstractReport):
         raise NotImplementedError()

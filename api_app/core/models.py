@@ -119,15 +119,20 @@ class Parameter(models.Model):
         ]
 
     def clean_config(self):
-        if (
+        count_configs = (
             bool(self.analyzer_config)
             + bool(self.connector_config)
             + bool(self.visualizer_config)
-            > 1
-        ):
+        )
+
+        if count_configs > 1:
             raise ValidationError(
                 "You can't have the same parameter on more than one"
                 " configuration at the time"
+            )
+        elif count_configs == 0:
+            raise ValidationError(
+                "The parameter must be set to at least a configuration"
             )
 
     def clean(self) -> None:

@@ -10,8 +10,8 @@ from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
     VisualizableHorizontalList,
-    VisualizableLevel,
     VisualizableObject,
+    VisualizablePage,
     VisualizableTitle,
     VisualizableVerticalList,
     Visualizer,
@@ -212,13 +212,13 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         self.assertEqual(vvl.to_dict(), expected_result)
 
 
-class VisualizableLevelTestCase(CustomTestCase):
+class VisualizablePageTestCase(CustomTestCase):
     def test_to_dict(self):
         value = VisualizableBase(
             value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
         )
         vvl = VisualizableHorizontalList(value=[value])
-        vl = VisualizableLevel()
+        vl = VisualizablePage()
         vl.add_level(level=0, horizontal_list=vvl)
         expected_result = {
             "level": 0,

@@ -307,6 +307,14 @@ You may want to look at a few existing examples to start to build a new one:
       2. Remember to correctly set the `dependencies`
       3. Remember to correctly set the `objects`
 
+## How to modify the default value of a plugin
+
+Default value of plugins are saved as `PluginConfig` objects. To change its value, and propagate to every IntelOwl user you have to
+1. Inside django admin, go in the `Parameter` section and select the parameter of which you want to change the value
+2. At the bottom of the page, change the value and copy/remember/save it/print the primary key (small number under **Value**)
+3. Use `manage.py dumppluginconfig INSERT_THE_PK`
+4. If you want, you can enter in the `reverse_migration` function the previous value
+5. Commit the file!
 
 ## How to modify/delete a plugin
 

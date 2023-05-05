@@ -42,6 +42,8 @@ class PluginConfigInline(admin.TabularInline):
 @admin.register(Parameter)
 class ParameterAdminView(admin.ModelAdmin):
     inlines = [PluginConfigInline]
+    search_fields = ["name"]
+    list_filter = ["is_secret"]
     list_display = ("name", "type", "description", "is_secret", "required")
     fields = list_display
 

@@ -17,7 +17,7 @@ from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
 
 class Command(BaseCommand):
-    help = "Execute celery task"
+    help = "Create migration file from plugin saved inside the db"
 
     def add_arguments(self, parser):
         parser.add_argument(

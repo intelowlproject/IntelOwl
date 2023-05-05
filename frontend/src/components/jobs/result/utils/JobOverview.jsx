@@ -26,7 +26,7 @@ import { StatusIcon } from "../../../common";
 import VisualizerReport from "../visualizer/visualizer";
 import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
 
-const NO_VISUALIZER_UI_ELEMENT = "no visualizer";
+const NO_VISUALIZER_UI_ELEMENT_CODE = -1;
 
 export default function JobOverview({ isRunningJob, job, refetch }) {
   console.debug("JobOverview rendered");
@@ -45,8 +45,9 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     }
   }
   const rawElements = React.useMemo(
-    () => ({
-      "Analyzers Report": {
+    () => [
+      {
+        id: 1,
         nav: (
           <div className="d-flex-center">
             <strong>Analyzers Report</strong>
@@ -58,7 +59,8 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         ),
         report: <AnalyzersReportTable job={job} refetch={refetch} />,
       },
-      "Connectors Report": {
+      {
+        id: 2,
         nav: (
           <div className="d-flex-center">
             <strong>Connectors Report</strong>
@@ -70,7 +72,8 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         ),
         report: <ConnectorsReportTable job={job} refetch={refetch} />,
       },
-      "Visualizers Report": {
+      {
+        id: 3,
         nav: (
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>
@@ -82,12 +85,12 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         ),
         report: <VisualizersReportTable job={job} refetch={refetch} />,
       },
-    }),
+    ],
     [job, refetch, AnalyzerDenominator, ConnectorDenominator]
   );
 
   // state
-  const [UIElements, setUIElements] = useState({});
+  const [UIElements, setUIElements] = useState([]);
   const [
     isSelectedUI,
     activeElement,
@@ -104,7 +107,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   const selectUISection = useCallback(
     (isUI) => {
       setIsSelectedUI(isUI);
-      setActiveElement(Object.keys(isUI ? UIElements : rawElements)[0]);
+      setActiveElement((isUI ? UIElements : rawElements)[0].id);
     },
     [UIElements, rawElements, setActiveElement, setIsSelectedUI]
   );
@@ -121,39 +124,33 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     console.debug(job);
 
     // generate UI elements
-    const newUIElements = {};
-    job.visualizers_to_execute.forEach((visualizerLabel) => {
-      newUIElements[visualizerLabel] = {
-        nav: (
-          <div className="d-flex-center">
-            <strong>{visualizerLabel}</strong>
-          </div>
-        ),
-        report: (
-          <Loader
-            loading={
-              !job.visualizer_reports.find(
-                (report) => report.name === visualizerLabel
-              )
-            }
-            render={() => (
-              <VisualizerReport
-                visualizerReport={job.visualizer_reports.find(
-                  (report) => report.name === visualizerLabel
-                )}
-              />
-            )}
-          />
-        ),
-      };
-    });
+    const newUIElements = job.visualizer_reports.map((visualizerReport) => ({
+      id: visualizerReport.id,
+      nav: (
+        <div className="d-flex-center">
+          <strong>{visualizerReport.name}</strong>
+        </div>
+      ),
+      report: (
+        <Loader
+          loading={
+            visualizerReport === undefined ||
+            ["pending", "running"].includes(visualizerReport.status)
+          }
+          render={() => (
+            <VisualizerReport visualizerReport={visualizerReport} />
+          )}
+        />
+      ),
+    }));
 
     // in case there are no visualizers add a "no data" visualizer
-    if (Object.keys(newUIElements).length === 0) {
-      newUIElements[NO_VISUALIZER_UI_ELEMENT] = {
+    if (newUIElements.length === 0) {
+      newUIElements.push({
+        id: NO_VISUALIZER_UI_ELEMENT_CODE,
         nav: null,
         report: <p className="text-center">No visualizers available.</p>,
-      };
+      });
     }
 
     setUIElements(newUIElements);
@@ -165,13 +162,15 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     /* set the default to the first visualizer only in case no section is selected and UI elements have been downloaded.
     In case a section is selected and job data are refreshed (thanks to the polling) do NOT change the section the user is watching
     */
-    if (activeElement === "" && Object.keys(UIElements).length !== 0) {
-      const firstVisualizer = Object.keys(UIElements)[0];
-      if (firstVisualizer === NO_VISUALIZER_UI_ELEMENT) {
+    if (activeElement === undefined && UIElements.length !== 0) {
+      const firstVisualizer = UIElements[0];
+      if (firstVisualizer.id === NO_VISUALIZER_UI_ELEMENT_CODE) {
         selectUISection(false);
       } else {
-        console.debug(`set default visualizer to: ${firstVisualizer}`);
-        setActiveElement(firstVisualizer);
+        console.debug(
+          `set default visualizer to: ${firstVisualizer.name} (id: ${firstVisualizer.id})`
+        );
+        setActiveElement(firstVisualizer.id);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,7 +182,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   const elementsToShow = isSelectedUI ? UIElements : rawElements;
   return (
     <Loader
-      loading={UIElements === {}}
+      loading={UIElements.length === 0}
       render={() => (
         <Container fluid>
           {/* bar with job id and utilities buttons */}
@@ -232,15 +231,19 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
               <div className="flex-fill horizontal-scrollable">
                 <Nav tabs className="flex-nowrap h-100">
                   {/* generate the nav with the UI/raw visualizers avoid to generate the navbar item for the "no visualizer element" */}
-                  {Object.entries(elementsToShow).map(
-                    ([navTitle, componentsObject]) =>
-                      navTitle !== NO_VISUALIZER_UI_ELEMENT && (
+                  {elementsToShow.map(
+                    (componentsObject) =>
+                      componentsObject.id !== NO_VISUALIZER_UI_ELEMENT_CODE && (
                         <NavItem>
                           <NavLink
                             className={`${
-                              activeElement === navTitle ? "active" : ""
+                              activeElement === componentsObject.id
+                                ? "active"
+                                : ""
                             }`}
-                            onClick={() => setActiveElement(navTitle)}
+                            onClick={() =>
+                              setActiveElement(componentsObject.id)
+                            }
                           >
                             {componentsObject.nav}
                           </NavLink>
@@ -252,11 +255,11 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
             </div>
             {/* reports section */}
             <TabContent activeTab={activeElement}>
-              {Object.entries(elementsToShow).map(
-                ([navTitle, componentsObject]) => (
-                  <TabPane tabId={navTitle}>{componentsObject.report}</TabPane>
-                )
-              )}
+              {elementsToShow.map((componentsObject) => (
+                <TabPane tabId={componentsObject.id}>
+                  {componentsObject.report}
+                </TabPane>
+              ))}
             </TabContent>
           </Row>
         </Container>

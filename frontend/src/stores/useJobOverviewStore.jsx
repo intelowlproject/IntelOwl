@@ -12,11 +12,11 @@ import { create } from "zustand";
 
 const useJobOverviewStore = create((set) => ({
   isSelectedUI: true,
-  activeElement: "",
+  activeElement: undefined,
   setIsSelectedUI: (isSelectedUI) => set(() => ({ isSelectedUI })),
   setActiveElement: (activeElement) => set(() => ({ activeElement })),
   resetJobOverview: () =>
-    set(() => ({ isSelectedUI: true, activeElement: "" })),
+    set(() => ({ isSelectedUI: true, activeElement: undefined })),
 }));
 
 export default useJobOverviewStore;

@@ -224,7 +224,7 @@ class VisualizablePageTestCase(CustomTestCase):
             "level": 0,
             "elements": vvl.to_dict(),
         }
-        self.assertEqual(vl.to_dict()[0], expected_result)
+        self.assertEqual(vl.to_dict()[1][0], expected_result)
 
 
 class VisualizerTestCase(CustomTestCase):

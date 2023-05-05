@@ -16,6 +16,7 @@ class VisualizerReport(AbstractReport):
         "VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
     report = models.JSONField(default=list, validators=[validate_report])
+    name = models.CharField(null=True, blank=True, default=None, max_length=50)
 
 
 class VisualizerConfig(AbstractConfig):

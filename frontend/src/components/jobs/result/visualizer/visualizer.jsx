@@ -34,6 +34,8 @@ export function convertToElement(element, isChild = false) {
           className={element.className}
           activeColor={element.activeColor}
           disable={element.disable}
+          icon={getIcon(element.icon)}
+          italic={element.italic}
         />
       );
       break;

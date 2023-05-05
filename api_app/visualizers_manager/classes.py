@@ -109,7 +109,7 @@ class VisualizableTitle(VisualizableObject):
         if self.disable != self.title.disable or self.disable != self.value.disable:
             logger.warning(
                 "Each part of the title should be disabled. "
-                f"Forcing all to disable={self.disable}"
+                / f"Forcing all to disable={self.disable}"
             )
             self.title.disable = self.disable
             self.value.disable = self.disable
@@ -148,10 +148,8 @@ class VisualizableBool(VisualizableBase):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        # bool does not support icon, bold and italic at the moment
-        result.pop("icon", None)
+        # bool does not support bold because the default is bold
         result.pop("bold", None)
-        result.pop("italic", None)
         return result
 
 
@@ -191,9 +189,8 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def attributes(self) -> List[str]:
         return super().attributes + ["name", "open", "value"]
 
-    @property
-    def type(self) -> str:
-        return "vertical_list"
+    def __bool__(self):
+        return True
 
     @property
     def more_elements_object(self) -> VisualizableBase:
@@ -209,6 +206,10 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
                 result["values"].append(self.more_elements_object.to_dict())
 
         return result
+
+    @property
+    def type(self) -> str:
+        return "vertical_list"
 
 
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):

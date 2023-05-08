@@ -14,9 +14,9 @@ export function BooleanVisualizer({
   disable,
 }) {
   let coreComponent = (
-    <p className={`mb-0 ${italic ? "fst-italic" : ""}`}>
+    <span className={`${italic ? "fst-italic" : ""}`}>
       {name} {icon}
-    </p>
+    </span>
   );
   // link added only in case is available and the component is not disabled, or it will be clickable
   if (link && !disable) {

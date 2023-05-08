@@ -12,13 +12,13 @@ export function BaseVisualizer({
   disable,
 }) {
   let coreComponent = (
-    <p
-      className={`mb-0 ${color} ${bold ? "fw-bold" : ""} ${
+    <span
+      className={`${color} ${bold ? "fw-bold" : ""} ${
         italic ? "fst-italic" : ""
       }`}
     >
       {value} {icon}
-    </p>
+    </span>
   );
   // link added only in case is available and the component is not disabled, or it will be clickable
   if (link && !disable) {

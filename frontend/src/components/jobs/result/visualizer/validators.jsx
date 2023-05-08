@@ -62,12 +62,11 @@ function parseElementList(rawElementList) {
 
 // parse a single element
 function parseElementFields(rawElement) {
-  // every component has the "type" field
-  const validatedFields = { type: parseComponentType(rawElement.type) };
-  // HList doesn't have this field, don't pass it even if it wouldn't be used
-  if (rawElement.disable !== undefined) {
-    validatedFields.disable = parseBool(rawElement.disable);
-  }
+  // HList and Title don't have disable field, they will not be used
+  const validatedFields = {
+    type: parseComponentType(rawElement.type),
+    disable: parseBool(rawElement.disable),
+  };
 
   // validation for the elements
   switch (validatedFields.type) {

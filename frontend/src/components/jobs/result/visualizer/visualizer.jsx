@@ -76,7 +76,6 @@ export function convertToElement(element, isChild = false) {
         <TitleVisualizer
           title={convertToElement(element.title, true)}
           value={convertToElement(element.value, true)}
-          disable={element.disable}
         />
       );
       break;

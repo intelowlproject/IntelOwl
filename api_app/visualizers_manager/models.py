@@ -18,6 +18,9 @@ class VisualizerReport(AbstractReport):
     report = models.JSONField(default=list, validators=[validate_report])
     name = models.CharField(null=True, blank=True, default=None, max_length=50)
 
+    class Meta:
+        ordering = ["pk"]
+
 
 class VisualizerConfig(AbstractConfig):
     analyzers = models.ManyToManyField(

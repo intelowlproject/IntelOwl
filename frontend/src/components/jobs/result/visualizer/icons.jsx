@@ -11,14 +11,28 @@ import {
   AiFillFire,
 } from "react-icons/ai";
 import {
+  BsFillCloudArrowUpFill,
+  BsFillCreditCard2BackFill,
+  BsFillInboxFill,
   BsFillInfoSquareFill,
+  BsIncognito,
   BsShieldFillCheck,
   BsTwitter,
 } from "react-icons/bs";
-import { FaBiohazard } from "react-icons/fa";
+import { FaBiohazard, FaLock } from "react-icons/fa";
+import { HiMagnifyingGlassCircle } from "react-icons/hi2";
+import { ImExit } from "react-icons/im";
 import { SiVirustotal } from "react-icons/si";
 import { RiAlarmWarningFill, RiAliensFill } from "react-icons/ri";
 
+import { GiLighthouse, GiRetroController } from "react-icons/gi";
+import { HiFilter } from "react-icons/hi";
+import {
+  MdCloudSync,
+  MdEmail,
+  MdSignalWifiStatusbarConnectedNoInternet2,
+} from "react-icons/md";
+import { TbFishHook } from "react-icons/tb";
 import { PUBLIC_URL } from "../../../../constants/environment";
 
 const generalIcons = Object.freeze({
@@ -31,6 +45,20 @@ const generalIcons = Object.freeze({
   shield: <BsShieldFillCheck />,
   fire: <AiFillFire />,
   alarm: <RiAlarmWarningFill />,
+  magnifyingGlass: <HiMagnifyingGlassCircle />,
+  creditCard: <BsFillCreditCard2BackFill />,
+  email: <MdEmail />,
+  hook: <TbFishHook />,
+  filter: <HiFilter />,
+  incognito: <BsIncognito />,
+  inbox: <BsFillInboxFill />,
+  cloudUpload: <BsFillCloudArrowUpFill />,
+  cloudSync: <MdCloudSync />,
+  lighthouseOn: <GiLighthouse />,
+  controller: <GiRetroController />,
+  exit: <ImExit />,
+  connection: <MdSignalWifiStatusbarConnectedNoInternet2 />,
+  locker: <FaLock />,
   // external services
   virusTotal: (
     // eslint-disable-next-line react/jsx-no-constructed-context-values

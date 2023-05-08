@@ -3,7 +3,7 @@
 
 import re
 from logging import getLogger
-from typing import List
+from typing import Optional
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -85,42 +85,48 @@ class MimeTypes(models.TextChoices):
     MIXED = "multipart/mixed"
 
     @classmethod
-    def ZIP(cls) -> List["MimeTypes"]:
-        return [cls.ZIP1, cls.ZIP2]
-
-    @classmethod
-    def WORD(cls) -> List["MimeTypes"]:
-        return [cls.WORD1, cls.WORD2]
+    def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:
+        if file_name.endswith(".js") or file_name.endswith(".jse"):
+            mimetype = cls.JAVASCRIPT1
+        elif file_name.endswith(".vbs") or file_name.endswith(".vbe"):
+            mimetype = cls.VB_SCRIPT
+        elif file_name.endswith(".iqy"):
+            mimetype = cls.IQY
+        elif file_name.endswith(".apk"):
+            mimetype = cls.APK
+        elif file_name.endswith(".dex"):
+            mimetype = cls.DEX
+        elif file_name.endswith(".one"):
+            mimetype = cls.ONE_NOTE
+        else:
+            return None
+        return mimetype
 
     @classmethod
     def calculate(cls, file_pointer, file_name) -> str:
         from magic import from_buffer as magic_from_buffer
 
-        REGEX_OFFICE_FILES = r"\.[xl|doc]\w{0,3}$"
-
         mimetype = None
         if file_name:
-            if file_name.endswith(".js") or file_name.endswith(".jse"):
-                mimetype = cls.JAVASCRIPT1
-            elif file_name.endswith(".vbs") or file_name.endswith(".vbe"):
-                mimetype = cls.VB_SCRIPT
-            elif file_name.endswith(".iqy"):
-                mimetype = cls.IQY
-            elif file_name.endswith(".apk"):
-                mimetype = cls.APK
-            elif file_name.endswith(".dex"):
-                mimetype = cls.DEX
-            elif file_name.endswith(".one"):
-                mimetype = cls.ONE_NOTE
+            mimetype = cls._calculate_from_filename(file_name)
 
-        if not mimetype:
+        if mimetype is None:
             buffer = file_pointer.read()
             mimetype = magic_from_buffer(buffer, mime=True)
             logger.debug(f"mimetype is {mimetype}")
-            mimetype = cls(mimetype)
+            try:
+                mimetype = cls(mimetype)
+            except ValueError:
+                logger.error(
+                    f"Unable to valid a {cls.__name__} for mimetype {mimetype}"
+                )
+            else:
+                mimetype = mimetype.value
 
-        if mimetype in cls.ZIP() and re.search(REGEX_OFFICE_FILES, file_name):
-            return cls.ANDROID
+        if mimetype in [cls.ZIP1.value, cls.ZIP1.value]:
+            REGEX_OFFICE_FILES = r"\.[xl|doc]\w{0,3}$"
+            if re.search(REGEX_OFFICE_FILES, file_name):
+                mimetype = cls.ANDROID.value
 
         return mimetype
 

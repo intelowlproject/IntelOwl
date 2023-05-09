@@ -3,7 +3,40 @@
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
 ## [v5.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.0)
+This major release is another big step forward for IntelOwl!! 🚀
 
+We heard your feedback! During the event at [Fosdem](https://fosdem.org/2023/schedule/event/security_intelowl/) we announced that we were working in adding an _aggregated and simplified visualization of analyzer results_.
+We created it. Now, by leveraging a new plugin type called <b>Visualizers</b>, you will be able to create custom visualizations, based on your specific use cases!
+
+This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
+
+That would speed the analysis of the results a lot if done correctly!
+
+To aid in this process we added a lot of [documentation and some very simple pre-built analyzers that you can use as example](https://intelowl.readthedocs.io/en/latest/Usage.html#visualizers):
+
+
+
+
+Moreover this release anticipates other important crucial steps for IntelOwl:
+* On June 9th [Matteo Lodi](https://twitter.com/matte_lodi) and [Simone Berni](https://twitter.com/0ssig3no) are presenting IntelOwl at one of the most important Cyber Security events in Italy: [HackinBo](https://www.hackinbo.it/programma.php)
+* On May 28th the [Google Summer of Code 2023](https://developers.google.com/open-source/gsoc/timeline) is starting and IntelOwl is participating again with 2 new students! Welcome to [Shivam Purohit](https://twitter.com/stay_away_plss) and [Abheek Tripathy](https://twitter.com/abheekblahblah)!
+
+**Other important changes:**
+
+We have done some big refactor changes that could make your application do not work as expected after this major upgrade. Please follow the the [migration guide](https://intelowl.readthedocs.io/en/latest/Installation.html#updating-to-5-0-0-from-a-4-x-x-version) before upgrading IntelOwl to the new major release.
+
+* We moved away from the old big `analyzer_config.json` which was storing all the base configuration of the Analyzers to a database model (we did the same for all the other plugins types too). This allows us to manage plugins creation/modification/deletion in a more reliable manner and via the Django Admin Interface. If you have created custom plugins and changed those `<plugins>_config.json` file manually, you would need to re-create those custom plugins again from the Django Admin Interface.
+
+* we have REMOVED all the environment configuration that we deprecated with the v4.0.0 release and the script to migrate them.
+* we have REMOVED all the analyzers that we deprecated during the v4 releases cycle.
+* 
+**New/Improved Analyzers:**
+* added more public Yara Rules (@dr4konia, @facebook)
+
+**fixes / adjust / minor changes**
+* several little fixes and adjustments here and there
+* moved from TLP:WHITE to TLP:CLEAR
+* a lot of dependencies upgrades
 
 
 ## [v4.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.3)

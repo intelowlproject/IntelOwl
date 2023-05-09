@@ -285,6 +285,23 @@ Maintainers strive to keep the upgrade between major version easy but it's not a
 Below you can find the additional process required to upgrade from each major versions.
 </div>
 
+#### Updating to >=5.0.0 from a 4.x.x version
+IntelOwl v5 introduced some major changes regarding how the plugins and their related configuration are managed in the application.
+Before upgrading, some important things should be checked by the administrator:
+* We moved away from the old big `analyzer_config.json` which was storing all the base configuration of the Analyzers to a database model (we did the same for all the other plugins types too). This allows us to manage plugins creation/modification/deletion in a more reliable manner and via the Django Admin Interface. If you have created custom plugins and changed those `<plugins>_config.json` file manually, you would need to re-create those custom plugins again from the Django Admin Interface. To do that please follow the [related new documentation](https://intelowl.readthedocs.io/en/develop/Usage.html#analyzers-customization)
+* We have REMOVED all the analyzers that we deprecated during the v4 releases cycle. Please substitute them with their respective new names, in case they have a replacement.
+  * REMOVED `Pulsedive_Active_IOC` analyzer. Please substitute it with the new `Pulsedive` analyzer.
+  * REMOVED `Fortiguard` analyzer because endpoint does not work anymore. No substitute.
+  * REMOVED `Rendertron` analyzer not working as intended. No substitute.
+  * REMOVED `ThreatMiner`, `SecurityTrails` and `Robtex` various analyzers and substituted with new versions.
+  * REMOVED `Doc_Info_Experimental`. Its functionality (XLM Macro parsing) is moved to `Doc_Info`
+  * REMOVED `Strings_Info_Classic`. Please use `Strings_Info`
+  * REMOVED `Strings_Info_ML`. Please use `Strings_Info` and set the parameter `rank_strings` to `True`
+  * REMOVED all `Yara_Scan_<repo>` analyzers. They all went merged in the single `Yara` analyzer
+
+#### Updating to >=5.0.0 from a 3.x.x version
+This is not supported. Please perform a major upgrade once at a time.
+
 #### Updating to >=4.0.0 from a 3.x.x version
 IntelOwl v4 introduced some major changes regarding the permission management, allowing an easier way to manage users and visibility. But that did break the previous available DB.
 So, to migrate to the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.

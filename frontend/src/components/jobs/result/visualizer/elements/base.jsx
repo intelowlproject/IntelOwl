@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 export function BaseVisualizer({
+  size,
   value,
   icon,
   color,
@@ -30,7 +31,7 @@ export function BaseVisualizer({
   }
   return (
     <div
-      className={`small d-flex align-items-center ${
+      className={`${size} small d-flex align-items-center text-center justify-content-center ${
         disable ? "opacity-25" : ""
       } ${className} ${color}`}
     >
@@ -40,6 +41,7 @@ export function BaseVisualizer({
 }
 
 BaseVisualizer.propTypes = {
+  size: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   icon: PropTypes.string,
   color: PropTypes.string,

@@ -15,6 +15,7 @@ import {
 } from "react-icons/io";
 
 export function VerticalListVisualizer({
+  size,
   name,
   values,
   className,
@@ -25,7 +26,7 @@ export function VerticalListVisualizer({
   const toggleList = () => setIsListOpen(!isListOpen);
 
   return (
-    <Card className={`${className} ${disable ? "opacity-50" : ""}`}>
+    <Card className={`${size} ${className} ${disable ? "opacity-50" : ""}`}>
       <CardTitle className="p-1 mb-0">
         <Button
           className="p-0 w-100 px-1"
@@ -62,6 +63,7 @@ export function VerticalListVisualizer({
 }
 
 VerticalListVisualizer.propTypes = {
+  size: PropTypes.string.isRequired,
   name: PropTypes.element.isRequired,
   values: PropTypes.arrayOf(PropTypes.element).isRequired,
   className: PropTypes.string,

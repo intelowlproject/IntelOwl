@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { Badge } from "reactstrap";
 
 export function BooleanVisualizer({
+  size,
   name,
   value,
   link,
@@ -30,7 +31,7 @@ export function BooleanVisualizer({
     <Badge
       pill
       color={value === true ? activeColor : "gray"}
-      className={`${disable ? "opacity-25" : ""} ${className}`}
+      className={`${size} ${disable ? "opacity-25" : ""} ${className}`}
     >
       <div className="d-flex align-items-center">{coreComponent}</div>
     </Badge>
@@ -38,6 +39,7 @@ export function BooleanVisualizer({
 }
 
 BooleanVisualizer.propTypes = {
+  size: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   value: PropTypes.bool.isRequired,
   link: PropTypes.string,

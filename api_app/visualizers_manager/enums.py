@@ -4,6 +4,25 @@
 import enum
 
 
+class VisualizableSize(enum.Enum):
+    S_1 = "1"
+    S_2 = "2"
+    S_3 = "3"
+    S_4 = "4"
+    S_5 = "5"
+    S_6 = "6"
+    S_7 = "7"
+    S_8 = "8"
+    S_9 = "9"
+    S_10 = "10"
+    S_11 = "11"
+    S_ALL = "12"
+    S_AUTO = "auto"
+
+    def __str__(self):
+        return self.value
+
+
 class VisualizableColor(enum.Enum):
     PRIMARY = "primary"
     SECONDARY = "secondary"

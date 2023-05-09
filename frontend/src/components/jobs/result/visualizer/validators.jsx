@@ -11,6 +11,29 @@ function parseBool(value) {
   return !!value;
 }
 
+function parseSize(value) {
+  if (
+    [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "auto",
+    ].includes(value)
+  ) {
+    return `col-${value}`;
+  }
+  return "col-auto";
+}
+
 function parseComponentType(value) {
   if (
     [
@@ -66,6 +89,7 @@ function parseElementFields(rawElement) {
   const validatedFields = {
     type: parseComponentType(rawElement.type),
     disable: parseBool(rawElement.disable),
+    size: parseSize(rawElement.size),
   };
 
   // validation for the elements

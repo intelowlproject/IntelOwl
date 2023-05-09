@@ -19,15 +19,15 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * This is a recursive function: It's called by the component to convert the inner components.
  *
  * @param {object} element data used to generate the component
- * @param {boolean} isChild set to true in case an element is use into another (Ex: base is used in Title title and Title value)
  * @returns {Object} component to visualize
  */
-export function convertToElement(element, isChild = false) {
+export function convertToElement(element) {
   let visualizerElement;
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
       visualizerElement = (
         <BooleanVisualizer
+          size={element.size}
           name={element.name}
           value={element.value}
           link={element.link}
@@ -41,12 +41,6 @@ export function convertToElement(element, isChild = false) {
       break;
     }
     case VisualizerComponentType.HLIST: {
-      /* This is a special case and it's the opposit of the others:
-      We WANT to force the spaces between chidren (because are different componets)
-      and we DON'T WANT to add the space for this specific component (because is a wrapper) 
-      */
-      // eslint-disable-next-line no-param-reassign
-      isChild = true;
       visualizerElement = (
         <HorizontalListVisualizer
           values={element.values.map((additionalElement) =>
@@ -60,9 +54,10 @@ export function convertToElement(element, isChild = false) {
     case VisualizerComponentType.VLIST: {
       visualizerElement = (
         <VerticalListVisualizer
-          name={convertToElement(element.name, true)}
+          size={element.size}
+          name={convertToElement(element.name)}
           values={element.values.map((additionalElement) =>
-            convertToElement(additionalElement, true)
+            convertToElement(additionalElement)
           )}
           className={element.className}
           startOpen={element.startOpen}
@@ -74,8 +69,9 @@ export function convertToElement(element, isChild = false) {
     case VisualizerComponentType.TITLE: {
       visualizerElement = (
         <TitleVisualizer
-          title={convertToElement(element.title, true)}
-          value={convertToElement(element.value, true)}
+          size={element.size}
+          title={convertToElement(element.title)}
+          value={convertToElement(element.value)}
         />
       );
       break;
@@ -83,6 +79,7 @@ export function convertToElement(element, isChild = false) {
     default: {
       visualizerElement = (
         <BaseVisualizer
+          size={element.size}
           value={element.value}
           icon={getIcon(element.icon)}
           color={element.color}
@@ -95,12 +92,6 @@ export function convertToElement(element, isChild = false) {
       );
       break;
     }
-  }
-  /* we want to use this div as wrapper for the components, the children are part of the component.
-  For this reason they aren't wrapped
-  */
-  if (!isChild) {
-    return <div className="col-auto mb-1">{visualizerElement}</div>;
   }
   return visualizerElement;
 }

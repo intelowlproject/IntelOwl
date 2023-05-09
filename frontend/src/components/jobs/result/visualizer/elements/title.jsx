@@ -5,7 +5,7 @@ export function TitleVisualizer({ size, title, value }) {
   return (
     <div className={`${size} d-flex flex-column align-items-center`}>
       <div className="mb-1 text-capitalize">{title}</div>
-      <div className="p-1 d-inline-flex">{value}</div>
+      <div className="p-1">{value}</div>
     </div>
   );
 }

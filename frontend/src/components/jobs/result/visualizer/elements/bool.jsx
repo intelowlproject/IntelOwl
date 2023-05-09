@@ -28,13 +28,17 @@ export function BooleanVisualizer({
     );
   }
   return (
-    <Badge
-      pill
-      color={value === true ? activeColor : "gray"}
-      className={`${size} ${disable ? "opacity-25" : ""} ${className}`}
-    >
-      <div className="d-flex align-items-center">{coreComponent}</div>
-    </Badge>
+    <div className={`${size}`}>
+      <Badge
+        pill
+        color={value === true ? activeColor : "gray"}
+        className={`w-100 text-wrap ${
+          disable ? "opacity-25" : ""
+        } ${className}`}
+      >
+        {coreComponent}
+      </Badge>
+    </div>
   );
 }
 

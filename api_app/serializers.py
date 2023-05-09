@@ -89,7 +89,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         try:
             validate_runtime_configuration(runtime_config)
         except django.core.exceptions.ValidationError as e:
-            raise ValidationError(str(e))
+            logger.info(e, stack_info=True)
+            raise ValidationError("Runtime Configuration Validation Failed")
         return runtime_config
 
     def validate_tlp(self, tlp: str):
@@ -254,7 +255,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         try:
             job.full_clean()
         except django.core.exceptions.ValidationError as e:
-            raise ValidationError(str(e))
+            logger.info(e, stack_info=True)
+            raise ValidationError("Validation failed")
         job.save()
         if tags:
             job.tags.set(tags)
@@ -477,7 +479,8 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
                 attrs["file"], attrs["file_name"]
             )
         except ValueError as e:
-            raise ValidationError(e)
+            logger.info(e, stack_info=True)
+            raise ValidationError("mimetype is not correct")
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)

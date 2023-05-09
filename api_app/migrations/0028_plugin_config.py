@@ -27,17 +27,32 @@ def migrate_plugin_config(apps, schema_editor):
         plugin_config.full_clean()
         plugin_config.save()
 
+
 def reverse_migrate_plugin_config(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     apps.get_model("visualizers_manager", "VisualizerConfig")
     for plugin_config in PluginConfig.objects.all():
-        plugin_config.organization = plugin_config.owner.membership.organization if plugin_config.for_organization else None
-        config = plugin_config.parameter.analyzer_config or plugin_config.parameter.connector_config or plugin_config.parameter.visualizer_config
+        plugin_config.organization = (
+            plugin_config.owner.membership.organization
+            if plugin_config.for_organization
+            else None
+        )
+        config = (
+            plugin_config.parameter.analyzer_config
+            or plugin_config.parameter.connector_config
+            or plugin_config.parameter.visualizer_config
+        )
         plugin_config.plugin_name = config.name
         plugin_config.attribute = plugin_config.parameter.name
-        plugin_config.type = "1" if isinstance(config, AnalyzerConfig) else "2" if isinstance(config, ConnectorConfig) else "3"
+        plugin_config.type = (
+            "1"
+            if isinstance(config, AnalyzerConfig)
+            else "2"
+            if isinstance(config, ConnectorConfig)
+            else "3"
+        )
         plugin_config.config_type = "2" if plugin_config.parameter.is_secret else "1"
         plugin_config.full_clean()
         plugin_config.save()
@@ -46,19 +61,23 @@ def reverse_migrate_plugin_config(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0027_parameter'),
-        ('analyzers_manager', '0023_params'),
-        ('connectors_manager', '0015_params'),
-        ('visualizers_manager', '0013_params'),
+        ("api_app", "0027_parameter"),
+        ("analyzers_manager", "0023_params"),
+        ("connectors_manager", "0015_params"),
+        ("visualizers_manager", "0013_params"),
     ]
 
     operations = [
-
         migrations.AddField(
             model_name="pluginconfig",
             name="parameter",
-            field=models.ForeignKey("api_app.parameter",default=None,  on_delete=django.db.models.deletion.CASCADE, null=True,
-                                    related_name="values"),
+            field=models.ForeignKey(
+                "api_app.parameter",
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                null=True,
+                related_name="values",
+            ),
         ),
         migrations.AddField(
             model_name="pluginconfig",
@@ -68,75 +87,64 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="pluginconfig",
             name="value",
-            field=models.JSONField(blank=True, null=True)
+            field=models.JSONField(blank=True, null=True),
         ),
         migrations.RemoveConstraint(
-            model_name='pluginconfig',
-            name='unique_custom_config_entry',
+            model_name="pluginconfig",
+            name="unique_custom_config_entry",
         ),
-
-
         migrations.AlterField(
             model_name="pluginconfig",
             name="config_type",
             field=models.CharField(
-                choices=[("1", "Parameter"), ("2", "Secret")], default="1", max_length=2, null=True, blank=True
+                choices=[("1", "Parameter"), ("2", "Secret")],
+                default="1",
+                max_length=2,
+                null=True,
+                blank=True,
             ),
         ),
         migrations.AlterField(
             model_name="pluginconfig",
             name="type",
             field=models.CharField(
-                        choices=[("1", "Analyzer"), ("2", "Connector")], max_length=2, null=True, blank=True
-                    )
+                choices=[("1", "Analyzer"), ("2", "Connector")],
+                max_length=2,
+                null=True,
+                blank=True,
+            ),
         ),
         migrations.AlterField(
             model_name="pluginconfig",
             name="plugin_name",
-            field= models.CharField(
-                max_length=128, null=True, blank=True
-            )
+            field=models.CharField(max_length=128, null=True, blank=True),
         ),
         migrations.AlterField(
             model_name="pluginconfig",
             name="attribute",
-            field=models.CharField(
-                max_length=128, null=True, blank=True
-            )
+            field=models.CharField(max_length=128, null=True, blank=True),
         ),
-        migrations.RunPython(
-            migrate_plugin_config, reverse_migrate_plugin_config
-        ),
+        migrations.RunPython(migrate_plugin_config, reverse_migrate_plugin_config),
         migrations.AlterField(
             model_name="pluginconfig",
             name="parameter",
-            field=models.ForeignKey("api_app.parameter", on_delete=django.db.models.deletion.CASCADE,
-                                    null=False,
-                                    related_name="values"),
+            field=models.ForeignKey(
+                "api_app.parameter",
+                on_delete=django.db.models.deletion.CASCADE,
+                null=False,
+                related_name="values",
+            ),
         ),
-        migrations.RemoveField(
-            model_name="pluginconfig",
-            name="organization"
-        ),
-        migrations.RemoveField(
-            model_name="pluginconfig",
-            name="attribute"
-        ),
-        migrations.RemoveField(
-            model_name="pluginconfig",
-            name="plugin_name"
-        ),
-        migrations.RemoveField(
-            model_name="pluginconfig",
-            name="type"
-        ),
+        migrations.RemoveField(model_name="pluginconfig", name="organization"),
+        migrations.RemoveField(model_name="pluginconfig", name="attribute"),
+        migrations.RemoveField(model_name="pluginconfig", name="plugin_name"),
+        migrations.RemoveField(model_name="pluginconfig", name="type"),
         migrations.RemoveField(
             model_name="pluginconfig",
             name="config_type",
         ),
         migrations.AlterUniqueTogether(
             name="pluginconfig",
-            unique_together={("owner", "for_organization", "parameter")}
+            unique_together={("owner", "for_organization", "parameter")},
         ),
-
     ]

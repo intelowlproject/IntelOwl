@@ -2,6 +2,10 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.0)
+
+
+
 ## [v4.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.3)
 
 **New features**

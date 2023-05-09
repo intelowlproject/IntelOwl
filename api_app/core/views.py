@@ -153,7 +153,8 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
             try:
                 health_status = class_.health_check(obj.name, request.user)
             except Exception as e:
-                raise ValidationError({"detail": str(e)})
+                logger.info(e, stack_info=True)
+                raise ValidationError({"detail": "Unexpected exception raised"})
         except NotImplementedError:
             raise ValidationError({"detail": "No healthcheck implemented"})
         else:

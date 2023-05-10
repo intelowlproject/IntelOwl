@@ -1,36 +1,46 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import logging
 
 from pydragonfly import Dragonfly, DragonflyException
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
 class DragonflyEmulation(FileAnalyzer):
-    def set_params(self, params):
-        # max no. of tries when polling for result
-        self.max_tries = 30
-        # max 5 minutes waiting
-        self.poll_distance = 10
+
+    max_tries: int = 30
+    poll_distance: int = 10
+    operating_system: str
+    profiles: list
+    root: bool
+    allow_actions: bool
+    private: bool
+    _url_key_name: str
+    _api_key_name: str
+
+    def config(self):
+        super().config()
         # build analysis options
-        os = params.get("operating_system", None)
         self.analysis_options = {
-            "profiles": params.get("profiles", []),
-            "os": os if os in ["WINDOWS", "LINUX"] else None,
-            "root": params.get("root", False),
-            "allow_actions": params.get("allow_actions", False),
-            "private": params.get("private", False),
+            "profiles": self.profiles,
+            "os": self.operating_system
+            if self.operating_system in ["WINDOWS", "LINUX"]
+            else None,
+            "root": self.root,
+            "allow_actions": self.allow_actions,
+            "private": self.private,
         }
         # get secrets
-        api_key: str = self._secrets["api_key_name"]
-        api_url: str = self._secrets["url_key_name"]
         # init Dragonfly client instance
-        self.df = Dragonfly(api_key=api_key)
-        if api_url:
-            self.df._server_url = api_url
+        self.df = Dragonfly(api_key=self._api_key_name)
+        if self._url_key_name:
+            self.df._server_url = self._url_key_name
 
     def run(self):
         try:
@@ -79,11 +89,11 @@ class DragonflyEmulation(FileAnalyzer):
                 patch(
                     "requests.Session.request",
                     side_effect=[
-                        MockResponse(
+                        MockUpResponse(
                             {"id": 1, "malware_type": "PE"}, 201
                         ),  # __upload; sample ID
-                        MockResponse({"id": 1}, 201),  # __upload; analysis ID
-                        MockResponse(
+                        MockUpResponse({"id": 1}, 201),  # __upload; analysis ID
+                        MockUpResponse(
                             {
                                 "id": 1,
                                 "created_at": "2022-01-17T12:07:55.446274Z",
@@ -116,7 +126,7 @@ class DragonflyEmulation(FileAnalyzer):
                             },
                             200,
                         ),  # __poll_and_fetch_result; Analysis.retrieve
-                        MockResponse(
+                        MockUpResponse(
                             [{"id": 1, "rule": "testrule", "weight": 0, "matches": []}],
                             200,
                         ),  # __poll_and_fetch_result; Report.matched_rules

@@ -2,6 +2,10 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.0)
+
+
+
 ## [v4.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.3)
 
 **New features**
@@ -20,6 +24,16 @@
 * fixes to `initialize.sh`
 * now Observable name is copy pastable in the Job Result Page
 * a lot of dependencies upgrade (like Django from v3.2 to v4.1)
+
+**CARE!!!** After having upgraded IntelOwl, in case the application does not start and you get an error like this:
+```commandline
+PermissionError: [Errno 13] Permission denied: '/var/log/intel_owl/django/authentication.log
+```
+just run this:
+```commandline
+sudo chown -R www-data:www-data /var/lib/docker/volumes/intel_owl_generic_logs/_data/django
+```
+and restart IntelOwl. It should solve the permissions problem.
 
 
 ## [v4.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.2)

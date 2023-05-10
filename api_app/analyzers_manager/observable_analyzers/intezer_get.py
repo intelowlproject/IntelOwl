@@ -9,19 +9,22 @@ from intezer_sdk import errors as intezer_errors
 from intezer_sdk.analysis import FileAnalysis
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
 
 
 class IntezerGet(ObservableAnalyzer):
-    def set_params(self, params):
-        # soft time limit
-        soft_time_limit = params.get("soft_time_limit", 100)
-        self.timeout = soft_time_limit - 5
+
+    soft_time_limit: int
+    _api_key_name: str
+
+    def config(self):
+        super().config()
+        self.timeout = self.soft_time_limit - 5
         # interval
         self.poll_interval = 3
         # read secret and set API key
-        intezer_api.set_global_api(api_key=self._secrets["api_key_name"])
+        intezer_api.set_global_api(api_key=self._api_key_name)
         intezer_sdk.consts.USER_AGENT = "IntelOwl"
 
     def run(self):

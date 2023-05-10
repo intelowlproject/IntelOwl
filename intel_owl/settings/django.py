@@ -1,6 +1,9 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # flake8: noqa E501
 
-from .commons import BASE_STATIC_PATH
+from .commons import BASE_STATIC_PATH, DEBUG
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -14,6 +17,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "certego_saas.ext.middlewares.LogMiddleware",  # custom
 ]
+if DEBUG:
+    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
 
 ROOT_URLCONF = "intel_owl.urls"
 

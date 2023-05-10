@@ -4,8 +4,8 @@
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class MalpediaScan(FileAnalyzer):
@@ -16,14 +16,13 @@ class MalpediaScan(FileAnalyzer):
     base_url = "https://malpedia.caad.fkie.fraunhofer.de/api"
     url = base_url + "/scan/binary"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         # get file
         binary = self.read_file_bytes()
         # construct req
-        headers = {"Authorization": f"APIToken {self.__api_key}"}
+        headers = {"Authorization": f"APIToken {self._api_key_name}"}
         files = {"file": binary}
 
         try:
@@ -41,7 +40,7 @@ class MalpediaScan(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 )
             )
         ]

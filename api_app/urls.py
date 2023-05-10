@@ -5,6 +5,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (
+    CommentViewSet,
     JobViewSet,
     PluginConfigViewSet,
     TagViewSet,
@@ -14,7 +15,6 @@ from .views import (
     analyze_observable,
     ask_analysis_availability,
     ask_multi_analysis_availability,
-    plugin_disabler,
     plugin_state_viewer,
 )
 
@@ -22,6 +22,7 @@ from .views import (
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"jobs", JobViewSet, basename="jobs")
+router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"plugin-config", PluginConfigViewSet, basename="plugin-config")
 
 # These come after /api/..
@@ -41,9 +42,10 @@ urlpatterns = [
     ),
     # router viewsets
     path("", include(router.urls)),
-    # Plugins (analyzers_manager, connectors_manager, playbooks_manager)
+    # Plugins
     path("", include("api_app.analyzers_manager.urls")),
     path("", include("api_app.connectors_manager.urls")),
+    path("", include("api_app.visualizers_manager.urls")),
     path("", include("api_app.playbooks_manager.urls")),
     # auth
     path("auth/", include("authentication.urls")),
@@ -54,6 +56,6 @@ urlpatterns = [
     path("", include("certego_saas.apps.notifications.urls")),
     # organization sub-app
     path("me/", include("certego_saas.apps.organization.urls")),
+    # this is for retro-compatibility
     path("plugin-disable/", plugin_state_viewer, name="plugin_state_viewer"),
-    path("plugin-disable/<int:plugin_type>/<str:plugin_name>/", plugin_disabler),
 ]

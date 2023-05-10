@@ -3,8 +3,9 @@
 
 import logging
 import traceback
+import typing
 from abc import ABCMeta, abstractmethod
-from typing import Type
+from pathlib import PosixPath
 
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -13,8 +14,7 @@ from django.utils.functional import cached_property
 
 from api_app.models import Job
 
-from .dataclasses import AbstractConfig
-from .models import AbstractReport
+from .models import AbstractConfig, AbstractReport
 
 logger = logging.getLogger(__name__)
 
@@ -25,39 +25,70 @@ class Plugin(metaclass=ABCMeta):
     For internal use only.
     """
 
-    _config: AbstractConfig
-    job_id: int
-    report_defaults: dict
-    kwargs: dict
-    report: AbstractReport
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        runtime_configuration: dict,
+        task_id: int,
+        **kwargs,
+    ):
+
+        self._config = config
+        self.job_id = job_id
+        self.runtime_configuration = runtime_configuration
+        self.task_id = task_id
+
+        self.kwargs = kwargs
+        # some post init processing
+        self.report = self.init_report_object()
+        # monkeypatch if in test suite
+        if settings.STAGE_CI:
+            self._monkeypatch()
+
+    @classmethod
+    @property
+    @abstractmethod
+    def python_base_path(cls) -> PosixPath:
+        ...
+
+    @classmethod
+    def all_subclasses(cls):
+        posix_dir = PosixPath(str(cls.python_base_path).replace(".", "/"))
+        for plugin in posix_dir.rglob("*.py"):
+            if plugin.stem == "__init__":
+                continue
+
+            package = f"{str(plugin.parent).replace('/', '.')}.{plugin.stem}"
+            __import__(package)
+        classes = cls.__subclasses__()
+        return sorted(
+            [class_ for class_ in classes if not class_.__name__.startswith("MockUp")],
+            key=lambda x: x.__name__,
+        )
 
     @cached_property
-    def _job(self) -> Job:
+    def _job(self) -> "Job":
         return Job.objects.get(pk=self.job_id)
 
-    @cached_property
-    def _secrets(self) -> dict:
-        return self._config.read_secrets(user=self._job.user)
+    def __repr__(self):
+        return f"({self.__class__.__name__}, job: #{self.job_id})"
 
-    @property
-    def _params(self) -> dict:
-        default_params = self._config.param_values
-        runtime_params = self.report_defaults["runtime_configuration"]
-        # overwrite default with runtime
-        return {**default_params, **runtime_params}
+    def config(self):
+        for param, value in self._config.read_params(self._job).items():
+            attribute_name = f"_{param.name}" if param.is_secret else param.name
+            setattr(self, attribute_name, value)
+            logger.debug(
+                f"Adding to {self.__class__.__name__} "
+                f"param {attribute_name} with value {value} "
+            )
 
-    def set_params(self, params: dict):
-        """
-        Method which receives the parsed `config["params"]` dict.
-        This is called inside `__post__init__`.
-        """
-
-    @abstractmethod
-    def before_run(self, *args, **kwargs):
+    def before_run(self):
         """
         function called directly before run function.
         """
-        raise NotImplementedError()
+        self.report.status = self.report.Status.RUNNING.value
+        self.report.save(update_fields=["status"])
 
     @abstractmethod
     def run(self) -> dict:
@@ -68,16 +99,48 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractmethod
     def after_run(self):
         """
         function called after run function.
         """
-        raise NotImplementedError()
+        self.report.end_time = timezone.now()
+        self.report.save()
 
+    def after_run_success(self, content):
+        self.report.report = content
+        self.report.status = self.report.Status.SUCCESS.value
+        self.report.save(update_fields=["status", "report"])
+
+    def log_error(self, e):
+        if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):
+            error_message = self.get_error_message(e)
+            logger.error(error_message)
+        else:
+            traceback.print_exc()
+            error_message = self.get_error_message(e, is_base_err=True)
+            logger.exception(error_message)
+
+    def after_run_failed(self, e: Exception):
+        self.log_error(e)
+        self.report.errors.append(str(e))
+        self.report.status = self.report.Status.FAILED
+        self.report.save(update_fields=["status", "errors"])
+        if settings.STAGE_CI:
+            raise e
+
+    @classmethod
     @property
     @abstractmethod
-    def report_model(self):
+    def report_model(cls) -> typing.Type[AbstractReport]:
+        """
+        Returns Model to be used for *init_report_object*
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    @property
+    @abstractmethod
+    def config_model(cls) -> typing.Type[AbstractConfig]:
         """
         Returns Model to be used for *init_report_object*
         """
@@ -85,20 +148,20 @@ class Plugin(metaclass=ABCMeta):
 
     def init_report_object(self):
         """
-        Returns report object set in *__post__init__* fn
+        Returns report object set in *__init__* fn
         """
         # unique constraint ensures only one report is possible
         # update case: recurring plugin run
         _report, _ = self.report_model.objects.update_or_create(
             job_id=self.job_id,
-            name=self._config.name,
+            config=self._config,
             defaults={
                 "report": {},
                 "errors": [],
-                "status": AbstractReport.Status.PENDING,
+                "status": AbstractReport.Status.PENDING.value,
                 "start_time": timezone.now(),
                 "end_time": timezone.now(),
-                **self.report_defaults,
+                "task_id": self.task_id,
             },
         )
         return _report
@@ -113,30 +176,23 @@ class Plugin(metaclass=ABCMeta):
     def get_error_message(self, exc, is_base_err=False):
         return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
 
-    def start(self, *args, **kwargs) -> AbstractReport:
+    def start(self, *args, **kwargs):
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
+        self.config()
         try:
             self.before_run()
             _result = self.run()
-            self.report.report = _result
-        except (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded) as e:
-            self._handle_exception(e)
         except Exception as e:
-            self._handle_base_exception(e)
+            self.after_run_failed(e)
         else:
-            self.report.status = self.report.Status.SUCCESS
-
-        # add end time of process
-        self.report.end_time = timezone.now()
-
-        self.after_run()
-        self.report.save()
-
-        return self.report
+            self.after_run_success(_result)
+        finally:
+            # add end time of process
+            self.after_run()
 
     def _handle_exception(self, exc) -> None:
         error_message = self.get_error_message(exc)
@@ -161,77 +217,10 @@ class Plugin(metaclass=ABCMeta):
         for mock_fn in patches:
             cls.start = mock_fn(cls.start)
 
-    def __post__init__(self) -> None:
-        """
-        Hook for post `__init__` processing.
-        Always call `super().__post__init__()` if overwritten in subclass.
-        """
-        # init report
-        self.report = self.init_report_object()
-        # set params
-        self.set_params(self._params)
-        # monkeypatch if in test suite
-        if settings.STAGE_CI:
-            self._monkeypatch()
-
-    def __init__(
-        self,
-        config: AbstractConfig,
-        job_id: int,
-        report_defaults: dict = None,
-        **kwargs,
-    ):
-        self._config = config
-        self.job_id = job_id
-        self.report_defaults = report_defaults if report_defaults is not None else {}
-        self.kwargs = kwargs
-        # some post init processing
-        self.__post__init__()  # lgtm [py/init-calls-subclass]
-
-    @classmethod
-    @abstractmethod
-    def get_config_class(cls) -> Type[AbstractConfig]:
-        raise NotImplementedError()
-
-    @classmethod
-    def update(cls) -> bool:
-        from intel_owl.celery import broadcast
-        from intel_owl.tasks import update_plugin
-
-        # Requires _update to be implemented. Not every analyzer have to implement it
-        gen = cls.get_config_class().get_from_python_module(cls)
-        try:
-            plugin_name, config = next(gen)
-        except StopIteration:
-            return False
-        else:
-            if hasattr(cls, "_update") and callable(cls._update):
-                if settings.NFS:
-                    logger.info(f"Starting direct update of plugin {plugin_name}")
-                    update_plugin(None, plugin_name, cls.get_config_class()._get_type())
-                    logger.info(f"Ended direct update of plugin {plugin_name}")
-                else:
-                    logger.info(
-                        f"about to send broadcast to queue {config.config.queue}"
-                        f" for plugin {plugin_name}"
-                    )
-
-                    broadcast(
-                        update_plugin.__name__,
-                        queue=config.config.queue,
-                        arguments={
-                            "plugin_name": plugin_name,
-                            "plugin_type": cls.get_config_class()._get_type(),
-                        },
-                    )
-                    logger.info(
-                        f"sent broadcast to queue {config.config.queue}"
-                        f" for plugin {plugin_name}"
-                    )
-                return True
-            return False
-
     @classmethod
     @property
-    def enabled(cls):
-        return not cls.get_config_class().is_disabled(cls.__name__)
+    def python_module(cls) -> str:
+        valid_module = cls.__module__.replace(str(cls.python_base_path), "")
+        # remove the starting dot
+        valid_module = valid_module[1:]
+        return f"{valid_module}.{cls.__name__}"

@@ -1,23 +1,33 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
 from django.db import models
 
-from api_app.models import Job
+from api_app.analyzers_manager.constants import AllTypes
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
+from api_app.fields import ChoiceArrayField
+from api_app.models import default_runtime
+from api_app.validators import validate_runtime_configuration
 
 
-class CachedPlaybook(models.Model):
-    name = models.CharField(max_length=225, primary_key=True)
-    # Required fields
-    description = models.CharField(max_length=225, default="", blank=True)
-    analyzers = models.JSONField(default=dict)
-    connectors = models.JSONField(default=dict)
+class PlaybookConfig(models.Model):
+    name = models.CharField(max_length=30, null=False, unique=True, primary_key=True)
+    type = ChoiceArrayField(
+        models.CharField(choices=AllTypes.choices, null=False, max_length=50)
+    )
+    description = models.TextField(null=False)
+    disabled = models.BooleanField(null=False, default=False)
 
-    # Optional Fields
-    supports = models.JSONField(default=list)
-    disabled = models.BooleanField(default=False)
+    analyzers = models.ManyToManyField(
+        AnalyzerConfig, related_name="playbooks", blank=True
+    )
+    connectors = models.ManyToManyField(
+        ConnectorConfig, related_name="playbooks", blank=True
+    )
 
-    # job might not be necessary.
-    job = models.ForeignKey(
-        Job, on_delete=models.SET_NULL, related_name="job", null=True, blank=True
+    runtime_configuration = models.JSONField(
+        blank=True,
+        default=default_runtime,
+        null=False,
+        validators=[validate_runtime_configuration],
     )

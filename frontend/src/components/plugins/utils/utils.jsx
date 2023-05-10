@@ -19,17 +19,23 @@ import {
 } from "react-icons/md";
 
 import { IconButton, BooleanIcon } from "@certego/certego-ui";
-import { ORG_PLUGIN_DISABLE_URI } from "../../../constants/api";
 
 import { markdownToHtml, TLPTag } from "../../common";
 import {
   useOrganizationStore,
   usePluginConfigurationStore,
 } from "../../../stores";
+import {
+  ANALYZERS_CONFIG_URI,
+  CONNECTORS_CONFIG_URI,
+  VISUALIZERS_CONFIG_URI,
+} from "../../../constants/api";
+import { pluginType } from "../../../constants/constants";
 
 const { checkPluginHealth } = usePluginConfigurationStore.getState();
 
 export function PluginInfoCard({ pluginInfo }) {
+  console.debug(pluginInfo);
   return (
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
@@ -114,15 +120,14 @@ export function PluginInfoCard({ pluginInfo }) {
               <h6 className="text-secondary">
                 Verification &nbsp;
                 <PluginVerificationIcon
-                  pluginName={pluginInfo?.name}
-                  verification={pluginInfo?.verification}
+                  pluginName={pluginInfo.name}
+                  verification={pluginInfo.verification}
                 />
               </h6>
-              {pluginInfo?.verification?.error_message && (
-                <div className="text-danger">
-                  {pluginInfo?.verification?.error_message}
-                </div>
-              )}
+              <p className="small text-danger">
+                {!pluginInfo?.verification.configured &&
+                  pluginInfo?.verification.details}
+              </p>
             </div>
           )}
         </div>
@@ -131,7 +136,7 @@ export function PluginInfoCard({ pluginInfo }) {
             <h6 className="text-secondary">Analyzers &nbsp;</h6>
             <ul>
               {Object.entries(pluginInfo?.analyzers).map(([key, value]) => (
-                <li key={`plugininfocard-analyzer__${pluginInfo?.name}-${key}`}>
+                <li key={`plugininfocard-analyzer__${pluginInfo.name}-${key}`}>
                   <span>{key}</span>
                   {Object.keys(pluginInfo?.analyzers[key]).length !== 0 && (
                     <ul>
@@ -173,17 +178,18 @@ export function PluginInfoCard({ pluginInfo }) {
 }
 
 export function PluginInfoPopoverIcon({ pluginInfo }) {
+  const noSpaceName = pluginInfo.name.replaceAll(" ", "_");
   return (
     <div>
       <MdInfo
-        id={`table-infoicon__${pluginInfo.name}`}
+        id={`table-infoicon__${noSpaceName}`}
         className="text-info"
         fontSize="20"
       />
       <UncontrolledPopover
         trigger="hover"
         delay={{ show: 0, hide: 500 }}
-        target={`table-infoicon__${pluginInfo.name}`}
+        target={`table-infoicon__${noSpaceName}`}
         popperClassName="p-0 w-33"
       >
         <PluginInfoCard pluginInfo={pluginInfo} />
@@ -196,7 +202,7 @@ export function PluginVerificationIcon({ pluginName, verification }) {
   const divId = `table-pluginverificationicon__${pluginName}`;
   return (
     <span id={divId}>
-      <BooleanIcon withColors truthy={verification?.configured} />
+      <BooleanIcon withColors truthy={verification.configured} />
       <UncontrolledTooltip
         target={divId}
         placement="top"
@@ -204,14 +210,12 @@ export function PluginVerificationIcon({ pluginName, verification }) {
         innerClassName={classnames(
           "text-start text-nowrap md-fit-content border border-darker",
           {
-            "bg-success text-darker": verification?.configured,
-            "bg-danger text-darker": !verification?.configured,
+            "bg-success text-darker": verification.configured,
+            "bg-danger text-darker": !verification.configured,
           }
         )}
       >
-        {verification?.configured
-          ? "Ready to use!"
-          : verification?.error_message}
+        {verification.details}
       </UncontrolledTooltip>
     </span>
   );
@@ -221,13 +225,13 @@ function PluginHealthSpinner() {
   return <Spinner type="ripple" size="sm" className="text-darker" />;
 }
 
-export function PluginHealthCheckButton({ pluginName, pluginType }) {
+export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isHealthy, setIsHealthy] = React.useState(undefined);
 
   const onClick = async () => {
     setIsLoading(true);
-    const status = await checkPluginHealth(pluginType, pluginName);
+    const status = await checkPluginHealth(pluginType_, pluginName);
     setIsHealthy(status);
     setIsLoading(false);
   };
@@ -277,11 +281,18 @@ export function OrganizationPluginStateToggle({
   if (!organization.name) title = "You're not a part of any organization";
   else if (!isUserOwner)
     title = `You're not an owner of your organization - ${organization.name}`;
+  let baseUrl = "";
+  if (type === pluginType.ANALYZER) {
+    baseUrl = ANALYZERS_CONFIG_URI;
+  } else if (type === pluginType.CONNECTOR) {
+    baseUrl = CONNECTORS_CONFIG_URI;
+  } else if (type === pluginType.VISUALIZER) {
+    baseUrl = VISUALIZERS_CONFIG_URI;
+  }
 
   const onClick = async () => {
-    if (disabled)
-      await axios.delete(`${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`);
-    else await axios.post(`${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`);
+    if (disabled) await axios.delete(`${baseUrl}/${pluginName}/organization`);
+    else await axios.post(`${baseUrl}/${pluginName}/organization`);
     fetchAllOrganizations();
     refetch();
   };
@@ -322,5 +333,5 @@ PluginVerificationIcon.propTypes = {
 
 PluginHealthCheckButton.propTypes = {
   pluginName: PropTypes.string.isRequired,
-  pluginType: PropTypes.oneOf(["analyzer", "connector"]).isRequired,
+  pluginType_: PropTypes.oneOf(["analyzer", "connector"]).isRequired,
 };

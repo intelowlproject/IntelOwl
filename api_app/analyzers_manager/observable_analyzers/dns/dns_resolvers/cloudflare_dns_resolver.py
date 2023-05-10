@@ -9,8 +9,8 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
 
@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 class CloudFlareDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with CloudFlare"""
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "A")
+    query_type: str
 
     def run(self):
         try:
@@ -32,7 +31,7 @@ class CloudFlareDNSResolver(classes.ObservableAnalyzer):
 
             params = {
                 "name": observable,
-                "type": self._query_type,
+                "type": self.query_type,
             }
             headers = {"accept": "application/dns-json"}
             response = requests.get(
@@ -56,7 +55,7 @@ class CloudFlareDNSResolver(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"Answer": ["test1", "test2"]}, 200),
+                    return_value=MockUpResponse({"Answer": ["test1", "test2"]}, 200),
                 ),
             )
         ]

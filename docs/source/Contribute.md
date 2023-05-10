@@ -2,11 +2,11 @@
 
 Intel Owl was designed to ease the addition of new analyzers, connectors and playbooks. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
-* Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
+- Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
-* Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
+- Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
 
-* Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
+- Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
 
 ## Rules
 
@@ -157,7 +157,7 @@ npm start
 
 You may want to look at a few existing examples to start to build a new one, such as:
 
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer 
+- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
 - [malpedia_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/malpedia_scan.py), if you are creating a file analyzer
 - [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
 - **Please note:** If the new analyzer that you are adding is free for the user to use, please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`.
@@ -165,55 +165,38 @@ You may want to look at a few existing examples to start to build a new one, suc
 After having written the new python module, you have to remember to:
 
 1. Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
-2. Add a new entry in the [analyzer configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) following alphabetical order:
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new analyzer. This is a trick to have tests in the same class of its analyzer.
+3. Create the configuration inside django admin in `Analyzers_manager/AnalyzerConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Parameters (at the bottom of the page)
+      1. *name
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. default:  default value provided for the parameter
+   6. *Type: `observable` or `file`
+   7. *Docker based: if the analyzer run through a docker instance
+   8. *Maximum tlp: maximum tlp to allow the run on the connector
+   9. ~Observable supported: required if `type` is `observable`
+   10. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
+   11. Run hash: if the analyzer supports hash as inputs
+   12. ~Run hash type: required if `run hash` is `True`
+   13. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
-Example:
-
-```json
-"Analyzer_Name": {
-    "type": "file", // or "observable"
-    "python_module": "<module_name>.<class_name>",
-    "description": "very cool analyzer",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": true,
-    "run_hash": true, // required only for file analyzer
-    "observable_supported": ["ip", "domain", "url", "hash", "generic"], // required only for observable analyzer
-    "supported_filetypes": ["application/javascript"], // required only for file analyzer
-    "config": {
-      "soft_time_limit": 100,
-      "queue": "long",
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "ANALYZER_SPECIAL_KEY",
-        "type": "string",
-        "required": true,
-        "default": null,
-        "description": "API Key for the analyzer",
-      }
-    }
-},
-```
-
-The `config` can be used in case the new analyzer uses specific configuration arguments and `secrets` can be used to declare any secrets the analyzer requires in order to run (Example: API Key, URL, etc.).
-In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
-MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
-
-  <div class="admonition note">
-  <p class="admonition-title">Note</p>
-  Please see <a href="Usage.html#analyzers-customization">Analyzers customization section</a> to get the explanation of the other available keys.
-  </div>
-
-3. Remember to use `_monkeypatch()` in its class to create automated tests for the new analyzer. This is a trick to have tests in the same class of its analyzer.
-
-4. If a File analyzer was added, define its name in [test_file_scripts.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_file_scripts.py) (not required for Observable Analyzers).
-
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
+      1. AnalyzerConfig
+      2. Parameter
+      3. PluginConfig
+    
 5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
-6. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
-
-7. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
+6. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
 ### Integrating a docker based analyzer
 
@@ -236,71 +219,116 @@ You may want to look at a few existing examples to start to build a new one:
 After having written the new python module, you have to remember to:
 
 1. Put the module in the `connectors` directory
-2. Add a new entry in the [connector_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/connector_config.json) following alphabetical order:
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new connector. This is a trick to have tests in the same class of its connector.
+3. Create the configuration inside django admin in `Connectors_manager/ConnectorConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Parameters (at the bottom of the page)
+      1. *name
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. default:  default value provided for the parameter
+   7. *Maximum tlp: maximum tlp to allow the run on the connector
+   8. *Run on failure: if the connector should be run even if the job fails
 
-Example:
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
+      1. ConnectorConfig
+      2. Parameter
+      3. PluginConfig
 
-```json
-"Connector_Name": {
-    "python_module": "<module_name>.<class_name>",
-    "description": "very cool connector",
-    "maximum_tlp": "WHITE",
-    "run_on_failure": false,
-    "config": {
-      "soft_time_limit": 100,
-      "queue": "default",
-    }
-    "secrets": {
-         "env_var_key": "CONNECTOR_SPECIAL_KEY",
-         "type": "string",
-         "required": true,
-         "default": null,
-         "description": "API Key for the connector",
-    }
-},
-```
 
-Remember to set at least:
+## How to add a new Visualizer
 
-- `python_module`: name of the task that the connector must launch
-- `description`: little description of the connector
-- `maximum_tlp`: maximum TLP of the analysis up to which the connector is allowed to run.
+### Configuration
+1. Put the module in the `visualizers` directory
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new visualizer. This is a trick to have tests in the same class of its connector.
+3. Create the configuration inside django admin in `Visualizers_manager/VisualizerConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Parameters (at the bottom of the page)
+      1. *name
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. default:  default value provided for the parameter
+   6. *Analyzers: List of analyzers that **must** have run to execute the visualizer
+   7. *Connectors: List of connectors that **must** have run to execute the visualizer
 
-Similar to analyzers, the `config` can be used in case the new connector uses specific configuration arguments and `secrets` can be used to declare any secrets the connector requires in order to run (Example: API Key).
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
+      1. VisualizerConfig
+      2. Parameter
+      3. PluginConfig
 
-Please see [Connectors customization section](./Usage.md#connectors-customization) to get the explanation of the other available keys.
 
-3. Add the new connector in the lists in the docs: [Usage](./Usage.md). Also, if the connector provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
-4. Follow steps 4-5 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
+### Python class
+
+The visualizers python code could be not immediate, so a small digression on _how_ it works is necessary.
+Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
+To do so, some utility classes have been made:
+
+- `VisualizablePage`: A single page of the final report, made of different **levels**. Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontaList` 
+- `VisualizableHorizontaList`: An horizontal list of visualizable elements that will be displayed as they are
+- `VisualizableVerticalList`: A vertical list made of a name, a title, and the list of elements.
+- `VisualizableBool`: The representation of a boolean value
+- `VisualizableTitle`: The representation of a tuple, composed of a title and a value
+- `VisualizableBase`: The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.
+
+Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
+At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
+
+You may want to look at a few existing examples to start to build a new one:
+
+- [dns.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/dns.py)
+- [yara.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/yara.py)
+
 
 ## How to add a new Playbook
+1. Create the configuration inside django admin in `Playbooks_manager/PlaybookConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Description: description of the configuration
+   3. *Type: list of types that are supported by the playbook
+   4. *Analyzers: List of analyzers that will be run
+   5. *Connectors: List of connectors that will be run
+2. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata playbooks_manager.PlaybookConfig --pks "<your playbook name>"`
+   2. Create a new migration file inside `/playbooks_manager/migrations/`
+      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
+      2. Remember to correctly set the `dependencies`
+      3. Remember to correctly set the `objects`
 
-You may want to look at the existing [playbook_configuration.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/playbooks_config.json) file. To set up a new Playbook, Add a new entry to the configuraions file in alphabetical order:
+## How to modify the default value of a plugin
 
-Example:
+Default value of plugins are saved as `PluginConfig` objects. To change its value, and propagate to every IntelOwl user you have to
+1. Inside django admin, go in the `Parameter` section and select the parameter of which you want to change the value
+2. At the bottom of the page, change the value and copy/remember/save it/print the primary key (small number under **Value**)
+3. Use `manage.py dumppluginconfig INSERT_THE_PK`
+4. If you want, you can enter in the `reverse_migration` function the previous value
+5. Commit the file!
 
-```json
-"Playbook_Name": {
-    "description": "very cool playbook",
-    "analyzers": {
-            "AbuseIPDB": {},
-            "Shodan": {
-                "include_honeyscore": true
-            },
-            "FireHol_IPList": {}
-    },
-    "connectors": {
-            "MISP": {
-                "ssl_check": true
-            },
-            "OpenCTI": {
-                "ssl_verify": true
-            }
-    }
-},
-```
+## How to modify/delete a plugin
 
-Here, The parameters for the analyzers and connectors to be used go in as an entry in the dictionary value.
+If the changes that you have to make should stay local, you can just change the configuration inside the `Django admin` page.
+
+But if, instead, you want your changes to be usable by every IntelOwl user, you have to create a new migration.  
+
+To do so, you can use `analyzers_manager/migrations/0019_dnstwist_params.py` as an example:
+1. You have to create a new migration file
+2. Add as dependency the previous last migration of the package
+3. You have to create a forward and a reverse function
+4. You have to make the proper changes of the configuration inside these functions (change parameters, secrets, or even delete the configuration)
+   1. If changes are made, you have to validate the instance calling `.full_clean()` and then you can save the instance with `.save()`
+
 
 ## Modifying functionalities of the Certego packages
 
@@ -321,6 +349,7 @@ Follow these guides to understand how to start to contribute to them while devel
 IntelOwl makes use of the django testing framework and the `unittest` library for unit testing of the API endpoints and End-to-End testing of the analyzers and connectors.
 
 ### Configuration
+
 - In the encrypted folder `tests/test_files.zip` (password: "infected") there are some real malware samples that you can use for testing purposes.
 
 <div class="admonition danger">
@@ -331,20 +360,22 @@ Please remember that these are dangerous malware! They come encrypted and locked
 </div>
 
 - With the following environment variables you can customize your tests:
-    * `DISABLE_LOGGING_TEST` -> disable logging to get a clear output
-    * `MOCK_CONNECTIONS` -> mock connections to external API to test the analyzers without a real connection or a valid API key
+
+  - `DISABLE_LOGGING_TEST` -> disable logging to get a clear output
+  - `MOCK_CONNECTIONS` -> mock connections to external API to test the analyzers without a real connection or a valid API key
 
 - If you prefer to use custom inputs for tests, you can change the following environment variables in the environment file based on the data you would like to test:
-    * `TEST_JOB_ID`
-    * `TEST_MD5`
-    * `TEST_URL`
-    * `TEST_IP`
-    * `TEST_DOMAIN`
+  - `TEST_JOB_ID`
+  - `TEST_MD5`
+  - `TEST_URL`
+  - `TEST_IP`
+  - `TEST_DOMAIN`
 
 ### Setup containers
 
-The point here is to launch the code in your environment and not the last official image in Docker Hub. 
+The point here is to launch the code in your environment and not the last official image in Docker Hub.
 For this, use the `test` or the `ci` option when launching the containers with the `start.py` script.
+
 - Use the `test` option to _actually_ execute tests that simulate a real world environment without mocking connections.
 - Use the `ci` option to execute tests in a CI environment where connections are mocked.
 
@@ -367,44 +398,19 @@ Examples:
 $ docker exec intelowl_uwsgi python3 manage.py test
 ```
 
+##### Run tests for a particular plugin
+
+To test a plugin in real environment, i.e. without mocked data, we suggest that you use the GUI of IntelOwl directly.
+Meaning that you have your plugin configured, you have selected a correct observable/file to analyze,
+and the final report shown in the GUI of IntelOwl is exactly what you wanted. 
+
+
 ##### Run tests available in a particular file
 
 Examples:
 
 ```bash
 $ docker exec intelowl_uwsgi python3 manage.py test tests.api_app tests.test_crons # dotted paths
-```
-
-##### Run tests for a particular analyzer or class of analyzers
-You can leverage an helper script. Syntax:
-
-```bash
-$ docker/scripts/test_analyzers.sh <analyzer_class> <comma_separated_analyzer_names>
-```
-
-Examples:
-
-- Observable analyzers tests:
-
-    ```bash
-    $ docker/scripts/test_analyzers.sh ip Shodan_Honeyscore,Darksearch_Query # run only the specified analyzers
-    $ docker/scripts/test_analyzers.sh domain # run all domain analyzers
-    ```
-
-    supports: `ip`, `domain`, `url`, `hash`, `generic`.
-        
-- File analyzers tests:
-
-    ```bash
-    $ docker/scripts/test_analyzers.sh exe File_Info,PE_Info # run only the specified analyzers
-    $ docker/scripts/test_analyzers.sh pdf # run all PDF analyzers
-    ```
-
-    supports: `exe`, `dll`, `doc`, `excel`, `rtf`, `html`, `pdf`, `js`, `apk`.
-
-Otherwise, you can use the normal Django syntax like previously shown. Example:
-```bash
-$ docker exec intelowl_uwsgi python3 manage.py test tests.analyzers_manager.test_observable_scripts.GenericAnalyzersTestCase
 ```
 
 #### Frontend

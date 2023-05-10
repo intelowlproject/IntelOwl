@@ -9,8 +9,8 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
@@ -75,7 +75,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
         except self.Quad9503StatusCode as e:
-            logger.warning(e)
+            logger.info(e)
             self.report.errors.append(str(e))
             timeout = True
         else:
@@ -110,7 +110,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"Answer": False}, 200),
+                    return_value=MockUpResponse({"Answer": False}, 200),
                 ),
             )
         ]

@@ -5,23 +5,19 @@ import json
 import logging
 import time
 from abc import ABCMeta
-from typing import Tuple, Type
+from typing import Tuple
 
 import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import (
-    if_mock_connections,
-    mocked_docker_analyzer_get,
-    mocked_docker_analyzer_post,
-    patch,
-)
+from certego_saas.apps.user.models import User
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+from ..core.models import AbstractConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
-from .dataclasses import AnalyzerConfig
-from .models import AnalyzerReport
+from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from .models import AnalyzerConfig, AnalyzerReport
 
 logger = logging.getLogger(__name__)
 
@@ -38,16 +34,23 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     TypeChoices = TypeChoices
 
     @classmethod
-    def get_config_class(cls) -> Type[AnalyzerConfig]:
-        return AnalyzerConfig
+    @property
+    def config_exception(cls):
+        return AnalyzerConfigurationException
 
     @property
     def analyzer_name(self) -> str:
         return self._config.name
 
+    @classmethod
     @property
-    def report_model(self):
+    def report_model(cls):
         return AnalyzerReport
+
+    @classmethod
+    @property
+    def config_model(cls):
+        return AnalyzerConfig
 
     def get_exceptions_to_catch(self):
         """
@@ -88,24 +91,29 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             return None
         if isinstance(result, dict):
             for key, values in result.items():
-                result[key] = self._validate_result(values, level=level + 1)
+                result[key] = self._validate_result(
+                    values, level=level + 1, max_recursion=max_recursion
+                )
         elif isinstance(result, list):
             for i, _ in enumerate(result):
-                result[i] = self._validate_result(result[i], level=level + 1)
+                result[i] = self._validate_result(
+                    result[i], level=level + 1, max_recursion=max_recursion
+                )
         elif isinstance(result, str):
             return result.replace("\u0000", "")
         elif isinstance(result, int) and result > 9223372036854775807:  # max int 8bytes
             result = 9223372036854775807
         return result
 
-    def before_run(self, *args, **kwargs):
-        self.report.update_status(status=self.report.Status.RUNNING)
+    def after_run_success(self, content):
+        super().after_run_success(self._validate_result(content, max_recursion=15))
 
-    def after_run(self):
-        self.report.report = self._validate_result(self.report.report)
-
-    def __repr__(self):
-        return f"({self.analyzer_name}, job_id: #{self.job_id})"
+    @classmethod
+    def update(cls) -> bool:
+        if hasattr(cls, "_update") and callable(cls._update):
+            cls._update()
+            return True
+        return False
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -119,8 +127,17 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     observable_name: str
     observable_classification: str
 
-    def __post__init__(self):
-        # check if we should run the hash instead of the binary
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        runtime_configuration: dict,
+        task_id: int,
+        **kwargs,
+    ):
+        super().__init__(config, job_id, runtime_configuration, task_id, **kwargs)
+
+        self._config: AnalyzerConfig
         if self._job.is_sample and self._config.run_hash:
             self.observable_classification = ObservableTypes.HASH
             # check which kind of hash the analyzer needs
@@ -132,7 +149,11 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         else:
             self.observable_name = self._job.observable_name
             self.observable_classification = self._job.observable_classification
-        return super(ObservableAnalyzer, self).__post__init__()
+
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)
@@ -161,6 +182,28 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     filename: str
     file_mimetype: str
 
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        runtime_configuration: dict,
+        task_id: int,
+        **kwargs,
+    ):
+        super().__init__(config, job_id, runtime_configuration, task_id, **kwargs)
+        self.md5 = self._job.md5
+        self.filename = self._job.file_name
+        # this is updated in the filepath property, like a cache decorator.
+        # if the filepath is requested, it means that the analyzer downloads...
+        # ...the file from AWS because it requires a path and it needs to be deleted
+        self.__filepath = None
+        self.file_mimetype = self._job.file_mimetype
+
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_ANALYZER_FILE_PYTHON_PATH
+
     def read_file_bytes(self) -> bytes:
         self._job.file.seek(0)
         return self._job.file.read()
@@ -172,16 +215,6 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 file=self._job.file, analyzer=self.analyzer_name
             )
         return self.__filepath
-
-    def __post__init__(self):
-        self.md5 = self._job.md5
-        self.filename = self._job.file_name
-        # this is updated in the filepath property, like a cache decorator.
-        # if the filepath is requested, it means that the analyzer downloads...
-        # ...the file from AWS because it requires a path and it needs to be deleted
-        self.__filepath = None
-        self.file_mimetype = self._job.file_mimetype
-        return super(FileAnalyzer, self).__post__init__()
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)
@@ -291,7 +324,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             return self.__polling(req_key, chance, re_poll_try=re_poll_try + 1)
         else:
             status = json_data.get("status", None)
-            if status and status == "running":
+            if status and status == self._job.Status.RUNNING.value:
                 logger.info(
                     f"Poll number #{chance + 1}, "
                     f"status: 'running' <-- {self.__repr__()}"
@@ -324,7 +357,9 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             f"parameter when executing start.py."
         )
 
-    def _docker_run(self, req_data: dict, req_files: dict = None) -> dict:
+    def _docker_run(
+        self, req_data: dict, req_files: dict = None, analyzer_name: str = None
+    ) -> dict:
         """
         Helper function that takes of care of requesting new analysis,
         reading response, polling for result and exception handling for a
@@ -333,6 +368,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         Args:
             req_data (Dict): Dict of request JSON.
             req_files (Dict, optional): Dict of files to send. Defaults to None.
+            analyzer_name: optional, could be used for edge cases
 
         Raises:
             AnalyzerConfigurationException: In case docker service is not running
@@ -365,7 +401,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         err = final_resp.get("error", None)
         report = final_resp.get("report", None)
 
-        if not report:
+        # APKiD provides empty result in case it does not support the binary type
+        if not report and (analyzer_name != "APKiD"):
             raise AnalyzerRunException(f"Report is empty. Reason: {err}")
 
         if isinstance(report, dict):
@@ -400,6 +437,16 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             raise AssertionError
         return resp
 
+    @staticmethod
+    def mocked_docker_analyzer_get(*args, **kwargs):
+        return MockUpResponse(
+            {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
+        )
+
+    @staticmethod
+    def mocked_docker_analyzer_post(*args, **kwargs):
+        return MockUpResponse({"key": "test", "status": "running"}, 202)
+
     def _monkeypatch(self, patches: list = None):
         """
         Here, `_monkeypatch` is an instance method and not a class method.
@@ -417,11 +464,11 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    side_effect=mocked_docker_analyzer_get,
+                    side_effect=self.mocked_docker_analyzer_get,
                 ),
                 patch(
                     "requests.post",
-                    side_effect=mocked_docker_analyzer_post,
+                    side_effect=self.mocked_docker_analyzer_post,
                 ),
             )
         )
@@ -429,20 +476,14 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.start = mock_fn(self.start)
 
     @classmethod
-    def health_check(cls, analyzer_name: str) -> bool:
+    def health_check(cls, analyzer_name: str, user: User) -> bool:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-        health_status = False
-
         try:
             requests.head(cls.url, timeout=10)
-        except requests.exceptions.ConnectionError:
-            # status=False, so pass
-            pass
-        except requests.exceptions.Timeout:
-            # status=False, so pass
-            pass
+        except requests.exceptions.RequestException:
+            health_status = False
         else:
             health_status = True
 

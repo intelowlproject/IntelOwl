@@ -17,8 +17,6 @@ RUN npm install npm@latest --location=global \
 # Stage 2: Backend
 FROM python:3.9.16
 
-COPY --from=frontend-build /build /var/www/reactapp
-
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
@@ -44,6 +42,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
 
+# perl not interactive
+ENV PERL_MM_USE_DEFAULT 1
+# msgconvert
+RUN cpan -T Email::Outlook::Message
+
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
@@ -55,18 +58,20 @@ RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
 
 COPY . $PYTHONPATH
 
+COPY --from=frontend-build /build /var/www/reactapp
+
 RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/celery.log ${LOG_PATH}/django/celery_errors.log \
     && touch ${LOG_PATH}/django/django_auth_ldap.log ${LOG_PATH}/django/django_errors.log \
     && touch ${LOG_PATH}/django/certego_saas.log ${LOG_PATH}/django/certego_saas_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
-
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff
-    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
+    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh \
+
 
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"

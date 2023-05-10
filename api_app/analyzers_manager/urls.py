@@ -4,26 +4,18 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import (
-    AnalyzerActionViewSet,
-    AnalyzerHealthCheckAPI,
-    AnalyzerListAPI,
-    AnalyzerUpdateAPI,
-)
+from .views import AnalyzerActionViewSet, AnalyzerConfigAPI
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(
-    r"jobs/(?P<job_id>\d+)/analyzer/(?P<name>\w+)",
+    r"jobs/(?P<job_id>\d+)/analyzer/(?P<report_id>\w+)",
     AnalyzerActionViewSet,
 )
+router.register(r"analyzer", AnalyzerConfigAPI, basename="analyzer")
+
 
 urlpatterns = [
-    path(
-        "get_analyzer_configs", AnalyzerListAPI.as_view(), name="get_analyzer_configs"
-    ),
-    path("analyzer/<str:name>/healthcheck", AnalyzerHealthCheckAPI.as_view()),
-    path("analyzer/<str:name>/update", AnalyzerUpdateAPI.as_view()),
     # Viewsets
     path(r"", include(router.urls)),
 ]

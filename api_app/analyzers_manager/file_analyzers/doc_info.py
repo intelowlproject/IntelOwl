@@ -17,6 +17,7 @@ from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encr
 from oletools.olevba import VBA_Parser
 
 from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.analyzers_manager.models import MimeTypes
 
 logger = logging.getLogger(__name__)
 
@@ -32,22 +33,16 @@ class CannotDecryptException(Exception):
 
 
 class DocInfo(FileAnalyzer):
-    def set_params(self, params):
+    experimental: bool
+    additional_passwords_to_check: list
+
+    def config(self):
+        super().config()
         self.olevba_results = {}
         self.vbaparser = None
-        self.experimental = params.get("experimental", False)
         self.passwords_to_check = []
-        # this is to extract the passwords for encryption requested by the client
-        # you can use pyintelowl to send additional passwords to check for
-        # example:
-        #             "additional_configuration": {
-        #                 "Doc_Info": {
-        #                     "additional_passwords_to_check": ["testpassword"]
-        #                 }
-        #             },
-        additional_passwords_to_check = params.get("additional_passwords_to_check", [])
-        if isinstance(additional_passwords_to_check, list):
-            self.passwords_to_check.extend(additional_passwords_to_check)
+
+        self.passwords_to_check.extend(self.additional_passwords_to_check)
 
     def run(self):
         results = {}
@@ -136,34 +131,29 @@ class DocInfo(FileAnalyzer):
                 self.vbaparser.close()
 
         results["olevba"] = self.olevba_results
-
-        results["msodde"] = self.analyze_msodde()
-        results["follina"] = self.analyze_for_follina_cve()
+        if self.file_mimetype != MimeTypes.ONE_NOTE:
+            results["msodde"] = self.analyze_msodde()
+        if self.file_mimetype in MimeTypes.WORD():
+            results["follina"] = self.analyze_for_follina_cve()
         return results
 
     def analyze_for_follina_cve(self) -> List[str]:
         hits = []
-        if (
-            self.file_mimetype
-            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ):
-            # case docx
-            zipped = zipfile.ZipFile(self.filepath)
-            try:
-                template = zipped.read("word/_rels/document.xml.rels")
-            except KeyError:
-                pass
-            else:
-                # logic reference:
-                # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
-                xml_root = fromstring(template)
-                for xml_node in xml_root.iter():
-                    target = xml_node.attrib.get("Target")
-                    if target:
-                        target = target.strip().lower()
-                        hits += re.findall(r"mhtml:(https?://.*?)!", target)
+        # case docx
+        zipped = zipfile.ZipFile(self.filepath)
+        try:
+            template = zipped.read("word/_rels/document.xml.rels")
+        except KeyError:
+            pass
         else:
-            logger.info(f"Wrong mimetype to search for follina {self.md5}")
+            # logic reference:
+            # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
+            xml_root = fromstring(template)
+            for xml_node in xml_root.iter():
+                target = xml_node.attrib.get("Target")
+                if target:
+                    target = target.strip().lower()
+                    hits += re.findall(r"mhtml:(https?://.*?)!", target)
         return hits
 
     def analyze_msodde(self):
@@ -173,7 +163,14 @@ class DocInfo(FileAnalyzer):
             )
         except Exception as e:
             error_message = f"job_id {self.job_id} msodde parser failed. Error: {e}"
-            logger.warning(error_message, stack_info=True)
+            # This may happen for text/plain samples types
+            # and should not be treated as an engine error
+            if "Could not determine delimiter" in str(e) or self.filename.endswith(
+                ".exe"
+            ):
+                logger.info(error_message, stack_info=True)
+            else:
+                logger.warning(error_message, stack_info=True)
             self.report.errors.append(error_message)
             self.report.save()
             msodde_result = f"Error: {e}"

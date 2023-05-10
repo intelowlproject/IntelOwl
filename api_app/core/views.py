@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-import typing
 from abc import ABCMeta, abstractmethod
 
 from drf_spectacular.utils import extend_schema as add_docs
@@ -10,17 +9,14 @@ from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import app as celery_app
 
-from .classes import Plugin
-from .dataclasses import AbstractConfig
-from .models import AbstractReport
+from .models import AbstractConfig, AbstractReport
 from .serializers import AbstractConfigSerializer
 
 logger = logging.getLogger(__name__)
@@ -32,12 +28,13 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         IsObjectOwnerOrSameOrgPermission,
     ]
 
+    @classmethod
     @property
     @abstractmethod
-    def report_model(self):
+    def report_model(cls):
         raise NotImplementedError()
 
-    def get_object(self, job_id: int, name: str) -> AbstractReport:
+    def get_object(self, job_id: int, report_id: int) -> AbstractReport:
         """
         overrides drf's get_object
         get plugin report object by name and job_id
@@ -45,12 +42,13 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         try:
             obj = self.report_model.objects.get(
                 job_id=job_id,
-                name=name,
+                pk=report_id,
             )
-            self.check_object_permissions(self.request, obj)
-            return obj
         except self.report_model.DoesNotExist:
             raise NotFound()
+        else:
+            self.check_object_permissions(self.request, obj)
+            return obj
 
     def perform_kill(self, report: AbstractReport):
         """
@@ -60,7 +58,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
-        report.update_status(AbstractReport.Status.KILLED)
+        report.status = AbstractReport.Status.KILLED
+        report.save(update_fields=["status"])
 
     def perform_retry(self, report: AbstractReport):
         raise NotImplementedError()
@@ -73,12 +72,13 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         },
     )
     @action(detail=False, methods=["patch"])
-    def kill(self, request, job_id, name):
+    def kill(self, request, job_id, report_id):
         logger.info(
-            f"kill request from user {request.user} for job_id {job_id}, name {name}"
+            f"kill request from user {request.user}"
+            f" for job_id {job_id}, pk {report_id}"
         )
         # get report object or raise 404
-        report = self.get_object(job_id, name)
+        report = self.get_object(job_id, report_id)
         if report.status not in [
             AbstractReport.Status.RUNNING,
             AbstractReport.Status.PENDING,
@@ -96,12 +96,13 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         },
     )
     @action(detail=False, methods=["patch"])
-    def retry(self, request, job_id, name):
+    def retry(self, request, job_id, report_id):
         logger.info(
-            f"retry request from user {request.user} for job_id {job_id}, name {name}"
+            f"retry request from user {request.user}"
+            f" for job_id {job_id}, report_id {report_id}"
         )
         # get report object or raise 404
-        report = self.get_object(job_id, name)
+        report = self.get_object(job_id, report_id)
         if report.status not in [
             AbstractReport.Status.FAILED,
             AbstractReport.Status.KILLED,
@@ -115,116 +116,75 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PluginListAPI(APIView, metaclass=ABCMeta):
-    @property
-    @abstractmethod
-    def serializer_class(self) -> typing.Type[AbstractConfigSerializer]:
-        raise NotImplementedError()
+class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
+    serializer_class = AbstractConfigSerializer
+    permission_classes = [IsAuthenticated]
+    ordering = ["name"]
 
-    def get(self, request, *args, **kwargs):
-        from api_app.models import OrganizationPluginState, PluginConfig
+    def get_queryset(self):
+        return self.serializer_class.Meta.model.objects.all()
 
-        try:
-            ac = self.serializer_class.read_and_verify_config(request.user)
-            PluginConfig.apply(ac, request.user, self.serializer_class._get_type())
-            OrganizationPluginState.apply(
-                ac, request.user, self.serializer_class._get_type()
-            )
-            return Response(ac, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.exception(
-                f"get_plugin_configs requester:{str(request.user)} error:{e}."
-            )
-            return Response(
-                {"error": "error in get_plugin_configs. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
-@add_docs(
-    description="Health Check: if server instance associated with plugin is up or not",
-    request=None,
-    responses={
-        200: inline_serializer(
-            name="PluginHealthCheckSuccessResponse",
-            fields={
-                "status": rfs.BooleanField(allow_null=True),
-            },
-        ),
-    },
-)
-class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    @property
-    @abstractmethod
-    def config_model(self) -> typing.Type[AbstractConfig]:
-        raise NotImplementedError()
-
-    def perform_healthcheck(self, plugin_name: str) -> bool:
-        plugin_config = self.config_model.get(plugin_name)
-        if plugin_config is None:
-            raise ValidationError(
-                {
-                    "detail": f"{self.__class__.__name__.split('Health')[0]} "
-                    "doesn't exist"
-                }
-            )
-
-        class_: typing.Type[Plugin] = plugin_config.get_class()
+    @add_docs(
+        description="Health Check: "
+        "if server instance associated with plugin is up or not",
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="PluginHealthCheckSuccessResponse",
+                fields={
+                    "status": rfs.BooleanField(allow_null=True),
+                },
+            ),
+        },
+    )
+    @action(
+        methods=["get"],
+        detail=True,
+        url_path="health_check",
+        permission_classes=[IsAdminUser],
+    )
+    def health_check(self, request, pk=None):
+        logger.info(f"get healthcheck from user {request.user}, pk {pk}")
+        obj: AbstractConfig = self.get_object()
+        class_ = obj.python_class
         try:
             if not hasattr(class_, "health_check") or not callable(class_.health_check):
                 raise NotImplementedError()
-            status_ = class_.health_check(plugin_name)
+            try:
+                health_status = class_.health_check(obj.name, request.user)
+            except Exception as e:
+                logger.info(e, stack_info=True)
+                raise ValidationError({"detail": "Unexpected exception raised"})
         except NotImplementedError:
             raise ValidationError({"detail": "No healthcheck implemented"})
-
-        return status_
-
-    def get(self, request, name):
-        logger.info(f"get healthcheck from user {request.user}, name {name}")
-        health_status = self.perform_healthcheck(name)
-        return Response(data={"status": health_status}, status=status.HTTP_200_OK)
-
-
-@add_docs(
-    description="Update plugin with latest configuration",
-    request=None,
-    responses={
-        200: inline_serializer(
-            name="PluginUpdateSuccessResponse",
-            fields={
-                "status": rfs.BooleanField(allow_null=False),
-                "detail": rfs.CharField(allow_null=True),
-            },
-        ),
-    },
-)
-class PluginUpdateAPI(APIView, metaclass=ABCMeta):
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    @property
-    @abstractmethod
-    def config_model(self):
-        raise NotImplementedError()
-
-    def post(self, request, name: str):
-        logger.info(f"update request from user {request.user}, name {name}")
-        plugin_config: AbstractConfig = self.config_model.get(name)
-        if plugin_config is None:
-            raise ValidationError(
-                {
-                    "detail": f"{self.__class__.__name__.split('Update')[0]} "
-                    "doesn't exist"
-                }
-            )
-        try:
-            class_: typing.Type[Plugin] = plugin_config.get_class()
-        except ImportError:
-            raise ValidationError({"detail": "Unable to import plugin"})
         else:
-            success = class_.update()
-            if not success:
-                raise ValidationError({"detail": "No update implemented"})
+            return Response(data={"status": health_status}, status=status.HTTP_200_OK)
 
-        return Response(data={"status": True}, status=status.HTTP_200_OK)
+    @add_docs(description="Disable plugin for your organization", request=None)
+    @action(
+        methods=["post"],
+        detail=True,
+        url_path="organization",
+    )
+    def disable_in_org(self, request, pk=None):
+        logger.info(f"get disable_in_org from user {request.user}, pk {pk}")
+        obj: AbstractConfig = self.get_object()
+        if not request.user.has_membership() or not request.user.membership.is_owner:
+            raise PermissionDenied()
+        organization = request.user.membership.organization
+        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+            raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
+        obj.disabled_in_organizations.add(organization)
+        return Response(status=status.HTTP_201_CREATED)
+
+    @disable_in_org.mapping.delete
+    def enable_in_org(self, request, pk=None):
+        logger.info(f"get enable_in_org from user {request.user}, pk {pk}")
+        obj: AbstractConfig = self.get_object()
+        if not request.user.has_membership() or not request.user.membership.is_owner:
+            raise PermissionDenied()
+        organization = request.user.membership.organization
+        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+            raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
+        obj.disabled_in_organizations.remove(organization)
+        return Response(status=status.HTTP_202_ACCEPTED)

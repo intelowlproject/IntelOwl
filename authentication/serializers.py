@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+
 import logging
 import re
 
@@ -170,16 +171,16 @@ class EmailVerificationSerializer(
             certego_apps_settings.SLACK_TOKEN
             and certego_apps_settings.DEFAULT_SLACK_CHANNEL
         ):
+            userprofile = user.user_profile
+            user_admin_link = (
+                f"{settings.WEB_CLIENT_URL}/admin/certego_saas_user/user/{user.pk}"
+            )
+            userprofile_admin_link = (
+                f"{settings.WEB_CLIENT_URL}"
+                f"/admin/authentication/userprofile/{userprofile.pk}"
+            )
+            slack = Slack()
             try:
-                userprofile = user.user_profile
-                user_admin_link = (
-                    f"{settings.WEB_CLIENT_URL}/admin/certego_saas_user/user/{user.pk}"
-                )
-                userprofile_admin_link = (
-                    f"{settings.WEB_CLIENT_URL}"
-                    f"/admin/authentication/userprofile/{userprofile.pk}"
-                )
-                slack = Slack()
                 slack.send_message(
                     title="Newly registered user!!",
                     body=(

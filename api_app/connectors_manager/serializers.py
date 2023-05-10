@@ -1,58 +1,24 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from django.conf import settings
-from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer
-from api_app.models import TLP, PluginConfig
+from api_app.core.serializers import (
+    AbstractConfigSerializer,
+    AbstractListConfigSerializer,
+    AbstractReportSerializer,
+)
 
-from .models import ConnectorReport
+from .models import ConnectorConfig, ConnectorReport
 
 
 class ConnectorConfigSerializer(AbstractConfigSerializer):
-    """
-    Serializer for `connector_config.json`.
-    """
-
-    maximum_tlp = rfs.ChoiceField(choices=TLP.choices)
-    run_on_failure = rfs.BooleanField(default=False)
-    CONFIG_FILE_NAME = "connector_config.json"
-
-    @classmethod
-    def _get_type(cls):
-        return PluginConfig.PluginType.CONNECTOR
-
-    def validate_python_module(self, python_module: str) -> str:
-        clspath = f"{settings.BASE_CONNECTOR_PYTHON_PATH}.{python_module}"
-        try:
-            import_string(clspath)
-        except ImportError as exc:
-            raise rfs.ValidationError(
-                f"`python_module` incorrect, {clspath} couldn't be imported"
-            ) from exc
-
-        return python_module
+    class Meta:
+        model = ConnectorConfig
+        fields = rfs.ALL_FIELDS
+        list_serializer_class = AbstractListConfigSerializer
 
 
-class ConnectorReportSerializer(rfs.ModelSerializer):
-    """
-    ConnectorReport model's serializer.
-    """
-
-    type = rfs.CharField(default="connector")
-
+class ConnectorReportSerializer(AbstractReportSerializer):
     class Meta:
         model = ConnectorReport
-        fields = (
-            "name",
-            "status",
-            "report",
-            "errors",
-            "process_time",
-            "start_time",
-            "end_time",
-            "runtime_configuration",
-            "type",
-            "parent_playbook",
-        )
+        fields = AbstractReportSerializer.Meta.fields

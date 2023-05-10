@@ -7,21 +7,21 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):
     base_url: str = "https://exchange.xforce.ibmcloud.com/api"
     web_url: str = "https://exchange.xforce.ibmcloud.com"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.__api_password = self._secrets["api_password_name"]
-        self.malware_only = params.get("malware_only", False)
+    _api_key_name: str
+    _api_password_name: str
+    malware_only: bool
+    timeout: int = 5
 
     def run(self):
-        auth = HTTPBasicAuth(self.__api_key, self.__api_password)
+        auth = HTTPBasicAuth(self._api_key_name, self._api_password_name)
         headers = {"Accept": "application/json"}
 
         endpoints = self._get_endpoints()
@@ -33,7 +33,9 @@ class XForce(classes.ObservableAnalyzer):
                 else:
                     observable_to_check = self.observable_name
                 url = f"{self.base_url}/{endpoint}/{observable_to_check}"
-                response = requests.get(url, auth=auth, headers=headers)
+                response = requests.get(
+                    url, auth=auth, headers=headers, timeout=self.timeout
+                )
                 if response.status_code == 404:
                     result["found"] = False
                 else:
@@ -85,7 +87,7 @@ class XForce(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

@@ -1,0 +1,90 @@
+[
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 412,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 402,
+      "updated_at": "2023-05-02T08:26:09.707Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 413,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 403,
+      "updated_at": "2023-05-02T08:26:09.715Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 414,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 407,
+      "updated_at": "2023-05-02T08:26:09.722Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 415,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 408,
+      "updated_at": "2023-05-02T08:26:09.729Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 416,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 410,
+      "updated_at": "2023-05-02T08:26:09.736Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 417,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 411,
+      "updated_at": "2023-05-02T08:26:09.743Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 418,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 413,
+      "updated_at": "2023-05-02T08:26:09.750Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 419,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 414,
+      "updated_at": "2023-05-02T08:26:09.758Z"
+    }
+  }
+]

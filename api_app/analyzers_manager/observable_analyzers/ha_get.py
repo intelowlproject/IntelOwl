@@ -4,8 +4,8 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class HybridAnalysisGet(ObservableAnalyzer):
@@ -13,12 +13,11 @@ class HybridAnalysisGet(ObservableAnalyzer):
     api_url: str = f"{base_url}/api/v2/"
     sample_url: str = f"{base_url}/sample"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         headers = {
-            "api-key": self.__api_key,
+            "api-key": self._api_key_name,
             "user-agent": "Falcon Sandbox",
             "accept": "application/json",
         }
@@ -67,7 +66,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         [
                             {
                                 "job_id": "1",

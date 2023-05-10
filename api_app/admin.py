@@ -17,6 +17,9 @@ class JobAdminView(admin.ModelAdmin):
         "file_name",
         "file_mimetype",
         "received_request_time",
+        "analyzers_executed",
+        "connectors_executed",
+        "visualizers_executed",
     )
     list_display_link = (
         "id",
@@ -28,6 +31,19 @@ class JobAdminView(admin.ModelAdmin):
         "observable_name",
         "file_name",
     )
+    list_filter = (
+        "status",
+        "user",
+    )
+
+    def analyzers_executed(self, instance: Job):  # noqa
+        return [analyzer.name for analyzer in instance.analyzers_to_execute.all()]
+
+    def connectors_executed(self, instance: Job):  # noqa
+        return [connector.name for connector in instance.connectors_to_execute.all()]
+
+    def visualizers_executed(self, instance: Job):  # noqa
+        return [visualizer.name for visualizer in instance.visualizers_to_execute.all()]
 
 
 @admin.register(Tag)
@@ -38,14 +54,6 @@ class TagAdminView(admin.ModelAdmin):
 
 @admin.register(PluginConfig)
 class PluginCredentialAdminView(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "type",
-        "attribute",
-        "plugin_name",
-        "config_type",
-        "organization",
-        "owner",
-    )
-    search_fields = ("attribute", "plugin_name", "organization", "owner")
-    list_filter = ("config_type", "type", "plugin_name", "organization", "owner")
+    list_display = ("id", "for_organization", "owner", "attribute", "is_secret")
+    search_fields = ("for_organization", "owner", "attribute", "is_secret")
+    list_filter = ("for_organization", "owner")

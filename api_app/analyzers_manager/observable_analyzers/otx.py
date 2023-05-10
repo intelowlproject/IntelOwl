@@ -8,10 +8,39 @@ from urllib.parse import urlparse
 import OTXv2
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
+
+
+class OTXv2Extended(OTXv2.OTXv2):
+    """
+    This is to add "timeout" feature without having to do a fork
+    Once this PR is merged: https://github.com/AlienVault-OTX/OTX-Python-SDK/pull/66
+    we can remove this and use the upstream
+    """
+
+    def __init__(self, *args, timeout=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.timeout = timeout
+
+    def get(self, url, **kwargs):
+        try:
+            response = self.session().get(
+                self.create_url(url, **kwargs),
+                headers=self.headers,
+                proxies=self.proxies,
+                verify=self.verify,
+                cert=self.cert,
+                timeout=self.timeout,
+            )
+            return self.handle_response_errors(response).json()
+        except (
+            OTXv2.requests.exceptions.RetryError,
+            OTXv2.requests.exceptions.Timeout,
+        ) as e:
+            raise OTXv2.RetryError(e)
 
 
 class OTX(classes.ObservableAnalyzer):
@@ -21,37 +50,12 @@ class OTX(classes.ObservableAnalyzer):
     Download all the data is slow with the IP addresses.
     """
 
-    # This is to add "timeout" feature without having to do a fork
-    # Once this PR is merged: https://github.com/AlienVault-OTX/OTX-Python-SDK/pull/66
-    # we can remove this and use the upstream
-    class OTXv2Extended(OTXv2.OTXv2):
-        def __init__(self, *args, timeout=None, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.timeout = timeout
+    verbose: bool
+    sections: list
+    full_analysis: bool
+    timeout: int = 30
 
-        def get(self, url, **kwargs):
-            try:
-                response = self.session().get(
-                    self.create_url(url, **kwargs),
-                    headers=self.headers,
-                    proxies=self.proxies,
-                    verify=self.verify,
-                    cert=self.cert,
-                    timeout=self.timeout,
-                )
-                return self.handle_response_errors(response).json()
-            except (
-                OTXv2.requests.exceptions.RetryError,
-                OTXv2.requests.exceptions.Timeout,
-            ) as e:
-                raise OTXv2.RetryError(e)
-
-    def set_params(self, params):
-        self._api_key = self._secrets["api_key_name"]
-        self.verbose = params.get("verbose", False)
-        self.sections = params.get("sections", ["general"])
-        self.full_analysis = params.get("full_analysis", False)
-        self.timeout = params.get("timeout", 30)
+    _api_key_name: str
 
     def _extract_indicator_type(self) -> "OTXv2.IndicatorTypes":
         observable_classification = self.observable_classification
@@ -120,8 +124,8 @@ class OTX(classes.ObservableAnalyzer):
         return analysis_result
 
     def run(self):
-        otx = self.OTXv2Extended(
-            timeout=self.timeout, api_key=self._api_key, user_agent="IntelOwl"
+        otx = OTXv2Extended(
+            timeout=self.timeout, api_key=self._api_key_name, user_agent="IntelOwl"
         )
 
         to_analyze_observable = self.observable_name
@@ -185,7 +189,7 @@ class OTX(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("requests.Session.get", return_value=MockResponse({}, 200))
+                patch("requests.Session.get", return_value=MockUpResponse({}, 200))
             )
         ]
         return super()._monkeypatch(patches=patches)

@@ -1,248 +1,221 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import json
 import logging
-import os
-from abc import abstractmethod
-from copy import deepcopy
-from typing import Dict, List, Optional, TypedDict
+from collections import defaultdict
 
-from cache_memoize import cache_memoize
-from django.conf import settings
+from django.db.models import OuterRef, Subquery
 from rest_framework import serializers as rfs
 
-from api_app.helpers import calculate_md5
-from api_app.models import PluginConfig
-from intel_owl.consts import PARAM_DATATYPE_CHOICES
+from api_app.core.models import AbstractReport, Parameter
 
 logger = logging.getLogger(__name__)
-
-
-class ConfigVerificationType(TypedDict):
-    configured: bool
-    error_message: Optional[str]
-    missing_secrets: List[str]
-
-
-class BaseField(rfs.Field):
-    def to_representation(self, value):
-        return value
-
-    def to_internal_value(self, data):
-        return data
 
 
 class _ConfigSerializer(rfs.Serializer):
     """
     To validate `config` attr.
-    Used for `analyzer_config.json` and `connector_config.json` files.
     """
 
     queue = rfs.CharField(required=True)
     soft_time_limit = rfs.IntegerField(required=True)
 
 
-class _ParamSerializer(rfs.Serializer):
-    """
-    To validate `params` attr.
-    Used for `analyzer_config.json` and `connector_config.json` files.
-    """
+class ParamListSerializer(rfs.ListSerializer):
+    @property
+    def data(self):
+        # this is to return a dict instead of a list
+        return super(rfs.ListSerializer, self).data
 
-    value = BaseField()
-    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES)
-    description = rfs.CharField(allow_blank=True, required=True, max_length=512)
+    def to_representation(self, data):
+        result = super().to_representation(data)
+        return {elem.pop("name"): elem for elem in result}
 
-    def validate(self, attrs):
-        value_type = type(attrs["value"]).__name__
-        expected_type = attrs["type"]
-        if value_type != expected_type:
-            raise rfs.ValidationError(
-                f"Invalid value type. {value_type} != {expected_type}"
+
+class ParameterCompleteSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Parameter
+        fields = rfs.ALL_FIELDS
+
+
+class ParameterSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Parameter
+        fields = ["name", "type", "description", "required"]
+        list_serializer_class = ParamListSerializer
+
+
+class AbstractListConfigSerializer(rfs.ListSerializer):
+
+    plugins = rfs.PrimaryKeyRelatedField(read_only=True)
+
+    def to_representation(self, data):
+        from api_app.models import PluginConfig
+
+        plugins = self.child.Meta.model.objects.filter(
+            pk__in=[plugin.pk for plugin in data]
+        )
+        user = self.context["request"].user
+        enabled_plugins = plugins.filter(disabled=False)
+
+        # get the values for that configurations
+        configurations = PluginConfig.visible_for_user(user).filter(
+            **{f"parameter__{self.child.Meta.model.snake_case_name}__pk__in": plugins}
+        )
+        # value for owner
+        subquery_owner = Subquery(
+            configurations.filter(
+                parameter=OuterRef("pk"), owner=user, for_organization=False
+            ).values("value")[:1]
+        )
+        # value for default
+        subquery_default = Subquery(
+            configurations.filter(parameter=OuterRef("pk"))
+            .filter(owner__isnull=True)
+            .values("value")[:1]
+        )
+        # value for org
+        if user and user.has_membership():
+            subquery_org = Subquery(
+                configurations.filter(parameter=OuterRef("pk"))
+                .filter(for_organization=True, owner=user.membership.organization.owner)
+                .values("value")[:1]
             )
-        return super().validate(attrs)
-
-
-class _SecretSerializer(rfs.Serializer):
-    """
-    To validate `secrets` attr.
-    Used for `analyzer_config.json` and `connector_config.json` files.
-    """
-
-    env_var_key = rfs.CharField(required=True, max_length=128)
-    description = rfs.CharField(required=True, allow_blank=True, max_length=512)
-    required = rfs.BooleanField(required=True)
-    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES, required=False)
-    default = BaseField(required=False)
-
-    def validate(self, attrs):
-        if "type" in attrs and "default" in attrs:
-            default_type = type(attrs["default"]).__name__
-            expected_type = attrs["type"]
-            if default_type != expected_type:
-                raise rfs.ValidationError(
-                    f"Invalid default type. {default_type} != {expected_type}"
-                )
-        return super().validate(attrs)
-
-
-class AbstractConfigSerializer(rfs.Serializer):
-    """
-    Abstract serializer for `analyzer_config.json` and `connector_config.json`.
-    """
-
-    # constants
-    CONFIG_FILE_NAME = ""
-
-    # sentinel/ flag
-    _is_valid_flag = False
-
-    # common basic fields
-    name = rfs.CharField(required=True)
-    python_module = rfs.CharField(required=True, max_length=128)
-    disabled = rfs.BooleanField(required=True)
-    description = rfs.CharField(allow_blank=True, required=False)
-    # common custom fields
-    config = _ConfigSerializer()
-    secrets = rfs.DictField(child=_SecretSerializer())
-    params = rfs.DictField(child=_ParamSerializer())
-    # automatically populated fields
-    verification = rfs.SerializerMethodField()
-    extends = rfs.CharField(allow_blank=True, required=False)
-
-    def is_valid(self, raise_exception=False):
-        ret = super().is_valid(raise_exception=raise_exception)
-        if ret:
-            self._is_valid_flag = True
-        return ret
-
-    @classmethod
-    @abstractmethod
-    def _get_type(cls):
-        raise NotImplementedError()
-
-    def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
-        # raw instance because input is json and not django model object
-        # get all missing secrets
-        secrets = raw_instance.get("secrets", {})
-        missing_secrets = []
-        for s_key, s_dict in secrets.items():
-            # check if available in environment
-            if (
-                not PluginConfig.visible_for_user(self.context.get("user", None))
-                .filter(
-                    attribute=s_key,
-                    type=self._get_type(),
-                    plugin_name=raw_instance["name"],
-                )
-                .exists()
-                and s_dict["required"]
-            ):
-                missing_secrets.append(s_key)
-
-        num_missing_secrets = len(missing_secrets)
-        if num_missing_secrets:
-            configured = False
-            num_total_secrets = len(secrets.keys())
-            error_message = "(%s) not set; (%d of %d satisfied)" % (
-                ",".join(missing_secrets),
-                num_total_secrets - num_missing_secrets,
-                num_total_secrets,
+            logger.debug("Excluding plugins disabled in organization")
+            enabled_plugins = enabled_plugins.exclude(
+                disabled_in_organizations=user.membership.organization.pk
             )
         else:
-            configured = True
-            error_message = None
+            from django.db.models import Value
 
-        return {
-            "configured": configured,
-            "error_message": error_message,
-            "missing_secrets": missing_secrets,
-        }
-
-    # utility methods
-
-    @classmethod
-    def _get_config_path(cls) -> str:
-        """
-        Returns full path to the config file.
-        """
-        return os.path.join(
-            settings.PROJECT_LOCATION, "configuration", cls.CONFIG_FILE_NAME
-        )
-
-    @classmethod
-    def _read_config(cls) -> dict:
-        """
-        Returns config file as `dict`.
-        """
-        config_path = cls._get_config_path()
-        with open(config_path) as f:
-            config_dict = json.load(f)
-        return config_dict
-
-    @classmethod
-    def _md5_config_file(cls) -> str:
-        """
-        Returns md5sum of config file.
-        """
-        fpath = cls._get_config_path()
-        with open(fpath, "r") as fp:
-            buffer = fp.read().encode("utf-8")
-            md5hash = calculate_md5(buffer)
-        return md5hash
-
-    @classmethod
-    def _complete_config(
-        cls, config_dict: dict, plugin_name: str, visited: set
-    ) -> dict:
-        """
-        Completes config by parsing extends configs
-        """
-        if plugin_name in visited:
-            raise RuntimeError(f"Circular dependency detected in {cls} config")
-        visited.add(plugin_name)
-        result = config_dict[plugin_name]
-        if plugin_name not in config_dict:
-            raise RuntimeError(
-                f"Plugin {plugin_name} not found in {cls} config "
-                "but referenced in extends"
+            logger.debug(
+                f"User {user.username} is not a member of an organization,"
+                f"meaning that there are no disabled plugins"
             )
-        if "extends" in config_dict[plugin_name]:
-            parent_plugin = config_dict[plugin_name]["extends"]
-            result = deepcopy(cls._complete_config(config_dict, parent_plugin, visited))
-            for key in config_dict[plugin_name]:
-                if key != "extends":
-                    result[key] = config_dict[plugin_name][key]
+            subquery_org = Value(False)
+        # annotate if the params are configured or not with the subquery
+        params = (
+            Parameter.objects.filter(
+                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
+            )
+            .prefetch_related(self.child.Meta.model.snake_case_name)
+            .annotate(
+                value_owner=subquery_owner,
+                value_default=subquery_default,
+                value_organization=subquery_org,
+            )
+        )
+        parsed = defaultdict(list)
+        # populate the result for every plugin (even the ones without parameters)
+        # parsed[plugin]= [parameter1]
+        for parameter in params:
+            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
+                parameter
+            )
+        logger.debug(
+            ", ".join(
+                [
+                    f"plugin {key} has {len(values)} parameters"
+                    for key, values in parsed.items()
+                ]
+            )
+        )
+        result = []
+        # we can finally construct our result
+        for plugin in plugins:
+            plugin_representation = self.child.to_representation(plugin)
+            plugin_representation["params"] = {}
+            plugin_representation["secrets"] = {}
+            total_parameter = len(parsed[plugin])
+            parameter_required_not_configured = []
+            for param in parsed[plugin]:
+                # the priority order is
+                # 1 owner
+                # 2 organization
+                # 3 default
+                value = (
+                    param.value_owner or param.value_organization or param.value_default
+                )
+                if param.required and not bool(value):
+                    parameter_required_not_configured.append(param.name)
+                param_representation = ParameterSerializer(param).data
+                if param.is_secret and value == param.value_organization:
+                    value = "redacted"
+                logger.debug(
+                    f"Parameter {param.name} for plugin {plugin.name} "
+                    f"has value {value} for user {user.username}"
+                )
+                param_representation["value"] = value
+                param_representation.pop("name")
+                if param.is_secret:
+                    plugin_representation["secrets"][param.name] = param_representation
+                else:
+                    plugin_representation["params"][param.name] = param_representation
+            if not parameter_required_not_configured:
+                logger.debug(f"Plugin {plugin.name} is configured")
+                configured = True
+                details = "Ready to use!"
+            else:
+                logger.debug(f"Plugin {plugin.name} is not configured")
+                details = (
+                    f"{', '.join(parameter_required_not_configured)} "
+                    "secret"
+                    f"{'' if len(parameter_required_not_configured) == 1 else 's'}"
+                    " not set;"
+                    f" ({total_parameter - len(parameter_required_not_configured)} "
+                    f"of {total_parameter} satisfied)"
+                )
+                configured = False
+            if plugin in enabled_plugins:
+                logger.debug(f"Plugin {plugin.name} is disabled")
+                disabled = False
+            else:
+                logger.debug(f"Plugin {plugin.name} is enabled")
+                disabled = True
+            plugin_representation["disabled"] = disabled
+            plugin_representation["verification"] = {
+                "configured": configured,
+                "details": details,
+                "missing_secrets": parameter_required_not_configured,
+            }
+            result.append(plugin_representation)
+
         return result
 
-    @classmethod
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 365,  # 1 year
-        args_rewrite=lambda cls, user=None: f"{cls.__name__}-"
-        f"{user.username if user else ''}-"
-        f"{cls._md5_config_file()}",
-    )
-    def read_and_verify_config(cls, user=None) -> Dict:
-        """
-        Returns verified config.
-        This function is memoized for the md5sum of the JSON file.
-        """
-        config_dict = cls._read_config()
-        for plugin in config_dict:
-            config_dict[plugin] = cls._complete_config(config_dict, plugin, set())
-        serializer_errors = {}
-        for key, config in config_dict.items():
-            new_config = {"name": key, **config}
-            serializer = cls(
-                data=new_config, context={"user": user}
-            )  # lgtm [py/call-to-non-callable]
-            if serializer.is_valid():
-                config_dict[key] = serializer.data
-            else:
-                serializer_errors[key] = serializer.errors
 
-        if bool(serializer_errors):
-            logger.error(f"{cls.__name__} serializer failed: {serializer_errors}")
-            raise rfs.ValidationError(serializer_errors)
+class AbstractConfigSerializer(rfs.ModelSerializer):
 
-        return config_dict
+    config = _ConfigSerializer(required=True)
+    parameters = ParameterSerializer(write_only=True, many=True)
+
+    class Meta:
+        exclude = ["disabled_in_organizations"]
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()
+
+
+class AbstractReportSerializer(rfs.ModelSerializer):
+
+    name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
+
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "process_time",
+            "report",
+            "status",
+            "errors",
+            "start_time",
+            "end_time",
+            "runtime_configuration",
+        )
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        data["type"] = instance.__class__.__name__.replace("Report", "").lower()
+        return data
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()

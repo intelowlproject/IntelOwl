@@ -1,6 +1,11 @@
 version: "3.8"
 
 services:
+
+  uwsgi:
+    depends_on:
+      - postgres
+
   postgres:
     image: library/postgres:12-alpine
     container_name: intelowl_postgres
@@ -8,6 +13,3 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./env_file_postgres
-  uwsgi:
-    depends_on:
-      - postgres

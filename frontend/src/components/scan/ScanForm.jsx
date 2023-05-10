@@ -1,6 +1,6 @@
 import React from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdInfoOutline } from "react-icons/md";
 import {
   FormFeedback,
   FormGroup,
@@ -12,6 +12,7 @@ import {
   Input,
   Spinner,
   Button,
+  UncontrolledTooltip,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Form, Formik, FieldArray } from "formik";
@@ -75,11 +76,11 @@ const groupPlaybooks = (playbooksList) => {
 
   playbooksList.forEach((obj) => {
     // filter on basis of type
-    if (obj.supports.includes("file")) {
+    if (obj.type.includes("file")) {
       grouped.file.push(obj);
     }
 
-    obj.supports.forEach((clsfn) => {
+    obj.type.forEach((clsfn) => {
       if (clsfn !== "file") {
         grouped[clsfn].push(obj);
       }
@@ -89,19 +90,18 @@ const groupPlaybooks = (playbooksList) => {
 };
 
 const stateSelector = (state) => [
-  state.loading,
-  state.error,
+  state.analyzersLoading,
+  state.connectorsLoading,
+  state.playbooksLoading,
+  state.analyzersError,
+  state.connectorsError,
+  state.playbooksError,
   groupAnalyzers(state.analyzers),
   state.connectors,
   groupPlaybooks(state.playbooks),
 ];
 
 const checkChoices = [
-  {
-    value: "check_all",
-    label:
-      "Do not execute if a similar analysis is currently running or reported without fails",
-  },
   {
     value: "running_only",
     label: "Do not execute if a similar analysis is currently running",
@@ -147,11 +147,12 @@ const initialValues = {
   analyzers: [],
   connectors: [],
   playbooks: [],
-  tlp: "WHITE",
+  tlp: "CLEAR",
   runtime_configuration: {},
   tags: [],
   check: "check_all",
   analysisOptionValues: "Analyzers/Connectors",
+  hoursAgo: 24,
 };
 
 // Component
@@ -185,8 +186,12 @@ export default function ScanForm() {
 
   // API/ store
   const [
-    pluginsLoading,
-    pluginsError,
+    analyzersLoading,
+    connectorsLoading,
+    playbooksLoading,
+    analyzersError,
+    connectorsError,
+    playbooksError,
     analyzersGrouped,
     connectors,
     playbooksGrouped,
@@ -208,7 +213,7 @@ export default function ScanForm() {
               </div>
               {!v.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.error_message}
+                  ⚠ {v.verification.details}
                 </div>
               )}
             </div>
@@ -237,7 +242,7 @@ export default function ScanForm() {
               </div>
               {!v.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.error_message}
+                  ⚠ {v.verification.details}
                 </div>
               )}
             </div>
@@ -281,9 +286,11 @@ export default function ScanForm() {
     (values) => {
       const errors = {};
 
-      if (pluginsError) {
-        errors.analyzers = pluginsError;
-        errors.connectors = pluginsError;
+      if (analyzersError) {
+        errors.analyzers = analyzersError;
+      }
+      if (connectorsError) {
+        errors.connectors = connectorsError;
       }
 
       if (values.classification === "file") {
@@ -297,14 +304,14 @@ export default function ScanForm() {
       }
       return errors;
     },
-    [pluginsError]
+    [analyzersError, connectorsError]
   );
 
   const ValidatePlaybooks = React.useCallback(
     (values) => {
       const errors = {};
-      if (pluginsError) {
-        errors.playbooks = pluginsError;
+      if (playbooksError) {
+        errors.playbooks = playbooksError;
       }
       if (values.playbooks.length === 0) {
         return `Please select a playbook!`;
@@ -320,7 +327,7 @@ export default function ScanForm() {
       }
       return errors;
     },
-    [pluginsError]
+    [playbooksError]
   );
 
   const startPlaybooks = React.useCallback(
@@ -369,6 +376,18 @@ export default function ScanForm() {
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
+      /* We have 2 cases:
+       1) use default config -> we need the runtime_configuration field has value {}
+       2) custom config -> we need to add visualizers because it's required from the backend
+
+      Note: we don't put visualizers in the editor because it could be very verbose
+      */
+      if (Object.keys(formValues.runtime_configuration).length) {
+        formValues.runtime_configuration.visualizers = {};
+      }
+
+      console.debug("ScanFrom - onSubmit - formValues");
+      console.debug(formValues);
 
       try {
         const jobIds = await createJob(formValues);
@@ -446,11 +465,11 @@ export default function ScanForm() {
                         formik.values.observable_names.length > 0
                           ? formik.values.observable_names.map(
                               (name, index) => (
-                                <Row
-                                  className="py-2"
+                                <div
+                                  className="py-2 d-flex"
                                   key={`observable_names.${index + 0}`}
                                 >
-                                  <Col sm={11}>
+                                  <Col sm={11} className="pe-3">
                                     <Field
                                       as={Input}
                                       type="text"
@@ -483,7 +502,7 @@ export default function ScanForm() {
                                   >
                                     <BsFillTrashFill />
                                   </Button>
-                                </Row>
+                                </div>
                               )
                             )
                           : null}
@@ -552,8 +571,8 @@ export default function ScanForm() {
                     </Label>
                     <Col sm={9}>
                       <Loader
-                        loading={pluginsLoading}
-                        error={pluginsError}
+                        loading={analyzersLoading}
+                        error={analyzersError}
                         render={() => (
                           <>
                             <MultiSelectDropdownInput
@@ -577,7 +596,7 @@ export default function ScanForm() {
                       Select Connectors
                     </Label>
                     <Col sm={9}>
-                      {!(pluginsLoading || pluginsError) && (
+                      {!(connectorsLoading || connectorsError) && (
                         <>
                           <MultiSelectDropdownInput
                             options={connectorOptions}
@@ -633,7 +652,7 @@ export default function ScanForm() {
                   <Label sm={3} htmlFor="playbooks">
                     Select Playbooks
                   </Label>
-                  {!(pluginsLoading || pluginsError) && (
+                  {!(playbooksLoading || playbooksError) && (
                     <Col sm={9}>
                       <MultiSelectDropdownInput
                         options={playbookOptions}
@@ -644,26 +663,6 @@ export default function ScanForm() {
                   )}
                 </FormGroup>
               )}
-              <FormGroup row className="mt-2">
-                <Label sm={3}>Extra configuration</Label>
-                <Col sm={9}>
-                  {checkChoices.map((ch) => (
-                    <FormGroup check key={`checkchoice__${ch.value}`}>
-                      <Field
-                        as={Input}
-                        id={`checkchoice__${ch.value}`}
-                        type="radio"
-                        name="check"
-                        value={ch.value}
-                        onChange={formik.handleChange}
-                      />
-                      <Label check for={`checkchoice__${ch.value}`}>
-                        {ch.label}
-                      </Label>
-                    </FormGroup>
-                  ))}
-                </Col>
-              </FormGroup>
 
               <hr />
               <FormGroup row>
@@ -706,6 +705,76 @@ export default function ScanForm() {
                     )}
                   </FormText>
                   <ErrorMessage component={FormFeedback} name="tlp" />
+                </Col>
+              </FormGroup>
+
+              <FormGroup row className="mt-2">
+                <Label sm={3}>Scan configuration</Label>
+                <Col sm={9}>
+                  <FormGroup check key="checkchoice__check_all">
+                    <Field
+                      as={Input}
+                      id="checkchoice__check_all"
+                      type="radio"
+                      name="check"
+                      value="check_all"
+                      onChange={formik.handleChange}
+                    />
+                    <div className="d-flex align-items-center">
+                      <Label
+                        check
+                        for="checkchoice__check_all"
+                        className="col-8"
+                      >
+                        Do not execute if a similar analysis is currently
+                        running or reported without fails
+                      </Label>
+                      <div className="col-4 d-flex align-items-center">
+                        H:
+                        <div className="col-4 mx-1">
+                          <Field
+                            as={Input}
+                            id="checkchoice__check_all__minutes_ago"
+                            type="number"
+                            name="hoursAgo"
+                            onChange={formik.handleChange}
+                          />
+                        </div>
+                        <div className="col-2">
+                          <MdInfoOutline id="minutes-ago-info-icon" />
+                          <UncontrolledTooltip
+                            target="minutes-ago-info-icon"
+                            placement="right"
+                            fade={false}
+                            innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
+                          >
+                            <span>
+                              Max age (in hours) for the similar analysis.
+                              <br />
+                              The default value is 24 hours (1 day).
+                              <br />
+                              Empty value takes all the previous analysis.
+                            </span>
+                          </UncontrolledTooltip>
+                        </div>
+                      </div>
+                    </div>
+                  </FormGroup>
+                  {checkChoices.map((ch) => (
+                    <FormGroup check key={`checkchoice__${ch.value}`}>
+                      <Field
+                        as={Input}
+                        id={`checkchoice__${ch.value}`}
+                        type="radio"
+                        name="check"
+                        value={ch.value}
+                        onChange={formik.handleChange}
+                      />
+                      <Label check for={`checkchoice__${ch.value}`}>
+                        {ch.label}
+                      </Label>
+                    </FormGroup>
+                  ))}
                 </Col>
               </FormGroup>
 

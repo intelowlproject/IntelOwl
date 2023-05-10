@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import logging
 import os
 import uuid
 from typing import Dict
@@ -10,30 +11,44 @@ from typing import Dict
 from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
-from kombu import Exchange, Queue
+from kombu import Queue
+from kombu.common import Broadcast
 
+from intel_owl.settings import STAGE_PRODUCTION, STAGE_STAGING
+
+logger = logging.getLogger(__name__)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
 app = Celery("intel_owl")
 
-if settings.AWS_SQS:
-    if settings.STAGE_PRODUCTION:
+
+def get_queue_url(queue):
+    if STAGE_PRODUCTION:
         SQS_QUEUE = "prod"
-    elif settings.STAGE_STAGING:
+    elif STAGE_STAGING:
         SQS_QUEUE = "stag"
     else:
-        SQS_QUEUE = "local"
+        SQS_QUEUE = "test"
+    return f"intelowl-{SQS_QUEUE}-{get_queue_name(queue)}"
 
+
+def get_queue_name(queue: str) -> str:
+    if not settings.AWS_SQS:
+        return queue
+    return f"{queue}.fifo"
+
+
+if settings.AWS_SQS:
     PREDEFINED_QUEUES = {
-        queue: {
+        get_queue_name(queue): {
             "url": f"https://sqs.{settings.AWS_REGION}"
             f".amazonaws.com/{settings.AWS_USER_NUMBER}/"
-            f"intelowl-{SQS_QUEUE}-{queue}"
+            f"{get_queue_url(queue)}"
         }
         for queue in settings.CELERY_QUEUES
     }
     # in this way they are printed in the Docker logs
-    print(f"predefined queues active: {PREDEFINED_QUEUES}")
+    logger.info(f"predefined queues active: {PREDEFINED_QUEUES}")
 
     BROKER_TRANSPORT_OPTIONS = {
         "region": settings.AWS_REGION,
@@ -52,17 +67,26 @@ else:
     BROKER_TRANSPORT_OPTIONS = {}
 
 DEFAULT_QUEUE = settings.CELERY_QUEUES[0]
-
-app.conf.update(
-    task_default_queue=DEFAULT_QUEUE,
-    task_queues=[
-        Queue(
-            key,
-            Exchange(key),
-            routing_key=key,
+task_queues = [
+    Queue(
+        get_queue_name(key),
+        routing_key=key,
+    )
+    for key in settings.CELERY_QUEUES
+]
+if not settings.AWS_SQS:
+    task_queues.append(
+        Broadcast(
+            name=settings.BROADCAST_QUEUE,
+            queue=get_queue_name(settings.BROADCAST_QUEUE),
+            routing_key=settings.BROADCAST_QUEUE,
+            unique=False,
+            auto_delete=False,
         )
-        for key in settings.CELERY_QUEUES
-    ],
+    )
+app.conf.update(
+    task_default_queue=get_queue_name(DEFAULT_QUEUE),
+    task_queues=task_queues,
     task_time_limit=1800,
     broker_url=settings.BROKER_URL,
     result_backend=settings.RESULT_BACKEND,
@@ -108,7 +132,7 @@ app.conf.beat_schedule = {
         "task": "intel_owl.tasks.remove_old_jobs",
         "schedule": crontab(minute=10, hour=2),
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
@@ -116,71 +140,80 @@ app.conf.beat_schedule = {
     "check_stuck_analysis": {
         "task": "intel_owl.tasks.check_stuck_analysis",
         "schedule": crontab(minute="*/5"),
+        "kwargs": {"check_pending": True},
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
     # Executes only on Wed because on Tue it's updated
     "maxmind_updater": {
-        "task": "intel_owl.tasks.maxmind_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=1, day_of_week=3),
+        "args": ["maxmind.Maxmind"],
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
     # execute every 6 hours
     "talos_updater": {
-        "task": "intel_owl.tasks.talos_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=5, hour="*/6"),
+        "args": ["talos.Talos"],
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
     # execute every 10 minutes
     "tor_updater": {
-        "task": "intel_owl.tasks.tor_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute="*/10"),
+        "args": ["tor.Tor"],
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
     # yara repo updater 1 time a day
     "yara_updater": {
-        "task": "intel_owl.tasks.yara_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=0),
+        "args": ["yara_scan.YaraScan"],
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
     # quark rules updater 2 time a week
     "quark_updater": {
-        "task": "intel_owl.tasks.quark_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=0, day_of_week=[2, 5]),
+        "args": ["quark_engine.QuarkEngine"],
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
-    # quark rules updater 2 time a week
+    # notification
     "update_notifications_with_releases": {
         "task": "intel_owl.tasks.update_notifications_with_releases",
         "schedule": crontab(minute=0, hour=22),
         "options": {
-            "queue": DEFAULT_QUEUE,
+            "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
 }
 
 
-def broadcast(function: str, queue: str = None, arguments: Dict = None):
-    if queue:
-        if queue not in settings.CELERY_QUEUES:
-            queue = DEFAULT_QUEUE
-        queue = [f"celery@worker_{queue}"]
-    app.control.broadcast(function, destination=queue, arguments=arguments)
+def broadcast(function, queue: str = None, arguments: Dict = None):
+    if settings.AWS_SQS:
+        raise NotImplementedError("SQS does not support the broadcast at the moment.")
+    else:
+        if queue:
+            if queue not in settings.CELERY_QUEUES:
+                queue = DEFAULT_QUEUE
+            queue = [f"celery@worker_{queue}"]
+        app.control.broadcast(function.__name__, destination=queue, arguments=arguments)

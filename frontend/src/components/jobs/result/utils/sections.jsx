@@ -11,6 +11,7 @@ import {
   MdDeleteOutline,
   MdPauseCircleOutline,
   MdOutlineRefresh,
+  MdComment,
 } from "react-icons/md";
 
 import {
@@ -37,11 +38,20 @@ function DeleteIcon() {
   );
 }
 
+function CommentIcon({ commentNumber }) {
+  return (
+    <span>
+      <MdComment className="me-1" />
+      Comments ({commentNumber})
+    </span>
+  );
+}
+
 function retryJobIcon() {
   return (
     <span>
       <MdOutlineRefresh className="me-1" />
-      Retry Job
+      Rescan
     </span>
   );
 }
@@ -102,12 +112,12 @@ export function JobActionsBar({ job, refetch }) {
     connectors: job.connectors_requested,
     runtime_configuration: job.runtime_configuration,
     tags_labels: job.tags.map((optTag) => optTag.label),
-    playbooks: job.playbooks_requested,
+    playbooks: [job.playbook_requested],
   };
 
   const handleRetry = async () => {
     addToast("Retrying the same job...", null, "spinner", false, 2000);
-    if (job.playbooks_requested.length > 0) {
+    if (job.playbook_to_execute) {
       console.debug("retrying Playbook");
       const jobId = await createPlaybookJob(formValues).then(refetch);
       setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);
@@ -118,8 +128,19 @@ export function JobActionsBar({ job, refetch }) {
     }
   };
 
+  const commentIcon = () => <CommentIcon commentNumber={job.comments.length} />;
   return (
     <ContentSection className="d-inline-flex me-2">
+      <IconButton
+        id="commentbtn"
+        Icon={commentIcon}
+        size="sm"
+        color="darker"
+        className="me-2"
+        onClick={() => navigate(`/jobs/${job.id}/comments`)}
+        title="Comments"
+        titlePlacement="top"
+      />
       {job.permissions?.delete && (
         <IconButton
           id="deletejobbtn"
@@ -268,14 +289,12 @@ export function JobInfoCard({ job }) {
               />,
             ],
             [
-              "Playbook(s)",
-              job.playbooks_to_execute.map((playbook) => (
-                <PlaybookTag
-                  key={playbook}
-                  playbook={playbook}
-                  className="mr-2"
-                />
-              )),
+              "Playbook",
+              <PlaybookTag
+                key={job.playbook_to_execute}
+                playbook={job.playbook_to_execute}
+                className="mr-2"
+              />,
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>

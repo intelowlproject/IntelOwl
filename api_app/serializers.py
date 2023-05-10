@@ -1,36 +1,38 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+
 import copy
+import datetime
 import json
 import logging
-from typing import Dict, List, Tuple
+import uuid
+from typing import Any, Dict, List, Union
 
+import django.core.exceptions
+from django.db.models import Q
 from django.http import QueryDict
-from drf_spectacular.utils import extend_schema_serializer
+from django.utils.timezone import now
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ValidationError
 
-from certego_saas.apps.organization.membership import Membership
-
-# from django.contrib.auth import get_user_model
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from intel_owl.celery import DEFAULT_QUEUE
 
-from .analyzers_manager.constants import ObservableTypes
-from .analyzers_manager.dataclasses import AnalyzerConfig
+from .analyzers_manager.constants import ObservableTypes, TypeChoices
+from .analyzers_manager.models import AnalyzerConfig, MimeTypes
 from .analyzers_manager.serializers import AnalyzerReportSerializer
-from .connectors_manager.dataclasses import ConnectorConfig
+from .choices import TLP
+from .connectors_manager.exceptions import NotRunnableConnector
+from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
-from .exceptions import NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
-from .helpers import (
-    calculate_md5,
-    calculate_mimetype,
-    calculate_observable_classification,
-    gen_random_colorhex,
-)
-from .models import TLP, Job, PluginConfig, Tag
-from .playbooks_manager.dataclasses import PlaybookConfig
+from .core.models import Parameter
+from .helpers import calculate_md5, gen_random_colorhex
+from .models import Comment, Job, PluginConfig, Tag, default_runtime
+from .playbooks_manager.models import PlaybookConfig
+from .visualizers_manager.models import VisualizerConfig
+from .visualizers_manager.serializers import VisualizerReportSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +43,11 @@ __all__ = [
     "JobSerializer",
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
-    "AnalysisResponseSerializer",
+    "JobResponseSerializer",
     "MultipleFileAnalysisSerializer",
     "MultipleObservableAnalysisSerializer",
-    "multi_result_enveloper",
     "PluginConfigSerializer",
-    "PlaybookFileAnalysisSerializer",
-    "PlaybookObservableAnalysisSerializer",
+    "CommentSerializer",
 ]
 
 
@@ -58,33 +58,6 @@ class TagSerializer(rfs.ModelSerializer):
     class Meta:
         model = Tag
         fields = rfs.ALL_FIELDS
-
-
-class JobAvailabilitySerializer(rfs.ModelSerializer):
-    """
-    Serializer for ask_analysis_availability
-    """
-
-    class Meta:
-        model = Job
-        fields = rfs.ALL_FIELDS
-
-    md5 = rfs.CharField(max_length=128, required=True)
-    analyzers = rfs.ListField(default=list)
-    playbooks = rfs.ListField(default=list, required=False)
-    running_only = rfs.BooleanField(default=False, required=False)
-    minutes_ago = rfs.IntegerField(default=None, required=False)
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        playbooks = attrs.get("playbooks", [])
-        analyzers = attrs.get("analyzers", [])
-
-        if len(playbooks) != 0 and len(analyzers) != 0:
-            raise rfs.ValidationError(
-                "Either only send the 'playbooks' parameter or the 'analyzers' one."
-            )
-        return attrs
 
 
 class _AbstractJobViewSerializer(rfs.ModelSerializer):
@@ -102,189 +75,238 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     """
 
     tags_labels = rfs.ListField(default=list)
-    runtime_configuration = rfs.JSONField(required=False, default={}, write_only=True)
-    analyzers_requested = rfs.ListField(default=list)
-    connectors_requested = rfs.ListField(default=list)
+    runtime_configuration = rfs.JSONField(
+        required=False, default=default_runtime, write_only=True
+    )
     md5 = rfs.HiddenField(default=None)
+    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
+
+    def validate_runtime_configuration(self, runtime_config: Dict):
+        from api_app.validators import validate_runtime_configuration
+
+        if not runtime_config:
+            runtime_config = default_runtime()
+        try:
+            validate_runtime_configuration(runtime_config)
+        except django.core.exceptions.ValidationError as e:
+            logger.info(e, stack_info=True)
+            raise ValidationError("Runtime Configuration Validation Failed")
+        return runtime_config
+
+    def validate_tlp(self, tlp: str):
+        if tlp == "WHITE":
+            return TLP.CLEAR.value
+        return tlp
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
+        self.log_runnable = True
+        self.mtm_fields = {
+            "analyzers_requested": None,
+            "connectors_requested": None,
+            "analyzers_to_execute": None,
+            "connectors_to_execute": None,
+            "visualizers_to_execute": None,
+        }
 
     def validate(self, attrs: dict) -> dict:
-        # check and validate runtime_configuration
-        runtime_conf = attrs.get("runtime_configuration", {})
-        if runtime_conf and isinstance(runtime_conf, list):
-            runtime_conf = json.loads(runtime_conf[0])
-        attrs["runtime_configuration"] = runtime_conf
-        self.filter_analyzers_and_connectors(attrs)
+        attrs = super().validate(attrs)
+        if playbook := attrs.get("playbook_requested", None):
+            if attrs.get("analyzers_requested", []) or attrs.get(
+                "connectors_requested", []
+            ):
+                raise ValidationError(
+                    "You can't specify a playbook and plugins together"
+                )
+            if playbook.disabled:
+                raise ValidationError(
+                    {"detail": "No playbooks can be run after filtering."}
+                )
+            attrs["playbook_to_execute"] = playbook
+            attrs["analyzers_requested"] = list(playbook.analyzers.all())
+            attrs["connectors_requested"] = list(playbook.connectors.all())
+
+        attrs["analyzers_requested"] = self.filter_analyzers_requested(
+            attrs["analyzers_requested"]
+        )
+        attrs["connectors_requested"] = self.filter_connectors_requested(
+            attrs["connectors_requested"]
+        )
+        attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(
+            attrs["analyzers_requested"], attrs
+        )
+        attrs["connectors_to_execute"] = self.set_connectors_to_execute(
+            attrs["connectors_requested"], attrs
+        )
+        attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(
+            attrs["analyzers_to_execute"], attrs["connectors_to_execute"]
+        )
+        attrs["warnings"] = self.filter_warnings
+
         return attrs
 
-    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
-        # init empty list
-        cleaned_analyzer_list = []
-        selected_analyzers = []
+    def set_visualizers_to_execute(
+        self,
+        analyzers_to_execute: List[AnalyzerConfig],
+        connectors_to_execute: List[ConnectorConfig],
+    ) -> List[VisualizerConfig]:
+        visualizers_to_execute = []
 
-        analyzers_requested = serialized_data.get("analyzers_requested", [])
-        if serialized_data.get("playbooks_requested", []):
-            analyzers_requested = serialized_data.get("analyzers_to_execute", [])
+        for visualizer in VisualizerConfig.objects.all():
+            visualizer: VisualizerConfig
+            if (
+                visualizer.is_runnable(self.context["request"].user)
+                # subsets
+                and set(visualizer.analyzers.all().values_list("pk", flat=True))
+                <= {analyzer.pk for analyzer in analyzers_to_execute}
+                and set(visualizer.connectors.all().values_list("pk", flat=True))
+                <= {connector.pk for connector in connectors_to_execute}
+            ):
+                logger.info(f"Going to use {visualizer.name}")
+                visualizers_to_execute.append(visualizer)
+        return visualizers_to_execute
 
-        tlp = serialized_data.get("tlp", TLP.WHITE).upper()
+    def set_connectors_to_execute(
+        self, connectors_requested: List[ConnectorConfig], serialized_data
+    ) -> List[ConnectorConfig]:
+        tlp = serialized_data["tlp"]
+        connectors_executed = self.plugins_to_execute(
+            tlp, connectors_requested, not self.all_connectors
+        )
+        return connectors_executed
 
-        # read config
-        analyzer_dataclasses = AnalyzerConfig.all()
-        all_analyzer_names = list(analyzer_dataclasses.keys())
-
-        # run all analyzers ?
-        run_all = len(analyzers_requested) == 0
-        if run_all:
-            # select all
-            selected_analyzers.extend(all_analyzer_names)
-        else:
-            # select the ones requested
-            selected_analyzers.extend(analyzers_requested)
-
-        for a_name in selected_analyzers:
-            try:
-                config = analyzer_dataclasses.get(a_name, None)
-
-                if not config:
-                    if not run_all:
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't run: not available in configuration"
-                        )
-                    # don't add warning if run_all
-                    continue
-
-                if (
-                    not config.is_ready_to_use
-                    or "plugin_states" in self.context
-                    and self.context["plugin_states"]
-                    .filter(plugin_name=a_name, disabled=True)
-                    .exists()
-                ):
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't run: is disabled or unconfigured"
-                    )
-
-                if tlp != TLP.WHITE and config.leaks_info:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because it leaks info externally."
-                    )
-                if tlp == TLP.RED and config.external_service:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because you"
-                        " filtered external analyzers."
-                    )
-            except NotRunnableAnalyzer as e:
-                if run_all:
-                    # in this case, they are not warnings but
-                    # expected and wanted behavior
-                    logger.debug(e)
-                else:
-                    logger.warning(e)
-                    self.filter_warnings.append(str(e))
-            else:
-                cleaned_analyzer_list.append(a_name)
-
-        if len(cleaned_analyzer_list) == 0:
+    def set_analyzers_to_execute(
+        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+    ) -> List[AnalyzerConfig]:
+        tlp = serialized_data["tlp"]
+        analyzers_executed = self.plugins_to_execute(
+            tlp, analyzers_requested, not self.all_analyzers
+        )
+        if not analyzers_executed:
             raise ValidationError(
                 {"detail": "No Analyzers can be run after filtering."}
             )
-        return cleaned_analyzer_list
+        return analyzers_executed
 
-    def filter_connectors(self, serialized_data: Dict) -> List[str]:
-        # init empty list
-        cleaned_connectors_list = []
-        selected_connectors = []
-
-        connectors_requested = serialized_data.get("connectors_requested", [])
-        playbook_mode = not len(serialized_data.get("playbooks_requested", [])) == 0
-
-        # run all connectors ?
-        run_all = len(connectors_requested) == 0
-
-        if playbook_mode:
-            connectors_requested = serialized_data.get("connectors_to_execute", [])
-            run_all = False
-
-        tlp = serialized_data.get("tlp", TLP.WHITE).upper()
-
-        # read config
-        connector_dataclasses = ConnectorConfig.all()
-        all_connector_names = list(connector_dataclasses.keys())
-
-        # run all connectors ?
-        if run_all:
-            # select all
-            selected_connectors.extend(all_connector_names)
-        else:
-            # select the ones requested
-            selected_connectors.extend(connectors_requested)
-
-        for c_name in selected_connectors:
+    def plugins_to_execute(
+        self,
+        tlp,
+        plugins_requested: List[Union[AnalyzerConfig, ConnectorConfig]],
+        add_warning: bool = False,
+    ) -> List[Union[AnalyzerConfig, ConnectorConfig]]:
+        plugins_to_execute = plugins_requested.copy()
+        for plugin_config in plugins_requested:
             try:
-                cc = connector_dataclasses.get(c_name, None)
-
-                if not cc:
-                    if not run_all:
-                        raise NotRunnableConnector(
-                            f"{c_name} won't run: not available in configuration"
-                        )
-                    # don't add warning if run_all
-                    continue
-
-                if not cc.is_ready_to_use:  # check configured/disabled
+                if not plugin_config.is_runnable(self.context["request"].user):
                     raise NotRunnableConnector(
-                        f"{c_name} won't run: is disabled or unconfigured"
+                        f"{plugin_config.name} won't run: is disabled or not configured"
                     )
 
                 if TLP.get_priority(tlp) > TLP.get_priority(
-                    cc.maximum_tlp
+                    plugin_config.maximum_tlp
                 ):  # check if job's tlp allows running
                     # e.g. if connector_tlp is GREEN(1),
-                    # run for job_tlp WHITE(0) & GREEN(1) only
+                    # run for job_tlp CLEAR(0) & GREEN(1) only
                     raise NotRunnableConnector(
-                        f"{c_name} won't run: "
-                        f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
+                        f"{plugin_config.name} won't run: "
+                        f"job.tlp ('{tlp}') >"
+                        f" maximum_tlp ('{plugin_config.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
-                if run_all or playbook_mode:
-                    # in this case, they are not warnings but
-                    # expected and wanted behavior
-                    logger.debug(e)
-                else:
-                    logger.warning(e)
+                plugins_to_execute.remove(plugin_config)
+                if add_warning:
+                    logger.info(e)
                     self.filter_warnings.append(str(e))
-            else:
-                cleaned_connectors_list.append(c_name)
+                else:
+                    logger.debug(e)
 
-        return cleaned_connectors_list
+        return plugins_to_execute
 
-    def filter_analyzers_and_connectors(self, attrs: dict) -> dict:
-        attrs["analyzers_to_execute"] = self.filter_analyzers(attrs)
-        attrs["connectors_to_execute"] = self.filter_connectors(attrs)
-        attrs["warnings"] = self.filter_warnings
-        self.filter_warnings = []
-        return attrs
+    def filter_analyzers_requested(self, analyzers):
+        self.all_analyzers = False
+        if not analyzers:
+            analyzers = list(AnalyzerConfig.objects.all())
+            self.all_analyzers = True
+        return analyzers
+
+    def filter_connectors_requested(self, connectors):
+        self.all_connectors = False
+        if not connectors:
+            connectors = list(ConnectorConfig.objects.all())
+            self.all_connectors = True
+        return connectors
 
     def create(self, validated_data: dict) -> Job:
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
-        validated_data.pop("runtime_configuration")
+        send_task = validated_data.pop("send_task", False)
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
             )[0]
             for label in tags_labels
         ]
+        for key in self.mtm_fields:
+            self.mtm_fields[key] = validated_data.pop(key)
 
-        job = Job.objects.create(**validated_data)
+        job = Job(user=self.context["request"].user, **validated_data)
+        try:
+            job.full_clean()
+        except django.core.exceptions.ValidationError as e:
+            logger.info(e, stack_info=True)
+            raise ValidationError("Validation failed")
+        job.save()
         if tags:
             job.tags.set(tags)
 
+        for key, value in self.mtm_fields.items():
+            mtm = getattr(job, key)
+            mtm.set(value)
+        if send_task:
+            from intel_owl.tasks import job_pipeline
+
+            logger.info("Sending task")
+            job_pipeline.apply_async(
+                args=[job.pk],
+                routing_key=DEFAULT_QUEUE,
+                MessageGroupId=str(uuid.uuid4()),
+            )
+
         return job
+
+
+class CommentSerializer(rfs.ModelSerializer):
+    """
+    Used for ``create()``
+    """
+
+    class Meta:
+        model = Comment
+        fields = ("id", "content", "created_at", "user", "job_id")
+
+    user = UserSerializer(read_only=True)
+    job_id = rfs.PrimaryKeyRelatedField(
+        queryset=Job.objects.all(), write_only=True, source="job"
+    )
+
+    def validate(self, attrs: dict) -> dict:
+        attrs = super().validate(attrs)
+
+        user = self.context["request"].user
+        job = attrs.get("job")
+        try:
+            Job.visible_for_user(user).get(pk=job.pk)
+        except Job.DoesNotExist:
+            raise ValidationError(
+                {"detail": f"You have no permission to comment on job {job.pk}"}
+            )
+        return attrs
+
+    def create(self, validated_data: dict) -> Comment:
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
 
 
 class JobListSerializer(_AbstractJobViewSerializer):
@@ -294,7 +316,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file",)
+        exclude = ("file", "errors")
 
 
 class JobSerializer(_AbstractJobViewSerializer):
@@ -306,8 +328,16 @@ class JobSerializer(_AbstractJobViewSerializer):
         model = Job
         exclude = ("file",)
 
-    analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
-    connector_reports = ConnectorReportSerializer(many=True, read_only=True)
+    analyzer_reports = AnalyzerReportSerializer(
+        many=True, read_only=True, source="analyzerreports"
+    )
+    connector_reports = ConnectorReportSerializer(
+        many=True, read_only=True, source="connectorreports"
+    )
+    visualizer_reports = VisualizerReportSerializer(
+        many=True, read_only=True, source="visualizerreports"
+    )
+    comments = CommentSerializer(many=True, read_only=True)
 
     permissions = rfs.SerializerMethodField()
 
@@ -376,11 +406,25 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
                 errors.append(exc.detail)
             else:
                 ret.append(validated)
-                errors.append({})
 
         if any(errors):
             raise ValidationError(errors)
 
+        return ret
+
+
+class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerializer):
+    playbooks_requested = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True
+    )
+
+    def to_internal_value(self, data):
+        ret = []
+        for playbook in data.pop("playbooks_requested", [None]):
+            item = copy.deepcopy(data)
+            item["playbook_requested"] = playbook
+            results = super().to_internal_value(item)
+            ret.extend(results)
         return ret
 
 
@@ -393,7 +437,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     file = rfs.FileField(required=True)
     file_name = rfs.CharField(required=False)
     file_mimetype = rfs.CharField(required=False)
-    is_sample = rfs.HiddenField(default=True)
+    is_sample = rfs.HiddenField(write_only=True, default=True)
 
     class Meta:
         model = Job
@@ -409,17 +453,34 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "playbooks_requested",
+            "playbook_requested",
             "tags_labels",
         )
-        list_serializer_class = MultipleFileAnalysisSerializer
+
+    @classmethod
+    def many_init(cls, *args, **kwargs):
+        # Instantiate the child serializer.
+        data = kwargs["data"]
+        kwargs["child"] = cls()
+        if "playbooks_requested" in data:
+            list_serializer_class = MultiplePlaybooksMultipleFileAnalysisSerializer
+        else:
+            list_serializer_class = MultipleFileAnalysisSerializer
+        # Instantiate the parent list serializer.
+        return list_serializer_class(*args, **kwargs)
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
         # calculate ``file_mimetype``
         if "file_name" not in attrs:
             attrs["file_name"] = attrs["file"].name
-        attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
+        try:
+            attrs["file_mimetype"] = MimeTypes.calculate(
+                attrs["file"], attrs["file_name"]
+            )
+        except ValueError as e:
+            logger.info(e, stack_info=True)
+            raise ValidationError("mimetype is not correct")
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)
@@ -429,57 +490,38 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
-    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
-        cleaned_analyzer_list = []
+    def set_analyzers_to_execute(
+        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+    ) -> List[AnalyzerConfig]:
+        analyzers_to_execute = analyzers_requested.copy()
 
         # get values from serializer
-        partially_filtered_analyzers = super().filter_analyzers(serialized_data)
+        partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
+            pk__in=[config.pk for config in analyzers_to_execute]
+        )
+        file_mimetype = serialized_data["file_mimetype"]
 
-        # read config
-        analyzer_dataclasses = AnalyzerConfig.all()
-
-        playbook_mode = not len(serialized_data.get("playbooks_requested", [])) == 0
-
-        run_all = len(serialized_data.get("analyzers_requested", [])) == 0
-
-        if playbook_mode:
-            run_all = False
-
-        for a_name in partially_filtered_analyzers:
-            try:
-                config = analyzer_dataclasses.get(a_name, None)
-                if serialized_data["is_sample"]:
-                    if not config.is_type_file:
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because does not support files."
-                        )
-                    if not config.is_filetype_supported(
-                        serialized_data["file_mimetype"], serialized_data["file_name"]
-                    ):
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because mimetype "
-                            f"{serialized_data['file_mimetype']} is not supported."
-                        )
-                else:
-                    raise ValidationError(
-                        f"{a_name} won't be run because is_sample is False."
-                    )
-            except NotRunnableAnalyzer as e:
-                if run_all or playbook_mode:
-                    # in this case, they are not warnings but
-                    # expected and wanted behavior
-                    logger.debug(e)
-                else:
-                    logger.warning(e)
-                    self.filter_warnings.append(str(e))
-            else:
-                cleaned_analyzer_list.append(a_name)
-
-        if len(cleaned_analyzer_list) == 0:
-            raise ValidationError(
-                {"detail": "No Analyzers can be run after filtering."}
+        supported_query = (
+            Q(
+                supported_filetypes__len=0,
             )
-        return cleaned_analyzer_list
+            & ~Q(not_supported_filetypes__contains=[file_mimetype])
+        ) | Q(supported_filetypes__contains=[file_mimetype])
+
+        for analyzer in partially_filtered_analyzers_qs.exclude(
+            Q(type=TypeChoices.FILE) & supported_query
+        ):
+            analyzers_to_execute.remove(analyzer)
+            message = (
+                f"{analyzer.name} won't be run "
+                "because does not support the file mimetype."
+            )
+            if self.all_analyzers:
+                logger.debug(message)
+            else:
+                logger.info(message)
+                self.filter_warnings.append(message)
+        return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
 
 
 class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
@@ -488,22 +530,20 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
     Used for ``create()``.
     """
 
+    observables = rfs.ListField(required=True)
+
     def update(self, instance, validated_data):
         raise NotImplementedError("This serializer does not support update().")
-
-    observables = rfs.ListField(required=True)
 
     def to_internal_value(self, data):
         ret = []
         errors = []
-
-        for classification, name in data.get("observables", []):
+        for classification, name in data.pop("observables", []):
 
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
 
-            item.pop("observables", None)
             item["observable_name"] = name
             if classification:
                 item["observable_classification"] = classification
@@ -513,11 +553,25 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
                 errors.append(exc.detail)
             else:
                 ret.append(validated)
-                errors.append({})
-
         if any(errors):
             raise ValidationError(errors)
+        return ret
 
+
+class MultiplePlaybooksMultipleObservableAnalysisSerializer(
+    MultipleObservableAnalysisSerializer
+):
+    playbooks_requested = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True
+    )
+
+    def to_internal_value(self, data):
+        ret = []
+        for playbook in data.pop("playbooks_requested", [None]):
+            item = copy.deepcopy(data)
+            item["playbook_requested"] = playbook
+            results = super().to_internal_value(item)
+            ret.extend(results)
         return ret
 
 
@@ -529,7 +583,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     observable_name = rfs.CharField(required=True)
     observable_classification = rfs.CharField(required=False)
-    is_sample = rfs.HiddenField(default=False)
+    is_sample = rfs.HiddenField(write_only=True, default=False)
 
     class Meta:
         model = Job
@@ -544,15 +598,29 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
+            "playbook_requested",
             "tags_labels",
         )
-        list_serializer_class = MultipleObservableAnalysisSerializer
+
+    @classmethod
+    def many_init(cls, *args, **kwargs):
+        # Instantiate the child serializer.
+        data = kwargs["data"]
+        kwargs["child"] = cls()
+        if "playbooks_requested" in data:
+            list_serializer_class = (
+                MultiplePlaybooksMultipleObservableAnalysisSerializer
+            )
+        else:
+            list_serializer_class = MultipleObservableAnalysisSerializer
+        # Instantiate the parent list serializer.
+        return list_serializer_class(*args, **kwargs)
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
         # calculate ``observable_classification``
         if not attrs.get("observable_classification", None):
-            attrs["observable_classification"] = calculate_observable_classification(
+            attrs["observable_classification"] = ObservableTypes.calculate(
                 attrs["observable_name"]
             )
         attrs["observable_name"] = self.defanged_values_removal(
@@ -584,235 +652,179 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             value = value.replace("\n", "")
         return value
 
-    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
-        cleaned_analyzer_list = []
+    def set_analyzers_to_execute(
+        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+    ) -> List[AnalyzerConfig]:
+        analyzers_to_execute = analyzers_requested.copy()
 
-        # get values from serializer
-        partially_filtered_analyzers = super().filter_analyzers(serialized_data)
-
-        # read config
-        analyzer_dataclasses = AnalyzerConfig.all()
-
-        playbook_mode = not len(serialized_data.get("playbooks_requested", [])) == 0
-
-        run_all = len(serialized_data.get("analyzers_requested", [])) == 0
-
-        if playbook_mode:
-            run_all = False
-
-        for a_name in partially_filtered_analyzers:
-            try:
-                config = analyzer_dataclasses.get(a_name, None)
-                if serialized_data["is_sample"]:
-                    raise ValidationError(
-                        f"{a_name} won't be run because is_sample is True."
-                    )
-                else:
-                    if not config.is_type_observable:
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because "
-                            "it does not support observable."
-                        )
-
-                    if not config.is_observable_type_supported(
-                        serialized_data["observable_classification"]
-                    ):
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because "
-                            "it does not support observable type "
-                            f"{serialized_data['observable_classification']}."
-                        )
-            except NotRunnableAnalyzer as e:
-                if run_all or playbook_mode:
-                    # in this case, they are not warnings but
-                    # expected and wanted behavior
-                    logger.debug(e)
-                else:
-                    logger.warning(e)
-                    self.filter_warnings.append(str(e))
+        partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
+            pk__in=[config.pk for config in analyzers_to_execute]
+        )
+        for analyzer in partially_filtered_analyzers_qs.exclude(
+            type=TypeChoices.OBSERVABLE,
+            observable_supported__contains=[
+                serialized_data["observable_classification"]
+            ],
+        ):
+            analyzers_to_execute.remove(analyzer)
+            message = (
+                f"{analyzer.name} won't be run because"
+                " it does not support the requested observable."
+            )
+            if self.all_analyzers:
+                logger.debug(message)
             else:
-                cleaned_analyzer_list.append(a_name)
+                logger.info(message)
+                self.filter_warnings.append(message)
 
-        if len(cleaned_analyzer_list) == 0:
-            raise ValidationError(
-                {"detail": "No Analyzers can be run after filtering."}
-            )
-        return cleaned_analyzer_list
+        return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
 
 
-class PlaybookBaseSerializer:
-    def filter_playbooks(self, attrs: Dict) -> Tuple[List]:
-        # init empty list
-        valid_playbook_list = []
-        analyzers_to_be_run = []
-        connectors_to_be_run = []
-        warnings = []
+class JobEnvelopeSerializer(rfs.ListSerializer):
+    @property
+    def data(self):
+        # this is to return a dict instead of a list
+        return super(rfs.ListSerializer, self).data
 
-        # get values from serializer
-        selected_playbooks = attrs.get("playbooks_requested", [])
+    def to_internal_value(self, data):
+        super().to_internal_value(data)
 
-        # read config
-        playbook_dataclasses = PlaybookConfig.all()
-
-        for p_name in selected_playbooks:
-            try:
-                pp = playbook_dataclasses.get(p_name, None)
-                if not pp:
-                    continue
-                elif not pp.is_ready_to_use:
-                    raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
-
-                else:
-                    valid_playbook_list.append(p_name)
-
-                for analyzer in pp.analyzers:
-                    analyzer_class = AnalyzerConfig.get(analyzer)
-                    try:
-                        if analyzer_class is None:
-                            raise NotRunnableAnalyzer(
-                                f"Analyzer {analyzer} couldn't be"
-                                " run as it doesn't exist."
-                            )
-
-                        if analyzer_class.type == "file" and "file" in pp.supports:
-                            analyzers_to_be_run.append(analyzer)
-
-                        # this means that analyzer is of type observable
-                        if analyzer_class.is_observable_type_supported(
-                            attrs["observable_classification"]
-                        ):
-                            analyzers_to_be_run.append(analyzer)
-                        else:
-                            raise NotRunnableAnalyzer(
-                                f"{analyzer} won't run: not supported."
-                            )
-                    except (NotRunnableAnalyzer) as e:
-                        # in this case, they are not warnings but
-                        # expected and wanted behavior
-                        logger.debug(e)
-
-                        if analyzer_class is None:
-                            warnings.append(str(e))
-
-                for connector in pp.connectors:
-                    try:
-                        connector_class = ConnectorConfig.get(connector)
-                        if connector_class is None:
-                            raise NotRunnableConnector(
-                                f"Connector {connector} couldn't be run"
-                                " as it doesn't exist."
-                            )
-                    except (NotRunnableConnector) as e:
-                        logger.warning(e)
-                        warnings.append(str(e))
-
-                    connectors_to_be_run.append(connector)
-
-            except (NotRunnablePlaybook) as e:
-                logger.warning(e)
-                warnings.append(str(e))
-
-        if len(valid_playbook_list) == 0:
-            raise ValidationError(
-                {"detail": "No playbooks can be run after filtering."}
-            )
-
-        attrs["playbooks_to_execute"] = valid_playbook_list
-        attrs["playbooks_requested"] = selected_playbooks
-
-        # making it so that analyzers and connectors are unique
-        attrs["analyzers_to_execute"] = list(set(analyzers_to_be_run))
-        attrs["connectors_to_execute"] = list(set(connectors_to_be_run))
-        attrs["warnings"] = warnings
-
-        return attrs
-
-    def validate_(self, attrs: dict) -> dict:
-        attrs = self.filter_playbooks(attrs)
-        return attrs
+    def to_representation(self, data):
+        results = super().to_representation(data)
+        return {"results": results, "count": len(results)}
 
 
-class PlaybookObservableAnalysisSerializer(
-    PlaybookBaseSerializer, ObservableAnalysisSerializer
-):
-    class Meta:
-        model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
-            "observable_name",
-            "observable_classification",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbooks_requested",
-            "tags_labels",
-        )
-        list_serializer_class = MultipleObservableAnalysisSerializer
+class JobResponseSerializer(rfs.ModelSerializer):
+    STATUS_ACCEPTED = "accepted"
+    STATUS_NOT_AVAILABLE = "not_available"
 
-    def validate(self, attrs: dict) -> dict:
-        attrs_ = super().validate_(attrs)
-        attrs_final = super().validate(attrs_)
-
-        return attrs_final
-
-
-class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSerializer):
-    class Meta:
-        model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
-            "file",
-            "file_name",
-            "file_mimetype",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbooks_requested",
-            "tags_labels",
-        )
-        list_serializer_class = MultipleFileAnalysisSerializer
-
-    def validate(self, attrs: dict) -> dict:
-        attrs["observable_classification"] = "file"
-        attrs_ = super().validate_(attrs)
-        attrs_final = super().validate(attrs_)
-
-        return attrs_final
-
-
-class AnalysisResponseSerializer(rfs.Serializer):
-    job_id = rfs.IntegerField()
-    status = rfs.CharField()
-    warnings = rfs.ListField(required=False)
-    analyzers_running = rfs.ListField()
-    connectors_running = rfs.ListField()
-    playbooks_running = rfs.ListField(required=False)
-
-
-def multi_result_enveloper(serializer_class, many):
-    component_name = (
-        f'Multi{serializer_class.__name__.replace("Serializer", "")}'
-        f'{"List" if many else ""}'
+    job_id = rfs.IntegerField(source="pk")
+    analyzers_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="analyzers_to_execute", many=True
+    )
+    connectors_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="connectors_to_execute", many=True
+    )
+    visualizers_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="visualizers_to_execute", many=True
+    )
+    playbook_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="playbook_to_execute"
     )
 
-    @extend_schema_serializer(many=False, component_name=component_name)
-    class EnvelopeSerializer(rfs.Serializer):
-        count = rfs.BooleanField()  # No. of items in the results list
-        results = serializer_class(many=many)
+    class Meta:
+        model = Job
+        fields = [
+            "job_id",
+            "analyzers_running",
+            "connectors_running",
+            "visualizers_running",
+            "playbook_running",
+        ]
+        extra_kwargs = {"warnings": {"read_only": True, "required": False}}
+        list_serializer_class = JobEnvelopeSerializer
 
-    return EnvelopeSerializer
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["status"] = self.STATUS_ACCEPTED
+        return result
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.setdefault("status", self.STATUS_NOT_AVAILABLE)
+        return initial
+
+
+class JobAvailabilitySerializer(rfs.ModelSerializer):
+    """
+    Serializer for ask_analysis_availability
+    """
+
+    class Meta:
+        model = Job
+        fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
+
+    md5 = rfs.CharField(max_length=128, required=True)
+    analyzers = rfs.PrimaryKeyRelatedField(
+        queryset=AnalyzerConfig.objects.all(), many=True, required=False
+    )
+    playbooks = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), required=False, many=True
+    )
+    running_only = rfs.BooleanField(default=False, required=False)
+    minutes_ago = rfs.IntegerField(default=None, required=False)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        playbooks = attrs.get("playbooks", [])
+        analyzers = attrs.get("analyzers", [])
+        if not analyzers and not playbooks:
+            attrs["analyzers"] = list(AnalyzerConfig.objects.all())
+        elif len(playbooks) != 0 and len(analyzers) != 0:
+            raise rfs.ValidationError(
+                "Either only send the 'playbooks' parameter or the 'analyzers' one."
+            )
+        return attrs
+
+    def create(self, validated_data):
+
+        statuses_to_check = [Job.Status.RUNNING]
+
+        if not validated_data["running_only"]:
+            statuses_to_check.append(Job.Status.REPORTED_WITHOUT_FAILS)
+            # since with playbook
+            # it is expected behavior
+            # for analyzers to often fail
+            if validated_data.get("playbooks", []):
+                statuses_to_check.append(Job.Status.REPORTED_WITH_FAILS)
+        # this means that the user is trying to
+        # check availability of the case where all
+        # analyzers were run but no playbooks were
+        # triggered.
+        query = Q(md5=validated_data["md5"]) & Q(status__in=statuses_to_check)
+        if validated_data.get("playbooks", []):
+            query &= Q(playbook_requested__in=validated_data["playbooks"])
+        else:
+            analyzers = validated_data.get("analyzers", [])
+            for analyzer in analyzers:
+                query &= Q(analyzers_requested__in=[analyzer])
+        # we want a job that has every analyzer requested
+        if validated_data.get("minutes_ago", None):
+            minutes_ago_time = now() - datetime.timedelta(
+                minutes=validated_data["minutes_ago"]
+            )
+            query &= Q(received_request_time__gte=minutes_ago_time)
+
+        last_job_for_md5 = (
+            Job.visible_for_user(self.context["request"].user)
+            .filter(query)
+            .only("pk")
+            .latest("received_request_time")
+        )
+        return last_job_for_md5
+
+
+class PluginConfigCompleteSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = PluginConfig
+        fields = rfs.ALL_FIELDS
 
 
 class PluginConfigSerializer(rfs.ModelSerializer):
-    class CustomJSONField(rfs.JSONField):
+    class Meta:
+        model = PluginConfig
+        fields = (
+            "attribute",
+            "config_type",
+            "type",
+            "plugin_name",
+            "value",
+            "owner",
+            "organization",
+            "id",
+        )
+
+    class CustomValueField(rfs.JSONField):
         def to_internal_value(self, data):
             if not data:
                 raise ValidationError("empty insertion")
@@ -820,7 +832,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             try:
                 return json.loads(data)
             except json.JSONDecodeError:
-                # this is to accept classicstrings
+                # this is to accept literal strings
                 data = f'"{data}"'
                 try:
                     return json.loads(data)
@@ -828,128 +840,71 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                     logger.info(f"value {data} ({type(data)}) raised ValidationError")
                     raise ValidationError("Value is not JSON-compliant.")
 
+        def get_attribute(self, instance: PluginConfig):
+            if (
+                instance.is_secret()
+                and instance.for_organization
+                and self.context["request"].user.pk != instance.owner.pk
+            ):
+                return "redacted"
+            return super().get_attribute(instance)
+
         def to_representation(self, value):
-            return json.dumps(super().to_representation(value))
+            result = super().to_representation(value)
+            if isinstance(result, (list, dict)):
+                return json.dumps(result)
+            return result
 
-    # certego_saas does not expose organization.id to frontend
-    organization = rfs.SlugRelatedField(
-        allow_null=True,
-        slug_field="name",
-        queryset=Organization.objects.all(),
-        required=False,
-    )
+    type = rfs.ChoiceField(choices=["1", "2", "3"])  # retrocompatibility
+    config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
+    attribute = rfs.CharField()
+    plugin_name = rfs.CharField()
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-    value = CustomJSONField()
 
-    class Meta:
-        model = PluginConfig
-        fields = rfs.ALL_FIELDS
+    organization = rfs.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(), required=False, allow_null=True
+    )
+    value = CustomValueField()
 
-    def to_representation(self, instance):
-        if (
-            instance.organization
-            and self.context["request"].user.pk != instance.organization.owner.pk
-        ):
-            instance.value = "redacted"
-        return super().to_representation(instance)
+    def validate_value_type(self, value: Any, parameter: Parameter):
+        if type(value).__name__ != parameter.type:
+            raise ValidationError(
+                f"Value has type {type(value).__name__} instead of {parameter.type}"
+            )
 
     def validate(self, attrs):
-        super().validate(attrs)
+        if self.partial:
+            # we are in an update
+            return attrs
+        if (
+            "organization" in attrs
+            and attrs["organization"]
+            and (attrs.pop("organization").owner != attrs["owner"])
+        ):
+            attrs["for_organization"] = True
+            raise ValidationError("You are not owner of the organization")
 
-        # check if owner is admin of organization
-        if attrs.get("organization", None):
-            # here the owner can't be retrieved by the field
-            # because the HiddenField will always return None
-            owner = self.context["request"].user
-            # check if the user is owner of the organization
-            membership = Membership.objects.filter(
-                user=owner,
-                organization=attrs.get("organization"),
-                is_owner=True,
-            )
-            if not membership.exists():
-                logger.warning(
-                    f"User {owner} is not owner of "
-                    f"organization {attrs.get('organization')}."
-                )
-                raise PermissionDenied("User is not owner of the organization.")
-
-        if attrs["type"] == PluginConfig.PluginType.ANALYZER:
-            config = AnalyzerConfig
-            category = "Analyzer"
-        elif attrs["type"] == PluginConfig.PluginType.CONNECTOR:
-            config = ConnectorConfig
-            category = "Connector"
+        _value = attrs["value"]
+        # retro compatibility
+        _type = attrs.pop("type")
+        _config_type = attrs.pop("config_type")
+        _plugin_name = attrs.pop("plugin_name")
+        _attribute = attrs.pop("attribute")
+        if _type == "1":
+            class_ = AnalyzerConfig
+        elif _type == "2":
+            class_ = ConnectorConfig
+        elif _type == "3":
+            class_ = VisualizerConfig
         else:
-            logger.error(f"Unknown custom config type: {attrs['type']}")
-            raise ValidationError("Invalid type.")
-
-        if attrs["plugin_name"] not in config.all():
-            raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
-
-        if (
-            attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].params
-        ):
-            raise ValidationError(
-                f"{category} {attrs['plugin_name']} does not "
-                f"have parameter {attrs['attribute']}."
-            )
-        elif (
-            attrs["config_type"] == PluginConfig.ConfigType.SECRET
-            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets
-        ):
-
-            raise ValidationError(
-                f"{category} {attrs['plugin_name']} does not "
-                f"have secret {attrs['attribute']}."
-            )
-        # Check if the type of value is valid for the attribute.
-
-        expected_type = (
-            config.all()[attrs["plugin_name"]].params[attrs["attribute"]].type
-            if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else config.all()[attrs["plugin_name"]].secrets[attrs["attribute"]].type
+            raise RuntimeError("Not configured")
+        parameter = class_.objects.get(name=_plugin_name).parameters.get(
+            name=_attribute, is_secret=_config_type == "2"
         )
-        if expected_type == "str":
-            expected_type = str
-        elif expected_type == "list":
-            expected_type = list
-        elif expected_type == "dict":
-            expected_type = dict
-        elif expected_type == "int":
-            expected_type = int
-        elif expected_type == "float":
-            expected_type = float
-        elif expected_type == "bool":
-            expected_type = bool
-
-        if expected_type and not isinstance(
-            attrs["value"],
-            expected_type,
-        ):
-            raise ValidationError(
-                f"{category} {attrs['plugin_name']} attribute "
-                f"{attrs['attribute']} has wrong type "
-                f"{type(attrs['value']).__name__}. Expected: "
-                f"{expected_type.__name__}."
-            )
-
-        inclusion_params = attrs.copy()
-        exclusion_params = {}
-        inclusion_params.pop("value")
-        if "organization" not in inclusion_params:
-            inclusion_params["organization__isnull"] = True
-        if self.instance is not None:
-            exclusion_params["id"] = self.instance.id
-        if (
-            PluginConfig.objects.filter(**inclusion_params)
-            .exclude(**exclusion_params)
-            .exists()
-        ):
-            raise ValidationError(
-                f"{category} {attrs['plugin_name']} "
-                f"{self} attribute {attrs['attribute']} already exists."
-            )
-        logger.info(f"validation finished for {attrs}")
+        self.validate_value_type(_value, parameter)
+        attrs["parameter"] = parameter
         return attrs
+
+    def update(self, instance, validated_data):
+        self.validate_value_type(validated_data["value"], instance.parameter)
+        return super().update(instance, validated_data)

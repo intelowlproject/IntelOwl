@@ -32,8 +32,8 @@ import {
   TLP_CHOICES,
   TLP_DESCRIPTION_MAP,
   OBSERVABLE_TYPES,
-  ALL_CLASSIFICATIONS,
   scanTypes,
+  ALL_CLASSIFICATIONS,
 } from "../../constants";
 import { TLPTag, markdownToHtml } from "../common";
 import {
@@ -101,16 +101,6 @@ const stateSelector = (state) => [
   groupPlaybooks(state.playbooks),
 ];
 
-const checkChoices = [
-  {
-    value: "running_only",
-    label: "Do not execute if a similar analysis is currently running",
-  },
-  {
-    value: "force_new",
-    label: "Force new analysis",
-  },
-];
 const observableType2PropsMap = {
   ip: {
     placeholder: "8.8.8.8",
@@ -147,11 +137,11 @@ const initialValues = {
   analyzers: [],
   connectors: [],
   playbooks: [],
-  tlp: "CLEAR",
+  tlp: "RED",
   runtime_configuration: {},
   tags: [],
   check: "check_all",
-  analysisOptionValues: "Analyzers/Connectors",
+  analysisOptionValues: scanTypes.playbooks,
   hoursAgo: 24,
 };
 
@@ -376,6 +366,12 @@ export default function ScanForm() {
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
+
+      if (values.analyzers.length === 0) {
+        addToast("Failed!", "Please select at least one analyzer", "danger");
+        return;
+      }
+
       /* We have 2 cases:
        1) use default config -> we need the runtime_configuration field has value {}
        2) custom config -> we need to add visualizers because it's required from the backend
@@ -682,22 +678,24 @@ export default function ScanForm() {
               <FormGroup row>
                 <Label sm={3}>TLP</Label>
                 <Col sm={9}>
-                  {TLP_CHOICES.map((ch) => (
-                    <FormGroup inline check key={`tlpchoice__${ch}`}>
-                      <Label check for={`tlpchoice__${ch}`}>
-                        <TLPTag value={ch} />
-                      </Label>
-                      <Field
-                        as={Input}
-                        id={`tlpchoice__${ch}`}
-                        type="radio"
-                        name="tlp"
-                        value={ch}
-                        invalid={formik.errors.tlp && formik.touched.tlp}
-                        onChange={formik.handleChange}
-                      />
-                    </FormGroup>
-                  ))}
+                  <div>
+                    {TLP_CHOICES.map((ch) => (
+                      <FormGroup inline check key={`tlpchoice__${ch}`}>
+                        <Label check for={`tlpchoice__${ch}`}>
+                          <TLPTag value={ch} />
+                        </Label>
+                        <Field
+                          as={Input}
+                          id={`tlpchoice__${ch}`}
+                          type="radio"
+                          name="tlp"
+                          value={ch}
+                          invalid={formik.errors.tlp && formik.touched.tlp}
+                          onChange={formik.handleChange}
+                        />
+                      </FormGroup>
+                    ))}
+                  </div>
                   <FormText>
                     {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
                       "TLP: ",
@@ -760,21 +758,19 @@ export default function ScanForm() {
                       </div>
                     </div>
                   </FormGroup>
-                  {checkChoices.map((ch) => (
-                    <FormGroup check key={`checkchoice__${ch.value}`}>
-                      <Field
-                        as={Input}
-                        id={`checkchoice__${ch.value}`}
-                        type="radio"
-                        name="check"
-                        value={ch.value}
-                        onChange={formik.handleChange}
-                      />
-                      <Label check for={`checkchoice__${ch.value}`}>
-                        {ch.label}
-                      </Label>
-                    </FormGroup>
-                  ))}
+                  <FormGroup check key="checkchoice__force_new">
+                    <Field
+                      as={Input}
+                      id="checkchoice__force_new"
+                      type="radio"
+                      name="check"
+                      value="force_new"
+                      onChange={formik.handleChange}
+                    />
+                    <Label check for="checkchoice__force_new">
+                      Force new analysis
+                    </Label>
+                  </FormGroup>
                 </Col>
               </FormGroup>
 

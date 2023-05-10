@@ -16,6 +16,20 @@ import useRecentScansStore from "../../stores/useRecentScansStore";
 
 const { append: appendToRecentScans } = useRecentScansStore.getState();
 
+function prettifyErrors(errorResponse) {
+  // only validation errors returns an array of errors
+  if (Array.isArray(errorResponse.response.data?.errors)) {
+    return (
+      <ul>
+        {errorResponse.response.data.errors.map((error) => (
+          <li>{error.detail}</li>
+        ))}
+      </ul>
+    );
+  }
+  return JSON.stringify(errorResponse.response.data);
+}
+
 export async function createPlaybookJob(formValues) {
   // check existing
   if (formValues.check !== "force_new") {
@@ -75,7 +89,7 @@ export async function createPlaybookJob(formValues) {
     return Promise.reject(error);
   } catch (e) {
     console.error(e);
-    addToast("Failed!", e.parsedMsg, "danger");
+    addToast("Failed!", prettifyErrors(e), "danger");
     return Promise.reject(e);
   }
 }
@@ -87,7 +101,7 @@ export async function createComment(formValues) {
     return Promise.resolve(resp);
   } catch (e) {
     console.error(e);
-    addToast("Failed!", e.parsedMsg, "danger");
+    addToast("Failed!", prettifyErrors(e), "danger");
     return Promise.reject(e);
   }
 }
@@ -99,7 +113,7 @@ export async function deleteComment(commentId) {
     return Promise.resolve(resp);
   } catch (e) {
     console.error(e);
-    addToast("Failed!", e.parsedMsg, "danger");
+    addToast("Failed!", prettifyErrors(e), "danger");
     return Promise.reject(e);
   }
 }
@@ -176,7 +190,7 @@ export async function createJob(formValues) {
     return Promise.reject(error);
   } catch (e) {
     console.error(e);
-    addToast("Failed!", e.parsedMsg, "danger");
+    addToast("Failed!", prettifyErrors(e), "danger");
     return Promise.reject(e);
   }
 }

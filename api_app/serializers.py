@@ -127,11 +127,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             attrs["analyzers_requested"] = list(playbook.analyzers.all())
             attrs["connectors_requested"] = list(playbook.connectors.all())
 
-        attrs["analyzers_requested"] = self.filter_analyzers_requested(
-            attrs["analyzers_requested"]
+        self.all_analyzers = (
+            len(attrs["analyzers_requested"]) == AnalyzerConfig.objects.all().count()
         )
-        attrs["connectors_requested"] = self.filter_connectors_requested(
-            attrs["connectors_requested"]
+        self.all_connectors = (
+            len(attrs["connectors_requested"]) == ConnectorConfig.objects.all().count()
         )
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(
             attrs["analyzers_requested"], attrs
@@ -222,20 +222,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     logger.debug(e)
 
         return plugins_to_execute
-
-    def filter_analyzers_requested(self, analyzers):
-        self.all_analyzers = False
-        if not analyzers:
-            analyzers = list(AnalyzerConfig.objects.all())
-            self.all_analyzers = True
-        return analyzers
-
-    def filter_connectors_requested(self, connectors):
-        self.all_connectors = False
-        if not connectors:
-            connectors = list(ConnectorConfig.objects.all())
-            self.all_connectors = True
-        return connectors
 
     def create(self, validated_data: dict) -> Job:
         # create ``Tag`` objects from tags_labels

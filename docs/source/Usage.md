@@ -175,6 +175,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [HuntressLab Yara rules](https://github.com/embee-research/Yara)
   * [elceef Yara Rules](https://github.com/elceef/yara-rulz)
   * [dr4k0nia Yara rules](https://github.com/dr4k0nia/yara-rules)
+  * [Facebook Yara rules](https://github.com/facebook/malware-detection)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 
 ###### External services
@@ -325,9 +326,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 
 #### Analyzers Customization
 
-You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
-
-You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
+You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerreport/`.
 
 The following are all the keys that you can change without touching the source code:
 - `name`: Name of the analyzer
@@ -424,11 +423,17 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
 
 ### Visualizers
 
+With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
+You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
+
 Visualizers are designed to run after the analyzers and the connectors.
 The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
 
 Each visualizer must define a set of analyzers and connectors as requirement:
 in fact the visualizers can not be chosen at the time of Job creation (once you click into the `Scan` button) but every single visualizer that it is configured and that has its requirements satisfied will be automatically selected and executed.
+
+This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
+To simplify the process, take example from the pre-built analyzers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
 
 ##### List of pre-built Visualizers
 
@@ -469,7 +474,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 ##### List of pre-built playbooks
 
 - `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
-- `Sample Static Anlysis`: A playbook containing all analyzers that perform static analysis on files.
+- `Sample Static Analysis`: A playbook containing all analyzers that perform static analysis on files.
 
 #### Playbooks customization
 

@@ -26,7 +26,7 @@ db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
 class Stratos(classes.ObservableAnalyzer):
     def check_in_list(self, dataset_loc, ip):
         # Checks the IP in a list(S.No,IP,Rating).
-        with open(dataset_loc, "r") as f:
+        with open(dataset_loc, "r", encoding="utf-8") as f:
             db = f.read()
 
         db_list = db.split("\n")
@@ -61,7 +61,7 @@ class Stratos(classes.ObservableAnalyzer):
         p = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
         p.raise_for_status()
 
-        with open(db_loc, "w") as f:
+        with open(db_loc, "w", encoding="utf-8") as f:
             f.write(p.content.decode())
 
     def updater(self):

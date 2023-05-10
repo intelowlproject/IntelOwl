@@ -90,7 +90,7 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
 
             logger.debug(
                 f"User {user.username} is not a member of an organization,"
-                f"meaning that there are no disabled plugins"
+                "meaning that there are no disabled plugins"
             )
             subquery_org = Value(False)
         # annotate if the params are configured or not with the subquery

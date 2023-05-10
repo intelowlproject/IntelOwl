@@ -21,7 +21,9 @@ class FileInfo(FileAnalyzer):
     def config(self):
         super().config()
         # check repo_downloader.sh file
-        with open(f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r") as f:
+        with open(
+            f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r", encoding="utf-8"
+        ) as f:
             version = f.read().strip()
         self.exiftool_path = f"{self.EXIF_TOOL_PATH}/Image-ExifTool-{version}/exiftool"
 

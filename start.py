@@ -60,8 +60,9 @@ PATH_MAPPING["all_analyzers.test"] = [
 ]
 
 
-def version_regex(arg_value, pat=re.compile(r"^[3-4]\.[0-9]{1,2}.[0-9]{1,2}$")):
+def version_regex(arg_value, pat=re.compile(r"^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$")):
     if not pat.match(arg_value):
+        print(f"type error for version {arg_value}")
         raise argparse.ArgumentTypeError
     return arg_value
 
@@ -96,7 +97,7 @@ def start():
         type=version_regex,
         default=CURRENT_VERSION,
         help="choose the version you would like to install (>=3.0.0)."
-        " Works only in 'prod' mode",
+        " Works only in 'prod' mode. Default version is the most recently released.",
     )
     # integrations
     parser.add_argument(

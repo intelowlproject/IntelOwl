@@ -44,7 +44,7 @@ class CustomTestCase(TestCase):
 
 class CustomAPITestCase(CustomTestCase):
     def setUp(self):
-        super(CustomAPITestCase, self).setUp()
+        super().setUp()
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 

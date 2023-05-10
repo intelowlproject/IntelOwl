@@ -18,7 +18,7 @@ User = get_user_model()
 
 class ApiViewTests(CustomAPITestCase):
     def setUp(self):
-        super(ApiViewTests, self).setUp()
+        super().setUp()
         self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
         self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
         self.analyze_file_data = {

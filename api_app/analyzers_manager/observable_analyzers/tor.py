@@ -30,7 +30,7 @@ class Tor(classes.ObservableAnalyzer):
                 f"database location {database_location} does not exist"
             )
 
-        with open(database_location, "r") as f:
+        with open(database_location, "r", encoding="utf-8") as f:
             db = f.read()
 
         db_list = db.split("\n")
@@ -50,7 +50,7 @@ class Tor(classes.ObservableAnalyzer):
             data_extracted = r.content.decode()
             findings = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", data_extracted)
 
-            with open(database_location, "w") as f:
+            with open(database_location, "w", encoding="utf-8") as f:
                 for ip in findings:
                     if ip:
                         f.write(f"{ip}\n")

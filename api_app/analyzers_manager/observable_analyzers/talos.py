@@ -28,7 +28,7 @@ class Talos(classes.ObservableAnalyzer):
                 f"database location {database_location} does not exist"
             )
 
-        with open(database_location, "r") as f:
+        with open(database_location, "r", encoding="utf-8") as f:
             db = f.read()
 
         db_list = db.split("\n")
@@ -45,7 +45,7 @@ class Talos(classes.ObservableAnalyzer):
             r = requests.get(url)
             r.raise_for_status()
 
-            with open(database_location, "w") as f:
+            with open(database_location, "w", encoding="utf-8") as f:
                 f.write(r.content.decode())
 
             if not os.path.exists(database_location):

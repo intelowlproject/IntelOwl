@@ -33,6 +33,11 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
+    @property
+    def python_base_path(self) -> str:
+        # this is just to avoid errors with the Abstract class
+        return ""
+
     @classmethod
     @property
     def config_exception(cls):

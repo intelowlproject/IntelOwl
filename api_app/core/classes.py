@@ -173,7 +173,8 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    def get_error_message(self, exc, is_base_err=False):
+    @staticmethod
+    def get_error_message(exc, is_base_err=False):
         return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
 
     def start(self, *args, **kwargs):

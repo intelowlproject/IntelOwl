@@ -9,7 +9,8 @@ logger = getLogger(__name__)
 
 
 class IsObjectRealOwnerPermission(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    @staticmethod
+    def has_object_permission(request, view, obj):
         if obj_owner := getattr(obj, "owner", None):
             return obj_owner == request.user
         return False

@@ -128,7 +128,8 @@ class FileAnalyzerTestCase(CustomTestCase):
                         f" with configuration {config.name}"
                     )
 
-    def tearDown(self) -> None:
+    @staticmethod
+    def tearDown() -> None:
         Job.objects.all().delete()
 
 
@@ -225,5 +226,6 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                     finally:
                         signal.alarm(0)
 
-    def tearDown(self) -> None:
+    @staticmethod
+    def tearDown() -> None:
         Job.objects.all().delete()

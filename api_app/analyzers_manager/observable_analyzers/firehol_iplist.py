@@ -53,7 +53,8 @@ class FireHol_IPList(classes.ObservableAnalyzer):
 
         return result
 
-    def download_iplist(self, list_name):
+    @staticmethod
+    def download_iplist(list_name):
         if ".ipset" not in list_name and ".netset" not in list_name:
             raise AnalyzerConfigurationException(
                 f"extension missing from {list_name} (add .ipset or .netset to name)"

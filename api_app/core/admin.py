@@ -22,7 +22,8 @@ class AbstractReportAdminView(admin.ModelAdmin):
     list_display_links = ("id",)
     search_fields = ("config",)
 
-    def has_add_permission(self, request):
+    @staticmethod
+    def has_add_permission(request):
         return False
 
 
@@ -92,15 +93,18 @@ class AbstractConfigAdminView(JsonViewerAdminView):
     # allow to clone the object
     save_as = True
 
-    def params(self, instance: AbstractConfig):
+    @staticmethod
+    def params(instance: AbstractConfig):
         return list(
             instance.parameters.filter(is_secret=False).values_list("name", flat=True)
         )
 
-    def secrets(self, instance: AbstractConfig):
+    @staticmethod
+    def secrets(instance: AbstractConfig):
         return list(
             instance.parameters.filter(is_secret=True).values_list("name", flat=True)
         )
 
-    def disabled_in_orgs(self, instance: AbstractConfig):
+    @staticmethod
+    def disabled_in_orgs(instance: AbstractConfig):
         return [org.name for org in instance.disabled_in_organizations.all()]

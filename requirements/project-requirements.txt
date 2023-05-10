@@ -1,5 +1,5 @@
 # django libs
-Django==4.1.7
+Django==4.1.9
 psycopg2-binary==2.9.6
 django-auth-ldap==4.3.0
 django-radius==1.5.0

@@ -192,6 +192,4 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
 def config_loggers(*args, **kwags):
     from logging.config import dictConfig
 
-    from django.conf import settings
-
     dictConfig(settings.LOGGING)

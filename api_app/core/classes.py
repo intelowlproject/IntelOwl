@@ -50,7 +50,7 @@ class Plugin(metaclass=ABCMeta):
     @property
     @abstractmethod
     def python_base_path(cls) -> PosixPath:
-        ...
+        raise NotImplementedError()
 
     @classmethod
     def all_subclasses(cls):

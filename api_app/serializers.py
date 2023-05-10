@@ -51,9 +51,6 @@ __all__ = [
 ]
 
 
-# User = get_user_model()
-
-
 class TagSerializer(rfs.ModelSerializer):
     class Meta:
         model = Tag

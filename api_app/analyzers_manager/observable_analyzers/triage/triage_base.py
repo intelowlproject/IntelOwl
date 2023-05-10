@@ -25,6 +25,11 @@ class TriageMixin(BaseAnalyzerMixin):
     report_type: str
     max_tries: int
 
+    @property
+    def python_base_path(self) -> str:
+        # this is just to avoid errors with the Abstract class
+        return ""
+
     def config(self):
         super().config()
         if self.endpoint == "private":

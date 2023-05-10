@@ -18,9 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class WebRisk(classes.ObservableAnalyzer):
-    """Check if observable analyzed is marked as malicious by Google WebRisk API"""
+    """Check if observable analyzed is marked as malicious by Google WebRisk API
 
-    """
     Get these secrets from a Service Account valid file.
     Example:
         {
@@ -38,6 +37,7 @@ class WebRisk(classes.ObservableAnalyzer):
            "https://www.googleapis.com/robot/v1/metadata/x509/somedomain"
         }
     """
+
     _service_account_json: dict
 
     def run(self):

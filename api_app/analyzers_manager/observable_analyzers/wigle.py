@@ -34,19 +34,19 @@ class WiGLE(classes.ObservableAnalyzer):
 
         try:
             if self.search_type == "WiFi Network":
-                uri = f"/api/v3/detail/wifi/{self.args.get('wifiNetworkId', None)}"
+                uri = f"/api/v3/detail/wifi/{self.args.get('wifiNetworkId')}"
             elif self.search_type == "CDMA Network":
                 uri = (
-                    f"/api/v3/detail/cell/CDMA/{self.args.get('sid', None)}/"
-                    f"{self.args.get('nid', None)}/{self.args.get('bsid', None)}"
+                    f"/api/v3/detail/cell/CDMA/{self.args.get('sid')}/"
+                    f"{self.args.get('nid')}/{self.args.get('bsid')}"
                 )
             elif self.search_type == "Bluetooth Network":
-                uri = f"/api/v3/detail/bt/{self.args.get('btNetworkId', None)}"
+                uri = f"/api/v3/detail/bt/{self.args.get('btNetworkId')}"
             elif self.search_type == "GSM/LTE/WCDMA Network":
                 uri = (
                     "/api/v3/detail/cell/"
-                    f"{self.args.get('type', None)}/{self.args.get('operator', None)}/"
-                    f"{self.args.get('lac', None)}/{self.args.get('cid', None)}"
+                    f"{self.args.get('type')}/{self.args.get('operator')}/"
+                    f"{self.args.get('lac')}/{self.args.get('cid')}"
                 )
             else:
                 raise AnalyzerConfigurationException(

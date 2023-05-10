@@ -46,10 +46,12 @@ class MockUpMWDB:
     def __init__(self):
         pass
 
-    def upload_file(self, *args, **kwargs):
+    @staticmethod
+    def upload_file(*args, **kwargs):
         return MockUpUploadObject()
 
-    def query_file(self, *args, **kwargs):
+    @staticmethod
+    def query_file(*args, **kwargs):
         return MockUpQueryObject()
 
 

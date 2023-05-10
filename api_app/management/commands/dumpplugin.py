@@ -19,7 +19,8 @@ from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 class Command(BaseCommand):
     help = "Create migration file from plugin saved inside the db"
 
-    def add_arguments(self, parser):
+    @staticmethod
+    def add_arguments(parser):
         parser.add_argument(
             "plugin_class",
             type=str,
@@ -36,7 +37,8 @@ class Command(BaseCommand):
             help="Plugin config name to use",
         )
 
-    def _get_serialization(self, obj, serializer_class):
+    @staticmethod
+    def _get_serialization(obj, serializer_class):
         obj_data = serializer_class(obj).data
         obj_data["model"] = f"{obj._meta.app_label}.{obj._meta.object_name}"
         params_data = []
@@ -54,7 +56,8 @@ class Command(BaseCommand):
                 values_data.append(PluginConfigCompleteSerializer(value).data)
         return obj_data, params_data, values_data
 
-    def _migrate_template(self):
+    @staticmethod
+    def _migrate_template():
         return """
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
@@ -74,7 +77,8 @@ def migrate(apps, schema_editor):
         value.save()
 """  # noqa
 
-    def _reverse_migrate_template(self):
+    @staticmethod
+    def _reverse_migrate_template():
         return """
 def reverse_migrate(apps, schema_editor):
     python_path = object.pop("model")
@@ -103,7 +107,8 @@ class Migration(migrations.Migration):
             self._get_last_migration("api_app"), app, self._get_last_migration(app)
         )
 
-    def _get_last_migration(self, app):
+    @staticmethod
+    def _get_last_migration(app):
         from django.db.migrations.recorder import MigrationRecorder
 
         return MigrationRecorder.Migration.objects.filter(app=app).latest("id").name
@@ -142,7 +147,8 @@ values = {2}
             f"_{obj.snake_case_name}.py"
         )
 
-    def _save_file(self, name_file, content, app):
+    @staticmethod
+    def _save_file(name_file, content, app):
         with open(
             "api_app" / PosixPath(app) / "migrations" / name_file, "w", encoding="utf-8"
         ) as f:

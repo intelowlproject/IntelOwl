@@ -14,7 +14,8 @@ from ..dns_responses import malicious_detector_response
 
 
 class MockUpSafeBrowsing:
-    def lookup_urls(self, urls: List[str]) -> Dict:
+    @staticmethod
+    def lookup_urls(urls: List[str]) -> Dict:
         return {
             url: {
                 "malicious": True,

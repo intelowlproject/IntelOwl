@@ -10,14 +10,16 @@ from api_app.models import PluginConfig
 class Command(BaseCommand):
     help = "Create migration file from pluginconfig saved inside the db"
 
-    def add_arguments(self, parser):
+    @staticmethod
+    def add_arguments(parser):
         parser.add_argument(
             "plugin_config",
             type=int,
             help="PluginConfig pk to dump",
         )
 
-    def _migrate_template(self, obj):
+    @staticmethod
+    def _migrate_template(obj):
         return """
 def migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")    
@@ -29,7 +31,8 @@ def migrate(apps, schema_editor):
             obj.pk, obj.value
         )
 
-    def _reverse_migrate_template(self):
+    @staticmethod
+    def _reverse_migrate_template():
         return """
 def reverse_migrate(apps, schema_editor):
     pass
@@ -55,7 +58,8 @@ class Migration(migrations.Migration):
             self._get_last_migration(app),
         )
 
-    def _get_last_migration(self, app):
+    @staticmethod
+    def _get_last_migration(app):
         from django.db.migrations.recorder import MigrationRecorder
 
         return MigrationRecorder.Migration.objects.filter(app=app).latest("id").name
@@ -82,7 +86,8 @@ class Migration(migrations.Migration):
             f"_{obj.__class__.__name__.lower()}_{obj.parameter.name.lower()}.py"
         )
 
-    def _save_file(self, name_file, content, app):
+    @staticmethod
+    def _save_file(name_file, content, app):
         with open(
             PosixPath(app) / "migrations" / name_file, "w", encoding="utf-8"
         ) as f:

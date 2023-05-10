@@ -49,10 +49,12 @@ class MockResponseNoOp:
     def __init__(self, json_data, status_code):
         pass
 
-    def search(self, *args, **kwargs):
+    @staticmethod
+    def search(*args, **kwargs):
         return {}
 
-    def query(self, *args, **kwargs):
+    @staticmethod
+    def query(*args, **kwargs):
         return {}
 
 

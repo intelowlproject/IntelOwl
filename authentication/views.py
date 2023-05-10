@@ -184,7 +184,8 @@ class GoogleLoginCallbackView(LoginView):
         # return redirect(f"http://localhost:3001/login?token={token}")
         return redirect(self.request.build_absolute_uri(f"/login?token={token}"))
 
-    def get_post_response_data(self, request, token_obj) -> dict:
+    @staticmethod
+    def get_post_response_data(request, token_obj) -> dict:
         data = {
             "token": token_obj.token,
         }

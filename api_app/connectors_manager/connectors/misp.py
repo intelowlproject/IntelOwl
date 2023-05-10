@@ -159,11 +159,14 @@ class MockPyMISP:
     def __init__(self, *args, **kwargs) -> None:
         pass
 
-    def add_event(self, *args, **kwargs) -> MockUpMISPElement:
+    @staticmethod
+    def add_event(*args, **kwargs) -> MockUpMISPElement:
         return MockUpMISPElement()
 
-    def add_attribute(self, *args, **kwargs) -> MockUpMISPElement:
+    @staticmethod
+    def add_attribute(*args, **kwargs) -> MockUpMISPElement:
         return MockUpMISPElement()
 
-    def get_event(self, event_id) -> dict:
+    @staticmethod
+    def get_event(event_id) -> dict:
         return {"Event": {"id": event_id}}

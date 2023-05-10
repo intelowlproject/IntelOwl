@@ -31,7 +31,8 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
             )
         return job
 
-    def create(self, validated_data):
+    @staticmethod
+    def create(validated_data):
 
         job = validated_data["job"]
         types_supported = list(

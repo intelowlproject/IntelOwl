@@ -24,7 +24,8 @@ db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
 
 
 class Stratos(classes.ObservableAnalyzer):
-    def check_in_list(self, dataset_loc, ip):
+    @staticmethod
+    def check_in_list(dataset_loc, ip):
         # Checks the IP in a list(S.No,IP,Rating).
         with open(dataset_loc, "r", encoding="utf-8") as f:
             db = f.read()
@@ -56,7 +57,8 @@ class Stratos(classes.ObservableAnalyzer):
 
         return result
 
-    def download_dataset(self, url, db_loc):
+    @staticmethod
+    def download_dataset(url, db_loc):
         # Dataset website certificates are not correctly configured.
         p = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
         p.raise_for_status()

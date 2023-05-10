@@ -9,7 +9,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 class Command(BaseCommand):
     help = "Execute celery task"
 
-    def add_arguments(self, parser):
+    @staticmethod
+    def add_arguments(parser):
         parser.add_argument(
             "config_name",
             type=str,

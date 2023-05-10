@@ -50,7 +50,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             self.check_object_permissions(self.request, obj)
             return obj
 
-    def perform_kill(self, report: AbstractReport):
+    @staticmethod
+    def perform_kill(report: AbstractReport):
         """
         performs kill
          override for callbacks after kill operation

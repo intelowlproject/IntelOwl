@@ -118,20 +118,8 @@ const tableProps = {
   ),
 };
 
-const tablePropsPlaybooks = JSON.parse(JSON.stringify(tableProps));
-
 export function AnalyzersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
-  if (job?.playbook_to_execute) {
-    return (
-      <DataTable
-        data={job?.analyzer_reports}
-        customProps={{ job, refetch }}
-        {...tablePropsPlaybooks}
-      />
-    );
-  }
-
   return (
     <DataTable
       data={job?.analyzer_reports}
@@ -143,16 +131,6 @@ export function AnalyzersReportTable({ job, refetch }) {
 
 export function ConnectorsReportTable({ job, refetch }) {
   console.debug("ConnectorsReportTable rendered");
-  if (job?.playbook_to_execute) {
-    return (
-      <DataTable
-        data={job?.connector_reports}
-        customProps={{ job, refetch }}
-        {...tablePropsPlaybooks}
-      />
-    );
-  }
-
   return (
     <DataTable
       data={job?.connector_reports}
@@ -161,18 +139,9 @@ export function ConnectorsReportTable({ job, refetch }) {
     />
   );
 }
+
 export function VisualizersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
-  if (job?.playbook_to_execute) {
-    return (
-      <DataTable
-        data={job?.visualizer_reports}
-        customProps={{ job, refetch }}
-        {...tablePropsPlaybooks}
-      />
-    );
-  }
-
   return (
     <DataTable
       data={job?.visualizer_reports}

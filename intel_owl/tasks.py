@@ -39,7 +39,7 @@ def remove_old_jobs():
 
     logger.info("started remove_old_jobs")
 
-    retention_days = int(secrets.get_secret("OLD_JOBS_RETENTION_DAYS", 3))
+    retention_days = int(secrets.get_secret("OLD_JOBS_RETENTION_DAYS", 14))
     date_to_check = now() - datetime.timedelta(days=retention_days)
     old_jobs = Job.objects.filter(finished_analysis_time__lt=date_to_check)
     num_jobs_to_delete = old_jobs.count()

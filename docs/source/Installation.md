@@ -101,7 +101,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
 
 Optional configuration:
-* `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
+* `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 14 days). Change this if you want to keep your old analysis longer in the database.
 
 #### Other optional configuration to enable specific services / features
 
@@ -184,11 +184,6 @@ There are 3 options to execute the web server:
     Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
     
     After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
-
-### Plugin configuration (optional)
-
-Refer to [Analyzers customization](Usage.html#analyzers-customization), [Connectors customization](Usage.html#connectors-customization), [Visualizers customization](Usage.html#visualizers-customization).
-
 
 ## Run
 

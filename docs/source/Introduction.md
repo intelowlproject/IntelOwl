@@ -17,6 +17,13 @@ Main features:
 * compatibility with some of the AWS services. More in the future.
 * fast and reliable deploy: clone the project, set up the configuration and then you are ready to run it via docker-compose
 
+To know more about the project and its growth over time, you may be interested in reading the following official blog posts and/or videos:
+
+- [Youtube demo](https://youtu.be/pHnh3qTzSeM)
+- [Certego Blog: v.4.0.0 Announcement](https://www.certego.net/en/news/intel-owl-release-v4-0-0/)
+- [Honeynet Blog: v3.0.0 Announcement](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/)
+- [Intel Owl on Daily Swig](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
+- [Honeynet Blog: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
 
 Feel free to ask everything it comes to your mind about the project to the author:
 Matteo Lodi ([Twitter](https://twitter.com/matte_lodi)).

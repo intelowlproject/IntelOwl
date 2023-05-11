@@ -103,10 +103,10 @@ const stateSelector = (state) => [
 ];
 
 const observableType2RegExMap = {
-  domain: "^(.?.?.?[-_a-zA-Z0-9]+)+$", //eslint-disable-line
-  ip: "((^s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))s*$)|(^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*$))",
+  domain: "^(?:[\\w-]{1,63}\\.)+[\\w-]{2,63}$",
+  ip: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
   url: "^.{2,20}://.+$",
-  hash: "^[a-zA-Z0-9]{4,}$",
+  hash: "^[a-zA-Z0-9]{32,}$",
 };
 
 // Component
@@ -289,30 +289,27 @@ export default function ScanForm() {
     [connectors]
   );
 
-  const playbookOptions = React.useMemo(
-    () =>
-      playbooksGrouped[formik.values.classification]
-        .map((v) => ({
-          isDisabled: v.disabled,
-          value: v.name,
-          label: (
-            <div className="d-flex justify-content-start align-items-start flex-column">
-              <div className="d-flex justify-content-start align-items-baseline flex-column">
-                <div>{v.name}&nbsp;</div>
-                <div className="small text-left text-muted">
-                  {markdownToHtml(v.description)}
-                </div>
+  const playbookOptions = (classification) =>
+    playbooksGrouped[classification]
+      .map((v) => ({
+        isDisabled: v.disabled,
+        value: v.name,
+        label: (
+          <div className="d-flex justify-content-start align-items-start flex-column">
+            <div className="d-flex justify-content-start align-items-baseline flex-column">
+              <div>{v.name}&nbsp;</div>
+              <div className="small text-left text-muted">
+                {markdownToHtml(v.description)}
               </div>
             </div>
-          ),
-          labelDisplay: v.name,
-        }))
-        .sort((a, b) =>
-          // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+          </div>
         ),
-    [playbooksGrouped, formik.values.classification]
-  );
+        labelDisplay: v.name,
+      }))
+      .sort((a, b) =>
+        // eslint-disable-next-line no-nested-ternary
+        a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+      );
 
   const ValidatePlaybooks = React.useCallback(
     (values) => {
@@ -370,10 +367,7 @@ export default function ScanForm() {
     [navigate, refetchQuota, ValidatePlaybooks]
   );
 
-  console.debug("playbooksGrouped");
-  console.debug(playbooksGrouped);
-  console.debug("formik.values.playbooks");
-  console.debug(formik.values.playbooks);
+  console.debug(`classification: ${formik.values.classification}`);
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
@@ -408,10 +402,22 @@ export default function ScanForm() {
                             "observableType",
                             event.target.value
                           );
+                          formik.setFieldValue(
+                            "classification",
+                            event.target.value === "observable"
+                              ? "generic"
+                              : "file"
+                          );
+                          formik.setFieldValue("observable_names", [""]);
+                          formik.setFieldValue("playbooks", []); // reset
                           formik.setFieldValue("analyzers", []); // reset
                         }}
                       />
-                      <Label check>{ch}</Label>
+                      <Label check>
+                        {ch === "observable"
+                          ? "observable (domain, IP, URL, HASH, etc...)"
+                          : "file"}
+                      </Label>
                     </Col>
                   </FormGroup>
                 ))}
@@ -440,6 +446,7 @@ export default function ScanForm() {
                                 <Field
                                   as={Input}
                                   type="text"
+                                  placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a"
                                   id={`observable_names.${index}`}
                                   name={`observable_names.${index}`}
                                   className="input-dark"
@@ -453,7 +460,9 @@ export default function ScanForm() {
                                   }
                                   onChange={(event) => {
                                     if (index === 0) {
-                                      let classification = "generic";
+                                      const oldClassification =
+                                        formik.values.classification;
+                                      let newClassification = "generic";
                                       Object.entries(
                                         observableType2RegExMap
                                       ).forEach(([typeName, typeRegEx]) => {
@@ -462,29 +471,29 @@ export default function ScanForm() {
                                             event.target.value
                                           )
                                         ) {
-                                          classification = typeName;
+                                          newClassification = typeName;
                                         }
                                       });
-                                      console.debug(
-                                        `classification: ${classification}`
-                                      );
                                       formik.setFieldValue(
                                         "classification",
-                                        classification
+                                        newClassification
                                       );
-                                      // set a default playbook in case user didn't select anything and there is a valid playbook
-                                      // if (formik.values.playbooks.length === 0 && playbooksGrouped[classification].length > 0) {
-                                      //   formik.setFieldValue(
-                                      //   "playbooks",
-                                      //   playbooksGrouped[classification][0]
-                                      // );
-                                      // }
+                                      // in case a palybook is available and i changed classification or no playbooks is selected i select a playbook
+                                      if (
+                                        playbookOptions(newClassification)
+                                          .length > 0 &&
+                                        (oldClassification !==
+                                          newClassification ||
+                                          formik.values.playbooks.length === 0)
+                                      ) {
+                                        formik.setFieldValue("playbooks", [
+                                          playbookOptions(newClassification)[0],
+                                        ]);
+                                      }
                                     }
                                     const observableNames =
                                       formik.values.observable_names;
                                     observableNames[index] = event.target.value;
-                                    console.debug("observableNames");
-                                    console.debug(observableNames);
                                     formik.setFieldValue(
                                       "observable_names",
                                       observableNames
@@ -530,9 +539,18 @@ export default function ScanForm() {
                     type="file"
                     id="file"
                     name="files"
-                    onChange={(event) =>
-                      formik.setFieldValue("files", event.currentTarget.files)
-                    }
+                    onChange={(event) => {
+                      formik.setFieldValue("file", event.currentTarget.files);
+                      formik.setFieldValue("classification", "file");
+                      if (
+                        formik.values.playbooks.length === 0 &&
+                        playbookOptions("file").length > 0
+                      ) {
+                        formik.setFieldValue("playbooks", [
+                          playbookOptions("file")[0],
+                        ]);
+                      }
+                    }}
                     className="input-dark"
                     multiple
                   />
@@ -641,7 +659,7 @@ export default function ScanForm() {
                 {!(playbooksLoading || playbooksError) && (
                   <Col sm={9}>
                     <MultiSelectDropdownInput
-                      options={playbookOptions}
+                      options={playbookOptions(formik.values.classification)}
                       value={formik.values.playbooks}
                       onChange={(v) => formik.setFieldValue("playbooks", v)}
                     />

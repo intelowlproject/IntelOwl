@@ -85,6 +85,10 @@ class MimeTypes(models.TextChoices):
     MIXED = "multipart/mixed"
 
     @classmethod
+    def word_mimetypes(cls):
+        return [cls.WORD1, cls.WORD1, cls.DOC, cls.OFFICE, cls.ZIP1, cls.ZIP2]
+
+    @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:
         if file_name.endswith(".js") or file_name.endswith(".jse"):
             mimetype = cls.JAVASCRIPT1
@@ -123,7 +127,7 @@ class MimeTypes(models.TextChoices):
             else:
                 mimetype = mimetype.value
 
-        if mimetype in [cls.ZIP1.value, cls.ZIP1.value]:
+        if mimetype in [cls.ZIP1.value, cls.ZIP2.value]:
             REGEX_OFFICE_FILES = r"\.[xl|doc]\w{0,3}$"
             if re.search(REGEX_OFFICE_FILES, file_name):
                 mimetype = cls.ANDROID.value

@@ -133,7 +133,7 @@ class DocInfo(FileAnalyzer):
         results["olevba"] = self.olevba_results
         if self.file_mimetype != MimeTypes.ONE_NOTE:
             results["msodde"] = self.analyze_msodde()
-        if self.file_mimetype in MimeTypes.WORD():
+        if self.file_mimetype in MimeTypes.word_mimetypes():
             results["follina"] = self.analyze_for_follina_cve()
         return results
 

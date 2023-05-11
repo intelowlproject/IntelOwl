@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import logging
+import re
 import uuid
 from typing import Any, Dict, List, Union
 
@@ -497,6 +498,18 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             pk__in=[config.pk for config in analyzers_to_execute]
         )
         file_mimetype = serialized_data["file_mimetype"]
+        if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP1.value]:
+            EXCEL_OFFICE_FILES = r"\.[xl]\w{0,3}$"
+            DOC_OFFICE_FILES = r"\.[doc]\w{0,3}$"
+            if re.search(DOC_OFFICE_FILES, serialized_data["file_name"]):
+                # its an excel file
+                file_mimetype = MimeTypes.DOC.value
+            elif re.search(EXCEL_OFFICE_FILES, serialized_data["file_name"]):
+                # its an excel file
+                file_mimetype = MimeTypes.EXCEL1.value
+            else:
+                # its an android file
+                file_mimetype = MimeTypes.APK.value
 
         supported_query = (
             Q(

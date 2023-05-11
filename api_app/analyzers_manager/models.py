@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import re
 from logging import getLogger
 from typing import Optional
 
@@ -42,7 +41,6 @@ class MimeTypes(models.TextChoices):
     APK = "application/vnd.android.package-archive"
     DEX = "application/x-dex"
     ONE_NOTE = "application/onenote"
-    ANDROID = "android"
     ZIP1 = "application/zip"
     ZIP2 = "multipart/x-zip"
     JAVA = "application/java-archive"
@@ -122,11 +120,6 @@ class MimeTypes(models.TextChoices):
                 )
             else:
                 mimetype = mimetype.value
-
-        if mimetype in [cls.ZIP1.value, cls.ZIP1.value]:
-            REGEX_OFFICE_FILES = r"\.[xl|doc]\w{0,3}$"
-            if re.search(REGEX_OFFICE_FILES, file_name):
-                mimetype = cls.ANDROID.value
 
         return mimetype
 

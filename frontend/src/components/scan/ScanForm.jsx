@@ -370,6 +370,10 @@ export default function ScanForm() {
     [navigate, refetchQuota, ValidatePlaybooks]
   );
 
+  console.debug("playbooksGrouped");
+  console.debug(playbooksGrouped);
+  console.debug("formik.values.playbooks");
+  console.debug(formik.values.playbooks);
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
@@ -387,29 +391,32 @@ export default function ScanForm() {
         <hr />
         <FormikProvider value={formik}>
           <Form onSubmit={formik.handleSubmit}>
-            <FormGroup className="d-flex offset-sm-3 col-sm-9">
-              {["observable", "file"].map((ch) => (
-                <FormGroup check inline key={`observableType__${ch}`}>
-                  <Col>
-                    <Field
-                      as={Input}
-                      id={`observableType__${ch}`}
-                      type="radio"
-                      name="observableType"
-                      value={ch}
-                      onClick={(event) => {
-                        formik.setFieldValue(
-                          "observableType",
-                          event.target.value
-                        );
-                        formik.setFieldValue("analyzers", []); // reset
-                      }}
-                    />
-                    <Label check>{ch}</Label>
-                  </Col>
-                </FormGroup>
-              ))}
-            </FormGroup>
+            <Row>
+              <div className="col-sm-3 col-form-label" />
+              <FormGroup className="mb-0 d-flex col-sm-9">
+                {["observable", "file"].map((ch) => (
+                  <FormGroup check inline key={`observableType__${ch}`}>
+                    <Col>
+                      <Field
+                        as={Input}
+                        id={`observableType__${ch}`}
+                        type="radio"
+                        name="observableType"
+                        value={ch}
+                        onClick={(event) => {
+                          formik.setFieldValue(
+                            "observableType",
+                            event.target.value
+                          );
+                          formik.setFieldValue("analyzers", []); // reset
+                        }}
+                      />
+                      <Label check>{ch}</Label>
+                    </Col>
+                  </FormGroup>
+                ))}
+              </FormGroup>
+            </Row>
             {formik.values.observableType === "observable" ? (
               <FieldArray
                 name="observable_names"
@@ -465,6 +472,13 @@ export default function ScanForm() {
                                         "classification",
                                         classification
                                       );
+                                      // set a default playbook in case user didn't select anything and there is a valid playbook
+                                      // if (formik.values.playbooks.length === 0 && playbooksGrouped[classification].length > 0) {
+                                      //   formik.setFieldValue(
+                                      //   "playbooks",
+                                      //   playbooksGrouped[classification][0]
+                                      // );
+                                      // }
                                     }
                                     const observableNames =
                                       formik.values.observable_names;
@@ -526,29 +540,32 @@ export default function ScanForm() {
               </FormGroup>
             )}
             <hr />
-            <FormGroup
-              className="d-flex offset-sm-3 col-sm-9"
-              style={{ marginTop: "10px" }}
-            >
-              {Object.values(scanTypes).map((type_) => (
-                <FormGroup check inline key={`analysistype__${type_}`}>
-                  <Col>
-                    <Field
-                      as={Input}
-                      id={`analysistype__${type_}`}
-                      type="radio"
-                      name="analysisOptionValues"
-                      value={type_}
-                      onClick={() => {
-                        setScanType(type_);
-                        formik.setFieldValue("playbooks", []); // reset
-                      }}
-                    />
-                    <Label check>{type_}</Label>
-                  </Col>
-                </FormGroup>
-              ))}
-            </FormGroup>
+            <Row>
+              <div className="col-sm-3 col-form-label" />
+              <FormGroup
+                className="d-flex col-sm-9"
+                style={{ marginTop: "10px" }}
+              >
+                {Object.values(scanTypes).map((type_) => (
+                  <FormGroup check inline key={`analysistype__${type_}`}>
+                    <Col>
+                      <Field
+                        as={Input}
+                        id={`analysistype__${type_}`}
+                        type="radio"
+                        name="analysisOptionValues"
+                        value={type_}
+                        onClick={() => {
+                          setScanType(type_);
+                          formik.setFieldValue("playbooks", []); // reset
+                        }}
+                      />
+                      <Label check>{type_}</Label>
+                    </Col>
+                  </FormGroup>
+                ))}
+              </FormGroup>
+            </Row>
             {scanType === scanTypes.analyzers_and_connectors && (
               <>
                 <FormGroup row>
@@ -560,18 +577,11 @@ export default function ScanForm() {
                       loading={analyzersLoading}
                       error={analyzersError}
                       render={() => (
-                        <>
-                          <MultiSelectDropdownInput
-                            options={analyzersOptions}
-                            value={formik.values.analyzers}
-                            onChange={(v) =>
-                              formik.setFieldValue("analyzers", v)
-                            }
-                          />
-                          <FormText>
-                            Default: all configured analyzers are triggered.
-                          </FormText>
-                        </>
+                        <MultiSelectDropdownInput
+                          options={analyzersOptions}
+                          value={formik.values.analyzers}
+                          onChange={(v) => formik.setFieldValue("analyzers", v)}
+                        />
                       )}
                     />
                     <ErrorMessage component={FormFeedback} name="analyzers" />
@@ -583,18 +593,11 @@ export default function ScanForm() {
                   </Label>
                   <Col sm={9}>
                     {!(connectorsLoading || connectorsError) && (
-                      <>
-                        <MultiSelectDropdownInput
-                          options={connectorOptions}
-                          value={formik.values.connectors}
-                          onChange={(v) =>
-                            formik.setFieldValue("connectors", v)
-                          }
-                        />
-                        <FormText>
-                          Default: all configured connectors are triggered.
-                        </FormText>
-                      </>
+                      <MultiSelectDropdownInput
+                        options={connectorOptions}
+                        value={formik.values.connectors}
+                        onChange={(v) => formik.setFieldValue("connectors", v)}
+                      />
                     )}
                     <ErrorMessage component={FormFeedback} name="connectors" />
                   </Col>

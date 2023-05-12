@@ -122,7 +122,7 @@ export default function ScanForm() {
       analyzers: [],
       connectors: [],
       playbooks: [],
-      tlp: "RED",
+      tlp: "AMBER",
       runtime_configuration: {},
       tags: [],
       check: "check_all",

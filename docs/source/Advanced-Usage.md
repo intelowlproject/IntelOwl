@@ -42,7 +42,7 @@ table, th, td {
       <li><code>APKiD</code></li>
       <li><code>Thug_URL_Info</code>,
       <code>Thug_HTML_Info</code></li>
-      <li><code>BoxJS_Scan_JavaScript</code></li>
+      <li><code>BoxJS</code></li>
       <li><code>Qiling_Windows</code>,
       <code>Qiling_Windows_Shellcode</code>,
       <code>Qiling_Linux</code>,

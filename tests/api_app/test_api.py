@@ -103,7 +103,7 @@ class ApiViewTests(CustomAPITestCase):
 
     def test_analyze_file__pcap(self):
         # with noone, only the PCAP analyzers should be executed
-        analyzers_requested = []
+        analyzers_requested = ["Yara"]
         file_name = "example.pcap"
         uploaded_file, md5 = self.__get_test_file(file_name)
         file_mimetype = "application/vnd.tcpdump.pcap"

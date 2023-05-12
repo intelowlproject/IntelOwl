@@ -148,6 +148,8 @@ export default function ScanForm() {
           errors.tlp = "Invalid choice";
         }
       }
+      console.debug("errors");
+      console.debug(errors);
       return errors;
     },
     onSubmit: async (values) => {
@@ -540,7 +542,7 @@ export default function ScanForm() {
                     id="file"
                     name="files"
                     onChange={(event) => {
-                      formik.setFieldValue("file", event.currentTarget.files);
+                      formik.setFieldValue("files", event.currentTarget.files);
                       formik.setFieldValue("classification", "file");
                       if (
                         formik.values.playbooks.length === 0 &&

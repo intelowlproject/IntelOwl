@@ -50,22 +50,29 @@ class ParameterAdminView(admin.ModelAdmin):
 
 
 class ParameterInlineForm(forms.ModelForm):
-    default = forms.JSONField()
+    default = forms.JSONField(required=False)
 
     class Meta:
         model = Parameter
         fields = ParameterAdminView.fields
 
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get("instance", None)
+        if instance:
+            kwargs["initial"] = {"default": instance.default}
+        super().__init__(*args, **kwargs)
+
     def save(self, commit: bool = ...):
         instance = super().save(commit=commit)
-        pc = PluginConfig(
-            value=self.cleaned_data["default"],
-            owner=None,
-            for_organization=False,
-            parameter=instance,
-        )
-        pc.full_clean()
-        pc.save()
+        if self.cleaned_data["default"] is not None:
+            pc = PluginConfig(
+                value=self.cleaned_data["default"],
+                owner=None,
+                for_organization=False,
+                parameter=instance,
+            )
+            pc.full_clean()
+            pc.save()
 
         return instance
 
@@ -74,7 +81,7 @@ class ParameterInline(admin.TabularInline):
     model = Parameter
     list_display = ParameterAdminView.list_display
     fields = list_display + ("default",)
-    extra = 1
+    extra = 0
     show_change_link = True
     form = ParameterInlineForm
 

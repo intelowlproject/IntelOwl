@@ -183,6 +183,17 @@ class Parameter(models.Model):
                     f" {self.name} for configuration {self.config.name}"
                 )
 
+    @property
+    def default(self):
+        from api_app.models import PluginConfig
+
+        try:
+            pc = PluginConfig.objects.get(parameter=self, owner__isnull=True)
+        except PluginConfig.DoesNotExist:
+            return None
+        else:
+            return pc.value
+
 
 class AbstractConfig(models.Model):
 

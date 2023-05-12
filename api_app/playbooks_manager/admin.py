@@ -8,7 +8,7 @@ from api_app.playbooks_manager.models import PlaybookConfig
 
 
 @admin.register(PlaybookConfig)
-class PluginConfigAdminView(JsonViewerAdminView):
+class PlaybookConfigAdminView(JsonViewerAdminView):
     list_display = (
         "name",
         "type",

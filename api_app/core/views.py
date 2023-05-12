@@ -161,7 +161,7 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             return Response(data={"status": health_status}, status=status.HTTP_200_OK)
 
-    @add_docs(description="Disable plugin for your organization", request=None)
+    @add_docs(description="Disable/Enable plugin for your organization", request=None)
     @action(
         methods=["post"],
         detail=True,

@@ -54,6 +54,20 @@ class TagAdminView(admin.ModelAdmin):
 
 @admin.register(PluginConfig)
 class PluginCredentialAdminView(admin.ModelAdmin):
-    list_display = ("id", "for_organization", "owner", "attribute", "is_secret")
-    search_fields = ("for_organization", "owner", "attribute", "is_secret")
-    list_filter = ("for_organization", "owner")
+    list_display = ("id", "value", "parameter_name", "for_organization", "owner_name")
+    search_fields = ["parameter__name", "value"]
+    list_filter = (
+        "for_organization",
+        "owner",
+        "parameter__analyzer_config__name",
+        "parameter__connector_config__name",
+        "parameter__visualizer_config__name",
+    )
+
+    def parameter_name(self, instance: PluginConfig):
+        return instance.parameter.name
+
+    def owner_name(self, instance: PluginConfig):
+        if instance.owner:
+            return instance.owner.name
+        return None

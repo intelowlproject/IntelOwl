@@ -22,7 +22,8 @@ class VisualizerConfigSerializer(AbstractConfigSerializer):
 class VisualizerReportSerializer(AbstractReportSerializer):
     name = rfs.SerializerMethodField()
 
-    def get_name(self, instance: VisualizerReport):
+    @classmethod
+    def get_name(cls, instance: VisualizerReport):
         return instance.name or instance.config.pk
 
     class Meta:

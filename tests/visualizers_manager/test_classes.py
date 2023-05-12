@@ -16,7 +16,7 @@ from api_app.visualizers_manager.classes import (
     VisualizableVerticalList,
     Visualizer,
 )
-from api_app.visualizers_manager.enums import VisualizableColor
+from api_app.visualizers_manager.enums import VisualizableColor, VisualizableSize
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 
@@ -28,10 +28,11 @@ class VisualizableObjectTestCase(CustomTestCase):
             return "test"
 
     def test_to_dict(self):
-        vo = self.MockUpVisualizableObject(False)
+        vo = self.MockUpVisualizableObject(size=VisualizableSize.S_1, disable=False)
         result = vo.to_dict()
 
         expected_result = {
+            "size": "1",
             "disable": False,
             "type": "test",
         }
@@ -54,6 +55,7 @@ class VisualizableBaseTestCase(CustomTestCase):
             "type": "base",
             "value": "test",
             "color": "dark",
+            "size": "auto",
             "link": "https://test.com",
             "classname": "test",
             "icon": "",
@@ -73,8 +75,9 @@ class VisualizableBaseTestCase(CustomTestCase):
 
     def test_disable(self):
         vo = VisualizableBase(
-            "",
+            value="",
             color=VisualizableColor.DARK,
+            size=VisualizableSize.S_3,
             link="https://test.com",
             classname="test",
             disable=True,
@@ -86,6 +89,7 @@ class VisualizableBaseTestCase(CustomTestCase):
             "type": "base",
             "value": "",
             "color": "dark",
+            "size": "3",
             "link": "https://test.com",
             "classname": "test",
             "icon": "",
@@ -103,6 +107,9 @@ class VisualizableBoolTestCase(CustomTestCase):
             "link": "",
             "classname": "",
             "color": "danger",
+            "icon": "",
+            "italic": False,
+            "size": "auto",
             "disable": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
@@ -125,6 +132,7 @@ class VisualizableTitleTestCase(CustomTestCase):
             "type": "title",
             "title": title.to_dict(),
             "value": value.to_dict(),
+            "size": "auto",
             "disable": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
@@ -142,6 +150,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "name": name.to_dict(),
             "open": False,
             "disable": True,
+            "size": "auto",
             "values": [value.to_dict()],
         }
         self.assertEqual(vvl.to_dict()["values"], vvl.to_dict()["values"])
@@ -159,6 +168,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "name": name.to_dict(),
             "disable": True,
             "open": False,
+            "size": "auto",
             "values": [],
         }
         self.assertCountEqual(vvl.to_dict(), expected_result)
@@ -172,6 +182,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "name": name.to_dict(),
             "disable": True,
             "open": False,
+            "size": "auto",
             "values": [],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
@@ -186,7 +197,6 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "disable": False,
             "values": [value.to_dict()],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
@@ -196,7 +206,6 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "disable": False,
             "values": [],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
@@ -206,7 +215,6 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "disable": False,
             "values": [],
         }
         self.assertEqual(vvl.to_dict(), expected_result)

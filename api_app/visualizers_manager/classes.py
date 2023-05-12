@@ -61,8 +61,8 @@ class VisualizableObject:
 class VisualizableBase(VisualizableObject):
     def __init__(
         self,
-        size: VisualizableSize = VisualizableSize.S_AUTO,
         value: Any = "",
+        size: VisualizableSize = VisualizableSize.S_AUTO,
         color: VisualizableColor = VisualizableColor.TRANSPARENT,
         link: str = "",
         # you can use an element of the enum or an iso3166 alpha2 code (for flags)
@@ -241,6 +241,9 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
+        # currently hlist doesn't support disable and size
+        result.pop("disable")
+        result.pop("size")
         return result
 
 

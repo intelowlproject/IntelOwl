@@ -63,8 +63,8 @@ export const OBSERVABLE_TYPES = Object.keys(
 );
 
 export const scanTypes = {
-  analyzers_and_connectors: "Analyzers/Connectors",
   playbooks: "Playbooks",
+  analyzers_and_connectors: "Analyzers/Connectors",
 };
 
 export const ALL_CLASSIFICATIONS = OBSERVABLE_TYPES.concat("file");

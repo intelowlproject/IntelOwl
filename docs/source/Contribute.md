@@ -188,11 +188,12 @@ After having written the new python module, you have to remember to:
    12. ~Run hash type: required if `run hash` is `True`
    13. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
-4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer (you will find it under `api_app/analyzers_manager/migrations`). The script will create the following models:
       1. AnalyzerConfig
       2. Parameter
       3. PluginConfig
+   2. Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin AnalyzerConfig <new_analyzer_name>`
     
 5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
@@ -236,11 +237,12 @@ After having written the new python module, you have to remember to:
    7. *Maximum tlp: maximum tlp to allow the run on the connector
    8. *Run on failure: if the connector should be run even if the job fails
 
-4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new connector (you will find it under `api_app/connectors_manager/migrations`). The script will create the following models:
       1. ConnectorConfig
       2. Parameter
       3. PluginConfig
+   2. Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin ConnectorConfig <new_connector_name>`
 
 
 ## How to add a new Visualizer
@@ -265,10 +267,11 @@ After having written the new python module, you have to remember to:
    7. *Connectors: List of connectors that **must** have run to execute the visualizer
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new visualizer (you will find it under `api_app/visualizers_manager/migrations`). The script will create the following models:
       1. VisualizerConfig
       2. Parameter
       3. PluginConfig
+   2. Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin VisualizerConfig <new_visualizer_name>`
 
 
 ### Python class

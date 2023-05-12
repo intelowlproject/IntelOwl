@@ -83,7 +83,7 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     python_path = object.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    Model.objects.get(name=obj["name"]).delete()
+    Model.objects.get(name=object["name"]).delete()
 """
 
     def _body_template(self, app):

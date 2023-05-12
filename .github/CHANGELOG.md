@@ -15,7 +15,7 @@ That would speed the analysis of the results a lot if done correctly!
 To aid in this process we added a lot of [documentation and some very simple pre-built analyzers that you can use as example](https://intelowl.readthedocs.io/en/latest/Usage.html#visualizers):
 
 Moreover this release anticipates other important crucial steps for IntelOwl:
-* On June 9th [Matteo Lodi](https://twitter.com/matte_lodi) and [Simone Berni](https://twitter.com/0ssig3no) are presenting IntelOwl at one of the most important Cyber Security events in Italy: [HackinBo](https://www.hackinbo.it/programma.php)
+* On June 10th [Matteo Lodi](https://twitter.com/matte_lodi) and [Simone Berni](https://twitter.com/0ssig3no) are presenting IntelOwl at one of the most important Cyber Security events in Italy: [HackinBo](https://www.hackinbo.it/programma.php)
 * On May 28th the [Google Summer of Code 2023](https://developers.google.com/open-source/gsoc/timeline) is starting and IntelOwl is participating again with 2 new students! Welcome to [Shivam Purohit](https://twitter.com/stay_away_plss) and [Abheek Tripathy](https://twitter.com/abheekblahblah)!
 
 This release was possible thanks to the effort put in place by [Certego](https://www.certego.net) in supporting the maintainers.

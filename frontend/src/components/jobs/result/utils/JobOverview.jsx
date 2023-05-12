@@ -12,6 +12,7 @@ import {
   Container,
   TabContent,
   TabPane,
+  Spinner,
 } from "reactstrap";
 
 import { GoBackButton, Loader } from "@certego/certego-ui";
@@ -26,6 +27,7 @@ import { StatusIcon } from "../../../common";
 import VisualizerReport from "../visualizer/visualizer";
 import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
 
+const LOADING_VISUALIZER_UI_ELEMENT_CODE = -2;
 const NO_VISUALIZER_UI_ELEMENT_CODE = -1;
 
 export default function JobOverview({ isRunningJob, job, refetch }) {
@@ -123,7 +125,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     console.debug("JobOverview - create/update visualizer components");
     console.debug(job);
 
-    // generate UI elements
+    // 1) generate UI elements in case visualizers terminated
     const newUIElements = job.visualizer_reports.map((visualizerReport) => ({
       id: visualizerReport.id,
       nav: (
@@ -131,20 +133,23 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <strong>{visualizerReport.name}</strong>
         </div>
       ),
-      report: (
-        <Loader
-          loading={
-            visualizerReport === undefined ||
-            ["pending", "running"].includes(visualizerReport.status)
-          }
-          render={() => (
-            <VisualizerReport visualizerReport={visualizerReport} />
-          )}
-        />
-      ),
+      report: <VisualizerReport visualizerReport={visualizerReport} />,
     }));
 
-    // in case there are no visualizers add a "no data" visualizer
+    // 2) in case visualizers are running put a loader
+    if (newUIElements.length === 0 && job.visualizers_to_execute.length > 0) {
+      newUIElements.push({
+        id: LOADING_VISUALIZER_UI_ELEMENT_CODE,
+        nav: null,
+        report: (
+          <div className="d-flex justify-content-center">
+            <Spinner />
+          </div>
+        ),
+      });
+    }
+
+    // 3) in case there are no visualizers add a "no data" visualizer
     if (newUIElements.length === 0) {
       newUIElements.push({
         id: NO_VISUALIZER_UI_ELEMENT_CODE,
@@ -162,7 +167,10 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     /* set the default to the first visualizer only in case no section is selected and UI elements have been downloaded.
     In case a section is selected and job data are refreshed (thanks to the polling) do NOT change the section the user is watching
     */
-    if (activeElement === undefined && UIElements.length !== 0) {
+    if (
+      UIElements.length !== 0 &&
+      [undefined, LOADING_VISUALIZER_UI_ELEMENT_CODE].includes(activeElement)
+    ) {
       const firstVisualizer = UIElements[0];
       if (firstVisualizer.id === NO_VISUALIZER_UI_ELEMENT_CODE) {
         selectUISection(false);

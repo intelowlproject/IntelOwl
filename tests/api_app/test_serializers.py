@@ -51,17 +51,9 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         self.ajcs.validate({"playbook_requested": p, "tlp": "CLEAR"})
 
     def test_validate_analyzers_requested(self):
-        with self.assertRaises(ValidationError):
-            self.ajcs.validate(
-                {
-                    "observables": [["ip", "8.8.8.8"]],
-                    "analyzers_requested": [],
-                    "connectors_requested": [],
-                    "tlp": "CLEAR",
-                    "runtime_configuration": {},
-                    "tags_labels": [],
-                }
-            )
+        analyzers = self.ajcs.filter_analyzers_requested([])
+        self.assertEqual(len(analyzers), AnalyzerConfig.objects.all().count())
+        self.assertTrue(self.ajcs.all_analyzers)
 
     def test_filter_analyzers_not_runnable(self):
         a = AnalyzerConfig.objects.get(name="Tranco")

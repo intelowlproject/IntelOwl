@@ -9,7 +9,7 @@ from api_app.choices import TLP
 
 def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    for config in AnalyzerConfig.objects.filter(
+    AnalyzerConfig.objects.filter(
         Q(
             python_module__in=[
                 "cape_sandbox.CAPEsandbox",
@@ -29,35 +29,68 @@ def migrate(apps, schema_editor):
             ]
         )
         | Q(name="VirusTotal_v3_Get_File_And_Scan")
-    ):
-        config.maximum_tlp = TLP.CLEAR
-        config.full_clean()
-        config.save()
+    ).update(maximum_tlp=TLP.CLEAR.value)
 
-    for config in AnalyzerConfig.objects.filter(
+    AnalyzerConfig.objects.filter(
         python_module__in=["firehol_iplist.FireHol_IPList", "talos.Talos", "tor.Tor"]
-    ):
-        config.maximum_tlp = TLP.RED
-        config.full_clean()
-        config.save()
+    ).update(maximum_tlp=TLP.RED.value)
 
-    for config in AnalyzerConfig.objects.filter(
+    AnalyzerConfig.objects.filter(
         python_module__in=["triage.triage_search.TriageSearch"]
-    ):
-        config.maximum_tlp = TLP.AMBER
-        config.full_clean()
-        config.save()
+    ).filter(maximum_tlp=TLP.AMBER.value)
 
-    for config in AnalyzerConfig.objects.filter(name="UnpacMe_EXE_Unpacker"):
-        config.name = "UnpacMe"
-        config.full_clean()
-        config.save()
-    for config in AnalyzerConfig.objects.filter(name="BoxJS_Scan_JavaScript"):
-        config.name = "Box_JS"
-        config.full_clean()
-        config.save()
+    new_config = AnalyzerConfig.objects.get(name="UnpacMe_EXE_Unpacker")
+    new_config.name = "UnpacMe"
+    new_config.save()
+    old_config = AnalyzerConfig.objects.get(name="UnpacMe_EXE_Unpacker")
+    for param in old_config.parameters.all():
+        param.analyzer_config = new_config
+        param.save()
+    for visualizer in old_config.visualizers.all():
+        visualizer.analyzers.remove(old_config)
+        visualizer.analyzers.add(new_config)
+        visualizer.save()
+    for playbook in old_config.playbooks.all():
+        playbook.analyzers.remove(old_config)
+        playbook.analyzers.add(new_config)
+        playbook.save()
+    for job in old_config.requested_in_jobs.all():
+        job.analyzers_requested.remove(old_config)
+        job.analyzers_requested.add(new_config)
+        job.save()
+    for job in old_config.executed_in_jobs.all():
+        job.analyzers_to_execute.remove(old_config)
+        job.analyzers_to_execute.add(new_config)
+        job.save()
 
-    for config in AnalyzerConfig.objects.filter(
+    old_config.delete()
+
+    new_config = AnalyzerConfig.objects.get(name="BoxJS_Scan_JavaScript")
+    new_config.name = "BoxJS"
+    new_config.save()
+    old_config = AnalyzerConfig.objects.get(name="BoxJS_Scan_JavaScript")
+    for param in old_config.parameters.all():
+        param.analyzer_config = new_config
+        param.save()
+    for visualizer in old_config.visualizers.all():
+        visualizer.analyzers.remove(old_config)
+        visualizer.analyzers.add(new_config)
+        visualizer.save()
+    for playbook in old_config.playbooks.all():
+        playbook.analyzers.remove(old_config)
+        playbook.analyzers.add(new_config)
+        playbook.save()
+    for job in old_config.requested_in_jobs.all():
+        job.analyzers_requested.remove(old_config)
+        job.analyzers_requested.add(new_config)
+        job.save()
+    for job in old_config.executed_in_jobs.all():
+        job.analyzers_to_execute.remove(old_config)
+        job.analyzers_to_execute.add(new_config)
+        job.save()
+    old_config.delete()
+
+    AnalyzerConfig.objects.filter(
         Q(python_module="darksearch.DarkSearchQuery")
         | Q(
             name__in=[
@@ -78,13 +111,12 @@ def migrate(apps, schema_editor):
                 "Anomali_Threatstream_PassiveDNS",
             ]
         )
-    ):
-        config.delete()
+    ).delete()
 
 
 def reverse_migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    for config in AnalyzerConfig.objects.filter(
+    AnalyzerConfig.objects.filter(
         Q(
             python_module__in=[
                 "cape_sandbox.CAPEsandbox",
@@ -100,11 +132,8 @@ def reverse_migrate(apps, schema_editor):
             ]
         )
         | Q(name="VirusTotal_v3_Get_File_And_Scan")
-    ):
-        config.maximum_tlp = TLP.GREEN
-        config.full_clean()
-        config.save()
-    for config in AnalyzerConfig.objects.filter(
+    ).update(maximum_tlp=TLP.GREEN.value)
+    AnalyzerConfig.objects.filter(
         python_module__in=[
             "dragonfly.DragonflyEmulation",
             "filescan.FileScanUpload",
@@ -113,22 +142,36 @@ def reverse_migrate(apps, schema_editor):
             "talos.Talos",
             "tor.Tor",
         ]
-    ):
-        config.maximum_tlp = TLP.AMBER
-        config.full_clean()
-        config.save()
-    for config in AnalyzerConfig.objects.filter(python_module="sublime.Sublime"):
-        config.maximum_tlp = TLP.RED
-        config.full_clean()
-        config.save()
-    for config in AnalyzerConfig.objects.filter(name="UnpacMe"):
-        config.name = "UnpacMe_EXE_Unpacker"
-        config.full_clean()
-        config.save()
-    for config in AnalyzerConfig.objects.filter(name="BoxJS"):
-        config.name = "BoxJS_Scan_JavaScript"
-        config.full_clean()
-        config.save()
+    ).update(maximum_tlp=TLP.AMBER.value)
+    AnalyzerConfig.objects.filter(python_module="sublime.Sublime").update(maximum_tlp=TLP.RED.value)
+    config = AnalyzerConfig.objects.get(name="UnpacMe")
+    config.name = "UnpacMe_EXE_Unpacker"
+    new_config = config.save()
+    old_config = AnalyzerConfig.objects.get(name="UnpacMe")
+    for param in old_config.parameters.all():
+        param.analyzer_config = new_config
+        param.save()
+    for visualizer in old_config.visualizers.all():
+        visualizer.analyzers.remove(old_config)
+        visualizer.analyzers.add(new_config)
+    for playbook in old_config.playbooks.all():
+        playbook.analyzers.remove(old_config)
+        playbook.analyzers.add(new_config)
+    old_config.delete()
+    config = AnalyzerConfig.objects.get(name="BoxJS")
+    config.name = "BoxJS_Scan_JavaScript"
+    new_config = config.save()
+    old_config = AnalyzerConfig.objects.get(name="BoxJS")
+    for param in old_config.parameters.all():
+        param.analyzer_config = new_config
+        param.save()
+    for visualizer in old_config.visualizers.all():
+        visualizer.analyzers.remove(old_config)
+        visualizer.analyzers.add(new_config)
+    for playbook in old_config.playbooks.all():
+        playbook.analyzers.remove(old_config)
+        playbook.analyzers.add(new_config)
+    old_config.delete()
 
 
 class Migration(migrations.Migration):
@@ -142,4 +185,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(migrate, reverse_migrate),
+
     ]

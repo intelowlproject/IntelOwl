@@ -10,7 +10,7 @@ def migrate(apps, schema_editor):
     pc.type = ["file"]
     pc.description = "Execute a static analysis"
     pc.disabled = False
-    pc.analyzers.set(["Rtf_Info", "APKiD", "Doc_Info", "ClamAV", "Cymru_Hash_Registry_Get_File", "OneNote_Info", "MalwareBazaar_Get_File", "YARAify_File_Search", "PDF_Info", "BoxJS_Scan_JavaScript", "HybridAnalysis_Get_File", "Yara", "OTX_Check_Hash", "Quark_Engine"])
+    pc.analyzers.set(["Rtf_Info", "APKiD", "Doc_Info", "ClamAV", "Cymru_Hash_Registry_Get_File", "OneNote_Info", "MalwareBazaar_Get_File", "YARAify_File_Search", "PDF_Info", "BoxJS", "HybridAnalysis_Get_File", "Yara", "OTX_Check_Hash", "Quark_Engine"])
     pc.full_clean()
     pc.save()
 

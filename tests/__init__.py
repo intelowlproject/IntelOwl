@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta, abstractmethod
+from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -108,9 +109,11 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
             status=AbstractReport.Status.FAILED, user=self.superuser
         )
         self.client.force_authenticate(self.superuser)
-        response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
-        )
+        with patch.object(_report.config, "is_runnable") as is_runnable:
+            is_runnable.return_value = True
+            response = self.client.patch(
+                f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
+            )
 
         self.assertEqual(response.status_code, 204)
         self.client.force_authenticate(self.user)

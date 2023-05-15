@@ -212,7 +212,7 @@ class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase)
         return "analyzer"
 
     def init_report(self, status: str, user) -> AnalyzerReport:
-        config = AnalyzerConfig.objects.get(name="MISP")
+        config = AnalyzerConfig.objects.get(name="Yara")
         _job = Job.objects.create(
             user=user,
             status=Job.Status.RUNNING,

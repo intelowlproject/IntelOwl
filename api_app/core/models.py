@@ -193,7 +193,7 @@ class Parameter(models.Model):
                             owner=None,
                             for_organization=False,
                         )[0]
-                    else:
+                    elif "api_key" in self.name:
                         return PluginConfig.objects.get_or_create(
                             value="test",
                             parameter=self,

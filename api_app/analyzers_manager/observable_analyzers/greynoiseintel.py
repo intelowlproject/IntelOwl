@@ -42,6 +42,8 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
                 raise AnalyzerRunException(
                     "Invalid API Version. Supported are: v2 (paid), v3 (community)"
                 )
+        # greynoise library does provide empty messages in case of these errors...
+        # so it's better to catch them and create custom management
         except RateLimitError as e:
             self.report.errors.append(e)
             self.report.save()

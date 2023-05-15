@@ -67,7 +67,10 @@ def migrate(apps, schema_editor):
     o = Model(**object)
     o.full_clean()
     o.save()
+    param_maps = {
+    }
     for param in params:
+        param_id = param.pop("id")
         for key in ["analyzer_config", "connector_config", "visualizer_config"]:
             if param[key]:
                 param[key] = o
@@ -75,8 +78,10 @@ def migrate(apps, schema_editor):
         par = Parameter(**param)
         par.full_clean()
         par.save()
+        param_maps[param_id] = par
     for value in values:
-        value["parameter"] = Parameter.objects.get(pk=value["parameter"])
+        parameter = param_maps[value["parameter"]]
+        value["parameter"] = parameter
         value = PluginConfig(**value)
         value.full_clean()
         value.save()

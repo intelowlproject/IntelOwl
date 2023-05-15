@@ -180,11 +180,26 @@ class Parameter(models.Model):
             except PluginConfig.DoesNotExist:
                 if settings.STAGE_CI:
                     if "url" in self.name:
-                        return "https://intelowl.com"
+                        return PluginConfig.objects.get_or_create(
+                            value="https://intelowl.com",
+                            parameter=self,
+                            owner=None,
+                            for_organization=False,
+                        )
                     elif "pdns_credentials" == self.name:
-                        return "user|pwd"
+                        return PluginConfig.objects.get_or_create(
+                            value="user|pwd",
+                            parameter=self,
+                            owner=None,
+                            for_organization=False,
+                        )
                     else:
-                        return "test"
+                        return PluginConfig.objects.get_or_create(
+                            value="test",
+                            parameter=self,
+                            owner=None,
+                            for_organization=False,
+                        )
 
                 raise RuntimeError(
                     "Unable to find a valid value for parameter"

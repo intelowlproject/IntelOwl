@@ -160,6 +160,7 @@ def migrate(apps, schema_editor):
         par.save()
         param_maps[param_id] = par
     for value in values:
+        value.pop("id")
         parameter = param_maps[value["parameter"]]
         value["parameter"] = parameter
         value = PluginConfig(**value)

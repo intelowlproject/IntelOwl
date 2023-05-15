@@ -14,7 +14,6 @@ from .. import CustomAPITestCase, PluginActionViewsetTestCase
 class AnalyzerConfigAPITestCase(CustomAPITestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
     URL = "/api/analyzer"
@@ -206,7 +205,6 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
 class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
     @property

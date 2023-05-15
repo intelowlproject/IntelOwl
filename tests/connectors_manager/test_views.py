@@ -12,7 +12,6 @@ from .. import CustomAPITestCase, PluginActionViewsetTestCase
 class ConnectorConfigAPITestCase(CustomAPITestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0003_connector_pluginconfig.json",
     ]
     URL = "/api/connector"
 
@@ -173,7 +172,6 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
 class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0003_connector_pluginconfig.json",
     ]
 
     @property

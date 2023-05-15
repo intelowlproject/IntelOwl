@@ -185,21 +185,21 @@ class Parameter(models.Model):
                             parameter=self,
                             owner=None,
                             for_organization=False,
-                        )
+                        )[0]
                     elif "pdns_credentials" == self.name:
                         return PluginConfig.objects.get_or_create(
                             value="user|pwd",
                             parameter=self,
                             owner=None,
                             for_organization=False,
-                        )
+                        )[0]
                     else:
                         return PluginConfig.objects.get_or_create(
                             value="test",
                             parameter=self,
                             owner=None,
                             for_organization=False,
-                        )
+                        )[0]
 
                 raise RuntimeError(
                     "Unable to find a valid value for parameter"

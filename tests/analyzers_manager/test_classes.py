@@ -19,7 +19,6 @@ class MockUpObservableAnalyzer(ObservableAnalyzer):
 class FileAnalyzerTestCase(CustomTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
     def _create_jobs(self):
@@ -135,7 +134,6 @@ class FileAnalyzerTestCase(CustomTestCase):
 class ObservableAnalyzerTestCase(CustomTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
     def test_post_init(self):

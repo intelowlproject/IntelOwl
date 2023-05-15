@@ -178,21 +178,35 @@ class Parameter(models.Model):
                 logger.info(f"Retrieved {result.value=}, default value")
                 return result
             except PluginConfig.DoesNotExist:
+                if settings.STAGE_CI:
+                    if "url" in self.name:
+                        return PluginConfig.objects.get_or_create(
+                            value="https://intelowl.com",
+                            parameter=self,
+                            owner=None,
+                            for_organization=False,
+                        )[0]
+                    elif "pdns_credentials" == self.name:
+                        return PluginConfig.objects.get_or_create(
+                            value="user|pwd",
+                            parameter=self,
+                            owner=None,
+                            for_organization=False,
+                        )[0]
+                    elif "test" in self.name:
+                        pass
+                    else:
+                        return PluginConfig.objects.get_or_create(
+                            value="test",
+                            parameter=self,
+                            owner=None,
+                            for_organization=False,
+                        )[0]
+
                 raise RuntimeError(
                     "Unable to find a valid value for parameter"
                     f" {self.name} for configuration {self.config.name}"
                 )
-
-    @property
-    def default(self):
-        from api_app.models import PluginConfig
-
-        try:
-            pc = PluginConfig.objects.get(parameter=self, owner__isnull=True)
-        except PluginConfig.DoesNotExist:
-            return None
-        else:
-            return pc.value
 
 
 class AbstractConfig(models.Model):

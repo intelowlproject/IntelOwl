@@ -293,6 +293,10 @@ Before upgrading, some important things should be checked by the administrator:
   * REMOVED `Strings_Info_Classic`. Please use `Strings_Info`
   * REMOVED `Strings_Info_ML`. Please use `Strings_Info` and set the parameter `rank_strings` to `True`
   * REMOVED all `Yara_Scan_<repo>` analyzers. They all went merged in the single `Yara` analyzer
+  * REMOVED `Darksearch_Query` analyzer because the service does not exist anymore. No substitute.
+  * REMOVED `UnpacMe_EXE_Unpacker`. Please use `UnpacMe`
+  * REMOVED `BoxJS_Scan_JavaScript`. Please use `BoxJS`
+  * REMOVED all `Anomali_Threatstream_<option>` analyzers. Now we have a single `Anomali_Threatstream` analyzer. Use the parameters to select the specific API you need.
 
 #### Updating to >=5.0.0 from a 3.x.x version
 This is not supported. Please perform a major upgrade once at a time.

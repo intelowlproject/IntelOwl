@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
-from api_app.models import Job
+from api_app.models import Job, PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -12,7 +12,6 @@ from .. import CustomAPITestCase, PluginActionViewsetTestCase
 class ConnectorConfigAPITestCase(CustomAPITestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0003_connector_pluginconfig.json",
     ]
     URL = "/api/connector"
 
@@ -71,6 +70,18 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
 
     def test_health_check(self):
         connector: ConnectorConfig = ConnectorConfig.objects.get(name="YETI")
+        pc1 = PluginConfig.objects.create(
+            parameter=connector.parameters.get(name="api_key_name"),
+            value="test",
+            for_organization=False,
+            owner=None,
+        )
+        pc2 = PluginConfig.objects.create(
+            parameter=connector.parameters.get(name="url_key_name"),
+            value="https://test",
+            for_organization=False,
+            owner=None,
+        )
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")
         self.assertEqual(response.status_code, 403)
 
@@ -80,6 +91,8 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
         result = response.json()
         self.assertIn("status", result)
         self.assertTrue(result["status"])
+        pc1.delete()
+        pc2.delete()
 
     def test_organization_disable(self):
         connector = "Slack"
@@ -173,7 +186,6 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
 class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0003_connector_pluginconfig.json",
     ]
 
     @property

@@ -57,9 +57,15 @@ class ParameterInlineForm(forms.ModelForm):
         fields = ParameterAdminView.fields
 
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get("instance", None)
+        instance: Parameter = kwargs.get("instance", None)
         if instance:
-            kwargs["initial"] = {"default": instance.default}
+            try:
+                default = PluginConfig.objects.get(
+                    parameter=instance, owner__isnull=True
+                )
+            except PluginConfig.DoesNotExist:
+                default = None
+            kwargs["initial"] = {"default": default}
         super().__init__(*args, **kwargs)
 
     def save(self, commit: bool = ...):

@@ -103,17 +103,32 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         self.assertEqual(response.status_code, 404)
 
     def test_retry_204(self):
+        from api_app.models import PluginConfig
+
         # create new report with status "FAILED"
         _report = self.init_report(
             status=AbstractReport.Status.FAILED, user=self.superuser
         )
         self.client.force_authenticate(self.superuser)
+        pcs = []
+        for param in _report.config.parameters.filter(required=True):
+            if "url" in param.name:
+                value = "https://intelowl"
+            else:
+                value = "test"
+            pcs.append(
+                PluginConfig.objects.create(
+                    value=value, parameter=param, for_organization=False, owner=None
+                )
+            )
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
         )
 
         self.assertEqual(response.status_code, 204)
         self.client.force_authenticate(self.user)
+        for pc in pcs:
+            pc.delete()
 
     def test_retry_400(self):
         # create a new report whose status is not "FAILED"/"KILLED"

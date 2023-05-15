@@ -14,7 +14,6 @@ from .. import CustomAPITestCase, PluginActionViewsetTestCase
 class AnalyzerConfigAPITestCase(CustomAPITestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
     URL = "/api/analyzer"
@@ -206,7 +205,6 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
 class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
-        "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
     @property
@@ -214,7 +212,7 @@ class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase)
         return "analyzer"
 
     def init_report(self, status: str, user) -> AnalyzerReport:
-        config = AnalyzerConfig.objects.get(name="MISP")
+        config = AnalyzerConfig.objects.get(name="HaveIBeenPwned")
         _job = Job.objects.create(
             user=user,
             status=Job.Status.RUNNING,

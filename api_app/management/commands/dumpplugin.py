@@ -67,11 +67,22 @@ def migrate(apps, schema_editor):
     o = Model(**object)
     o.full_clean()
     o.save()
+    param_maps = {
+    }
     for param in params:
+        param_id = param.pop("id")
+        for key in ["analyzer_config", "connector_config", "visualizer_config"]:
+            if param[key]:
+                param[key] = o
+                break    
         par = Parameter(**param)
         par.full_clean()
         par.save()
+        param_maps[param_id] = par
     for value in values:
+        value.pop("id")
+        parameter = param_maps[value["parameter"]]
+        value["parameter"] = parameter
         value = PluginConfig(**value)
         value.full_clean()
         value.save()
@@ -83,7 +94,7 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     python_path = object.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    Model.objects.get(name=obj["name"]).delete()
+    Model.objects.get(name=object["name"]).delete()
 """
 
     def _body_template(self, app):

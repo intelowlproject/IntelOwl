@@ -6,13 +6,13 @@ This page includes the most important things to know and understand when using I
 - [Organizations and User Management](#organizations-and-user-management)
   - [Multi Tenancy](#multi-tenancy)
   - [Registration](#registration)
-- [TLP Support](#tlp-support)
 - [Plugins](#plugins)
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
   - [Visualizers](#visualizers)
   - [Playbooks](#playbooks)
+- [TLP Support](#tlp-support)
 
 ## Client
 
@@ -89,22 +89,12 @@ In a development environment the emails that would be sent are written to the st
 #### Recaptcha configuration
 The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
 
-If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE), then you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `docker/env_template.js` file.
+If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE).
+
+Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY_IO_PUBLIC` value in the `env_file_app` file. Plus you would need to remember to set to `True` the `PUBLIC_DEPLOYMENT` variable too.
+
+Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `docker/env_template.js` file.
 In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
-
-
-## TLP Support
-
-IntelOwl supports the **Traffic Light Protocol** (TLP) to facilitate sharing of job analysis results.
-
-Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
-
-1. `CLEAR`: no restriction (`WHITE` was replaced by `CLEAR` in TLP v2.0, but `WHITE` is supported for retrocompatibility)
-2. `GREEN`: disable analyzers that could impact privacy
-3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
-4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
-
-These indicators when used with `maximum_tlp` (option available in connectors), give you the control of what information is shared to the external platforms.
 
 ## Plugins
 
@@ -197,7 +187,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 - `SublimeSecurity`: Analyze an Email with [Sublime Security](https://docs.sublimesecurity.com/docs) live flow
 - `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
-- `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
+- `UnpacMe`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 - `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
 - `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
 - `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
@@ -309,7 +299,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
 * `CRXcavator`: scans a chrome extension against crxcavator.io
 * `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
-* `Darksearch_Query`: Search a keyword against darksearch.io's search API. It's possible to make complex queries using boolean logic. For example, `OSINT AND CTI OR intelowl NOT hack` is a valid observable name.
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 * `EmailRep`: search an email address on [emailrep.io](https://emailrep.io)
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
@@ -497,3 +486,20 @@ Those are the only ways to do that for now. We are planning to provide more easi
 ---
 
 To contribute to the project, see [Contribute](./Contribute.md).
+
+## TLP Support
+The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 
+
+IntelOwl is not a threat intel sharing platform, like the [MISP platform](https://www.misp-project.org/). However, IntelOwl is able to share analysis results to external platforms (via [Connectors](#connectors)) and to send possible privacy related information to external services (via [Analyzers](#analyzers)).
+
+This is why IntelOwl does support a customized version of the **Traffic Light Protocol** (TLP): to allow the user to have a better knowledge of how their data are being shared.
+
+Every [Analyzer](#analyzers) and [Connector](#connectors) can be configured with a `maximum_tlp` value.
+Based on that value, IntelOwl understands if the specific plugin is allowed or not to run (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN` only)
+
+These is how every available TLP value behaves once selected for an analysis execution:
+1. `CLEAR`: no restriction (`WHITE` was replaced by `CLEAR` in TLP v2.0, but `WHITE` is supported for retrocompatibility)
+2. `GREEN`: disable analyzers that could impact privacy
+3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
+4. `RED` (default): disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
+

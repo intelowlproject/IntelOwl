@@ -74,21 +74,23 @@ class DNS(Visualizer):
             logger.debug(f"{analyzer_report.config.python_complete_path=}")
             logger.debug(f"{analyzer_report=}")
             if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
+                disable_element = not analyzer_report.report["resolutions"]
                 first_level_elements.append(
                     self.VList(
                         name=self.Base(
-                            value=f"{printable_analyzer_name} "
-                            f"({len(analyzer_report.report['resolutions'])})"
+                            value=f"{printable_analyzer_name}", disable=disable_element
                         ),
                         value=[
                             self.Base(
                                 value=dns_resolution["data"]
                                 if self._job.observable_classification
                                 == ObservableClassification.DOMAIN
-                                else dns_resolution
+                                else dns_resolution,
+                                disable=False,
                             )
                             for dns_resolution in analyzer_report.report["resolutions"]
                         ],
+                        disable=disable_element,
                         open=True,
                     )
                 )
@@ -100,7 +102,7 @@ class DNS(Visualizer):
                     )
                 )
 
-        page = self.Page()
+        page = self.Page(name="DNS")
         page.add_level(
             level=1,
             horizontal_list=self.HList(value=first_level_elements),

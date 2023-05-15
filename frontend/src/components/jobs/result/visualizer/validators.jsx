@@ -11,6 +11,29 @@ function parseBool(value) {
   return !!value;
 }
 
+function parseSize(value) {
+  if (
+    [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "auto",
+    ].includes(value)
+  ) {
+    return `col-${value}`;
+  }
+  return "col-auto";
+}
+
 function parseComponentType(value) {
   if (
     [
@@ -62,18 +85,20 @@ function parseElementList(rawElementList) {
 
 // parse a single element
 function parseElementFields(rawElement) {
-  // every component has the "type" field
-  const validatedFields = { type: parseComponentType(rawElement.type) };
-  // HList doesn't have this field, don't pass it even if it wouldn't be used
-  if (rawElement.disable !== undefined) {
-    validatedFields.disable = parseBool(rawElement.disable);
-  }
+  // HList and Title don't have disable field, they will not be used
+  const validatedFields = {
+    type: parseComponentType(rawElement.type),
+    disable: parseBool(rawElement.disable),
+    size: parseSize(rawElement.size),
+  };
 
   // validation for the elements
   switch (validatedFields.type) {
     case VisualizerComponentType.BOOL: {
       validatedFields.name = rawElement.name;
       validatedFields.value = parseBool(rawElement.value);
+      validatedFields.icon = rawElement.icon;
+      validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
       validatedFields.activeColor = parseColor(rawElement.color, "danger");

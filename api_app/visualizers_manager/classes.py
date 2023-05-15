@@ -3,7 +3,7 @@
 import abc
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Type, Union
+from typing import Any, Dict, List, Tuple, Type, Union
 
 from django.conf import settings
 from django.db.models import QuerySet
@@ -13,6 +13,7 @@ from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,
     VisualizableIcon,
+    VisualizableSize,
 )
 from api_app.visualizers_manager.exceptions import (
     VisualizerConfigurationException,
@@ -24,12 +25,15 @@ logger = logging.getLogger(__name__)
 
 
 class VisualizableObject:
-    def __init__(self, disable: bool = True):
+    def __init__(
+        self, size: VisualizableSize = VisualizableSize.S_AUTO, disable: bool = True
+    ):
+        self.size = size
         self.disable = disable
 
     @property
     def attributes(self) -> List[str]:
-        return ["disable"]
+        return ["size", "disable"]
 
     @property
     @abc.abstractmethod
@@ -58,6 +62,7 @@ class VisualizableBase(VisualizableObject):
     def __init__(
         self,
         value: Any = "",
+        size: VisualizableSize = VisualizableSize.S_AUTO,
         color: VisualizableColor = VisualizableColor.TRANSPARENT,
         link: str = "",
         # you can use an element of the enum or an iso3166 alpha2 code (for flags)
@@ -67,7 +72,7 @@ class VisualizableBase(VisualizableObject):
         classname: str = "",
         disable: bool = True,
     ):
-        super().__init__(disable)
+        super().__init__(size, disable)
         self.value = value
         self.color = color
         self.link = link
@@ -101,9 +106,10 @@ class VisualizableTitle(VisualizableObject):
         self,
         title: VisualizableBase,
         value: VisualizableBase,
+        size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
     ):
-        super().__init__(disable)
+        super().__init__(size, disable)
         self.title = title
         self.value = value
         if self.disable != self.title.disable or self.disable != self.value.disable:
@@ -129,10 +135,11 @@ class VisualizableBool(VisualizableBase):
         name: str,
         value: bool,
         *args,
+        size: VisualizableSize = VisualizableSize.S_AUTO,
         color: VisualizableColor = VisualizableColor.DANGER,
         **kwargs,
     ):
-        super().__init__(*args, color=color, value=value, **kwargs)
+        super().__init__(*args, size=size, color=color, value=value, **kwargs)
         self.name = name
 
     def __bool__(self):
@@ -148,10 +155,8 @@ class VisualizableBool(VisualizableBase):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        # bool does not support icon, bold and italic at the moment
-        result.pop("icon", None)
+        # bool does not support bold because the default is bold
         result.pop("bold", None)
-        result.pop("italic", None)
         return result
 
 
@@ -174,9 +179,11 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         open: bool = False,  # noqa
         max_elements_number: int = -1,
         add_count_in_title: bool = True,
+        size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
     ):
         super().__init__(
+            size=size,
             disable=disable,
         )
         if add_count_in_title:
@@ -191,9 +198,8 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def attributes(self) -> List[str]:
         return super().attributes + ["name", "open", "value"]
 
-    @property
-    def type(self) -> str:
-        return "vertical_list"
+    def __bool__(self):
+        return True
 
     @property
     def more_elements_object(self) -> VisualizableBase:
@@ -209,6 +215,10 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
                 result["values"].append(self.more_elements_object.to_dict())
 
         return result
+
+    @property
+    def type(self) -> str:
+        return "vertical_list"
 
 
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
@@ -231,18 +241,22 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
+        # currently hlist doesn't support disable and size
+        result.pop("disable")
+        result.pop("size")
         return result
 
 
 class VisualizablePage:
-    def __init__(self):
+    def __init__(self, name: str = None):
         self._levels = {}
+        self.name = name
 
     def add_level(self, level: int, horizontal_list: VisualizableHorizontalList):
         self._levels[level] = horizontal_list
 
-    def to_dict(self) -> List[Dict]:
-        return [
+    def to_dict(self) -> Tuple[str, List[Dict]]:
+        return self.name, [
             {"level": level, "elements": hl.to_dict()}
             for level, hl in self._levels.items()
         ]
@@ -254,6 +268,7 @@ class VisualizablePage:
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
+    Size = VisualizableSize
     Color = VisualizableColor
     Icon = VisualizableIcon
     Alignment = VisualizableAlignment
@@ -308,7 +323,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
                 f"Report has not correct type: {type(self.report.report)}"
             )
         for elem in content:
-            if not isinstance(elem, list):
+            if not isinstance(elem, tuple) or not isinstance(elem[1], list):
                 raise VisualizerRunException(
                     f"Report Page has not correct type: {type(elem)}"
                 )
@@ -318,8 +333,10 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
                 report = self.report
             else:
                 report = self.copy_report()
-            report.report = page
-            report.save(update_fields=["report"])
+            name, content = page
+            report.name = name
+            report.report = content
+            report.save()
 
     def after_run(self):
         super().after_run()

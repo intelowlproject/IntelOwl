@@ -26,7 +26,7 @@ class Yara(Visualizer):
             for match in matches
             if match.get("match", None)
         ]
-        page1 = self.Page()
+        page1 = self.Page(name="Yara first page")
         h1 = self.HList(
             value=[
                 self.Title(
@@ -53,7 +53,7 @@ class Yara(Visualizer):
             ]
         )
         logger.debug(h2.to_dict())
-        page2 = self.Page()
+        page2 = self.Page(name="Yara second page")
         page2.add_level(level=1, horizontal_list=h1)
         page2.add_level(level=2, horizontal_list=h2)
         logger.debug(page1)

@@ -178,7 +178,7 @@ class Parameter(models.Model):
                 logger.info(f"Retrieved {result.value=}, default value")
                 return result
             except PluginConfig.DoesNotExist:
-                if settings.STAGE_CI or True:
+                if settings.STAGE_CI:
                     if "url" in self.name:
                         return PluginConfig.objects.get_or_create(
                             value="https://intelowl.com",

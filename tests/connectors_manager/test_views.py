@@ -70,8 +70,18 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
 
     def test_health_check(self):
         connector: ConnectorConfig = ConnectorConfig.objects.get(name="YETI")
-        pc1 = PluginConfig.objects.create(parameter=connector.parameters.get(name="api_key_name"), value="test", for_organization=False, owner=None)
-        pc2 = PluginConfig.objects.create(parameter=connector.parameters.get(name="url_key_name"), value="https://test", for_organization=False, owner=None)
+        pc1 = PluginConfig.objects.create(
+            parameter=connector.parameters.get(name="api_key_name"),
+            value="test",
+            for_organization=False,
+            owner=None,
+        )
+        pc2 = PluginConfig.objects.create(
+            parameter=connector.parameters.get(name="url_key_name"),
+            value="https://test",
+            for_organization=False,
+            owner=None,
+        )
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")
         self.assertEqual(response.status_code, 403)
 

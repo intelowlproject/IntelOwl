@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('analyzers_manager', '0023_params'),
+        ('playbooks_manager', '0005_static_analysis'),
     ]
 
     operations = [

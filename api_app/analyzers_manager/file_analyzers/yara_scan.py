@@ -319,7 +319,7 @@ class YaraScan(FileAnalyzer):
                 analyzer_config=self._config,
                 is_secret=True,
                 name="private_repositories",
-            ).get_first_value()
+            ).get_first_value(self._job.user)
             if valid_value.for_organization:
                 if self._job.user.has_membership():
                     owner = (

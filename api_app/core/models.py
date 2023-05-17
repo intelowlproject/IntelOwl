@@ -344,7 +344,11 @@ class AbstractConfig(models.Model):
             if param.name in job.get_config_runtime_configuration(self):
                 result[param] = job.get_config_runtime_configuration(self)[param.name]
             else:
-                result[param] = param.get_first_value(job.user).value
+                try:
+                    result[param] = param.get_first_value(job.user).value
+                except RuntimeError as e:
+                    if param.required:
+                        raise e
         return result
 
     def get_signature(self, job):

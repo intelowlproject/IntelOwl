@@ -60,11 +60,11 @@ class ParameterInlineForm(forms.ModelForm):
         instance: Parameter = kwargs.get("instance", None)
         if instance:
             try:
-                default = PluginConfig.objects.get(
-                    parameter=instance, owner__isnull=True
-                )
+                pc = PluginConfig.objects.get(parameter=instance, owner__isnull=True)
             except PluginConfig.DoesNotExist:
                 default = None
+            else:
+                default = pc.value
             kwargs["initial"] = {"default": default}
         super().__init__(*args, **kwargs)
 

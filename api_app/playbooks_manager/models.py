@@ -11,7 +11,7 @@ from api_app.validators import validate_runtime_configuration
 
 
 class PlaybookConfig(models.Model):
-    name = models.CharField(max_length=30, null=False, unique=True, primary_key=True)
+    name = models.CharField(max_length=100, null=False, unique=True, primary_key=True)
     type = ChoiceArrayField(
         models.CharField(choices=AllTypes.choices, null=False, max_length=50)
     )

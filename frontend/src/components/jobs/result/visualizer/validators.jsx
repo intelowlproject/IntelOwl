@@ -90,6 +90,7 @@ function parseElementFields(rawElement) {
     type: parseComponentType(rawElement.type),
     disable: parseBool(rawElement.disable),
     size: parseSize(rawElement.size),
+    alignment: parseAlignment(rawElement.alignment),
   };
 
   // validation for the elements
@@ -100,19 +101,16 @@ function parseElementFields(rawElement) {
       validatedFields.icon = rawElement.icon;
       validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.link = rawElement.link;
-      validatedFields.className = rawElement.classname;
       validatedFields.activeColor = parseColor(rawElement.color, "danger");
       break;
     }
     case VisualizerComponentType.HLIST: {
       validatedFields.values = parseElementList(rawElement.values);
-      validatedFields.alignment = parseAlignment(rawElement.alignment);
       break;
     }
     case VisualizerComponentType.VLIST: {
       validatedFields.name = parseElementFields(rawElement.name);
       validatedFields.values = parseElementList(rawElement.values);
-      validatedFields.className = rawElement.classname;
       validatedFields.startOpen = parseBool(rawElement.open);
       break;
     }
@@ -129,7 +127,6 @@ function parseElementFields(rawElement) {
       validatedFields.link = rawElement.link;
       validatedFields.bold = parseBool(rawElement.bold);
       validatedFields.italic = parseBool(rawElement.italic);
-      validatedFields.className = rawElement.classname;
       break;
     }
   }

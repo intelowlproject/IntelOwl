@@ -7,11 +7,17 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.fields import ChoiceArrayField
 from api_app.models import default_runtime
-from api_app.validators import validate_runtime_configuration
+from api_app.validators import plugin_name_validator, validate_runtime_configuration
 
 
 class PlaybookConfig(models.Model):
-    name = models.CharField(max_length=100, null=False, unique=True, primary_key=True)
+    name = models.CharField(
+        max_length=100,
+        null=False,
+        unique=True,
+        primary_key=True,
+        validators=[plugin_name_validator],
+    )
     type = ChoiceArrayField(
         models.CharField(choices=AllTypes.choices, null=False, max_length=50)
     )

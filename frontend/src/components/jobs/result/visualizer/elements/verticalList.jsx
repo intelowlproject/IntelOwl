@@ -16,9 +16,9 @@ import {
 
 export function VerticalListVisualizer({
   size,
+  alignment,
   name,
   values,
-  className,
   startOpen,
   disable,
 }) {
@@ -27,15 +27,16 @@ export function VerticalListVisualizer({
 
   return (
     <div className={`${size}`}>
-      <Card className={`${className} ${disable ? "opacity-50" : ""}`}>
+      <Card className={`${disable ? "opacity-50" : ""}`}>
         <CardTitle className="p-1 mb-0">
           <Button
             className="p-0 w-100 px-1"
             onClick={toggleList}
             color={name.props.color.replace("bg-", "")}
-            disabled={disable}
           >
-            <div className="d-flex align-items-center">
+            <div
+              className={`d-flex align-items-center justify-content-${alignment}`}
+            >
               {isListOpen ? (
                 <IoIosArrowDropupCircle className="me-1" />
               ) : (
@@ -68,13 +69,13 @@ VerticalListVisualizer.propTypes = {
   size: PropTypes.string.isRequired,
   name: PropTypes.element.isRequired,
   values: PropTypes.arrayOf(PropTypes.element).isRequired,
-  className: PropTypes.string,
+  alignment: PropTypes.string,
   startOpen: PropTypes.bool,
   disable: PropTypes.bool,
 };
 
 VerticalListVisualizer.defaultProps = {
-  className: "",
+  alignment: "",
   startOpen: false,
   disable: false,
 };

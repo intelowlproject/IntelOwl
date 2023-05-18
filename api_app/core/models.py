@@ -14,7 +14,7 @@ from django.utils.module_loading import import_string
 from kombu import uuid
 
 from api_app.core.choices import ParamTypes, Status
-from api_app.validators import validate_config
+from api_app.validators import plugin_name_validator, validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
@@ -213,7 +213,13 @@ class AbstractConfig(models.Model):
 
     parameters: Manager
 
-    name = models.CharField(max_length=50, null=False, unique=True, primary_key=True)
+    name = models.CharField(
+        max_length=50,
+        null=False,
+        unique=True,
+        primary_key=True,
+        validators=[plugin_name_validator],
+    )
     python_module = models.CharField(null=False, max_length=120, db_index=True)
     description = models.TextField(null=False)
     disabled = models.BooleanField(null=False, default=False)

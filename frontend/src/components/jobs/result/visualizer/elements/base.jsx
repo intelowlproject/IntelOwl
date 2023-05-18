@@ -3,13 +3,13 @@ import PropTypes from "prop-types";
 
 export function BaseVisualizer({
   size,
+  alignment,
   value,
   icon,
   color,
   link,
   bold,
   italic,
-  className,
   disable,
 }) {
   let coreComponent = (
@@ -31,9 +31,9 @@ export function BaseVisualizer({
   }
   return (
     <div
-      className={`${size} small d-flex align-items-center text-center justify-content-center ${
+      className={`${size} small d-flex align-items-center text-${alignment} justify-content-${alignment} ${
         disable ? "opacity-25" : ""
-      } ${className} ${color}`}
+      } ${color}`}
     >
       {coreComponent}
     </div>
@@ -43,21 +43,21 @@ export function BaseVisualizer({
 BaseVisualizer.propTypes = {
   size: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
+  alignment: PropTypes.string,
   icon: PropTypes.string,
   color: PropTypes.string,
   link: PropTypes.string,
   bold: PropTypes.bool,
   italic: PropTypes.bool,
-  className: PropTypes.string,
   disable: PropTypes.bool,
 };
 
 BaseVisualizer.defaultProps = {
   icon: "",
+  alignment: "center",
   color: "",
   link: "",
   bold: false,
   italic: false,
-  className: "",
   disable: false,
 };

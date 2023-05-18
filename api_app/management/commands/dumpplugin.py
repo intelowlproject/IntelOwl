@@ -57,6 +57,15 @@ class Command(BaseCommand):
         return obj_data, params_data, values_data
 
     @staticmethod
+    def _imports() -> str:
+        return """
+from django.db import migrations
+from django.db.models.fields.related_descriptors import ManyToManyDescriptor
+
+
+        """
+
+    @staticmethod
     def _migrate_template():
         return """
 def migrate(apps, schema_editor):
@@ -64,9 +73,19 @@ def migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")    
     python_path = object.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    o = Model(**object)
+    mtm, no_mtm = {}, {}
+    for field, value in object.items():
+        if type(getattr(Model, field)) == ManyToManyDescriptor:
+            mtm[field] = value
+        else:
+            no_mtm[field] = value
+            
+    o = Model(**no_mtm)
     o.full_clean()
     o.save()
+    for field, value in mtm.items():
+        attribute = getattr(o, field)
+        attribute.set(value)
     param_maps = {
     }
     for param in params:
@@ -99,8 +118,6 @@ def reverse_migrate(apps, schema_editor):
 
     def _body_template(self, app):
         return """
-from django.db import migrations
-
 
 class Migration(migrations.Migration):
 
@@ -129,16 +146,19 @@ class Migration(migrations.Migration):
             obj, serializer_class
         )
         return """
-object = {0}
+{0}
+        
+object = {1}
 
-params = {1}
+params = {2}
 
-values = {2}
+values = {3}
 
-{3}
 {4}
 {5}
-        """.format(
+{6}
+        """.format(  # noqa
+            self._imports(),
             str(json.loads(json.dumps(obj_data))),
             str(json.loads(json.dumps(param_data))),
             str(json.loads(json.dumps(values_data))),
@@ -160,9 +180,13 @@ values = {2}
 
     @staticmethod
     def _save_file(name_file, content, app):
-        with open(
-            "api_app" / PosixPath(app) / "migrations" / name_file, "w", encoding="utf-8"
-        ) as f:
+        path = "api_app" / PosixPath(app) / "migrations" / name_file
+        if path.exists():
+            raise RuntimeError(
+                f"Migration {path} already exists."
+                f" Please apply migration before create a new one"
+            )
+        with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
     def handle(self, *args, **options):
@@ -182,3 +206,6 @@ values = {2}
         content = self._migration_file(obj, serializer_class, app)
         name_file = self._name_file(obj, app)
         self._save_file(name_file, content, app)
+        self.stdout.write(
+            self.style.SUCCESS(f"Migration {name_file} created with success")
+        )

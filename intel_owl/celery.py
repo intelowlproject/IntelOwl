@@ -157,6 +157,16 @@ app.conf.beat_schedule = {
         },
     },
     # execute every 6 hours
+    "phishing_army_updater": {
+        "task": "intel_owl.tasks.update",
+        "schedule": crontab(minute=5, hour="*/6"),
+        "args": ["phishing_army.PhishingArmy"],
+        "options": {
+            "queue": get_queue_name(DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
+    # execute every 6 hours
     "talos_updater": {
         "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=5, hour="*/6"),

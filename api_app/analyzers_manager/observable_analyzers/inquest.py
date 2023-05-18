@@ -47,6 +47,7 @@ class InQuest(ObservableAnalyzer):
 
     def run(self):
         result = {}
+        link = ""
         headers = {"Content-Type": "application/json"}
         # optional API key
         if hasattr(self, "_api_key_name"):
@@ -59,6 +60,7 @@ class InQuest(ObservableAnalyzer):
             self.report.errors.append(warning)
 
         if self.inquest_analysis == "dfi_search":
+            link = "dfi"
             if self.observable_classification == self.ObservableTypes.HASH:
                 uri = (
                     f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
@@ -91,9 +93,11 @@ class InQuest(ObservableAnalyzer):
 
         elif self.inquest_analysis == "iocdb_search":
             uri = f"/api/iocdb/search?keyword={self.observable_name}"
+            link = "iocdb"
 
         elif self.inquest_analysis == "repdb_search":
             uri = f"/api/repdb/search?keyword={self.observable_name}"
+            link = "repdb"
 
         else:
             raise AnalyzerConfigurationException(
@@ -116,6 +120,7 @@ class InQuest(ObservableAnalyzer):
         if self.generic_identifier_mode == "auto":
             result["type_of_generic"] = self.type_of_generic()
 
+        result["link"] = f"https://labs.inquest.net/{link}"
         return result
 
     @classmethod

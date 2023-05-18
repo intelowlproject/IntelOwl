@@ -183,6 +183,7 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
             "tor.Tor",
             "yara_scan.YaraScan",
             "quark_engine.QuarkEngine",
+            "phishing_army.PhishingArmy",
         ]:
             update(python_module, queue=queue)
 

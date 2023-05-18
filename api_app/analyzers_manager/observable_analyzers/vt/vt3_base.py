@@ -226,6 +226,8 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
                 observable_name, relationships_requested, uri, result
             )
 
+        result["link"] = f"https://www.virustotal.com/gui/{obs_clfn}/{observable_name}"
+
         return result
 
     def _vt_scan_file(self, md5: str, rescan_instead: bool = False) -> dict:

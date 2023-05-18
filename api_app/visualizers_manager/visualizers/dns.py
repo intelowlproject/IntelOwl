@@ -9,12 +9,6 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.
 from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.dns0_eu_malicious_detector import (  # noqa: E501
     DNS0EUMaliciousDetector,
 )
-from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.google_webrisk import (  # noqa: E501
-    WebRisk,
-)
-from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.googlesf import (  # noqa: E501
-    GoogleSF,
-)
 from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.quad9_malicious_detector import (  # noqa: E501
     Quad9MaliciousDetector,
 )
@@ -57,8 +51,6 @@ class DNS(Visualizer):
     def second_level_analyzers(cls) -> List[str]:
         return [  # noqa
             CloudFlareMaliciousDetector.python_module,
-            GoogleSF.python_module,
-            WebRisk.python_module,
             DNS0EUMaliciousDetector.python_module,
             Quad9MaliciousDetector.python_module,
         ]
@@ -102,6 +94,7 @@ class DNS(Visualizer):
                     )
                 )
 
+        sorted(first_level_elements, key=lambda x: x.name)
         page = self.Page(name="DNS")
         page.add_level(
             level=1,

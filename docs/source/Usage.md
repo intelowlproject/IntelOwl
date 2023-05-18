@@ -257,6 +257,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `Phishstats`: Search [PhishStats API](https://phishstats.info/) to determine if an IP/URL/domain is malicious.
 * `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
+* `PhishingArmy`: Search an observable in the [PhishingArmy](https://phishing.army/) blocklist
 * `Pulsedive`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
 * `Quad9_Malicious_Detector`: Leverages Quad9 DoH to check if a domain is related to malware

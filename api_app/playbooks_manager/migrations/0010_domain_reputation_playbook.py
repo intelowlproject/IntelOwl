@@ -27,7 +27,7 @@ objects = [
                 "CloudFlare_Malicious_Detector",
                 "URLhaus",
                 "VirusTotal_v3_Get_Observable",
-                "Phishstats",
+                "PhishingArmy",
                 "InQuest_REPdb",
                 "GoogleSafebrowsing",
             ],

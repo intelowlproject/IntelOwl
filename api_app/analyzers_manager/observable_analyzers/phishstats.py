@@ -27,9 +27,9 @@ class PhishStats(ObservableAnalyzer):
             try:
                 IPv4Address(to_analyze_observable_name)
             except AddressValueError:
-                to_analyze_observable_classification = self.ObservableTypes.IP
-            else:
                 to_analyze_observable_classification = self.ObservableTypes.DOMAIN
+            else:
+                to_analyze_observable_classification = self.ObservableTypes.IP
 
         if to_analyze_observable_classification == self.ObservableTypes.IP:
             endpoint = (

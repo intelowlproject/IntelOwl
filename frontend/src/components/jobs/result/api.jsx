@@ -91,7 +91,7 @@ export async function saveJobAsPlaybook(values) {
   const data = {
     name: values.name,
     description: values.description,
-    job_id: values.jobId,
+    job: values.jobId,
   };
   try {
     const response = await axios.post(`${API_BASE_URI}/playbook`, data);

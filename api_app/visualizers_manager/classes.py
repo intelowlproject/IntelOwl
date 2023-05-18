@@ -26,14 +26,18 @@ logger = logging.getLogger(__name__)
 
 class VisualizableObject:
     def __init__(
-        self, size: VisualizableSize = VisualizableSize.S_AUTO, disable: bool = True
+        self,
+        size: VisualizableSize = VisualizableSize.S_AUTO,
+        alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
+        disable: bool = True,
     ):
         self.size = size
+        self.alignment = alignment
         self.disable = disable
 
     @property
     def attributes(self) -> List[str]:
-        return ["size", "disable"]
+        return ["size", "alignment", "disable"]
 
     @property
     @abc.abstractmethod
@@ -63,6 +67,7 @@ class VisualizableBase(VisualizableObject):
         self,
         value: Any = "",
         size: VisualizableSize = VisualizableSize.S_AUTO,
+        alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         color: VisualizableColor = VisualizableColor.TRANSPARENT,
         link: str = "",
         # you can use an element of the enum or an iso3166 alpha2 code (for flags)
@@ -72,7 +77,7 @@ class VisualizableBase(VisualizableObject):
         classname: str = "",
         disable: bool = True,
     ):
-        super().__init__(size, disable)
+        super().__init__(size, alignment, disable)
         self.value = value
         self.color = color
         self.link = link
@@ -106,10 +111,11 @@ class VisualizableTitle(VisualizableObject):
         self,
         title: VisualizableBase,
         value: VisualizableBase,
+        alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
     ):
-        super().__init__(size, disable)
+        super().__init__(size, alignment, disable)
         self.title = title
         self.value = value
         if self.disable != self.title.disable or self.disable != self.value.disable:
@@ -157,6 +163,8 @@ class VisualizableBool(VisualizableBase):
         result = super().to_dict()
         # bool does not support bold because the default is bold
         result.pop("bold", None)
+        # bool does not support alignment: it's a stand alone component
+        result.pop("alignment", None)
         return result
 
 
@@ -179,11 +187,13 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         open: bool = False,  # noqa
         max_elements_number: int = -1,
         add_count_in_title: bool = True,
+        alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
     ):
         super().__init__(
             size=size,
+            alignment=alignment,
             disable=disable,
         )
         if add_count_in_title:
@@ -227,13 +237,12 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
         value: List[VisualizableObject],
         alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
     ):
-        super().__init__(disable=False)
+        super().__init__(alignment=alignment, disable=False)
         self.value = value
-        self.alignment = alignment
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["value", "alignment"]
+        return super().attributes + ["value"]
 
     @property
     def type(self) -> str:

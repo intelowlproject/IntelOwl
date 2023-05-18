@@ -31,7 +31,6 @@ export function convertToElement(element) {
           name={element.name}
           value={element.value}
           link={element.link}
-          className={element.className}
           activeColor={element.activeColor}
           disable={element.disable}
           icon={getIcon(element.icon)}
@@ -59,7 +58,7 @@ export function convertToElement(element) {
           values={element.values.map((additionalElement) =>
             convertToElement(additionalElement)
           )}
-          className={element.className}
+          alignment={element.alignment}
           startOpen={element.startOpen}
           disable={element.disable}
         />
@@ -70,6 +69,7 @@ export function convertToElement(element) {
       visualizerElement = (
         <TitleVisualizer
           size={element.size}
+          alignment={element.alignment}
           title={convertToElement(element.title)}
           value={convertToElement(element.value)}
         />
@@ -80,13 +80,13 @@ export function convertToElement(element) {
       visualizerElement = (
         <BaseVisualizer
           size={element.size}
+          alignment={element.alignment}
           value={element.value}
           icon={getIcon(element.icon)}
           color={element.color}
           link={element.link}
           bold={element.bold}
           italic={element.italic}
-          className={element.className}
           disable={element.disable}
         />
       );

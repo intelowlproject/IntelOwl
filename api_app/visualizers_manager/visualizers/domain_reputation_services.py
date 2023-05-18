@@ -33,114 +33,134 @@ class DomainReputationServices(Visualizer):
         analyzer_report = self.analyzer_reports().get(
             config__name="VirusTotal_v3_Get_Observable"
         )
-        hits = (
-            analyzer_report.report.get("data", {})
-            .get("total_votes", {})
-            .get("malicious", 0)
-        )
-        virustotal_report = self.Title(
-            self.Base(
-                value="VirusTotal",
-                link=analyzer_report.report["link"],
-                icon=VisualizableIcon.VIRUSTotal,
-            ),
-            self.Base(value=f"Engine Hits: {hits}"),
-            disable=analyzer_report.status != Status.SUCCESS,
-        )
-        first_level_elements.append(virustotal_report)
+        if analyzer_report:
+            hits = (
+                analyzer_report.report.get("data", {})
+                .get("total_votes", {})
+                .get("malicious", 0)
+            )
+            virustotal_report = self.Title(
+                self.Base(
+                    value="VirusTotal",
+                    link=analyzer_report.report["link"],
+                    icon=VisualizableIcon.VIRUSTotal,
+                ),
+                self.Base(value=f"Engine Hits: {hits}"),
+                disable=analyzer_report.status != Status.SUCCESS or not hits,
+            )
+            first_level_elements.append(virustotal_report)
 
         analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
-        disabled = (
-            analyzer_report.status != Status.SUCCESS
-            or analyzer_report.report.get("query_status", None) != "ok"
-        )
-        urlhaus_report = self.Title(
-            self.Base(
-                value="URLhaus",
-                link=analyzer_report.report.get("urlhaus_reference", ""),
-                icon=VisualizableIcon.URLHAUS,
-            ),
-            self.Base(
-                value=""
-                if disabled
-                else f'found {analyzer_report.report.get("urlhaus_status", "")}'
-            ),
-            disable=disabled,
-        )
-        first_level_elements.append(urlhaus_report)
+        if analyzer_report:
+            disabled = (
+                analyzer_report.status != Status.SUCCESS
+                or analyzer_report.report.get("query_status", None) != "ok"
+            )
+            urlhaus_report = self.Title(
+                self.Base(
+                    value="URLhaus",
+                    link=analyzer_report.report.get("urlhaus_reference", ""),
+                    icon=VisualizableIcon.URLHAUS,
+                ),
+                self.Base(
+                    value=""
+                    if disabled
+                    else f'found {analyzer_report.report.get("urlhaus_status", "")}'
+                ),
+                disable=disabled,
+            )
+            first_level_elements.append(urlhaus_report)
 
         analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
-        disabled = (
-            analyzer_report.status != Status.SUCCESS
-            or analyzer_report.report.get("query_status", None) != "ok"
-        )
-        threatfox_report = self.Title(
-            self.Base(value="ThreatFox", link=analyzer_report.report.get("link", "")),
-            self.Base(
-                value=""
-                if disabled
-                else f"found "
-                f'{analyzer_report.report.get("data", {}).get("malware_printable", "")}'
-            ),
-            disable=disabled,
-        )
-        first_level_elements.append(threatfox_report)
+        if analyzer_report:
+            disabled = (
+                analyzer_report.status != Status.SUCCESS
+                or analyzer_report.report.get("query_status", None) != "ok"
+            )
+            data = analyzer_report.report.get("data", {})
+            threatfox_report = self.Title(
+                self.Base(
+                    value="ThreatFox", link=analyzer_report.report.get("link", "")
+                ),
+                self.Base(
+                    value=""
+                    if disabled
+                    else f"found " f'{data.get("malware_printable", "")}'
+                ),
+                disable=disabled,
+            )
+            first_level_elements.append(threatfox_report)
 
         analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
-        results = analyzer_report.report.get("results", {})
-        in_database = results.get("in_database", False)
-        disabled = analyzer_report.status != Status.SUCCESS or not in_database
-        phishtank_report = self.Title(
-            self.Base(
-                value="Phishtank",
-                link=results.get("phish_detail_page", ""),
-                icon=VisualizableIcon.PHISHING,
-            ),
-            self.Base(value="" if disabled else "found"),
-            disable=disabled,
-        )
-        second_level_elements.append(phishtank_report)
+        if analyzer_report:
+            results = analyzer_report.report.get("results", {})
+            in_database = results.get("in_database", False)
+            disabled = analyzer_report.status != Status.SUCCESS or not in_database
+            phishtank_report = self.Title(
+                self.Base(
+                    value="Phishtank",
+                    link=results.get("phish_detail_page", ""),
+                    icon=VisualizableIcon.PHISHING,
+                ),
+                self.Base(value="" if disabled else "found"),
+                disable=disabled,
+            )
+            second_level_elements.append(phishtank_report)
 
         analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
-        found = analyzer_report.report.get("found", False)
-        disabled = analyzer_report.status != Status.SUCCESS or not found
-        phishtank_report = self.Title(
-            self.Base(
-                value="PhishingArmy",
-                link=analyzer_report.report.get("link", ""),
-                icon=VisualizableIcon.PHISHING,
-            ),
-            self.Base(value="" if disabled else "found"),
-            disable=disabled,
-        )
-        second_level_elements.append(phishtank_report)
+        if analyzer_report:
+            found = analyzer_report.report.get("found", False)
+            disabled = analyzer_report.status != Status.SUCCESS or not found
+            phishtank_report = self.Title(
+                self.Base(
+                    value="PhishingArmy",
+                    link=analyzer_report.report.get("link", ""),
+                    icon=VisualizableIcon.PHISHING,
+                ),
+                self.Base(value="" if disabled else "found"),
+                disable=disabled,
+            )
+            second_level_elements.append(phishtank_report)
 
         analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
-        success = analyzer_report.report.get("success", False)
-        data = analyzer_report.report.get("data", [])
-        disabled = analyzer_report.status != Status.SUCCESS or not success or not data
-        inquest_report = self.Title(
-            self.Base(
-                value="InQuest",
-                link=analyzer_report.report.get("link", ""),
-                icon=VisualizableIcon.WARNING,
-            ),
-            self.Base(value="" if disabled else "found"),
-            disable=disabled,
-        )
-        second_level_elements.append(inquest_report)
+        if analyzer_report:
+            success = analyzer_report.report.get("success", False)
+            data = analyzer_report.report.get("data", [])
+            disabled = (
+                analyzer_report.status != Status.SUCCESS or not success or not data
+            )
+            inquest_report = self.Title(
+                self.Base(
+                    value="InQuest",
+                    link=analyzer_report.report.get("link", ""),
+                    icon=VisualizableIcon.WARNING,
+                ),
+                self.Base(value="" if disabled else "found"),
+                disable=disabled,
+            )
+            second_level_elements.append(inquest_report)
 
         analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
-        pulses = analyzer_report.report.get("pulses", [])
-        disabled = analyzer_report.status != Status.SUCCESS or not pulses
-        otx_report = self.VList(
-            name=self.Base(value="OTXQuery", icon=VisualizableIcon.OTX),
-            value=[p.get("link", "") for p in pulses],
-            open=True,
-            max_elements_number=5,
-            disable=disabled,
-        )
-        second_level_elements.append(otx_report)
+        if analyzer_report:
+            pulses = analyzer_report.report.get("pulses", [])
+            disabled = analyzer_report.status != Status.SUCCESS or not pulses
+            otx_report = self.VList(
+                name=self.Base(
+                    value="OTX Alienvault", icon=VisualizableIcon.OTX, disable=disabled
+                ),
+                value=[
+                    self.Base(
+                        value=p.get("name", ""),
+                        link=p.get("link", ""),
+                        disable=disabled,
+                    )
+                    for p in pulses
+                ],
+                open=True,
+                max_elements_number=5,
+                disable=disabled,
+            )
+            second_level_elements.append(otx_report)
 
         page = self.Page(name="Reputation")
         page.add_level(

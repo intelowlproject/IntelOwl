@@ -188,6 +188,11 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         )
         if add_count_in_title:
             name.value += f" ({len(value)})"
+        for v in value:
+            if isinstance(v, str):
+                raise TypeError(
+                    f"value {v} should be a VisualizableObject and not a string"
+                )
         self.value = value
         self.max_elements_number = max_elements_number
         self.name = name

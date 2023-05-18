@@ -429,6 +429,8 @@ To simplify the process, take example from the pre-built analyzers listed below 
 
 - `DNS`: displays the aggregation of every DNS analyzer report
 - `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
+- `Domain_Reputation`: Visualizer for the Playbook "Popular URL Reputation Services"
+- `IP_Reputation`: Visualizer for the Playbook "Popular IP Reputation Services"
 
 
 #### Visualizers customization
@@ -465,6 +467,8 @@ The following is the list of the available pre-built playbooks. You can also nav
 
 - `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
 - `Sample Static Analysis`: A playbook containing all analyzers that perform static analysis on files.
+- `Popular URL Reputation Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
+- `Popular IP Reputation Services`: Collection of the most popular and free reputation analyzers for IP addresses
 
 #### Playbooks customization
 

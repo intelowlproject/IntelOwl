@@ -157,7 +157,7 @@ values = {3}
 {4}
 {5}
 {6}
-        """.format(
+        """.format(  # noqa
             self._imports(),
             str(json.loads(json.dumps(obj_data))),
             str(json.loads(json.dumps(param_data))),
@@ -183,7 +183,8 @@ values = {3}
         path = "api_app" / PosixPath(app) / "migrations" / name_file
         if path.exists():
             raise RuntimeError(
-                f"Migration {path} already exists. Please apply migration before create a new one"
+                f"Migration {path} already exists."
+                f" Please apply migration before create a new one"
             )
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)

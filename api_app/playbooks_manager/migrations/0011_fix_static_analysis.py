@@ -7,6 +7,7 @@ from django.db import migrations
 def migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     pc = PlaybookConfig.objects.get(name="Sample Static Analysis")
+    pc.name = "Sample_Static_Analysis"
     pc.description = (
         "Playbooks containing the majority of the Internal Static Analysis tools"
     )

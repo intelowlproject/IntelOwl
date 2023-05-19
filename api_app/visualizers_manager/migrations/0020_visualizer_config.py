@@ -4,7 +4,7 @@ object = {
     "name": "IP_Reputation",
     "config": {"queue": "default", "soft_time_limit": 60},
     "python_module": "ip_reputation_services.IPReputationServices",
-    "description": 'Visualizer for the Playbook "Popular IP Reputation Services"',
+    "description": 'Visualizer for the Playbook "Popular_IP_Reputation_Services"',
     "disabled": False,
     "disabled_in_organizations": [],
     "analyzers": [
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("api_app", "0030_pluginconfig_repositories"),
-        ("visualizers_manager", "0020_dns_visualizer_change"),
+        ("visualizers_manager", "0019_dns_visualizer_change"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

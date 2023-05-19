@@ -23,7 +23,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("visualizers_manager", "0019_visualizer_config"),
+        ("visualizers_manager", "0018_visualizer_config"),
     ]
 
     operations = [

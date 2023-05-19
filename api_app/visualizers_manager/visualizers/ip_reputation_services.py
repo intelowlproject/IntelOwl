@@ -192,11 +192,13 @@ class IPReputationServices(Visualizer):
             found = analyzer_report.report.get("found", False)
             disabled = analyzer_report.status != Status.SUCCESS or not found
             ioc = analyzer_report.report.get("ioc", {})
-            honeypots = [h for h in ioc.get("general_honeypot", [])]
-            if ioc.get("cowrie"):
-                honeypots.append("Cowrie")
-            if ioc.get("log4j"):
-                honeypots.append("Log4Pot")
+            honeypots = []
+            if ioc:
+                honeypots = [h for h in ioc.get("general_honeypot", [])]
+                if ioc.get("cowrie"):
+                    honeypots.append("Cowrie")
+                if ioc.get("log4j"):
+                    honeypots.append("Log4Pot")
             gb_report = self.VList(
                 name=self.Base(
                     value="GreedyBear Honeypots",

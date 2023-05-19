@@ -3,6 +3,7 @@
 
 import base64
 import logging
+from urllib.parse import urlparse
 
 import requests
 
@@ -18,8 +19,12 @@ class Phishtank(ObservableAnalyzer):
 
     def run(self):
         headers = {"User-Agent": "phishtank/IntelOwl"}
+        observable_to_analyze = self.observable_name
+        if self.observable_classification == self.ObservableTypes.URL:
+            observable_to_analyze = "http://" + urlparse(self.observable_name).hostname
+
         data = {
-            "url": base64.b64encode(self.observable_name.encode("utf-8")),
+            "url": base64.b64encode(observable_to_analyze.encode("utf-8")),
             "format": "json",
         }
         # optional API key

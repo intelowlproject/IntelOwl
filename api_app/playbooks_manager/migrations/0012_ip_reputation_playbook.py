@@ -7,7 +7,7 @@ from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 objects = [
     {
         "model": "playbooks_manager.playbookconfig",
-        "pk": "Popular IP Reputation Services",
+        "pk": "Popular_IP_Reputation_Services",
         "fields": {
             "type": '["ip"]',
             "description": "Collection of the most popular"

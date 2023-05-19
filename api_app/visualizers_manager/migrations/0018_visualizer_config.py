@@ -4,7 +4,7 @@ object = {
     "name": "Domain_Reputation",
     "config": {"queue": "default", "soft_time_limit": 60},
     "python_module": "domain_reputation_services.DomainReputationServices",
-    "description": 'Visualizer for the Playbook "Popular URL Reputation Services"',
+    "description": 'Visualizer for the Playbook "Popular_URL_Reputation_Services"',
     "disabled": False,
     "disabled_in_organizations": [],
     "analyzers": [
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0030_pluginconfig_repositories"),
         ("analyzers_manager", "0028_alter_analyzerconfig_name"),
-        ("visualizers_manager", "0018_alter_visualizerreport_options"),
+        ("visualizers_manager", "0017_alter_visualizerreport_options"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

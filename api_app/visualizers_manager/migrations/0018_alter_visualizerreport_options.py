@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("visualizers_manager", "0017a_dns_visualizer_change"),
+        ("visualizers_manager", "0017_alter_visualizerreport_options_and_more"),
     ]
 
     operations = [

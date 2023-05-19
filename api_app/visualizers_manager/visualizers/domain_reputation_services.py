@@ -15,7 +15,7 @@ class DomainReputationServices(Visualizer):
             analyzer_report = self.analyzer_reports().get(
                 config__name="VirusTotal_v3_Get_Observable"
             )
-        except AnalyzerConfig.DoesNotExists:
+        except AnalyzerConfig.DoesNotExist:
             logger.warning("VirusTotal_v3_Get_Observable report does not exist")
         else:
             hits = (
@@ -37,7 +37,7 @@ class DomainReputationServices(Visualizer):
     def _urlhaus(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
-        except AnalyzerConfig.DoesNotExists:
+        except AnalyzerConfig.DoesNotExist:
             logger.warning("URLhaus report does not exist")
         else:
             disabled = (
@@ -62,7 +62,7 @@ class DomainReputationServices(Visualizer):
     def _threatfox(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
-        except AnalyzerConfig.DoesNotExists:
+        except AnalyzerConfig.DoesNotExist:
             logger.warning("Threatfox report does not exist")
         else:
             disabled = (
@@ -85,7 +85,7 @@ class DomainReputationServices(Visualizer):
     def _phishtank(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
-        except AnalyzerConfig.DoesNotExists:
+        except AnalyzerConfig.DoesNotExist:
             logger.warning("Phishtank report does not exist")
         else:
             results = analyzer_report.report.get("results", {})
@@ -105,7 +105,7 @@ class DomainReputationServices(Visualizer):
     def _phishing_army(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
-        except AnalyzerConfig.DoesNotExists:
+        except AnalyzerConfig.DoesNotExist:
             logger.warning("PhishingArmy report does not exist")
         else:
             found = analyzer_report.report.get("found", False)
@@ -124,7 +124,7 @@ class DomainReputationServices(Visualizer):
     def _inquest_repdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
-        except AnalyzerConfig.DoesNotExists:
+        except AnalyzerConfig.DoesNotExist:
             logger.warning("InQuest_REPdb report does not exist")
         else:
             success = analyzer_report.report.get("success", False)
@@ -146,7 +146,7 @@ class DomainReputationServices(Visualizer):
     def _otxquery(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
-        except AnalyzerConfig.DoesNotExists:
+        except AnalyzerConfig.DoesNotExist:
             logger.warning("OTXQuery report does not exist")
         else:
             pulses = analyzer_report.report.get("pulses", [])

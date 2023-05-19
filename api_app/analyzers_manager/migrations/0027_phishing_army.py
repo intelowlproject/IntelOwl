@@ -1,4 +1,4 @@
-object = {
+object_ = {
     "name": "PhishingArmy",
     "config": {"queue": "default", "soft_time_limit": 60},
     "python_module": "phishing_army.PhishingArmy",
@@ -23,9 +23,9 @@ values = []
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")
-    python_path = object.pop("model")
+    python_path = object_.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    o = Model(**object)
+    o = Model(**object_)
     o.full_clean()
     o.save()
     param_maps = {}
@@ -49,9 +49,9 @@ def migrate(apps, schema_editor):
 
 
 def reverse_migrate(apps, schema_editor):
-    python_path = object.pop("model")
+    python_path = object_.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    Model.objects.get(name=object["name"]).delete()
+    Model.objects.get(name=object_["name"]).delete()
 
 
 from django.db import migrations

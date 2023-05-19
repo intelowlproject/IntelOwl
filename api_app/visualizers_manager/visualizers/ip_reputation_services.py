@@ -193,7 +193,7 @@ class IPReputationServices(Visualizer):
             ioc = analyzer_report.report.get("ioc", {})
             honeypots = []
             if ioc:
-                honeypots = [h for h in ioc.get("general_honeypot", [])]
+                honeypots = list(ioc.get("general_honeypot", []))
                 if ioc.get("cowrie"):
                     honeypots.append("Cowrie")
                 if ioc.get("log4j"):

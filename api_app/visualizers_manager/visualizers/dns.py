@@ -94,7 +94,6 @@ class DNS(Visualizer):
                     )
                 )
 
-        sorted(first_level_elements, key=lambda x: x.name)
         page = self.Page(name="DNS")
         page.add_level(
             level=1,

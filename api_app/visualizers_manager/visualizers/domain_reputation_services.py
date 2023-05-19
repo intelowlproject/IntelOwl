@@ -10,27 +10,7 @@ logger = getLogger(__name__)
 
 
 class DomainReputationServices(Visualizer):
-    def run(self) -> List[Dict]:
-        first_level_elements = []
-        second_level_elements = []
-        third_level_elements = []
-
-        for analyzer_report in self.analyzer_reports():
-            if (
-                "Malicious_Detector" in analyzer_report.config.name
-                or analyzer_report.config.name == "GoogleSafebrowsing"
-            ):
-                printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-                logger.debug(f"{printable_analyzer_name=}")
-                logger.debug(f"{analyzer_report.config.python_complete_path=}")
-                logger.debug(f"{analyzer_report=}")
-                third_level_elements.append(
-                    self.Bool(
-                        name=printable_analyzer_name,
-                        value=analyzer_report.report["malicious"],
-                    )
-                )
-
+    def _vt3(self):
         try:
             analyzer_report = self.analyzer_reports().get(
                 config__name="VirusTotal_v3_Get_Observable"
@@ -52,8 +32,9 @@ class DomainReputationServices(Visualizer):
                 self.Base(value=f"Engine Hits: {hits}"),
                 disable=analyzer_report.status != Status.SUCCESS or not hits,
             )
-            first_level_elements.append(virustotal_report)
+            return virustotal_report
 
+    def _urlhaus(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
         except AnalyzerConfig.DoesNotExists:
@@ -76,8 +57,9 @@ class DomainReputationServices(Visualizer):
                 ),
                 disable=disabled,
             )
-            first_level_elements.append(urlhaus_report)
+            return urlhaus_report
 
+    def _threatfox(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
         except AnalyzerConfig.DoesNotExists:
@@ -99,8 +81,9 @@ class DomainReputationServices(Visualizer):
                 ),
                 disable=disabled,
             )
-            first_level_elements.append(threatfox_report)
+            return threatfox_report
 
+    def _phishtank(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
         except AnalyzerConfig.DoesNotExists:
@@ -118,8 +101,9 @@ class DomainReputationServices(Visualizer):
                 self.Base(value="" if disabled else "found"),
                 disable=disabled,
             )
-            second_level_elements.append(phishtank_report)
+            return phishtank_report
 
+    def _phishing_army(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
         except AnalyzerConfig.DoesNotExists:
@@ -136,8 +120,9 @@ class DomainReputationServices(Visualizer):
                 self.Base(value="" if disabled else "found"),
                 disable=disabled,
             )
-            second_level_elements.append(phishtank_report)
+            return phishtank_report
 
+    def _inquest_repdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
         except AnalyzerConfig.DoesNotExists:
@@ -157,8 +142,9 @@ class DomainReputationServices(Visualizer):
                 self.Base(value="" if disabled else "found"),
                 disable=disabled,
             )
-            second_level_elements.append(inquest_report)
+            return inquest_report
 
+    def _otxquery(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
         except AnalyzerConfig.DoesNotExists:
@@ -182,7 +168,42 @@ class DomainReputationServices(Visualizer):
                 max_elements_number=5,
                 disable=disabled,
             )
-            second_level_elements.append(otx_report)
+            return otx_report
+
+    def run(self) -> List[Dict]:
+        first_level_elements = []
+        second_level_elements = []
+        third_level_elements = []
+
+        for analyzer_report in self.analyzer_reports():
+            if (
+                "Malicious_Detector" in analyzer_report.config.name
+                or analyzer_report.config.name == "GoogleSafebrowsing"
+            ):
+                printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+                logger.debug(f"{printable_analyzer_name=}")
+                logger.debug(f"{analyzer_report.config.python_complete_path=}")
+                logger.debug(f"{analyzer_report=}")
+                third_level_elements.append(
+                    self.Bool(
+                        name=printable_analyzer_name,
+                        value=analyzer_report.report["malicious"],
+                    )
+                )
+
+        first_level_elements.append(self._vt3())
+
+        first_level_elements.append(self._urlhaus())
+
+        first_level_elements.append(self._threatfox())
+
+        second_level_elements.append(self._phishtank())
+
+        second_level_elements.append(self._phishing_army())
+
+        second_level_elements.append(self._inquest_repdb())
+
+        second_level_elements.append(self._otxquery())
 
         page = self.Page(name="Reputation")
         page.add_level(

@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("api_app", "0030_pluginconfig_repositories"),
-        ("analyzers_manager", "0027_phishing_army"),
+        ("analyzers_manager", "0028_alter_analyzerconfig_name"),
         ("visualizers_manager", "0018_alter_visualizerreport_options"),
     ]
 

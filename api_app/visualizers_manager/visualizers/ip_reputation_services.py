@@ -14,11 +14,7 @@ logger = getLogger(__name__)
 
 
 class IPReputationServices(Visualizer):
-    def run(self) -> List[Dict]:
-        first_level_elements = []
-        second_level_elements = []
-        third_level_elements = []
-
+    def _vt3(self):
         try:
             analyzer_report = self.analyzer_reports().get(
                 config__name="VirusTotal_v3_Get_Observable"
@@ -40,8 +36,9 @@ class IPReputationServices(Visualizer):
                 self.Base(value=f"Engine Hits: {hits}"),
                 disable=analyzer_report.status != Status.SUCCESS or not hits,
             )
-            first_level_elements.append(virustotal_report)
+            return virustotal_report
 
+    def _greynoise(self):
         try:
             analyzer_report = self.analyzer_reports().get(
                 config__name="GreyNoiseCommunity"
@@ -70,8 +67,9 @@ class IPReputationServices(Visualizer):
                 self.Base(value=analyzer_report.report.get("name", ""), color=color),
                 disable=disabled,
             )
-            first_level_elements.append(greynoise_report)
+            return greynoise_report
 
+    def _urlhaus(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
         except AnalyzerConfig.DoesNotExists:
@@ -94,8 +92,9 @@ class IPReputationServices(Visualizer):
                 ),
                 disable=disabled,
             )
-            first_level_elements.append(urlhaus_report)
+            return urlhaus_report
 
+    def _threatfox(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
         except AnalyzerConfig.DoesNotExists:
@@ -117,8 +116,9 @@ class IPReputationServices(Visualizer):
                 ),
                 disable=disabled,
             )
-            first_level_elements.append(threatfox_report)
+            return threatfox_report
 
+    def _inquest_repdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
         except AnalyzerConfig.DoesNotExists:
@@ -138,9 +138,9 @@ class IPReputationServices(Visualizer):
                 self.Base(value="" if disabled else "found"),
                 disable=disabled,
             )
-            first_level_elements.append(inquest_report)
+            return inquest_report
 
-        abuse_categories_report = None
+    def _abuse_ipdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="AbuseIPDB")
         except AnalyzerConfig.DoesNotExists:
@@ -161,7 +161,6 @@ class IPReputationServices(Visualizer):
                 self.Base(value="" if disabled else f"{isp} ({usage})"),
                 disable=disabled,
             )
-            third_level_elements.append(abuse_report)
 
             disabled = analyzer_report.status != Status.SUCCESS or not data
             categories_extracted = []
@@ -182,7 +181,9 @@ class IPReputationServices(Visualizer):
                 size=VisualizableSize.S_2,
             )
 
-        gb_report = None
+            return abuse_report, abuse_categories_report
+
+    def _greedybear(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="GreedyBear")
         except AnalyzerConfig.DoesNotExists:
@@ -209,7 +210,9 @@ class IPReputationServices(Visualizer):
                 disable=disabled,
                 size=VisualizableSize.S_2,
             )
+            return gb_report
 
+    def _crowdsec(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Crowdsec")
         except AnalyzerConfig.DoesNotExists:
@@ -219,7 +222,7 @@ class IPReputationServices(Visualizer):
             sub_classifications = classifications.get("classifications", [])
             false_positives = classifications.get("false_positives", [])
             disabled = analyzer_report.status != Status.SUCCESS or not classifications
-            crowdsec_report = self.VList(
+            crowdsec_classification_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Classifications",
                     icon=VisualizableIcon.INFO,
@@ -235,17 +238,10 @@ class IPReputationServices(Visualizer):
                 disable=disabled,
                 size=VisualizableSize.S_2,
             )
-            second_level_elements.append(crowdsec_report)
-
-            if gb_report:
-                second_level_elements.append(gb_report)
-
-            if abuse_categories_report:
-                second_level_elements.append(abuse_categories_report)
 
             behaviors = analyzer_report.report.get("behaviors", [])
             disabled = analyzer_report.status != Status.SUCCESS or not behaviors
-            crowdsec_report = self.VList(
+            crowdsec_behaviors_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Behaviors",
                     icon=VisualizableIcon.ALARM,
@@ -260,8 +256,9 @@ class IPReputationServices(Visualizer):
                 disable=disabled,
                 size=VisualizableSize.S_2,
             )
-            second_level_elements.append(crowdsec_report)
+            return crowdsec_classification_report, crowdsec_behaviors_report
 
+    def _otxquery(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
         except AnalyzerConfig.DoesNotExists:
@@ -289,8 +286,9 @@ class IPReputationServices(Visualizer):
                 disable=disabled,
                 size=VisualizableSize.S_4,
             )
-            second_level_elements.append(otx_report)
+            return otx_report
 
+    def _firehol(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="FireHol_IPList")
         except AnalyzerConfig.DoesNotExists:
@@ -310,8 +308,9 @@ class IPReputationServices(Visualizer):
                 max_elements_number=5,
                 disable=disabled,
             )
-            third_level_elements.append(otx_report)
+            return otx_report
 
+    def _tor(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="TorProject")
         except AnalyzerConfig.DoesNotExists:
@@ -322,8 +321,9 @@ class IPReputationServices(Visualizer):
                 name="Tor Exit Node",
                 value=analyzer_report.status == Status.SUCCESS and found,
             )
-            third_level_elements.append(tor_report)
+            return tor_report
 
+    def _talos(self):
         try:
             analyzer_report = self.analyzer_reports().get(
                 config__name="TalosReputation"
@@ -336,11 +336,46 @@ class IPReputationServices(Visualizer):
                 name="Talos Reputation",
                 value=analyzer_report.status == Status.SUCCESS and found,
             )
-            third_level_elements.append(talos_report)
+            return talos_report
 
-        logger.debug(first_level_elements)
-        logger.debug(second_level_elements)
-        logger.debug(third_level_elements)
+    def run(self) -> List[Dict]:
+        first_level_elements = []
+        second_level_elements = []
+        third_level_elements = []
+
+        first_level_elements.append(self._vt3())
+
+        first_level_elements.append(self._greynoise())
+
+        first_level_elements.append(self._urlhaus())
+
+        first_level_elements.append(self._threatfox())
+
+        first_level_elements.append(self._inquest_repdb())
+
+        abuse_report, abuse_categories_report = self._abuse_ipdb()
+        third_level_elements.append(abuse_report)
+
+        gb_report = self._greedybear()
+
+        crowdsec_classification_report, crowdsec_behaviors_report = self._crowdsec()
+        second_level_elements.append(crowdsec_classification_report)
+
+        if gb_report:
+            second_level_elements.append(gb_report)
+
+        if abuse_categories_report:
+            second_level_elements.append(abuse_categories_report)
+
+        second_level_elements.append(crowdsec_behaviors_report)
+
+        second_level_elements.append(self._otxquery())
+
+        third_level_elements.append(self._firehol())
+
+        third_level_elements.append(self._tor())
+
+        third_level_elements.append(self._talos())
 
         page = self.Page(name="Reputation")
         page.add_level(

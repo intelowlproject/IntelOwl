@@ -58,12 +58,9 @@ class Command(BaseCommand):
 
     @staticmethod
     def _imports() -> str:
-        return """
-from django.db import migrations
+        return """from django.db import migrations
 from django.db.models.fields.related_descriptors import ManyToManyDescriptor
-
-
-        """
+"""
 
     @staticmethod
     def _migrate_template():
@@ -145,9 +142,7 @@ class Migration(migrations.Migration):
         obj_data, param_data, values_data = self._get_serialization(
             obj, serializer_class
         )
-        return """
-{0}
-        
+        return """{0}
 object = {1}
 
 params = {2}

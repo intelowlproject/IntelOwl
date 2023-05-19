@@ -1,6 +1,7 @@
 from logging import getLogger
 from typing import Dict, List
 
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.core.choices import Status
 from api_app.visualizers_manager.classes import Visualizer
 from api_app.visualizers_manager.enums import VisualizableIcon
@@ -30,10 +31,13 @@ class DomainReputationServices(Visualizer):
                     )
                 )
 
-        analyzer_report = self.analyzer_reports().get(
-            config__name="VirusTotal_v3_Get_Observable"
-        )
-        if analyzer_report:
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="VirusTotal_v3_Get_Observable"
+            )
+        except AnalyzerConfig.DoesNotExists:
+            logger.warning("VirusTotal_v3_Get_Observable report does not exist")
+        else:
             hits = (
                 analyzer_report.report.get("data", {})
                 .get("total_votes", {})
@@ -50,8 +54,11 @@ class DomainReputationServices(Visualizer):
             )
             first_level_elements.append(virustotal_report)
 
-        analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
-        if analyzer_report:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
+        except AnalyzerConfig.DoesNotExists:
+            logger.warning("URLhaus report does not exist")
+        else:
             disabled = (
                 analyzer_report.status != Status.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
@@ -71,8 +78,11 @@ class DomainReputationServices(Visualizer):
             )
             first_level_elements.append(urlhaus_report)
 
-        analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
-        if analyzer_report:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
+        except AnalyzerConfig.DoesNotExists:
+            logger.warning("Threatfox report does not exist")
+        else:
             disabled = (
                 analyzer_report.status != Status.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
@@ -91,8 +101,11 @@ class DomainReputationServices(Visualizer):
             )
             first_level_elements.append(threatfox_report)
 
-        analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
-        if analyzer_report:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
+        except AnalyzerConfig.DoesNotExists:
+            logger.warning("Phishtank report does not exist")
+        else:
             results = analyzer_report.report.get("results", {})
             in_database = results.get("in_database", False)
             disabled = analyzer_report.status != Status.SUCCESS or not in_database
@@ -107,8 +120,11 @@ class DomainReputationServices(Visualizer):
             )
             second_level_elements.append(phishtank_report)
 
-        analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
-        if analyzer_report:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
+        except AnalyzerConfig.DoesNotExists:
+            logger.warning("PhishingArmy report does not exist")
+        else:
             found = analyzer_report.report.get("found", False)
             disabled = analyzer_report.status != Status.SUCCESS or not found
             phishtank_report = self.Title(
@@ -122,8 +138,11 @@ class DomainReputationServices(Visualizer):
             )
             second_level_elements.append(phishtank_report)
 
-        analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
-        if analyzer_report:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
+        except AnalyzerConfig.DoesNotExists:
+            logger.warning("InQuest_REPdb report does not exist")
+        else:
             success = analyzer_report.report.get("success", False)
             data = analyzer_report.report.get("data", [])
             disabled = (
@@ -140,8 +159,11 @@ class DomainReputationServices(Visualizer):
             )
             second_level_elements.append(inquest_report)
 
-        analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
-        if analyzer_report:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
+        except AnalyzerConfig.DoesNotExists:
+            logger.warning("OTXQuery report does not exist")
+        else:
             pulses = analyzer_report.report.get("pulses", [])
             disabled = analyzer_report.status != Status.SUCCESS or not pulses
             otx_report = self.VList(

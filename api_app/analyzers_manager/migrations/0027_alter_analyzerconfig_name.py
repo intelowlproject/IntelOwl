@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='analyzerconfig',
             name='name',
-            field=models.CharField(max_length=50, primary_key=True, serialize=False, unique=True, validators=[django.core.validators.RegexValidator('^\\w+$/', 'Your name should match the [A-Za-z0-9_] characters')]),
+            field=models.CharField(max_length=50, primary_key=True, serialize=False, unique=True, validators=[django.core.validators.RegexValidator('^\\w+$', 'Your name should match the [A-Za-z0-9_] characters')]),
         ),
     ]

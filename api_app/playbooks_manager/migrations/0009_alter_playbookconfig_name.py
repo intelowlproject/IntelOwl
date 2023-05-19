@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 unique=True,
                 validators=[
                     django.core.validators.RegexValidator(
-                        "^\\w+$/", "Your name should match the [A-Za-z0-9_] characters"
+                        "^\\w+$", "Your name should match the [A-Za-z0-9_] characters"
                     )
                 ],
             ),

@@ -104,16 +104,15 @@ class IPReputationServices(Visualizer):
                 analyzer_report.status != Status.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
             )
-            data = analyzer_report.report.get("data", {})
+            data = analyzer_report.report.get("data", [])
+            malware_printable = ""
+            if data:
+                malware_printable = data[0].get("malware_printable", "")
             threatfox_report = self.Title(
                 self.Base(
                     value="ThreatFox", link=analyzer_report.report.get("link", "")
                 ),
-                self.Base(
-                    value=""
-                    if disabled
-                    else f"found " f'{data.get("malware_printable", "")}'
-                ),
+                self.Base(value="" if disabled else f"found {malware_printable}"),
                 disable=disabled,
             )
             return threatfox_report

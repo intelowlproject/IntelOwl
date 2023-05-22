@@ -32,6 +32,7 @@ class VisualizableObjectTestCase(CustomTestCase):
         result = vo.to_dict()
 
         expected_result = {
+            "alignment": "around",
             "size": "1",
             "disable": False,
             "type": "test",
@@ -49,6 +50,7 @@ class VisualizableBaseTestCase(CustomTestCase):
             disable=True,
         )
         expected_result = {
+            "alignment": "center",
             "disable": True,
             "bold": False,
             "italic": False,
@@ -83,6 +85,7 @@ class VisualizableBaseTestCase(CustomTestCase):
             disable=True,
         )
         expected_result = {
+            "alignment": "center",
             "disable": True,
             "bold": False,
             "italic": False,
@@ -129,6 +132,7 @@ class VisualizableTitleTestCase(CustomTestCase):
         vo = VisualizableTitle(title, value)
 
         expected_result = {
+            "alignment": "center",
             "type": "title",
             "title": title.to_dict(),
             "value": value.to_dict(),
@@ -146,6 +150,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         )
         vvl = VisualizableVerticalList(name=name, value=[value])
         expected_result = {
+            "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
             "open": False,
@@ -164,6 +169,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         )
         vvl = VisualizableVerticalList(name=name, value=[value])
         expected_result = {
+            "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,
@@ -178,6 +184,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         name = VisualizableBase(value="test")
         vvl = VisualizableVerticalList(name=name, value=[])
         expected_result = {
+            "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,

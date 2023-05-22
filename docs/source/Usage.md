@@ -257,6 +257,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `Phishstats`: Search [PhishStats API](https://phishstats.info/) to determine if an IP/URL/domain is malicious.
 * `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
+* `PhishingArmy`: Search an observable in the [PhishingArmy](https://phishing.army/) blocklist
 * `Pulsedive`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
 * `Quad9_Malicious_Detector`: Leverages Quad9 DoH to check if a domain is related to malware
@@ -428,6 +429,8 @@ To simplify the process, take example from the pre-built analyzers listed below 
 
 - `DNS`: displays the aggregation of every DNS analyzer report
 - `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
+- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
+- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
 
 
 #### Visualizers customization
@@ -463,7 +466,9 @@ The following is the list of the available pre-built playbooks. You can also nav
 ##### List of pre-built playbooks
 
 - `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
-- `Sample Static Analysis`: A playbook containing all analyzers that perform static analysis on files.
+- `Sample_Static_Analysis`: A playbook containing all analyzers that perform static analysis on files.
+- `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
+- `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
 
 #### Playbooks customization
 

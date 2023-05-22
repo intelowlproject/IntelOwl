@@ -12,7 +12,7 @@ from api_app.validators import plugin_name_validator, validate_runtime_configura
 
 class PlaybookConfig(models.Model):
     name = models.CharField(
-        max_length=30,
+        max_length=100,
         null=False,
         unique=True,
         primary_key=True,

@@ -8,7 +8,12 @@ from django.utils.timezone import now
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
-from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
+from api_app.analyzers_manager.observable_analyzers import (
+    maxmind,
+    phishing_army,
+    talos,
+    tor,
+)
 from api_app.models import Job
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
 
@@ -70,6 +75,15 @@ class CronTests(CustomTestCase):
     )
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos._update()
+        self.assertTrue(os.path.exists(db_file_path))
+
+    @if_mock_connections(
+        patch(
+            "requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")
+        )
+    )
+    def test_phishing_army_updater(self, mock_get=None):
+        db_file_path = phishing_army.PhishingArmy._update()
         self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(

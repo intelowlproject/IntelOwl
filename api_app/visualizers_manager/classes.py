@@ -173,7 +173,7 @@ class VisualizableListMixin:
         result = super().to_dict()  # noqa
         values: List[VisualizableObject] = result.pop("value", [])
         if any(x for x in values):
-            result["values"] = [val.to_dict() for val in values]
+            result["values"] = [val.to_dict() for val in values if val is not None]
         else:
             result["values"] = []
         return result
@@ -198,6 +198,11 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         )
         if add_count_in_title:
             name.value += f" ({len(value)})"
+        for v in value:
+            if isinstance(v, str):
+                raise TypeError(
+                    f"value {v} should be a VisualizableObject and not a string"
+                )
         self.value = value
         self.max_elements_number = max_elements_number
         self.name = name

@@ -68,10 +68,10 @@ from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")    
-    python_path = object.pop("model")
+    python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     mtm, no_mtm = {}, {}
-    for field, value in object.items():
+    for field, value in plugin.items():
         if type(getattr(Model, field)) == ManyToManyDescriptor:
             mtm[field] = value
         else:
@@ -108,9 +108,9 @@ def migrate(apps, schema_editor):
     def _reverse_migrate_template():
         return """
 def reverse_migrate(apps, schema_editor):
-    python_path = object.pop("model")
+    python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    Model.objects.get(name=object["name"]).delete()
+    Model.objects.get(name=plugin["name"]).delete()
 """
 
     def _body_template(self, app):
@@ -143,7 +143,7 @@ class Migration(migrations.Migration):
             obj, serializer_class
         )
         return """{0}
-object = {1}
+plugin = {1}
 
 params = {2}
 

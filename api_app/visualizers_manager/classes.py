@@ -74,7 +74,6 @@ class VisualizableBase(VisualizableObject):
         icon: Union[VisualizableIcon, str] = VisualizableIcon.EMPTY,
         bold: bool = False,
         italic: bool = False,
-        classname: str = "",
         disable: bool = True,
     ):
         super().__init__(size, alignment, disable)
@@ -84,7 +83,6 @@ class VisualizableBase(VisualizableObject):
         self.icon = icon
         self.bold = bold
         self.italic = italic
-        self.classname = classname
 
     @property
     def attributes(self) -> List[str]:
@@ -92,7 +90,6 @@ class VisualizableBase(VisualizableObject):
             "value",
             "color",
             "link",
-            "classname",
             "icon",
             "bold",
             "italic",
@@ -138,22 +135,19 @@ class VisualizableTitle(VisualizableObject):
 class VisualizableBool(VisualizableBase):
     def __init__(
         self,
-        name: str,
-        value: bool,
+        value: str,
+        disable: bool,
         *args,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         color: VisualizableColor = VisualizableColor.DANGER,
         **kwargs,
     ):
-        super().__init__(*args, size=size, color=color, value=value, **kwargs)
-        self.name = name
+        super().__init__(
+            *args, value=value, size=size, color=color, disable=disable, **kwargs
+        )
 
     def __bool__(self):
-        return bool(self.name)
-
-    @property
-    def attributes(self) -> List[str]:
-        return super().attributes + ["name"]
+        return bool(self.value)
 
     @property
     def type(self) -> str:

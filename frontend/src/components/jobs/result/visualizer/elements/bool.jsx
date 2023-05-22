@@ -5,18 +5,16 @@ import { Badge } from "reactstrap";
 
 export function BooleanVisualizer({
   size,
-  name,
   value,
   link,
   icon,
   italic,
-  className,
   activeColor,
   disable,
 }) {
   let coreComponent = (
     <span className={`${italic ? "fst-italic" : ""}`}>
-      {name} {icon}
+      {value} {icon}
     </span>
   );
   // link added only in case is available and the component is not disabled, or it will be clickable
@@ -31,10 +29,8 @@ export function BooleanVisualizer({
     <div className={`${size}`}>
       <Badge
         pill
-        color={value === true ? activeColor : "gray"}
-        className={`w-100 text-wrap ${
-          disable ? "opacity-25" : ""
-        } ${className}`}
+        color={disable ? "gray" : activeColor}
+        className={`w-100 text-wrap ${disable ? "opacity-25" : ""}`}
       >
         {coreComponent}
       </Badge>
@@ -44,12 +40,10 @@ export function BooleanVisualizer({
 
 BooleanVisualizer.propTypes = {
   size: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  value: PropTypes.bool.isRequired,
+  value: PropTypes.string.isRequired,
   link: PropTypes.string,
   icon: PropTypes.string,
   italic: PropTypes.bool,
-  className: PropTypes.string,
   activeColor: PropTypes.string,
   disable: PropTypes.bool,
 };
@@ -58,7 +52,6 @@ BooleanVisualizer.defaultProps = {
   link: "",
   icon: "",
   italic: false,
-  className: "",
   activeColor: "danger",
   disable: false,
 };

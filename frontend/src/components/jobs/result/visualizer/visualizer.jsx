@@ -28,7 +28,6 @@ export function convertToElement(element) {
       visualizerElement = (
         <BooleanVisualizer
           size={element.size}
-          name={element.name}
           value={element.value}
           link={element.link}
           activeColor={element.activeColor}

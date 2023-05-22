@@ -187,8 +187,8 @@ class DomainReputationServices(Visualizer):
             logger.debug(f"{analyzer_report=}")
             third_level_elements.append(
                 self.Bool(
-                    name=printable_analyzer_name,
-                    value=analyzer_report.report["malicious"],
+                    value=printable_analyzer_name,
+                    disable=not analyzer_report.report["malicious"],
                 )
             )
 

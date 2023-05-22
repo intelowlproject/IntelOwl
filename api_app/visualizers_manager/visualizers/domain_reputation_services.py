@@ -1,6 +1,8 @@
 from logging import getLogger
 from typing import Dict, List
 
+from django.db.models import Q
+
 from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.core.choices import Status
 from api_app.visualizers_manager.classes import Visualizer
@@ -174,21 +176,21 @@ class DomainReputationServices(Visualizer):
         second_level_elements = []
         third_level_elements = []
 
-        for analyzer_report in self.analyzer_reports():
-            if (
-                "Malicious_Detector" in analyzer_report.config.name
-                or analyzer_report.config.name == "GoogleSafebrowsing"
-            ):
-                printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-                logger.debug(f"{printable_analyzer_name=}")
-                logger.debug(f"{analyzer_report.config.python_complete_path=}")
-                logger.debug(f"{analyzer_report=}")
-                third_level_elements.append(
-                    self.Bool(
-                        name=printable_analyzer_name,
-                        value=analyzer_report.report["malicious"],
-                    )
+        for analyzer_report in self.analyzer_reports().filter(
+            Q(config__name__endswith="Malicious_Detector")
+            | Q(config__name="GoogleSafebrowsing")
+        ):
+
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+            logger.debug(f"{analyzer_report.config.python_complete_path=}")
+            logger.debug(f"{analyzer_report=}")
+            third_level_elements.append(
+                self.Bool(
+                    name=printable_analyzer_name,
+                    value=analyzer_report.report["malicious"],
                 )
+            )
 
         first_level_elements.append(self._vt3())
 

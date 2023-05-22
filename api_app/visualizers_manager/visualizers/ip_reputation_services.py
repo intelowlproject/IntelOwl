@@ -144,6 +144,7 @@ class IPReputationServices(Visualizer):
             analyzer_report = self.analyzer_reports().get(config__name="AbuseIPDB")
         except AnalyzerReport.DoesNotExist:
             logger.warning("AbuseIPDB report does not exist")
+            return None, None
         else:
             data = analyzer_report.report.get("data", [])
             isp = data.get("isp", "")
@@ -218,6 +219,7 @@ class IPReputationServices(Visualizer):
             analyzer_report = self.analyzer_reports().get(config__name="Crowdsec")
         except AnalyzerReport.DoesNotExist:
             logger.warning("Crowdsec report does not exist")
+            return None, None
         else:
             classifications = analyzer_report.report.get("classifications", [])
             sub_classifications = classifications.get("classifications", [])
@@ -362,11 +364,9 @@ class IPReputationServices(Visualizer):
         crowdsec_classification_report, crowdsec_behaviors_report = self._crowdsec()
         second_level_elements.append(crowdsec_classification_report)
 
-        if gb_report:
-            second_level_elements.append(gb_report)
+        second_level_elements.append(gb_report)
 
-        if abuse_categories_report:
-            second_level_elements.append(abuse_categories_report)
+        second_level_elements.append(abuse_categories_report)
 
         second_level_elements.append(crowdsec_behaviors_report)
 

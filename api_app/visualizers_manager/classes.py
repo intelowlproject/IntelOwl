@@ -173,7 +173,7 @@ class VisualizableListMixin:
         result = super().to_dict()  # noqa
         values: List[VisualizableObject] = result.pop("value", [])
         if any(x for x in values):
-            result["values"] = [val.to_dict() for val in values]
+            result["values"] = [val.to_dict() for val in values if val is not None]
         else:
             result["values"] = []
         return result

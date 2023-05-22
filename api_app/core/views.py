@@ -121,6 +121,7 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     serializer_class = AbstractConfigSerializer
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
+    lookup_field = "name"
 
     def get_queryset(self):
         return self.serializer_class.Meta.model.objects.all()

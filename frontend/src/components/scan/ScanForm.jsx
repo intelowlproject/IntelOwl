@@ -213,6 +213,11 @@ export default function ScanForm() {
     },
   });
 
+  React.useEffect(() => {
+    formik.validateForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values]);
+
   const [scanType, setScanType] = React.useState(
     formik.values.analysisOptionValues
   );
@@ -384,6 +389,8 @@ export default function ScanForm() {
   );
 
   console.debug(`classification: ${formik.values.classification}`);
+  console.debug(`isValid: ${formik.isValid}`);
+  console.debug(formik);
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}

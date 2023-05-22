@@ -130,6 +130,9 @@ export default function ScanForm() {
       hoursAgo: 24,
     },
     validate: (values) => {
+      console.debug("validate - values");
+      console.debug(values);
+
       const errors = {};
 
       if (analyzersError) {
@@ -139,16 +142,27 @@ export default function ScanForm() {
         errors.connectors = connectorsError;
       }
 
-      if (values.classification === "file") {
+      if (values.observableType === "file") {
         if (!values.files || values.files.length === 0) {
           errors.files = "required";
         }
-      } else if (values.observable_names && values.observable_names.length) {
-        if (!TLP_CHOICES.includes(values.tlp)) {
-          errors.tlp = "Invalid choice";
-        }
+      } else if (
+        values.observable_names.filter((observable) => observable.length)
+          .length === 0
+      ) {
+        errors.observable_names = "required";
       }
-      console.debug("errors");
+
+      if (!TLP_CHOICES.includes(values.tlp)) {
+        errors.tlp = "Invalid choice";
+      }
+
+      // check playbooks or analyzers
+      if (values.playbooks.length === 0 && values.analyzers.length === 0) {
+        errors.playbooks = "playbooks or analyzers required";
+      }
+
+      console.debug("formik validation errors");
       console.debug(errors);
       return errors;
     },
@@ -411,8 +425,10 @@ export default function ScanForm() {
                               : "file"
                           );
                           formik.setFieldValue("observable_names", [""]);
+                          formik.setFieldValue("files", [""]);
                           formik.setFieldValue("playbooks", []); // reset
                           formik.setFieldValue("analyzers", []); // reset
+                          formik.setFieldValue("connectors", []); // reset
                         }}
                       />
                       <Label check>
@@ -679,9 +695,7 @@ export default function ScanForm() {
                 <TagSelectInput
                   id="scanform-tagselectinput"
                   selectedTags={formik.values.tags}
-                  setSelectedTags={(v) =>
-                    formik.setFieldValue("tags", v, false)
-                  }
+                  setSelectedTags={(v) => formik.setFieldValue("tags", v)}
                 />
               </Col>
             </FormGroup>
@@ -780,7 +794,12 @@ export default function ScanForm() {
             <FormGroup row className="mt-2">
               <Button
                 type="submit"
-                disabled={!(formik.isValid || formik.isSubmitting)}
+                /* dirty return True if values are different then default
+                 we cannot run the validation on mount or we get an infinite loop.
+                */
+                disabled={
+                  !formik.dirty || !formik.isValid || formik.isSubmitting
+                }
                 color="primary"
                 size="lg"
                 outline

@@ -32,7 +32,7 @@ class VisualizableObjectTestCase(CustomTestCase):
         result = vo.to_dict()
 
         expected_result = {
-            "alignment": "center",
+            "alignment": "around",
             "size": "1",
             "disable": False,
             "type": "test",
@@ -104,7 +104,6 @@ class VisualizableBoolTestCase(CustomTestCase):
     def test_to_dict(self):
         vo = VisualizableBool(name="test", value=True)
         expected_result = {
-            "alignment": "center",
             "type": "bool",
             "name": "test",
             "value": True,

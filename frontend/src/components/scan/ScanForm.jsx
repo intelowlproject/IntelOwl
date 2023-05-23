@@ -647,7 +647,6 @@ export default function ScanForm() {
                     />
                   </Col>
                 </FormGroup>
-                <span>ooooooooo</span>
                 <FormGroup row>
                   <Label sm={3} for="connectors">
                     Select Connectors

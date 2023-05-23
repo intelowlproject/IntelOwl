@@ -213,6 +213,12 @@ export default function ScanForm() {
     },
   });
 
+  /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
+  and leaves the UI with values not valid, for this reason the scan button is disabled, but if the user set focus on the UI the last
+  validation trigger and start scan is enabled. To avoid this we use this hook that force the validation when the form values change.
+  
+  This hook is the reason why we can disable the validation in the setFieldValue method (3rd params).
+  */
   React.useEffect(() => {
     formik.validateForm();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -389,8 +395,6 @@ export default function ScanForm() {
   );
 
   console.debug(`classification: ${formik.values.classification}`);
-  console.debug(`isValid: ${formik.isValid}`);
-  console.debug(formik);
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
@@ -423,7 +427,8 @@ export default function ScanForm() {
                         onClick={(event) => {
                           formik.setFieldValue(
                             "observableType",
-                            event.target.value
+                            event.target.value,
+                            false
                           );
                           formik.setFieldValue(
                             "classification",
@@ -431,11 +436,17 @@ export default function ScanForm() {
                               ? "generic"
                               : "file"
                           );
-                          formik.setFieldValue("observable_names", [""]);
-                          formik.setFieldValue("files", [""]);
-                          formik.setFieldValue("playbooks", []); // reset
-                          formik.setFieldValue("analyzers", []); // reset
-                          formik.setFieldValue("connectors", []); // reset
+                          formik.setFieldValue("observable_names", [""], false);
+                          formik.setFieldValue("files", [""], false);
+                          formik.setFieldValue(
+                            "analysisOptionValues",
+                            scanTypes.playbooks,
+                            false
+                          );
+                          setScanType(scanTypes.playbooks);
+                          formik.setFieldValue("playbooks", [], false); // reset
+                          formik.setFieldValue("analyzers", [], false); // reset
+                          formik.setFieldValue("connectors", [], false); // reset
                         }}
                       />
                       <Label check>
@@ -501,7 +512,8 @@ export default function ScanForm() {
                                       });
                                       formik.setFieldValue(
                                         "classification",
-                                        newClassification
+                                        newClassification,
+                                        false
                                       );
                                       // in case a palybook is available and i changed classification or no playbooks is selected i select a playbook
                                       if (
@@ -511,9 +523,15 @@ export default function ScanForm() {
                                           newClassification ||
                                           formik.values.playbooks.length === 0)
                                       ) {
-                                        formik.setFieldValue("playbooks", [
-                                          playbookOptions(newClassification)[0],
-                                        ]);
+                                        formik.setFieldValue(
+                                          "playbooks",
+                                          [
+                                            playbookOptions(
+                                              newClassification
+                                            )[0],
+                                          ],
+                                          false
+                                        );
                                       }
                                     }
                                     const observableNames =
@@ -521,7 +539,8 @@ export default function ScanForm() {
                                     observableNames[index] = event.target.value;
                                     formik.setFieldValue(
                                       "observable_names",
-                                      observableNames
+                                      observableNames,
+                                      false
                                     );
                                   }}
                                 />
@@ -565,15 +584,21 @@ export default function ScanForm() {
                     id="file"
                     name="files"
                     onChange={(event) => {
-                      formik.setFieldValue("files", event.currentTarget.files);
-                      formik.setFieldValue("classification", "file");
+                      formik.setFieldValue(
+                        "files",
+                        event.currentTarget.files,
+                        false
+                      );
+                      formik.setFieldValue("classification", "file", false);
                       if (
                         formik.values.playbooks.length === 0 &&
                         playbookOptions("file").length > 0
                       ) {
-                        formik.setFieldValue("playbooks", [
-                          playbookOptions("file")[0],
-                        ]);
+                        formik.setFieldValue(
+                          "playbooks",
+                          [playbookOptions("file")[0]],
+                          false
+                        );
                       }
                     }}
                     className="input-dark"
@@ -600,7 +625,7 @@ export default function ScanForm() {
                         value={type_}
                         onClick={() => {
                           setScanType(type_);
-                          formik.setFieldValue("playbooks", []); // reset
+                          formik.setFieldValue("playbooks", [], false); // reset
                         }}
                       />
                       <Label check>{type_}</Label>
@@ -623,7 +648,9 @@ export default function ScanForm() {
                         <MultiSelectDropdownInput
                           options={analyzersOptions}
                           value={formik.values.analyzers}
-                          onChange={(v) => formik.setFieldValue("analyzers", v)}
+                          onChange={(v) =>
+                            formik.setFieldValue("analyzers", v, false)
+                          }
                         />
                       )}
                     />
@@ -639,7 +666,9 @@ export default function ScanForm() {
                       <MultiSelectDropdownInput
                         options={connectorOptions}
                         value={formik.values.connectors}
-                        onChange={(v) => formik.setFieldValue("connectors", v)}
+                        onChange={(v) =>
+                          formik.setFieldValue("connectors", v, false)
+                        }
                       />
                     )}
                     <ErrorMessage component={FormFeedback} name="connectors" />
@@ -686,7 +715,9 @@ export default function ScanForm() {
                     <MultiSelectDropdownInput
                       options={playbookOptions(formik.values.classification)}
                       value={formik.values.playbooks}
-                      onChange={(v) => formik.setFieldValue("playbooks", v)}
+                      onChange={(v) =>
+                        formik.setFieldValue("playbooks", v, false)
+                      }
                     />
                   </Col>
                 )}
@@ -702,7 +733,9 @@ export default function ScanForm() {
                 <TagSelectInput
                   id="scanform-tagselectinput"
                   selectedTags={formik.values.tags}
-                  setSelectedTags={(v) => formik.setFieldValue("tags", v)}
+                  setSelectedTags={(v) =>
+                    formik.setFieldValue("tags", v, false)
+                  }
                 />
               </Col>
             </FormGroup>

@@ -101,6 +101,9 @@ const observableType2RegExMap = {
   hash: "^[a-zA-Z0-9]{32,}$",
 };
 
+const sanitizeObservable = (observable) =>
+  observable.replaceAll("[", "").replaceAll("]", "");
+
 // Component
 export default function ScanForm() {
   console.debug("ScanForm rendered!");
@@ -167,6 +170,9 @@ export default function ScanForm() {
 
       const formValues = {
         ...values,
+        observable_names: values.observable_names.map((observable) =>
+          sanitizeObservable(observable)
+        ),
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
@@ -358,6 +364,9 @@ export default function ScanForm() {
     async (values) => {
       const formValues = {
         ...values,
+        observable_names: values.observable_names.map((observable) =>
+          sanitizeObservable(observable)
+        ),
         tlp: values.tlp,
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         playbooks: values.playbooks.map((x) => x.value),
@@ -499,7 +508,9 @@ export default function ScanForm() {
                                       ).forEach(([typeName, typeRegEx]) => {
                                         if (
                                           new RegExp(typeRegEx).test(
-                                            event.target.value
+                                            sanitizeObservable(
+                                              event.target.value
+                                            )
                                           )
                                         ) {
                                           newClassification = typeName;

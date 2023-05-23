@@ -36,7 +36,6 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   // raw elements
   let AnalyzerDenominator = job.analyzers_to_execute?.length || "all";
   let ConnectorDenominator = job.connectors_to_execute?.length || "all";
-  const VisualizerDenominator = "all";
 
   if (job.playbook_to_execute) {
     AnalyzerDenominator = job.analyzers_to_execute.length;
@@ -80,8 +79,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>
             <Badge className="ms-2">
-              {job.visualizers_to_execute?.length} /&nbsp;
-              {VisualizerDenominator}
+              {job.visualizers_to_execute?.length} /&nbsp; all
             </Badge>
           </div>
         ),
@@ -245,7 +243,10 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
                         <NavItem>
                           <NavLink
                             className={`${
-                              activeElement === componentsObject.id
+                              // ignore the loading id or the "active" class create an empty block in the navbar
+                              activeElement === componentsObject.id &&
+                              componentsObject.id !==
+                                LOADING_VISUALIZER_UI_ELEMENT_CODE
                                 ? "active"
                                 : ""
                             }`}

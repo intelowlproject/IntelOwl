@@ -12,6 +12,7 @@ import {
   Spinner,
   Button,
   UncontrolledTooltip,
+  Collapse,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { Field, Form, FieldArray, useFormik, FormikProvider } from "formik";
@@ -25,6 +26,10 @@ import {
   addToast,
 } from "@certego/certego-ui";
 
+import {
+  IoIosArrowDropdownCircle,
+  IoIosArrowDropupCircle,
+} from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
 import { usePluginConfigurationStore } from "../../stores";
 import { TLP_CHOICES, TLP_DESCRIPTION_MAP, scanTypes } from "../../constants";
@@ -232,6 +237,9 @@ export default function ScanForm() {
     () => setModalOpen((o) => !o),
     [setModalOpen]
   );
+
+  const [isAdvancedSettingsOpen, toggleAdvancedSettings] =
+    React.useState(false);
 
   // page title
   useTitle("IntelOwl | Scan", { restoreOnUnmount: true });
@@ -725,110 +733,130 @@ export default function ScanForm() {
             )}
 
             <hr />
-            <FormGroup row>
-              <Label sm={3} id="scanform-tagselectinput">
-                Tags
-              </Label>
-              <Col sm={9}>
-                <TagSelectInput
-                  id="scanform-tagselectinput"
-                  selectedTags={formik.values.tags}
-                  setSelectedTags={(v) =>
-                    formik.setFieldValue("tags", v, false)
-                  }
-                />
-              </Col>
-            </FormGroup>
-            <FormGroup row>
-              <Label sm={3}>TLP</Label>
-              <Col sm={9}>
-                <div>
-                  {TLP_CHOICES.map((ch) => (
-                    <FormGroup inline check key={`tlpchoice__${ch}`}>
-                      <Label check for={`tlpchoice__${ch}`}>
-                        <TLPTag value={ch} />
-                      </Label>
-                      <Field
-                        as={Input}
-                        id={`tlpchoice__${ch}`}
-                        type="radio"
-                        name="tlp"
-                        value={ch}
-                        invalid={formik.errors.tlp && formik.touched.tlp}
-                        onChange={formik.handleChange}
-                      />
-                    </FormGroup>
-                  ))}
-                </div>
-                <FormText>
-                  {TLP_DESCRIPTION_MAP[formik.values.tlp].replace("TLP: ", "")}
-                </FormText>
-              </Col>
-            </FormGroup>
-
-            <FormGroup row className="mt-2">
-              <Label sm={3}>Scan configuration</Label>
-              <Col sm={9}>
-                <FormGroup check key="checkchoice__check_all">
-                  <Field
-                    as={Input}
-                    id="checkchoice__check_all"
-                    type="radio"
-                    name="check"
-                    value="check_all"
-                    onChange={formik.handleChange}
+            <Button
+              size="sm"
+              onClick={() => toggleAdvancedSettings(!isAdvancedSettingsOpen)}
+              color="primary"
+            >
+              <span className="me-1">Advanced settings</span>
+              {isAdvancedSettingsOpen ? (
+                <IoIosArrowDropupCircle />
+              ) : (
+                <IoIosArrowDropdownCircle />
+              )}
+            </Button>
+            <Collapse isOpen={isAdvancedSettingsOpen}>
+              <FormGroup row>
+                <Label sm={3} id="scanform-tagselectinput">
+                  Tags
+                </Label>
+                <Col sm={9}>
+                  <TagSelectInput
+                    id="scanform-tagselectinput"
+                    selectedTags={formik.values.tags}
+                    setSelectedTags={(v) =>
+                      formik.setFieldValue("tags", v, false)
+                    }
                   />
-                  <div className="d-flex align-items-center">
-                    <Label check for="checkchoice__check_all" className="col-8">
-                      Do not execute if a similar analysis is currently running
-                      or reported without fails
-                    </Label>
-                    <div className="col-4 d-flex align-items-center">
-                      H:
-                      <div className="col-4 mx-1">
+                </Col>
+              </FormGroup>
+              <FormGroup row>
+                <Label sm={3}>TLP</Label>
+                <Col sm={9}>
+                  <div>
+                    {TLP_CHOICES.map((ch) => (
+                      <FormGroup inline check key={`tlpchoice__${ch}`}>
+                        <Label check for={`tlpchoice__${ch}`}>
+                          <TLPTag value={ch} />
+                        </Label>
                         <Field
                           as={Input}
-                          id="checkchoice__check_all__minutes_ago"
-                          type="number"
-                          name="hoursAgo"
+                          id={`tlpchoice__${ch}`}
+                          type="radio"
+                          name="tlp"
+                          value={ch}
+                          invalid={formik.errors.tlp && formik.touched.tlp}
                           onChange={formik.handleChange}
                         />
-                      </div>
-                      <div className="col-2">
-                        <MdInfoOutline id="minutes-ago-info-icon" />
-                        <UncontrolledTooltip
-                          target="minutes-ago-info-icon"
-                          placement="right"
-                          fade={false}
-                          innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
-                        >
-                          <span>
-                            Max age (in hours) for the similar analysis.
-                            <br />
-                            The default value is 24 hours (1 day).
-                            <br />
-                            Empty value takes all the previous analysis.
-                          </span>
-                        </UncontrolledTooltip>
+                      </FormGroup>
+                    ))}
+                  </div>
+                  <FormText>
+                    {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
+                      "TLP: ",
+                      ""
+                    )}
+                  </FormText>
+                </Col>
+              </FormGroup>
+              <FormGroup row className="mt-2">
+                <Label sm={3}>Scan configuration</Label>
+                <Col sm={9}>
+                  <FormGroup check key="checkchoice__check_all">
+                    <Field
+                      as={Input}
+                      id="checkchoice__check_all"
+                      type="radio"
+                      name="check"
+                      value="check_all"
+                      onChange={formik.handleChange}
+                    />
+                    <div className="d-flex align-items-center">
+                      <Label
+                        check
+                        for="checkchoice__check_all"
+                        className="col-8"
+                      >
+                        Do not execute if a similar analysis is currently
+                        running or reported without fails
+                      </Label>
+                      <div className="col-4 d-flex align-items-center">
+                        H:
+                        <div className="col-4 mx-1">
+                          <Field
+                            as={Input}
+                            id="checkchoice__check_all__minutes_ago"
+                            type="number"
+                            name="hoursAgo"
+                            onChange={formik.handleChange}
+                          />
+                        </div>
+                        <div className="col-2">
+                          <MdInfoOutline id="minutes-ago-info-icon" />
+                          <UncontrolledTooltip
+                            target="minutes-ago-info-icon"
+                            placement="right"
+                            fade={false}
+                            innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
+                          >
+                            <span>
+                              Max age (in hours) for the similar analysis.
+                              <br />
+                              The default value is 24 hours (1 day).
+                              <br />
+                              Empty value takes all the previous analysis.
+                            </span>
+                          </UncontrolledTooltip>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </FormGroup>
-                <FormGroup check key="checkchoice__force_new">
-                  <Field
-                    as={Input}
-                    id="checkchoice__force_new"
-                    type="radio"
-                    name="check"
-                    value="force_new"
-                    onChange={formik.handleChange}
-                  />
-                  <Label check for="checkchoice__force_new">
-                    Force new analysis
-                  </Label>
-                </FormGroup>
-              </Col>
-            </FormGroup>
+                  </FormGroup>
+                  <FormGroup check key="checkchoice__force_new">
+                    <Field
+                      as={Input}
+                      id="checkchoice__force_new"
+                      type="radio"
+                      name="check"
+                      value="force_new"
+                      onChange={formik.handleChange}
+                    />
+                    <Label check for="checkchoice__force_new">
+                      Force new analysis
+                    </Label>
+                  </FormGroup>
+                </Col>
+              </FormGroup>
+            </Collapse>
 
             <FormGroup row className="mt-2">
               <Button

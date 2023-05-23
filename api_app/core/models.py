@@ -238,6 +238,7 @@ class AbstractConfig(models.Model):
         indexes = [
             models.Index(fields=("python_module", "disabled")),
         ]
+        ordering = ["name", "disabled"]
 
     @classmethod
     @property

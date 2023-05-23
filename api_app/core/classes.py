@@ -156,11 +156,7 @@ class Plugin(metaclass=ABCMeta):
             job_id=self.job_id,
             config=self._config,
             defaults={
-                "report": {},
-                "errors": [],
                 "status": AbstractReport.Status.PENDING.value,
-                "start_time": timezone.now(),
-                "end_time": timezone.now(),
                 "task_id": self.task_id,
             },
         )

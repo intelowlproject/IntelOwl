@@ -46,7 +46,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             "test",
             color=VisualizableColor.DARK,
             link="https://test.com",
-            classname="test",
             disable=True,
         )
         expected_result = {
@@ -59,7 +58,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             "color": "dark",
             "size": "auto",
             "link": "https://test.com",
-            "classname": "test",
             "icon": "",
         }
         self.assertEqual(vo.to_dict(), expected_result)
@@ -69,7 +67,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             "",
             color=VisualizableColor.DARK,
             link="https://test.com",
-            classname="test",
             disable=False,
         )
         expected_result = {}
@@ -81,7 +78,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             color=VisualizableColor.DARK,
             size=VisualizableSize.S_3,
             link="https://test.com",
-            classname="test",
             disable=True,
         )
         expected_result = {
@@ -94,7 +90,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             "color": "dark",
             "size": "3",
             "link": "https://test.com",
-            "classname": "test",
             "icon": "",
         }
         self.assertEqual(vo.to_dict(), expected_result)
@@ -102,18 +97,16 @@ class VisualizableBaseTestCase(CustomTestCase):
 
 class VisualizableBoolTestCase(CustomTestCase):
     def test_to_dict(self):
-        vo = VisualizableBool(name="test", value=True)
+        vo = VisualizableBool(value="test", disable=False)
         expected_result = {
             "type": "bool",
-            "name": "test",
-            "value": True,
+            "value": "test",
             "link": "",
-            "classname": "",
             "color": "danger",
             "icon": "",
             "italic": False,
             "size": "auto",
-            "disable": True,
+            "disable": False,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 

@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { ContentSection } from "@certego/certego-ui";
+import { ContentSection, ErrorAlert } from "@certego/certego-ui";
 
 import { visualizerValidator } from "./validators";
 
@@ -28,7 +28,6 @@ export function convertToElement(element) {
       visualizerElement = (
         <BooleanVisualizer
           size={element.size}
-          name={element.name}
           value={element.value}
           link={element.link}
           activeColor={element.activeColor}
@@ -99,6 +98,20 @@ export function convertToElement(element) {
 export default function VisualizerReport({ visualizerReport }) {
   console.debug("VisualizerReport - visualizerReport");
   console.debug(visualizerReport);
+
+  // in case there are some errors, show them
+  if (visualizerReport.errors.length) {
+    return (
+      <ErrorAlert
+        error={{
+          response: {
+            statusText: "An error occurred during the rendering",
+          },
+          parsedMsg: visualizerReport.errors,
+        }}
+      />
+    );
+  }
 
   // validate data
   const validatedData = visualizerReport.report.map((fieldElement) =>

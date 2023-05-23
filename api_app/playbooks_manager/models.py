@@ -37,3 +37,6 @@ class PlaybookConfig(models.Model):
         null=False,
         validators=[validate_runtime_configuration],
     )
+
+    class Meta:
+        ordering = ["name", "disabled"]

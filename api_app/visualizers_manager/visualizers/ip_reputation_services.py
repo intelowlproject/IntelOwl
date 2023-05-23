@@ -321,8 +321,8 @@ class IPReputationServices(Visualizer):
         else:
             found = analyzer_report.report.get("found", False)
             tor_report = self.Bool(
-                name="Tor Exit Node",
-                value=analyzer_report.status == Status.SUCCESS and found,
+                value="Tor Exit Node",
+                disable=not (analyzer_report.status == Status.SUCCESS and found),
             )
             return tor_report
 
@@ -336,8 +336,8 @@ class IPReputationServices(Visualizer):
         else:
             found = analyzer_report.report.get("found", False)
             talos_report = self.Bool(
-                name="Talos Reputation",
-                value=analyzer_report.status == Status.SUCCESS and found,
+                value="Talos Reputation",
+                disable=not (analyzer_report.status == Status.SUCCESS and found),
             )
             return talos_report
 

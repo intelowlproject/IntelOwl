@@ -64,7 +64,7 @@ class DNS(Visualizer):
             printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
             logger.debug(f"{printable_analyzer_name=}")
             logger.debug(f"{analyzer_report.config.python_complete_path=}")
-            logger.debug(f"{analyzer_report=}")
+            logger.debug(f"{analyzer_report.report=}")
             if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
                 disable_element = not analyzer_report.report["resolutions"]
                 first_level_elements.append(
@@ -89,8 +89,8 @@ class DNS(Visualizer):
             else:
                 second_level_elements.append(
                     self.Bool(
-                        name=printable_analyzer_name,
-                        value=analyzer_report.report["malicious"],
+                        value=printable_analyzer_name,
+                        disable=not analyzer_report.report["malicious"],
                     )
                 )
 

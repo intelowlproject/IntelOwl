@@ -2,7 +2,6 @@ import React from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
 import { MdEdit, MdInfoOutline } from "react-icons/md";
 import {
-  FormFeedback,
   FormGroup,
   Label,
   Container,
@@ -13,16 +12,10 @@ import {
   Spinner,
   Button,
   UncontrolledTooltip,
+  Collapse,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import {
-  ErrorMessage,
-  Field,
-  Form,
-  FieldArray,
-  useFormik,
-  FormikProvider,
-} from "formik";
+import { Field, Form, FieldArray, useFormik, FormikProvider } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
 import {
@@ -33,6 +26,10 @@ import {
   addToast,
 } from "@certego/certego-ui";
 
+import {
+  IoIosArrowDropdownCircle,
+  IoIosArrowDropupCircle,
+} from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
 import { usePluginConfigurationStore } from "../../stores";
 import { TLP_CHOICES, TLP_DESCRIPTION_MAP, scanTypes } from "../../constants";
@@ -109,6 +106,9 @@ const observableType2RegExMap = {
   hash: "^[a-zA-Z0-9]{32,}$",
 };
 
+const sanitizeObservable = (observable) =>
+  observable.replaceAll("[", "").replaceAll("]", "");
+
 // Component
 export default function ScanForm() {
   console.debug("ScanForm rendered!");
@@ -130,6 +130,9 @@ export default function ScanForm() {
       hoursAgo: 24,
     },
     validate: (values) => {
+      console.debug("validate - values");
+      console.debug(values);
+
       const errors = {};
 
       if (analyzersError) {
@@ -139,16 +142,28 @@ export default function ScanForm() {
         errors.connectors = connectorsError;
       }
 
-      if (values.classification === "file") {
+      if (values.observableType === "file") {
         if (!values.files || values.files.length === 0) {
           errors.files = "required";
         }
-      } else if (values.observable_names && values.observable_names.length) {
-        if (!TLP_CHOICES.includes(values.tlp)) {
-          errors.tlp = "Invalid choice";
-        }
+      } else if (
+        values.observable_names.filter((observable) => observable.length)
+          .length === 0
+      ) {
+        // we cannot return a list of errors (one for each observable), or isValid doesn't work
+        errors.observable_names = "observable(s) are required";
       }
-      console.debug("errors");
+
+      if (!TLP_CHOICES.includes(values.tlp)) {
+        errors.tlp = "Invalid choice";
+      }
+
+      // check playbooks or analyzers
+      if (values.playbooks.length === 0 && values.analyzers.length === 0) {
+        errors.playbooks = "playbooks or analyzers required";
+      }
+
+      console.debug("formik validation errors");
       console.debug(errors);
       return errors;
     },
@@ -160,6 +175,9 @@ export default function ScanForm() {
 
       const formValues = {
         ...values,
+        observable_names: values.observable_names.map((observable) =>
+          sanitizeObservable(observable)
+        ),
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
@@ -199,6 +217,17 @@ export default function ScanForm() {
     },
   });
 
+  /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
+  and leaves the UI with values not valid, for this reason the scan button is disabled, but if the user set focus on the UI the last
+  validation trigger and start scan is enabled. To avoid this we use this hook that force the validation when the form values change.
+  
+  This hook is the reason why we can disable the validation in the setFieldValue method (3rd params).
+  */
+  React.useEffect(() => {
+    formik.validateForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values]);
+
   const [scanType, setScanType] = React.useState(
     formik.values.analysisOptionValues
   );
@@ -208,6 +237,9 @@ export default function ScanForm() {
     () => setModalOpen((o) => !o),
     [setModalOpen]
   );
+
+  const [isAdvancedSettingsOpen, toggleAdvancedSettings] =
+    React.useState(false);
 
   // page title
   useTitle("IntelOwl | Scan", { restoreOnUnmount: true });
@@ -340,6 +372,9 @@ export default function ScanForm() {
     async (values) => {
       const formValues = {
         ...values,
+        observable_names: values.observable_names.map((observable) =>
+          sanitizeObservable(observable)
+        ),
         tlp: values.tlp,
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         playbooks: values.playbooks.map((x) => x.value),
@@ -370,6 +405,8 @@ export default function ScanForm() {
   );
 
   console.debug(`classification: ${formik.values.classification}`);
+  console.debug("formik");
+  console.debug(formik);
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
@@ -402,7 +439,8 @@ export default function ScanForm() {
                         onClick={(event) => {
                           formik.setFieldValue(
                             "observableType",
-                            event.target.value
+                            event.target.value,
+                            false
                           );
                           formik.setFieldValue(
                             "classification",
@@ -410,9 +448,17 @@ export default function ScanForm() {
                               ? "generic"
                               : "file"
                           );
-                          formik.setFieldValue("observable_names", [""]);
-                          formik.setFieldValue("playbooks", []); // reset
-                          formik.setFieldValue("analyzers", []); // reset
+                          formik.setFieldValue("observable_names", [""], false);
+                          formik.setFieldValue("files", [""], false);
+                          formik.setFieldValue(
+                            "analysisOptionValues",
+                            scanTypes.playbooks,
+                            false
+                          );
+                          setScanType(scanTypes.playbooks);
+                          formik.setFieldValue("playbooks", [], false); // reset
+                          formik.setFieldValue("analyzers", [], false); // reset
+                          formik.setFieldValue("connectors", [], false); // reset
                         }}
                       />
                       <Label check>
@@ -470,7 +516,9 @@ export default function ScanForm() {
                                       ).forEach(([typeName, typeRegEx]) => {
                                         if (
                                           new RegExp(typeRegEx).test(
-                                            event.target.value
+                                            sanitizeObservable(
+                                              event.target.value
+                                            )
                                           )
                                         ) {
                                           newClassification = typeName;
@@ -478,7 +526,8 @@ export default function ScanForm() {
                                       });
                                       formik.setFieldValue(
                                         "classification",
-                                        newClassification
+                                        newClassification,
+                                        false
                                       );
                                       // in case a palybook is available and i changed classification or no playbooks is selected i select a playbook
                                       if (
@@ -488,9 +537,15 @@ export default function ScanForm() {
                                           newClassification ||
                                           formik.values.playbooks.length === 0)
                                       ) {
-                                        formik.setFieldValue("playbooks", [
-                                          playbookOptions(newClassification)[0],
-                                        ]);
+                                        formik.setFieldValue(
+                                          "playbooks",
+                                          [
+                                            playbookOptions(
+                                              newClassification
+                                            )[0],
+                                          ],
+                                          false
+                                        );
                                       }
                                     }
                                     const observableNames =
@@ -498,13 +553,10 @@ export default function ScanForm() {
                                     observableNames[index] = event.target.value;
                                     formik.setFieldValue(
                                       "observable_names",
-                                      observableNames
+                                      observableNames,
+                                      false
                                     );
                                   }}
-                                />
-                                <ErrorMessage
-                                  component={FormFeedback}
-                                  name={`observable_names.${index}`}
                                 />
                               </Col>
                               <Button
@@ -542,15 +594,21 @@ export default function ScanForm() {
                     id="file"
                     name="files"
                     onChange={(event) => {
-                      formik.setFieldValue("files", event.currentTarget.files);
-                      formik.setFieldValue("classification", "file");
+                      formik.setFieldValue(
+                        "files",
+                        event.currentTarget.files,
+                        false
+                      );
+                      formik.setFieldValue("classification", "file", false);
                       if (
                         formik.values.playbooks.length === 0 &&
                         playbookOptions("file").length > 0
                       ) {
-                        formik.setFieldValue("playbooks", [
-                          playbookOptions("file")[0],
-                        ]);
+                        formik.setFieldValue(
+                          "playbooks",
+                          [playbookOptions("file")[0]],
+                          false
+                        );
                       }
                     }}
                     className="input-dark"
@@ -577,7 +635,7 @@ export default function ScanForm() {
                         value={type_}
                         onClick={() => {
                           setScanType(type_);
-                          formik.setFieldValue("playbooks", []); // reset
+                          formik.setFieldValue("playbooks", [], false); // reset
                         }}
                       />
                       <Label check>{type_}</Label>
@@ -600,11 +658,12 @@ export default function ScanForm() {
                         <MultiSelectDropdownInput
                           options={analyzersOptions}
                           value={formik.values.analyzers}
-                          onChange={(v) => formik.setFieldValue("analyzers", v)}
+                          onChange={(v) =>
+                            formik.setFieldValue("analyzers", v, false)
+                          }
                         />
                       )}
                     />
-                    <ErrorMessage component={FormFeedback} name="analyzers" />
                   </Col>
                 </FormGroup>
                 <FormGroup row>
@@ -616,10 +675,11 @@ export default function ScanForm() {
                       <MultiSelectDropdownInput
                         options={connectorOptions}
                         value={formik.values.connectors}
-                        onChange={(v) => formik.setFieldValue("connectors", v)}
+                        onChange={(v) =>
+                          formik.setFieldValue("connectors", v, false)
+                        }
                       />
                     )}
-                    <ErrorMessage component={FormFeedback} name="connectors" />
                   </Col>
                 </FormGroup>
                 <FormGroup row>
@@ -663,7 +723,9 @@ export default function ScanForm() {
                     <MultiSelectDropdownInput
                       options={playbookOptions(formik.values.classification)}
                       value={formik.values.playbooks}
-                      onChange={(v) => formik.setFieldValue("playbooks", v)}
+                      onChange={(v) =>
+                        formik.setFieldValue("playbooks", v, false)
+                      }
                     />
                   </Col>
                 )}
@@ -671,116 +733,140 @@ export default function ScanForm() {
             )}
 
             <hr />
-            <FormGroup row>
-              <Label sm={3} id="scanform-tagselectinput">
-                Tags
-              </Label>
-              <Col sm={9}>
-                <TagSelectInput
-                  id="scanform-tagselectinput"
-                  selectedTags={formik.values.tags}
-                  setSelectedTags={(v) =>
-                    formik.setFieldValue("tags", v, false)
-                  }
-                />
-              </Col>
-            </FormGroup>
-            <FormGroup row>
-              <Label sm={3}>TLP</Label>
-              <Col sm={9}>
-                <div>
-                  {TLP_CHOICES.map((ch) => (
-                    <FormGroup inline check key={`tlpchoice__${ch}`}>
-                      <Label check for={`tlpchoice__${ch}`}>
-                        <TLPTag value={ch} />
-                      </Label>
-                      <Field
-                        as={Input}
-                        id={`tlpchoice__${ch}`}
-                        type="radio"
-                        name="tlp"
-                        value={ch}
-                        invalid={formik.errors.tlp && formik.touched.tlp}
-                        onChange={formik.handleChange}
-                      />
-                    </FormGroup>
-                  ))}
-                </div>
-                <FormText>
-                  {TLP_DESCRIPTION_MAP[formik.values.tlp].replace("TLP: ", "")}
-                </FormText>
-                <ErrorMessage component={FormFeedback} name="tlp" />
-              </Col>
-            </FormGroup>
-
-            <FormGroup row className="mt-2">
-              <Label sm={3}>Scan configuration</Label>
-              <Col sm={9}>
-                <FormGroup check key="checkchoice__check_all">
-                  <Field
-                    as={Input}
-                    id="checkchoice__check_all"
-                    type="radio"
-                    name="check"
-                    value="check_all"
-                    onChange={formik.handleChange}
+            <Button
+              size="sm"
+              onClick={() => toggleAdvancedSettings(!isAdvancedSettingsOpen)}
+              color="primary"
+            >
+              <span className="me-1">Advanced settings</span>
+              {isAdvancedSettingsOpen ? (
+                <IoIosArrowDropupCircle />
+              ) : (
+                <IoIosArrowDropdownCircle />
+              )}
+            </Button>
+            <Collapse isOpen={isAdvancedSettingsOpen}>
+              <FormGroup row>
+                <Label sm={3} id="scanform-tagselectinput">
+                  Tags
+                </Label>
+                <Col sm={9}>
+                  <TagSelectInput
+                    id="scanform-tagselectinput"
+                    selectedTags={formik.values.tags}
+                    setSelectedTags={(v) =>
+                      formik.setFieldValue("tags", v, false)
+                    }
                   />
-                  <div className="d-flex align-items-center">
-                    <Label check for="checkchoice__check_all" className="col-8">
-                      Do not execute if a similar analysis is currently running
-                      or reported without fails
-                    </Label>
-                    <div className="col-4 d-flex align-items-center">
-                      H:
-                      <div className="col-4 mx-1">
+                </Col>
+              </FormGroup>
+              <FormGroup row>
+                <Label sm={3}>TLP</Label>
+                <Col sm={9}>
+                  <div>
+                    {TLP_CHOICES.map((ch) => (
+                      <FormGroup inline check key={`tlpchoice__${ch}`}>
+                        <Label check for={`tlpchoice__${ch}`}>
+                          <TLPTag value={ch} />
+                        </Label>
                         <Field
                           as={Input}
-                          id="checkchoice__check_all__minutes_ago"
-                          type="number"
-                          name="hoursAgo"
+                          id={`tlpchoice__${ch}`}
+                          type="radio"
+                          name="tlp"
+                          value={ch}
+                          invalid={formik.errors.tlp && formik.touched.tlp}
                           onChange={formik.handleChange}
                         />
-                      </div>
-                      <div className="col-2">
-                        <MdInfoOutline id="minutes-ago-info-icon" />
-                        <UncontrolledTooltip
-                          target="minutes-ago-info-icon"
-                          placement="right"
-                          fade={false}
-                          innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
-                        >
-                          <span>
-                            Max age (in hours) for the similar analysis.
-                            <br />
-                            The default value is 24 hours (1 day).
-                            <br />
-                            Empty value takes all the previous analysis.
-                          </span>
-                        </UncontrolledTooltip>
+                      </FormGroup>
+                    ))}
+                  </div>
+                  <FormText>
+                    {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
+                      "TLP: ",
+                      ""
+                    )}
+                  </FormText>
+                </Col>
+              </FormGroup>
+              <FormGroup row className="mt-2">
+                <Label sm={3}>Scan configuration</Label>
+                <Col sm={9}>
+                  <FormGroup check key="checkchoice__check_all">
+                    <Field
+                      as={Input}
+                      id="checkchoice__check_all"
+                      type="radio"
+                      name="check"
+                      value="check_all"
+                      onChange={formik.handleChange}
+                    />
+                    <div className="d-flex align-items-center">
+                      <Label
+                        check
+                        for="checkchoice__check_all"
+                        className="col-8"
+                      >
+                        Do not execute if a similar analysis is currently
+                        running or reported without fails
+                      </Label>
+                      <div className="col-4 d-flex align-items-center">
+                        H:
+                        <div className="col-4 mx-1">
+                          <Field
+                            as={Input}
+                            id="checkchoice__check_all__minutes_ago"
+                            type="number"
+                            name="hoursAgo"
+                            onChange={formik.handleChange}
+                          />
+                        </div>
+                        <div className="col-2">
+                          <MdInfoOutline id="minutes-ago-info-icon" />
+                          <UncontrolledTooltip
+                            target="minutes-ago-info-icon"
+                            placement="right"
+                            fade={false}
+                            innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
+                          >
+                            <span>
+                              Max age (in hours) for the similar analysis.
+                              <br />
+                              The default value is 24 hours (1 day).
+                              <br />
+                              Empty value takes all the previous analysis.
+                            </span>
+                          </UncontrolledTooltip>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </FormGroup>
-                <FormGroup check key="checkchoice__force_new">
-                  <Field
-                    as={Input}
-                    id="checkchoice__force_new"
-                    type="radio"
-                    name="check"
-                    value="force_new"
-                    onChange={formik.handleChange}
-                  />
-                  <Label check for="checkchoice__force_new">
-                    Force new analysis
-                  </Label>
-                </FormGroup>
-              </Col>
-            </FormGroup>
+                  </FormGroup>
+                  <FormGroup check key="checkchoice__force_new">
+                    <Field
+                      as={Input}
+                      id="checkchoice__force_new"
+                      type="radio"
+                      name="check"
+                      value="force_new"
+                      onChange={formik.handleChange}
+                    />
+                    <Label check for="checkchoice__force_new">
+                      Force new analysis
+                    </Label>
+                  </FormGroup>
+                </Col>
+              </FormGroup>
+            </Collapse>
 
             <FormGroup row className="mt-2">
               <Button
                 type="submit"
-                disabled={!(formik.isValid || formik.isSubmitting)}
+                /* dirty return True if values are different then default
+                 we cannot run the validation on mount or we get an infinite loop.
+                */
+                disabled={
+                  !formik.dirty || !formik.isValid || formik.isSubmitting
+                }
                 color="primary"
                 size="lg"
                 outline

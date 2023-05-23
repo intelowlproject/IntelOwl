@@ -43,7 +43,18 @@ INSTALLED_APPS = [
     "drf_recaptcha",
     # performance debugging
     "silk",
+    # two-factor-auth
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_email",  # <- if you want email capability.
+    "two_factor",
+    "two_factor.plugins.phonenumber",  # <- if you want phone number capability.
+    "two_factor.plugins.email",  # <- if you want email capability.
 ]
+
+LOGIN_URL = "two_factor:login"
+LOGIN_REDIRECT_URL = "/"
 
 from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]

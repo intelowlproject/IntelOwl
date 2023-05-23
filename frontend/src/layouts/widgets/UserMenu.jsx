@@ -43,7 +43,9 @@ export default function UserMenu(props) {
         <DropdownNavLink to="/me/sessions">
           <IoMdKey className="me-2" /> API Access/ Sessions
         </DropdownNavLink>
-        {/* Your plugin configuration */}
+        <DropdownNavLink to="/me/two-factor-auth">
+          <IoMdKey className="me-2" /> Two-Factor-Auth
+        </DropdownNavLink>
         <DropdownNavLink to="/me/config">
           <BsSliders className="me-2" /> Your plugin configuration
         </DropdownNavLink>

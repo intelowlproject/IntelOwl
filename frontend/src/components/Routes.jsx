@@ -19,6 +19,10 @@ const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
 const UserConfig = React.lazy(() => import("./me/config/UserConfig"));
+const TwoFactorAuth = React.lazy(() =>
+  import("./me/two-factor-auth/Two_Factor_Auth")
+);
+
 /*
 lazy imports to enable code splitting
 */
@@ -100,6 +104,15 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <Sessions />
+      </Suspense>
+    ),
+  },
+  /* two-factor-auth */
+  {
+    path: "/me/two-factor-auth/*",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <TwoFactorAuth />
       </Suspense>
     ),
   },

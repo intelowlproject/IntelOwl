@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import render
 from django.urls import include, path, re_path
+from two_factor.urls import urlpatterns as tf_urls
 
 
 def render_reactapp(request):
@@ -16,6 +17,7 @@ def render_reactapp(request):
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
     path("api/", include("api_app.urls")),
+    path("", include(tf_urls)),
     re_path(r"^(?!api|silk)$", render_reactapp),
     re_path(r"^(?!api|silk)(?:.*)/?$", render_reactapp),
 ]

@@ -2,7 +2,6 @@ import React from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
 import { MdEdit, MdInfoOutline } from "react-icons/md";
 import {
-  FormFeedback,
   FormGroup,
   Label,
   Container,
@@ -15,14 +14,7 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import {
-  ErrorMessage,
-  Field,
-  Form,
-  FieldArray,
-  useFormik,
-  FormikProvider,
-} from "formik";
+import { Field, Form, FieldArray, useFormik, FormikProvider } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
 import {
@@ -150,7 +142,8 @@ export default function ScanForm() {
         values.observable_names.filter((observable) => observable.length)
           .length === 0
       ) {
-        errors.observable_names = "required";
+        // we cannot return a list of errors (one for each observable), or isValid doesn't work
+        errors.observable_names = "observable(s) are required";
       }
 
       if (!TLP_CHOICES.includes(values.tlp)) {
@@ -395,6 +388,8 @@ export default function ScanForm() {
   );
 
   console.debug(`classification: ${formik.values.classification}`);
+  console.debug("formik");
+  console.debug(formik);
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
@@ -544,10 +539,6 @@ export default function ScanForm() {
                                     );
                                   }}
                                 />
-                                <ErrorMessage
-                                  component={FormFeedback}
-                                  name={`observable_names.${index}`}
-                                />
                               </Col>
                               <Button
                                 color="primary"
@@ -654,9 +645,9 @@ export default function ScanForm() {
                         />
                       )}
                     />
-                    <ErrorMessage component={FormFeedback} name="analyzers" />
                   </Col>
                 </FormGroup>
+                <span>ooooooooo</span>
                 <FormGroup row>
                   <Label sm={3} for="connectors">
                     Select Connectors
@@ -671,7 +662,6 @@ export default function ScanForm() {
                         }
                       />
                     )}
-                    <ErrorMessage component={FormFeedback} name="connectors" />
                   </Col>
                 </FormGroup>
                 <FormGroup row>
@@ -763,7 +753,6 @@ export default function ScanForm() {
                 <FormText>
                   {TLP_DESCRIPTION_MAP[formik.values.tlp].replace("TLP: ", "")}
                 </FormText>
-                <ErrorMessage component={FormFeedback} name="tlp" />
               </Col>
             </FormGroup>
 

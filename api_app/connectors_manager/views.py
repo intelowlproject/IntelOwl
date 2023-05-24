@@ -33,4 +33,4 @@ class ConnectorActionViewSet(PluginActionViewSet):
         signature = report.config.get_signature(
             report.job,
         )
-        signature()
+        signature.apply_async()

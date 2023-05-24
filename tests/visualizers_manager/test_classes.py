@@ -183,7 +183,20 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "disable": True,
             "open": False,
             "size": "auto",
-            "values": [],
+            "values": [
+                {
+                    "alignment": "center",
+                    "bold": False,
+                    "color": "",
+                    "disable": False,
+                    "icon": "",
+                    "italic": False,
+                    "link": "",
+                    "size": "auto",
+                    "type": "base",
+                    "value": "no data available",
+                }
+            ],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
 

@@ -4,7 +4,7 @@ import { Row } from "reactstrap";
 
 export function HorizontalListVisualizer({ values, alignment }) {
   return (
-    <Row className={`align-items-center justify-content-${alignment}`}>
+    <Row className={`align-items-start justify-content-${alignment}`}>
       {values}
     </Row>
   );

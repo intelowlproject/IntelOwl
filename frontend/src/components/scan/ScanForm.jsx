@@ -32,7 +32,12 @@ import {
 } from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
 import { usePluginConfigurationStore } from "../../stores";
-import { TLP_CHOICES, TLP_DESCRIPTION_MAP, scanTypes } from "../../constants";
+import {
+  TLP_CHOICES,
+  TLP_COLOR_MAP,
+  TLP_DESCRIPTION_MAP,
+  scanTypes,
+} from "../../constants";
 import { TLPTag, markdownToHtml } from "../common";
 import {
   RuntimeConfigurationModal,
@@ -782,10 +787,14 @@ export default function ScanForm() {
                     ))}
                   </div>
                   <FormText>
-                    {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
-                      "TLP: ",
-                      ""
-                    )}
+                    <span
+                      style={{ color: `${TLP_COLOR_MAP[formik.values.tlp]}` }}
+                    >
+                      {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
+                        "TLP: ",
+                        ""
+                      )}
+                    </span>
                   </FormText>
                 </Col>
               </FormGroup>

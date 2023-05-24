@@ -144,21 +144,28 @@ class DocInfo(FileAnalyzer):
 
     def analyze_for_follina_cve(self) -> List[str]:
         hits = []
-        # case docx
-        zipped = zipfile.ZipFile(self.filepath)
         try:
-            template = zipped.read("word/_rels/document.xml.rels")
-        except KeyError:
-            pass
+            # case docx
+            zipped = zipfile.ZipFile(self.filepath)
+        except zipfile.BadZipFile:
+            logger.info(
+                f"file {self.filename} is not a zip file so we"
+                f"cant' do custom Follina Extraction"
+            )
         else:
-            # logic reference:
-            # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
-            xml_root = fromstring(template)
-            for xml_node in xml_root.iter():
-                target = xml_node.attrib.get("Target")
-                if target:
-                    target = target.strip().lower()
-                    hits += re.findall(r"mhtml:(https?://.*?)!", target)
+            try:
+                template = zipped.read("word/_rels/document.xml.rels")
+            except KeyError:
+                pass
+            else:
+                # logic reference:
+                # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
+                xml_root = fromstring(template)
+                for xml_node in xml_root.iter():
+                    target = xml_node.attrib.get("Target")
+                    if target:
+                        target = target.strip().lower()
+                        hits += re.findall(r"mhtml:(https?://.*?)!", target)
         return hits
 
     def analyze_msodde(self):

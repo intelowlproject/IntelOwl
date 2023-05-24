@@ -106,7 +106,7 @@ class IPReputationServices(Visualizer):
             )
             data = analyzer_report.report.get("data", [])
             malware_printable = ""
-            if data:
+            if data and isinstance(data, list):
                 malware_printable = data[0].get("malware_printable", "")
             threatfox_report = self.Title(
                 self.Base(

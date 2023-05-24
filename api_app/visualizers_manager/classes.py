@@ -181,6 +181,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         open: bool = False,  # noqa
         max_elements_number: int = -1,
         add_count_in_title: bool = True,
+        fill_empty: bool = True,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
@@ -197,6 +198,8 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
                 raise TypeError(
                     f"value {v} should be a VisualizableObject and not a string"
                 )
+        if fill_empty and not value:
+            value = [VisualizableBase(value="no data available", disable=False)]
         self.value = value
         self.max_elements_number = max_elements_number
         self.name = name

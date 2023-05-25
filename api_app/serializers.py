@@ -3,6 +3,7 @@
 
 import copy
 import datetime
+import ipaddress
 import json
 import logging
 import re
@@ -628,14 +629,14 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
+        attrs["observable_name"] = self.defanged_values_removal(
+            attrs["observable_name"]
+        )
         # calculate ``observable_classification``
         if not attrs.get("observable_classification", None):
             attrs["observable_classification"] = ObservableTypes.calculate(
                 attrs["observable_name"]
             )
-        attrs["observable_name"] = self.defanged_values_removal(
-            attrs["observable_name"]
-        )
         if attrs["observable_classification"] in [
             ObservableTypes.HASH,
             ObservableTypes.DOMAIN,
@@ -643,6 +644,20 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             # force lowercase in ``observable_name``.
             # Ref: https://github.com/intelowlproject/IntelOwl/issues/658
             attrs["observable_name"] = attrs["observable_name"].lower()
+
+        if attrs["observable_classification"] == ObservableTypes.IP.value:
+            ip = ipaddress.ip_address(attrs["observable_name"])
+            if ip.is_loopback:
+                raise ValidationError("Loopback address")
+            elif ip.is_private:
+                raise ValidationError("Private address")
+            elif ip.is_multicast:
+                raise ValidationError("Multicast address")
+            elif ip.is_link_local:
+                raise ValidationError("Local link address")
+            elif ip.is_reserved:
+                raise ValidationError("Reserved address")
+
         # calculate ``md5``
         attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
         attrs = super().validate(attrs)

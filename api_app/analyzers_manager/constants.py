@@ -42,8 +42,11 @@ class ObservableTypes(models.TextChoices):
             ipaddress.ip_address(value)
         except ValueError:
             if re.match(
-                r"^.+://[a-z\d-]{1,63}(?:\.[a-z\d-]{1,63})+"
-                r"(?:/[a-zA-Z\d-]{1,63})*(?:\.\w+)?",
+                r"^.+://[a-z\d-]{1,200}"
+                r"(?:\.[a-zA-Z\d\u2044\u2215!#$&(-;=?-\[\]_~]{1,200})+"
+                r"(?::\d{2,6})?"
+                r"(?:/[a-zA-Z\d\u2044\u2215!#$&(-;=?-\[\]_~]{1,200})*"
+                r"(?:\.\w+)?",
                 value,
             ):
                 classification = cls.URL

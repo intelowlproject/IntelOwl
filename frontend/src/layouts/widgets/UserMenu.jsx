@@ -43,7 +43,7 @@ export default function UserMenu(props) {
         <DropdownNavLink to="/me/sessions">
           <IoMdKey className="me-2" /> API Access/ Sessions
         </DropdownNavLink>
-        <DropdownNavLink to="/me/two-factor-auth">
+        <DropdownNavLink to="/account/two_factor/login">
           <IoMdKey className="me-2" /> Two-Factor-Auth
         </DropdownNavLink>
         <DropdownNavLink to="/me/config">

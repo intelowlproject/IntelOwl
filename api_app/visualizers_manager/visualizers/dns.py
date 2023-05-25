@@ -9,12 +9,6 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.
 from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.dns0_eu_malicious_detector import (  # noqa: E501
     DNS0EUMaliciousDetector,
 )
-from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.google_webrisk import (  # noqa: E501
-    WebRisk,
-)
-from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.googlesf import (  # noqa: E501
-    GoogleSF,
-)
 from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.quad9_malicious_detector import (  # noqa: E501
     Quad9MaliciousDetector,
 )
@@ -57,8 +51,6 @@ class DNS(Visualizer):
     def second_level_analyzers(cls) -> List[str]:
         return [  # noqa
             CloudFlareMaliciousDetector.python_module,
-            GoogleSF.python_module,
-            WebRisk.python_module,
             DNS0EUMaliciousDetector.python_module,
             Quad9MaliciousDetector.python_module,
         ]
@@ -72,7 +64,7 @@ class DNS(Visualizer):
             printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
             logger.debug(f"{printable_analyzer_name=}")
             logger.debug(f"{analyzer_report.config.python_complete_path=}")
-            logger.debug(f"{analyzer_report=}")
+            logger.debug(f"{analyzer_report.report=}")
             if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
                 disable_element = not analyzer_report.report["resolutions"]
                 first_level_elements.append(
@@ -97,8 +89,8 @@ class DNS(Visualizer):
             else:
                 second_level_elements.append(
                     self.Bool(
-                        name=printable_analyzer_name,
-                        value=analyzer_report.report["malicious"],
+                        value=printable_analyzer_name,
+                        disable=not analyzer_report.report["malicious"],
                     )
                 )
 

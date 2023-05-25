@@ -34,6 +34,9 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     def report_model(cls):
         raise NotImplementedError()
 
+    def get_queryset(self):
+        return self.report_model.objects.all()
+
     def get_object(self, job_id: int, report_id: int) -> AbstractReport:
         """
         overrides drf's get_object
@@ -121,6 +124,7 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     serializer_class = AbstractConfigSerializer
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
+    lookup_field = "name"
 
     def get_queryset(self):
         return self.serializer_class.Meta.model.objects.all()
@@ -144,8 +148,8 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         url_path="health_check",
         permission_classes=[IsAdminUser],
     )
-    def health_check(self, request, pk=None):
-        logger.info(f"get healthcheck from user {request.user}, pk {pk}")
+    def health_check(self, request, name=None):
+        logger.info(f"get healthcheck from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         class_ = obj.python_class
         try:
@@ -171,8 +175,8 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         detail=True,
         url_path="organization",
     )
-    def disable_in_org(self, request, pk=None):
-        logger.info(f"get disable_in_org from user {request.user}, pk {pk}")
+    def disable_in_org(self, request, name=None):
+        logger.info(f"get disable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if not request.user.has_membership() or not request.user.membership.is_owner:
             raise PermissionDenied()
@@ -183,8 +187,8 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_201_CREATED)
 
     @disable_in_org.mapping.delete
-    def enable_in_org(self, request, pk=None):
-        logger.info(f"get enable_in_org from user {request.user}, pk {pk}")
+    def enable_in_org(self, request, name=None):
+        logger.info(f"get enable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if not request.user.has_membership() or not request.user.membership.is_owner:
             raise PermissionDenied()

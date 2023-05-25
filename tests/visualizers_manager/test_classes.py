@@ -32,6 +32,7 @@ class VisualizableObjectTestCase(CustomTestCase):
         result = vo.to_dict()
 
         expected_result = {
+            "alignment": "around",
             "size": "1",
             "disable": False,
             "type": "test",
@@ -45,10 +46,10 @@ class VisualizableBaseTestCase(CustomTestCase):
             "test",
             color=VisualizableColor.DARK,
             link="https://test.com",
-            classname="test",
             disable=True,
         )
         expected_result = {
+            "alignment": "center",
             "disable": True,
             "bold": False,
             "italic": False,
@@ -57,7 +58,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             "color": "dark",
             "size": "auto",
             "link": "https://test.com",
-            "classname": "test",
             "icon": "",
         }
         self.assertEqual(vo.to_dict(), expected_result)
@@ -67,7 +67,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             "",
             color=VisualizableColor.DARK,
             link="https://test.com",
-            classname="test",
             disable=False,
         )
         expected_result = {}
@@ -79,10 +78,10 @@ class VisualizableBaseTestCase(CustomTestCase):
             color=VisualizableColor.DARK,
             size=VisualizableSize.S_3,
             link="https://test.com",
-            classname="test",
             disable=True,
         )
         expected_result = {
+            "alignment": "center",
             "disable": True,
             "bold": False,
             "italic": False,
@@ -91,7 +90,6 @@ class VisualizableBaseTestCase(CustomTestCase):
             "color": "dark",
             "size": "3",
             "link": "https://test.com",
-            "classname": "test",
             "icon": "",
         }
         self.assertEqual(vo.to_dict(), expected_result)
@@ -99,18 +97,16 @@ class VisualizableBaseTestCase(CustomTestCase):
 
 class VisualizableBoolTestCase(CustomTestCase):
     def test_to_dict(self):
-        vo = VisualizableBool(name="test", value=True)
+        vo = VisualizableBool(value="test", disable=False)
         expected_result = {
             "type": "bool",
-            "name": "test",
-            "value": True,
+            "value": "test",
             "link": "",
-            "classname": "",
             "color": "danger",
             "icon": "",
             "italic": False,
             "size": "auto",
-            "disable": True,
+            "disable": False,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -129,6 +125,7 @@ class VisualizableTitleTestCase(CustomTestCase):
         vo = VisualizableTitle(title, value)
 
         expected_result = {
+            "alignment": "center",
             "type": "title",
             "title": title.to_dict(),
             "value": value.to_dict(),
@@ -146,6 +143,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         )
         vvl = VisualizableVerticalList(name=name, value=[value])
         expected_result = {
+            "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
             "open": False,
@@ -164,6 +162,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         )
         vvl = VisualizableVerticalList(name=name, value=[value])
         expected_result = {
+            "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,
@@ -178,12 +177,26 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         name = VisualizableBase(value="test")
         vvl = VisualizableVerticalList(name=name, value=[])
         expected_result = {
+            "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,
             "open": False,
             "size": "auto",
-            "values": [],
+            "values": [
+                {
+                    "alignment": "center",
+                    "bold": False,
+                    "color": "",
+                    "disable": False,
+                    "icon": "",
+                    "italic": False,
+                    "link": "",
+                    "size": "auto",
+                    "type": "base",
+                    "value": "no data available",
+                }
+            ],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
 

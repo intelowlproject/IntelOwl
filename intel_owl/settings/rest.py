@@ -72,5 +72,6 @@ DRF_RECAPTCHA_SECRET_KEY = (
 # and to have this populated also for people who upgraded from previous versions
 if not DRF_RECAPTCHA_SECRET_KEY:
     DRF_RECAPTCHA_SECRET_KEY = "fake"
-DRF_RECAPTCHA_TESTING = STAGE_LOCAL or STAGE_CI
+
+DRF_RECAPTCHA_TESTING = STAGE_LOCAL or STAGE_CI or DRF_RECAPTCHA_SECRET_KEY == "fake"
 DRF_RECAPTCHA_TESTING_PASS = True

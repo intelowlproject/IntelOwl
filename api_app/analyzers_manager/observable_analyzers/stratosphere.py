@@ -34,7 +34,11 @@ class Stratos(classes.ObservableAnalyzer):
 
         for ip_tuple in db_list[2:]:
             if ip in ip_tuple:
-                ip_rating = (ip_tuple.split(",")[2]).strip()
+                split_tuple = ip_tuple.split(",")
+                if split_tuple == 3:
+                    ip_rating = (split_tuple[2]).strip()
+                else:
+                    ip_rating = "found"
                 return ip_rating
         return ""
 

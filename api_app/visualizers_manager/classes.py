@@ -74,7 +74,6 @@ class VisualizableBase(VisualizableObject):
         icon: Union[VisualizableIcon, str] = VisualizableIcon.EMPTY,
         bold: bool = False,
         italic: bool = False,
-        classname: str = "",
         disable: bool = True,
     ):
         super().__init__(size, alignment, disable)
@@ -84,7 +83,6 @@ class VisualizableBase(VisualizableObject):
         self.icon = icon
         self.bold = bold
         self.italic = italic
-        self.classname = classname
 
     @property
     def attributes(self) -> List[str]:
@@ -92,7 +90,6 @@ class VisualizableBase(VisualizableObject):
             "value",
             "color",
             "link",
-            "classname",
             "icon",
             "bold",
             "italic",
@@ -138,22 +135,19 @@ class VisualizableTitle(VisualizableObject):
 class VisualizableBool(VisualizableBase):
     def __init__(
         self,
-        name: str,
-        value: bool,
+        value: str,
+        disable: bool,
         *args,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         color: VisualizableColor = VisualizableColor.DANGER,
         **kwargs,
     ):
-        super().__init__(*args, size=size, color=color, value=value, **kwargs)
-        self.name = name
+        super().__init__(
+            *args, value=value, size=size, color=color, disable=disable, **kwargs
+        )
 
     def __bool__(self):
-        return bool(self.name)
-
-    @property
-    def attributes(self) -> List[str]:
-        return super().attributes + ["name"]
+        return bool(self.value)
 
     @property
     def type(self) -> str:
@@ -173,7 +167,7 @@ class VisualizableListMixin:
         result = super().to_dict()  # noqa
         values: List[VisualizableObject] = result.pop("value", [])
         if any(x for x in values):
-            result["values"] = [val.to_dict() for val in values]
+            result["values"] = [val.to_dict() for val in values if val is not None]
         else:
             result["values"] = []
         return result
@@ -187,6 +181,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         open: bool = False,  # noqa
         max_elements_number: int = -1,
         add_count_in_title: bool = True,
+        fill_empty: bool = True,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
@@ -198,6 +193,13 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         )
         if add_count_in_title:
             name.value += f" ({len(value)})"
+        for v in value:
+            if isinstance(v, str):
+                raise TypeError(
+                    f"value {v} should be a VisualizableObject and not a string"
+                )
+        if fill_empty and not value:
+            value = [VisualizableBase(value="no data available", disable=False)]
         self.value = value
         self.max_elements_number = max_elements_number
         self.name = name

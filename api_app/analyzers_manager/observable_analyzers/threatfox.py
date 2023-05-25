@@ -23,6 +23,11 @@ class ThreatFox(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         result = response.json()
+        data = result.get("data", {})
+        if isinstance(data, dict):
+            ioc_id = data.get("id", "")
+            if ioc_id:
+                result["link"] = f"https://threatfox.abuse.ch/ioc/{ioc_id}"
         return result
 
     @classmethod

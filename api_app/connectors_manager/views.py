@@ -22,8 +22,6 @@ class ConnectorConfigAPI(AbstractConfigAPI):
 
 
 class ConnectorActionViewSet(PluginActionViewSet):
-    queryset = ConnectorReport.objects.all()
-
     @classmethod
     @property
     def report_model(cls):
@@ -33,4 +31,4 @@ class ConnectorActionViewSet(PluginActionViewSet):
         signature = report.config.get_signature(
             report.job,
         )
-        signature()
+        signature.apply_async()

@@ -43,7 +43,7 @@ We have done some big refactor changes that could make your application do not w
 * Added more public Yara Rules (@dr4konia, @facebook) and we worked hard to optimize intensively Yara scanning. Now it should be super fast.
 * Added [Sublime Security](https://docs.sublimesecurity.com/docs) analyzer (new framework to analyze emails).
 * Updated and refactored `Dnstwist` analyzer to support more recent added options and work more reliably.
-* Fixes to several analyzers like VirusTotal, OTX, APKiD
+* Fixes to several analyzers like VirusTotal, OTX, APKiD, ClamAV
 
 **Fixes / adjust / minor changes**
 * moved from TLP:WHITE to TLP:CLEAR

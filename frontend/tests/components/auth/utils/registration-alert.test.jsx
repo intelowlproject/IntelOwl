@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import {
   InviteOnlyAlert,
   AfterRegistrationModalAlert,
+  RegistrationSetUpModalAlert,
 } from "../../../../src/components/auth/utils/registration-alert";
 
 describe("registration-alert", () => {
@@ -33,6 +34,30 @@ describe("registration-alert", () => {
 
     const elementText = screen.getByText("Registration successful! 🥳");
     expect(elementText).toBeInTheDocument();
+    const buttonElement = screen.getByRole("button");
+    expect(buttonElement).toBeInTheDocument();
+
+    await user.click(buttonElement);
+
+    await waitFor(() => {
+      // check redirect to "/"
+      expect(global.location.pathname).toEqual("/");
+    });
+  });
+
+  test("RegistrationSetUpModalAlert component", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <RegistrationSetUpModalAlert isOpen setIsOpen={jest.fn()} />
+      </BrowserRouter>
+    );
+
+    const elementText = screen.getByText("Error");
+    expect(elementText).toBeInTheDocument();
+    const elementAlertText = screen.getByText("Wrong registration setup!");
+    expect(elementAlertText).toBeInTheDocument();
     const buttonElement = screen.getByRole("button");
     expect(buttonElement).toBeInTheDocument();
 

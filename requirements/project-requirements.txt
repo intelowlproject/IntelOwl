@@ -7,7 +7,7 @@ django-filter==23.2
 django-storages==1.13.1
 django-celery-beat==2.5.0
 django-celery-results==2.5.0
-django-ses == 3.4.0
+django-ses == 3.5.0
 django-iam-dbauth==0.1.4
 django-prettyjson==0.4.1
 django-silk==5.0.3

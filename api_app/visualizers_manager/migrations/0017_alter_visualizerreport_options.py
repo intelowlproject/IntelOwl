@@ -7,15 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("playbooks_manager", "0008_fix_free_to_use_playbook"),
+        ("visualizers_manager", "0016_visualizerreport_name"),
     ]
 
     operations = [
+        migrations.AlterModelOptions(
+            name="visualizerreport",
+            options={"ordering": ["pk"]},
+        ),
         migrations.AlterField(
-            model_name="playbookconfig",
+            model_name="visualizerconfig",
             name="name",
             field=models.CharField(
-                max_length=100,
+                max_length=50,
                 primary_key=True,
                 serialize=False,
                 unique=True,

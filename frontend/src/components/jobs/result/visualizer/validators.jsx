@@ -96,8 +96,7 @@ function parseElementFields(rawElement) {
   // validation for the elements
   switch (validatedFields.type) {
     case VisualizerComponentType.BOOL: {
-      validatedFields.name = rawElement.name;
-      validatedFields.value = parseBool(rawElement.value);
+      validatedFields.value = rawElement.value;
       validatedFields.icon = rawElement.icon;
       validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.link = rawElement.link;

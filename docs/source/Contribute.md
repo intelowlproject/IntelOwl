@@ -33,6 +33,8 @@ Keeping to a consistent code style throughout the project makes it easier to con
 
 ## How to start (Setup project and development instance)
 
+This guide assumes that you have already performed the steps required to install the project. If not, please do it ([Installation Guide](https://intelowl.readthedocs.io/en/latest/Installation.html)).
+
 Create a personal fork of the project on Github.
 Then, please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
 
@@ -41,6 +43,7 @@ Then, please create a new branch based on the **develop** branch that contains t
 Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit/pre-commit) to force linters on every commits you perform
 
 ```bash
+# from the project directory
 # create virtualenv to host pre-commit installation
 python3 -m venv venv
 source venv/bin/activate
@@ -48,8 +51,12 @@ source venv/bin/activate
 pip install pre-commit
 pre-commit install
 
-# create .env file for controlling repo_downloader.sh (to speed up image builds during development)
+# create .env file for controlling repo_downloader.sh 
+# (to speed up image builds during development: it avoid downloading some repos)
 cp docker/.env.start.test.template docker/.env.start.test
+
+# set STAGE env variable to "local"
+sed -i "s/STAGE=\"production\"/STAGE=\"local\"/g" docker/env_file_app
 ```
 
 ### Backend

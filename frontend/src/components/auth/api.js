@@ -65,3 +65,12 @@ export async function resetPassword(body) {
     return Promise.reject(err);
   }
 }
+
+export async function checkRegistrationSetup() {
+  try {
+    const resp = await axios.get(`${AUTH_BASE_URI}/check_registration_setup`);
+    return resp;
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}

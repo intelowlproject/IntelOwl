@@ -21,8 +21,9 @@ import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import {
   AfterRegistrationModalAlert,
   InviteOnlyAlert,
+  RegistrationSetUpModalAlert,
 } from "./utils/registration-alert";
-import { registerUser } from "./api";
+import { registerUser, checkRegistrationSetup } from "./api";
 import {
   EmailValidator,
   PasswordValidator,
@@ -161,10 +162,21 @@ export default function Register() {
   useTitle("IntelOwl | Sign up", { restoreOnUnmount: true });
 
   // local state
-  const [showModal, setShowModal] = React.useState(false);
+  const [showAfterRegistrationModal, setShowAfterRegistrationModal] =
+    React.useState(false);
+  const [showRegistrationSetupModal, setShowRegistrationSetupModal] =
+    React.useState(false);
   const [passwordShown, setPasswordShown] = React.useState(false);
 
-  console.debug("ShowModal:", showModal);
+  console.debug("showAfterRegistrationModal:", showAfterRegistrationModal);
+
+  React.useEffect(() => {
+    checkRegistrationSetup().catch(() => {
+      setShowRegistrationSetupModal(true);
+    });
+  }, []);
+
+  console.debug("showRegistrationSetupModal:", showRegistrationSetupModal);
 
   // callbacks
   const onSubmit = React.useCallback(
@@ -192,20 +204,26 @@ export default function Register() {
           initialValues[key] = INITIAL_VALUES[key];
         });
 
-        setShowModal(true);
+        setShowAfterRegistrationModal(true);
       } catch (e) {
         // handled inside registerUser
       }
     },
-    [setShowModal]
+    [setShowAfterRegistrationModal]
   );
 
   return (
     <ContentSection className="bg-body">
-      {showModal && (
+      {showRegistrationSetupModal && (
+        <RegistrationSetUpModalAlert
+          isOpen={showRegistrationSetupModal}
+          setIsOpen={setShowRegistrationSetupModal}
+        />
+      )}
+      {showAfterRegistrationModal && (
         <AfterRegistrationModalAlert
-          isOpen={showModal}
-          setIsOpen={setShowModal}
+          isOpen={showAfterRegistrationModal}
+          setIsOpen={setShowAfterRegistrationModal}
         />
       )}
       <Container fluid className="col-12">

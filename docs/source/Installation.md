@@ -110,12 +110,15 @@ Configuration required to enable integration with Slack:
 * `DEFAULT_SLACK_CHANNEL`: ID of the Slack channel you want to post the message to
 
 Configuration required to enable Re-Captcha in the Login and the Registration Page:
+In the `docker/env_file_app`:
 * `RECAPTCHA_SECRET_KEY_IO_LOCAL`: your recaptcha secret key internal deployment
 * `RECAPTCHA_SECRET_KEY_IO_PUBLIC`: your recaptcha secret key for public deployment
+In the `docker/env_template.js`:
+* `RECAPTCHA_SITEKEY`: Recaptcha Key for your site
 
 Configuration required to have InteOwl sending Emails (registration requests, mail verification, password reset/change, etc)
-* `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager
-* `DEFAULT_EMAIL`: email address used for correspondence with users
+* `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager (example: `noreply@mydomain.com`)
+* `DEFAULT_EMAIL`: email address used for correspondence with users (example: `info@mydomain.com`)
 * `EMAIL_HOST`: the host to use for sending email with SMTP
 * `EMAIL_HOST_USER`: username to use for the SMTP server defined in EMAIL_HOST
 * `EMAIL_HOST_PASSWORD`: password to use for the SMTP server defined in EMAIL_HOST. This setting is used in conjunction with EMAIL_HOST_USER when authenticating to the SMTP server.

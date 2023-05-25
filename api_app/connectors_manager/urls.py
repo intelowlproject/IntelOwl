@@ -11,6 +11,7 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(
     r"jobs/(?P<job_id>\d+)/connector/(?P<report_id>\w+)",
     ConnectorActionViewSet,
+    basename="connectorreport",
 )
 router.register(r"connector", ConnectorConfigAPI, basename="connector")
 

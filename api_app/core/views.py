@@ -34,6 +34,9 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     def report_model(cls):
         raise NotImplementedError()
 
+    def get_queryset(self):
+        return self.report_model.objects.all()
+
     def get_object(self, job_id: int, report_id: int) -> AbstractReport:
         """
         overrides drf's get_object

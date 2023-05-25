@@ -22,8 +22,6 @@ class ConnectorConfigAPI(AbstractConfigAPI):
 
 
 class ConnectorActionViewSet(PluginActionViewSet):
-    queryset = ConnectorReport.objects.all()
-
     @classmethod
     @property
     def report_model(cls):

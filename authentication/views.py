@@ -7,6 +7,7 @@ from typing import List
 import rest_email_auth.views
 from authlib.integrations.base_client import OAuthError
 from authlib.oauth2 import OAuth2Error
+from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
 from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
@@ -190,3 +191,43 @@ class GoogleLoginCallbackView(LoginView):
             "token": token_obj.token,
         }
         return data
+
+
+@api_view(["get"])
+@permission_classes([AllowAny])
+def check_registration_setup(request):
+    logger.info(f"Requested checking registration setup from {request.user}.")
+    errors = {}
+
+    # email setup
+    if not settings.DEFAULT_FROM_EMAIL:
+        errors["DEFAULT_FROM_EMAIL"] = "required"
+    if not settings.DEFAULT_EMAIL:
+        errors["DEFAULT_EMAIL"] = "required"
+
+    # if you are in production environment
+    if settings.STAGE_PRODUCTION:
+        # SES backend
+        if settings.AWS_SES:
+            if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
+                errors["AWS SES backend"] = "configuration required"
+        else:
+            # SMTP backend
+            required_variables = [
+                settings.EMAIL_HOST,
+                settings.EMAIL_HOST_USER,
+                settings.EMAIL_HOST_PASSWORD,
+                settings.EMAIL_PORT,
+            ]
+            for variable in required_variables:
+                if not variable:
+                    errors["SMTP backend"] = "configuration required"
+
+        # recaptcha key
+        if settings.DRF_RECAPTCHA_SECRET_KEY == "fake":
+            errors["RECAPTCHA_SECRET_KEY"] = "required"
+
+    logger.info(f"Registration setup errors: {errors}")
+    if errors:
+        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+    return Response(status=status.HTTP_200_OK)

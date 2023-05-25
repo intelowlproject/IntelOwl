@@ -335,3 +335,73 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertFalse(
             content["is_active"], msg="newly registered user must have is_active=False"
         )
+
+
+class CheckRegistrationSetupTestCase(CustomOAuthTestCase):
+    def test_200_local_setup(self):
+        with self.settings(
+            DEFAULT_FROM_EMAIL="fake@email.it",
+            DEFAULT_EMAIL="fake@email.it",
+            STAGE_LOCAL="true",
+        ):
+            response = self.client.get("/api/auth/check_registration_setup")
+            self.assertEqual(response.status_code, 200)
+
+    def test_200_prod_smtp_setup(self):
+        with self.settings(
+            DEFAULT_FROM_EMAIL="fake@email.it",
+            DEFAULT_EMAIL="fake@email.it",
+            STAGE_PRODUCTION="true",
+            EMAIL_HOST="test",
+            EMAIL_HOST_USER="test",
+            EMAIL_HOST_PASSWORD="test",
+            EMAIL_PORT="test",
+            DRF_RECAPTCHA_SECRET_KEY="recaptchakey",
+        ):
+            response = self.client.get("/api/auth/check_registration_setup")
+            self.assertEqual(response.status_code, 200)
+
+    def test_200_prod_ses_setup(self):
+        with self.settings(
+            DEFAULT_FROM_EMAIL="fake@email.it",
+            DEFAULT_EMAIL="fake@email.it",
+            STAGE_PRODUCTION="true",
+            AWS_SES="true",
+            AWS_ACCESS_KEY_ID="test",
+            AWS_SECRET_ACCESS_KEY="test",
+            DRF_RECAPTCHA_SECRET_KEY="recaptchakey",
+        ):
+            response = self.client.get("/api/auth/check_registration_setup")
+            self.assertEqual(response.status_code, 200)
+
+    def test_501_local_setup(self):
+        with self.settings(DEFAULT_FROM_EMAIL="", DEFAULT_EMAIL="", STAGE_LOCAL="true"):
+            response = self.client.get("/api/auth/check_registration_setup")
+            self.assertEqual(response.status_code, 501)
+
+    def test_501_prod_smtp_setup(self):
+        with self.settings(
+            DEFAULT_FROM_EMAIL="fake@email.it",
+            DEFAULT_EMAIL="fake@email.it",
+            STAGE_PRODUCTION="true",
+            EMAIL_HOST="",
+            EMAIL_HOST_USER="",
+            EMAIL_HOST_PASSWORD="",
+            EMAIL_PORT="",
+            DRF_RECAPTCHA_SECRET_KEY="fake",
+        ):
+            response = self.client.get("/api/auth/check_registration_setup")
+            self.assertEqual(response.status_code, 501)
+
+    def test_501_prod_ses_setup(self):
+        with self.settings(
+            DEFAULT_FROM_EMAIL="fake@email.it",
+            DEFAULT_EMAIL="fake@email.it",
+            STAGE_PRODUCTION="true",
+            AWS_SES="true",
+            AWS_ACCESS_KEY_ID="",
+            AWS_SECRET_ACCESS_KEY="",
+            DRF_RECAPTCHA_SECRET_KEY="fake",
+        ):
+            response = self.client.get("/api/auth/check_registration_setup")
+            self.assertEqual(response.status_code, 501)

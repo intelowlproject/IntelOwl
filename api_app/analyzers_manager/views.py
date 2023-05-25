@@ -62,8 +62,6 @@ class AnalyzerConfigAPI(AbstractConfigAPI):
 
 
 class AnalyzerActionViewSet(PluginActionViewSet):
-    queryset = AnalyzerReport.objects.all()
-
     @classmethod
     @property
     def report_model(cls):

@@ -56,5 +56,5 @@ BROKER_URL=amqp://guest:guest@rabbitmq:5672
 
 
 # drf-recaptcha
-RECAPTCHA_SECRET_KEY_IO_PUBLIC="testkey"
-RECAPTCHA_SECRET_KEY_IO_LOCAL="testkey"
+# RECAPTCHA_SECRET_KEY_IO_PUBLIC="testkey"
+# RECAPTCHA_SECRET_KEY_IO_LOCAL="testkey"

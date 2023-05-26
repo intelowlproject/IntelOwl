@@ -41,7 +41,7 @@ class PhishStats(ObservableAnalyzer):
             )
         elif to_analyze_observable_classification == self.ObservableTypes.GENERIC:
             endpoint = (
-                f"phishing?_where=(title,like,"
+                "phishing?_where=(title,like,"
                 f"~{to_analyze_observable_name}~)&_sort=-date"
             )
         else:

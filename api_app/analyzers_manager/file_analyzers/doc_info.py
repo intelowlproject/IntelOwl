@@ -150,7 +150,7 @@ class DocInfo(FileAnalyzer):
         except zipfile.BadZipFile:
             logger.info(
                 f"file {self.filename} is not a zip file so we"
-                f"cant' do custom Follina Extraction"
+                "cant' do custom Follina Extraction"
             )
         else:
             try:

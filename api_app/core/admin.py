@@ -57,7 +57,7 @@ class ParameterInlineForm(forms.ModelForm):
         fields = ParameterAdminView.fields
 
     def __init__(self, *args, **kwargs):
-        instance: Parameter = kwargs.get("instance", None)
+        instance: Parameter = kwargs.get("instance")
         if instance:
             try:
                 pc = PluginConfig.objects.get(parameter=instance, owner__isnull=True)

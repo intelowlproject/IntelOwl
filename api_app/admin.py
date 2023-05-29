@@ -64,9 +64,11 @@ class PluginCredentialAdminView(admin.ModelAdmin):
         "parameter__visualizer_config__name",
     )
 
+    @staticmethod
     def parameter_name(self, instance: PluginConfig):
         return instance.parameter.name
 
+    @staticmethod
     def owner_name(self, instance: PluginConfig):
         if instance.owner:
             return instance.owner.name

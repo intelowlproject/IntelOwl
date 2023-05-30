@@ -9,7 +9,7 @@
     "axios-hooks": "^3.1.5",
     "bootstrap": "^5.2.3",
     "classnames": "^2.3.1",
-    "flag-icons": "^6.6.6",
+    "flag-icons": "^6.7.0",
     "formik": "^2.2.9",
     "md5": "^2.3.0",
     "prop-types": "^15.8.1",

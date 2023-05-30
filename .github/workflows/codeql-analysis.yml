@@ -34,7 +34,7 @@ jobs:
         fetch-depth: 2
 
     - name: Set up Python
-      uses: actions/setup-python@v4.5.0
+      uses: actions/setup-python@v4.6.1
       with:
         python-version: '3.9'
 

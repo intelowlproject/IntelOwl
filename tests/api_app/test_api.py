@@ -370,9 +370,9 @@ class ApiViewTests(CustomAPITestCase):
         contents = response.json()
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 400, msg=msg)
-        error = contents["errors"][0]
+        error = contents["errors"]["detail"][0]
         self.assertEqual(error["tlp"][0], '"incorrect" is not a valid choice.', msg=msg)
-        error = contents["errors"][1]
+        error = contents["errors"]["detail"][1]
         self.assertEqual(error["tlp"][0], '"incorrect" is not a valid choice.', msg=msg)
 
     def test_ask_multi_analysis_availability(self):

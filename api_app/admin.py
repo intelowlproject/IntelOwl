@@ -65,11 +65,11 @@ class PluginCredentialAdminView(admin.ModelAdmin):
     )
 
     @staticmethod
-    def parameter_name(self, instance: PluginConfig):
+    def parameter_name(instance: PluginConfig):
         return instance.parameter.name
 
     @staticmethod
-    def owner_name(self, instance: PluginConfig):
+    def owner_name(instance: PluginConfig):
         if instance.owner:
             return instance.owner.name
         return None

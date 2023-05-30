@@ -89,7 +89,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             validate_runtime_configuration(runtime_config)
         except django.core.exceptions.ValidationError as e:
             logger.info(e, stack_info=True)
-            raise ValidationError("Runtime Configuration Validation Failed")
+            raise ValidationError({"detail": "Runtime Configuration Validation Failed"})
         return runtime_config
 
     def validate_tlp(self, tlp: str):
@@ -116,7 +116,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 "connectors_requested", []
             ):
                 raise ValidationError(
-                    "You can't specify a playbook and plugins together"
+                    {"detail": "You can't specify a playbook and plugins together"}
                 )
             if playbook.disabled:
                 raise ValidationError(
@@ -255,7 +255,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             job.full_clean()
         except django.core.exceptions.ValidationError as e:
             logger.info(e, stack_info=True)
-            raise ValidationError("Validation failed")
+            raise ValidationError({"detail": "Validation model failed"})
         job.save()
         if tags:
             job.tags.set(tags)
@@ -379,7 +379,9 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
         if data.getlist("file_names", False) and len(data.getlist("file_names")) != len(
             data.getlist("files")
         ):
-            raise ValidationError("file_names and files must have the same length.")
+            raise ValidationError(
+                {"detail": "file_names and files must have the same length."}
+            )
 
         try:
             base_data: QueryDict = data.copy()
@@ -407,7 +409,7 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
                 ret.append(validated)
 
         if any(errors):
-            raise ValidationError(errors)
+            raise ValidationError({"detail": errors})
 
         return ret
 
@@ -479,7 +481,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             )
         except ValueError as e:
             logger.info(e, stack_info=True)
-            raise ValidationError("mimetype is not correct")
+            raise ValidationError({"detail": "Mimetype is not correct"})
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)
@@ -565,7 +567,7 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
             else:
                 ret.append(validated)
         if any(errors):
-            raise ValidationError(errors)
+            raise ValidationError({"detail": errors})
         return ret
 
 
@@ -648,15 +650,15 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         if attrs["observable_classification"] == ObservableTypes.IP.value:
             ip = ipaddress.ip_address(attrs["observable_name"])
             if ip.is_loopback:
-                raise ValidationError("Loopback address")
+                raise ValidationError({"detail": "Loopback address"})
             elif ip.is_private:
-                raise ValidationError("Private address")
+                raise ValidationError({"detail": "Private address"})
             elif ip.is_multicast:
-                raise ValidationError("Multicast address")
+                raise ValidationError({"detail": "Multicast address"})
             elif ip.is_link_local:
-                raise ValidationError("Local link address")
+                raise ValidationError({"detail": "Local link address"})
             elif ip.is_reserved:
-                raise ValidationError("Reserved address")
+                raise ValidationError({"detail": "Reserved address"})
 
         # calculate ``md5``
         attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
@@ -852,7 +854,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     class CustomValueField(rfs.JSONField):
         def to_internal_value(self, data):
             if not data:
-                raise ValidationError("empty insertion")
+                raise ValidationError({"detail": "Empty insertion"})
             logger.info(f"verifying that value {data} ({type(data)}) is JSON compliant")
             try:
                 return json.loads(data)
@@ -863,7 +865,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                     return json.loads(data)
                 except json.JSONDecodeError:
                     logger.info(f"value {data} ({type(data)}) raised ValidationError")
-                    raise ValidationError("Value is not JSON-compliant.")
+                    raise ValidationError({"detail": "Value is not JSON-compliant."})
 
         def get_attribute(self, instance: PluginConfig):
             if (
@@ -894,7 +896,10 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     def validate_value_type(self, value: Any, parameter: Parameter):
         if type(value).__name__ != parameter.type:
             raise ValidationError(
-                f"Value has type {type(value).__name__} instead of {parameter.type}"
+                {
+                    "detail": f"Value has type {type(value).__name__}"
+                    f" instead of {parameter.type}"
+                }
             )
 
     def validate(self, attrs):
@@ -907,7 +912,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             and (attrs.pop("organization").owner != attrs["owner"])
         ):
             attrs["for_organization"] = True
-            raise ValidationError("You are not owner of the organization")
+            raise ValidationError({"detail": "You are not owner of the organization"})
 
         _value = attrs["value"]
         # retro compatibility

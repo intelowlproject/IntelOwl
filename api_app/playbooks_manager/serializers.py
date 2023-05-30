@@ -27,7 +27,7 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
         owner = self.context["request"].user
         if job.user.pk != owner.pk:
             raise ValidationError(
-                "You can create a playbook from a job that you created"
+                {"detail": "You can create a playbook from a job that only you created"}
             )
         return job
 
@@ -56,7 +56,7 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
         try:
             pc.full_clean()
         except django.core.exceptions.ValidationError as e:
-            raise ValidationError(e)
+            raise ValidationError({"detail": e})
         pc.save()
         pc.analyzers.set(list(job.analyzers_to_execute.all()))
         pc.connectors.set(list(job.connectors_to_execute.all()))

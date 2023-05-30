@@ -5,6 +5,8 @@
 ## [v5.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.0)
 This major release is another big step forward for IntelOwl!! 🚀
 
+Official blog post: [v.5.0.0 Announcement](https://www.certego.net/blog/intelowl-v5-released)
+
 We heard your feedback! During the event at [Fosdem](https://fosdem.org/2023/schedule/event/security_intelowl/) we announced that we were working in adding an _aggregated and simplified visualization of analyzer results_.
 We created it. Now, by leveraging a new plugin type called <b>Visualizers</b>, you will be able to create custom visualizations, based on your specific use cases!
 

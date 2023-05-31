@@ -77,8 +77,8 @@ describe("test JobOverview (job report)", () => {
               connectors: {},
               visualizers: {},
             },
-            received_request_time: "2023-05-31T08:19:03.256003Z",
-            finished_analysis_time: "2023-05-31T08:19:04.484684Z",
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
             errors: [],
@@ -142,13 +142,13 @@ describe("test JobOverview (job report)", () => {
       within(JobInfoCardSection).getByText("Start Time")
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("10:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
     ).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("End Time")
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("10:19:04 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023")
     ).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
@@ -262,8 +262,8 @@ describe("test JobOverview (job report)", () => {
               connectors: {},
               visualizers: {},
             },
-            received_request_time: "2023-05-31T08:19:03.256003Z",
-            finished_analysis_time: "2023-05-31T08:19:04.484684Z",
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
             errors: [],
@@ -327,13 +327,13 @@ describe("test JobOverview (job report)", () => {
       within(JobInfoCardSection).getByText("Start Time")
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("10:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
     ).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("End Time")
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("10:19:04 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023")
     ).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
@@ -499,8 +499,8 @@ describe("test JobOverview (job report)", () => {
               connectors: {},
               visualizers: {},
             },
-            received_request_time: "2023-05-31T08:19:03.256003Z",
-            finished_analysis_time: "2023-05-31T08:19:04.484684Z",
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
             errors: [],
@@ -564,13 +564,13 @@ describe("test JobOverview (job report)", () => {
       within(JobInfoCardSection).getByText("Start Time")
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("10:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
     ).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("End Time")
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("10:19:04 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023")
     ).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
@@ -643,7 +643,7 @@ describe("test JobOverview (job report)", () => {
               connectors: {},
               visualizers: {},
             },
-            received_request_time: "2023-05-31T08:19:03.256003Z",
+            received_request_time: "2023-05-31T08:19:03.256003",
             finished_analysis_time: null,
             process_time: null,
             tlp: "AMBER",
@@ -706,7 +706,7 @@ describe("test JobOverview (job report)", () => {
       within(JobInfoCardSection).getByText("Start Time")
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("10:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
     ).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("End Time")
@@ -917,8 +917,8 @@ describe("test JobOverview (job report)", () => {
               connectors: {},
               visualizers: {},
             },
-            received_request_time: "2023-05-31T08:19:03.256003Z",
-            finished_analysis_time: "2023-05-31T08:19:04.484684Z",
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
             errors: [],

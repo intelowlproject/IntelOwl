@@ -45,7 +45,7 @@ All info about installation, usage, configuration and contribution can be found 
 
 ### Publications and Media
 
-To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowl.readthedocs.io/en/latest/Installation.md#publications-and-media)
+To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowl.readthedocs.io/en/latest/Introduction.html#publications-and-media)
 
 ### Available services or analyzers
 

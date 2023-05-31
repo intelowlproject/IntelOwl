@@ -1,0 +1,420 @@
+# django-two-factor-auth translation.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the django-two-factor-auth package.
+# 
+# Translators:
+# ken Www, 2021
+# gab_tes, 2021
+msgid ""
+msgstr ""
+"Project-Id-Version: django-two-factor-auth\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-05-15 22:55+0200\n"
+"PO-Revision-Date: 2013-11-19 18:12+0000\n"
+"Last-Translator: gab_tes, 2021\n"
+"Language-Team: Japanese (http://www.transifex.com/Bouke/django-two-factor-auth/language/ja/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: forms.py:16 plugins/phonenumber/forms.py:12
+msgid "Method"
+msgstr "何を使いますか？"
+
+#: forms.py:28 forms.py:49 forms.py:107 forms.py:161 plugins/email/forms.py:19
+msgid "Token"
+msgstr "トークン"
+
+#: forms.py:34 forms.py:56
+msgid "Entered token is not valid."
+msgstr "入力したトークンは無効です。"
+
+#: forms.py:103
+msgid "Yes, I am sure"
+msgstr "はい、そうです。"
+
+#: forms.py:141
+#, python-format
+msgid "Don't ask again on this device for %(minutes)i minutes"
+msgstr "このデバイスで%(minutes)i分間二度と尋ねないでください"
+
+#: forms.py:144
+#, python-format
+msgid "Don't ask again on this device for %(hours)i hours"
+msgstr "このデバイスで%(hours)i時間二度と尋ねないでください"
+
+#: forms.py:147
+#, python-format
+msgid "Don't ask again on this device for %(days)i days"
+msgstr "このデバイスで%(days)i日間二度と尋ねないでください"
+
+#. Translators: twilio_locale should be a locale supported by
+#. Twilio, see http://bit.ly/187I5cr
+#: gateways/twilio/gateway.py:84 gateways/twilio/views.py:50
+msgctxt "twilio_locale"
+msgid "en"
+msgstr "ja-JP"
+
+#: plugins/email/forms.py:11
+msgid "Email address"
+msgstr ""
+
+#: plugins/email/method.py:11
+msgid "Email"
+msgstr ""
+
+#: plugins/phonenumber/forms.py:10 plugins/phonenumber/forms.py:25
+msgid "Phone Number"
+msgstr "電話番号"
+
+#: plugins/phonenumber/method.py:28 plugins/phonenumber/utils.py:25
+msgid "Phone call"
+msgstr "お電話"
+
+#: plugins/phonenumber/method.py:33 plugins/phonenumber/utils.py:27
+msgid "Text message"
+msgstr "メッセージ"
+
+#: plugins/phonenumber/models.py:16
+msgid "Phone Call"
+msgstr "お電話"
+
+#: plugins/phonenumber/models.py:17
+msgid "Text Message"
+msgstr "メッセージ"
+
+#: plugins/phonenumber/models.py:39
+msgid "method"
+msgstr "何を使いました。"
+
+#: plugins/phonenumber/models.py:83
+#: plugins/phonenumber/templatetags/phonenumber.py:41
+#, python-format
+msgid "Send text message to %s"
+msgstr "%sにテキストメッセージを送信する"
+
+#: plugins/phonenumber/models.py:85
+#: plugins/phonenumber/templatetags/phonenumber.py:43
+#, python-format
+msgid "Call number %s"
+msgstr "%sに電話する"
+
+#: plugins/phonenumber/validators.py:14
+msgid ""
+"Please enter a valid phone number, including your country code starting with"
+" + or 00."
+msgstr "+または00で始まる国コードを含む有効な電話番号を入力してください。"
+
+#: plugins/registry.py:39
+msgid "Token generator"
+msgstr "トークンジェネレーター"
+
+#: plugins/yubikey/forms.py:8 plugins/yubikey/forms.py:24
+#: plugins/yubikey/method.py:11
+msgid "YubiKey"
+msgstr "YubiKey"
+
+#: plugins/yubikey/forms.py:11
+msgid "The YubiKey could not be verified."
+msgstr "YubiKeyを検証できませんでした。"
+
+#: templates/two_factor/_wizard_actions.html:5
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: templates/two_factor/_wizard_actions.html:10
+#: templates/two_factor/_wizard_actions.html:12
+msgid "Back"
+msgstr "戻る"
+
+#: templates/two_factor/_wizard_actions.html:14
+msgid "Next"
+msgstr "次"
+
+#: templates/two_factor/core/backup_tokens.html:5
+#: templates/two_factor/profile/profile.html:37
+msgid "Backup Tokens"
+msgstr "バックアップトークン "
+
+#: templates/two_factor/core/backup_tokens.html:6
+msgid ""
+"Backup tokens can be used when your primary and backup phone numbers aren't "
+"available. The backup tokens below can be used for login verification. If "
+"you've used up all your backup tokens, you can generate a new set of backup "
+"tokens. Only the backup tokens shown below will be valid."
+msgstr "バックアップトークンは、メインの電話番号とバックアップの電話番号が利用できない場合に使用できます。 以下のバックアップトークンは、ログインの確認に使用できます。 すべてのバックアップトークンを使い果たした場合は、新しいバックアップトークンのセットを生成できます。 以下に示すバックアップトークンのみが有効になります。"
+
+#: templates/two_factor/core/backup_tokens.html:18
+msgid "Print these tokens and keep them somewhere safe."
+msgstr "これらのトークンを印刷して、安全な場所に保管してください。"
+
+#: templates/two_factor/core/backup_tokens.html:20
+msgid "You don't have any backup codes yet."
+msgstr "バックアップコードはまだありません。"
+
+#: templates/two_factor/core/backup_tokens.html:25
+#: templates/two_factor/core/setup_complete.html:12
+#: templates/two_factor/core/setup_complete.html:19
+msgid "Back to Account Security"
+msgstr "アカウントのセキュリティに戻る"
+
+#: templates/two_factor/core/backup_tokens.html:26
+msgid "Generate Tokens"
+msgstr "トークンを生成する "
+
+#: templates/two_factor/core/login.html:5
+msgid "Login"
+msgstr "ログイン"
+
+#: templates/two_factor/core/login.html:8
+msgid "Enter your credentials."
+msgstr "資格情報を入力してください。"
+
+#: templates/two_factor/core/login.html:11
+#: templates/two_factor/core/setup.html:29
+msgid "We are calling your phone right now, please enter the digits you hear."
+msgstr "現在、電話をかけています。聞こえた数字を入力してください。"
+
+#: templates/two_factor/core/login.html:14
+#: templates/two_factor/core/setup.html:32
+msgid "We sent you a text message, please enter the tokens we sent."
+msgstr "テキストメッセージを送信しました。送信したトークンを入力してください。"
+
+#: templates/two_factor/core/login.html:17
+msgid "Please enter the tokens generated by your token generator."
+msgstr "トークンジェネレーターによって生成されたトークンを入力してください。"
+
+#: templates/two_factor/core/login.html:21
+msgid ""
+"Use this form for entering backup tokens for logging in. These tokens have "
+"been generated for you to print and keep safe. Please enter one of these "
+"backup tokens to login to your account."
+msgstr "このフォームを使用して、ログイン用のバックアップトークンを入力します。これらのトークンは、印刷して安全に保管するために生成されています。 アカウントにログインするには、これらのバックアップトークンのいずれかを入力してください。"
+
+#: templates/two_factor/core/login.html:33
+msgid "Or, alternatively, use one of your backup phones:"
+msgstr "または、代わりに、バックアップ電話の1つを使用します。"
+
+#: templates/two_factor/core/login.html:43
+msgid "As a last resort, you can use a backup token:"
+msgstr "最後の手段として、バックアップトークンを使用できます："
+
+#: templates/two_factor/core/login.html:46
+msgid "Use Backup Token"
+msgstr "バックアップトークンを使用する"
+
+#: templates/two_factor/core/otp_required.html:5
+msgid "Permission Denied"
+msgstr "アクセス拒否"
+
+#: templates/two_factor/core/otp_required.html:7
+msgid ""
+"The page you requested, enforces users to verify using two-factor "
+"authentication for security reasons. You need to enable these security "
+"features in order to access this page."
+msgstr "リクエストしたページでは、セキュリティ上の理由から、ユーザーに二段階認証を使用して確認するように強制しています。 このページにアクセスするには、これらのセキュリティ機能を有効にする必要があります。"
+
+#: templates/two_factor/core/otp_required.html:11
+#: templates/two_factor/profile/profile.html:56
+msgid ""
+"Two-factor authentication is not enabled for your account. Enable two-factor"
+" authentication for enhanced account security."
+msgstr "アカウントで二段階認証が有効になっていません。アカウントのセキュリティを強化するために二段階認証を有効にします。"
+
+#: templates/two_factor/core/otp_required.html:16
+msgid "Go back"
+msgstr "戻って"
+
+#: templates/two_factor/core/otp_required.html:18
+#: templates/two_factor/core/setup.html:5
+#: templates/two_factor/core/setup_complete.html:5
+#: templates/two_factor/profile/profile.html:60
+msgid "Enable Two-Factor Authentication"
+msgstr "二段階認証を有効にする"
+
+#: templates/two_factor/core/phone_register.html:5
+msgid "Add Backup Phone"
+msgstr "バックアップ電話を追加する"
+
+#: templates/two_factor/core/phone_register.html:8
+msgid ""
+"You'll be adding a backup phone number to your account. This number will be "
+"used if your primary method of registration is not available."
+msgstr "アカウントに予備の電話番号を追加します。 この番号は、主要な登録方法が利用できない場合に使用されます。"
+
+#: templates/two_factor/core/phone_register.html:12
+msgid ""
+"We've sent a token to your phone number. Please enter the token you've "
+"received."
+msgstr "電話番号にトークンを送信しました。 受け取ったトークンを入力してください。"
+
+#: templates/two_factor/core/setup.html:7
+msgid ""
+"You are about to take your account security to the next level. Follow the "
+"steps in this wizard to enable two-factor authentication."
+msgstr "アカウントのセキュリティを次のレベルに引き上げようとしています。 このウィザードの手順に従って、二段階認証を有効にします。"
+
+#: templates/two_factor/core/setup.html:11
+msgid "Please select which authentication method you would like to use."
+msgstr "使用する認証方法を選択してください。"
+
+#: templates/two_factor/core/setup.html:14
+msgid ""
+"To start using a token generator, please use your smartphone to scan the QR "
+"code below. For example, use Google Authenticator. Then, enter the token "
+"generated by the app."
+msgstr "トークンジェネレーターの使用を開始するには、スマートフォンを使用して以下のQRコードをスキャンしてください。 たとえば、Google認証システムを使用します。 次に、アプリによって生成されたトークンを入力します。"
+
+#: templates/two_factor/core/setup.html:20
+msgid ""
+"Please enter the phone number you wish to receive the text messages on. This"
+" number will be validated in the next step."
+msgstr "テキストメッセージを受信したい電話番号を入力してください。 この番号は次のステップで検証されます。"
+
+#: templates/two_factor/core/setup.html:24
+msgid ""
+"Please enter the phone number you wish to be called on. This number will be "
+"validated in the next step."
+msgstr "電話をかけたい電話番号を入力してください。 この番号は次のステップで検証されます。"
+
+#: templates/two_factor/core/setup.html:36
+msgid ""
+"We've encountered an issue with the selected authentication method. Please "
+"go back and verify that you entered your information correctly, try again, "
+"or use a different authentication method instead. If the issue persists, "
+"contact the site administrator."
+msgstr "選択した認証方法で問題が発生しました。 戻って情報を正しく入力したことを確認するか、再試行するか、代わりに別の認証方法を使用してください。 問題が解決しない場合は、サイト管理者に連絡してください。"
+
+#: templates/two_factor/core/setup.html:43
+msgid ""
+"To identify and verify your YubiKey, please insert a token in the field "
+"below. Your YubiKey will be linked to your account."
+msgstr "YubiKeyを識別して確認するには、下のフィールドにトークンを挿入してください。YubiKeyはあなたのアカウントにリンクされます。"
+
+#: templates/two_factor/core/setup_complete.html:7
+msgid ""
+"Congratulations, you've successfully enabled two-factor authentication."
+msgstr "おめでとうございます。2要素認証が正常に有効になりました。"
+
+#: templates/two_factor/core/setup_complete.html:14
+msgid ""
+"However, it might happen that you don't have access to your primary token "
+"device. To enable account recovery, add a phone number."
+msgstr "プライマリトークンデバイスにアクセスできない場合があります。 アカウントの復旧を有効にするには、電話番号を追加します。"
+
+#: templates/two_factor/core/setup_complete.html:21
+#: templates/two_factor/profile/profile.html:34
+msgid "Add Phone Number"
+msgstr "電話番号を追加"
+
+#: templates/two_factor/profile/disable.html:5
+msgid "Disable Two-factor Authentication"
+msgstr "二段階認証を無効にする"
+
+#: templates/two_factor/profile/disable.html:6
+msgid ""
+"You are about to disable two-factor authentication. This weakens your "
+"account security, are you sure?"
+msgstr "2要素認証を無効にしようとしています。 これはアカウントのセキュリティを弱めます、本当に確かですか？"
+
+#: templates/two_factor/profile/disable.html:12
+msgid "Disable"
+msgstr "無効"
+
+#: templates/two_factor/profile/profile.html:5
+msgid "Account Security"
+msgstr "アカウントのセキュリティ"
+
+#: templates/two_factor/profile/profile.html:9
+msgid "Tokens will be generated by your token generator."
+msgstr "トークンはトークンジェネレーターによって生成されます。 "
+
+#: templates/two_factor/profile/profile.html:11
+#, python-format
+msgid "Primary method: %(primary)s"
+msgstr "主な方法：%(primary)s"
+
+#: templates/two_factor/profile/profile.html:13
+msgid "Tokens will be generated by your YubiKey."
+msgstr "トークンはYubiKeyによって生成されます。"
+
+#: templates/two_factor/profile/profile.html:17
+msgid "Backup Phone Numbers"
+msgstr "バックアップ電話番号 "
+
+#: templates/two_factor/profile/profile.html:18
+msgid ""
+"If your primary method is not available, we are able to send backup tokens "
+"to the phone numbers listed below."
+msgstr "主な方法が利用できない場合は、以下の電話番号にバックアップトークンを送信できます。"
+
+#: templates/two_factor/profile/profile.html:25
+msgid "Are you sure?"
+msgstr ""
+
+#: templates/two_factor/profile/profile.html:28
+msgid "Unregister"
+msgstr "登録解除"
+
+#: templates/two_factor/profile/profile.html:39
+msgid ""
+"If you don't have any device with you, you can access your account using "
+"backup tokens."
+msgstr "デバイスをお持ちでない場合は、バックアップトークンを使用してアカウントにアクセスできます。"
+
+#: templates/two_factor/profile/profile.html:41
+#, python-format
+msgid "You have only one backup token remaining."
+msgid_plural "You have %(counter)s backup tokens remaining."
+msgstr[0] "バックアップトークンが%(counter)s個残っています。"
+
+#: templates/two_factor/profile/profile.html:48
+msgid "Show Codes"
+msgstr "コードを表示"
+
+#: templates/two_factor/profile/profile.html:50
+#: templates/two_factor/profile/profile.html:54
+msgid "Disable Two-Factor Authentication"
+msgstr "二段階認証を無効にする"
+
+#: templates/two_factor/profile/profile.html:51
+msgid ""
+"However we strongly discourage you to do so, you can also disable two-factor"
+" authentication for your account."
+msgstr "そうすることは強くお勧めしません。アカウントの二段階認証を無効にすることもできます。"
+
+#: templates/two_factor/twilio/press_a_key.xml:4
+#, python-format
+msgid "Hi, this is %(site_name)s calling. Press any key to continue."
+msgstr "こんにちは、これは%(site_name)s呼び出しです。 続行するには、任意のキーを押してください。"
+
+#: templates/two_factor/twilio/press_a_key.xml:6
+msgid "You didn’t press any keys. Good bye."
+msgstr ""
+
+#: templates/two_factor/twilio/sms_message.html:2
+#, python-format
+msgid "Your OTP token is %(token)s"
+msgstr "あなたのOTPトークンは%(token)sです"
+
+#: templates/two_factor/twilio/token.xml:3
+msgid "Your token is:"
+msgstr ""
+
+#: templates/two_factor/twilio/token.xml:7
+msgid "Repeat:"
+msgstr ""
+
+#: templates/two_factor/twilio/token.xml:11
+msgid "Good bye."
+msgstr ""
+
+#: views/core.py:267
+msgid "Your session has timed out. Please login again."
+msgstr "あなたのセッションは時間切れです。 もう一度ログインしてください。"
+
+#: views/utils.py:146
+msgid "ManagementForm data is missing or has been tampered with"
+msgstr "マネジメントフォームのデータが見つからないか、改竄されています。"

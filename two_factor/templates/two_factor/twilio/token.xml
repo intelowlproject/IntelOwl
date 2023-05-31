@@ -1,0 +1,12 @@
+{% load i18n %}<?xml version="1.0" encoding="UTF-8" ?>
+<Response>
+  <Say language="{{ locale }}">{% trans "Your token is:" %}</Say>
+  <Pause>
+{% for digit in token %}  <Say language="{{ locale }}">{{ digit }}</Say>
+  <Pause>
+{% endfor %}  <Say language="{{ locale }}">{% trans "Repeat:" %}</Say>
+  <Pause>
+{% for digit in token %}  <Say language="{{ locale }}">{{ digit }}</Say>
+  <Pause>
+{% endfor %}  <Say language="{{ locale }}">{% trans "Good bye." %}</Say>
+</Response>

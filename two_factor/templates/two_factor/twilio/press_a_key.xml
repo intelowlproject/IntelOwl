@@ -1,0 +1,7 @@
+{% load i18n %}<?xml version="1.0" encoding="UTF-8" ?>
+<Response>
+  <Gather timeout="15" numDigits="1" finishOnKey="">
+    <Say language="{{ locale }}">{% blocktrans %}Hi, this is {{ site_name }} calling. Press any key to continue.{% endblocktrans %}</Say>
+  </Gather>
+  <Say language="{{ locale }}">{% trans "You didn’t press any keys. Good bye." %}</Say>
+</Response>

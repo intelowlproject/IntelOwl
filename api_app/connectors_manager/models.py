@@ -1,22 +1,39 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from django.conf import settings
 from django.db import models
 
-from api_app.core.models import AbstractReport
+from api_app.choices import TLP
+from api_app.connectors_manager.exceptions import ConnectorConfigurationException
+from api_app.core.models import AbstractConfig, AbstractReport
 
 
 class ConnectorReport(AbstractReport):
-    job = models.ForeignKey(
-        "api_app.Job", related_name="connector_reports", on_delete=models.CASCADE
+    config = models.ForeignKey(
+        "ConnectorConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
 
     class Meta:
-        unique_together = [("name", "job")]
+        unique_together = [("config", "job")]
 
-    def __str__(self):
-        return f"ConnectorReport(job:#{self.job_id}, {self.connector_name})"
+
+class ConnectorConfig(AbstractConfig):
+    maximum_tlp = models.CharField(
+        null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50
+    )
+    run_on_failure = models.BooleanField(null=False, default=True)
+
+    @classmethod
+    @property
+    def plugin_type(cls) -> str:
+        return "2"
 
     @property
-    def connector_name(self) -> str:
-        return self.name
+    def python_base_path(self) -> str:
+        return settings.BASE_CONNECTOR_PYTHON_PATH
+
+    @classmethod
+    @property
+    def config_exception(cls):
+        return ConnectorConfigurationException

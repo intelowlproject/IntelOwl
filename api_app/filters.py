@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import rest_framework_filters as filters
 from django.db.models import Q
 

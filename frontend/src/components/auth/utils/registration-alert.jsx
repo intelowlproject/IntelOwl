@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Modal, ModalHeader, ModalBody, Alert } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { INTELOWL_DOCS_URL } from "../../../constants/environment";
 
 export function InviteOnlyAlert() {
   return (
@@ -80,7 +81,57 @@ export function AfterRegistrationModalAlert(props) {
   );
 }
 
+export function RegistrationSetUpModalAlert(props) {
+  const { isOpen, setIsOpen } = props;
+  const navigate = useNavigate();
+
+  // callbacks
+  const toggle = React.useCallback(() => {
+    navigate("/");
+    setIsOpen((o) => !o);
+  }, [navigate, setIsOpen]);
+
+  return (
+    <Modal
+      autoFocus
+      centered
+      zIndex="1050"
+      size="lg"
+      isOpen={isOpen}
+      keyboard={false}
+      backdrop="static"
+      labelledBy="Registration setup modal"
+    >
+      <ModalHeader toggle={toggle}>Error</ModalHeader>
+      <ModalBody className="px-5">
+        <>
+          <section>
+            <Alert color="danger" className="text-center">
+              <h3>Wrong registration setup!</h3>
+            </Alert>
+          </section>
+          <section className="mt-4">
+            <p>
+              Please check the{" "}
+              <a href={INTELOWL_DOCS_URL} target="_blank" rel="noreferrer">
+                documentation
+              </a>{" "}
+              and verify that you have correctly configured all the required
+              variables.
+            </p>
+          </section>
+        </>
+      </ModalBody>
+    </Modal>
+  );
+}
+
 AfterRegistrationModalAlert.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
+};
+
+RegistrationSetUpModalAlert.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   setIsOpen: PropTypes.func.isRequired,
 };

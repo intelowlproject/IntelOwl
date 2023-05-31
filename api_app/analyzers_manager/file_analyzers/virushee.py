@@ -8,8 +8,8 @@ from typing import Optional
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -21,20 +21,22 @@ class VirusheeFileUpload(FileAnalyzer):
     poll_distance = 10
     base_url = "https://api.virushee.com"
 
-    def set_params(self, params):
-        self.__to_force_scan = params.get("force_scan", False)
+    force_scan: bool
+    _api_key_name: str
+
+    def config(self):
+        super().config()
         self.__session = requests.Session()
-        api_key = self._secrets["api_key_name"]
-        if not api_key:
+        if not hasattr(self, "_api_key_name"):
             logger.info(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
-            self.__session.headers["X-API-Key"] = api_key
+            self.__session.headers["X-API-Key"] = self._api_key_name
 
     def run(self):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        if not self.__to_force_scan:
+        if not self.force_scan:
             hash_result = self.__check_report_for_hash()
             if hash_result:
                 return hash_result
@@ -90,14 +92,14 @@ class VirusheeFileUpload(FileAnalyzer):
                 patch(
                     "requests.Session.get",
                     side_effect=[
-                        MockResponse({"message": "hash_not_found"}, 404),
-                        MockResponse({"message": "analysis_in_progress"}, 202),
-                        MockResponse({"result": "test"}, 200),
+                        MockUpResponse({"message": "hash_not_found"}, 404),
+                        MockUpResponse({"message": "analysis_in_progress"}, 202),
+                        MockUpResponse({"result": "test"}, 200),
                     ],
                 ),
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({"task": "123-456-789"}, 201),
+                    return_value=MockUpResponse({"task": "123-456-789"}, 201),
                 ),
             )
         ]

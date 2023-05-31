@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 class ClassicDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Default resolver"""
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "A")
+    query_type: str
 
     def run(self):
         resolutions = []
@@ -35,7 +34,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 if hostname:
                     resolutions.append(hostname)
             except (socket.gaierror, socket.herror):
-                logger.warning(f"No resolution for ip {self.observable_name}")
+                logger.info(f"No resolution for ip {self.observable_name}")
                 self.report.errors.append(
                     f"No resolution for ip {self.observable_name}"
                 )
@@ -50,7 +49,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 observable = urlparse(self.observable_name).hostname
 
             try:
-                dns_resolutions = dns.resolver.resolve(observable, self._query_type)
+                dns_resolutions = dns.resolver.resolve(observable, self.query_type)
                 for resolution in dns_resolutions:
                     element = {
                         "TTL": dns_resolutions.rrset.ttl,
@@ -64,7 +63,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 dns.resolver.NoAnswer,
                 dns.resolver.NoNameservers,
             ):
-                logger.warning(
+                logger.info(
                     "No resolution for "
                     f"{self.observable_classification} {self.observable_name}"
                 )

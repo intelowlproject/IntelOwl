@@ -10,9 +10,6 @@ import random
 import re
 
 from django.utils import timezone
-from magic import from_buffer as magic_from_buffer
-
-from api_app.analyzers_manager.constants import ObservableTypes
 
 logger = logging.getLogger(__name__)
 
@@ -29,73 +26,6 @@ def gen_random_colorhex() -> str:
     # flake8: noqa
     r = lambda: random.randint(0, 255)
     return "#%02X%02X%02X" % (r(), r(), r())
-
-
-def calculate_mimetype(file_pointer, file_name) -> str:
-    mimetype = None
-    if file_name:
-        if file_name.endswith(".js") or file_name.endswith(".jse"):
-            mimetype = "application/javascript"
-        elif file_name.endswith(".vbs") or file_name.endswith(".vbe"):
-            mimetype = "application/x-vbscript"
-        elif file_name.endswith(".iqy"):
-            mimetype = "text/x-ms-iqy"
-        elif file_name.endswith(".apk"):
-            mimetype = "application/vnd.android.package-archive"
-        elif file_name.endswith(".dex"):
-            mimetype = "application/x-dex"
-        elif file_name.endswith(".one"):
-            mimetype = "application/onenote"
-
-    if not mimetype:
-        buffer = file_pointer.read()
-        mimetype = magic_from_buffer(buffer, mime=True)
-
-    return mimetype
-
-
-def calculate_observable_classification(value: str) -> str:
-    """Returns observable classification for the given value.\n
-    Only following types are supported:
-    ip, domain, url, hash (md5, sha1, sha256), generic (if no match)
-
-    Args:
-        value (str):
-            observable value
-    Returns:
-        str: one of `ip`, `url`, `domain`, `hash` or 'generic'.
-    """
-    try:
-        ipaddress.ip_address(value)
-    except ValueError:
-        if re.match(
-            r"^.+://[a-z\d-]{1,63}(?:\.[a-z\d-]{1,63})+"
-            r"(?:/[a-zA-Z\d-]{1,63})*(?:\.\w+)?",
-            value,
-        ):
-            classification = ObservableTypes.URL
-        elif re.match(
-            r"^([\[\\]?\.[\]\\]?)?[a-z\d-]{1,63}(([\[\\]?\.[\]\\]?)[a-z\d-]{1,63})+$",
-            value,
-            re.IGNORECASE,
-        ):
-            classification = ObservableTypes.DOMAIN
-        elif (
-            re.match(r"^[a-f\d]{32}$", value, re.IGNORECASE)
-            or re.match(r"^[a-f\d]{40}$", value, re.IGNORECASE)
-            or re.match(r"^[a-f\d]{64}$", value, re.IGNORECASE)
-        ):
-            classification = ObservableTypes.HASH
-        else:
-            classification = ObservableTypes.GENERIC
-            logger.info(
-                f"Couldn't detect observable classification for {value}, setting as 'generic'..."
-            )
-    else:
-        # it's a simple IP
-        classification = ObservableTypes.IP
-
-    return classification
 
 
 def calculate_md5(value) -> str:

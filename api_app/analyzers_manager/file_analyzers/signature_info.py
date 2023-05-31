@@ -8,7 +8,7 @@ from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

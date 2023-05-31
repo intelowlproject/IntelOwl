@@ -7,32 +7,29 @@ from urllib.parse import urlparse
 import pypdns
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class CIRCL_PDNS(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        self.__credentials = self._secrets["pdns_credentials"]
-        if not self.__credentials:
-            raise AnalyzerConfigurationException(
-                "No secret retrieved for `pdns_credentials`."
-            )
+    _pdns_credentials: str
+
+    def config(self):
+        super().config()
         self.domain = self.observable_name
         if self.observable_classification == self.ObservableTypes.URL:
             self.domain = urlparse(self.observable_name).hostname
-
-    def run(self):
-        # You should save CIRCL credentials with this template: "<user>|<pwd>"
-        split_credentials = self.__credentials.split("|")
-        if len(split_credentials) != 2:
+            # You should save CIRCL credentials with this template: "<user>|<pwd>"
+        self.split_credentials = self._pdns_credentials.split("|")
+        if len(self.split_credentials) != 2:
             raise AnalyzerRunException(
                 "CIRCL credentials not properly configured."
                 "Template to use: '<user>|<pwd>'"
             )
 
-        user = split_credentials[0]
-        pwd = split_credentials[1]
+    def run(self):
+
+        user, pwd = self.split_credentials
         pdns = pypdns.PyPDNS(basic_auth=(user, pwd))
 
         try:

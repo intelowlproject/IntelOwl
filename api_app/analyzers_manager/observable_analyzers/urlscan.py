@@ -7,8 +7,8 @@ import time
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -16,30 +16,28 @@ logger = logging.getLogger(__name__)
 class UrlScan(ObservableAnalyzer):
     base_url: str = "https://urlscan.io/api/v1"
 
-    def set_params(self, params):
-        self.analysis_type = params.get("urlscan_analysis", "search")
-        self.visibility = params.get("visibility", "private")
-        self.search_size = params.get("search_size", 100)
-        self.__api_key = self._secrets["api_key_name"]
+    urlscan_analysis: str
+    visibility: str
+    search_size: int
+    _api_key_name: str
 
     def run(self):
-        result = {}
         headers = {"Content-Type": "application/json", "User-Agent": "IntelOwl/v1.x"}
-        if not self.__api_key and self.analysis_type == "search":
+        if not hasattr(self, "_api_key_name") and self.urlscan_analysis == "search":
             logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
-            headers["API-Key"] = self.__api_key
+            headers["API-Key"] = self._api_key_name
 
         self.session = requests.Session()
         self.session.headers = headers
-        if self.analysis_type == "search":
+        if self.urlscan_analysis == "search":
             result = self.__urlscan_search()
-        elif self.analysis_type == "submit_result":
+        elif self.urlscan_analysis == "submit_result":
             req_api_token = self.__urlscan_submit()
             result = self.__poll_for_result(req_api_token)
         else:
             raise AnalyzerRunException(
-                f"not supported analysis_type {self.analysis_type}."
+                f"not supported analysis_type {self.urlscan_analysis}."
                 " Supported is 'search' and 'submit_result'."
             )
         return result
@@ -77,7 +75,6 @@ class UrlScan(ObservableAnalyzer):
         return result
 
     def __urlscan_search(self):
-        result = {}
         params = {
             "q": f'{self.observable_classification}:"{self.observable_name}"',
             "size": self.search_size,
@@ -87,9 +84,11 @@ class UrlScan(ObservableAnalyzer):
         try:
             resp = self.session.get(self.base_url + "/search/", params=params)
             resp.raise_for_status()
-            result = resp.json()
+
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
+        else:
+            result = resp.json()
         return result
 
     @classmethod
@@ -98,9 +97,9 @@ class UrlScan(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({"api": "test"}, 200),
+                    return_value=MockUpResponse({"api": "test"}, 200),
                 ),
-                patch("requests.Session.get", return_value=MockResponse({}, 200)),
+                patch("requests.Session.get", return_value=MockUpResponse({}, 200)),
             )
         ]
         return super()._monkeypatch(patches=patches)

@@ -4,29 +4,31 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Shodan(classes.ObservableAnalyzer):
     base_url: str = "https://api.shodan.io/"
 
-    def set_params(self, params):
-        self.analysis_type = params.get("shodan_analysis", "search")
-        self.__api_key = self._secrets["api_key_name"]
+    shodan_analysis: str
+    _api_key_name: str
 
     def run(self):
-        if self.analysis_type == "search":
-            params = {"key": self.__api_key, "minify": True}
+        if self.shodan_analysis == "search":
+            params = {"key": self._api_key_name, "minify": True}
             uri = f"shodan/host/{self.observable_name}"
-        elif self.analysis_type == "honeyscore":
+        elif self.shodan_analysis == "honeyscore":
             params = {
-                "key": self.__api_key,
+                "key": self._api_key_name,
             }
             uri = f"labs/honeyscore/{self.observable_name}"
         else:
             raise AnalyzerConfigurationException(
-                f"analysis type: '{self.analysis_type}' not supported."
+                f"analysis type: '{self.shodan_analysis}' not supported."
                 "Supported are: 'search', 'honeyscore'."
             )
 
@@ -37,7 +39,7 @@ class Shodan(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         result = response.json()
-        if self.analysis_type == "honeyscore":
+        if self.shodan_analysis == "honeyscore":
             return {"honeyscore": result}
         return result
 
@@ -47,7 +49,7 @@ class Shodan(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

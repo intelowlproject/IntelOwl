@@ -7,8 +7,11 @@ import re
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -16,15 +19,17 @@ logger = logging.getLogger(__name__)
 class InQuest(ObservableAnalyzer):
     base_url: str = "https://labs.inquest.net"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.analysis_type = params.get("inquest_analysis", "dfi_search")
+    _api_key_name: str
+    inquest_analysis: str
+
+    def config(self):
+        super().config()
         self.generic_identifier_mode = "user-defined"  # Or auto
 
     @property
     def hash_type(self):
         hash_lengths = {32: "md5", 40: "sha1", 64: "sha256", 128: "sha512"}
-        hash_type = hash_lengths.get(len(self.observable_name), None)
+        hash_type = hash_lengths.get(len(self.observable_name))
         if not hash_type:
             raise AnalyzerRunException(
                 f"Given Hash: '{hash}' is not supported."
@@ -42,10 +47,11 @@ class InQuest(ObservableAnalyzer):
 
     def run(self):
         result = {}
+        link = ""
         headers = {"Content-Type": "application/json"}
         # optional API key
-        if self.__api_key:
-            headers["Authorization"] = self.__api_key
+        if hasattr(self, "_api_key_name"):
+            headers["Authorization"] = self._api_key_name
         else:
             warning = "No API key retrieved"
             logger.info(
@@ -53,7 +59,8 @@ class InQuest(ObservableAnalyzer):
             )
             self.report.errors.append(warning)
 
-        if self.analysis_type == "dfi_search":
+        if self.inquest_analysis == "dfi_search":
+            link = "dfi"
             if self.observable_classification == self.ObservableTypes.HASH:
                 uri = (
                     f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
@@ -84,15 +91,17 @@ class InQuest(ObservableAnalyzer):
             else:
                 raise AnalyzerRunException()
 
-        elif self.analysis_type == "iocdb_search":
+        elif self.inquest_analysis == "iocdb_search":
             uri = f"/api/iocdb/search?keyword={self.observable_name}"
+            link = "iocdb"
 
-        elif self.analysis_type == "repdb_search":
+        elif self.inquest_analysis == "repdb_search":
             uri = f"/api/repdb/search?keyword={self.observable_name}"
+            link = "repdb"
 
         else:
             raise AnalyzerConfigurationException(
-                f"analysis type: '{self.analysis_type}' not supported."
+                f"analysis type: '{self.inquest_analysis}' not supported."
                 "Supported are: 'dfi_search', 'iocdb_search', 'repdb_search'."
             )
 
@@ -103,7 +112,7 @@ class InQuest(ObservableAnalyzer):
             raise AnalyzerRunException(e)
         result = response.json()
         if (
-            self.analysis_type == "dfi_search"
+            self.inquest_analysis == "dfi_search"
             and self.observable_classification == self.ObservableTypes.HASH
         ):
             result["hash_type"] = self.hash_type
@@ -111,6 +120,7 @@ class InQuest(ObservableAnalyzer):
         if self.generic_identifier_mode == "auto":
             result["type_of_generic"] = self.type_of_generic()
 
+        result["link"] = f"https://labs.inquest.net/{link}"
         return result
 
     @classmethod
@@ -119,7 +129,7 @@ class InQuest(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

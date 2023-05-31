@@ -10,8 +10,8 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class Tor(classes.ObservableAnalyzer):
                 f"database location {database_location} does not exist"
             )
 
-        with open(database_location, "r") as f:
+        with open(database_location, "r", encoding="utf-8") as f:
             db = f.read()
 
         db_list = db.split("\n")
@@ -41,9 +41,6 @@ class Tor(classes.ObservableAnalyzer):
 
     @classmethod
     def _update(cls):
-        if not cls.enabled:
-            logger.warning("No running updater for Tor, because it is disabled")
-            return
         try:
             logger.info("starting download of db from tor project")
             url = "https://check.torproject.org/exit-addresses"
@@ -53,7 +50,7 @@ class Tor(classes.ObservableAnalyzer):
             data_extracted = r.content.decode()
             findings = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", data_extracted)
 
-            with open(database_location, "w") as f:
+            with open(database_location, "w", encoding="utf-8") as f:
                 for ip in findings:
                     if ip:
                         f.write(f"{ip}\n")
@@ -75,7 +72,7 @@ class Tor(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {},
                         200,
                         content=b"""ExitNode D2A4BEE6754A9711EB0FAC47F3059BE6FC0D72C7

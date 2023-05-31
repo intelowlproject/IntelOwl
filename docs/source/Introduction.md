@@ -1,22 +1,30 @@
 # Introduction
 
-Official first announcement: [Certego News](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
-
 IntelOwl was designed with the intent to help the community, in particular those researchers that can not afford commercial solutions, in the generation of threat intelligence data, in a simple, scalable and reliable way.
 
 Main features:
 
-* modern Django-Python application: easy to understand and write code upon it
-* it can get data from multiple sources with a single API request
-* more than 150 available analyzers that you can use to generate or retrieve data about a suspicious file or observable (IP, domain, …)
-* built-in Web Interface, written in React, provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis and more.
-* official library and CLI client available on GitHub: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl)
-* built-in support for integration with other SIEM/SOAR projects using connectors, specifically aimed at Threat Sharing Platforms.
-* easily integrable with other tools thanks to the REST API framework and to the PyIntelOwl library.
-* easily and completely customizable, both the APIs and the analyzers
-* compatibility with some of the AWS services. More in the future.
-* fast and reliable deploy: clone the project, set up the configuration and then you are ready to run it via docker-compose
+- Provides enrichment of Threat Intel for malware as well as observables (IP, Domain, URL, hash, etc).
+- This application is built to **scale out** and to **speed up the retrieval of threat info**.
+- Thanks to the official libraries [pyintelowl](https://github.com/intelowlproject/pyintelowl) and [go-intelowl](https://github.com/intelowlproject/go-intelowl), it can be integrated easily in your stack of security tools to automate common jobs usually performed, for instance, by SOC analysts manually.
+- Intel Owl is composed of:
+  - **analyzers** that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
+  - **connectors** that can be run to export data to external platforms (like MISP or OpenCTI)
+  - **visualizers** that can be run to create custom visualizations of analyzers results
+  - **playbooks** that are meant to make analysis easily repeatable
+- API REST written in Django and Python 3.9.
+- Built-in frontend client written in ReactJS, with **[certego-ui](https://github.com/certego/certego-ui)**: provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
 
+## Publications and media
+To know more about the project and its growth over time, you may be interested in reading the following official blog posts and/or videos:
+
+- [Certego Blog: v.5.0.0 Announcement](https://www.certego.net/blog/intelowl-v5-released)
+- [Youtube demo](https://youtu.be/pHnh3qTzSeM)
+- [Certego Blog: v.4.0.0 Announcement](https://www.certego.net/en/news/intel-owl-release-v4-0-0/)
+- [Honeynet Blog: v3.0.0 Announcement](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/)
+- [Intel Owl on Daily Swig](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
+- [Honeynet Blog: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
+- [Certego Blog: First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
 
 Feel free to ask everything it comes to your mind about the project to the author:
 Matteo Lodi ([Twitter](https://twitter.com/matte_lodi)).

@@ -7,8 +7,8 @@ import time
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 class FileScanUpload(FileAnalyzer):
     """FileScan_Upload_File analyzer"""
 
-    def set_params(self, params):
-        self.max_tries = 30
-        self.poll_distance = 10
-        self.base_url = "https://www.filescan.io/api"
+    max_tries: int = 30
+    poll_distance: int = 10
+    base_url = "https://www.filescan.io/api"
+    _api_key: str
 
     def run(self):
         task_id = self.__upload_file_for_scan()
@@ -32,7 +32,9 @@ class FileScanUpload(FileAnalyzer):
             raise AnalyzerRunException("File is empty")
         try:
             response = requests.post(
-                self.base_url + "/scan/file", files={"file": (self.filename, binary)}
+                self.base_url + "/scan/file",
+                files={"file": (self.filename, binary)},
+                headers={"X-Api-Key": self._api_key},
             )
             response.raise_for_status()
         except requests.RequestException as e:
@@ -58,7 +60,9 @@ class FileScanUpload(FileAnalyzer):
 
         for chance in range(self.max_tries):
             logger.info(f"[POLLING] {obj_repr} -> #{chance + 1}/{self.max_tries}")
-            response = requests.get(url, params=params)
+            response = requests.get(
+                url, params=params, headers={"X-Api-Key": self._api_key}
+            )
             report = response.json()
             if report["allFinished"]:
                 break
@@ -72,11 +76,11 @@ class FileScanUpload(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"allFinished": True}, 200),
+                    return_value=MockUpResponse({"allFinished": True}, 200),
                 ),
                 patch(
                     "requests.post",
-                    return_value=MockResponse({"flow_id": 1}, 200),
+                    return_value=MockUpResponse({"flow_id": 1}, 200),
                 ),
             )
         ]

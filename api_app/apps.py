@@ -12,12 +12,14 @@ logger = getLogger(__name__)
 class ApiAppConfig(AppConfig):
     name = "api_app"
 
-    def ready(self):
+    @staticmethod
+    def ready():
         # flake8: noqa
         from django.core.cache import cache
 
-        import api_app.signals
-        from authentication.views import DurinAuthenticationScheme
+        import api_app.core.signals  # noqa
+        import api_app.signals  # noqa
+        from authentication.views import DurinAuthenticationScheme  # noqa
 
         logger.info("Cleaning cache")
         try:

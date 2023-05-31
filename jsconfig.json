@@ -1,0 +1,7 @@
+// this is a config file for VSCode. It allows to suggest the imports in the frontend.
+{
+    "compilerOptions": {
+      "checkJs": true,
+      "jsx": "react"
+    }
+  }

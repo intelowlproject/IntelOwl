@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.observable_analyzers.vt.vt3_base import (
     VirusTotalv3AnalyzerMixin,
 )
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class VirusTotalv3ScanFile(FileAnalyzer, VirusTotalv3AnalyzerMixin):
@@ -19,13 +19,13 @@ class VirusTotalv3ScanFile(FileAnalyzer, VirusTotalv3AnalyzerMixin):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"data": {"attributes": {"status": "completed"}}}, 200
                     ),
                 ),
                 patch(
                     "requests.post",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200
                     ),
                 ),

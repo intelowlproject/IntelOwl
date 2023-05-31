@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # Security Stuff
 from django.core.management.utils import get_random_secret_key
 

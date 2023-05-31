@@ -6,7 +6,7 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
@@ -14,8 +14,12 @@ class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
     url: str = "http://cyberchef-server:3000/bake"
     config_filename: str = "cyberchef_recipes.json"
 
-    def set_params(self, params):
-        self.recipe_name = params.get("recipe_name", "")
+    recipe_name: str
+    recipe_code: list
+    output_type: str
+
+    def config(self):
+        super().config()
         if self.recipe_name:
             try:
                 try:
@@ -41,8 +45,7 @@ class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
                     f"Unknown predefined recipe: {self.recipe_name}"
                 )
         else:
-            self.recipe = params.get("recipe_code", [])
-        self.output_type = params.get("output_type", "")
+            self.recipe = self.recipe_code
 
     def run(self):
 

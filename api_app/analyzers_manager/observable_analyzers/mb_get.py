@@ -4,7 +4,7 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class MB_GET(classes.ObservableAnalyzer):
@@ -39,7 +39,9 @@ class MB_GET(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse({"data": [{"sha256_hash": "test"}]}, 200),
+                    return_value=MockUpResponse(
+                        {"data": [{"sha256_hash": "test"}]}, 200
+                    ),
                 ),
             )
         ]

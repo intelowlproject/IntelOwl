@@ -8,8 +8,11 @@ import requests
 from django.utils.functional import cached_property
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -23,29 +26,31 @@ class IntelX(ObservableAnalyzer):
 
     base_url: str = "https://2.intelx.io"
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "phonebook")
-        if self._query_type not in ["phonebook", "intelligent"]:
-            raise AnalyzerConfigurationException(f"{self._query_type} not supported")
-        self.url = self.base_url + f"/{self._query_type}/search"
-        self._rows_limit = int(params.get("rows_limit", 1000))
-        self._max_tries = int(params.get("max_tries", 10))
-        self._poll_distance = int(params.get("poll_distance", 3))
-        self._timeout = int(params.get("timeout", 10))
-        self._datefrom = params.get("datefrom", "")
-        self._dateto = params.get("dateto", "")
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
+
+    query_type: str
+    rows_limit: int
+    max_tries: int
+    poll_distance: int
+    timeout: int
+    datefrom: str
+    dateto: str
+
+    def config(self):
+        super().config()
+        if self.query_type not in ["phonebook", "intelligent"]:
+            raise AnalyzerConfigurationException(f"{self.query_type} not supported")
+        self.url = self.base_url + f"/{self.query_type}/search"
 
     @cached_property
     def _session(self):
         session = requests.Session()
-        session.headers.update({"x-key": self.__api_key, "User-Agent": "IntelOwl"})
+        session.headers.update({"x-key": self._api_key_name, "User-Agent": "IntelOwl"})
         return session
 
     def _poll_for_results(self, search_id):
         json_data = {}
-        for chance in range(self._max_tries):
-            time.sleep(self._poll_distance)
+        for chance in range(self.max_tries):
             logger.info(
                 f"Result Polling. Try #{chance + 1}. Starting the query..."
                 f"<-- {self.__repr__()}"
@@ -53,7 +58,7 @@ class IntelX(ObservableAnalyzer):
             try:
                 r = self._session.get(
                     f"{self.url}/result?id={search_id}"
-                    f"&limit={self._rows_limit}&offset=-1"
+                    f"&limit={self.rows_limit}&offset=-1"
                 )
                 r.raise_for_status()
             except requests.RequestException as e:
@@ -62,6 +67,7 @@ class IntelX(ObservableAnalyzer):
                 if r.status_code == 200:
                     json_data = r.json()
                     break
+            time.sleep(self.poll_distance)
 
         if not json_data:
             raise AnalyzerRunException(
@@ -69,7 +75,7 @@ class IntelX(ObservableAnalyzer):
                 f" observable {self.observable_name}"
             )
 
-        if self._query_type == "phonebook":
+        if self.query_type == "phonebook":
             selectors = json_data["selectors"]
             parsed_selectors = self.__pb_search_results(selectors)
             result = {"id": search_id, **parsed_selectors}
@@ -82,20 +88,20 @@ class IntelX(ObservableAnalyzer):
             "term": self.observable_name,
             "buckets": [],
             "lookuplevel": 0,
-            "maxresults": self._rows_limit,
-            "timeout": self._timeout,
+            "maxresults": self.rows_limit,
+            "timeout": self.timeout,
             "sort": 4,  # newest items first
             "media": 0,
             "terminate": [],
         }
-        if self._query_type == "phonebook":
+        if self.query_type == "phonebook":
             params["target"] = 0
-        elif self._query_type == "intelligent":
-            params["datefrom"] = self._datefrom
-            params["dateto"] = self._dateto
+        elif self.query_type == "intelligent":
+            params["datefrom"] = self.datefrom
+            params["dateto"] = self.dateto
         # POST the search term --> Fetch the 'id' --> GET the results using the 'id'
         logger.info(
-            f"starting {self._query_type} request for observable {self.observable_name}"
+            f"starting {self.query_type} request for observable {self.observable_name}"
         )
         r = self._session.post(self.url, json=params)
         r.raise_for_status()
@@ -128,11 +134,11 @@ class IntelX(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({"id": 1}, 200),
+                    return_value=MockUpResponse({"id": 1}, 200),
                 ),
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"selectors": []}, 200),
+                    return_value=MockUpResponse({"selectors": []}, 200),
                 ),
             )
         ]

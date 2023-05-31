@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from ._util import get_secret
 from .aws import AWS_REGION
 from .commons import STAGE_CI, STAGE_LOCAL

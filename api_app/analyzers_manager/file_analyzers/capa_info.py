@@ -15,15 +15,17 @@ class CapaInfo(FileAnalyzer, DockerBasedAnalyzer):
     timeout: int = 60 * 9
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
-    def set_params(self, params):
+    shellcode: bool
+    arch: str
+
+    def config(self):
+        super().config()
         self.args = []
-        arch = params.get("arch", "64")
-        if arch != "64":
-            arch = "32"
-        shellcode = params.get("shellcode", False)
-        if shellcode:
+        if self.arch != "64":
+            self.arch = "32"
+        if self.shellcode:
             self.args.append("-f")
-            self.args.append("sc" + arch)
+            self.args.append("sc" + self.arch)
 
     def run(self):
         # get binary

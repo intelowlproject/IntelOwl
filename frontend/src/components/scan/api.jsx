@@ -10,10 +10,39 @@ import {
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
   API_BASE_URI,
+  COMMENT_BASE_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
 const { append: appendToRecentScans } = useRecentScansStore.getState();
+
+function prettifyErrors(errorResponse) {
+  // only validation errors returns an array of errors
+  /**
+    "errors":{
+			"detail":[
+				{"observable_name":["This field may not be blank.", "another error"]},
+				{"another_key": "another error"},
+			]
+		}
+   */
+  if (Array.isArray(errorResponse.response.data?.errors?.detail)) {
+    let prettyHTMLList = [];
+    errorResponse.response.data.errors.detail.forEach((objectDict) => {
+      Object.values(objectDict).forEach((errorItem) => {
+        if (Array.isArray(errorItem)) {
+          errorItem.forEach((error) => prettyHTMLList.push(error));
+        } else {
+          prettyHTMLList.push(errorItem);
+        }
+      });
+    });
+    prettyHTMLList = prettyHTMLList.map((e) => <li>{e}</li>);
+    return <ul>{prettyHTMLList}</ul>;
+  }
+
+  return JSON.stringify(errorResponse.response.data);
+}
 
 export async function createPlaybookJob(formValues) {
   // check existing
@@ -33,10 +62,7 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data.results;
 
   respData.forEach((x) => {
-    if (x.playbooks_running)
-      x.playbooks_running.forEach((playbook_) =>
-        playbooksRunning.add(playbook_)
-      );
+    if (x.playbook_running) playbooksRunning.add(x.playbook_running);
     if (x.warnings) warnings.push(...x.warnings);
   });
 
@@ -77,7 +103,31 @@ export async function createPlaybookJob(formValues) {
     return Promise.reject(error);
   } catch (e) {
     console.error(e);
-    addToast("Failed!", e.parsedMsg, "danger");
+    addToast("Failed!", prettifyErrors(e), "danger");
+    return Promise.reject(e);
+  }
+}
+
+export async function createComment(formValues) {
+  try {
+    const resp = await axios.post(`${COMMENT_BASE_URI}`, formValues);
+
+    return Promise.resolve(resp);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", prettifyErrors(e), "danger");
+    return Promise.reject(e);
+  }
+}
+
+export async function deleteComment(commentId) {
+  try {
+    const resp = await axios.delete(`${COMMENT_BASE_URI}/${commentId}`);
+
+    return Promise.resolve(resp);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", prettifyErrors(e), "danger");
     return Promise.reject(e);
   }
 }
@@ -154,13 +204,17 @@ export async function createJob(formValues) {
     return Promise.reject(error);
   } catch (e) {
     console.error(e);
-    addToast("Failed!", e.parsedMsg, "danger");
+    addToast("Failed!", prettifyErrors(e), "danger");
     return Promise.reject(e);
   }
 }
 
 async function _askAnalysisAvailability(formValues) {
+  console.debug("_askAnalysisAvailability - formValues");
+  console.debug(formValues);
+
   const payload = [];
+  const minutesAgo = formValues.hoursAgo * 60;
 
   if (formValues.classification === "file") {
     const promises = [];
@@ -170,6 +224,9 @@ async function _askAnalysisAvailability(formValues) {
         playbooks: formValues.playbooks,
         md5: md5(readFileAsync(file)),
       };
+      if (minutesAgo) {
+        body.minutes_ago = minutesAgo;
+      }
       promises.push(body.md5);
       if (formValues.check === "running_only") {
         body.running_only = "True";
@@ -184,6 +241,9 @@ async function _askAnalysisAvailability(formValues) {
         playbooks: formValues.playbooks,
         md5: md5(ObservableName),
       };
+      if (minutesAgo) {
+        body.minutes_ago = minutesAgo;
+      }
       if (formValues.check === "running_only") {
         body.running_only = "True";
       }
@@ -191,16 +251,18 @@ async function _askAnalysisAvailability(formValues) {
     });
   }
 
+  console.debug("_askAnalysisAvailability - payload");
+  console.debug(payload);
   try {
     const response = await axios.post(
       ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
       payload
     );
-    const answer = response.data.results;
-    if (answer.some((x) => x.status === "not_available")) {
+    const answer = response.data;
+    if (answer.count === 0) {
       return 0;
     }
-    const jobIds = answer.map((x) => x.job_id);
+    const jobIds = answer.results.map((x) => x.job_id);
     jobIds.forEach((jobId) => {
       appendToRecentScans(jobId, "secondary");
     });

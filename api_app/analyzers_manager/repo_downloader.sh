@@ -19,7 +19,7 @@ chown -R www-data:www-data ~/.quark-engine
 
 # Clone dictionaries for dnstwist analyzer
 cd /opt/deploy
-svn export https://github.com/elceef/dnstwist/tags/20201022/dictionaries dnstwist-dictionaries
+svn export https://github.com/elceef/dnstwist/tags/20230402/dictionaries dnstwist-dictionaries
 
 # download exiftool
 # https://exiftool.org/install.html#Unix

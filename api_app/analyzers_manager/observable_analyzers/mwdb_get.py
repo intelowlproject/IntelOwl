@@ -13,11 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class MWDBGet(ObservableAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
-        mwdb = mwdblib.MWDB(api_key=self.__api_key)
+        mwdb = mwdblib.MWDB(api_key=self._api_key_name)
 
         result = {}
         try:

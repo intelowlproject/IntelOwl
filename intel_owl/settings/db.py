@@ -1,10 +1,13 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # Database Conf
 
 import sys
 
 from intel_owl import secrets
 
-from .aws import AWS_REGION
+from .aws import AWS_RDS_IAM_ROLE, AWS_REGION
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -15,7 +18,6 @@ PG_USER = secrets.get_secret("DB_USER")
 PG_PASSWORD = secrets.get_secret("DB_PASSWORD")
 PG_SSL = secrets.get_secret("DB_SSL", False) == "True"
 PG_ENGINE = "django.db.backends.postgresql"
-AWS_RDS_IAM_ROLE = secrets.get_secret("AWS_RDS_IAM_ROLE", False) == "True"
 if AWS_RDS_IAM_ROLE:
     if PG_PASSWORD:
         print(

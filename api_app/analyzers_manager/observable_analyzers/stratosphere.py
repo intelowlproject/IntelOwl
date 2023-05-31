@@ -9,8 +9,8 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -24,16 +24,21 @@ db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
 
 
 class Stratos(classes.ObservableAnalyzer):
-    def check_in_list(self, dataset_loc, ip):
+    @staticmethod
+    def check_in_list(dataset_loc, ip):
         # Checks the IP in a list(S.No,IP,Rating).
-        with open(dataset_loc, "r") as f:
+        with open(dataset_loc, "r", encoding="utf-8") as f:
             db = f.read()
 
         db_list = db.split("\n")
 
         for ip_tuple in db_list[2:]:
             if ip in ip_tuple:
-                ip_rating = (ip_tuple.split(",")[2]).strip()
+                split_tuple = ip_tuple.split(",")
+                if split_tuple == 3:
+                    ip_rating = (split_tuple[2]).strip()
+                else:
+                    ip_rating = "found"
                 return ip_rating
         return ""
 
@@ -56,12 +61,13 @@ class Stratos(classes.ObservableAnalyzer):
 
         return result
 
-    def download_dataset(self, url, db_loc):
+    @staticmethod
+    def download_dataset(url, db_loc):
         # Dataset website certificates are not correctly configured.
         p = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
         p.raise_for_status()
 
-        with open(db_loc, "w") as f:
+        with open(db_loc, "w", encoding="utf-8") as f:
             f.write(p.content.decode())
 
     def updater(self):
@@ -118,7 +124,7 @@ class Stratos(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200, content=b"7.7.7.7"),
+                    return_value=MockUpResponse({}, 200, content=b"7.7.7.7"),
                 ),
             )
         ]

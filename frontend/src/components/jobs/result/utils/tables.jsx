@@ -29,11 +29,9 @@ const tableProps = {
           {job.permissions?.plugin_actions === true &&
             ["running", "pending"].includes(plugin.status.toLowerCase()) && (
               <IconButton
-                id={`killplugin-${plugin.name}`}
+                id={`killplugin-${plugin.id}`}
                 Icon={MdPauseCircleOutline}
-                onClick={() =>
-                  killPlugin(job.id, plugin.type, plugin.name).then(refetch)
-                }
+                onClick={() => killPlugin(job.id, plugin).then(refetch)}
                 color="accent"
                 size="xs"
                 title={`Kill ${plugin.type} run`}
@@ -44,11 +42,9 @@ const tableProps = {
           {job.permissions?.plugin_actions === true &&
             ["failed", "killed"].includes(plugin.status.toLowerCase()) && (
               <IconButton
-                id={`retryplugin-${plugin.name}`}
+                id={`retryplugin-${plugin.id}`}
                 Icon={MdOutlineRefresh}
-                onClick={() =>
-                  retryPlugin(job.id, plugin.type, plugin.name).then(refetch)
-                }
+                onClick={() => retryPlugin(job.id, plugin).then(refetch)}
                 color="light"
                 size="xs"
                 title={`Retry ${plugin.type} run`}
@@ -122,33 +118,8 @@ const tableProps = {
   ),
 };
 
-const tablePropsPlaybooks = JSON.parse(JSON.stringify(tableProps));
-
-tablePropsPlaybooks.columns.push({
-  Header: "Playbook",
-  id: "playbook",
-  accessor: "parent_playbook",
-  Cell: ({ value }) => {
-    if (value != null) {
-      return <span>{value}</span>;
-    }
-    return <span />;
-  },
-  Filter: DefaultColumnFilter,
-  maxWidth: 300,
-});
-
 export function AnalyzersReportTable({ job, refetch }) {
-  if (job?.playbooks_to_execute.length > 1) {
-    return (
-      <DataTable
-        data={job?.analyzer_reports}
-        customProps={{ job, refetch }}
-        {...tablePropsPlaybooks}
-      />
-    );
-  }
-
+  console.debug("AnalyzersReportTable rendered");
   return (
     <DataTable
       data={job?.analyzer_reports}
@@ -159,16 +130,7 @@ export function AnalyzersReportTable({ job, refetch }) {
 }
 
 export function ConnectorsReportTable({ job, refetch }) {
-  if (job?.playbooks_to_execute.length > 1) {
-    return (
-      <DataTable
-        data={job?.connector_reports}
-        customProps={{ job, refetch }}
-        {...tablePropsPlaybooks}
-      />
-    );
-  }
-
+  console.debug("ConnectorsReportTable rendered");
   return (
     <DataTable
       data={job?.connector_reports}
@@ -178,10 +140,23 @@ export function ConnectorsReportTable({ job, refetch }) {
   );
 }
 
+export function VisualizersReportTable({ job, refetch }) {
+  console.debug("AnalyzersReportTable rendered");
+  return (
+    <DataTable
+      data={job?.visualizer_reports}
+      customProps={{ job, refetch }}
+      {...tableProps}
+    />
+  );
+}
 AnalyzersReportTable.propTypes = {
   job: PropTypes.object.isRequired,
 };
 
 ConnectorsReportTable.propTypes = {
+  job: PropTypes.object.isRequired,
+};
+VisualizersReportTable.propTypes = {
   job: PropTypes.object.isRequired,
 };

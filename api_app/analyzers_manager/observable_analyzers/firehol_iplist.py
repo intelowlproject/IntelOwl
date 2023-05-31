@@ -11,8 +11,11 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +23,7 @@ db_path = f"{settings.MEDIA_ROOT}"
 
 
 class FireHol_IPList(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        self.list_names = params.get("list_names", ["firehol_level1.netset"])
+    list_names: list
 
     def run(self):
         ip = self.observable_name
@@ -37,7 +39,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
 
             self.check_iplist_status(list_name)
 
-            with open(f"{db_path}/{list_name}", "r") as f:
+            with open(f"{db_path}/{list_name}", "r", encoding="utf-8") as f:
                 db = f.read()
 
             db_list = db.split("\n")
@@ -51,7 +53,8 @@ class FireHol_IPList(classes.ObservableAnalyzer):
 
         return result
 
-    def download_iplist(self, list_name):
+    @staticmethod
+    def download_iplist(list_name):
         if ".ipset" not in list_name and ".netset" not in list_name:
             raise AnalyzerConfigurationException(
                 f"extension missing from {list_name} (add .ipset or .netset to name)"
@@ -72,7 +75,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
                 if not line.startswith("#"):
                     data_cleaned += f"{line}\n"
 
-            with open(iplist_location, "w") as f:
+            with open(iplist_location, "w", encoding="utf-8") as f:
                 f.write(data_cleaned)
 
             if not os.path.exists(iplist_location):
@@ -107,7 +110,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         json_data={},
                         status_code=200,
                         text="""0.0.0.0/8\n

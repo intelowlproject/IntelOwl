@@ -12,13 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class SpeakEasy(FileAnalyzer):
-    def set_params(self, params):
-        self.raw_offset = params.get("raw_offset", 0x0)
-        self.arch = params.get("arch", "x64")
-        self.shellcode = params.get("shellcode", False)
+    raw_offset: int
+    arch: str
+    shellcode: bool
 
     def run(self):
-        results = {}
         s = speakeasy.Speakeasy()
         if self.shellcode:
             arch = e_arch.ARCH_AMD64

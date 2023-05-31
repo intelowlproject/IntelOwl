@@ -6,8 +6,8 @@ import json
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class ThreatFox(classes.ObservableAnalyzer):
@@ -23,6 +23,11 @@ class ThreatFox(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         result = response.json()
+        data = result.get("data", {})
+        if isinstance(data, dict):
+            ioc_id = data.get("id", "")
+            if ioc_id:
+                result["link"] = f"https://threatfox.abuse.ch/ioc/{ioc_id}"
         return result
 
     @classmethod
@@ -31,7 +36,7 @@ class ThreatFox(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

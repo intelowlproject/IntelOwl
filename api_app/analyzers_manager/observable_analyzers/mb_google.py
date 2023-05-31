@@ -14,10 +14,10 @@ class MB_GOOGLE(MB_GET):
     def run(self):
         results = {}
 
-        query = "{} site:bazaar.abuse.ch".format(self.observable_name)
+        query = f"{self.observable_name} site:bazaar.abuse.ch"
         for url in googlesearch.search(query, stop=20):
             mb_hash = url.split("/")[-2]
-            res = super(MB_GOOGLE, self).query_mb_api(observable_name=mb_hash)
+            res = super().query_mb_api(observable_name=mb_hash)
             results[mb_hash] = res
 
         return results

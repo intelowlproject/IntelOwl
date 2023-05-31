@@ -151,22 +151,14 @@ const jobTableColumns = [
         Cell: ({ value: job }) => (
           <div className="d-flex flex-column justify-content-center">
             <span>
-              {job.analyzers_to_execute.length}/
-              {job.analyzers_requested.length ||
-                (job.playbooks_to_execute.length > 0
-                  ? job.analyzers_to_execute.length
-                  : "all")}{" "}
+              {job.analyzers_to_execute.length}/{job.analyzers_requested.length}{" "}
               analyzers
             </span>
             <span>
               {job.connectors_to_execute.length}/
               {job.connectors_requested.length} connectors
             </span>
-
-            <span>
-              {job.playbooks_to_execute.length}/
-              {job.playbooks_to_execute.length} playbooks
-            </span>
+            <span>{job.visualizers_to_execute.length}/all visualizers</span>
           </div>
         ),
         disableSortBy: true,

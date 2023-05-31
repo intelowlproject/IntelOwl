@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import ConfigContainer from "./ConfigContainer";
 
 export default function UserConfig() {
-  console.debug("Config rendered!");
+  console.debug("UserConfigPage rendered!");
 
   useTitle("IntelOwl | Config", {
     restoreOnUnmount: true,

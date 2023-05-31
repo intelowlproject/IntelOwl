@@ -11,9 +11,7 @@ class CustomOAuthTestCase(APITestCase):
         username = "john.doe"
         email = "john.doe@example.com"
         password = "hunter2"
-        if User.objects.filter(username=username).exists():
-            user = User.objects.get(username=username)
-            user.delete()
+        User.objects.all().delete()
         cls.user = User.objects.create_superuser(username, email, password)
         cls.creds = {
             "username": username,
@@ -25,5 +23,5 @@ class CustomOAuthTestCase(APITestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.user.delete()
+        User.objects.all().delete()
         return super().tearDownClass()

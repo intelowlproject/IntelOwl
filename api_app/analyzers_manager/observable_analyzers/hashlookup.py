@@ -4,13 +4,12 @@
 from pyhashlookup import Hashlookup, PyHashlookupError
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class HashLookupServer(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        self.hashlookup_server = params.get("hashlookup_server", "")
+    hashlookup_server: str
 
     def run(self):
         if self.hashlookup_server:

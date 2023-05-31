@@ -1,27 +1,22 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import grp
 import os
 import pwd
-from pathlib import PosixPath
 
 # placeholder for later
+from pathlib import Path
+
 get_secret = os.environ.get
 
 uid = pwd.getpwnam("www-data").pw_uid
 gid = grp.getgrnam("www-data").gr_gid
 
 
-def touch(path):
-    with open(path, "a", encoding="utf-8") as file_pointer:
-        file_pointer.close()
-
-
-def set_permissions(directory):
-    from .commons import STAGE_CI
-
-    if STAGE_CI:
-        return
-    directory = PosixPath(directory)
-    if directory.exists():
-        os.chown(directory, uid, gid)
-    for file in directory.rglob("*"):
-        os.chown(file, uid, gid)
+def set_permissions(directory: Path):
+    if not directory.exists():
+        raise RuntimeError(f"Directory {directory} does not exists")
+    os.chown(directory, uid, gid)
+    for path in directory.rglob("*"):
+        os.chown(path, uid, gid)

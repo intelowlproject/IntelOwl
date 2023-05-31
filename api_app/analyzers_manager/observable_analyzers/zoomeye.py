@@ -4,20 +4,22 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class ZoomEye(classes.ObservableAnalyzer):
     base_url: str = "https://api.zoomeye.org/"
 
-    def set_params(self, params):
-        self.search_type = params.get("search_type", "host")
-        self.query = params.get("query", "")
-        self.page = params.get("page", 1)
-        self.facets = params.get("facets", "")
-        self.history = params.get("history", True)
-        self.__api_key = self._secrets["api_key_name"]
+    search_type: str
+    query: str
+    page: int
+    facets: str
+    history: bool
+    _api_key_name: str
 
     def __build_zoomeye_url(self):
         if self.observable_classification == self.ObservableTypes.IP:
@@ -51,7 +53,7 @@ class ZoomEye(classes.ObservableAnalyzer):
         self.__build_zoomeye_url()
 
         try:
-            response = requests.get(self.url, headers={"API-KEY": self.__api_key})
+            response = requests.get(self.url, headers={"API-KEY": self._api_key_name})
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
@@ -75,7 +77,7 @@ class ZoomEye(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

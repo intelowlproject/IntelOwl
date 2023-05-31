@@ -14,17 +14,20 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling (in seconds)
     poll_distance: int = 30
 
-    def set_params(self, params):
-        self.args = self._thug_args_builder(params)
+    user_agent: str
+    dom_events: str
+    use_proxy: bool
+    proxy: str
+    enable_awis: bool
+    enable_image_processing_analysis: bool
 
-    @staticmethod
-    def _thug_args_builder(config_params):
-        user_agent = config_params.get("user_agent", "winxpie60")
-        dom_events = config_params.get("dom_events", None)
-        use_proxy = config_params.get("use_proxy", False)
-        proxy = config_params.get("proxy", None)
-        enable_awis = config_params.get("enable_awis", False)
-        enable_img_proc = config_params.get("enable_image_processing_analysis", False)
+    def _thug_args_builder(self):
+        user_agent = self.user_agent
+        dom_events = self.dom_events
+        use_proxy = self.use_proxy
+        proxy = self.proxy
+        enable_awis = self.enable_awis
+        enable_img_proc = self.enable_image_processing_analysis
         # make request arguments
         # analysis timeout is set to 5 minutes
         args = ["-T", "300", "-u", str(user_agent)]
@@ -40,13 +43,14 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         return args
 
     def run(self):
+        args = self._thug_args_builder()
         # construct a valid directory name into which thug will save the result
         tmp_dir = secrets.token_hex(4)
         # make request data
-        self.args.extend(["-n", "/home/thug/" + tmp_dir, self.observable_name])
+        args.extend(["-n", "/home/thug/" + tmp_dir, self.observable_name])
 
         req_data = {
-            "args": self.args,
+            "args": args,
             "callback_context": {"read_result_from": tmp_dir},
         }
 

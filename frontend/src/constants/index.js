@@ -4,7 +4,7 @@ export const JOB_TYPE_COLOR_MAP = {
   observable: "#42796f",
 };
 export const TLP_COLOR_MAP = {
-  WHITE: "#FFFFFF",
+  CLEAR: "#FFFFFF",
   GREEN: "#33FF00",
   AMBER: "#FFC000",
   RED: "#FF0033",
@@ -17,7 +17,7 @@ export const OBSERVABLE_CLASSIFICATION_COLOR_MAP = {
   generic: "#733010",
 };
 export const TLP_DESCRIPTION_MAP = {
-  WHITE: "TLP: use all analyzers",
+  CLEAR: "TLP: use all analyzers",
   GREEN: "TLP: disable analyzers that could impact privacy",
   AMBER:
     "TLP: disable analyzers that could impact privacy and limit access to my organization",
@@ -63,8 +63,8 @@ export const OBSERVABLE_TYPES = Object.keys(
 );
 
 export const scanTypes = {
-  analyzers_and_connectors: "Analyzers/Connectors",
   playbooks: "Playbooks",
+  analyzers_and_connectors: "Analyzers/Connectors",
 };
 
 export const ALL_CLASSIFICATIONS = OBSERVABLE_TYPES.concat("file");

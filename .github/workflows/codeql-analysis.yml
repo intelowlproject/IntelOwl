@@ -7,8 +7,6 @@ permissions: read-all
 name: "CodeQL"
 
 on:
-  push:
-    branches: [master, develop]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master, develop]
@@ -36,7 +34,7 @@ jobs:
         fetch-depth: 2
 
     - name: Set up Python
-      uses: actions/setup-python@v4.5.0
+      uses: actions/setup-python@v4.6.1
       with:
         python-version: '3.9'
 

@@ -15,6 +15,7 @@
 [![Dependency Review](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
 [![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
+[![DeepSource](https://app.deepsource.com/gh/intelowlproject/IntelOwl.svg/?label=resolved+issues&token=BSvKHrnk875Y0Bykb79GNo8w)](https://app.deepsource.com/gh/intelowlproject/IntelOwl/?ref=repository-badge)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl/badge)](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7120/badge)](https://bestpractices.coreinfrastructure.org/projects/7120)
 # Intel Owl
@@ -33,6 +34,7 @@ Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intell
 - Intel Owl is composed of:
   - **analyzers** that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
   - **connectors** that can be run to export data to external platforms (like MISP or OpenCTI)
+  - **visualizers** that can be run to create custom visualizations of analyzers results
   - **playbooks** that are meant to make analysis easily repeatable
 - API REST written in Django and Python 3.9.
 - Built-in frontend client written in ReactJS, with **[certego-ui](https://github.com/certego/certego-ui)**: provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
@@ -41,25 +43,18 @@ Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intell
 We try hard to keep our documentation well written, easy to understand and always updated.
 All info about installation, usage, configuration and contribution can be found [here](https://intelowl.readthedocs.io/)
 
-### Publications
+### Publications and Media
 
-To know more about the project and its growth over time, you may be interested in reading the following official blog posts and/or videos:
-
-- [Youtube demo](https://youtu.be/pHnh3qTzSeM)
-- [Certego Blog: v.4.0.0 Announcement](https://www.certego.net/en/news/intel-owl-release-v4-0-0/)
-- [Honeynet Blog: v3.0.0 Announcement](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/)
-- [Intel Owl on Daily Swig](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
-- [Honeynet Blog: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
-- [Certego Blog: First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
+To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowl.readthedocs.io/en/latest/Installation.md#publications-and-media)
 
 ### Available services or analyzers
 
 You can see the full list of all available analyzers in the [documentation](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers).
 
-| Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| -------------------------------------------------- |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Inbuilt modules                                    | - Static Office Document, RTF, PDF, PE File Analysis and metadata extraction<br/> - Strings Deobfuscation and analysis ([FLOSS](https://github.com/mandiant/flare-floss), [Stringsifter](https://github.com/mandiant/stringsifter), ...)<br/> - PE Emulation with [Qiling](https://github.com/qilingframework/qiling) and [Speakeasy](https://github.com/mandiant/speakeasy)<br/> - PE Signature verification<br/> - PE Capabilities Extraction ([CAPA](https://github.com/mandiant/capa))<br/> - Javascript Emulation ([Box-js](https://github.com/CapacitorSet/box-js))<br/> - Android Malware Analysis ([Quark-Engine](https://github.com/quark-engine/quark-engine), ...)<br/> - SPF and DMARC Validator<br/> - Yara (a lot of public rules are available. You can also add your own rules)<br/> - more...                                                                                                                                                  |
-| External services                                  | - Abuse.ch <a href="https://bazaar.abuse.ch/about/" target="_blank">MalwareBazaar</a>/<a href="https://urlhaus.abuse.ch/" target="_blank">URLhaus</a>/<a href="https://threatfox.abuse.ch/about/" target="_blank">Threatfox</a>/<a href="https://yaraify.abuse.ch/about/" target="_blank">YARAify</a></br> - <a href="https://dragonfly.certego.net?utm_source=intelowl" target="_blank">Dragonfly sandbox</a><br> - <a href="https://docs.greynoise.io/docs/3rd-party-integrations" target="_blank"> GreyNoise v2</a><br/> - <a href="https://analyze.intezer.com/?utm_source=IntelOwl" target="_blank"> Intezer</a><br/> - VirusTotal v3<br/> - Crowdsec<br/> - <a href="https://urlscan.io/docs/integrations/" target="_blank">URLscan</a><br/> - Shodan<br/> - AlienVault OTX<br/> - <a href="https://intelx.io/integrations" target="_blank">Intelligence_X</a><br/> - <a href="https://www.misp-project.org/" target="_blank">MISP</a><br/> - many more.. |
+| Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------------------------------------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Inbuilt modules                                    | - Static Office Document, RTF, PDF, PE File Analysis and metadata extraction<br/> - Strings Deobfuscation and analysis ([FLOSS](https://github.com/mandiant/flare-floss), [Stringsifter](https://github.com/mandiant/stringsifter), ...)<br/> - PE Emulation with [Qiling](https://github.com/qilingframework/qiling) and [Speakeasy](https://github.com/mandiant/speakeasy)<br/> - PE Signature verification<br/> - PE Capabilities Extraction ([CAPA](https://github.com/mandiant/capa))<br/> - Javascript Emulation ([Box-js](https://github.com/CapacitorSet/box-js))<br/> - Android Malware Analysis ([Quark-Engine](https://github.com/quark-engine/quark-engine), ...)<br/> - SPF and DMARC Validator<br/> - Yara (a lot of public rules are available. You can also add your own rules)<br/> - more...                                                                                                                                                                                                                                  |
+| External services                                  | - Abuse.ch <a href="https://bazaar.abuse.ch/about/" target="_blank">MalwareBazaar</a>/<a href="https://urlhaus.abuse.ch/" target="_blank">URLhaus</a>/<a href="https://threatfox.abuse.ch/about/" target="_blank">Threatfox</a>/<a href="https://yaraify.abuse.ch/about/" target="_blank">YARAify</a></br> - <a href="https://dragonfly.certego.net?utm_source=intelowl" target="_blank">Dragonfly sandbox</a><br> - <a href="https://docs.greynoise.io/docs/3rd-party-integrations" target="_blank"> GreyNoise v2</a><br/> - <a href="https://analyze.intezer.com/?utm_source=IntelOwl" target="_blank"> Intezer</a><br/> - VirusTotal v3<br/> - <a href="https://doc.crowdsec.net/docs/next/cti_api/integration_intelowl/?utm_source=IntelOwl" target="_blank"> Crowdsec</a><br/> - <a href="https://urlscan.io/docs/integrations/" target="_blank">URLscan</a><br/> - Shodan<br/> - AlienVault OTX<br/> - <a href="https://intelx.io/integrations" target="_blank">Intelligence_X</a><br/> - <a href="https://www.misp-project.org/" target="_blank">MISP</a><br/> - many more.. |
 
 ## Partnerships and sponsors
 
@@ -109,15 +104,6 @@ If you are interested in participating in the next Google Summer of Code, check 
 
 ### 🥉 BRONZE
 
-#### LimaCharlie
-<a href="https://limacharlie.io/?utm_source=intelowl&utm_medium=banner"> <img style="border: 0.2px solid black" width=194 height=38 src="docs/static/limacharlie_logo.png" alt="LimaCharlie logo"> </a>
-
-[LimaCharlie](https://limacharlie.io/?utm_source=intelowl&utm_medium=banner) gives security teams full control over how they manage their security infrastructure. Get full visibility into your coverage, build what you want, control your data, get the security capabilities you need, for however long you need them, and pay only for what you use.
-
-Read everything about this partnership [in the LimaCharlie's blog](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner).
-
-
-
 #### Docker
 
 <a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=120 height=31 src="docs/static/docker_logo.png" alt="Docker logo"> </a>
@@ -125,6 +111,7 @@ Read everything about this partnership [in the LimaCharlie's blog](https://limac
 In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code. You may find the official IntelOwl Docker images [here](https://hub.docker.com/search?q=intelowlproject).
 
 ### Other collaborations
+ * [LimaCharlie](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner)
  * [Tines](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl)
 
 

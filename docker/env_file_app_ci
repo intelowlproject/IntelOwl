@@ -32,73 +32,6 @@ ELASTICSEARCH_HOST=
 ELASTICSEARCH_NO_OF_SHARDS=1
 ELASTICSEARCH_NO_OF_REPLICAS=0
 
-# analyzers secrets (optional)
-IPINFO_KEY=test
-SHODAN_KEY=test
-CAPESANDBOX_KEY=test
-ABUSEIPDB_KEY=test
-ANOMALI_THREATSTREAM_API_USER=test
-ANOMALI_THREATSTREAM_API_KEY=test
-AUTH0_KEY=test
-SECURITYTRAILS_KEY=test
-GSF_KEY=test
-OTX_KEY=test
-CIRCL_CREDENTIALS=user|pass
-VT_KEY=test
-HA_KEY=test
-INTEZER_KEY=test
-INQUEST_API_KEY=test
-FIRST_MISP_API=test
-MISP_KEY=test
-MAXMIND_KEY=test
-DNSDB_KEY=test
-HONEYDB_API_ID=test
-HONEYDB_API_KEY=test
-HUNTER_API_KEY=test
-CENSYS_API_ID=test
-CENSYS_API_SECRET=test
-ONYPHE_KEY=test
-GREYNOISE_API_KEY=test
-INTELX_API_KEY=test
-WHOISXMLAPI_KEY=test
-UNPAC_ME_API_KEY=test
-URLSCAN_API_KEY=test
-PHISHTANK_API_KEY=test
-ZOOMEYE_KEY=test
-TRIAGE_KEY=test
-EMAILREP_KEY=test
-MWDB_KEY=test
-WIGLE_KEY=test
-XFORCE_KEY=test
-XFORCE_PASSWORD=test
-SSAPINET_KEY=test
-MALPEDIA_KEY=test
-DEHASHED_AUTH_KEY=email@example.com:verysecureapikey
-OPENCTI_KEY=test
-YETI_KEY=test
-SPYSE_API_KEY=test
-DRAGONFLY_API_KEY=test
-BITCOINABUSE_KEY=test
-VIRUSHEE_API_KEY=test
-STALKPHISH_KEY=test
-GREEDYBEAR_API_KEY=test
-MALPEDIA_TOKEN=test
-YARAIFY_KEY=test
-HIBP_API_KEY=test
-DOCGUARD_KEY=test
-CHECKPHISH_KEY=test
-SERVICE_ACCOUNT_JSON=test
-PULSEDIVE_API_KEY=test
-KOODOUS_KEY=test
-HUNTERHOW_KEY=test
-BINARYEDGE_KEY=test
-VT_INTELLIGENCE_KEY=test
-CUCKOO_API_KEY=test
-
-# connectors secrets (optional)
-CONNECTOR_MISP_KEY=test
-CONNECTOR_OPENCTI_KEY=test
-CONNECTOR_YETI_KEY=test
 
 # Test tokens
 TEST_JOB_ID=1
@@ -108,18 +41,6 @@ TEST_URL=https://www.google.com/search?test
 TEST_MD5=446c5fbb11b9ce058450555c1c27153c
 TEST_GENERIC=email@example.com
 
-# URLs
-CAPESANDBOX_URL=http://fake_url.com
-CUCKOO_URL=http://fake_url.com
-MISP_URL=http://fake_url.com
-FIRST_MISP_URL=http://fake_url.com
-VT_NOTIFY_URL=http://fake_url.com
-OPENCTI_URL=http://fake_url.com
-YETI_URL=http://fake_url.com
-CONNECTOR_MISP_URL=http://fake_url.com
-CONNECTOR_OPENCTI_URL=http://fake_url.com
-CONNECTOR_YETI_URL=http://fake_url.com
-DRAGONFLY_API_URL=http://fake_url.com
 
 # other variables
 STAGE="ci"
@@ -133,8 +54,6 @@ COVERAGE_PROCESS_START=.coveragerc
 # broker configuration
 BROKER_URL=amqp://guest:guest@rabbitmq:5672
 
-# Playbooks
-TEST_PLAYBOOK=FREE_TO_USE_ANALYZERS
 
 # drf-recaptcha
 RECAPTCHA_SECRET_KEY_IO_PUBLIC="testkey"

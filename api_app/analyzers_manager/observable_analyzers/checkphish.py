@@ -6,23 +6,23 @@ import time
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AlreadyFailedJobException, AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class CheckPhish(classes.ObservableAnalyzer):
     base_url: str = "https://developers.checkphish.ai/api/neo/scan"
     status_url: str = base_url + "/status"
 
-    def set_params(self, params):
-        self.polling_tries = params.get("polling_tries", 10)
-        self.polling_time = params.get("polling_time", 0.5)
-        self.__api_key = self._secrets["api_key_name"]
+    polling_tries: int
+    polling_time: float
+
+    _api_key_name: str
 
     def run(self):
         try:
             json_data = {
-                "apiKey": self.__api_key,
+                "apiKey": self._api_key_name,
                 "urlInfo": {"url": self.observable_name},
             }
 
@@ -33,7 +33,7 @@ class CheckPhish(classes.ObservableAnalyzer):
 
         job_id = response.json().get("jobID")
         if job_id is None:
-            raise AlreadyFailedJobException(
+            raise AnalyzerRunException(
                 "Job creation confirmation not received from CheckPhish."
             )
 
@@ -41,7 +41,7 @@ class CheckPhish(classes.ObservableAnalyzer):
 
     def __poll_analysis_status(self, job_id):
         json_data = {
-            "apiKey": self.__api_key,
+            "apiKey": self._api_key_name,
             "jobID": job_id,  # Assumption: jobID corresponds to an actual job.
             # This is always the case when this function is called
             # in the "run" function.
@@ -61,12 +61,12 @@ class CheckPhish(classes.ObservableAnalyzer):
             status_json = result.get("status", "")
             error = result.get("error", False)
             if status_json is None:
-                raise AlreadyFailedJobException(f"Job {job_id} not found.")
+                raise AnalyzerRunException(f"Job {job_id} not found.")
             if error:
-                raise AlreadyFailedJobException(f"Analysis error for job_id {job_id}")
+                raise AnalyzerRunException(f"Analysis error for job_id {job_id}")
             if status_json == "DONE":
                 return result
-        raise AlreadyFailedJobException(f'Job "{job_id}" status retrieval failed.')
+        raise AnalyzerRunException(f'Job "{job_id}" status retrieval failed.')
 
     @classmethod
     def _monkeypatch(cls):
@@ -75,8 +75,8 @@ class CheckPhish(classes.ObservableAnalyzer):
                 patch(
                     "requests.post",
                     side_effect=[
-                        MockResponse({"jobID": "sample job ID"}, 200),
-                        MockResponse({"status": "DONE"}, 200),
+                        MockUpResponse({"jobID": "sample job ID"}, 200),
+                        MockUpResponse({"status": "DONE"}, 200),
                     ],
                 ),
             ),

@@ -185,7 +185,11 @@ class PEInfo(FileAnalyzer):
             os.remove(icon_path)
             dhashicon = "".join(icon_hash)
         except Exception as e:
-            logger.warning(e)
+            error = str(e)
+            if not error or "resource" in error:
+                logger.info(e, stack_info=True)
+            else:
+                logger.warning(e, stack_info=True)
         return dhashicon
 
     def _impfuzzy(self):
@@ -199,5 +203,5 @@ class PEInfo(FileAnalyzer):
             #
             impfuzzyhash = str(pyimpfuzzy.get_impfuzzy(self.filepath))
         except Exception as e:
-            logger.warning(e)
+            logger.warning(e, stack_info=True)
         return impfuzzyhash

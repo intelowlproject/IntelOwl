@@ -4,6 +4,7 @@
 import logging
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
+from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -30,17 +31,24 @@ class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
         # report is a string for ClamAV analyzer only
         report = self._docker_run(req_data, req_files)
 
-        signature = ""
-        clean = "OK" in report
-        if not clean:
+        detections = []
+        if "Infected files: 1" in report:
             lines = report.split("\n")
-            if lines:
-                words = lines[0].split()
+            for line in lines:
+                if "SUMMARY" in line:
+                    break
+                words = line.split()
                 if words:
                     signature = words[1]
                     logger.info(f"extracted signature {signature} for {self.job_id}")
-            else:
-                logger.warning(f"no line extracted? {self.job_id}")
-        detection = None if signature == "OK" else signature
+                    detections.append(signature)
+            if not detections:
+                logger.error(f"no detections extracted? {self.job_id}")
 
-        return {"clean": clean, "detection": detection, "raw_report": report}
+        return {"detections": list(set(detections)), "raw_report": report}
+
+    @staticmethod
+    def mocked_docker_analyzer_get(*args, **kwargs):
+        return MockUpResponse(
+            {"key": "test", "returncode": 0, "report": "OK real_signature\n"}, 200
+        )

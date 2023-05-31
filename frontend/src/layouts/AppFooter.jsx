@@ -16,7 +16,7 @@ function AppFooter() {
   const toasts = useToastr(selector);
 
   return (
-    <footer>
+    <footer className="flex-no-shrink">
       <div className="d-flex flex-column">
         {/* Toasts */}
         <section className="fixed-bottom" id="app-toasts">

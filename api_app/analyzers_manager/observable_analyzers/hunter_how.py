@@ -6,18 +6,20 @@ import base64
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Hunter_How(classes.ObservableAnalyzer):
     base_url: str = "https://api.hunter.how/search"
+    _api_key_name: str
+    page: int
+    page_size: int
+    start_time: str
+    end_time: str
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.base_url = "https://api.hunter.how/search"
-        if not self.__api_key:
-            raise AnalyzerConfigurationException("API key is required")
+    def config(self):
+        super().config()
         if self.observable_classification == self.ObservableTypes.IP:
             self.query = f'ip="{self.observable_name}"'
         elif self.observable_classification == self.ObservableTypes.DOMAIN:
@@ -26,13 +28,8 @@ class Hunter_How(classes.ObservableAnalyzer):
         self.encoded_query = base64.urlsafe_b64encode(
             self.query.encode("utf-8")
         ).decode("ascii")
-        self.page = params.get("page")
-        self.page_size = params.get("page_size")
-        self.start_time = params.get("start_time", "")
-        self.end_time = params.get("end_time", "")
-
         self.parameters = {
-            "api-key": self.__api_key,
+            "api-key": self._api_key_name,
             "query": self.encoded_query,
             "page": self.page,
             "page_size": self.page_size,
@@ -56,7 +53,7 @@ class Hunter_How(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"list": []}, 200),
+                    return_value=MockUpResponse({"list": []}, 200),
                 ),
             )
         ]

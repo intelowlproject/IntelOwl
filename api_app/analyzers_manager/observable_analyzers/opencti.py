@@ -29,18 +29,18 @@ RESULT_TRIM_MAP = {
 
 
 class OpenCTI(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        self.ssl_verify = params.get("ssl_verify", True)
-        self.proxies = params.get("proxies", {})
-        self.exact_search = params.get("exact_search", False)
-        self.__url_name = self._secrets["url_key_name"]
-        self.__api_key = self._secrets["api_key_name"]
+
+    ssl_verify: bool
+    proxies: dict
+    exact_search: bool
+    _url_key_name: str
+    _api_key_name: str
 
     def run(self):
         # set up client
         opencti_instance = pycti.OpenCTIApiClient(
-            url=self.__url_name,
-            token=self.__api_key,
+            url=self._url_key_name,
+            token=self._api_key_name,
             ssl_verify=self.ssl_verify,
             proxies=self.proxies,
         )

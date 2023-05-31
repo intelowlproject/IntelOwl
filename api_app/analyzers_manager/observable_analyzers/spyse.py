@@ -6,16 +6,15 @@ import re
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from intel_owl.consts import REGEX_CVE, REGEX_EMAIL
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Spyse(classes.ObservableAnalyzer):
     base_url: str = "https://api.spyse.com/v4/data/"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def __build_spyse_api_uri(self) -> str:
         if self.observable_classification == self.ObservableTypes.DOMAIN:
@@ -43,7 +42,7 @@ class Spyse(classes.ObservableAnalyzer):
     def run(self):
         headers = {
             "Accept": "application/json",
-            "Authorization": f"Bearer {self.__api_key}",
+            "Authorization": f"Bearer {self._api_key_name}",
         }
         api_uri = self.__build_spyse_api_uri()
         try:
@@ -61,7 +60,7 @@ class Spyse(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

@@ -44,7 +44,7 @@ function Layout() {
   return (
     <>
       <AppHeader />
-      <main role="main" className="px-1 px-md-5 mx-auto">
+      <main role="main" className="px-1 px-md-5">
         <ErrorBoundary FallbackComponent={ErrorHandler}>
           <Outlet />
         </ErrorBoundary>

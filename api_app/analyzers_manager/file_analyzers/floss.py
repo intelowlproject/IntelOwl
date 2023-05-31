@@ -20,25 +20,8 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
     # this is retrieved with bash command `getconf ARG_MAX`
     OS_MAX_ARGS: int = 2097152
 
-    def set_params(self, params):
-        self.max_no_of_strings = params.get(
-            "max_no_of_strings",
-            {
-                "stack_strings": 1000,
-                "static_strings": 1000,
-                "decoded_strings": 1000,
-                "tight_strings": 1000,
-            },
-        )
-        self.rank_strings = params.get(
-            "rank_strings",
-            {
-                "stack_strings": False,
-                "static_strings": False,
-                "decoded_strings": False,
-                "tight_strings": False,
-            },
-        )
+    max_no_of_strings: dict
+    rank_strings: dict
 
     def run(self):
         # get binary
@@ -53,7 +36,7 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         # we are changing the endpoint of _docker_run to stringsifter
         self.url = self.ranking_url
 
-        for key in self.max_no_of_strings.keys():
+        for key in self.max_no_of_strings:
             if self.rank_strings[key]:
                 strings = json_dumps(result["strings"][key])
                 # 4 is the number of arguments that we are already passing

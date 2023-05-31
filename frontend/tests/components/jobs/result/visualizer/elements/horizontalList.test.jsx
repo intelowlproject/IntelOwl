@@ -1,7 +1,6 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
-import { getIcon } from "../../../../../../src/components/jobs/result/visualizer/icons";
 import { HorizontalListVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/horizontalList";
 import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
 import { BooleanVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/bool";

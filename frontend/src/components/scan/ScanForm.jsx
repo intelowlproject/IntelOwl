@@ -15,7 +15,14 @@ import {
   Collapse,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import { Field, Form, FieldArray, useFormik, FormikProvider } from "formik";
+import {
+  Field,
+  Form,
+  FieldArray,
+  useFormik,
+  FormikProvider,
+  ErrorMessage,
+} from "formik";
 import useTitle from "react-use/lib/useTitle";
 
 import {
@@ -45,6 +52,15 @@ import {
   TagSelectInput,
 } from "./utils";
 import { createJob, createPlaybookJob } from "./api";
+
+function DangerErrorMessage(fieldName) {
+  return (
+    <ErrorMessage
+      name={fieldName}
+      render={(msg) => <span className="text-danger">{msg}</span>}
+    />
+  );
+}
 
 // constants
 const groupAnalyzers = (analyzersList) => {
@@ -163,9 +179,12 @@ export default function ScanForm() {
         errors.tlp = "Invalid choice";
       }
 
+      if (values.playbooks.length === 0) {
+        errors.playbooks = "playbooks required";
+      }
       // check playbooks or analyzers
-      if (values.playbooks.length === 0 && values.analyzers.length === 0) {
-        errors.playbooks = "playbooks or analyzers required";
+      if (values.analyzers.length === 0) {
+        errors.analyzers = "analyzers required";
       }
 
       console.debug("formik validation errors");
@@ -563,6 +582,7 @@ export default function ScanForm() {
                                     );
                                   }}
                                 />
+                                {DangerErrorMessage("observable_names")}
                               </Col>
                               <Button
                                 color="primary"
@@ -669,6 +689,7 @@ export default function ScanForm() {
                         />
                       )}
                     />
+                    {DangerErrorMessage("analyzers")}
                   </Col>
                 </FormGroup>
                 <FormGroup row>
@@ -732,6 +753,7 @@ export default function ScanForm() {
                         formik.setFieldValue("playbooks", v, false)
                       }
                     />
+                    {DangerErrorMessage("playbooks")}
                   </Col>
                 )}
               </FormGroup>

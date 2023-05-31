@@ -3,6 +3,9 @@
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
 ## [v5.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.0)
+
+[IntelOwlv5cover-01.webp](..%2Fdocs%2Fstatic%2FIntelOwlv5cover-01.webp)
+
 This major release is another big step forward for IntelOwl!! 🚀
 
 Official blog post: [v.5.0.0 Announcement](https://www.certego.net/blog/intelowl-v5-released)

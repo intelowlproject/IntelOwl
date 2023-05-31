@@ -21,7 +21,7 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * @param {object} element data used to generate the component
  * @returns {Object} component to visualize
  */
-export function convertToElement(element) {
+function convertToElement(element) {
   let visualizerElement;
   switch (element.type) {
     case VisualizerComponentType.BOOL: {

@@ -87,6 +87,7 @@ cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
 cd ..
+cp frontend/public/env_template.js frontend/public/env.js
 ./initialize.sh
 ```
 
@@ -113,7 +114,7 @@ Configuration required to enable Re-Captcha in the Login and the Registration Pa
 In the `docker/env_file_app`:
 * `RECAPTCHA_SECRET_KEY_IO_LOCAL`: your recaptcha secret key internal deployment
 * `RECAPTCHA_SECRET_KEY_IO_PUBLIC`: your recaptcha secret key for public deployment
-In the `docker/env_template.js`:
+In the `frontend/public/env.js`:
 * `RECAPTCHA_SITEKEY`: Recaptcha Key for your site
 
 Configuration required to have InteOwl sending Emails (registration requests, mail verification, password reset/change, etc)

@@ -93,7 +93,7 @@ If your intention is to publish IntelOwl as a Service you should first remember 
 
 Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY_IO_PUBLIC` value in the `env_file_app` file. Plus you would need to remember to set to `True` the `PUBLIC_DEPLOYMENT` variable too.
 
-Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `docker/env_template.js` file.
+Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `frontend/public/env.js` file.
 In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
 
 ## Plugins

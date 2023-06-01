@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { ContentSection, ErrorAlert } from "@certego/certego-ui";
 
-import { visualizerValidator } from "./validators";
+import { validateLevel } from "./validators";
 
 import { BooleanVisualizer } from "./elements/bool";
 import { BaseVisualizer } from "./elements/base";
@@ -21,7 +21,7 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * @param {object} element data used to generate the component
  * @returns {Object} component to visualize
  */
-export function convertToElement(element) {
+function convertToElement(element) {
   let visualizerElement;
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
@@ -114,26 +114,26 @@ export default function VisualizerReport({ visualizerReport }) {
   }
 
   // validate data
-  const validatedData = visualizerReport.report.map((fieldElement) =>
-    visualizerValidator(fieldElement)
+  const validatedLevels = visualizerReport.report.map((levelElement) =>
+    validateLevel(levelElement)
   );
-  validatedData.sort(
-    (firstElement, secondElement) => firstElement.level - secondElement.level
+  validatedLevels.sort(
+    (firstLevel, secondLevel) => firstLevel.level - secondLevel.level
   );
 
-  console.debug("VisualizerReport - validatedData");
-  console.debug(validatedData);
+  console.debug("VisualizerReport - validatedLevels");
+  console.debug(validatedLevels);
 
   // convert data to elements
-  const elementData = validatedData.map((level) =>
+  const levels = validatedLevels.map((level) =>
     convertToElement(level.elements)
   );
 
-  console.debug("VisualizerReport - elementData");
-  console.debug(elementData);
+  console.debug("VisualizerReport - levels");
+  console.debug(levels);
 
   // generate the levels/rows
-  let levelElements = elementData.map((levelData, levelIndex) => {
+  let levelElements = levels.map((levelData, levelIndex) => {
     let levelSize = levelIndex * 2 + 3;
     if (levelSize > 6) {
       levelSize = 6;
@@ -141,7 +141,7 @@ export default function VisualizerReport({ visualizerReport }) {
     return (
       <div className={`h${levelSize}`}>
         {levelData}
-        {levelIndex + 1 !== validatedData.length && (
+        {levelIndex + 1 !== levels.length && (
           <hr className="border-gray flex-grow-1 my-2" />
         )}
       </div>

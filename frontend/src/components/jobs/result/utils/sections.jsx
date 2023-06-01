@@ -195,7 +195,7 @@ export function JobInfoCard({ job }) {
     .substring(14, 19);
 
   return (
-    <>
+    <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker d-flex-center">
         <div className="d-flex-start-start">
           <h3>
@@ -304,7 +304,7 @@ export function JobInfoCard({ job }) {
           ))}
         </ListGroup>
       </ContentSection>
-    </>
+    </div>
   );
 }
 

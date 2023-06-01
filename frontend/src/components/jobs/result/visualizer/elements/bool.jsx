@@ -42,7 +42,7 @@ BooleanVisualizer.propTypes = {
   size: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   link: PropTypes.string,
-  icon: PropTypes.string,
+  icon: PropTypes.object,
   italic: PropTypes.bool,
   activeColor: PropTypes.string,
   disable: PropTypes.bool,
@@ -50,7 +50,7 @@ BooleanVisualizer.propTypes = {
 
 BooleanVisualizer.defaultProps = {
   link: "",
-  icon: "",
+  icon: undefined,
   italic: false,
   activeColor: "danger",
   disable: false,

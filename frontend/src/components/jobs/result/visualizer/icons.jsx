@@ -142,6 +142,9 @@ export function getIcon(iconCode) {
     return null;
   }
   const selectedIcon = generalIcons[iconCode];
+  /* in case the icon is not defined previously we cannot check if the icons is a flag or an invalid text:
+   we would need to known the code of all flags and it's too expensive
+  */
   if (!selectedIcon) {
     return <span className={` mx-1 fi fi-${iconCode}`} />;
   }

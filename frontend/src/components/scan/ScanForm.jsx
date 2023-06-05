@@ -179,11 +179,17 @@ export default function ScanForm() {
         errors.tlp = "Invalid choice";
       }
 
-      if (values.playbooks.length === 0) {
+      // check playbooks or analyzer selections based on the user selection
+      if (
+        values.analysisOptionValues === scanTypes.playbooks &&
+        values.playbooks.length === 0
+      ) {
         errors.playbooks = "playbooks required";
       }
-      // check playbooks or analyzers
-      if (values.analyzers.length === 0) {
+      if (
+        values.analysisOptionValues === scanTypes.analyzers_and_connectors &&
+        values.analyzers.length === 0
+      ) {
         errors.analyzers = "analyzers required";
       }
 

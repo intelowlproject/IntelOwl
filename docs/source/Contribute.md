@@ -518,4 +518,4 @@ Where are IntelOwl logs?
 With a default installation of IntelOwl, you would be able to get the application data from the following paths in your OS:
 * `/var/lib/docker/volumes/intel_owl_generic_logs/_data/django`: Django Application logs
 * `/var/lib/docker/volumes/intel_owl_generic_logs/_data/uwsgi`: Uwsgi application server logs
-* `/var/lib/docker/volumes/intel_owl_nginx_logs/_data/django`: Nginx Web Server Logs
+* `/var/lib/docker/volumes/intel_owl_nginx_logs/_data/`: Nginx Web Server Logs

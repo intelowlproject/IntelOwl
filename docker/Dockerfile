@@ -7,8 +7,6 @@ WORKDIR /
 COPY frontend/ .
 # copy version file as an env file
 COPY docker/.env .env.local
-# copy env.js file (also mounted as docker volume)
-COPY docker/env_template.js public/env.js
 # install and build
 RUN npm install npm@latest --location=global \
     && npm install \

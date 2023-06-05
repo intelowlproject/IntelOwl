@@ -35,9 +35,10 @@ cd docker/
 cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
+cd ..
+cp frontend/public/env_template.js frontend/public/env.js
 
 # verify installed dependencies
-cd ..
 ./initialize.sh
 
 # start the app
@@ -88,6 +89,7 @@ cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
 cd ..
 cp frontend/public/env_template.js frontend/public/env.js
+
 ./initialize.sh
 ```
 
@@ -283,6 +285,13 @@ Major versions of IntelOwl are usually incompatible from one another.
 Maintainers strive to keep the upgrade between major version easy but it's not always like that.
 Below you can find the additional process required to upgrade from each major versions.
 </div>
+
+#### Updating to >=5.0.1 from 5.0.0
+You need to create a new environment file for frontend environment variables:
+```commandline
+cp frontend/public/env_template.js frontend/public/env.js
+```
+Otherwise the project won't start
 
 #### Updating to >=5.0.0 from a 4.x.x version
 IntelOwl v5 introduced some major changes regarding how the plugins and their related configuration are managed in the application.

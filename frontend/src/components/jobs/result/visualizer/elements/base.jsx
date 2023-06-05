@@ -44,7 +44,7 @@ BaseVisualizer.propTypes = {
   size: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   alignment: PropTypes.string,
-  icon: PropTypes.string,
+  icon: PropTypes.object,
   color: PropTypes.string,
   link: PropTypes.string,
   bold: PropTypes.bool,
@@ -53,7 +53,7 @@ BaseVisualizer.propTypes = {
 };
 
 BaseVisualizer.defaultProps = {
-  icon: "",
+  icon: undefined,
   alignment: "center",
   color: "",
   link: "",

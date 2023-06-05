@@ -35,9 +35,10 @@ cd docker/
 cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
+cd ..
+cp frontend/public/env_template.js frontend/public/env.js
 
 # verify installed dependencies
-cd ..
 ./initialize.sh
 
 # start the app
@@ -87,6 +88,8 @@ cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
 cd ..
+cp frontend/public/env_template.js frontend/public/env.js
+
 ./initialize.sh
 ```
 
@@ -113,7 +116,7 @@ Configuration required to enable Re-Captcha in the Login and the Registration Pa
 In the `docker/env_file_app`:
 * `RECAPTCHA_SECRET_KEY_IO_LOCAL`: your recaptcha secret key internal deployment
 * `RECAPTCHA_SECRET_KEY_IO_PUBLIC`: your recaptcha secret key for public deployment
-In the `docker/env_template.js`:
+In the `frontend/public/env.js`:
 * `RECAPTCHA_SITEKEY`: Recaptcha Key for your site
 
 Configuration required to have InteOwl sending Emails (registration requests, mail verification, password reset/change, etc)
@@ -286,6 +289,7 @@ Below you can find the additional process required to upgrade from each major ve
 #### Updating to >=5.0.0 from a 4.x.x version
 IntelOwl v5 introduced some major changes regarding how the plugins and their related configuration are managed in the application.
 Before upgrading, some important things should be checked by the administrator:
+* A lot of database migrations will need to be applied. Just be patient few minutes once you install the new major release. If you get 500 status code errors in the GUI, just wait few minutes and then refresh the page.
 * We moved away from the old big `analyzer_config.json` which was storing all the base configuration of the Analyzers to a database model (we did the same for all the other plugins types too). This allows us to manage plugins creation/modification/deletion in a more reliable manner and via the Django Admin Interface. If you have created custom plugins and changed those `<plugins>_config.json` file manually, you would need to re-create those custom plugins again from the Django Admin Interface. To do that please follow the [related new documentation](https://intelowl.readthedocs.io/en/develop/Usage.html#analyzers-customization)
 * We have REMOVED all the analyzers that we deprecated during the v4 releases cycle. Please substitute them with their respective new names, in case they have a replacement.
   * REMOVED `Pulsedive_Active_IOC` analyzer. Please substitute it with the new `Pulsedive` analyzer.

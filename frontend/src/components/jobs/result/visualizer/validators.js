@@ -133,7 +133,7 @@ function parseElementFields(rawElement) {
 }
 
 // validate the visualizer rows
-export function visualizerValidator(levelRawData) {
+export function validateLevel(levelRawData) {
   const level = parseFloat(levelRawData.level);
   const elements = parseElementFields(levelRawData.elements);
   return { level, elements };

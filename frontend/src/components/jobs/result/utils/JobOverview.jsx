@@ -140,7 +140,10 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         id: LOADING_VISUALIZER_UI_ELEMENT_CODE,
         nav: null,
         report: (
-          <div className="d-flex justify-content-center">
+          <div
+            className="d-flex justify-content-center"
+            id="visualizerLoadingSpinner"
+          >
             <Spinner />
           </div>
         ),
@@ -192,7 +195,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       render={() => (
         <Container fluid>
           {/* bar with job id and utilities buttons */}
-          <Row className="g-0 d-flex-between-end">
+          <Row className="g-0 d-flex-between-end" id="utilitiesRow">
             <Col>
               <GoBackButton onlyIcon color="gray" />
               <h2>
@@ -265,7 +268,10 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
             {/* reports section */}
             <TabContent activeTab={activeElement}>
               {elementsToShow.map((componentsObject) => (
-                <TabPane tabId={componentsObject.id}>
+                <TabPane
+                  tabId={componentsObject.id}
+                  id={`jobReportTab${componentsObject.id}`}
+                >
                   {componentsObject.report}
                 </TabPane>
               ))}

@@ -2,6 +2,19 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.1)
+
+**Bug fixing for the v5.0.0 release**
+* The Scan Form button was not working. Now it works correctly.
+* Added more frontend tests to reduce chances to introduce new bugs.
+
+**Important notice for users migrating to the new major release**
+
+A lot of database migrations needs to be applied during the upgrade. Just be patient few minutes once you install the new major release. If you get 500 status code errors in the GUI, just wait few minutes and then refresh the page.
+
+**Minor changes**
+* Upgrade Mandiant's Floss version
+
 ## [v5.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.0)
 This major release is another big step forward for IntelOwl!! 🚀
 

@@ -19,6 +19,7 @@ const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
 const UserConfig = React.lazy(() => import("./me/config/UserConfig"));
+const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
 /*
 lazy imports to enable code splitting
 */
@@ -56,6 +57,10 @@ const noAuthRoutesLazy = [
     path: "/reset-password",
     element: <ResetPassword />,
   },
+  // {
+  //   path: "/change-password",
+  //   element: <ChangePassword />,
+  // },
 ].map((r) => ({
   ...r,
   element: (
@@ -73,6 +78,15 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <Logout />
+      </Suspense>
+    ),
+  },
+
+  {
+    path: "/change-password",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <ChangePassword />
       </Suspense>
     ),
   },

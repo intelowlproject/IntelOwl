@@ -8,6 +8,7 @@ import {
 import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
 import { IoMdKey, IoMdSettings } from "react-icons/io";
+import { RiLockPasswordFill } from "react-icons/ri";
 
 import { UserBubble, DropdownNavLink } from "@certego/certego-ui";
 
@@ -46,6 +47,10 @@ export default function UserMenu(props) {
         {/* Your plugin configuration */}
         <DropdownNavLink to="/me/config">
           <BsSliders className="me-2" /> Your plugin configuration
+        </DropdownNavLink>
+        {/* Change Password */}
+        <DropdownNavLink to="/change-password">
+          <RiLockPasswordFill className="me-2" /> Change password
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">

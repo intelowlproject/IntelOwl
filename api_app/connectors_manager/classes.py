@@ -98,7 +98,9 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
                     f"Found connector runnable {cc.name} for user {user.username}"
                 )
                 param: Parameter = cc.parameters.filter(name__startswith="url").first()
-                logger.info(f"Url retrieved to verify is {param.name}")
+                logger.info(
+                    f"Url retrieved to verify is {param.name} for connector {cc.name}"
+                )
                 if param:
                     try:
                         plugin_config = param.get_first_value(user)
@@ -111,10 +113,17 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
                             if settings.STAGE_CI:
                                 return True
                             try:
-                                requests.head(url, timeout=10)
-                            except requests.exceptions.ConnectionError:
-                                health_status = False
-                            except requests.exceptions.Timeout:
+                                # momentarily set this to False to
+                                # avoid fails for https services
+                                requests.head(url, timeout=10, verify=False)
+                            except (
+                                requests.exceptions.ConnectionError,
+                                requests.exceptions.Timeout,
+                            ) as e:
+                                logger.info(
+                                    f"Health check failed: url {url}"
+                                    f" for connector {cc.name}. Error: {e}"
+                                )
                                 health_status = False
                             else:
                                 health_status = True

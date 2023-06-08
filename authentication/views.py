@@ -115,6 +115,7 @@ class ChangePasswordView(APIView):
         # Check if the old password matches the user's current password
         user = request.user
         if not check_password(old_password, user.password):
+            logger.info("Invalid old password")
             # Return an error response if the old password doesn't match
             return Response(
                 {"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST

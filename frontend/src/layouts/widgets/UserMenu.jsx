@@ -44,13 +44,13 @@ export default function UserMenu(props) {
         <DropdownNavLink to="/me/sessions">
           <IoMdKey className="me-2" /> API Access/ Sessions
         </DropdownNavLink>
-        {/* Your plugin configuration */}
-        <DropdownNavLink to="/me/config">
-          <BsSliders className="me-2" /> Your plugin configuration
-        </DropdownNavLink>
         {/* Change Password */}
         <DropdownNavLink to="/change-password">
           <RiLockPasswordFill className="me-2" /> Change password
+        </DropdownNavLink>
+        {/* Your plugin configuration */}
+        <DropdownNavLink to="/me/config">
+          <BsSliders className="me-2" /> Your plugin configuration
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">

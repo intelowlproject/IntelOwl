@@ -37,7 +37,7 @@ checkdmarc==4.5.0
 dnspython==2.3.0
 dnstwist[full]==20230509
 google>=3.0.0
-google-cloud-webrisk==1.11.0
+google-cloud-webrisk==1.12.0
 intezer-sdk==1.16.1
 lief==0.13.1
 maxminddb==2.3.0

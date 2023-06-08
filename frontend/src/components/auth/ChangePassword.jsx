@@ -1,7 +1,7 @@
 // import axios from "axios";
 import React from "react";
 // import { AiOutlineInfoCircle } from "react-icons/ai";
-import { useSearchParams } from "react-router-dom";
+// import { useSearchParams } from "react-router-dom";
 import {
   FormGroup,
   Label,
@@ -9,154 +9,129 @@ import {
   Input,
   Spinner,
   Button,
-  Row,
+  // Row,
   // Tooltip,
 } from "reactstrap";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
-import { ContentSection } from "@certego/certego-ui";
+import { addToast, ContentSection } from "@certego/certego-ui";
 // import { AUTH_BASE_URI } from "../../constants/api";
 
 // import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
 
-import {
-  ResendVerificationEmailButton,
-  ForgotPasswordButton,
-} from "./utils/registration-buttons";
-
-// constants
 const initialValues = {
-  username: "",
-  password: "",
+  old_password: "",
+  new_password: "",
+  confirmNewPassword: "",
 };
-// methods
-const onValidate = (values) => {
+
+const validateForm = (values) => {
   const errors = {};
-  if (!values.username) {
-    errors.username = "Required";
+  if (!values.old_password) {
+    errors.old_password = "Required";
   }
-  if (!values.password) {
-    errors.password = "Required";
+  if (!values.new_password) {
+    errors.new_password = "Required";
+  }
+  if (!values.confirmNewPassword) {
+    errors.confirmNewPassword = "Required";
+  } else if (values.confirmNewPassword !== values.new_password) {
+    errors.confirmNewPassword = "Passwords do not match";
   }
   return errors;
 };
 
 // Component
 export default function ChangePassword() {
-  console.debug("Login rendered!");
-
-  // const [isOpen, setIsOpen] = React.useState(false);
-
   // page title
-  useTitle("IntelOwl | ChangePassword", { restoreOnUnmount: true });
-
-  // local state
-  const [passwordShown, setPasswordShown] = React.useState(false);
+  useTitle("IntelOwl | Change Password", { restoreOnUnmount: true });
 
   // auth store
-  const loginUser = useAuthStore(
-    React.useCallback((s) => s.service.loginUser, [])
+  const changePassword = useAuthStore(
+    React.useCallback((s) => s.service.changePassword, [])
   );
 
-  const updateToken = useAuthStore(React.useCallback((s) => s.updateToken, []));
-
-  // callbacks
+  // callback
   const onSubmit = React.useCallback(
-    async (values, _formik) => {
+    async (values, { setSubmitting }) => {
       try {
-        await loginUser(values);
-      } catch (e) {
-        // handled inside loginUser
+        await changePassword(values);
+        addToast("Password changed successfully!", null, "success");
+      } catch (error) {
+        addToast("Failed to change password", error.parsedMsg, "danger", true);
+      } finally {
+        setSubmitting(false);
       }
     },
-    [loginUser]
+    [changePassword]
   );
 
-  const [searchParams] = useSearchParams();
-  if (searchParams.get("token")) updateToken(searchParams.get("token"));
-
   return (
-    <ContentSection className="pt-20">
-      <Container className="col-12 col-lg-8 col-xl-4">
-        <ContentSection>
-          <Row>
-            <h3 className="fw-bold col-auto me-auto mt-2">Change Password</h3>
-          </Row>
-          <hr />
-          {/* Form */}
-          <Formik
-            initialValues={initialValues}
-            validate={onValidate}
-            onSubmit={onSubmit}
-            validateOnChange
-          >
-            {(formik) => (
-              <Form>
-                {/* username */}
-                <FormGroup>
-                  <Label for="LoginForm__password">Old Password</Label>
-                  <Input
-                    id="LoginForm__password"
-                    type="text"
-                    name="password"
-                    placeholder="Enter old password"
-                    // autoComplete="current-password"
-                    onChange={formik.handleChange}
-                  />
-                </FormGroup>
-                {/* password */}
-                <FormGroup>
-                  <Label for="LoginForm__password">New Password</Label>
-                  <Input
-                    id="LoginForm__password"
-                    type={passwordShown ? "text" : "password"}
-                    name="password"
-                    placeholder="Enter new password"
-                    onChange={formik.handleChange}
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <Label for="LoginForm__password">Confirm Password</Label>
-                  <Input
-                    id="LoginForm__password"
-                    type={passwordShown ? "text" : "password"}
-                    name="password"
-                    placeholder="Enter new password"
-                    onChange={formik.handleChange}
-                  />
-                </FormGroup>
-                <FormGroup check>
-                  <Input
-                    id="LoginForm__showPassword"
-                    type="checkbox"
-                    defaultChecked={passwordShown}
-                    onChange={() => setPasswordShown(!passwordShown)}
-                  />
-                  <Label check>Show password</Label>
-                </FormGroup>
-                {/* Submit */}
-                <FormGroup className="d-flex-center">
-                  <Button
-                    type="submit"
-                    // disabled={!(formik.isValid || formik.isSubmitting)}
-                    color="primary"
-                    outline
-                  >
-                    {formik.isSubmitting && <Spinner size="sm" />} Change
-                    Password
-                  </Button>
-                </FormGroup>
-              </Form>
-            )}
-          </Formik>
-        </ContentSection>
-        {/* popover buttons */}
-        <Row className="d-flex flex-column align-items-end g-0">
-          <ForgotPasswordButton />
-          <ResendVerificationEmailButton />
-        </Row>
+    <ContentSection className="bg-body">
+      <Container className="col-12 col-lg-8 col-xl-4 mt-5 mb-5">
+        <h3 className="fw-bold">Change Password</h3>
+        <hr />
+        <Formik
+          initialValues={initialValues}
+          validate={validateForm}
+          onSubmit={onSubmit}
+        >
+          {(formik) => (
+            <Form>
+              <FormGroup>
+                <Label for="oldPassword">Old Password</Label>
+                <Input
+                  id="oldPassword"
+                  type="password"
+                  name="old_password"
+                  onChange={formik.handleChange}
+                  value={formik.values.oldPassword}
+                  invalid={
+                    formik.touched.oldPassword && formik.errors.oldPassword
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  name="new_password"
+                  onChange={formik.handleChange}
+                  value={formik.values.newPassword}
+                  invalid={
+                    formik.touched.newPassword && formik.errors.newPassword
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="confirmNewPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmNewPassword"
+                  type="password"
+                  name="confirmNewPassword"
+                  onChange={formik.handleChange}
+                  value={formik.values.confirmNewPassword}
+                  invalid={
+                    formik.touched.confirmNewPassword &&
+                    formik.errors.confirmNewPassword
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Button
+                  type="submit"
+                  color="primary"
+                  disabled={formik.isSubmitting || !formik.isValid}
+                >
+                  {formik.isSubmitting && <Spinner size="sm" />} Change Password
+                </Button>
+              </FormGroup>
+            </Form>
+          )}
+        </Formik>
       </Container>
     </ContentSection>
   );

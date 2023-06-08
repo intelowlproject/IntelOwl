@@ -57,10 +57,6 @@ const noAuthRoutesLazy = [
     path: "/reset-password",
     element: <ResetPassword />,
   },
-  // {
-  //   path: "/change-password",
-  //   element: <ChangePassword />,
-  // },
 ].map((r) => ({
   ...r,
   element: (

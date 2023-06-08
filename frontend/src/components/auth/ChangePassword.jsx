@@ -1,7 +1,4 @@
-// import axios from "axios";
 import React from "react";
-// import { AiOutlineInfoCircle } from "react-icons/ai";
-// import { useSearchParams } from "react-router-dom";
 import {
   FormGroup,
   Label,
@@ -9,16 +6,12 @@ import {
   Input,
   Spinner,
   Button,
-  // Row,
-  // Tooltip,
 } from "reactstrap";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
 import { addToast, ContentSection } from "@certego/certego-ui";
-// import { AUTH_BASE_URI } from "../../constants/api";
 
-// import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
 
 const initialValues = {

@@ -78,6 +78,43 @@ def config_default():
     return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
 
 
+def valid_value_for_test(func):
+    def wrapper(self, user=None):
+        try:
+            return func(self, user)
+        except RuntimeError:
+            from api_app.models import PluginConfig
+
+            if not settings.STAGE_CI:
+                raise
+            if "url" in self.name:
+
+                return PluginConfig.objects.get_or_create(
+                    value="https://intelowl.com",
+                    parameter=self,
+                    owner=None,
+                    for_organization=False,
+                )[0]
+            elif "pdns_credentials" == self.name:
+                return PluginConfig.objects.get_or_create(
+                    value="user|pwd",
+                    parameter=self,
+                    owner=None,
+                    for_organization=False,
+                )[0]
+            elif "test" in self.name:
+                pass
+            else:
+                return PluginConfig.objects.get_or_create(
+                    value="test",
+                    parameter=self,
+                    owner=None,
+                    for_organization=False,
+                )[0]
+
+    return wrapper
+
+
 class Parameter(models.Model):
     name = models.CharField(null=False, blank=False, max_length=50)
     type = models.CharField(
@@ -150,6 +187,7 @@ class Parameter(models.Model):
 
         return PluginConfig.visible_for_user(user).filter(parameter=self)
 
+    @valid_value_for_test
     def get_first_value(self, user: User):
         from api_app.models import PluginConfig
 
@@ -178,31 +216,6 @@ class Parameter(models.Model):
                 logger.info(f"Retrieved {result.value=}, default value")
                 return result
             except PluginConfig.DoesNotExist:
-                if settings.STAGE_CI:
-                    if "url" in self.name:
-                        return PluginConfig.objects.get_or_create(
-                            value="https://intelowl.com",
-                            parameter=self,
-                            owner=None,
-                            for_organization=False,
-                        )[0]
-                    elif "pdns_credentials" == self.name:
-                        return PluginConfig.objects.get_or_create(
-                            value="user|pwd",
-                            parameter=self,
-                            owner=None,
-                            for_organization=False,
-                        )[0]
-                    elif "test" in self.name:
-                        pass
-                    else:
-                        return PluginConfig.objects.get_or_create(
-                            value="test",
-                            parameter=self,
-                            owner=None,
-                            for_organization=False,
-                        )[0]
-
                 raise RuntimeError(
                     "Unable to find a valid value for parameter"
                     f" {self.name} for configuration {self.config.name}"
@@ -210,27 +223,54 @@ class Parameter(models.Model):
 
 
 class AbstractConfig(models.Model):
-
-    parameters: Manager
-
     name = models.CharField(
-        max_length=50,
+        max_length=100,
         null=False,
         unique=True,
         primary_key=True,
         validators=[plugin_name_validator],
     )
-    python_module = models.CharField(null=False, max_length=120, db_index=True)
     description = models.TextField(null=False)
+
     disabled = models.BooleanField(null=False, default=False)
+    disabled_in_organizations = models.ManyToManyField(
+        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
+    )
+
+    class Meta:
+        indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
+        abstract = True
+
+    @classmethod
+    @property
+    def snake_case_name(cls) -> str:
+        import re
+
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
+
+    def _is_disabled_in_org(self, user: User = None):
+        if user and user.has_membership():
+            return self.disabled_in_organizations.filter(
+                pk=user.membership.organization.pk
+            ).exists()
+        return False
+
+    def is_runnable(self, user: User = None):
+        disabled_in_org = self._is_disabled_in_org(user)
+        logger.debug("{disabled_in_org=}, {self.disabled=}")
+        return not disabled_in_org and not self.disabled
+
+
+class PythonConfig(AbstractConfig):
+
+    parameters: Manager
+
+    python_module = models.CharField(null=False, max_length=120, db_index=True)
 
     config = models.JSONField(
         blank=False,
         default=config_default,
         validators=[validate_config],
-    )
-    disabled_in_organizations = models.ManyToManyField(
-        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
 
     class Meta:
@@ -239,13 +279,6 @@ class AbstractConfig(models.Model):
             models.Index(fields=("python_module", "disabled")),
         ]
         ordering = ["name", "disabled"]
-
-    @classmethod
-    @property
-    def snake_case_name(cls) -> str:
-        import re
-
-        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
 
     @classmethod
     @property
@@ -300,18 +333,8 @@ class AbstractConfig(models.Model):
                 return False
         return True
 
-    def _is_disabled_in_org(self, user: User = None):
-        if user and user.has_membership():
-            return self.disabled_in_organizations.filter(
-                pk=user.membership.organization.pk
-            ).exists()
-        return False
-
     def is_runnable(self, user: User = None):
-        configured = self._is_configured(user)
-        disabled_in_org = self._is_disabled_in_org(user)
-        logger.debug(f"{configured=}, {disabled_in_org=}, {self.disabled=}")
-        return configured and not disabled_in_org and not self.disabled
+        return super().is_runnable(user) and self._is_configured(user)
 
     @cached_property
     def queue(self):

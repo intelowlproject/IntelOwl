@@ -3,12 +3,12 @@
 
 from django.contrib import admin
 
-from api_app.core.admin import JsonViewerAdminView
+from api_app.core.admin import AbstractConfigAdminView
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
 @admin.register(PlaybookConfig)
-class PlaybookConfigAdminView(JsonViewerAdminView):
+class PlaybookConfigAdminView(AbstractConfigAdminView):
     list_display = (
         "name",
         "type",
@@ -18,8 +18,6 @@ class PlaybookConfigAdminView(JsonViewerAdminView):
         "get_connectors",
         "runtime_configuration",
     )
-    # allow to clone the object
-    save_as = True
 
     def _get_plugins(self, qs):  # noqa
         return [elem.name for elem in qs]

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "api_app.connectors_manager",
     "api_app.visualizers_manager",
     "api_app.playbooks_manager",
+    "api_app.pivot_manager",
     # auth
     "rest_email_auth",
     "drf_recaptcha",

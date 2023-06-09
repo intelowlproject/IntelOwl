@@ -93,6 +93,17 @@ class ParameterInline(admin.TabularInline):
 
 
 class AbstractConfigAdminView(JsonViewerAdminView):
+    list_display = ("name", "description", "disabled", "disabled_in_orgs")
+    search_fields = ("name",)
+    # allow to clone the object
+    save_as = True
+
+    @staticmethod
+    def disabled_in_orgs(instance: AbstractConfig):
+        return [org.name for org in instance.disabled_in_organizations.all()]
+
+
+class PythonConfigAdminView(AbstractConfigAdminView):
     inlines = [ParameterInline]
     list_display = (
         "name",
@@ -102,9 +113,6 @@ class AbstractConfigAdminView(JsonViewerAdminView):
         "disabled",
         "disabled_in_orgs",
     )
-    search_fields = ("name",)
-    # allow to clone the object
-    save_as = True
 
     @staticmethod
     def params(instance: AbstractConfig):
@@ -117,7 +125,3 @@ class AbstractConfigAdminView(JsonViewerAdminView):
         return list(
             instance.parameters.filter(is_secret=True).values_list("name", flat=True)
         )
-
-    @staticmethod
-    def disabled_in_orgs(instance: AbstractConfig):
-        return [org.name for org in instance.disabled_in_organizations.all()]

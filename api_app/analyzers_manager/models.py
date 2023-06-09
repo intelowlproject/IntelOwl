@@ -15,7 +15,7 @@ from api_app.analyzers_manager.constants import (
 )
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.choices import TLP
-from api_app.core.models import AbstractConfig, AbstractReport
+from api_app.core.models import AbstractReport, PythonConfig
 from api_app.fields import ChoiceArrayField
 
 logger = getLogger(__name__)
@@ -124,7 +124,7 @@ class MimeTypes(models.TextChoices):
         return mimetype
 
 
-class AnalyzerConfig(AbstractConfig):
+class AnalyzerConfig(PythonConfig):
     # generic
     type = models.CharField(choices=TypeChoices.choices, null=False, max_length=50)
     docker_based = models.BooleanField(null=False, default=False)

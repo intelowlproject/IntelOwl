@@ -111,6 +111,13 @@ class Plugin(metaclass=ABCMeta):
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
 
+    def execute_pivots(self):
+        from api_app.pivot_manager.models import PivotConfig
+
+        for pivot in self.pivots.all():
+            pivot: PivotConfig
+            pivot.pivot_job(self._job)
+
     def log_error(self, e):
         if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):
             error_message = self.get_error_message(e)
@@ -187,6 +194,7 @@ class Plugin(metaclass=ABCMeta):
             self.after_run_failed(e)
         else:
             self.after_run_success(_result)
+            self.execute_pivots()
         finally:
             # add end time of process
             self.after_run()

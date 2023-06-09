@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-from api_app.core.admin import AbstractConfigAdminView, AbstractReportAdminView
+from api_app.core.admin import AbstractReportAdminView, PythonConfigAdminView
 from api_app.visualizers_manager.forms import VisualizerConfigAdminForm
 from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 
@@ -14,8 +14,8 @@ class VisualizerReportAdminView(AbstractReportAdminView):
 
 
 @admin.register(VisualizerConfig)
-class VisualizerConfigAdminView(AbstractConfigAdminView):
-    list_display = AbstractConfigAdminView.list_display + (
+class VisualizerConfigAdminView(PythonConfigAdminView):
+    list_display = PythonConfigAdminView.list_display + (
         "get_analyzers",
         "get_connectors",
     )

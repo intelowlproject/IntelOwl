@@ -47,7 +47,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
             owner=self.user,
             parameter=param,
         )
-        pc.clean()
+        pc.full_clean()
         pc.save()
         self.assertEqual(pc.owner, org.owner)
         response = self.client.get(self.URL, {}, format="json")

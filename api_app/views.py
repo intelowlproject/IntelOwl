@@ -30,6 +30,7 @@ from .core.models import AbstractConfig
 from .filters import JobFilter
 from .models import Comment, Job, PluginConfig, Tag
 from .permissions import IsObjectRealOwnerPermission
+from .pivot_manager.models import PivotConfig
 from .serializers import (
     CommentSerializer,
     FileAnalysisSerializer,
@@ -137,7 +138,8 @@ def analyze_file(request):
     # It is not straightforward because you can't just add a class
     # which extends a ListSerializer.
     # Follow this doc to try to find a fix:
-    # https://drf-spectacular.readthedocs.io/en/latest/customization.html#declare-serializer-magic-with-openapiserializerextension
+    # https://drf-spectacular.readthedocs.io/en/latest/customization.html#declare-serializer-magic-with
+    # -openapiserializerextension
     request=inline_serializer(
         name="MultipleFilesSerializer",
         fields={
@@ -170,7 +172,9 @@ def analyze_multiple_files(request):
 @api_view(["POST"])
 def analyze_observable(request):
 
-    oas = ObservableAnalysisSerializer(data=request.data, context={"request": request})
+    oas = ObservableAnalysisSerializer(
+        data=request.data, context={"request": request}
+    )
     oas.is_valid(raise_exception=True)
     job = oas.save(send_task=True)
     return Response(
@@ -329,6 +333,30 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             content_type=job.file_mimetype,
             as_attachment=True,
         )
+
+    @add_docs(description="Pivot a job")
+    @action(detail=True, methods=["post"], url_path="pivot-(?P<pivot_config_pk>\d+)")
+    def pivot(self, request, pk=None, pivot_config_pk=None):
+        starting_job = self.get_object()
+        try:
+            pivot_config: PivotConfig = PivotConfig.objects.get(pk=pivot_config_pk)
+        except PivotConfig.DoesNotExist:
+            raise ValidationError({"detail": "Requested pivot config does not exist."})
+        else:
+            try:
+                jobs = pivot_config.pivot_job(starting_job)
+            except KeyError:
+                msg = (
+                    f"Unable to retrieve value at {self.field}"
+                    f" from job {starting_job.pk}"
+                )
+                logger.error(msg)
+                raise ValidationError({"detail": msg})
+            except Exception as e:
+                logger.exception(e)
+                raise ValidationError({"detail": str(e)})
+            else:
+                return Response(list(jobs), status=status.HTTP_201_CREATED)
 
     @action(
         url_path="aggregate/status",

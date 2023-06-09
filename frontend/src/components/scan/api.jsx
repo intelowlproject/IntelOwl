@@ -3,14 +3,15 @@ import React from "react";
 import axios from "axios";
 import md5 from "md5";
 
-import { ContentSection, readFileAsync, addToast } from "@certego/certego-ui";
+import { ContentSection, addToast } from "@certego/certego-ui";
 
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
-  API_BASE_URI,
   COMMENT_BASE_URI,
+  PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
+  PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
@@ -218,11 +219,14 @@ async function _askAnalysisAvailability(formValues) {
 
   if (formValues.classification === "file") {
     const promises = [];
-    Array.from(formValues.files).forEach((file) => {
+    // with .forEach is not possible (we should await an async)
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of Array.from(formValues.files)) {
       const body = {
         analyzers: formValues.analyzers,
         playbooks: formValues.playbooks,
-        md5: md5(readFileAsync(file)),
+        // eslint-disable-next-line no-await-in-loop
+        md5: md5(await file.text()),
       };
       if (minutesAgo) {
         body.minutes_ago = minutesAgo;
@@ -232,7 +236,7 @@ async function _askAnalysisAvailability(formValues) {
         body.running_only = "True";
       }
       payload.push(body);
-    });
+    }
     await Promise.all(promises);
   } else {
     formValues.observable_names.forEach((ObservableName) => {
@@ -311,11 +315,12 @@ async function _analyzeFile(formValues) {
       JSON.stringify(formValues.runtime_configuration)
     );
   }
+  console.debug("_analyzeFile");
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
 async function _startPlaybookFile(formValues) {
-  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
+  const playbookURI = PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI;
   const body = new FormData();
   Array.from(formValues.files).forEach((file) => {
     body.append("files", file, file.name);
@@ -331,7 +336,7 @@ async function _startPlaybookObservable(formValues) {
     observables.push([formValues.classification, ObservableName]);
   });
 
-  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_observables`;
+  const playbookURI = PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI;
   const body = {
     observables,
     playbooks_requested: formValues.playbooks,

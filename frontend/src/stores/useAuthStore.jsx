@@ -92,6 +92,23 @@ const useAuthStore = create((set, get) => ({
       );
       return setTimeout(get().service.logoutUser, 500);
     },
+    changePassword: async (values) => {
+      try {
+        set({ loading: true });
+        const resp = await axios.post(
+          `${AUTH_BASE_URI}/changepassword`,
+          values,
+          {
+            certegoUIenableProgressBar: false,
+          }
+        );
+        return Promise.resolve(resp);
+      } catch (err) {
+        return Promise.reject(err);
+      } finally {
+        set({ loading: false });
+      }
+    },
   },
 }));
 

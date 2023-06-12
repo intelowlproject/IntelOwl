@@ -16,8 +16,8 @@ from rest_framework.response import Response
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import app as celery_app
 
-from .models import AbstractConfig, AbstractReport
-from .serializers import AbstractConfigSerializer
+from .models import AbstractConfig, AbstractReport, PythonConfig
+from .serializers import PythonConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -120,50 +120,10 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
-    serializer_class = AbstractConfigSerializer
+class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
     lookup_field = "name"
-
-    def get_queryset(self):
-        return self.serializer_class.Meta.model.objects.all()
-
-    @add_docs(
-        description="Health Check: "
-        "if server instance associated with plugin is up or not",
-        request=None,
-        responses={
-            200: inline_serializer(
-                name="PluginHealthCheckSuccessResponse",
-                fields={
-                    "status": rfs.BooleanField(allow_null=True),
-                },
-            ),
-        },
-    )
-    @action(
-        methods=["get"],
-        detail=True,
-        url_path="health_check",
-        permission_classes=[IsAdminUser],
-    )
-    def health_check(self, request, name=None):
-        logger.info(f"get healthcheck from user {request.user}, name {name}")
-        obj: AbstractConfig = self.get_object()
-        class_ = obj.python_class
-        try:
-            if not hasattr(class_, "health_check") or not callable(class_.health_check):
-                raise NotImplementedError()
-            try:
-                health_status = class_.health_check(obj.name, request.user)
-            except Exception as e:
-                logger.info(e, stack_info=True)
-                raise ValidationError({"detail": "Unexpected exception raised"})
-        except NotImplementedError:
-            raise ValidationError({"detail": "No healthcheck implemented"})
-        else:
-            return Response(data={"status": health_status}, status=status.HTTP_200_OK)
 
     @add_docs(
         description="Disable/Enable plugin for your organization",
@@ -197,3 +157,46 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
             raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
         obj.disabled_in_organizations.remove(organization)
         return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class PythonConfigViewSet(AbstractConfigViewSet):
+    serializer_class = PythonConfigSerializer
+
+    def get_queryset(self):
+        return self.serializer_class.Meta.model.objects.all()
+
+    @add_docs(
+        description="Health Check: "
+        "if server instance associated with plugin is up or not",
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="PluginHealthCheckSuccessResponse",
+                fields={
+                    "status": rfs.BooleanField(allow_null=True),
+                },
+            ),
+        },
+    )
+    @action(
+        methods=["get"],
+        detail=True,
+        url_path="health_check",
+        permission_classes=[IsAdminUser],
+    )
+    def health_check(self, request, name=None):
+        logger.info(f"get healthcheck from user {request.user}, name {name}")
+        obj: PythonConfig = self.get_object()
+        class_ = obj.python_class
+        try:
+            if not hasattr(class_, "health_check") or not callable(class_.health_check):
+                raise NotImplementedError()
+            try:
+                health_status = class_.health_check(obj.name, request.user)
+            except Exception as e:
+                logger.info(e, stack_info=True)
+                raise ValidationError({"detail": "Unexpected exception raised"})
+        except NotImplementedError:
+            raise ValidationError({"detail": "No healthcheck implemented"})
+        else:
+            return Response(data={"status": health_status}, status=status.HTTP_200_OK)

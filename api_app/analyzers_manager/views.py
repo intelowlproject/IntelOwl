@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from api_app.core.views import AbstractConfigAPI, PluginActionViewSet
+from api_app.core.views import PluginActionViewSet, PythonConfigViewSet
 
 from ..models import Job
 from .filters import AnalyzerConfigFilter
@@ -23,12 +23,12 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = [
-    "AnalyzerConfigAPI",
+    "AnalyzerConfigViewSet",
     "AnalyzerActionViewSet",
 ]
 
 
-class AnalyzerConfigAPI(AbstractConfigAPI):
+class AnalyzerConfigViewSet(PythonConfigViewSet):
     serializer_class = AnalyzerConfigSerializer
     filterset_class = AnalyzerConfigFilter
 

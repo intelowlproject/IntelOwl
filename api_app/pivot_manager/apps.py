@@ -4,5 +4,5 @@
 from django.apps import AppConfig
 
 
-class ConnectorsManagerConfig(AppConfig):
+class PivotManagerConfig(AppConfig):
     name = "api_app.pivot_manager"

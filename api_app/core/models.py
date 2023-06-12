@@ -255,6 +255,13 @@ class AbstractConfig(models.Model):
             ).exists()
         return False
 
+    @classmethod
+    def runnable(cls, user: User = None) -> QuerySet:
+        objs = cls.objects.filter(disabled=False)
+        if user and user.has_membership():
+            objs = objs.exclude(disabled_in_organization=user.membership.organization)
+        return objs
+
     def is_runnable(self, user: User = None):
         disabled_in_org = self._is_disabled_in_org(user)
         logger.debug("{disabled_in_org=}, {self.disabled=}")
@@ -332,6 +339,10 @@ class PythonConfig(AbstractConfig):
             if not param.values_for_user(user).exists():
                 return False
         return True
+
+    @classmethod
+    def runnable(cls, user: User = None) -> QuerySet:
+        raise NotImplementedError()
 
     def is_runnable(self, user: User = None):
         return super().is_runnable(user) and self._is_configured(user)

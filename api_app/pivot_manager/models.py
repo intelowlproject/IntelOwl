@@ -1,8 +1,6 @@
 import logging
-import uuid
-from typing import Any, Generator
+from typing import Any, Generator, List
 
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -11,9 +9,8 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import MultiplePlaybooksMultipleObservableAnalysisSerializer
+from api_app.serializers import ObservableAnalysisSerializer
 from api_app.visualizers_manager.models import VisualizerConfig
-from intel_owl.celery import DEFAULT_QUEUE
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +29,12 @@ class Pivot(models.Model):
         indexes = [
             models.Index(fields=["starting_job"]),
             models.Index(fields=["ending_job"]),
+            models.Index(fields=["config"]),
         ]
+
+    @property
+    def value(self) -> Any:
+        return self.ending_job.analyzed_object_name
 
 
 class PivotConfig(AbstractConfig):
@@ -83,7 +85,9 @@ class PivotConfig(AbstractConfig):
             models.Index(fields=["playbook"]),
         ]
 
-    def clean_config(self):
+    def clean_config(self) -> None:
+        from django.core.exceptions import ValidationError
+
         if sum((bool(self.analyzer), bool(self.connector), bool(self.visualizer))) != 1:
             raise ValidationError(
                 "You must have exactly one between"
@@ -98,46 +102,78 @@ class PivotConfig(AbstractConfig):
     def config(self) -> AbstractConfig:
         return self.analyzer or self.connector or self.visualizer
 
-    def _get_value(self, report: AbstractReport) -> Generator[Any, None, None]:
+    def get_value(self, report: AbstractReport) -> Generator[Any, None, None]:
         value = report.report
 
         for key in self.field.split("."):
-            value = value[key]
+            try:
+                value = value[key]
+            except TypeError:
+                if isinstance(value, list):
+                    value = value[int(key)]
+                else:
+                    raise
 
         if isinstance(value, (int, dict)):
             raise ValueError(f"You can't use a {type(value)} as pivot")
         if isinstance(value, bytes):
             raise ValueError("At the moment we do not support pivoting to files")
         elif isinstance(value, list):
+            logger.info(f"Config {self.name} retrieved value {value}")
             yield from value
         else:
+            logger.info(f"Config {self.name} retrieved value {value}")
             yield value
 
-    def get_value(self, job: Job) -> Generator[Any, None, None]:
-        try:
-            report = self.config.reports.get(job=job)
-        except self.config.reports.model.DoesNotExist:
-            logger.error(
-                f"Job {job.pk} does not have a report for analyzer {self.config.name}"
-            )
-            raise
-        return self._get_value(report)
-
-    def pivot_job(self, starting_job: Job) -> Generator[Pivot, None, None]:
-        from intel_owl.tasks import job_pipeline
+    def _create_jobs(self, starting_job: Job) -> List[Job]:
         from tests.mock_utils import MockUpRequest
 
-        values = self.get_value(starting_job)
-        serializer = MultiplePlaybooksMultipleObservableAnalysisSerializer(
-            data={
-                "playbooks_requested": [self.playbook.pk],
-                "observables": list(values),
-            },
-            context={"request": MockUpRequest(user=starting_job.user)},
-        )
-        ending_jobs = serializer.save()
-        for ending_job in ending_jobs:
-            job_pipeline.apply_async(args=[ending_job.pk], routing_key=DEFAULT_QUEUE, MessageGroupId=str(uuid.uuid4()))
-            yield Pivot.objects.create(
-                starting_job=starting_job, config=self, ending_job=ending_job
+        try:
+            report = self.config.reports.get(job=starting_job)
+        except self.config.reports.model.DoesNotExist:
+            logger.error(
+                f"Job {starting_job.pk} does not have a report"
+                f" for analyzer {self.config.name}"
             )
+        else:
+            try:
+                # we do not want to calculate the classification here
+                observables = [(None, value) for value in self.get_value(report)]
+            except ValueError as e:
+                logger.exception(e)
+            else:
+                serializer = ObservableAnalysisSerializer(
+                    data={
+                        "playbooks_requested": [self.playbook.pk],
+                        "observables": observables,
+                        "send_task": True,
+                        "tlp": starting_job.tlp,
+                    },
+                    context={"request": MockUpRequest(user=starting_job.user)},
+                    many=True,
+                )
+                serializer.is_valid(raise_exception=True)
+                return serializer.save(send_task=True)
+        return []
+
+    def pivot_job(self, starting_job: Job) -> List[Pivot]:
+        from rest_framework.exceptions import ValidationError
+
+        try:
+            ending_jobs = self._create_jobs(starting_job)
+        except ValidationError as e:
+            logger.exception(e)
+            report = self.config.reports.get(job=starting_job)
+            report.append_error("Unable to create pivots", save=True)
+            return []
+        else:
+            pivots = []
+            logger.info(f"Jobs create from pivot are {ending_jobs}")
+            for ending_job in ending_jobs:
+                pivot = Pivot(
+                    starting_job=starting_job, config=self, ending_job=ending_job
+                )
+                pivot.full_clean()
+                pivots.append(pivot)
+                logger.info(f"Creating pivot {pivot.pk}")
+            return Pivot.objects.bulk_create(pivots)

@@ -14,7 +14,7 @@ from django.utils.functional import cached_property
 
 from api_app.models import Job
 
-from .models import AbstractConfig, AbstractReport
+from .models import AbstractReport, PythonConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class Plugin(metaclass=ABCMeta):
 
     def __init__(
         self,
-        config: AbstractConfig,
+        config: PythonConfig,
         job_id: int,
         runtime_configuration: dict,
         task_id: int,
@@ -111,10 +111,10 @@ class Plugin(metaclass=ABCMeta):
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
 
-    def execute_pivots(self):
+    def execute_pivots(self) -> None:
         from api_app.pivot_manager.models import PivotConfig
 
-        for pivot in self.pivots.all():
+        for pivot in self._config.pivots.runnable(self._job.user):
             pivot: PivotConfig
             pivot.pivot_job(self._job)
 
@@ -147,7 +147,7 @@ class Plugin(metaclass=ABCMeta):
     @classmethod
     @property
     @abstractmethod
-    def config_model(cls) -> typing.Type[AbstractConfig]:
+    def config_model(cls) -> typing.Type[PythonConfig]:
         """
         Returns Model to be used for *init_report_object*
         """

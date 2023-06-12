@@ -172,9 +172,7 @@ def analyze_multiple_files(request):
 @api_view(["POST"])
 def analyze_observable(request):
 
-    oas = ObservableAnalysisSerializer(
-        data=request.data, context={"request": request}
-    )
+    oas = ObservableAnalysisSerializer(data=request.data, context={"request": request})
     oas.is_valid(raise_exception=True)
     job = oas.save(send_task=True)
     return Response(
@@ -344,7 +342,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             raise ValidationError({"detail": "Requested pivot config does not exist."})
         else:
             try:
-                jobs = pivot_config.pivot_job(starting_job)
+                pivots = pivot_config.pivot_job(starting_job)
             except KeyError:
                 msg = (
                     f"Unable to retrieve value at {self.field}"
@@ -356,7 +354,10 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                 logger.exception(e)
                 raise ValidationError({"detail": str(e)})
             else:
-                return Response(list(jobs), status=status.HTTP_201_CREATED)
+                return Response(
+                    [pivot.ending_job.pk for pivot in pivots],
+                    status=status.HTTP_201_CREATED,
+                )
 
     @action(
         url_path="aggregate/status",

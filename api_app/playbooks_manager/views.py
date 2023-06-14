@@ -9,25 +9,19 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
-from api_app.playbooks_manager.serializers import (
-    PlaybookConfigCreateSerializer,
-    PlaybookConfigSerializer,
-)
+from api_app.playbooks_manager.serializers import PlaybookConfigSerializer
 from api_app.serializers import (
     FileAnalysisSerializer,
     JobResponseSerializer,
     ObservableAnalysisSerializer,
 )
-from certego_saas.ext.mixins import SerializerActionMixin
 
 logger = logging.getLogger(__name__)
 
 
-class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
+class PlaybookConfigViewSet(viewsets.ModelViewSet):
 
     serializer_class = PlaybookConfigSerializer
-
-    serializer_action_classes = {"create": PlaybookConfigCreateSerializer}
 
     permission_classes = [IsAuthenticated]
 

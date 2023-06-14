@@ -10,18 +10,18 @@ from api_app.playbooks_manager.models import PlaybookConfig
 
 
 class PlaybookConfigSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = PlaybookConfig
-        fields = rfs.ALL_FIELDS
 
-
-class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
+    type = rfs.CharField(read_only=True)
+    analyzers = rfs.PrimaryKeyRelatedField(read_only=True)
+    connectors = rfs.PrimaryKeyRelatedField(read_only=True)
+    pivot = rfs.PrimaryKeyRelatedField(read_only=True)
+    runtime_configuration = rfs.DictField(read_only=True)
 
     job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), write_only=True)
 
     class Meta:
         model = PlaybookConfig
-        fields = ("name", "description", "job")
+        fields = rfs.ALL_FIELDS
 
     def validate_job(self, job: Job):
         owner = self.context["request"].user

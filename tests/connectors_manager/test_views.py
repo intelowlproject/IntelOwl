@@ -10,7 +10,7 @@ from .. import CustomViewSetTestCase, PluginActionViewsetTestCase
 from ..core.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class ConnectorConfigAPITestCase(
+class ConnectorConfigViewSetTestCase(
     AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
 ):
 

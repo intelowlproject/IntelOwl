@@ -11,7 +11,7 @@ from .. import CustomViewSetTestCase, PluginActionViewsetTestCase
 from ..core.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class AnalyzerConfigAPITestCase(
+class AnalyzerConfigViewSetTestCase(
     AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
 ):
     fixtures = [

@@ -8,7 +8,7 @@ from .. import CustomViewSetTestCase
 from ..core.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class VisualizerConfigAPITestCase(
+class VisualizerConfigViewSetTestCase(
     AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
 ):
 

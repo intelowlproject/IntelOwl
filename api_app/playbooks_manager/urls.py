@@ -4,10 +4,10 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import PlaybookConfigAPI
+from .views import PlaybookConfigViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register(r"playbook", PlaybookConfigAPI, basename="playbook")
+router.register(r"playbook", PlaybookConfigViewSet, basename="playbook")
 
 urlpatterns = [
     path(r"", include(router.urls)),

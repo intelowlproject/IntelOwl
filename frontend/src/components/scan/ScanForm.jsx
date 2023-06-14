@@ -63,63 +63,6 @@ function DangerErrorMessage(fieldName) {
 }
 
 // constants
-const groupAnalyzers = (analyzersList) => {
-  const grouped = {
-    ip: [],
-    hash: [],
-    domain: [],
-    url: [],
-    generic: [],
-    file: [],
-  };
-  analyzersList.forEach((obj) => {
-    // filter on basis of type
-    if (obj.type === "file") {
-      grouped.file.push(obj);
-    } else {
-      obj.observable_supported.forEach((clsfn) => grouped[clsfn].push(obj));
-    }
-  });
-  return grouped;
-};
-
-const groupPlaybooks = (playbooksList) => {
-  const grouped = {
-    ip: [],
-    hash: [],
-    domain: [],
-    url: [],
-    generic: [],
-    file: [],
-  };
-
-  playbooksList.forEach((obj) => {
-    // filter on basis of type
-    if (obj.type.includes("file")) {
-      grouped.file.push(obj);
-    }
-
-    obj.type.forEach((clsfn) => {
-      if (clsfn !== "file") {
-        grouped[clsfn].push(obj);
-      }
-    });
-  });
-  return grouped;
-};
-
-const stateSelector = (state) => [
-  state.analyzersLoading,
-  state.connectorsLoading,
-  state.playbooksLoading,
-  state.analyzersError,
-  state.connectorsError,
-  state.playbooksError,
-  groupAnalyzers(state.analyzers),
-  state.connectors,
-  groupPlaybooks(state.playbooks),
-];
-
 const observableType2RegExMap = {
   domain: "^(?:[\\w-]{1,63}\\.)+[\\w-]{2,63}$",
   ip: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
@@ -164,7 +107,12 @@ export default function ScanForm() {
       }
 
       if (values.observableType === "file") {
-        if (!values.files || values.files.length === 0) {
+        // this is an edge case
+        if (
+          !values.files ||
+          values.files.length === 0 ||
+          (values.files.length === 1 && values.files[0] === "")
+        ) {
           errors.files = "required";
         }
       } else if (
@@ -289,10 +237,55 @@ export default function ScanForm() {
     analyzersError,
     connectorsError,
     playbooksError,
-    analyzersGrouped,
+    analyzers,
     connectors,
-    playbooksGrouped,
-  ] = usePluginConfigurationStore(stateSelector);
+    playbooks,
+  ] = usePluginConfigurationStore((state) => [
+    state.analyzersLoading,
+    state.connectorsLoading,
+    state.playbooksLoading,
+    state.analyzersError,
+    state.connectorsError,
+    state.playbooksError,
+    state.analyzers,
+    state.connectors,
+    state.playbooks,
+  ]);
+
+  const analyzersGrouped = React.useMemo(() => {
+    const grouped = {
+      ip: [],
+      hash: [],
+      domain: [],
+      url: [],
+      generic: [],
+      file: [],
+    };
+    analyzers.forEach((obj) => {
+      if (obj.type === "file") {
+        grouped.file.push(obj);
+      } else {
+        obj.observable_supported.forEach((clsfn) => grouped[clsfn].push(obj));
+      }
+    });
+    return grouped;
+  }, [analyzers]);
+
+  const playbooksGrouped = React.useMemo(() => {
+    const grouped = {
+      ip: [],
+      hash: [],
+      domain: [],
+      url: [],
+      generic: [],
+      file: [],
+    };
+    playbooks.forEach((obj) => {
+      // filter on basis of type
+      obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
+    });
+    return grouped;
+  }, [playbooks]);
 
   const analyzersOptions = React.useMemo(
     () =>
@@ -301,7 +294,10 @@ export default function ScanForm() {
           isDisabled: !v.verification.configured || v.disabled,
           value: v.name,
           label: (
-            <div className="d-flex justify-content-start align-items-start flex-column">
+            <div
+              id={`analyzer${v.name}`}
+              className="d-flex justify-content-start align-items-start flex-column"
+            >
               <div className="d-flex justify-content-start align-items-baseline flex-column">
                 <div>{v.name}&nbsp;</div>
                 <div className="small text-start text-muted">
@@ -411,7 +407,6 @@ export default function ScanForm() {
       };
 
       const errors = ValidatePlaybooks(values);
-
       if (Object.keys(errors).length !== 0) {
         addToast("Failed!", JSON.stringify(errors), "danger");
         return;
@@ -616,14 +611,14 @@ export default function ScanForm() {
               />
             ) : (
               <FormGroup row>
-                <Label className="required" sm={3} for="files">
+                <Label className="required" sm={3} for="file">
                   File(s)
                 </Label>
                 <Col sm={9}>
                   <Input
                     type="file"
                     id="file"
-                    name="files"
+                    name="file"
                     onChange={(event) => {
                       formik.setFieldValue(
                         "files",

@@ -63,18 +63,6 @@ function DangerErrorMessage(fieldName) {
 }
 
 // constants
-const stateSelector = (state) => [
-  state.analyzersLoading,
-  state.connectorsLoading,
-  state.playbooksLoading,
-  state.analyzersError,
-  state.connectorsError,
-  state.playbooksError,
-  state.analyzers,
-  state.connectors,
-  state.playbooks,
-];
-
 const observableType2RegExMap = {
   domain: "^(?:[\\w-]{1,63}\\.)+[\\w-]{2,63}$",
   ip: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
@@ -119,7 +107,12 @@ export default function ScanForm() {
       }
 
       if (values.observableType === "file") {
-        if (!values.files || values.files.length === 0) {
+        // this is an edge case
+        if (
+          !values.files ||
+          values.files.length === 0 ||
+          (values.files.length === 1 && values.files[0] === "")
+        ) {
           errors.files = "required";
         }
       } else if (
@@ -247,7 +240,17 @@ export default function ScanForm() {
     analyzers,
     connectors,
     playbooks,
-  ] = usePluginConfigurationStore(stateSelector);
+  ] = usePluginConfigurationStore((state) => [
+    state.analyzersLoading,
+    state.connectorsLoading,
+    state.playbooksLoading,
+    state.analyzersError,
+    state.connectorsError,
+    state.playbooksError,
+    state.analyzers,
+    state.connectors,
+    state.playbooks,
+  ]);
 
   const analyzersGrouped = React.useMemo(() => {
     const grouped = {

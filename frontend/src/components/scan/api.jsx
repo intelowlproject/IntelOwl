@@ -320,14 +320,18 @@ async function _analyzeFile(formValues) {
 }
 
 async function _startPlaybookFile(formValues) {
-  const playbookURI = PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI;
   const body = new FormData();
   Array.from(formValues.files).forEach((file) => {
     body.append("files", file, file.name);
   });
-  formValues.tags.map((x) => body.append("tags_labels", x));
-  formValues.playbooks.map((x) => body.append("playbooks_requested", x));
-  return axios.post(playbookURI, body);
+  body.append("tlp", formValues.tlp);
+  formValues.tags.forEach((tagObject) => {
+    body.append("tags_labels", tagObject.value.label);
+  });
+  formValues.playbooks.map((playbook) =>
+    body.append("playbooks_requested", playbook)
+  );
+  return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
 async function _startPlaybookObservable(formValues) {
@@ -336,12 +340,12 @@ async function _startPlaybookObservable(formValues) {
     observables.push([formValues.classification, ObservableName]);
   });
 
-  const playbookURI = PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI;
   const body = {
     observables,
     playbooks_requested: formValues.playbooks,
     tags_labels: formValues.tags_labels,
+    tlp: formValues.tlp,
   };
 
-  return axios.post(playbookURI, body);
+  return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }

@@ -3,19 +3,20 @@
 
 from django.contrib import admin
 
-from api_app.core.admin import AbstractConfigAdminView
+from api_app.pivot_manager.forms import PivotConfigModelForm
 from api_app.pivot_manager.models import Pivot, PivotConfig
 
 
 @admin.register(PivotConfig)
-class PivotConfigAdminView(AbstractConfigAdminView):
-    list_display = ["name", "config", "field", "playbook"]
+class PivotConfigAdminView(admin.ModelAdmin):
+    list_display = ["name", "config", "field", "playbook_to_execute"]
+    form = PivotConfigModelForm
 
 
 @admin.register(Pivot)
 class PivotAdminView(admin.ModelAdmin):
-    list_display = ["starting_job", "configuration", "ending_job"]
-    list_filter = ["config"]
+
+    list_display = ["starting_job", "configuration", "value", "ending_job", "owner"]
 
     @staticmethod
     def configuration(instance: Pivot) -> str:

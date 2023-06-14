@@ -333,7 +333,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         )
 
     @add_docs(description="Pivot a job")
-    @action(detail=True, methods=["post"], url_path="pivot-(?P<pivot_config_pk>\d+)")
+    @action(
+        detail=True, methods=["post"]
+    )  # , url_path="pivot-(?P<pivot_config_pk>\d+)")
     def pivot(self, request, pk=None, pivot_config_pk=None):
         starting_job = self.get_object()
         try:
@@ -342,7 +344,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             raise ValidationError({"detail": "Requested pivot config does not exist."})
         else:
             try:
-                pivots = pivot_config.pivot_job(starting_job)
+                pivots = pivot_config.pivot_job(starting_job.reports)
             except KeyError:
                 msg = (
                     f"Unable to retrieve value at {self.field}"

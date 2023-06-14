@@ -147,7 +147,9 @@ class Parameter(models.Model):
 
     class Meta:
         unique_together = [
-            ("name", "analyzer_config", "connector_config", "visualizer_config")
+            ("name", "analyzer_config"),
+            ("name", "connector_config"),
+            ("name", "visualizer_config"),
         ]
         indexes = [
             models.Index(fields=["analyzer_config", "is_secret"]),

@@ -51,8 +51,8 @@ class AnalyzerConfigViewSet(PythonConfigViewSet):
     @action(
         detail=True, methods=["post"], url_name="pull", permission_classes=[IsAdminUser]
     )
-    def pull(self, request, name=None):
-        logger.info(f"update request from user {request.user}, name {name}")
+    def pull(self, request, pk=None):
+        logger.info(f"update request from user {request.user}, name {pk}")
         obj: AnalyzerConfig = self.get_object()
         success = obj.python_class.update()
         if not success:

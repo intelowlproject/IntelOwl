@@ -42,7 +42,7 @@ class CustomTestCase(TestCase):
             )
 
 
-class CustomAPITestCase(CustomTestCase):
+class CustomViewSetTestCase(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.client = APIClient()

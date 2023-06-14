@@ -41,7 +41,7 @@ class Plugin(metaclass=ABCMeta):
 
         self.kwargs = kwargs
         # some post init processing
-        self.report = self.init_report_object()
+        self.report: AbstractReport = self.init_report_object()
         # monkeypatch if in test suite
         if settings.STAGE_CI:
             self._monkeypatch()
@@ -114,9 +114,12 @@ class Plugin(metaclass=ABCMeta):
     def execute_pivots(self) -> None:
         from api_app.pivot_manager.models import PivotConfig
 
-        for pivot in self._config.pivots.runnable(self._job.user):
-            pivot: PivotConfig
-            pivot.pivot_job(self._job)
+        if self._job.playbook_to_execute:
+            for pivot in self.pivots.runnable(self._job.user).filter(
+                used_by_playbooks=self._job.playbook_to_execute
+            ):
+                pivot: PivotConfig
+                pivot.pivot_job(self._job)
 
     def log_error(self, e):
         if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):

@@ -8,6 +8,7 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.models import AbstractConfig
 from api_app.fields import ChoiceArrayField
 from api_app.models import default_runtime
+from api_app.pivot_manager.models import PivotConfig
 from api_app.validators import validate_runtime_configuration
 
 
@@ -22,7 +23,9 @@ class PlaybookConfig(AbstractConfig):
     connectors = models.ManyToManyField(
         ConnectorConfig, related_name="playbooks", blank=True
     )
-
+    pivots = models.ManyToManyField(
+        PivotConfig, related_name="used_by_playbooks", blank=True
+    )
     runtime_configuration = models.JSONField(
         blank=True,
         default=default_runtime,

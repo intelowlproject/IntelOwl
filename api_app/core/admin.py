@@ -1,11 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django import forms
 from django.contrib import admin
 from django.db.models import JSONField
 from prettyjson import PrettyJSONWidget
 
+from api_app.core.forms import ParameterInlineForm
 from api_app.core.models import AbstractConfig, Parameter
 from api_app.models import PluginConfig
 
@@ -45,42 +45,8 @@ class ParameterAdminView(admin.ModelAdmin):
     inlines = [PluginConfigInline]
     search_fields = ["name"]
     list_filter = ["is_secret"]
-    list_display = ("name", "type", "description", "is_secret", "required")
+    list_display = ParameterInlineForm.Meta.fields
     fields = list_display
-
-
-class ParameterInlineForm(forms.ModelForm):
-    default = forms.JSONField(required=False)
-
-    class Meta:
-        model = Parameter
-        fields = ParameterAdminView.fields
-
-    def __init__(self, *args, **kwargs):
-        instance: Parameter = kwargs.get("instance")
-        if instance:
-            try:
-                pc = PluginConfig.objects.get(parameter=instance, owner__isnull=True)
-            except PluginConfig.DoesNotExist:
-                default = None
-            else:
-                default = pc.value
-            kwargs["initial"] = {"default": default}
-        super().__init__(*args, **kwargs)
-
-    def save(self, commit: bool = ...):
-        instance = super().save(commit=commit)
-        if self.cleaned_data["default"] is not None:
-            pc = PluginConfig(
-                value=self.cleaned_data["default"],
-                owner=None,
-                for_organization=False,
-                parameter=instance,
-            )
-            pc.full_clean()
-            pc.save()
-
-        return instance
 
 
 class ParameterInline(admin.TabularInline):

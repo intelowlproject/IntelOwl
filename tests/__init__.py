@@ -84,7 +84,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         self.assertEqual(response.status_code, 400, msg=msg)
         self.assertDictEqual(
             content["errors"],
-            {"detail": "Plugin call is not running or pending"},
+            {"detail": "Plugin is not running or pending"},
             msg=msg,
         )
 
@@ -142,7 +142,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         self.assertEqual(response.status_code, 400, msg=msg)
         self.assertDictEqual(
             content["errors"],
-            {"detail": "Plugin call status should be failed or killed"},
+            {"detail": "Plugin status should be failed or killed"},
             msg=msg,
         )
 

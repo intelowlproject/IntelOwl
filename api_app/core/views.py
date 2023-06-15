@@ -132,7 +132,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             AbstractReport.Status.KILLED,
         ]:
             raise ValidationError(
-                {"detail": "Plugin call status should be failed or killed"}
+                {"detail": "Plugin status should be failed or killed"}
             )
 
         # retry with the same arguments

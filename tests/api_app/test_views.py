@@ -35,7 +35,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertFalse(content)
         param = Parameter.objects.create(
             is_secret=True,
-            name="api_key_name",
+            name="mynewparameter",
             analyzer_config=AnalyzerConfig.objects.get(name="AbuseIPDB"),
             required=True,
             type="str",
@@ -111,7 +111,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(second_item["value"], "supersecret_low_privilege")
         param2 = Parameter.objects.create(
             is_secret=True,
-            name="api_key_name",
+            name="mysecondsupernewsecret",
             analyzer_config=AnalyzerConfig.objects.get(name="Auth0"),
             required=True,
         )

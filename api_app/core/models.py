@@ -103,7 +103,7 @@ def valid_value_for_test(func):
                     for_organization=False,
                 )[0]
             elif "test" in self.name:
-                pass
+                raise
             else:
                 return PluginConfig.objects.get_or_create(
                     value="test",

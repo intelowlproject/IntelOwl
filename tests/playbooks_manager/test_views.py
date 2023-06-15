@@ -3,7 +3,6 @@
 from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomViewSetTestCase
 from tests.core.test_views import AbstractConfigViewSetTestCaseMixin
@@ -28,23 +27,22 @@ class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTest
             type="observable",
             observable_supported=["ip"],
         )
-        job, _ = Job.objects.get_or_create(
-            user=self.user,
-            runtime_configuration={
-                "analyzers": {"test": {"abc": 3}},
-                "connectors": {},
-                "visualizers": {},
-            },
-        )
-        job.analyzers_requested.set([ac.name])
-        job.analyzers_to_execute.set([ac.name])
+
         response = self.client.post(
             self.URL,
             data={
                 "name": "TestCreate",
                 "description": "test",
-                "job": job.pk,
+                "analyzers": [ac.pk],
+                "connectors": [],
+                "pivots": [],
+                "runtime_configuration": {
+                    "analyzers": {"test": {"abc": 3}},
+                    "connectors": {},
+                    "visualizers": {},
+                },
             },
+            format="json",
         )
         self.assertEqual(response.status_code, 201, response.json())
         try:
@@ -63,4 +61,3 @@ class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTest
             pc.delete()
         finally:
             ac.delete()
-            job.delete()

@@ -1,13 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import django.core.exceptions
-from django.core.exceptions import ValidationError
 from rest_framework import serializers as rfs
+from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 
@@ -30,13 +29,10 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
         model = PlaybookConfig
         fields = rfs.ALL_FIELDS
 
-    def validate_job(self, job: Job):
-        owner = self.context["request"].user
-        if job.user.pk != owner.pk:
-            raise ValidationError(
-                {"detail": "You can create a playbook from a job that only you created"}
-            )
-        return job
+    def validate_analyzers(self, analyzers):
+        if not analyzers:
+            raise ValidationError("You must have at least one analyzer")
+        return analyzers
 
     @staticmethod
     def create(validated_data):
@@ -45,14 +41,13 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
             set(
                 [
                     type_supported
-                    for analyzer_config in validated_data["analyzers"]
+                    for analyzer_config in validated_data.get("analyzers", [])
                     for type_supported in analyzer_config.observable_supported
                 ]
             )
         )
         if any((x.type == TypeChoices.FILE.value for x in validated_data["analyzers"])):
             types_supported.append(TypeChoices.FILE)
-
         pc = PlaybookConfig(
             name=validated_data["name"],
             description=validated_data["description"],

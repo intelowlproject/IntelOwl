@@ -6,11 +6,14 @@ from tests import CustomTestCase
 
 class PivotRegexValidatorTestCase(CustomTestCase):
     def test_valid(self):
-        pivot_regex_validator("test")
-        pivot_regex_validator("test.t")
-        pivot_regex_validator("test.test")
-        pivot_regex_validator("test.test.0")
-        pivot_regex_validator("test.test.0.te_st")
+        try:
+            pivot_regex_validator("test")
+            pivot_regex_validator("test.t")
+            pivot_regex_validator("test.test")
+            pivot_regex_validator("test.test.0")
+            pivot_regex_validator("test.test.0.te_st")
+        except ValidationError as e:
+            self.fail(e)
 
     def test_invalid(self):
         with self.assertRaises(ValidationError):

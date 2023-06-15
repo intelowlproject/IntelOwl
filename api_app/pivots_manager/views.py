@@ -9,15 +9,11 @@ from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotSeria
 
 class PivotConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):
     serializer_class = PivotConfigSerializer
-
-    def get_queryset(self):
-        return PivotConfig.objects.all()
+    queryset = PivotConfig.objects.all()
 
 
 class PivotViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
     permission_classes = [IsAuthenticated, PivotOwnerPermission]
     serializer_class = PivotSerializer
     lookup_field = "pk"
-
-    def get_queryset(self):
-        return Pivot.objects.all()
+    queryset = Pivot.objects.all()

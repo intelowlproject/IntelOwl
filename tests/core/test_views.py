@@ -11,7 +11,7 @@ class ViewSetTestCaseMixin:
     @property
     @abstractmethod
     def model_class(cls) -> Type[AbstractConfig]:
-        ...
+        raise NotImplementedError()
 
     def test_list(self):
         response = self.client.get(self.URL)

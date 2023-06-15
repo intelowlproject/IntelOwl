@@ -89,4 +89,5 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         pcs = PivotConfigSerializer(data=data)
         pcs.is_valid(raise_exception=True)
         pivot_config = pcs.save()
+        self.assertEqual(pivot_config.name, f"{ac.pk}.test.0.{playbook.pk}")
         pivot_config.delete()

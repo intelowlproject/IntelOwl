@@ -44,7 +44,10 @@ class PivotConfigTestCase(CustomTestCase):
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
-        pc.full_clean()
+        try:
+            pc.full_clean()
+        except ValidationError as e:
+            self.fail(e)
 
     def test_field_validation_valid(self):
         pc = PivotConfig(
@@ -54,7 +57,10 @@ class PivotConfigTestCase(CustomTestCase):
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
-        pc.full_clean()
+        try:
+            pc.full_clean()
+        except ValidationError as e:
+            self.fail(e)
 
     def test_field_validation_start_dotted(self):
         pc = PivotConfig(
@@ -105,8 +111,11 @@ class PivotConfigTestCase(CustomTestCase):
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         report = AnalyzerReport(report={"test": "abc"}, config=ac)
-
-        self.assertEqual("abc", next(pc.get_value(report)))
+        try:
+            value = next(pc.get_value(report))
+        except StopIteration:
+            self.fail("No value to retrieve")
+        self.assertEqual("abc", value)
 
     def test_get_value_list(self):
         ac = AnalyzerConfig.objects.first()
@@ -118,7 +127,11 @@ class PivotConfigTestCase(CustomTestCase):
         report = AnalyzerReport(report={"test": ["abc", "edf"]}, config=ac)
         self.assertCountEqual(["abc", "edf"], list(pc.get_value(report)))
         pc.field = "test.0"
-        self.assertEqual("abc", next(pc.get_value(report)))
+        try:
+            value = next(pc.get_value(report))
+        except StopIteration:
+            self.fail("No value to retrieve")
+        self.assertEqual("abc", value)
 
     def test_get_value_dict(self):
         ac = AnalyzerConfig.objects.first()
@@ -130,9 +143,16 @@ class PivotConfigTestCase(CustomTestCase):
         report = AnalyzerReport(report={"test": {"test2": "abc"}}, config=ac)
 
         with self.assertRaises(ValueError):
-            next(pc.get_value(report))
+            try:
+                next(pc.get_value(report))
+            except StopIteration:
+                self.fail("No value to retrieve")
         pc.field = "test.test2"
-        self.assertEqual("abc", next(pc.get_value(report)))
+        try:
+            value = next(pc.get_value(report))
+        except StopIteration:
+            self.fail("No value to retrieve")
+        self.assertEqual("abc", value)
 
     def test_get_value_bytes(self):
         ac = AnalyzerConfig.objects.first()
@@ -144,7 +164,10 @@ class PivotConfigTestCase(CustomTestCase):
         report = AnalyzerReport(report={"test": b"abc"}, config=ac)
 
         with self.assertRaises(ValueError):
-            next(pc.get_value(report))
+            try:
+                next(pc.get_value(report))
+            except StopIteration:
+                self.fail("No value to retrieve")
 
     def test_create_job_multiple_generic(self):
 

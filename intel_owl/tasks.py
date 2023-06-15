@@ -139,7 +139,7 @@ def job_set_final_status(job_id: int):
 
 
 @app.task(name="job_set_pipeline_status", soft_time_limit=20)
-def job_set_pipeline_status(job_id: int, status:str ):
+def job_set_pipeline_status(job_id: int, status: str):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)

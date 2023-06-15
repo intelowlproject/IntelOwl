@@ -127,9 +127,9 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin):
             user=self.user, organization=org, is_owner=False
         )
         response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
-        # permission denied
-        self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
+        # permission denied
+        self.assertEqual(response.status_code, 403, result)
         self.assertIn("detail", result)
         self.assertEqual(
             result["detail"], "You do not have permission to perform this action."
@@ -140,9 +140,9 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin):
         plugin = self.model_class.objects.get(pk=plugin_pk)
         self.assertFalse(plugin.disabled_in_organizations.all().exists())
         response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
         result = response.json()
+        self.assertEqual(response.status_code, 400, result)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
         self.assertEqual(

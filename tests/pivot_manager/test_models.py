@@ -17,9 +17,9 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer=AnalyzerConfig.objects.first(),
-            connector=ConnectorConfig.objects.first(),
-            visualizer=VisualizerConfig.objects.first(),
+            analyzer_config=AnalyzerConfig.objects.first(),
+            connector_config=ConnectorConfig.objects.first(),
+            visualizer_config=VisualizerConfig.objects.first(),
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -40,7 +40,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer=AnalyzerConfig.objects.first(),
+            analyzer_config=AnalyzerConfig.objects.first(),
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -50,7 +50,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer=AnalyzerConfig.objects.first(),
+            analyzer_config=AnalyzerConfig.objects.first(),
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -60,7 +60,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer=AnalyzerConfig.objects.first(),
+            analyzer_config=AnalyzerConfig.objects.first(),
             field=".test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -71,7 +71,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer=AnalyzerConfig.objects.first(),
+            analyzer_config=AnalyzerConfig.objects.first(),
             field="test.",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -82,7 +82,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer=AnalyzerConfig.objects.first(),
+            analyzer_config=AnalyzerConfig.objects.first(),
             field="test!",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -91,7 +91,7 @@ class PivotConfigTestCase(CustomTestCase):
 
     def test_config(self):
         pc = PivotConfig(
-            analyzer=AnalyzerConfig.objects.first(),
+            analyzer_config=AnalyzerConfig.objects.first(),
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -100,7 +100,7 @@ class PivotConfigTestCase(CustomTestCase):
     def test_get_value_str(self):
         ac = AnalyzerConfig.objects.first()
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -111,7 +111,7 @@ class PivotConfigTestCase(CustomTestCase):
     def test_get_value_list(self):
         ac = AnalyzerConfig.objects.first()
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -123,7 +123,7 @@ class PivotConfigTestCase(CustomTestCase):
     def test_get_value_dict(self):
         ac = AnalyzerConfig.objects.first()
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -137,7 +137,7 @@ class PivotConfigTestCase(CustomTestCase):
     def test_get_value_bytes(self):
         ac = AnalyzerConfig.objects.first()
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -151,7 +151,7 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -171,7 +171,7 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -185,7 +185,7 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -199,7 +199,7 @@ class PivotConfigTestCase(CustomTestCase):
             user=User.objects.first(),
         )
         pc = PivotConfig(
-            analyzer=ac,
+            analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )

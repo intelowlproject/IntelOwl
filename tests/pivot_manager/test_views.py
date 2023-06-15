@@ -162,7 +162,7 @@ class PivotConfigViewSetTestCase(
         self.assertIn("non_field_errors", content["errors"])
         self.assertCountEqual(
             [
-                "The fields analyzer, field,"
+                "The fields analyzer_config, field,"
                 " playbook_to_execute must make a unique set."
             ],
             content["errors"]["non_field_errors"],

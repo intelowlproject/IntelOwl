@@ -4,23 +4,31 @@ from rest_framework.exceptions import ValidationError
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.serializers import AbstractConfigSerializer
+from api_app.models import Job
 from api_app.pivots_manager.models import Pivot, PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 
 
 class PivotSerializer(rfs.ModelSerializer):
+    starting_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
+    pivot_config = rfs.PrimaryKeyRelatedField(
+        queryset=PivotConfig.objects.all(), required=True
+    )
+    ending_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
+
     class Meta:
         model = Pivot
         fields = rfs.ALL_FIELDS
 
     def validate(self, attrs):
+        result = super().validate(attrs)
+
         if (
             attrs["starting_job"].user.pk != self.context["request"].user.pk
             or attrs["ending_job"].user.pk != self.context["request"].user.pk
         ):
             raise ValidationError("You do not have permission to pivot these two jobs")
-        result = super().validate(attrs)
         return result
 
 

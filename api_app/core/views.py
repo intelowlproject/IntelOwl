@@ -184,8 +184,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         url_path="health_check",
         permission_classes=[IsAdminUser],
     )
-    def health_check(self, request, name=None):
-        logger.info(f"get healthcheck from user {request.user}, name {name}")
+    def health_check(self, request, pk=None):
+        logger.info(f"get healthcheck from user {request.user}, name {pk}")
         obj: PythonConfig = self.get_object()
         class_ = obj.python_class
         try:

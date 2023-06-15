@@ -14,7 +14,7 @@ class PivotConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):
         return PivotConfig.objects.all()
 
 
-class PivotViewSet(viewsets.ModelViewSet):
+class PivotViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
     permission_classes = [IsAuthenticated, PivotOwnerPermission]
     serializer_class = PivotSerializer
     lookup_field = "pk"

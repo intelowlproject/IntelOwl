@@ -33,24 +33,6 @@ class PivotViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 200, response.json())
 
-    def test_update(self):
-        plugin = self.model_class.objects.order_by("?").first().pk
-        response = self.client.patch(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 403, response.json())
-
-        self.client.force_authenticate(self.superuser)
-        response = self.client.patch(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 200, response.json())
-
-    def test_delete(self):
-        plugin = self.model_class.objects.order_by("?").first().pk
-        response = self.client.delete(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 403, response.json())
-
-        self.client.force_authenticate(self.superuser)
-        response = self.client.delete(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 204)
-
     def test_create(self):
         data = {
             "starting_job": self.j1.pk,

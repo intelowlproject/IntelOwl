@@ -18,13 +18,25 @@ logger = logging.getLogger(__name__)
 
 class Pivot(models.Model):
     starting_job = models.ForeignKey(
-        Job, on_delete=models.CASCADE, related_name="pivot_children", null=False
+        Job,
+        on_delete=models.CASCADE,
+        related_name="pivot_children",
+        null=False,
+        editable=False,
     )
     pivot_config = models.ForeignKey(
-        "PivotConfig", on_delete=models.PROTECT, null=False, related_name="pivots"
+        "PivotConfig",
+        on_delete=models.PROTECT,
+        null=False,
+        related_name="pivots",
+        editable=False,
     )
     ending_job = models.ForeignKey(
-        Job, on_delete=models.CASCADE, related_name="pivot_parents", null=False
+        Job,
+        on_delete=models.CASCADE,
+        related_name="pivot_parents",
+        null=False,
+        editable=False,
     )
 
     class Meta:
@@ -194,7 +206,7 @@ class PivotConfig(AbstractConfig):
         from rest_framework.exceptions import ValidationError
 
         # coherence check, should not happen
-        if not self.config.objects.filter(
+        if not self.config.__class__.objects.filter(
             playbooks=starting_job.playbook_to_execute
         ).exists():
             logger.error(

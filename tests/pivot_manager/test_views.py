@@ -150,9 +150,9 @@ class PivotConfigViewSetTestCase(
     def test_create(self):
 
         data = {
-            "playbook_to_execute": self.pc.playbook_to_execute.pk,
+            "playbook_to_execute": self.pc.playbook_to_execute_id,
             "field": self.pc.field,
-            "analyzer_config": self.pc.analyzer_config.pk,
+            "analyzer_config": self.pc.analyzer_config_id,
         }
 
         response = self.client.post(self.URL, data=data)

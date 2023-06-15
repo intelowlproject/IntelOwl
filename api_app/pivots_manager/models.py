@@ -175,8 +175,7 @@ class PivotConfig(AbstractConfig):
         try:
             serializer = ObservableAnalysisSerializer(
                 data={
-                    "playbooks_requested": [self.playbook_to_execute.pk],
-                    # we do not want to calculate the classification here
+                    "playbooks_requested": [self.playbook_to_execute_id],
                     "observables": [(None, value) for value in self.get_value(report)],
                     "send_task": True,
                     "tlp": report.job.tlp,

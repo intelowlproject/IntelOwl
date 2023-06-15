@@ -24,9 +24,3 @@ class VisualizerActionViewSet(PluginActionViewSet):
     @property
     def report_model(cls):
         return VisualizerReport
-
-    def perform_retry(self, report: VisualizerReport):
-        signature = report.config.get_signature(
-            report.job,
-        )
-        signature.apply_async()

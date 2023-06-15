@@ -242,6 +242,11 @@ class AbstractConfig(models.Model):
 
     @classmethod
     @property
+    def runtime_configuration_key(cls) -> str:
+        return f"{cls.__name__.split('Config')[0].lower()}s"
+
+    @classmethod
+    @property
     def snake_case_name(cls) -> str:
         import re
 

@@ -32,10 +32,23 @@ class TLP(models.TextChoices):
 class Status(models.TextChoices):
     PENDING = "pending", "pending"
     RUNNING = "running", "running"
+
+    ANALYZERS_COMPLETE = "analyzers_complete", "analyzers_complete"
+    CONNECTORS_COMPLETE = "connectors_complete", "connectors_complete"
+    VISUALIZERS_COMPLETE = "visualizers_complete", "visualizers_complete"
+
     REPORTED_WITHOUT_FAILS = "reported_without_fails", "reported_without_fails"
     REPORTED_WITH_FAILS = "reported_with_fails", "reported_with_fails"
     KILLED = "killed", "killed"
     FAILED = "failed", "failed"
+
+    @classmethod
+    def pipeline_statuses(cls) -> typing.List["Status"]:
+        return [
+            cls.ANALYZERS_COMPLETE,
+            cls.CONNECTORS_COMPLETE,
+            cls.VISUALIZERS_COMPLETE,
+        ]
 
     @classmethod
     def final_statuses(cls) -> typing.List["Status"]:

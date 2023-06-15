@@ -169,7 +169,7 @@ class PivotConfigViewSetTestCase(
         )
 
         data = {
-            "playbook_to_execute": self.pc.playbook_to_execute.pk,
+            "playbook_to_execute": self.pc.playbook_to_execute_id,
             "field": self.pc.field,
             "connector_config": ConnectorConfig.objects.first().pk,
         }

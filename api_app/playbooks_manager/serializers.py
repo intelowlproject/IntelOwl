@@ -5,19 +5,26 @@ from django.core.exceptions import ValidationError
 from rest_framework import serializers as rfs
 
 from api_app.analyzers_manager.constants import TypeChoices
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
+from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
 class PlaybookConfigSerializer(rfs.ModelSerializer):
 
-    type = rfs.CharField(read_only=True)
-    analyzers = rfs.PrimaryKeyRelatedField(read_only=True)
-    connectors = rfs.PrimaryKeyRelatedField(read_only=True)
-    pivot = rfs.PrimaryKeyRelatedField(read_only=True)
-    runtime_configuration = rfs.DictField(read_only=True)
-
-    job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), write_only=True)
+    type = rfs.ListField(child=rfs.CharField(read_only=True), read_only=True)
+    analyzers = rfs.PrimaryKeyRelatedField(
+        many=True, queryset=AnalyzerConfig.objects.all(), required=True
+    )
+    connectors = rfs.PrimaryKeyRelatedField(
+        many=True, queryset=ConnectorConfig.objects.all(), required=True
+    )
+    pivots = rfs.PrimaryKeyRelatedField(
+        many=True, queryset=PivotConfig.objects.all(), required=True
+    )
+    runtime_configuration = rfs.DictField(required=True)
 
     class Meta:
         model = PlaybookConfig
@@ -34,30 +41,30 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
     @staticmethod
     def create(validated_data):
 
-        job = validated_data["job"]
         types_supported = list(
             set(
                 [
                     type_supported
-                    for analyzer_config in job.analyzers_to_execute.all()
+                    for analyzer_config in validated_data["analyzers"]
                     for type_supported in analyzer_config.observable_supported
                 ]
             )
         )
-        if job.is_sample:
+        if any((x.type == TypeChoices.FILE.value for x in validated_data["analyzers"])):
             types_supported.append(TypeChoices.FILE)
 
         pc = PlaybookConfig(
             name=validated_data["name"],
             description=validated_data["description"],
             type=types_supported,
-            runtime_configuration=job.runtime_configuration,
+            runtime_configuration=validated_data["runtime_configuration"],
         )
         try:
             pc.full_clean()
         except django.core.exceptions.ValidationError as e:
             raise ValidationError({"detail": e})
         pc.save()
-        pc.analyzers.set(list(job.analyzers_to_execute.all()))
-        pc.connectors.set(list(job.connectors_to_execute.all()))
+        pc.analyzers.set(validated_data["analyzers"])
+        pc.connectors.set(validated_data["connectors"])
+        pc.pivots.set(validated_data["connectors"])
         return pc

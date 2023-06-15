@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
-from api_app.pivot_manager.models import PivotConfig
+from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.user.models import User

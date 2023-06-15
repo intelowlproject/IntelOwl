@@ -3,8 +3,8 @@
 
 from django.contrib import admin
 
-from api_app.pivot_manager.forms import PivotConfigModelForm
-from api_app.pivot_manager.models import Pivot, PivotConfig
+from api_app.pivots_manager.forms import PivotConfigModelForm
+from api_app.pivots_manager.models import Pivot, PivotConfig
 
 
 @admin.register(PivotConfig)

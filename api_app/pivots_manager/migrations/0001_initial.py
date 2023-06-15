@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ending_job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pivot_parents', to='api_app.job')),
-                ('pivot_config', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='pivot_manager.pivotconfig')),
+                ('pivot_config', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='pivots_manager.pivotconfig')),
                 ('starting_job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pivot_children', to='api_app.job')),
             ],
         ),

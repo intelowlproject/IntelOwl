@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pivot_manager', '0001_initial'),
+        ('pivots_manager', '0001_initial'),
         ('playbooks_manager', '0014_playbookconfig_disabled_in_organizations'),
     ]
 
@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='playbookconfig',
             name='pivots',
-            field=models.ManyToManyField(blank=True, related_name='used_by_playbooks', to='pivot_manager.pivotconfig'),
+            field=models.ManyToManyField(blank=True, related_name='used_by_playbooks', to='pivots_manager.pivotconfig'),
         ),
     ]

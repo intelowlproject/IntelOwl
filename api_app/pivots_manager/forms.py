@@ -1,6 +1,6 @@
 from django import forms
 
-from api_app.pivot_manager.models import PivotConfig
+from api_app.pivots_manager.models import PivotConfig
 
 
 class PivotConfigModelForm(forms.ModelForm):

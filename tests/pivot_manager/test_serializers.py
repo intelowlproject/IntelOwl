@@ -1,7 +1,7 @@
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.models import Job
-from api_app.pivot_manager.models import Pivot, PivotConfig
-from api_app.pivot_manager.serializers import PivotConfigSerializer, PivotSerializer
+from api_app.pivots_manager.models import Pivot, PivotConfig
+from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotSerializer
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest

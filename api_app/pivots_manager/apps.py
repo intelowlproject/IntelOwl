@@ -5,4 +5,4 @@ from django.apps import AppConfig
 
 
 class PivotManagerConfig(AppConfig):
-    name = "api_app.pivot_manager"
+    name = "api_app.pivots_manager"

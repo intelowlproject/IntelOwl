@@ -3,7 +3,7 @@ from typing import Type
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
-from api_app.pivot_manager.models import Pivot, PivotConfig
+from api_app.pivots_manager.models import Pivot, PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomViewSetTestCase
 from tests.core.test_views import (

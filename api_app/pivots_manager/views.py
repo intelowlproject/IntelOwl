@@ -2,9 +2,9 @@ from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from api_app.core.views import AbstractConfigViewSet
-from api_app.pivot_manager.models import Pivot, PivotConfig
-from api_app.pivot_manager.permissions import PivotOwnerPermission
-from api_app.pivot_manager.serializers import PivotConfigSerializer, PivotSerializer
+from api_app.pivots_manager.models import Pivot, PivotConfig
+from api_app.pivots_manager.permissions import PivotOwnerPermission
+from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotSerializer
 
 
 class PivotConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):

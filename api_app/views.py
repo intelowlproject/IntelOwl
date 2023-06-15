@@ -30,7 +30,7 @@ from .core.models import AbstractConfig
 from .filters import JobFilter
 from .models import Comment, Job, PluginConfig, Tag
 from .permissions import IsObjectRealOwnerPermission
-from .pivot_manager.models import PivotConfig
+from .pivots_manager.models import PivotConfig
 from .serializers import (
     CommentSerializer,
     FileAnalysisSerializer,

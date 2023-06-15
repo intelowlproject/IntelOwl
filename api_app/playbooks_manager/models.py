@@ -8,7 +8,7 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.models import AbstractConfig
 from api_app.fields import ChoiceArrayField
 from api_app.models import default_runtime
-from api_app.pivot_manager.models import PivotConfig
+from api_app.pivots_manager.models import PivotConfig
 from api_app.validators import validate_runtime_configuration
 
 

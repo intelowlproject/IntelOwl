@@ -12,7 +12,10 @@ import { saveJobAsPlaybook } from "../api";
 const initialValues = {
   name: "",
   description: "",
-  jobId: "",
+  analyzers: [],
+  connectors: [],
+  pivots: [],
+  runtimeConfiguration: {}
 };
 
 // methods
@@ -109,8 +112,11 @@ function SaveAsPlaybookIcon() {
   );
 }
 
-export function SaveAsPlaybookButton({ jobId }) {
-  initialValues.jobId = jobId;
+export function SaveAsPlaybookButton({ analyzers, connectors, pivots, runtimeConfiguration }) {
+  initialValues.analyzers = analyzers;
+  initialValues.connectors = connectors;
+  initialValues.pivots = pivots;
+  initialValues.runtimeConfiguration = runtimeConfiguration
   return (
     <PopupFormButton
       id="saveasplaybook"
@@ -127,7 +133,10 @@ SaveAsPlaybookForm.propTypes = {
 };
 
 SaveAsPlaybookButton.propTypes = {
-  jobId: PropTypes.number.isRequired,
+  analyzers: PropTypes.arrayOf(PropTypes.string).isRequired,
+  connectors: PropTypes.arrayOf(PropTypes.string).isRequired,
+  pivots: PropTypes.arrayOf(PropTypes.number).isRequired,
+  runtimeConfiguration: PropTypes.object.isRequired,
 };
 
 export default SaveAsPlaybookButton;

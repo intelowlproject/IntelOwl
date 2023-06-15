@@ -46,7 +46,7 @@ urlpatterns = [
     path("", include("api_app.analyzers_manager.urls")),
     path("", include("api_app.connectors_manager.urls")),
     path("", include("api_app.visualizers_manager.urls")),
-    path("", include("api_app.pivot_manager.urls")),
+    path("", include("api_app.pivots_manager.urls")),
     path("", include("api_app.playbooks_manager.urls")),
     # auth
     path("auth/", include("authentication.urls")),

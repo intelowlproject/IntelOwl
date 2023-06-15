@@ -112,7 +112,7 @@ class Plugin(metaclass=ABCMeta):
         self.report.save(update_fields=["status", "report"])
 
     def execute_pivots(self) -> None:
-        from api_app.pivot_manager.models import PivotConfig
+        from api_app.pivots_manager.models import PivotConfig
 
         if self._job.playbook_to_execute:
             for pivot in self.pivots.runnable(self._job.user).filter(

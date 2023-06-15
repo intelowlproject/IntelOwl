@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from api_app.pivot_manager.validators import pivot_regex_validator
+from api_app.pivots_manager.validators import pivot_regex_validator
 from tests import CustomTestCase
 
 

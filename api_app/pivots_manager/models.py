@@ -21,7 +21,7 @@ class Pivot(models.Model):
         Job, on_delete=models.CASCADE, related_name="pivot_children", null=False
     )
     pivot_config = models.ForeignKey(
-        "PivotConfig", on_delete=models.PROTECT, null=False
+        "PivotConfig", on_delete=models.PROTECT, null=False, related_name="pivots"
     )
     ending_job = models.ForeignKey(
         Job, on_delete=models.CASCADE, related_name="pivot_parents", null=False

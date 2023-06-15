@@ -20,7 +20,7 @@ class PivotSerializer(rfs.ModelSerializer):
             or attrs["ending_job"].user.pk != self.context["request"].user.pk
         ):
             raise ValidationError("You do not have permission to pivot these two jobs")
-        result = super(PivotSerializer, self).validate(attrs)
+        result = super().validate(attrs)
         return result
 
 

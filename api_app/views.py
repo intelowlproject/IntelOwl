@@ -354,7 +354,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                 raise ValidationError({"detail": msg})
             except Exception as e:
                 logger.exception(e)
-                raise ValidationError({"detail": str(e)})
+                raise ValidationError(
+                    {"detail": f"Unable to start pivot from job {starting_job.pk}"}
+                )
             else:
                 return Response(
                     [pivot.ending_job.pk for pivot in pivots],

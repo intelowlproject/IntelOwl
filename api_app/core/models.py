@@ -266,7 +266,7 @@ class AbstractConfig(models.Model):
 
     def is_runnable(self, user: User = None):
         disabled_in_org = self._is_disabled_in_org(user)
-        logger.debug("{disabled_in_org=}, {self.disabled=}")
+        logger.debug(f"{disabled_in_org=}, {self.disabled=}")
         return not disabled_in_org and not self.disabled
 
 

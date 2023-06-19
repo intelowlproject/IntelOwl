@@ -434,18 +434,20 @@ export default function ScanForm() {
   console.debug(formik);
   return (
     <Container className="col-lg-12 col-xl-7">
-      {/* Quota badges */}
-      <ContentSection className="bg-body mb-2 d-flex-center">
-        <MonthBadge className="me-2 text-larger" />
-        <TotalBadge className="ms-2 me-3 text-larger" />
-        <QuotaInfoIcon />
-      </ContentSection>
       {/* Form */}
       <ContentSection id="ScanForm" className="mt-3 bg-body shadow">
-        <h3 className="fw-bold">
-          Scan&nbsp;
-          {formik.values.classification === "file" ? "Files" : "Observables"}
-        </h3>
+        <div className="mt-3 d-flex justify-content-between">
+          <h3 className="fw-bold">
+            Scan&nbsp;
+            {formik.values.classification === "file" ? "Files" : "Observables"}
+          </h3>
+          <div className="mt-1">
+            {/* Quota badges */}
+            <MonthBadge className="me-2 text-larger" />
+            <TotalBadge className="ms-2 me-3 text-larger" />
+            <QuotaInfoIcon />
+          </div>
+        </div>
         <hr />
         <FormikProvider value={formik}>
           <Form onSubmit={formik.handleSubmit}>

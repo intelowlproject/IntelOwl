@@ -49,8 +49,12 @@ class TestUserAuth(CustomOAuthTestCase):
 
     def test_login_200(self):
         self.assertEqual(AuthToken.objects.count(), 0)
+        body = {
+            **self.creds,
+            "recaptcha": "testkey",
+        }
 
-        response = self.client.post(login_uri, self.creds)
+        response = self.client.post(login_uri, body)
         content = response.json()
         msg = (response, content)
 
@@ -337,14 +341,16 @@ class TestUserAuth(CustomOAuthTestCase):
         )
 
 
-class CheckRegistrationSetupTestCase(CustomOAuthTestCase):
+class CheckConfigurationTestCase(CustomOAuthTestCase):
     def test_200_local_setup(self):
         with self.settings(
             DEFAULT_FROM_EMAIL="fake@email.it",
             DEFAULT_EMAIL="fake@email.it",
             STAGE_LOCAL="true",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get("/api/auth/configuration?page=register")
+            self.assertEqual(response.status_code, 200)
+            response = self.client.get("/api/auth/configuration?page=login")
             self.assertEqual(response.status_code, 200)
 
     def test_200_prod_smtp_setup(self):
@@ -358,7 +364,7 @@ class CheckRegistrationSetupTestCase(CustomOAuthTestCase):
             EMAIL_PORT="test",
             DRF_RECAPTCHA_SECRET_KEY="recaptchakey",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get("/api/auth/configuration?page=register")
             self.assertEqual(response.status_code, 200)
 
     def test_200_prod_ses_setup(self):
@@ -371,12 +377,12 @@ class CheckRegistrationSetupTestCase(CustomOAuthTestCase):
             AWS_SECRET_ACCESS_KEY="test",
             DRF_RECAPTCHA_SECRET_KEY="recaptchakey",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get("/api/auth/configuration?page=register")
             self.assertEqual(response.status_code, 200)
 
     def test_501_local_setup(self):
         with self.settings(DEFAULT_FROM_EMAIL="", DEFAULT_EMAIL="", STAGE_LOCAL="true"):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get("/api/auth/configuration?page=register")
             self.assertEqual(response.status_code, 501)
 
     def test_501_prod_smtp_setup(self):
@@ -390,7 +396,7 @@ class CheckRegistrationSetupTestCase(CustomOAuthTestCase):
             EMAIL_PORT="",
             DRF_RECAPTCHA_SECRET_KEY="fake",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get("/api/auth/configuration?page=register")
             self.assertEqual(response.status_code, 501)
 
     def test_501_prod_ses_setup(self):
@@ -403,5 +409,15 @@ class CheckRegistrationSetupTestCase(CustomOAuthTestCase):
             AWS_SECRET_ACCESS_KEY="",
             DRF_RECAPTCHA_SECRET_KEY="fake",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get("/api/auth/configuration?page=register")
+            self.assertEqual(response.status_code, 501)
+
+    def test_501_prod_recaptcha(self):
+        with self.settings(
+            STAGE_PRODUCTION="true",
+            DRF_RECAPTCHA_SECRET_KEY="fake",
+        ):
+            response = self.client.get("/api/auth/configuration?page=register")
+            self.assertEqual(response.status_code, 501)
+            response = self.client.get("/api/auth/configuration?page=login")
             self.assertEqual(response.status_code, 501)

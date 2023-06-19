@@ -6,7 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import {
   InviteOnlyAlert,
   AfterRegistrationModalAlert,
-  RegistrationSetUpModalAlert,
+  ConfigurationModalAlert,
 } from "../../../../src/components/auth/utils/registration-alert";
 
 describe("registration-alert", () => {
@@ -45,18 +45,24 @@ describe("registration-alert", () => {
     });
   });
 
-  test("RegistrationSetUpModalAlert component", async () => {
+  test("ConfigurationModalAlert component", async () => {
     const user = userEvent.setup();
 
     render(
       <BrowserRouter>
-        <RegistrationSetUpModalAlert isOpen setIsOpen={jest.fn()} />
+        <ConfigurationModalAlert
+          isOpen
+          setIsOpen={jest.fn()}
+          title="The Registration Feature has not been configured!"
+        />
       </BrowserRouter>
     );
 
-    const elementText = screen.getByText("Error");
+    const elementText = screen.getByText("Warning");
     expect(elementText).toBeInTheDocument();
-    const elementAlertText = screen.getByText("Wrong registration setup!");
+    const elementAlertText = screen.getByText(
+      "The Registration Feature has not been configured!"
+    );
     expect(elementAlertText).toBeInTheDocument();
     const buttonElement = screen.getByRole("button");
     expect(buttonElement).toBeInTheDocument();

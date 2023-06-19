@@ -27,11 +27,13 @@ from rest_framework.views import APIView
 
 from certego_saas.ext.mixins import RecaptchaV2Mixin
 from certego_saas.ext.throttling import POSTUserRateThrottle
+from intel_owl.enums import FrontendPage
 from intel_owl.settings import AUTH_USER_MODEL
 
 from .oauth import oauth
-from .serializers import (  # LoginSerializer,
+from .serializers import (
     EmailVerificationSerializer,
+    LoginSerializer,
     RegistrationSerializer,
 )
 
@@ -81,7 +83,13 @@ class ResendVerificationView(
     throttle_classes: List = [POSTUserRateThrottle]
 
 
-class LoginView(durin_views.LoginView):
+class LoginView(durin_views.LoginView, RecaptchaV2Mixin):
+    @staticmethod
+    def validate_and_return_user(request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data["user"]
+
     @staticmethod
     def get_client_obj(request) -> Client:
         user_agent = get_user_agent(request)
@@ -90,6 +98,11 @@ class LoginView(durin_views.LoginView):
         return client
 
     def post(self, request, *args, **kwargs):
+        try:
+            self.get_serializer()  # for RecaptchaV2Mixin
+        except AssertionError:
+            # it will raise this bcz `serializer_class` is not defined
+            pass
         response = super().post(request, *args, **kwargs)
         uname = request.user.username
         logger.info(f"LoginView: received request from '{uname}'.")
@@ -224,39 +237,43 @@ class GoogleLoginCallbackView(LoginView):
 
 @api_view(["get"])
 @permission_classes([AllowAny])
-def check_registration_setup(request):
-    logger.info(f"Requested checking registration setup from {request.user}.")
+def checkConfiguration(request):
+    logger.info(f"Requested checking configuration from {request.user}.")
+    page = request.query_params.get("page")
     errors = {}
 
-    # email setup
-    if not settings.DEFAULT_FROM_EMAIL:
-        errors["DEFAULT_FROM_EMAIL"] = "required"
-    if not settings.DEFAULT_EMAIL:
-        errors["DEFAULT_EMAIL"] = "required"
+    if page == FrontendPage.REGISTER.value:
+        # email setup
+        if not settings.DEFAULT_FROM_EMAIL:
+            errors["DEFAULT_FROM_EMAIL"] = "required"
+        if not settings.DEFAULT_EMAIL:
+            errors["DEFAULT_EMAIL"] = "required"
+
+        # if you are in production environment
+        if settings.STAGE_PRODUCTION:
+            # SES backend
+            if settings.AWS_SES:
+                if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
+                    errors["AWS SES backend"] = "configuration required"
+            else:
+                # SMTP backend
+                required_variables = [
+                    settings.EMAIL_HOST,
+                    settings.EMAIL_HOST_USER,
+                    settings.EMAIL_HOST_PASSWORD,
+                    settings.EMAIL_PORT,
+                ]
+                for variable in required_variables:
+                    if not variable:
+                        errors["SMTP backend"] = "configuration required"
 
     # if you are in production environment
     if settings.STAGE_PRODUCTION:
-        # SES backend
-        if settings.AWS_SES:
-            if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
-                errors["AWS SES backend"] = "configuration required"
-        else:
-            # SMTP backend
-            required_variables = [
-                settings.EMAIL_HOST,
-                settings.EMAIL_HOST_USER,
-                settings.EMAIL_HOST_PASSWORD,
-                settings.EMAIL_PORT,
-            ]
-            for variable in required_variables:
-                if not variable:
-                    errors["SMTP backend"] = "configuration required"
-
         # recaptcha key
         if settings.DRF_RECAPTCHA_SECRET_KEY == "fake":
             errors["RECAPTCHA_SECRET_KEY"] = "required"
 
-    logger.info(f"Registration setup errors: {errors}")
+    logger.info(f"Configuration errors: {errors}")
     if errors:
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
     return Response(status=status.HTTP_200_OK)

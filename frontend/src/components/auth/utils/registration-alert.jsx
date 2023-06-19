@@ -81,8 +81,8 @@ export function AfterRegistrationModalAlert(props) {
   );
 }
 
-export function RegistrationSetUpModalAlert(props) {
-  const { isOpen, setIsOpen } = props;
+export function ConfigurationModalAlert(props) {
+  const { isOpen, setIsOpen, title } = props;
   const navigate = useNavigate();
 
   // callbacks
@@ -100,24 +100,23 @@ export function RegistrationSetUpModalAlert(props) {
       isOpen={isOpen}
       keyboard={false}
       backdrop="static"
-      labelledBy="Registration setup modal"
+      labelledBy="Configuration modal"
     >
-      <ModalHeader toggle={toggle}>Error</ModalHeader>
+      <ModalHeader toggle={toggle}>Warning</ModalHeader>
       <ModalBody className="px-5">
         <>
           <section>
-            <Alert color="danger" className="text-center">
-              <h3>Wrong registration setup!</h3>
+            <Alert color="warning" className="text-center">
+              <h3>{title}</h3>
             </Alert>
           </section>
           <section className="mt-4">
             <p>
-              Please check the{" "}
+              If you are an admin please check the{" "}
               <a href={INTELOWL_DOCS_URL} target="_blank" rel="noreferrer">
                 documentation
               </a>{" "}
-              and verify that you have correctly configured all the required
-              variables.
+              and correctly configure all the required variables.
             </p>
           </section>
         </>
@@ -131,7 +130,8 @@ AfterRegistrationModalAlert.propTypes = {
   setIsOpen: PropTypes.func.isRequired,
 };
 
-RegistrationSetUpModalAlert.propTypes = {
+ConfigurationModalAlert.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   setIsOpen: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
 };

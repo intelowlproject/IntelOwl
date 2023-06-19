@@ -60,7 +60,7 @@ describe("Login component", () => {
       // check request has been performed
       expect(axios.post).toHaveBeenCalledWith(
         `${AUTH_BASE_URI}/login`,
-        { password: "dummyPwd1", username: "test_user" },
+        { password: "dummyPwd1", username: "test_user", recaptcha: "noKey" },
         { certegoUIenableProgressBar: false }
       );
     });

@@ -122,6 +122,10 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(JobInfoCardSection).getByText("dns.google.com")
     ).toBeInTheDocument();
+    const JobInfoCardDropDown = within(JobInfoCardSection).getByRole("button", {
+      name: "",
+    });
+    expect(JobInfoCardDropDown.id).toBe("JobInfoCardDropDown");
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS")

@@ -27,7 +27,6 @@ from rest_framework.views import APIView
 
 from certego_saas.ext.mixins import RecaptchaV2Mixin
 from certego_saas.ext.throttling import POSTUserRateThrottle
-from intel_owl.enums import FrontendPage
 from intel_owl.settings import AUTH_USER_MODEL
 
 from .oauth import oauth
@@ -240,9 +239,10 @@ class GoogleLoginCallbackView(LoginView):
 def checkConfiguration(request):
     logger.info(f"Requested checking configuration from {request.user}.")
     page = request.query_params.get("page")
+    register_uri = reverse("auth_register")
     errors = {}
 
-    if page == FrontendPage.REGISTER.value:
+    if page == register_uri.split("/")[-1]:
         # email setup
         if not settings.DEFAULT_FROM_EMAIL:
             errors["DEFAULT_FROM_EMAIL"] = "required"

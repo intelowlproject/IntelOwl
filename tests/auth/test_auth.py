@@ -342,6 +342,9 @@ class TestUserAuth(CustomOAuthTestCase):
 
 
 class CheckConfigurationTestCase(CustomOAuthTestCase):
+    def setUp(self):
+        self.assertEqual(reverse("auth_register"), "/api/auth/register")
+
     def test_200_local_setup(self):
         with self.settings(
             DEFAULT_FROM_EMAIL="fake@email.it",

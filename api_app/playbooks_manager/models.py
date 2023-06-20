@@ -1,20 +1,18 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 from django.db import models
-from django.db.models import F, Func, OuterRef, Subquery, Value
 
 from api_app.analyzers_manager.constants import AllTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.fields import ChoiceArrayField
-from api_app.models import Job, default_runtime
-from api_app.playbooks_manager.manager import PlaybookConfigManager
+from api_app.models import default_runtime
+from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
-from certego_saas.apps.user.models import User
 
 
 class PlaybookConfig(models.Model):
-    objects = PlaybookConfigManager()
+    objects = PlaybookConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,
@@ -44,4 +42,3 @@ class PlaybookConfig(models.Model):
 
     class Meta:
         ordering = ["name", "disabled"]
-

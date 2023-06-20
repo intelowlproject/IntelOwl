@@ -21,7 +21,7 @@ django-rest-email-auth==4.0.0
 
 uWSGI==2.0.20
 uwsgitop==0.11
-whitenoise==6.4.0
+whitenoise==6.5.0
 
 # infra
 boto3==1.26.143

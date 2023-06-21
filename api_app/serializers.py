@@ -147,20 +147,14 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def set_visualizers_to_execute(
         self,
-        analyzers_to_execute: List[AnalyzerConfig],
-        connectors_to_execute: List[ConnectorConfig],
+        playbook_to_execute: PlaybookConfig,
     ) -> List[VisualizerConfig]:
         visualizers_to_execute = []
 
-        for visualizer in VisualizerConfig.objects.all():
+        for visualizer in VisualizerConfig.objects.filter(playbooks=playbook_to_execute):
             visualizer: VisualizerConfig
             if (
                 visualizer.is_runnable(self.context["request"].user)
-                # subsets
-                and set(visualizer.analyzers.all().values_list("pk", flat=True))
-                <= {analyzer.pk for analyzer in analyzers_to_execute}
-                and set(visualizer.connectors.all().values_list("pk", flat=True))
-                <= {connector.pk for connector in connectors_to_execute}
             ):
                 logger.info(f"Going to use {visualizer.name}")
                 visualizers_to_execute.append(visualizer)

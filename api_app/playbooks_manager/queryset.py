@@ -13,7 +13,8 @@ class PlaybookConfigQuerySet(models.QuerySet):
     @staticmethod
     def _subquery_user(user: User) -> Subquery:
         return Subquery(
-            Job.objects.filter(
+            Job.objects.prefetch_related("user")
+            .filter(
                 user__pk=user.pk,
                 playbook_to_execute=OuterRef("pk"),
                 finished_analysis_time__gte=now() - datetime.timedelta(days=30),
@@ -26,7 +27,8 @@ class PlaybookConfigQuerySet(models.QuerySet):
     def _subquery_org(user: User) -> Union[Subquery, Value]:
         if user.has_membership():
             return Subquery(
-                Job.objects.filter(
+                Job.objects.prefetch_related("user")
+                .filter(
                     user__membership__organization__pk=user.membership.organization.pk,
                     playbook_to_execute=OuterRef("pk"),
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
@@ -41,7 +43,8 @@ class PlaybookConfigQuerySet(models.QuerySet):
     def _subquery_other(user: User) -> Subquery:
         if user.has_membership():
             return Subquery(
-                Job.objects.filter(
+                Job.objects.prefetch_related("user")
+                .filter(
                     playbook_to_execute=OuterRef("pk"),
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
                 )
@@ -52,7 +55,8 @@ class PlaybookConfigQuerySet(models.QuerySet):
                 .values("count")
             )
         return Subquery(
-            Job.objects.filter(playbook_to_execute=OuterRef("pk"))
+            Job.objects.prefetch_related("user")
+            .filter(playbook_to_execute=OuterRef("pk"))
             .exclude(user__pk=user.pk)
             .annotate(count=Func(F("pk"), function="Count"))
             .values("count")

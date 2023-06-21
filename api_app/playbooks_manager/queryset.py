@@ -64,7 +64,8 @@ class PlaybookConfigQuerySet(models.QuerySet):
         OTHER_WEIGHT_MULTIPLICATIVE = 1
 
         return (
-            self.prefetch_related("executed_in_jobs").annotate(
+            self.prefetch_related("executed_in_jobs")
+            .annotate(
                 user_weight=self._subquery_user(user),
                 org_weight=self._subquery_org(user),
                 other_weight=self._subquery_other(user),

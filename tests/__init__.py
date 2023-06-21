@@ -22,7 +22,6 @@ def get_logger() -> logging.Logger:
 
 
 class CustomTestCase(TestCase):
-
     def setUp(self) -> None:
         settings.DEBUG = True
 

@@ -23,6 +23,7 @@ def get_logger() -> logging.Logger:
 
 class CustomTestCase(TestCase):
     def setUp(self) -> None:
+        super().setUp()
         settings.DEBUG = True
 
     @classmethod

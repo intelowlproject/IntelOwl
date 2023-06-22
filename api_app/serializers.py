@@ -139,7 +139,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             attrs["connectors_requested"], attrs
         )
         attrs["visualizers_to_execute"] = list(
-            self.set_visualizers_to_execute(attrs["playbook_to_execute"])
+            self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
         )
         attrs["warnings"] = self.filter_warnings
 

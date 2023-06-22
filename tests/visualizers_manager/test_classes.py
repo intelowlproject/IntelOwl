@@ -266,10 +266,8 @@ class VisualizerTestCase(CustomTestCase):
             status="reported_without_fails",
         )
         vc = VisualizerConfig.objects.create(
-            name="test", python_module="yara.Yara", description="test"
+            name="test", python_module="yara.Yara", description="test", playbooks=pc
         )
-        vc.playbooks = pc
-        vc.save()
         ar = AnalyzerReport.objects.create(
             config=pc.analyzers.first(), job=job, task_id=uuid()
         )

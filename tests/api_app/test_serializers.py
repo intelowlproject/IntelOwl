@@ -127,7 +127,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_visualizers_all(self):
         v = VisualizerConfig.objects.get(name="Yara")
         pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
-        v.playbooks.set([pc])
+        v.playbook = pc
+        v.save()
         visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
             self.ajcs, pc
         )
@@ -137,7 +138,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_visualizers_is_runnable(self):
         v = VisualizerConfig.objects.get(name="Yara")
         pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
-        v.playbooks.set([pc])
+        v.playbook = pc
+        v.save()
         self.assertTrue(v.is_runnable(self.user))
         visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
             self.ajcs, pc

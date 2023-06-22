@@ -22,8 +22,12 @@ class VisualizerReport(AbstractReport):
 
 
 class VisualizerConfig(AbstractConfig):
-    playbooks = models.ManyToManyField(
-        PlaybookConfig, related_name="visualizers", blank=False
+    playbook = models.ForeignKey(
+        PlaybookConfig,
+        related_name="visualizers",
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
     )
 
     @classmethod

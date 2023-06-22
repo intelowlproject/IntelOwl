@@ -15,17 +15,8 @@ class VisualizerReportAdminView(AbstractReportAdminView):
 
 @admin.register(VisualizerConfig)
 class VisualizerConfigAdminView(AbstractConfigAdminView):
-    list_display = AbstractConfigAdminView.list_display + (
-        "get_analyzers",
-        "get_connectors",
-    )
+    list_display = AbstractConfigAdminView.list_display + ("playbook",)
     form = VisualizerConfigAdminForm
 
     def _get_plugins(self, qs):  # noqa
         return [elem.name for elem in qs]
-
-    def get_analyzers(self, obj: VisualizerConfig):
-        return self._get_plugins(obj.analyzers.all())
-
-    def get_connectors(self, obj: VisualizerConfig):
-        return self._get_plugins(obj.connectors.all())

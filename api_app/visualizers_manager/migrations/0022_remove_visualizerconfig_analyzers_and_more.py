@@ -7,7 +7,7 @@ def _migrate_dns(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     visualizer = VisualizerConfig.objects.get(name="DNS")
-    visualizer.playbooks.set([PlaybookConfig.objects.get(name="Dns")])
+    visualizer.playbook = PlaybookConfig.objects.get(name="Dns")
     visualizer.full_clean()
     visualizer.save()
 
@@ -34,7 +34,7 @@ def _migrate_yara(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     visualizer = VisualizerConfig.objects.get(name="Yara")
-    visualizer.playbooks.set([PlaybookConfig.objects.get(name="Sample_Static_Analysis")])
+    visualizer.playbook = PlaybookConfig.objects.get(name="Sample_Static_Analysis")
     visualizer.full_clean()
     visualizer.save()
 
@@ -69,8 +69,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='visualizerconfig',
-            name='playbooks',
-            field=models.ManyToManyField(related_name='visualizers', to='playbooks_manager.playbookconfig'),
+            name='playbook',
+            field=models.ForeignKey(blank=False, null=False, on_delete=models.CASCADE, related_name='visualizers', to='playbooks_manager.playbookconfig'),
         ),
         migrations.RunPython(migrate, reverse_migrate),
         migrations.RemoveField(

@@ -359,12 +359,10 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         report.save()
         return report
 
-
-
     def analyzer_reports(self) -> QuerySet:
         from api_app.analyzers_manager.models import AnalyzerReport
 
-        return  AnalyzerReport.objects.filter(job=self._job)
+        return AnalyzerReport.objects.filter(job=self._job)
 
     def connector_reports(self) -> QuerySet:
         from api_app.connectors_manager.models import ConnectorReport

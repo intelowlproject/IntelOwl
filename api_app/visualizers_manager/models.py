@@ -4,8 +4,6 @@
 from django.conf import settings
 from django.db import models
 
-from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException

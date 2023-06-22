@@ -18,11 +18,6 @@ from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 
 
-@patch.multiple(
-    "api_app.visualizers_manager.models.VisualizerConfig",
-    analyzers=None,
-    connectors=None,
-)
 class AbstractConfigTestCase(CustomTestCase):
     def test_abstract(self):
         with self.assertRaises(TypeError):

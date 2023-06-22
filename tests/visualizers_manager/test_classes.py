@@ -4,8 +4,9 @@
 
 from kombu import uuid
 
-from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.models import Job
+from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
@@ -258,7 +259,7 @@ class VisualizerTestCase(CustomTestCase):
             def run(self) -> dict:
                 return {}
 
-        ac = AnalyzerConfig.objects.first()
+        pc = PlaybookConfig.objects.first()
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -267,8 +268,10 @@ class VisualizerTestCase(CustomTestCase):
         vc = VisualizerConfig.objects.create(
             name="test", python_module="yara.Yara", description="test"
         )
-        vc.analyzers.set([ac])
-        ar = AnalyzerReport.objects.create(config=ac, job=job, task_id=uuid())
+        vc.playbooks.set([pc])
+        ar = AnalyzerReport.objects.create(
+            config=pc.analyzers.first(), job=job, task_id=uuid()
+        )
         v = MockUpVisualizer(vc, job.pk, {}, uuid())
         self.assertEqual(list(v.analyzer_reports()), [ar])
         ar.delete()

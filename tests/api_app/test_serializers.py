@@ -126,84 +126,30 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
 
     def test_filter_visualizers_all(self):
         v = VisualizerConfig.objects.get(name="Yara")
-        v.analyzers.set(AnalyzerConfig.objects.none())
-        v.connectors.set(AnalyzerConfig.objects.none())
-        with patch.object(VisualizerConfig.objects, "all") as all_objects:
-            all_objects.return_value = [v]
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, [], []
-            )
-            self.assertCountEqual(visualizers, [v])
+        pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
+        v.playbooks.set([pc])
+        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
+            self.ajcs, pc
+        )
+        self.assertCountEqual(visualizers, [v])
+        pc.delete()
 
     def test_filter_visualizers_is_runnable(self):
         v = VisualizerConfig.objects.get(name="Yara")
-        v.analyzers.set(AnalyzerConfig.objects.none())
-        v.connectors.set(AnalyzerConfig.objects.none())
+        pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
+        v.playbooks.set([pc])
         self.assertTrue(v.is_runnable(self.user))
-        with patch.object(VisualizerConfig.objects, "all") as all_objects:
-            all_objects.return_value = [v]
+        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
+            self.ajcs, pc
+        )
+        self.assertCountEqual(visualizers, [v])
+        with patch.object(VisualizerConfig, "is_runnable") as is_runnable:
+            is_runnable.return_value = False
             visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, [], []
-            )
-            self.assertCountEqual(visualizers, [v])
-            with patch.object(v, "is_runnable") as is_runnable:
-                is_runnable.return_value = False
-                visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                    self.ajcs, [], []
-                )
-                self.assertCountEqual(visualizers, [])
-
-    def test_filter_visualizers_analyzer_subset(self):
-        v = VisualizerConfig.objects.get(name="Yara")
-        v.analyzers.set(AnalyzerConfig.objects.none())
-        v.connectors.set(AnalyzerConfig.objects.none())
-        with patch.object(VisualizerConfig.objects, "all") as all_objects:
-            all_objects.return_value = VisualizerConfig.objects.filter(name="Yara")
-            # equal
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, [], []
-            )
-            self.assertCountEqual(visualizers, [v])
-
-            # bigger
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, [AnalyzerConfig.objects.first()], []
-            )
-            self.assertCountEqual(visualizers, [v])
-
-            # smaller
-            v.analyzers.set(AnalyzerConfig.objects.all())
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, [], []
+                self.ajcs, pc
             )
             self.assertCountEqual(visualizers, [])
-
-    def test_filter_visualizers_connector_subset(self):
-        v = VisualizerConfig.objects.get(name="Yara")
-        v.analyzers.set(AnalyzerConfig.objects.none())
-        v.connectors.set(AnalyzerConfig.objects.none())
-        with patch.object(VisualizerConfig.objects, "all") as all_objects:
-            all_objects.return_value = VisualizerConfig.objects.filter(name="Yara")
-            # equal
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, [], []
-            )
-            self.assertCountEqual(visualizers, [v])
-
-            # bigger
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs,
-                [],
-                [ConnectorConfig.objects.first()],
-            )
-            self.assertCountEqual(visualizers, [v])
-
-            # smaller
-            v.connectors.set(ConnectorConfig.objects.all())
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, [], []
-            )
-            self.assertCountEqual(visualizers, [])
+        pc.delete()
 
     def test_runtime_configuration_empty(self):
         self.ajcs.validate_runtime_configuration({})

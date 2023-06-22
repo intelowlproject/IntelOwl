@@ -151,7 +151,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     ) -> Generator[VisualizerConfig, None, None]:
         if playbook_to_execute:
             for visualizer in VisualizerConfig.objects.filter(
-                playbooks=playbook_to_execute
+                playbook=playbook_to_execute
             ):
                 visualizer: VisualizerConfig
                 if visualizer.is_runnable(self.context["request"].user):

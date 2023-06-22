@@ -3,6 +3,65 @@
 from django.db import migrations, models
 
 
+def _migrate_domain_reputation(apps):
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    vc = VisualizerConfig.objects.get(name="Domain_Reputation")
+    vc.playbook = PlaybookConfig.objects.get(name="Popular_URL_Reputation_Services")
+    vc.full_clean()
+    vc.save()
+
+def _reverse_migrate_domain_reputation(apps):
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    vc = VisualizerConfig.objects.get(name="Domain_Reputation")
+    vc.analyzers.set(
+        [
+            AnalyzerConfig.objects.get(name="ThreatFox"),
+            AnalyzerConfig.objects.get(name="DNS0_EU_Malicious_Detector"),
+            AnalyzerConfig.objects.get(name="Quad9_Malicious_Detector"),
+            AnalyzerConfig.objects.get(name="OTXQuery"),
+            AnalyzerConfig.objects.get(name="Phishtank"),
+            AnalyzerConfig.objects.get(name="CloudFlare_Malicious_Detector"),
+            AnalyzerConfig.objects.get(name="URLhaus"),
+            AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_Observable"),
+            AnalyzerConfig.objects.get(name="PhishingArmy"),
+            AnalyzerConfig.objects.get(name="InQuest_REPdb"),
+            AnalyzerConfig.objects.get(name="GoogleSafebrowsing"),
+        ]
+    )
+    vc.save()
+
+def _migrate_ip_reputation(apps):
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    vc = VisualizerConfig.objects.get(name="IP_Reputation")
+    vc.playbook = PlaybookConfig.objects.get(name="Popular_IP_Reputation_Services")
+    vc.full_clean()
+    vc.save()
+
+def _reverse_migrate_ip_reputation(apps):
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    vc = VisualizerConfig.objects.get(name="IP_Reputation")
+    vc.analyzers.set(
+        [
+            AnalyzerConfig.objects.get(name="TalosReputation"),
+            AnalyzerConfig.objects.get(name="Crowdsec"),
+            AnalyzerConfig.objects.get(name="OTXQuery"),
+            AnalyzerConfig.objects.get(name="TorProject"),
+            AnalyzerConfig.objects.get(name="AbuseIPDB"),
+            AnalyzerConfig.objects.get(name="GreedyBear"),
+            AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_Observable"),
+            AnalyzerConfig.objects.get(name="FireHol_IPList"),
+            AnalyzerConfig.objects.get(name="URLhaus"),
+            AnalyzerConfig.objects.get(name="ThreatFox"),
+            AnalyzerConfig.objects.get(name="InQuest_REPdb"),
+            AnalyzerConfig.objects.get(name="GreyNoiseCommunity"),
+        ]
+    )
+    vc.save()
+
 def _migrate_dns(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
@@ -51,10 +110,15 @@ def _reverse_migrate_yara(apps):
 def migrate(apps, schema_editor):
     _migrate_yara(apps)
     _migrate_dns(apps)
+    _migrate_ip_reputation(apps)
+    _migrate_domain_reputation(apps)
 
 def reverse_migrate(apps, schema_editor):
     _reverse_migrate_yara(apps)
     _reverse_migrate_dns(apps)
+    _reverse_migrate_ip_reputation(apps)
+    _reverse_migrate_domain_reputation(apps)
+
 
 
 class Migration(migrations.Migration):
@@ -70,9 +134,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='visualizerconfig',
             name='playbook',
-            field=models.ForeignKey(blank=False, null=False, on_delete=models.CASCADE, related_name='visualizers', to='playbooks_manager.playbookconfig'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=models.CASCADE, related_name='visualizers', to='playbooks_manager.playbookconfig'),
         ),
         migrations.RunPython(migrate, reverse_migrate),
+        migrations.AlterField(
+            model_name='visualizerconfig',
+            name='playbook',
+            field=models.ForeignKey(blank=False, null=False, on_delete=models.CASCADE, related_name='visualizers',
+                                    to='playbooks_manager.playbookconfig'),
+        ),
         migrations.RemoveField(
             model_name='visualizerconfig',
             name='analyzers',

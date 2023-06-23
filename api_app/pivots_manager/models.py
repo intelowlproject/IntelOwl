@@ -227,7 +227,7 @@ class PivotConfig(AbstractConfig):
         ending_jobs = self._create_jobs(report)
 
         pivots = []
-        logger.info(f"Jobs create from pivot are {ending_jobs}")
+        logger.info(f"Jobs created from pivot are {ending_jobs}")
         try:
             for ending_job in ending_jobs:
                 pivot = Pivot(

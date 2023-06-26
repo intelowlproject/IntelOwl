@@ -7,6 +7,7 @@ import uuid
 from typing import Optional
 
 from celery import group
+from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
@@ -200,86 +201,61 @@ class Job(models.Model):
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)
-        failed_analyzer_reports = self.analyzerreports.filter(
+        failed_analyzers_reports = self.analyzerreports.filter(
             status=AbstractReport.Status.FAILED.value
         ).values_list("pk", flat=True)
-        analyzers_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.analyzers_to_execute.filter(
-                pk__in=failed_analyzer_reports
-            )
-        ]
-        logger.info(f"Analyzer signatures are {analyzers_signatures}")
-        failed_connectors_reports = self.connectorreports.filter(
+        failed_connector_reports = self.connectorreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+        failed_visualizer_reports = self.visualizerreports.filter(
             status=AbstractReport.Status.FAILED.value
         ).values_list("pk", flat=True)
 
-        connectors_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.connectors_to_execute.filter(
-                pk__in=failed_connectors_reports
+        runner = (
+            self._get_signatures(
+                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
             )
-        ]
-        logger.info(f"Connector signatures are {connectors_signatures}")
-        failed_visualizers_reports = self.visualizerreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("pk", flat=True)
-
-        visualizers_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.visualizers_to_execute.filter(
-                pk__in=failed_visualizers_reports
+            | self._get_signatures(
+                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
             )
-        ]
-        logger.info(f"Visualizer signatures are {visualizers_signatures}")
-        return self._execute_signatures(
-            analyzers_signatures, connectors_signatures, visualizers_signatures
+            | self._get_signatures(
+                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
+            )
         )
+        return runner()
 
-    def job_cleanup(self) -> None:
-        logger.info(f"[STARTING] job_cleanup for <-- {self}.")
-        status_to_set = self.Status.RUNNING
+    def set_final_status(self) -> None:
+        logger.info(f"[STARTING] set_final_status for <-- {self}.")
 
-        try:
-            if self.status == self.Status.FAILED:
-                logger.error(
-                    f"[REPORT] {self}, status: failed. " "Do not process the report"
-                )
-            else:
-                stats = self.get_analyzer_reports_stats()
-
-                logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
-
-                if self.analyzers_to_execute.all().count() == stats["all"]:
-                    if stats["running"] > 0 or stats["pending"] > 0:
-                        status_to_set = self.Status.RUNNING
-                    elif stats["success"] == stats["all"]:
-                        status_to_set = self.Status.REPORTED_WITHOUT_FAILS
-                    elif stats["failed"] == stats["all"]:
-                        status_to_set = self.Status.FAILED
-                    elif stats["failed"] >= 1 or stats["killed"] >= 1:
-                        status_to_set = self.Status.REPORTED_WITH_FAILS
-                    elif stats["killed"] == stats["all"]:
-                        status_to_set = self.Status.KILLED
-
-        except Exception as e:
-            logger.exception(f"job_id: {self.pk}, Error: {e}")
-            self.append_error(str(e), save=False)
-
-        finally:
-            if not (self.status == self.Status.FAILED and self.finished_analysis_time):
-                self.finished_analysis_time = get_now()
-                self.process_time = self.calculate_process_time()
-            logger.info(f"{self.__repr__()} setting status to {status_to_set}")
-            self.status = status_to_set
-            self.save(
-                update_fields=[
-                    "status",
-                    "errors",
-                    "finished_analysis_time",
-                    "process_time",
-                ]
+        if self.status == self.Status.FAILED:
+            logger.error(
+                f"[REPORT] {self}, status: failed. " "Do not process the report"
             )
+        else:
+            stats = self._get_config_reports_stats()
+            logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
+
+            if stats["success"] == stats["all"]:
+                self.status = self.Status.REPORTED_WITHOUT_FAILS
+            elif stats["failed"] == stats["all"]:
+                self.status = self.Status.FAILED
+            elif stats["killed"] == stats["all"]:
+                self.status = self.Status.KILLED
+            elif stats["failed"] >= 1 or stats["killed"] >= 1:
+                self.status = self.Status.REPORTED_WITH_FAILS
+
+        if not self.finished_analysis_time:
+            self.finished_analysis_time = get_now()
+            self.process_time = self.calculate_process_time()
+        logger.info(f"{self.__repr__()} setting status to {self.status}")
+        self.save(
+            update_fields=[
+                "status",
+                "errors",
+                "finished_analysis_time",
+                "process_time",
+            ]
+        )
 
     def calculate_process_time(self) -> Optional[float]:
         if not self.finished_analysis_time:
@@ -287,87 +263,94 @@ class Job(models.Model):
         td = self.finished_analysis_time - self.received_request_time
         return round(td.total_seconds(), 2)
 
-    def append_error(self, err_msg: str, save=True):
+    def append_error(self, err_msg: str, save=True) -> None:
         self.errors.append(err_msg)
         if save:
             self.save(update_fields=["errors"])
 
-    def update_status(self, status: str, save=True):
+    def update_status(self, status: str, save=True) -> None:
         self.status = status
         if save:
             self.save(update_fields=["status"])
 
-    def get_analyzer_reports_stats(self) -> dict:
+    def _get_config_reports(self, config: typing.Type[AbstractConfig]) -> QuerySet:
+        return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
+
+    def _get_config_to_execute(self, config: typing.Type[AbstractConfig]) -> QuerySet:
+        return getattr(
+            self, f"{config.__name__.split('Config')[0].lower()}s_to_execute"
+        )
+
+    def _get_single_config_reports_stats(
+        self, config: typing.Type[AbstractConfig]
+    ) -> typing.Dict:
+        reports = self._get_config_reports(config)
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
             for s in AbstractReport.Status.values
         }
-        return self.analyzerreports.aggregate(
+        return reports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
 
-    def get_connector_reports_stats(self) -> dict:
-        aggregators = {
-            s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in AbstractReport.Status.values
-        }
-        return self.connectorreports.aggregate(
-            all=models.Count("status"),
-            **aggregators,
-        )
+    def _get_config_reports_stats(self) -> typing.Dict:
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+        from api_app.visualizers_manager.models import VisualizerConfig
+
+        result = {}
+        for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
+            partial_result = self._get_single_config_reports_stats(config)
+            # merge them
+            result = {
+                k: result.get(k, 0) + partial_result.get(k, 0)
+                for k in set(result) | set(partial_result)
+            }
+        return result
 
     def kill_if_ongoing(self):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+        from api_app.visualizers_manager.models import VisualizerConfig
         from intel_owl.celery import app as celery_app
 
-        statuses_to_filter = [
-            AbstractReport.Status.PENDING,
-            AbstractReport.Status.RUNNING,
-        ]
-        qs = self.analyzerreports.filter(status__in=statuses_to_filter)
-        task_ids_analyzers = list(qs.values_list("task_id", flat=True))
-        qs2 = self.connectorreports.filter(status__in=statuses_to_filter)
+        for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
+            reports = self._get_config_reports(config).filter(
+                status__in=[
+                    AbstractReport.Status.PENDING,
+                    AbstractReport.Status.RUNNING,
+                ]
+            )
 
-        task_ids_connectors = list(qs2.values_list("task_id", flat=True))
-        # kill celery tasks using task ids
-        celery_app.control.revoke(
-            task_ids_analyzers + task_ids_connectors, terminate=True
-        )
+            ids = list(reports.values_list("task_id", flat=True))
+            logger.info(f"We are going to kill tasks {ids}")
+            # kill celery tasks using task ids
+            celery_app.control.revoke(ids, terminate=True)
 
-        # update report statuses
-        qs.update(status=self.Status.KILLED)
+            reports.update(status=self.Status.KILLED)
+
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def execute(self):
-        self.update_status(Job.Status.RUNNING)
-        analyzers_signatures = [
-            plugin.get_signature(self) for plugin in self.analyzers_to_execute.all()
-        ]
-        logger.info(f"Analyzer signatures are {analyzers_signatures}")
+    def _get_signatures(self, queryset: QuerySet) -> Signature:
+        config_class = queryset.model
+        signatures = [plugin.get_signature(self) for plugin in queryset]
+        logger.info(f"{config_class} signatures are {signatures}")
 
-        connectors_signatures = [
-            plugin.get_signature(self) for plugin in self.connectors_to_execute.all()
-        ]
-        logger.info(f"Connector signatures are {connectors_signatures}")
-
-        visualizers_signatures = [
-            plugin.get_signature(self) for plugin in self.visualizers_to_execute.all()
-        ]
-        logger.info(f"Visualizer signatures are {visualizers_signatures}")
-        return self._execute_signatures(
-            analyzers_signatures, connectors_signatures, visualizers_signatures
+        return (
+            config_class.signature_pipeline_running(self)
+            | group(signatures)
+            | config_class.signature_pipeline_completed(self)
         )
 
-    def _execute_signatures(
-        self,
-        analyzers_signatures: typing.List,
-        connectors_signatures: typing.List,
-        visualizers_signatures: typing.List,
-    ):
+    def execute(self):
+        self.update_status(Job.Status.RUNNING)
         runner = (
-            group(analyzers_signatures)
-            | tasks.continue_job_pipeline.signature(
+            self._get_signatures(self.analyzers_to_execute.all())
+            | self._get_signatures(self.connectors_to_execute.all())
+            | self._get_signatures(self.visualizers_to_execute.all())
+            | tasks.job_set_final_status.signature(
                 args=[self.pk],
                 kwargs={},
                 queue=get_queue_name(DEFAULT_QUEUE),
@@ -375,43 +358,20 @@ class Job(models.Model):
                 immutable=True,
                 MessageGroupId=str(uuid.uuid4()),
             )
-            | group(connectors_signatures)
-            | group(visualizers_signatures)
         )
         runner()
 
     def get_config_runtime_configuration(self, config: AbstractConfig) -> typing.Dict:
-        from api_app.analyzers_manager.models import AnalyzerConfig
-        from api_app.connectors_manager.models import ConnectorConfig
-        from api_app.visualizers_manager.models import VisualizerConfig
-
-        if isinstance(config, AnalyzerConfig):
-            key = "analyzers"
-            try:
-                self.analyzers_to_execute.get(name=config.name)
-            except AnalyzerConfig.DoesNotExist:
-                raise TypeError(
-                    f"Analyzer {config.name} is not configured inside job {self.pk}"
-                )
-        elif isinstance(config, ConnectorConfig):
-            key = "connectors"
-            try:
-                self.connectors_to_execute.get(name=config.name)
-            except ConnectorConfig.DoesNotExist:
-                raise TypeError(
-                    f"Connector {config.name} is not configured inside job {self.pk}"
-                )
-        elif isinstance(config, VisualizerConfig):
-            key = "visualizers"
-            try:
-                self.visualizers_to_execute.get(name=config.name)
-            except VisualizerConfig.DoesNotExist:
-                raise TypeError(
-                    f"Visualizer {config.name} is not configured inside job {self.pk}"
-                )
-        else:
-            raise TypeError(f"Config {type(config)} is not supported")
-        return self.runtime_configuration[key].get(config.name, {})
+        try:
+            self._get_config_to_execute(config.__class__).get(name=config.name)
+        except config.DoesNotExist:
+            raise TypeError(
+                f"{config.__class__.__name__} {config.name} "
+                f"is not configured inside job {self.pk}"
+            )
+        return self.runtime_configuration[config.runtime_configuration_key].get(
+            config.name, {}
+        )
 
     @classmethod
     def visible_for_user(cls, user: User):

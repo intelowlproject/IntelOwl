@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.utils.module_loading import import_string
 from django.utils.timezone import now
 
+from api_app.choices import Status
 from intel_owl import secrets
 from intel_owl.celery import DEFAULT_QUEUE, app, get_queue_name
 
@@ -128,14 +129,25 @@ def update_notifications_with_releases():
     )
 
 
-@app.task(name="continue_job_pipeline", soft_time_limit=20)
-def continue_job_pipeline(job_id: int):
-
+@app.task(name="job_set_final_status", soft_time_limit=20)
+def job_set_final_status(job_id: int):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
-    job.job_cleanup()
+    job.set_final_status()
+
+
+@app.task(name="job_set_pipeline_status", soft_time_limit=20)
+def job_set_pipeline_status(job_id: int, status: str):
+    from api_app.models import Job
+
+    job = Job.objects.get(pk=job_id)
+    if status not in Status.running_statuses() + Status.partial_statuses():
+        logger.error(f"Unable to set job status to {status}")
+    else:
+        job.status = status
+        job.save(update_fields=["status"])
 
 
 @app.task(name="job_pipeline", soft_time_limit=100)

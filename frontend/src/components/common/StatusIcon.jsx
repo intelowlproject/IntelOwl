@@ -17,9 +17,15 @@ import { STATUS_COLORMAP } from "../../constants";
 const STATUS_ICON_MAP = {
   pending: MdOutlinePending,
   running: RiLoader2Fill,
+  analyzers_running: RiLoader2Fill,
+  connectors_running: RiLoader2Fill,
+  visualizers_running: RiLoader2Fill,
+  analyzers_completed: RiLoader2Fill,
+  connectors_completed: RiLoader2Fill,
+  visualizers_completed: RiLoader2Fill,
   reported_with_fails: MdWarningAmber,
-  success: MdCheckCircleOutline,
   reported_without_fails: MdCheckCircleOutline,
+  success: MdCheckCircleOutline,
   killed: MdOutlineBlock,
   failed: IoMdCloseCircleOutline,
 };

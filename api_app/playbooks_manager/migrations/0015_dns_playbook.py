@@ -40,7 +40,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0013_remove_old_playbook"),
+        ("playbooks_manager", "0014_remove_old_playbook"),
     ]
 
     operations = [

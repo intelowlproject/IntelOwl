@@ -94,6 +94,10 @@ class Job(models.Model):
                     "status",
                 ]
             ),
+            models.Index(
+                fields=["playbook_to_execute", "finished_analysis_time", "user"],
+                name="PlaybookConfigOrdering",
+            ),
         ]
 
     # constants

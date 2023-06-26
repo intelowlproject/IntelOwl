@@ -21,7 +21,7 @@ django-rest-email-auth==4.0.0
 
 uWSGI==2.0.20
 uwsgitop==0.11
-whitenoise==6.4.0
+whitenoise==6.5.0
 
 # infra
 boto3==1.26.143
@@ -29,7 +29,7 @@ celery[sqs]==5.3.0
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
-flower==1.2.0
+flower==2.0.0
 
 # plugins
 GitPython==3.1.30
@@ -38,7 +38,7 @@ dnspython==2.3.0
 dnstwist[full]==20230509
 google>=3.0.0
 google-cloud-webrisk==1.12.0
-intezer-sdk==1.16.1
+intezer-sdk==1.17.2
 lief==0.13.1
 maxminddb==2.3.0
 mwdblib==4.4.0
@@ -48,7 +48,7 @@ peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2023.2.7
 Pillow==9.5.0
-pycti==5.7.6
+pycti==5.8.2
 pydeep==0.4
 pyelftools==0.29
 PyExifTool==0.5.0

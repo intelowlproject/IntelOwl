@@ -17,6 +17,3 @@ class VisualizerReportAdminView(AbstractReportAdminView):
 class VisualizerConfigAdminView(AbstractConfigAdminView):
     list_display = AbstractConfigAdminView.list_display + ("playbook",)
     form = VisualizerConfigAdminForm
-
-    def _get_plugins(self, qs):  # noqa
-        return [elem.name for elem in qs]

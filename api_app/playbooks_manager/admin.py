@@ -16,6 +16,7 @@ class PlaybookConfigAdminView(JsonViewerAdminView):
         "disabled",
         "get_analyzers",
         "get_connectors",
+        "get_visualizers",
         "runtime_configuration",
     )
     # allow to clone the object
@@ -29,3 +30,6 @@ class PlaybookConfigAdminView(JsonViewerAdminView):
 
     def get_connectors(self, obj: PlaybookConfig):
         return self._get_plugins(obj.connectors.all())
+
+    def get_visualizers(self, obj: PlaybookConfig):
+        return self._get_plugins(obj.visualizers.all())

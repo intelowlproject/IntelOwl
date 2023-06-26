@@ -47,15 +47,10 @@ class Yara(Visualizer):
         )
 
     def run(self) -> List[Dict]:
-        yara_reports = self.analyzer_reports()
-        yara_num_matches = sum(
-            len(matches)
-            for yara_report in yara_reports
-            for matches in yara_report.report.values()
-        )
+        yara_report = self.analyzer_reports().get(config__name="Yara")
+        yara_num_matches = sum(len(matches) for matches in yara_report.report.values())
         signatures = [
             match["match"]
-            for yara_report in yara_reports
             for matches in yara_report.report.values()
             for match in matches
             if match.get("match", None)

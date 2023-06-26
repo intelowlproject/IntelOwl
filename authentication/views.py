@@ -249,26 +249,24 @@ def checkConfiguration(request):
         if not settings.DEFAULT_EMAIL:
             errors["DEFAULT_EMAIL"] = "required"
 
-        # if you are in production environment
-        if settings.STAGE_PRODUCTION:
-            # SES backend
-            if settings.AWS_SES:
-                if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
-                    errors["AWS SES backend"] = "configuration required"
-            else:
-                # SMTP backend
-                required_variables = [
-                    settings.EMAIL_HOST,
-                    settings.EMAIL_HOST_USER,
-                    settings.EMAIL_HOST_PASSWORD,
-                    settings.EMAIL_PORT,
-                ]
-                for variable in required_variables:
-                    if not variable:
-                        errors["SMTP backend"] = "configuration required"
+        # SES backend
+        if settings.AWS_SES:
+            if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
+                errors["AWS SES backend"] = "configuration required"
+        else:
+            # SMTP backend
+            required_variables = [
+                settings.EMAIL_HOST,
+                settings.EMAIL_HOST_USER,
+                settings.EMAIL_HOST_PASSWORD,
+                settings.EMAIL_PORT,
+            ]
+            for variable in required_variables:
+                if not variable:
+                    errors["SMTP backend"] = "configuration required"
 
     # if you are in production environment
-    if settings.STAGE_PRODUCTION:
+    if settings.USE_RECAPTCHA:
         # recaptcha key
         if settings.DRF_RECAPTCHA_SECRET_KEY == "fake":
             errors["RECAPTCHA_SECRET_KEY"] = "required"

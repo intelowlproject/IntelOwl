@@ -419,8 +419,7 @@ You can leverage it as a framework to create _custom aggregated and simplified v
 Visualizers are designed to run after the analyzers and the connectors.
 The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
 
-Each visualizer must define a set of analyzers and connectors as requirement:
-in fact the visualizers can not be chosen at the time of Job creation (once you click into the `Scan` button) but every single visualizer that it is configured and that has its requirements satisfied will be automatically selected and executed.
+Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
 
 This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
 To simplify the process, take example from the pre-built analyzers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
@@ -469,6 +468,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Sample_Static_Analysis`: A playbook containing all analyzers that perform static analysis on files.
 - `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
 - `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
+- `Dns`: A playbook containing all dns providers
 
 #### Playbooks customization
 

@@ -356,32 +356,12 @@ const visualizerTableColumns = [
     minWidth: 300,
   },
   {
-    Header: "Analyzers required",
-    id: "analyzers_required",
-    accessor: "analyzers",
-    Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
-    ),
-    disableSortBy: true,
+    Header: "Playbook connected to",
+    id: "playbook",
+    accessor: "playbook",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     Filter: SelectColumnFilter,
-  },
-  {
-    Header: "Connectors required",
-    id: "connectors_required",
-    accessor: "connectors",
-    Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
-    ),
-    disableSortBy: true,
-    Filter: SelectColumnFilter,
+    maxWidth: 115,
   },
 ];
 export {

@@ -369,7 +369,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
         return ConnectorReport.objects.filter(job=self._job)
 
-      
+
 # IMPORTANT! this function allows to handle the errors in the components render.
 # You must define a function that returns a Visualizable then
 # use this function as a decorator. Ex:

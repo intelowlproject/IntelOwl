@@ -7,6 +7,7 @@ import uuid
 from typing import Optional
 
 from celery import group
+from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
@@ -196,41 +197,28 @@ class Job(models.Model):
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)
-        failed_analyzer_reports = self.analyzerreports.filter(
+        failed_analyzers_reports = self.analyzerreports.filter(
             status=AbstractReport.Status.FAILED.value
         ).values_list("pk", flat=True)
-        analyzers_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.analyzers_to_execute.filter(
-                pk__in=failed_analyzer_reports
-            )
-        ]
-        logger.info(f"Analyzer signatures are {analyzers_signatures}")
-        failed_connectors_reports = self.connectorreports.filter(
+        failed_connector_reports = self.connectorreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+        failed_visualizer_reports = self.visualizerreports.filter(
             status=AbstractReport.Status.FAILED.value
         ).values_list("pk", flat=True)
 
-        connectors_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.connectors_to_execute.filter(
-                pk__in=failed_connectors_reports
+        runner = (
+            self._get_signatures(
+                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
             )
-        ]
-        logger.info(f"Connector signatures are {connectors_signatures}")
-        failed_visualizers_reports = self.visualizerreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("pk", flat=True)
-
-        visualizers_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.visualizers_to_execute.filter(
-                pk__in=failed_visualizers_reports
+            | self._get_signatures(
+                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
             )
-        ]
-        logger.info(f"Visualizer signatures are {visualizers_signatures}")
-        return self._execute_signatures(
-            analyzers_signatures, connectors_signatures, visualizers_signatures
+            | self._get_signatures(
+                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
+            )
         )
+        return runner()
 
     def set_final_status(self) -> None:
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
@@ -332,6 +320,7 @@ class Job(models.Model):
             )
 
             ids = list(reports.values_list("task_id", flat=True))
+            logger.info(f"We are going to kill tasks {ids}")
             # kill celery tasks using task ids
             celery_app.control.revoke(ids, terminate=True)
 
@@ -340,60 +329,23 @@ class Job(models.Model):
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def execute(self):
-        self.update_status(Job.Status.RUNNING)
-        analyzers_signatures = [
-            plugin.get_signature(self) for plugin in self.analyzers_to_execute.all()
-        ]
-        logger.info(f"Analyzer signatures are {analyzers_signatures}")
+    def _get_signatures(self, queryset: QuerySet) -> Signature:
+        config_class = queryset.model
+        signatures = [plugin.get_signature(self) for plugin in queryset]
+        logger.info(f"{config_class} signatures are {signatures}")
 
-        connectors_signatures = [
-            plugin.get_signature(self) for plugin in self.connectors_to_execute.all()
-        ]
-        logger.info(f"Connector signatures are {connectors_signatures}")
-
-        visualizers_signatures = [
-            plugin.get_signature(self) for plugin in self.visualizers_to_execute.all()
-        ]
-        logger.info(f"Visualizer signatures are {visualizers_signatures}")
-        return self._execute_signatures(
-            analyzers_signatures, connectors_signatures, visualizers_signatures
+        return (
+            config_class.signature_pipeline_running(self)
+            | group(signatures)
+            | config_class.signature_pipeline_completed(self)
         )
 
-    def _execute_signatures(
-        self,
-        analyzers_signatures: typing.List,
-        connectors_signatures: typing.List,
-        visualizers_signatures: typing.List,
-    ):
+    def execute(self):
+        self.update_status(Job.Status.RUNNING)
         runner = (
-            group(analyzers_signatures)
-            | tasks.job_set_pipeline_status.signature(
-                args=[self.pk, self.Status.ANALYZERS_COMPLETE.value],
-                kwargs={},
-                queue=get_queue_name(DEFAULT_QUEUE),
-                soft_time_limit=10,
-                immutable=True,
-                MessageGroupId=str(uuid.uuid4()),
-            )
-            | group(connectors_signatures)
-            | tasks.job_set_pipeline_status.signature(
-                args=[self.pk, self.Status.CONNECTORS_COMPLETE.value],
-                kwargs={},
-                queue=get_queue_name(DEFAULT_QUEUE),
-                soft_time_limit=10,
-                immutable=True,
-                MessageGroupId=str(uuid.uuid4()),
-            )
-            | group(visualizers_signatures)
-            | tasks.job_set_pipeline_status.signature(
-                args=[self.pk, self.Status.VISUALIZERS_COMPLETE.value],
-                kwargs={},
-                queue=get_queue_name(DEFAULT_QUEUE),
-                soft_time_limit=10,
-                immutable=True,
-                MessageGroupId=str(uuid.uuid4()),
-            )
+            self._get_signatures(self.analyzers_to_execute.all())
+            | self._get_signatures(self.connectors_to_execute.all())
+            | self._get_signatures(self.visualizers_to_execute.all())
             | tasks.job_set_final_status.signature(
                 args=[self.pk],
                 kwargs={},

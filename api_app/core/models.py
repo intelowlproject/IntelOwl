@@ -1,8 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+import uuid
 from typing import Any, Dict, Type
 
+from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
@@ -11,7 +13,6 @@ from django.db.models import Manager, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
-from kombu import uuid
 
 from api_app.core.choices import ParamTypes, Status
 from api_app.validators import plugin_name_validator, validate_config
@@ -259,6 +260,45 @@ class AbstractConfig(models.Model):
 
         raise NotImplementedError()
 
+    @classmethod
+    @property
+    def stage_status_complete(cls) -> str:
+        from api_app.choices import Status
+
+        name_plugin = cls.__name__.split("Config")[0]
+
+        return getattr(Status, f"{name_plugin.upper()}S_COMPLETED").value
+
+    @classmethod
+    @property
+    def stage_status_running(cls) -> str:
+        from api_app.choices import Status
+
+        name_plugin = cls.__name__.split("Config")[0]
+
+        return getattr(Status, f"{name_plugin.upper()}S_RUNNING").value
+
+    @classmethod
+    def signature_pipeline_running(cls, job) -> Signature:
+        return cls._signature_pipeline_status(job, cls.stage_status_running)
+
+    @classmethod
+    def signature_pipeline_completed(cls, job) -> Signature:
+        return cls._signature_pipeline_status(job, cls.stage_status_complete)
+
+    @classmethod
+    def _signature_pipeline_status(cls, job, status: str) -> Signature:
+        from intel_owl import tasks
+
+        return tasks.job_set_pipeline_status.signature(
+            args=[job.pk, status],
+            kwargs={},
+            queue=get_queue_name(DEFAULT_QUEUE),
+            soft_time_limit=10,
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
+
     @property
     def python_base_path(self) -> str:
         raise NotImplementedError()
@@ -370,7 +410,7 @@ class AbstractConfig(models.Model):
         job: Job
         if self.is_runnable(job.user):
             # gen new task_id
-            task_id = uuid()
+            task_id = str(uuid.uuid4())
             args = [
                 job.pk,
                 self.python_complete_path,

@@ -143,7 +143,7 @@ def job_set_pipeline_status(job_id: int, status: str):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
-    if status not in Status.pipeline_statuses():
+    if status not in Status.running_statuses() + Status.partial_statuses():
         logger.error(f"Unable to set job status to {status}")
     else:
         job.status = status

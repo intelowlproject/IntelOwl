@@ -7,6 +7,8 @@ permissions: read-all
 name: "CodeQL"
 
 on:
+  push:
+    branches: [master, develop]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master, develop]
@@ -15,6 +17,14 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
 
     strategy:
       fail-fast: false

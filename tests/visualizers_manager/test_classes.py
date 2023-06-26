@@ -16,6 +16,7 @@ from api_app.visualizers_manager.classes import (
     VisualizableTitle,
     VisualizableVerticalList,
     Visualizer,
+    visualizable_error_handler_with_params,
 )
 from api_app.visualizers_manager.enums import VisualizableColor, VisualizableSize
 from api_app.visualizers_manager.models import VisualizerConfig
@@ -320,3 +321,70 @@ class VisualizerTestCase(CustomTestCase):
                     signal.alarm(0)
 
         job.delete()
+
+
+class ErrorHandlerTestCase(CustomTestCase):
+    class TestClass:
+        @property
+        @visualizable_error_handler_with_params()
+        def no_error(self):
+            return VisualizableBool(
+                value="test", disable=False, color=VisualizableColor.SUCCESS
+            )
+
+        @property
+        @visualizable_error_handler_with_params("error component", VisualizableSize.S_2)
+        def error(self):
+            raise Exception("this is an exception to test the error")
+
+    def test_without_error(self):
+        result = self.TestClass().no_error
+        self.assertEqual(
+            result.to_dict(),
+            {
+                "size": "auto",
+                "disable": False,
+                "value": "test",
+                "color": "success",
+                "link": "",
+                "icon": "",
+                "italic": False,
+                "type": "bool",
+            },
+        )
+
+    def test_with_error(self):
+        result = self.TestClass().error
+        self.assertEqual(
+            result.to_dict(),
+            {
+                "size": "2",
+                "alignment": "center",
+                "disable": True,
+                "title": {
+                    "size": "auto",
+                    "alignment": "center",
+                    "disable": True,
+                    "value": "error component",
+                    "color": "",
+                    "link": "",
+                    "icon": "",
+                    "bold": False,
+                    "italic": False,
+                    "type": "base",
+                },
+                "value": {
+                    "size": "auto",
+                    "alignment": "center",
+                    "disable": True,
+                    "value": "error",
+                    "color": "danger",
+                    "link": "",
+                    "icon": "",
+                    "bold": False,
+                    "italic": False,
+                    "type": "base",
+                },
+                "type": "title",
+            },
+        )

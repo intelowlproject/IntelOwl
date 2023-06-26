@@ -6,9 +6,7 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
-    pc = PlaybookConfig.objects.create(
-        type=["domain"], name="DNS", description="Query the most popular DNS services"
-    )
+    pc = PlaybookConfig.objects.create(type=["domain"], name="Dns", description="Retrieve information from DNS about the domain")
     pc.analyzers.set(
         [
             "Classic_DNS",

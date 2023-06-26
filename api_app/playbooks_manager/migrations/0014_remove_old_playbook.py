@@ -39,7 +39,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0012_ip_reputation_playbook"),
+        ("playbooks_manager", "0013_alter_playbookconfig_options"),
     ]
 
     operations = [

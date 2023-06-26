@@ -5,7 +5,6 @@ from django.db.models import Q
 
 from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.core.choices import ReportStatus
-from api_app.core.choices import Status
 from api_app.visualizers_manager.classes import (
     Visualizer,
     visualizable_error_handler_with_params,

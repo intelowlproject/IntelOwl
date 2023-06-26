@@ -257,7 +257,7 @@ export function JobInfoCard({ job }) {
               <ArrowToggleIcon isExpanded={isOpen} />
             </Button>
             <UncontrolledTooltip placement="left" target="JobInfoCardDropDown">
-              Show Job Info
+              Toggle Job Metadata
             </UncontrolledTooltip>
           </Col>
         </Row>

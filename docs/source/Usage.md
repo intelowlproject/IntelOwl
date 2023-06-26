@@ -10,8 +10,8 @@ This page includes the most important things to know and understand when using I
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
-  - [Visualizers](#visualizers)
   - [Playbooks](#playbooks)
+  - [Visualizers](#visualizers)
 - [TLP Support](#tlp-support)
 
 ## Client
@@ -411,42 +411,6 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
   - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
   - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
-### Visualizers
-
-With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
-You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
-
-Visualizers are designed to run after the analyzers and the connectors.
-The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
-
-Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
-
-This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
-To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
-
-##### List of pre-built Visualizers
-
-- `DNS`: displays the aggregation of every DNS analyzer report
-- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
-- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
-- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
-
-
-#### Visualizers customization
-You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
-
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
-- `analyzers`: List of analyzers that must be executed
-- `connectors`: List of connectors that must be executed
-
 ### Playbooks
 
 Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
@@ -487,6 +451,42 @@ Another chance to create a new playbook is to leverage the "Save as Playbook" bu
 In this way, after you have done an analysis, you can save the configuration of analyzers/connectors for re-use with a single click.
 
 Those are the only ways to do that for now. We are planning to provide more easier ways to add new playbooks in the future.
+
+### Visualizers
+
+With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
+You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
+
+Visualizers are designed to run after the analyzers and the connectors.
+The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
+
+Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
+
+This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
+To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
+
+##### List of pre-built Visualizers
+
+- `DNS`: displays the aggregation of every DNS analyzer report
+- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
+- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
+- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
+
+
+#### Visualizers customization
+You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `analyzers`: List of analyzers that must be executed
+- `connectors`: List of connectors that must be executed
 
 ---
 

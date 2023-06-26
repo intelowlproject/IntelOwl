@@ -51,7 +51,14 @@ export default function JobResult() {
   React.useEffect(
     () =>
       setIsRunning(
-        job === undefined || ["pending", "running"].includes(job.status)
+        job === undefined ||
+          [
+            "pending",
+            "running",
+            "analyzers_to_execute",
+            "connectors_to_execute",
+            "visualizers_to_execute",
+          ].includes(job.status)
       ),
     [job]
   );

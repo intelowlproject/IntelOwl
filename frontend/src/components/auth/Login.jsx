@@ -18,8 +18,12 @@ import useTitle from "react-use/lib/useTitle";
 import { addToast, ContentSection } from "@certego/certego-ui";
 import { AUTH_BASE_URI } from "../../constants/api";
 
-import { PUBLIC_URL } from "../../constants/environment";
+import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
+import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
+import { RecaptchaValidator } from "./utils/validator";
+import { ConfigurationModalAlert } from "./utils/registration-alert";
 import { useAuthStore } from "../../stores";
+import { checkConfiguration } from "./api";
 
 import {
   ResendVerificationEmailButton,
@@ -30,6 +34,7 @@ import {
 const initialValues = {
   username: "",
   password: "",
+  recaptcha: "noKey",
 };
 // methods
 const onValidate = (values) => {
@@ -39,6 +44,11 @@ const onValidate = (values) => {
   }
   if (!values.password) {
     errors.password = "Required";
+  }
+  // recaptcha
+  const recaptchaErrors = RecaptchaValidator(values.recaptcha);
+  if (recaptchaErrors.recaptcha) {
+    errors.recaptcha = recaptchaErrors.recaptcha;
   }
   return errors;
 };
@@ -54,6 +64,20 @@ export default function Login() {
 
   // local state
   const [passwordShown, setPasswordShown] = React.useState(false);
+  const [showConfigurationModal, setShowConfigurationModal] =
+    React.useState(false);
+
+  React.useEffect(() => {
+    checkConfiguration({
+      params: {
+        page: "login",
+      },
+    }).catch(() => {
+      setShowConfigurationModal(true);
+    });
+  }, []);
+
+  console.debug("showConfigurationModal:", showConfigurationModal);
 
   // auth store
   const loginUser = useAuthStore(
@@ -79,6 +103,13 @@ export default function Login() {
 
   return (
     <ContentSection className="bg-body">
+      {showConfigurationModal && (
+        <ConfigurationModalAlert
+          isOpen={showConfigurationModal}
+          setIsOpen={setShowConfigurationModal}
+          title="The Recaptcha has not been configured!"
+        />
+      )}
       <Container className="col-12 col-lg-8 col-xl-4">
         <div className="g-0 my-2 d-none d-md-flex">
           <img
@@ -183,6 +214,15 @@ export default function Login() {
                     onChange={() => setPasswordShown(!passwordShown)}
                   />
                   <Label check>Show password</Label>
+                </FormGroup>
+                {/* reCAPTCHA */}
+                <FormGroup className="mt-3 d-flex">
+                  {RECAPTCHA_SITEKEY && (
+                    <ReCAPTCHAInput
+                      id="LoginForm__recaptcha"
+                      className="m-3 mx-auto"
+                    />
+                  )}
                 </FormGroup>
                 {/* Submit */}
                 <FormGroup className="d-flex-center">

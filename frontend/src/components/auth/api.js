@@ -66,9 +66,9 @@ export async function resetPassword(body) {
   }
 }
 
-export async function checkRegistrationSetup() {
+export async function checkConfiguration(body) {
   try {
-    const resp = await axios.get(`${AUTH_BASE_URI}/check_registration_setup`);
+    const resp = await axios.get(`${AUTH_BASE_URI}/configuration`, body);
     return resp;
   } catch (err) {
     return Promise.reject(err);

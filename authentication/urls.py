@@ -16,7 +16,7 @@ from .views import (
     RegistrationView,
     ResendVerificationView,
     TokenSessionsViewSet,
-    check_registration_setup,
+    checkConfiguration,
     google_login,
 )
 
@@ -57,6 +57,6 @@ urlpatterns = [
         GoogleLoginCallbackView.as_view(),
         name="oauth_google_callback",
     ),
-    path("check_registration_setup", check_registration_setup),
+    path("configuration", checkConfiguration),
     path("", include(router.urls)),
 ]

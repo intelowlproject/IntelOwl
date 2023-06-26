@@ -6,7 +6,9 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
-    pc = PlaybookConfig.objects.create(type=["domain"], name="Dns", description="Retrieve information from DNS about the domain")
+    pc = PlaybookConfig.objects.create(
+        type=["domain"], name="DNS", description="Query the most popular DNS services"
+    )
     pc.analyzers.set(
         [
             "Classic_DNS",
@@ -22,13 +24,9 @@ def migrate(apps, schema_editor):
     pc.full_clean()
 
 
-
 def reverse_migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     PlaybookConfig.objects.get(name="Dns").delete()
-
-
-
 
 
 class Migration(migrations.Migration):

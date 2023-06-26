@@ -270,10 +270,9 @@ After having written the new python module, you have to remember to:
       3. *description
       4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
       5. default:  default value provided for the parameter
-   6. *Analyzers: List of analyzers that **must** have run to execute the visualizer
-   7. *Connectors: List of connectors that **must** have run to execute the visualizer
+   6. *Playbook: Playbook that **must** have run to execute the visualizer
 
-4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
    1. You can use the django management command `dumpplugin` to automatically create the migration file for your new visualizer (you will find it under `api_app/visualizers_manager/migrations`). The script will create the following models:
       1. VisualizerConfig
       2. Parameter

@@ -50,21 +50,6 @@ const routes = [
     ),
   },
   {
-    key: "plugins-visualizers",
-    location: "visualizers",
-    Title: () => (
-      <span>
-        <IoIosEye />
-        &nbsp;Visualizers
-      </span>
-    ),
-    Component: () => (
-      <Suspense fallback={<FallBackLoading />}>
-        <Visualizers />
-      </Suspense>
-    ),
-  },
-  {
     key: "plugins-playbooks",
     location: "playbooks",
     Title: () => (
@@ -76,6 +61,21 @@ const routes = [
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
         <Playbooks />
+      </Suspense>
+    ),
+  },
+  {
+    key: "plugins-visualizers",
+    location: "visualizers",
+    Title: () => (
+      <span>
+        <IoIosEye />
+        &nbsp;Visualizers
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Visualizers />
       </Suspense>
     ),
   },

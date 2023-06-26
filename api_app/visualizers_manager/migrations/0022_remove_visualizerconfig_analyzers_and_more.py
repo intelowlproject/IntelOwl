@@ -11,6 +11,7 @@ def _migrate_domain_reputation(apps):
     vc.full_clean()
     vc.save()
 
+
 def _reverse_migrate_domain_reputation(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
@@ -32,6 +33,7 @@ def _reverse_migrate_domain_reputation(apps):
     )
     vc.save()
 
+
 def _migrate_ip_reputation(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
@@ -39,6 +41,7 @@ def _migrate_ip_reputation(apps):
     vc.playbook = PlaybookConfig.objects.get(name="Popular_IP_Reputation_Services")
     vc.full_clean()
     vc.save()
+
 
 def _reverse_migrate_ip_reputation(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
@@ -62,11 +65,12 @@ def _reverse_migrate_ip_reputation(apps):
     )
     vc.save()
 
+
 def _migrate_dns(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     visualizer = VisualizerConfig.objects.get(name="DNS")
-    visualizer.playbook = PlaybookConfig.objects.get(name="Dns")
+    visualizer.playbook = PlaybookConfig.objects.get(name="DNS")
     visualizer.full_clean()
     visualizer.save()
 
@@ -75,16 +79,18 @@ def _reverse_migrate_dns(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     visualizer = VisualizerConfig.objects.get(name="DNS")
-    visualizer.analyzers.set([
-        AnalyzerConfig.objects.get(name="Classic_DNS"),
-        AnalyzerConfig.objects.get(name="CloudFlare_DNS"),
-        AnalyzerConfig.objects.get(name="DNS0_EU"),
-        AnalyzerConfig.objects.get(name="Google_DNS"),
-        AnalyzerConfig.objects.get(name="Quad9_DNS"),
-        AnalyzerConfig.objects.get(name="CloudFlare_Malicious_Detector"),
-        AnalyzerConfig.objects.get(name="DNS0_EU_Malicious_Detector"),
-        AnalyzerConfig.objects.get(name="Quad9_Malicious_Detector"),
-    ])
+    visualizer.analyzers.set(
+        [
+            AnalyzerConfig.objects.get(name="Classic_DNS"),
+            AnalyzerConfig.objects.get(name="CloudFlare_DNS"),
+            AnalyzerConfig.objects.get(name="DNS0_EU"),
+            AnalyzerConfig.objects.get(name="Google_DNS"),
+            AnalyzerConfig.objects.get(name="Quad9_DNS"),
+            AnalyzerConfig.objects.get(name="CloudFlare_Malicious_Detector"),
+            AnalyzerConfig.objects.get(name="DNS0_EU_Malicious_Detector"),
+            AnalyzerConfig.objects.get(name="Quad9_Malicious_Detector"),
+        ]
+    )
     visualizer.full_clean()
     visualizer.save()
 
@@ -97,21 +103,26 @@ def _migrate_yara(apps):
     visualizer.full_clean()
     visualizer.save()
 
+
 def _reverse_migrate_yara(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     visualizer = VisualizerConfig.objects.get(name="Yara")
-    visualizer.analyzers.set([
-        AnalyzerConfig.objects.get(name="Yara"),
-    ])
+    visualizer.analyzers.set(
+        [
+            AnalyzerConfig.objects.get(name="Yara"),
+        ]
+    )
     visualizer.full_clean()
     visualizer.save()
+
 
 def migrate(apps, schema_editor):
     _migrate_yara(apps)
     _migrate_dns(apps)
     _migrate_ip_reputation(apps)
     _migrate_domain_reputation(apps)
+
 
 def reverse_migrate(apps, schema_editor):
     _reverse_migrate_yara(apps)
@@ -120,35 +131,45 @@ def reverse_migrate(apps, schema_editor):
     _reverse_migrate_domain_reputation(apps)
 
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('playbooks_manager', '0015_alter_playbookconfig_options'),
-        ('visualizers_manager', '0021_alter_visualizerconfig_options'),
-        ('analyzers_manager', '0030_alter_analyzerconfig_options'),
-        ('connectors_manager', '0017_alter_connectorconfig_options'),
+        ("playbooks_manager", "0015_alter_playbookconfig_options"),
+        ("visualizers_manager", "0021_alter_visualizerconfig_options"),
+        ("analyzers_manager", "0030_alter_analyzerconfig_options"),
+        ("connectors_manager", "0017_alter_connectorconfig_options"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='visualizerconfig',
-            name='playbook',
-            field=models.ForeignKey(blank=True, null=True, on_delete=models.CASCADE, related_name='visualizers', to='playbooks_manager.playbookconfig'),
+            model_name="visualizerconfig",
+            name="playbook",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=models.CASCADE,
+                related_name="visualizers",
+                to="playbooks_manager.playbookconfig",
+            ),
         ),
         migrations.RunPython(migrate, reverse_migrate),
         migrations.AlterField(
-            model_name='visualizerconfig',
-            name='playbook',
-            field=models.ForeignKey(blank=False, null=False, on_delete=models.CASCADE, related_name='visualizers',
-                                    to='playbooks_manager.playbookconfig'),
+            model_name="visualizerconfig",
+            name="playbook",
+            field=models.ForeignKey(
+                blank=False,
+                null=False,
+                on_delete=models.CASCADE,
+                related_name="visualizers",
+                to="playbooks_manager.playbookconfig",
+            ),
         ),
         migrations.RemoveField(
-            model_name='visualizerconfig',
-            name='analyzers',
+            model_name="visualizerconfig",
+            name="analyzers",
         ),
         migrations.RemoveField(
-            model_name='visualizerconfig',
-            name='connectors',
+            model_name="visualizerconfig",
+            name="connectors",
         ),
     ]

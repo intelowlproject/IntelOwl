@@ -422,7 +422,7 @@ The visualizer adds logic after the computations, allowing to show the final res
 Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
 
 This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
-To simplify the process, take example from the pre-built analyzers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
+To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
 
 ##### List of pre-built Visualizers
 

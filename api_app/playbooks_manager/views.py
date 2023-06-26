@@ -43,7 +43,9 @@ class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
         return super().check_permissions(request)
 
     def get_queryset(self):
-        return self.serializer_class.Meta.model.objects.order_by("name").all()
+        return self.serializer_class.Meta.model.objects.ordered_for_user(
+            self.request.user
+        )
 
     @add_docs(
         description="This endpoint allows to start a Job related to an observable",

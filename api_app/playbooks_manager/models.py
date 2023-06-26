@@ -7,10 +7,12 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.fields import ChoiceArrayField
 from api_app.models import default_runtime
+from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 
 
 class PlaybookConfig(models.Model):
+    objects = PlaybookConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,

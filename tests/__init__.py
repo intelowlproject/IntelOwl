@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import connections
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -21,6 +22,10 @@ def get_logger() -> logging.Logger:
 
 
 class CustomTestCase(TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        settings.DEBUG = True
+
     @classmethod
     def setUpTestData(cls):
         try:
@@ -40,6 +45,10 @@ class CustomTestCase(TestCase):
                 email="test@intelowl.com",
                 password="test",
             )
+
+    @staticmethod
+    def query_count_all() -> int:
+        return sum(len(c.queries) for c in connections.all())
 
 
 class CustomAPITestCase(CustomTestCase):

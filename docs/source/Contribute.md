@@ -297,6 +297,16 @@ To do so, some utility classes have been made:
 Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
 At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
 
+The best way to create a visualizer is to define several methods, one for each `Visualizable` you want to show in the UI, in your new visualizer and decore them with `visualizable_error_handler_with_params`. This decorator handles exceptions: in case there is a bug during the generation of a Visualizable element, it will be show an error instead of this component and all the other Visualizable are safe and will render correctly. Be careful using it because is a function returning a decorator! This means you need to use a syntax like this:
+```
+@visualizable_error_handler_with_params(error_name="custom visualizable", error_size=VisualizableSize.S_2)
+def custom_visualizable(self):
+   ...
+```
+
+instead of the syntax of other decorators that doesn't need the function call.
+
+
 You may want to look at a few existing examples to start to build a new one:
 
 - [dns.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/dns.py)

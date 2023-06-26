@@ -6,12 +6,46 @@ from typing import Dict, List
 
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.models import Job
-from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.classes import (
+    Visualizer,
+    visualizable_error_handler_with_params,
+)
 
 logger = getLogger(__name__)
 
 
 class Yara(Visualizer):
+    @visualizable_error_handler_with_params("Analyzer")
+    def _yara_analyzer(self):
+        return self.Title(
+            self.Base(
+                value="Analyzer",
+                color=self.Color.DARK,
+            ),
+            self.Base(value=self.__class__.__name__),
+            disable=False,
+        )
+
+    @visualizable_error_handler_with_params("N# Matches")
+    def _yara_match_number(self, yara_num_matches: int):
+        return self.Title(
+            self.Base(value="N# Matches", color=self.Color.DARK),
+            self.Base(value=yara_num_matches),
+            disable=not yara_num_matches,
+        )
+
+    @visualizable_error_handler_with_params("VirusTotal")
+    def _yara_signatures(self, signatures: List[str]):
+        disable_signatures = not signatures
+        return self.VList(
+            name=self.Base(value="Signatures", disable=disable_signatures),
+            value=[
+                self.Base(value=value, disable=disable_signatures)
+                for value in signatures
+            ],
+            disable=disable_signatures,
+        )
+
     def run(self) -> List[Dict]:
         yara_reports = self.analyzer_reports()
         yara_num_matches = sum(
@@ -27,29 +61,13 @@ class Yara(Visualizer):
             if match.get("match", None)
         ]
         page1 = self.Page(name="Yara first page")
-        h1 = self.HList(
-            value=[
-                self.Title(
-                    self.Base(
-                        value="Analyzer",
-                        color=self.Color.DARK,
-                    ),
-                    self.Base(value=self.__class__.__name__),
-                )
-            ]
-        )
+        h1 = self.HList(value=[self._yara_analyzer()])
         logger.debug(h1.to_dict())
         page1.add_level(level=1, horizontal_list=h1)
         h2 = self.HList(
             value=[
-                self.Title(
-                    self.Base(value="N# Matches", color=self.Color.DARK),
-                    self.Base(value=yara_num_matches),
-                ),
-                self.VList(
-                    name=self.Base(value="Signatures"),
-                    value=[self.Base(value=value) for value in signatures],
-                ),
+                self._yara_match_number(yara_num_matches),
+                self._yara_signatures(signatures),
             ]
         )
         logger.debug(h2.to_dict())

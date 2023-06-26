@@ -9,10 +9,19 @@ from api_app.core.models import AbstractConfig
 from api_app.fields import ChoiceArrayField
 from api_app.models import default_runtime
 from api_app.pivots_manager.models import PivotConfig
-from api_app.validators import validate_runtime_configuration
+from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
+from api_app.validators import plugin_name_validator, validate_runtime_configuration
 
 
-class PlaybookConfig(AbstractConfig):
+class PlaybookConfig(models.Model):
+    objects = PlaybookConfigQuerySet.as_manager()
+    name = models.CharField(
+        max_length=100,
+        null=False,
+        unique=True,
+        primary_key=True,
+        validators=[plugin_name_validator],
+    )
     type = ChoiceArrayField(
         models.CharField(choices=AllTypes.choices, null=False, max_length=50)
     )

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import uuid
 from abc import ABCMeta, abstractmethod
 
 from drf_spectacular.utils import extend_schema as add_docs
@@ -14,6 +15,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from intel_owl import tasks
 from intel_owl.celery import app as celery_app
 
 from .models import AbstractConfig, AbstractReport, PythonConfig
@@ -59,14 +61,32 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         performs kill
          override for callbacks after kill operation
         """
+        from api_app.models import Job
+
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
         report.status = AbstractReport.Status.KILLED
         report.save(update_fields=["status"])
+        # clean up job
 
-    def perform_retry(self, report: AbstractReport):
-        raise NotImplementedError()
+        job = Job.objects.get(pk=report.job.pk)
+        job.set_final_status()
+
+    @staticmethod
+    def perform_retry(report: AbstractReport):
+        signature = report.config.get_signature(
+            report.job,
+        )
+        runner = signature | tasks.job_set_final_status.signature(
+            args=[report.job.id],
+            kwargs={},
+            queue=report.config.queue,
+            soft_time_limit=10,
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
+        runner()
 
     @add_docs(
         description="Kill running plugin by closing celery task and marking as killed",
@@ -87,7 +107,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             AbstractReport.Status.RUNNING,
             AbstractReport.Status.PENDING,
         ]:
-            raise ValidationError({"detail": "Plugin call is not running or pending"})
+            raise ValidationError({"detail": "Plugin is not running or pending"})
 
         self.perform_kill(report)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -112,7 +132,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             AbstractReport.Status.KILLED,
         ]:
             raise ValidationError(
-                {"detail": "Plugin call status should be failed or killed"}
+                {"detail": "Plugin status should be failed or killed"}
             )
 
         # retry with the same arguments

@@ -26,9 +26,3 @@ class ConnectorActionViewSet(PluginActionViewSet):
     @property
     def report_model(cls):
         return ConnectorReport
-
-    def perform_retry(self, report: ConnectorReport):
-        signature = report.config.get_signature(
-            report.job,
-        )
-        signature.apply_async()

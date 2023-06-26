@@ -4,7 +4,7 @@
 from django.db import models
 
 
-class Status(models.TextChoices):
+class ReportStatus(models.TextChoices):
     FAILED = "FAILED"
     PENDING = "PENDING"
     RUNNING = "RUNNING"

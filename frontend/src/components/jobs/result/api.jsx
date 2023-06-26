@@ -5,7 +5,7 @@ import { IoMdWarning } from "react-icons/io";
 
 import { addToast, confirm } from "@certego/certego-ui";
 
-import { API_BASE_URI, JOB_BASE_URI } from "../../../constants/api";
+import { PLAYBOOKS_CONFIG_URI, JOB_BASE_URI } from "../../../constants/api";
 
 // constants
 
@@ -97,7 +97,7 @@ export async function saveJobAsPlaybook(values) {
     runtime_configuration: values.runtimeConfiguration
   };
   try {
-    const response = await axios.post(`${API_BASE_URI}/playbook`, data);
+    const response = await axios.post(PLAYBOOKS_CONFIG_URI, data);
 
     success = response.status === 200;
     if (success) {

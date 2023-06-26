@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0031_alter_job_status'),
+        ('api_app', '0031_job_playbookconfigordering'),
     ]
 
     operations = [

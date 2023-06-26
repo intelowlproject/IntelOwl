@@ -70,7 +70,7 @@ def _migrate_dns(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     visualizer = VisualizerConfig.objects.get(name="DNS")
-    visualizer.playbook = PlaybookConfig.objects.get(name="DNS")
+    visualizer.playbook = PlaybookConfig.objects.get(name="Dns")
     visualizer.full_clean()
     visualizer.save()
 

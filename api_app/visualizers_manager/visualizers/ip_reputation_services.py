@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Dict, List
 
 from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.core.choices import Status
+from api_app.core.choices import ReportStatus
 from api_app.visualizers_manager.classes import Visualizer
 from api_app.visualizers_manager.enums import (
     VisualizableColor,
@@ -34,7 +34,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.VIRUSTotal,
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
-                disable=analyzer_report.status != Status.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
             return virustotal_report
 
@@ -47,7 +47,9 @@ class IPReputationServices(Visualizer):
             logger.warning("GreynoiseCommunity report does not exist")
         else:
             message = analyzer_report.report.get("message", None)
-            disabled = analyzer_report.status != Status.SUCCESS or message != "Success"
+            disabled = (
+                analyzer_report.status != ReportStatus.SUCCESS or message != "Success"
+            )
             classification = analyzer_report.report.get("classification", "")
             if classification == "benign":
                 icon = VisualizableIcon.LIKE
@@ -76,7 +78,7 @@ class IPReputationServices(Visualizer):
             logger.warning("URLhaus report does not exist")
         else:
             disabled = (
-                analyzer_report.status != Status.SUCCESS
+                analyzer_report.status != ReportStatus.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
             )
             urlhaus_report = self.Title(
@@ -101,7 +103,7 @@ class IPReputationServices(Visualizer):
             logger.warning("Threatfox report does not exist")
         else:
             disabled = (
-                analyzer_report.status != Status.SUCCESS
+                analyzer_report.status != ReportStatus.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
             )
             data = analyzer_report.report.get("data", [])
@@ -126,7 +128,9 @@ class IPReputationServices(Visualizer):
             success = analyzer_report.report.get("success", False)
             data = analyzer_report.report.get("data", [])
             disabled = (
-                analyzer_report.status != Status.SUCCESS or not success or not data
+                analyzer_report.status != ReportStatus.SUCCESS
+                or not success
+                or not data
             )
             inquest_report = self.Title(
                 self.Base(
@@ -149,7 +153,7 @@ class IPReputationServices(Visualizer):
             data = analyzer_report.report.get("data", [])
             isp = data.get("isp", "")
             usage = data.get("usageType", "")
-            disabled = analyzer_report.status != Status.SUCCESS or (
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or (
                 not isp and not usage
             )
             abuse_report = self.Title(
@@ -162,7 +166,7 @@ class IPReputationServices(Visualizer):
                 disable=disabled,
             )
 
-            disabled = analyzer_report.status != Status.SUCCESS or not data
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not data
             categories_extracted = []
             for c in data.get("reports", []):
                 categories_extracted.extend(c.get("categories_human_readable", []))
@@ -190,7 +194,7 @@ class IPReputationServices(Visualizer):
             logger.warning("GreedyBear report does not exist")
         else:
             found = analyzer_report.report.get("found", False)
-            disabled = analyzer_report.status != Status.SUCCESS or not found
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not found
             ioc = analyzer_report.report.get("ioc", {})
             honeypots = []
             if ioc:
@@ -224,7 +228,9 @@ class IPReputationServices(Visualizer):
             classifications = analyzer_report.report.get("classifications", [])
             sub_classifications = classifications.get("classifications", [])
             false_positives = classifications.get("false_positives", [])
-            disabled = analyzer_report.status != Status.SUCCESS or not classifications
+            disabled = (
+                analyzer_report.status != ReportStatus.SUCCESS or not classifications
+            )
             crowdsec_classification_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Classifications",
@@ -243,7 +249,7 @@ class IPReputationServices(Visualizer):
             )
 
             behaviors = analyzer_report.report.get("behaviors", [])
-            disabled = analyzer_report.status != Status.SUCCESS or not behaviors
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not behaviors
             crowdsec_behaviors_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Behaviors",
@@ -268,7 +274,7 @@ class IPReputationServices(Visualizer):
             logger.warning("OTXQuery report does not exist")
         else:
             pulses = analyzer_report.report.get("pulses", [])
-            disabled = analyzer_report.status != Status.SUCCESS or not pulses
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not pulses
             otx_report = self.VList(
                 name=self.Base(
                     value="OTX Alienvault",
@@ -301,7 +307,9 @@ class IPReputationServices(Visualizer):
             for report, found in analyzer_report.report.items():
                 if found:
                     found_in_lists.append(report)
-            disabled = analyzer_report.status != Status.SUCCESS or not found_in_lists
+            disabled = (
+                analyzer_report.status != ReportStatus.SUCCESS or not found_in_lists
+            )
             otx_report = self.VList(
                 name=self.Base(
                     value="FireHol", icon=VisualizableIcon.FIRE, disable=disabled
@@ -322,7 +330,7 @@ class IPReputationServices(Visualizer):
             found = analyzer_report.report.get("found", False)
             tor_report = self.Bool(
                 value="Tor Exit Node",
-                disable=not (analyzer_report.status == Status.SUCCESS and found),
+                disable=not (analyzer_report.status == ReportStatus.SUCCESS and found),
             )
             return tor_report
 
@@ -337,7 +345,7 @@ class IPReputationServices(Visualizer):
             found = analyzer_report.report.get("found", False)
             talos_report = self.Bool(
                 value="Talos Reputation",
-                disable=not (analyzer_report.status == Status.SUCCESS and found),
+                disable=not (analyzer_report.status == ReportStatus.SUCCESS and found),
             )
             return talos_report
 

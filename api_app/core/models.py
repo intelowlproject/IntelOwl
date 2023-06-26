@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 
-from api_app.core.choices import ParamTypes, Status
+from api_app.core.choices import ParamTypes, ReportStatus
 from api_app.validators import plugin_name_validator, validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class AbstractReport(models.Model):
     # constants
-    Status = Status
+    Status = ReportStatus
 
     # fields
     status = models.CharField(max_length=50, choices=Status.choices)
@@ -266,7 +266,6 @@ class AbstractConfig(models.Model):
         from api_app.choices import Status
 
         name_plugin = cls.__name__.split("Config")[0]
-
         return getattr(Status, f"{name_plugin.upper()}S_COMPLETED").value
 
     @classmethod
@@ -275,7 +274,6 @@ class AbstractConfig(models.Model):
         from api_app.choices import Status
 
         name_plugin = cls.__name__.split("Config")[0]
-
         return getattr(Status, f"{name_plugin.upper()}S_RUNNING").value
 
     @classmethod

@@ -15,7 +15,7 @@ const initialValues = {
   analyzers: [],
   connectors: [],
   pivots: [],
-  runtimeConfiguration: {}
+  runtimeConfiguration: {},
 };
 
 // methods
@@ -112,11 +112,16 @@ function SaveAsPlaybookIcon() {
   );
 }
 
-export function SaveAsPlaybookButton({ analyzers, connectors, pivots, runtimeConfiguration }) {
+export function SaveAsPlaybookButton({
+  analyzers,
+  connectors,
+  pivots,
+  runtimeConfiguration,
+}) {
   initialValues.analyzers = analyzers;
   initialValues.connectors = connectors;
   initialValues.pivots = pivots;
-  initialValues.runtimeConfiguration = runtimeConfiguration
+  initialValues.runtimeConfiguration = runtimeConfiguration;
   return (
     <PopupFormButton
       id="saveasplaybook"

@@ -94,7 +94,7 @@ export async function saveJobAsPlaybook(values) {
     analyzers: values.analyzers,
     connectors: values.connectors,
     pivots: values.pivots,
-    runtime_configuration: values.runtimeConfiguration
+    runtime_configuration: values.runtimeConfiguration,
   };
   try {
     const response = await axios.post(PLAYBOOKS_CONFIG_URI, data);
@@ -111,9 +111,7 @@ export async function saveJobAsPlaybook(values) {
     }
   } catch (e) {
     addToast(
-      <span>
-        Failed creation of playbook with name {values.name}
-      </span>,
+      <span>Failed creation of playbook with name {values.name}</span>,
       e.parsedMsg,
       "warning"
     );

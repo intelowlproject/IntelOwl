@@ -5,13 +5,18 @@ from django.db.models import Q
 
 from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.core.choices import ReportStatus
-from api_app.visualizers_manager.classes import Visualizer
+from api_app.core.choices import Status
+from api_app.visualizers_manager.classes import (
+    Visualizer,
+    visualizable_error_handler_with_params,
+)
 from api_app.visualizers_manager.enums import VisualizableIcon
 
 logger = getLogger(__name__)
 
 
 class DomainReputationServices(Visualizer):
+    @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
             analyzer_report = self.analyzer_reports().get(
@@ -36,6 +41,7 @@ class DomainReputationServices(Visualizer):
             )
             return virustotal_report
 
+    @visualizable_error_handler_with_params("URLhaus")
     def _urlhaus(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
@@ -61,6 +67,7 @@ class DomainReputationServices(Visualizer):
             )
             return urlhaus_report
 
+    @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
@@ -84,6 +91,7 @@ class DomainReputationServices(Visualizer):
             )
             return threatfox_report
 
+    @visualizable_error_handler_with_params("Phishtank")
     def _phishtank(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
@@ -104,6 +112,7 @@ class DomainReputationServices(Visualizer):
             )
             return phishtank_report
 
+    @visualizable_error_handler_with_params("PhishingArmy")
     def _phishing_army(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
@@ -123,6 +132,7 @@ class DomainReputationServices(Visualizer):
             )
             return phishtank_report
 
+    @visualizable_error_handler_with_params("InQuest")
     def _inquest_repdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
@@ -147,6 +157,7 @@ class DomainReputationServices(Visualizer):
             )
             return inquest_report
 
+    @visualizable_error_handler_with_params("OTX Alienvault")
     def _otxquery(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")

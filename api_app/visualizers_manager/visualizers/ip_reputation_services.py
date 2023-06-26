@@ -3,7 +3,10 @@ from typing import Dict, List
 
 from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.core.choices import ReportStatus
-from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.classes import (
+    Visualizer,
+    visualizable_error_handler_with_params,
+)
 from api_app.visualizers_manager.enums import (
     VisualizableColor,
     VisualizableIcon,
@@ -14,6 +17,7 @@ logger = getLogger(__name__)
 
 
 class IPReputationServices(Visualizer):
+    @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
             analyzer_report = self.analyzer_reports().get(
@@ -38,6 +42,7 @@ class IPReputationServices(Visualizer):
             )
             return virustotal_report
 
+    @visualizable_error_handler_with_params("Greynoise")
     def _greynoise(self):
         try:
             analyzer_report = self.analyzer_reports().get(
@@ -71,6 +76,7 @@ class IPReputationServices(Visualizer):
             )
             return greynoise_report
 
+    @visualizable_error_handler_with_params("URLhaus")
     def _urlhaus(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
@@ -96,6 +102,7 @@ class IPReputationServices(Visualizer):
             )
             return urlhaus_report
 
+    @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
@@ -119,6 +126,7 @@ class IPReputationServices(Visualizer):
             )
             return threatfox_report
 
+    @visualizable_error_handler_with_params("InQuest")
     def _inquest_repdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
@@ -143,6 +151,7 @@ class IPReputationServices(Visualizer):
             )
             return inquest_report
 
+    @visualizable_error_handler_with_params("AbuseIPDB Categories")
     def _abuse_ipdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="AbuseIPDB")
@@ -187,6 +196,7 @@ class IPReputationServices(Visualizer):
 
             return abuse_report, abuse_categories_report
 
+    @visualizable_error_handler_with_params("GreedyBear Honeypots")
     def _greedybear(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="GreedyBear")
@@ -218,6 +228,7 @@ class IPReputationServices(Visualizer):
             )
             return gb_report
 
+    @visualizable_error_handler_with_params("Crowdsec Behaviors")
     def _crowdsec(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Crowdsec")
@@ -267,6 +278,7 @@ class IPReputationServices(Visualizer):
             )
             return crowdsec_classification_report, crowdsec_behaviors_report
 
+    @visualizable_error_handler_with_params("OTX Alienvault")
     def _otxquery(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
@@ -297,6 +309,7 @@ class IPReputationServices(Visualizer):
             )
             return otx_report
 
+    @visualizable_error_handler_with_params("FireHol")
     def _firehol(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="FireHol_IPList")
@@ -321,6 +334,7 @@ class IPReputationServices(Visualizer):
             )
             return otx_report
 
+    @visualizable_error_handler_with_params("Tor Exit Node")
     def _tor(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="TorProject")
@@ -334,6 +348,7 @@ class IPReputationServices(Visualizer):
             )
             return tor_report
 
+    @visualizable_error_handler_with_params("Talos Reputation")
     def _talos(self):
         try:
             analyzer_report = self.analyzer_reports().get(

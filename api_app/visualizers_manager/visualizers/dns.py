@@ -29,7 +29,11 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.quad9_dns_
 )
 from api_app.choices import ObservableClassification
 from api_app.models import Job
-from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.classes import (
+    VisualizableObject,
+    Visualizer,
+    visualizable_error_handler_with_params,
+)
 
 logger = getLogger(__name__)
 
@@ -55,43 +59,51 @@ class DNS(Visualizer):
             Quad9MaliciousDetector.python_module,
         ]
 
+    @visualizable_error_handler_with_params()
+    def _dns_resolution(self, analyzer_report: AnalyzerReport) -> VisualizableObject:
+        printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+        logger.debug(f"{printable_analyzer_name=}")
+        disable_element = not analyzer_report.report["resolutions"]
+        return self.VList(
+            name=self.Base(value=f"{printable_analyzer_name}", disable=disable_element),
+            value=[
+                self.Base(
+                    value=dns_resolution["data"]
+                    if self._job.observable_classification
+                    == ObservableClassification.DOMAIN
+                    else dns_resolution,
+                    disable=False,
+                )
+                for dns_resolution in analyzer_report.report["resolutions"]
+            ],
+            disable=disable_element,
+            open=True,
+        )
+
+    @visualizable_error_handler_with_params()
+    def _dns_block(self, analyzer_report: AnalyzerReport) -> VisualizableObject:
+        printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+        logger.debug(f"{printable_analyzer_name=}")
+        return self.Bool(
+            value=printable_analyzer_name,
+            disable=not analyzer_report.report["malicious"],
+        )
+
     def run(self) -> List[Dict]:
 
         first_level_elements = []
         second_level_elements = []
 
         for analyzer_report in self.analyzer_reports():
-            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-            logger.debug(f"{printable_analyzer_name=}")
             logger.debug(f"{analyzer_report.config.python_complete_path=}")
             logger.debug(f"{analyzer_report.report=}")
             if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
-                disable_element = not analyzer_report.report["resolutions"]
                 first_level_elements.append(
-                    self.VList(
-                        name=self.Base(
-                            value=f"{printable_analyzer_name}", disable=disable_element
-                        ),
-                        value=[
-                            self.Base(
-                                value=dns_resolution["data"]
-                                if self._job.observable_classification
-                                == ObservableClassification.DOMAIN
-                                else dns_resolution,
-                                disable=False,
-                            )
-                            for dns_resolution in analyzer_report.report["resolutions"]
-                        ],
-                        disable=disable_element,
-                        open=True,
-                    )
+                    self._dns_resolution(analyzer_report=analyzer_report)
                 )
             else:
                 second_level_elements.append(
-                    self.Bool(
-                        value=printable_analyzer_name,
-                        disable=not analyzer_report.report["malicious"],
-                    )
+                    self._dns_block(analyzer_report=analyzer_report)
                 )
 
         page = self.Page(name="DNS")

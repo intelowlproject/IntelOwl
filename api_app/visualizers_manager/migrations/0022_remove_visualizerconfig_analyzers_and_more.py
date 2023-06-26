@@ -134,7 +134,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("playbooks_manager", "0015_alter_playbookconfig_options"),
+        ("playbooks_manager", "0015_dns_playbook"),
         ("visualizers_manager", "0021_alter_visualizerconfig_options"),
         ("analyzers_manager", "0030_alter_analyzerconfig_options"),
         ("connectors_manager", "0017_alter_connectorconfig_options"),

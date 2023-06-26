@@ -10,6 +10,9 @@ from api_app.playbooks_manager.models import PlaybookConfig
 
 
 class PlaybookConfigSerializer(rfs.ModelSerializer):
+
+    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
+
     class Meta:
         model = PlaybookConfig
         fields = rfs.ALL_FIELDS

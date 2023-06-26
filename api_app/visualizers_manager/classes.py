@@ -362,23 +362,12 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     def analyzer_reports(self) -> QuerySet:
         from api_app.analyzers_manager.models import AnalyzerReport
 
-        self._config: VisualizerConfig
-        configs = self._config.analyzers.all()
-        queryset = AnalyzerReport.objects.filter(job=self._job)
-        if configs:
-            queryset = queryset.filter(config__in=configs)
-        return queryset
+        return AnalyzerReport.objects.filter(job=self._job)
 
     def connector_reports(self) -> QuerySet:
         from api_app.connectors_manager.models import ConnectorReport
 
-        self._config: VisualizerConfig
-        configs = self._config.connectors.all()
-
-        queryset = ConnectorReport.objects.filter(job=self._job)
-        if configs:
-            queryset = queryset.filter(config__in=configs)
-        return queryset
+        return ConnectorReport.objects.filter(job=self._job)
 
 
 # IMPORTANT! this function allows to handle the errors in the components render.

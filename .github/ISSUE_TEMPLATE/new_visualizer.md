@@ -10,10 +10,7 @@ assignees: ''
 ## Name
 
 
-## Analyzers
-
-
-## Connectors
+## Playbooks
 
 
 ## Why should we create it

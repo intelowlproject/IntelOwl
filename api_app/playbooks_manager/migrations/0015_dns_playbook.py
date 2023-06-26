@@ -11,31 +11,20 @@ def migrate(apps, schema_editor):
         [
             "Classic_DNS",
             "CloudFlare_DNS",
-            "CloudFlare_Malicious_Detector",
             "DNS0_EU",
-            "DNS0_EU_Malicious_Detector",
-            "DNSDB",
-            "GoogleSafebrowsing",
-            "GoogleWebRisk",
             "Google_DNS",
-            "OTXQuery",
-            "PhishingArmy",
             "Quad9_DNS",
+            "CloudFlare_Malicious_Detector",
+            "DNS0_EU_Malicious_Detector",
             "Quad9_Malicious_Detector",
-            "URLhaus",
-            "VirusTotal_v3_Get_Observable",
         ]
     )
     pc.full_clean()
 
 
-
 def reverse_migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     PlaybookConfig.objects.get(name="Dns").delete()
-
-
-
 
 
 class Migration(migrations.Migration):

@@ -205,9 +205,7 @@ class PivotConfigTestCase(CustomTestCase):
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
-        report = AnalyzerReport(
-            report={"test": [content]}, config=ac, job=job
-        )
+        report = AnalyzerReport(report={"test": [content]}, config=ac, job=job)
         jobs = list(pc._create_jobs(report, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("test.0", jobs[0].file_name)

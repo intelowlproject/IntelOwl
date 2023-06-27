@@ -369,7 +369,7 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
 
-        if data.getlist("file_names", False) and len(data.getlist("file_names")) != len(
+        if data.getlist("file_names", []) and len(data.getlist("file_names")) != len(
             data.getlist("files")
         ):
             raise ValidationError(
@@ -390,9 +390,9 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
             item = base_data.copy()
 
             item["file"] = file
-            if data.getlist("file_names", False):
+            if data.getlist("file_names", []):
                 item["file_name"] = data.getlist("file_names")[index]
-            if data.get("file_mimetypes", False):
+            if data.get("file_mimetypes", []):
                 item["file_mimetype"] = data["file_mimetypes"][index]
             try:
                 validated = self.child.run_validation(item)

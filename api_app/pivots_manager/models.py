@@ -6,6 +6,7 @@ from django.core.files import File
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.http import QueryDict
 from django.utils.functional import cached_property
 
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -178,43 +179,58 @@ class PivotConfig(AbstractConfig):
             logger.info(f"Config {self.name} retrieved value {value}")
             yield value
 
-    def _get_serializer(self, report: AbstractReport):
+    def _is_sample(self) -> bool:
         from api_app.analyzers_manager.constants import AllTypes
 
+        return AllTypes.FILE.value in self.playbook_to_execute.type
+
+    def _get_serializer(self, report: AbstractReport):
+
         values = self.get_value(report)
-        if AllTypes.FILE.value in self.playbook_to_execute.type:
+        if self._is_sample():
             return self._get_file_serializer(values, report.job.tlp, report.job.user)
         else:
-            return self._get_observable_serializer(values, report.job.tlp, report.job.user)
+            return self._get_observable_serializer(
+                values, report.job.tlp, report.job.user
+            )
 
-    def _get_observable_serializer(self, values:Generator[Any, None, None], tlp:str, user ):
+    def _get_observable_serializer(
+        self, values: Generator[Any, None, None], tlp: str, user
+    ):
         from api_app.serializers import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
         return ObservableAnalysisSerializer(
-                data={
-                    "playbooks_requested": [self.playbook_to_execute_id],
-                    "observables": [(None, value) for value in values],
-                    "send_task": True,
-                    "tlp": tlp,
-                },
-                context={"request": MockUpRequest(user=user)},
-                many=True,
-            )
-
-    def _get_file_serializer(self, values: Generator[bytes, None, None], tlp:str, user):
-        from api_app.serializers import FileAnalysisSerializer
-        from tests.mock_utils import MockUpRequest
-
-        files = [File(io.BytesIO(data), name=f"{self.field}.{i}") for i, data in enumerate(values)]
-        return FileAnalysisSerializer(
             data={
                 "playbooks_requested": [self.playbook_to_execute_id],
-                "files": files,
-                "file_names:":[file.name for file in files],
+                "observables": [(None, value) for value in values],
                 "send_task": True,
                 "tlp": tlp,
             },
+            context={"request": MockUpRequest(user=user)},
+            many=True,
+        )
+
+    def _get_file_serializer(
+        self, values: Generator[bytes, None, None], tlp: str, user
+    ):
+        from api_app.serializers import FileAnalysisSerializer
+        from tests.mock_utils import MockUpRequest
+
+        files = [
+            File(io.BytesIO(data), name=f"{self.field}.{i}")
+            for i, data in enumerate(values)
+        ]
+        querydict = QueryDict(mutable=True)
+        data = {
+            "playbooks_requested": self.playbook_to_execute_id,
+            "send_task": True,
+            "tlp": tlp,
+        }
+        querydict.update(data)
+        querydict.setlist("files", files)
+        return FileAnalysisSerializer(
+            data=querydict,
             context={"request": MockUpRequest(user=user)},
             many=True,
         )

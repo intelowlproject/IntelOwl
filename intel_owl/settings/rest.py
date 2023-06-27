@@ -6,7 +6,7 @@
 from datetime import timedelta
 
 from ._util import get_secret
-from .commons import DEBUG, PUBLIC_DEPLOYMENT, STAGE_CI, STAGE_LOCAL, VERSION
+from .commons import VERSION
 from .security import WEB_CLIENT_URL
 
 REST_FRAMEWORK = {
@@ -61,17 +61,13 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
     "VERSION": VERSION,
 }
-
+USE_RECAPTCHA = get_secret("USE_RECAPTCHA", "True") == "True"
 # drf-recaptcha
-DRF_RECAPTCHA_SECRET_KEY = (
-    str(get_secret("RECAPTCHA_SECRET_KEY_IO_PUBLIC"))
-    if PUBLIC_DEPLOYMENT and not DEBUG
-    else str(get_secret("RECAPTCHA_SECRET_KEY_IO_LOCAL"))
-)
+DRF_RECAPTCHA_SECRET_KEY = str(get_secret("RECAPTCHA_SECRET_KEY", ""))
 # this is necessary to avoid to have the related Django app to yell
 # and to have this populated also for people who upgraded from previous versions
 if not DRF_RECAPTCHA_SECRET_KEY:
     DRF_RECAPTCHA_SECRET_KEY = "fake"
 
-DRF_RECAPTCHA_TESTING = STAGE_LOCAL or STAGE_CI or DRF_RECAPTCHA_SECRET_KEY == "fake"
+DRF_RECAPTCHA_TESTING = not USE_RECAPTCHA
 DRF_RECAPTCHA_TESTING_PASS = True

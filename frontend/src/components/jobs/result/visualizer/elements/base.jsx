@@ -12,12 +12,9 @@ export function BaseVisualizer({
   bold,
   italic,
   disable,
-<<<<<<< HEAD
   id,
   copyText,
-=======
   isChild,
->>>>>>> 9f32afe (Frontend improvements (#1772))
 }) {
   let coreComponent = (
     <span

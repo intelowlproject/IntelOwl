@@ -4,7 +4,7 @@
 from django.conf import settings
 from django.db import models
 
-from api_app.core.models import AbstractConfig, AbstractReport
+from api_app.core.models import AbstractReport, PythonConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
 from api_app.visualizers_manager.validators import validate_report
@@ -21,7 +21,7 @@ class VisualizerReport(AbstractReport):
         ordering = ["pk"]
 
 
-class VisualizerConfig(AbstractConfig):
+class VisualizerConfig(PythonConfig):
     playbook = models.ForeignKey(
         PlaybookConfig,
         related_name="visualizers",

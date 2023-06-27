@@ -11,7 +11,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from api_app.core.views import AbstractConfigAPI, PluginActionViewSet
+from api_app.core.views import PluginActionViewSet, PythonConfigViewSet
 
 from .filters import AnalyzerConfigFilter
 from .models import AnalyzerConfig, AnalyzerReport
@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = [
-    "AnalyzerConfigAPI",
+    "AnalyzerConfigViewSet",
     "AnalyzerActionViewSet",
 ]
 
 
-class AnalyzerConfigAPI(AbstractConfigAPI):
+class AnalyzerConfigViewSet(PythonConfigViewSet):
     serializer_class = AnalyzerConfigSerializer
     filterset_class = AnalyzerConfigFilter
 
@@ -49,8 +49,8 @@ class AnalyzerConfigAPI(AbstractConfigAPI):
     @action(
         detail=True, methods=["post"], url_name="pull", permission_classes=[IsAdminUser]
     )
-    def pull(self, request, name=None):
-        logger.info(f"update request from user {request.user}, name {name}")
+    def pull(self, request, pk=None):
+        logger.info(f"update request from user {request.user}, name {pk}")
         obj: AnalyzerConfig = self.get_object()
         success = obj.python_class.update()
         if not success:

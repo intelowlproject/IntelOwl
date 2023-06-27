@@ -14,12 +14,12 @@ from api_app.models import Comment, Job, PluginConfig, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
-from .. import CustomAPITestCase
+from .. import CustomViewSetTestCase
 
 User = get_user_model()
 
 
-class PluginConfigViewSetTestCase(CustomAPITestCase):
+class PluginConfigViewSetTestCase(CustomViewSetTestCase):
     URL = "/api/plugin-config"
 
     def setUp(self):
@@ -35,7 +35,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertFalse(content)
         param = Parameter.objects.create(
             is_secret=True,
-            name="api_key_name",
+            name="mynewparameter",
             analyzer_config=AnalyzerConfig.objects.get(name="AbuseIPDB"),
             required=True,
             type="str",
@@ -47,7 +47,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
             owner=self.user,
             parameter=param,
         )
-        pc.clean()
+        pc.full_clean()
         pc.save()
         self.assertEqual(pc.owner, org.owner)
         response = self.client.get(self.URL, {}, format="json")
@@ -111,7 +111,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(second_item["value"], "supersecret_low_privilege")
         param2 = Parameter.objects.create(
             is_secret=True,
-            name="api_key_name",
+            name="mysecondsupernewsecret",
             analyzer_config=AnalyzerConfig.objects.get(name="Auth0"),
             required=True,
         )
@@ -132,7 +132,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         param.delete()
 
 
-class CommentViewSetTestCase(CustomAPITestCase):
+class CommentViewSetTestCase(CustomViewSetTestCase):
     comment_url = reverse("comments-list")
 
     def setUp(self):
@@ -187,7 +187,7 @@ class CommentViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class JobViewsetTests(CustomAPITestCase):
+class JobViewsetTests(CustomViewSetTestCase):
     jobs_list_uri = reverse("jobs-list")
     agg_status_uri = reverse("jobs-aggregate-status")
     agg_type_uri = reverse("jobs-aggregate-type")
@@ -360,7 +360,7 @@ class JobViewsetTests(CustomAPITestCase):
             )
 
 
-class TagViewsetTests(CustomAPITestCase):
+class TagViewsetTests(CustomViewSetTestCase):
 
     tags_list_uri = reverse("tags-list")
 

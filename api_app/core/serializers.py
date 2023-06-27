@@ -45,7 +45,7 @@ class ParameterSerializer(rfs.ModelSerializer):
         list_serializer_class = ParamListSerializer
 
 
-class AbstractListConfigSerializer(rfs.ListSerializer):
+class PythonListConfigSerializer(rfs.ListSerializer):
 
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
@@ -184,6 +184,10 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):
+    ...
+
+
+class PythonConfigSerializer(AbstractConfigSerializer):
 
     config = _ConfigSerializer(required=True)
     parameters = ParameterSerializer(write_only=True, many=True)

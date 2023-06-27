@@ -9,12 +9,12 @@ from api_app.models import PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
-from .. import CustomAPITestCase
+from .. import CustomViewSetTestCase
 
 custom_config_uri = reverse("plugin-config-list")
 
 
-class PluginConfigViewSetTestCase(CustomAPITestCase):
+class PluginConfigViewSetTestCase(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
         self.param = Parameter.objects.create(

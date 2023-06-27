@@ -18,8 +18,8 @@ from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPer
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
 
-from .models import AbstractConfig, AbstractReport
-from .serializers import AbstractConfigSerializer
+from .models import AbstractConfig, AbstractReport, PythonConfig
+from .serializers import PythonConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -140,11 +140,47 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
-    serializer_class = AbstractConfigSerializer
+class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
-    lookup_field = "name"
+    lookup_field = "pk"
+
+    @add_docs(
+        description="Disable/Enable plugin for your organization",
+        request=None,
+        responses={201: {}, 202: {}},
+    )
+    @action(
+        methods=["post"],
+        detail=True,
+        url_path="organization",
+    )
+    def disable_in_org(self, request, pk=None):
+        logger.info(f"get disable_in_org from user {request.user}, name {pk}")
+        obj: AbstractConfig = self.get_object()
+        if not request.user.has_membership() or not request.user.membership.is_owner:
+            raise PermissionDenied()
+        organization = request.user.membership.organization
+        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+            raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
+        obj.disabled_in_organizations.add(organization)
+        return Response(status=status.HTTP_201_CREATED)
+
+    @disable_in_org.mapping.delete
+    def enable_in_org(self, request, pk=None):
+        logger.info(f"get enable_in_org from user {request.user}, name {pk}")
+        obj: AbstractConfig = self.get_object()
+        if not request.user.has_membership() or not request.user.membership.is_owner:
+            raise PermissionDenied()
+        organization = request.user.membership.organization
+        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+            raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
+        obj.disabled_in_organizations.remove(organization)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class PythonConfigViewSet(AbstractConfigViewSet):
+    serializer_class = PythonConfigSerializer
 
     def get_queryset(self):
         return self.serializer_class.Meta.model.objects.all()
@@ -168,9 +204,9 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         url_path="health_check",
         permission_classes=[IsAdminUser],
     )
-    def health_check(self, request, name=None):
-        logger.info(f"get healthcheck from user {request.user}, name {name}")
-        obj: AbstractConfig = self.get_object()
+    def health_check(self, request, pk=None):
+        logger.info(f"get healthcheck from user {request.user}, name {pk}")
+        obj: PythonConfig = self.get_object()
         class_ = obj.python_class
         try:
             if not hasattr(class_, "health_check") or not callable(class_.health_check):
@@ -184,36 +220,3 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
             raise ValidationError({"detail": "No healthcheck implemented"})
         else:
             return Response(data={"status": health_status}, status=status.HTTP_200_OK)
-
-    @add_docs(
-        description="Disable/Enable plugin for your organization",
-        request=None,
-        responses={201: {}, 202: {}},
-    )
-    @action(
-        methods=["post"],
-        detail=True,
-        url_path="organization",
-    )
-    def disable_in_org(self, request, name=None):
-        logger.info(f"get disable_in_org from user {request.user}, name {name}")
-        obj: AbstractConfig = self.get_object()
-        if not request.user.has_membership() or not request.user.membership.is_owner:
-            raise PermissionDenied()
-        organization = request.user.membership.organization
-        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
-            raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
-        obj.disabled_in_organizations.add(organization)
-        return Response(status=status.HTTP_201_CREATED)
-
-    @disable_in_org.mapping.delete
-    def enable_in_org(self, request, name=None):
-        logger.info(f"get enable_in_org from user {request.user}, name {name}")
-        obj: AbstractConfig = self.get_object()
-        if not request.user.has_membership() or not request.user.membership.is_owner:
-            raise PermissionDenied()
-        organization = request.user.membership.organization
-        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
-            raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
-        obj.disabled_in_organizations.remove(organization)
-        return Response(status=status.HTTP_202_ACCEPTED)

@@ -91,7 +91,10 @@ export async function saveJobAsPlaybook(values) {
   const data = {
     name: values.name,
     description: values.description,
-    job: values.jobId,
+    analyzers: values.analyzers,
+    connectors: values.connectors,
+    pivots: values.pivots,
+    runtime_configuration: values.runtimeConfiguration,
   };
   try {
     const response = await axios.post(PLAYBOOKS_CONFIG_URI, data);
@@ -100,7 +103,7 @@ export async function saveJobAsPlaybook(values) {
     if (success) {
       addToast(
         <span>
-          Saved Job #{values.jobId} as Playbook with name {response.data.name}!
+          Playbook with name {response.data.name} created with success
         </span>,
         null,
         "info"
@@ -108,9 +111,7 @@ export async function saveJobAsPlaybook(values) {
     }
   } catch (e) {
     addToast(
-      <span>
-        Failed. Operation: <em>Saving Job #${values.jobId} as playbook</em>
-      </span>,
+      <span>Failed creation of playbook with name {values.name}</span>,
       e.parsedMsg,
       "warning"
     );

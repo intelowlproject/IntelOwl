@@ -51,7 +51,7 @@ class CustomTestCase(TestCase):
         return sum(len(c.queries) for c in connections.all())
 
 
-class CustomAPITestCase(CustomTestCase):
+class CustomViewSetTestCase(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.client = APIClient()

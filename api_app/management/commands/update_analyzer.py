@@ -23,7 +23,7 @@ class Command(BaseCommand):
         except AnalyzerConfig.DoesNotExist:
             self.stdout.write(
                 self.style.WARNING(
-                    f"Configuration {options['config_name']} does not exists"
+                    f"Configuration {options['config_name']} does not exist"
                 )
             )
             return

@@ -6,7 +6,7 @@
 from datetime import timedelta
 
 from ._util import get_secret
-from .commons import DEBUG, PUBLIC_DEPLOYMENT, STAGE_CI, STAGE_LOCAL, VERSION
+from .commons import VERSION
 from .security import WEB_CLIENT_URL
 
 REST_FRAMEWORK = {

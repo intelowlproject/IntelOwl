@@ -55,9 +55,12 @@ export default function JobResult() {
           [
             "pending",
             "running",
-            "analyzers_to_execute",
-            "connectors_to_execute",
-            "visualizers_to_execute",
+            "analyzers_running",
+            "connectors_running",
+            "visualizers_running",
+            "analyzers_completed",
+            "connectors_completed",
+            "visualizers_completed",
           ].includes(job.status)
       ),
     [job]

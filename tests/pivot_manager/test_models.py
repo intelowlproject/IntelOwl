@@ -163,11 +163,12 @@ class PivotConfigTestCase(CustomTestCase):
         )
         report = AnalyzerReport(report={"test": b"abc"}, config=ac)
 
-        with self.assertRaises(ValueError):
-            try:
-                next(pc.get_value(report))
-            except StopIteration:
-                self.fail("No value to retrieve")
+        try:
+            next(pc.get_value(report))
+        except StopIteration:
+            self.fail("No value to retrieve")
+        except ValueError:
+            self.fail("Raised exception")
 
     def test_create_job_multiple_generic(self):
         playbook = PlaybookConfig.objects.create(

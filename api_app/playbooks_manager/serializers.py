@@ -30,10 +30,6 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
     )
     runtime_configuration = rfs.DictField(required=True)
 
-    class Meta:
-        model = PlaybookConfig
-        fields = rfs.ALL_FIELDS
-
     def validate_analyzers(self, analyzers):
         if not analyzers:
             raise ValidationError("You must have at least one analyzer")

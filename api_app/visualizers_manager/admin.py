@@ -15,6 +15,6 @@ class VisualizerReportAdminView(AbstractReportAdminView):
 
 @admin.register(VisualizerConfig)
 class VisualizerConfigAdminView(PythonConfigAdminView):
-    list_display = AbstractConfigAdminView.list_display + ("playbook",)
+    list_display = PythonConfigAdminView.list_display + ("playbook",)
 
     form = VisualizerConfigAdminForm

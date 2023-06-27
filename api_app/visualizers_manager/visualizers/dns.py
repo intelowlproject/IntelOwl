@@ -91,11 +91,7 @@ class DNS(Visualizer):
 
     def run(self) -> List[Dict]:
 
-        first_level_elements = [
-            self.Title(
-                title=self.Base(value="test title"), value=self.Base(value="test value")
-            )
-        ]
+        first_level_elements = []
         second_level_elements = []
 
         for analyzer_report in self.analyzer_reports():

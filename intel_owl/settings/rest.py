@@ -63,7 +63,7 @@ SPECTACULAR_SETTINGS = {
 }
 USE_RECAPTCHA = get_secret("USE_RECAPTCHA", "True") == "True"
 # drf-recaptcha
-DRF_RECAPTCHA_SECRET_KEY = str(get_secret("RECAPTCHA_SECRET_KEY"))
+DRF_RECAPTCHA_SECRET_KEY = str(get_secret("RECAPTCHA_SECRET_KEY", ""))
 # this is necessary to avoid to have the related Django app to yell
 # and to have this populated also for people who upgraded from previous versions
 if not DRF_RECAPTCHA_SECRET_KEY:

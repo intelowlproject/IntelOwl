@@ -91,7 +91,7 @@ The Registration Page contains a Recaptcha form from Google. By default, that Re
 
 If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE).
 
-Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY_IO_PUBLIC` value in the `env_file_app` file. Plus you would need to remember to set to `True` the `PUBLIC_DEPLOYMENT` variable too.
+Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY` value in the `env_file_app` file.
 
 Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `frontend/public/env.js` file.
 In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.

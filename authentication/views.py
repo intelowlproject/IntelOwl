@@ -255,12 +255,14 @@ def checkConfiguration(request):
                 errors["AWS SES backend"] = "configuration required"
         else:
             # SMTP backend
-            if not all([
-                settings.EMAIL_HOST,
-                settings.EMAIL_HOST_USER,
-                settings.EMAIL_HOST_PASSWORD,
-                settings.EMAIL_PORT,
-            ]):
+            if not all(
+                [
+                    settings.EMAIL_HOST,
+                    settings.EMAIL_HOST_USER,
+                    settings.EMAIL_HOST_PASSWORD,
+                    settings.EMAIL_PORT,
+                ]
+            ):
                 errors["SMTP backend"] = "configuration required"
 
     # if you are in production environment
@@ -270,4 +272,6 @@ def checkConfiguration(request):
             errors["RECAPTCHA_SECRET_KEY"] = "required"
 
     logger.info(f"Configuration errors: {errors}")
-    return Response(status=status.HTTP_200_OK, data={"errors": errors} if errors else {})
+    return Response(
+        status=status.HTTP_200_OK, data={"errors": errors} if errors else {}
+    )

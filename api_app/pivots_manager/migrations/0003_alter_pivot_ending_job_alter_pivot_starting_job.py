@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0031_alter_parameter_unique_together'),
+        ('api_app', '0033_alter_parameter_unique_together'),
         ('pivots_manager', '0002_rename_pivot_manag_startin_21e74a_idx_pivots_mana_startin_694120_idx_and_more'),
     ]
 

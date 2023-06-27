@@ -12,10 +12,10 @@ class Migration(migrations.Migration):
     dependencies = [
         ('visualizers_manager', '0022_alter_visualizerconfig_name'),
         ('certego_saas_organization', '0001_initial'),
-        ('api_app', '0031_alter_parameter_unique_together'),
+        ('api_app', '0033_alter_parameter_unique_together'),
         ('analyzers_manager', '0031_alter_analyzerconfig_name'),
         ('connectors_manager', '0018_alter_connectorconfig_name'),
-        ('playbooks_manager', '0014_playbookconfig_disabled_in_organizations'),
+        ('playbooks_manager', '0016_playbookconfig_disabled_in_organizations'),
     ]
 
     operations = [

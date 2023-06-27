@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('pivots_manager', '0001_initial'),
-        ('playbooks_manager', '0014_playbookconfig_disabled_in_organizations'),
+        ('playbooks_manager', '0016_playbookconfig_disabled_in_organizations'),
     ]
 
     operations = [

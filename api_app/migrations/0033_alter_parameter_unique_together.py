@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
         ('analyzers_manager', '0031_alter_analyzerconfig_name'),
         ('visualizers_manager', '0022_alter_visualizerconfig_name'),
         ('connectors_manager', '0018_alter_connectorconfig_name'),
-        ('api_app', '0030_pluginconfig_repositories'),
+        ('api_app', '0032_alter_job_status'),
     ]
 
     operations = [

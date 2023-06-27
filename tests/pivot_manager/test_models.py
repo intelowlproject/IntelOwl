@@ -170,13 +170,17 @@ class PivotConfigTestCase(CustomTestCase):
                 self.fail("No value to retrieve")
 
     def test_create_job_multiple_generic(self):
-
+        playbook = PlaybookConfig.objects.create(
+            type=["generic"],
+            name="test123",
+            description="test123",
+        )
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             analyzer_config=ac,
             field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
+            playbook_to_execute=playbook,
         )
 
         report = AnalyzerReport(
@@ -189,6 +193,25 @@ class PivotConfigTestCase(CustomTestCase):
 
         self.assertEqual("something2", jobs[1].observable_name)
         self.assertEqual("generic", jobs[1].observable_classification)
+        playbook.delete()
+
+    def test_create_job_multiple_file(self):
+        ac = AnalyzerConfig.objects.first()
+        job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
+        pc = PivotConfig(
+            analyzer_config=ac,
+            field="test",
+            playbook_to_execute=PlaybookConfig.objects.filter(type=["file"]).first(),
+        )
+        with open("test_files/file.exe", "rb") as f:
+            content = f.read()
+        report = AnalyzerReport(
+            report={"test": [content]}, config=ac, job=job
+        )
+        jobs = list(pc._create_jobs(report, send_task=False))
+        self.assertEqual(1, len(jobs))
+        self.assertEqual("test.0", jobs[0].file_name)
+        self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
 
     def test_create_job(self):
         ac = AnalyzerConfig.objects.first()
@@ -196,7 +219,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             analyzer_config=ac,
             field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
+            playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
         report = AnalyzerReport(report={"test": "google.com"}, config=ac, job=job)
         jobs = list(pc._create_jobs(report, send_task=False))

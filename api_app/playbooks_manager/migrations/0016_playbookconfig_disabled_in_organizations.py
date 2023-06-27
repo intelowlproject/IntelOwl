@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('certego_saas_organization', '0001_initial'),
-        ('playbooks_manager', '0013_alter_playbookconfig_options'),
+        ('playbooks_manager', '0015_dns_playbook'),
     ]
 
     operations = [

@@ -1,6 +1,8 @@
+import io
 import logging
 from typing import Any, Generator, List
 
+from django.core.files import File
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -169,8 +171,6 @@ class PivotConfig(AbstractConfig):
 
         if isinstance(value, (int, dict)):
             raise ValueError(f"You can't use a {type(value)} as pivot")
-        if isinstance(value, bytes):
-            raise ValueError("At the moment we do not support pivoting to files")
         if isinstance(value, list):
             logger.info(f"Config {self.name} retrieved value {value}")
             yield from value
@@ -178,23 +178,53 @@ class PivotConfig(AbstractConfig):
             logger.info(f"Config {self.name} retrieved value {value}")
             yield value
 
-    def _create_jobs(
-        self, report: AbstractReport, send_task: bool = True
-    ) -> Generator[Job, None, None]:
+    def _get_serializer(self, report: AbstractReport):
+        from api_app.analyzers_manager.constants import AllTypes
+
+        values = self.get_value(report)
+        if AllTypes.FILE.value in self.playbook_to_execute.type:
+            return self._get_file_serializer(values, report.job.tlp, report.job.user)
+        else:
+            return self._get_observable_serializer(values, report.job.tlp, report.job.user)
+
+    def _get_observable_serializer(self, values:Generator[Any, None, None], tlp:str, user ):
         from api_app.serializers import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
-        try:
-            serializer = ObservableAnalysisSerializer(
+        return ObservableAnalysisSerializer(
                 data={
                     "playbooks_requested": [self.playbook_to_execute_id],
-                    "observables": [(None, value) for value in self.get_value(report)],
+                    "observables": [(None, value) for value in values],
                     "send_task": True,
-                    "tlp": report.job.tlp,
+                    "tlp": tlp,
                 },
-                context={"request": MockUpRequest(user=report.job.user)},
+                context={"request": MockUpRequest(user=user)},
                 many=True,
             )
+
+    def _get_file_serializer(self, values: Generator[bytes, None, None], tlp:str, user):
+        from api_app.serializers import FileAnalysisSerializer
+        from tests.mock_utils import MockUpRequest
+
+        files = [File(io.BytesIO(data), name=f"{self.field}.{i}") for i, data in enumerate(values)]
+        return FileAnalysisSerializer(
+            data={
+                "playbooks_requested": [self.playbook_to_execute_id],
+                "files": files,
+                "file_names:":[file.name for file in files],
+                "send_task": True,
+                "tlp": tlp,
+            },
+            context={"request": MockUpRequest(user=user)},
+            many=True,
+        )
+
+    def _create_jobs(
+        self, report: AbstractReport, send_task: bool = True
+    ) -> Generator[Job, None, None]:
+
+        try:
+            serializer = self._get_serializer(report)
         except ValueError as e:
             logger.exception(e)
             raise

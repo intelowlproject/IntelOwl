@@ -3,16 +3,14 @@
 from django.db import models
 
 from api_app.analyzers_manager.constants import AllTypes
-from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.connectors_manager.models import ConnectorConfig
+from api_app.core.models import AbstractConfig
 from api_app.fields import ChoiceArrayField
 from api_app.models import default_runtime
-from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 
 
-class PlaybookConfig(models.Model):
+class PlaybookConfig(AbstractConfig):
     objects = PlaybookConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
@@ -26,13 +24,13 @@ class PlaybookConfig(models.Model):
     )
 
     analyzers = models.ManyToManyField(
-        AnalyzerConfig, related_name="playbooks", blank=True
+        "analyzers_manager.AnalyzerConfig", related_name="playbooks", blank=True
     )
     connectors = models.ManyToManyField(
-        ConnectorConfig, related_name="playbooks", blank=True
+        "connectors_manager.ConnectorConfig", related_name="playbooks", blank=True
     )
     pivots = models.ManyToManyField(
-        PivotConfig, related_name="used_by_playbooks", blank=True
+        "pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True
     )
     runtime_configuration = models.JSONField(
         blank=True,

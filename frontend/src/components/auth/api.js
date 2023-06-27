@@ -69,8 +69,13 @@ export async function resetPassword(body) {
 export async function checkConfiguration(body) {
   try {
     const resp = await axios.get(`${AUTH_BASE_URI}/configuration`, body);
+    const { errors } = resp.data;
+    if (errors) {
+      return Promise.reject(errors);
+    }
     return resp;
   } catch (err) {
+    // this API always return 200, this catch should never ne triggered, but it's better to be safe
     return Promise.reject(err);
   }
 }

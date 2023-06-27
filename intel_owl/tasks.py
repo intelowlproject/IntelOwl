@@ -189,15 +189,24 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")
     if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
-        for python_module in [
-            "maxmind.Maxmind",
-            "talos.Talos",
-            "tor.Tor",
-            "yara_scan.YaraScan",
-            "quark_engine.QuarkEngine",
-            "phishing_army.PhishingArmy",
+        from api_app.analyzers_manager.file_analyzers.quark_engine import QuarkEngine
+        from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
+        from api_app.analyzers_manager.observable_analyzers.maxmind import Maxmind
+        from api_app.analyzers_manager.observable_analyzers.phishing_army import (
+            PhishingArmy,
+        )
+        from api_app.analyzers_manager.observable_analyzers.talos import Talos
+        from api_app.analyzers_manager.observable_analyzers.tor import Tor
+
+        for class_ in [
+            Maxmind,
+            Talos,
+            Tor,
+            YaraScan,
+            QuarkEngine,
+            PhishingArmy,
         ]:
-            update(python_module, queue=queue)
+            update(class_.python_module, queue=queue)
 
 
 # set logger

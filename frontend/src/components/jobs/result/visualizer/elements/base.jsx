@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { CopyToClipboardButton } from "@certego/certego-ui";
 
 export function BaseVisualizer({
   size,
@@ -11,6 +12,8 @@ export function BaseVisualizer({
   bold,
   italic,
   disable,
+  id,
+  text,
 }) {
   let coreComponent = (
     <span
@@ -29,13 +32,27 @@ export function BaseVisualizer({
       </a>
     );
   }
+
+  let copyButton = true;
+  if (
+    id.split("-").indexOf("vlist") !== -1 ||
+    id.split("-").indexOf("title") !== -1
+  )
+    copyButton = false;
+
   return (
     <div
       className={`${size} small d-flex align-items-center text-${alignment} justify-content-${alignment} ${
         disable ? "opacity-25" : ""
       } ${color}`}
     >
-      {coreComponent}
+      {copyButton ? (
+        <CopyToClipboardButton id={`${id}`} text={text || value}>
+          {coreComponent}
+        </CopyToClipboardButton>
+      ) : (
+        coreComponent
+      )}
     </div>
   );
 }
@@ -43,6 +60,7 @@ export function BaseVisualizer({
 BaseVisualizer.propTypes = {
   size: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
   alignment: PropTypes.string,
   icon: PropTypes.object,
   color: PropTypes.string,
@@ -50,6 +68,7 @@ BaseVisualizer.propTypes = {
   bold: PropTypes.bool,
   italic: PropTypes.bool,
   disable: PropTypes.bool,
+  text: PropTypes.string,
 };
 
 BaseVisualizer.defaultProps = {
@@ -60,4 +79,5 @@ BaseVisualizer.defaultProps = {
   bold: false,
   italic: false,
   disable: false,
+  text: "",
 };

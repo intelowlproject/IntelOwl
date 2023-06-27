@@ -21,12 +21,13 @@ export function VerticalListVisualizer({
   values,
   startOpen,
   disable,
+  id,
 }) {
   const [isListOpen, setIsListOpen] = useState(startOpen);
   const toggleList = () => setIsListOpen(!isListOpen);
 
   return (
-    <div className={`${size}`}>
+    <div className={`${size}`} key={id}>
       <Card className={`${disable ? "opacity-50" : ""}`}>
         <CardTitle className="p-1 mb-0">
           <Button
@@ -72,6 +73,7 @@ VerticalListVisualizer.propTypes = {
   alignment: PropTypes.string,
   startOpen: PropTypes.bool,
   disable: PropTypes.bool,
+  id: PropTypes.string.isRequired,
 };
 
 VerticalListVisualizer.defaultProps = {

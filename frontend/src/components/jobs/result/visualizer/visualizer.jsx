@@ -21,12 +21,13 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * @param {object} element data used to generate the component
  * @returns {Object} component to visualize
  */
-function convertToElement(element) {
+function convertToElement(element, idElement) {
   let visualizerElement;
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
       visualizerElement = (
         <BooleanVisualizer
+          key={idElement}
           size={element.size}
           value={element.value}
           link={element.link}
@@ -41,8 +42,9 @@ function convertToElement(element) {
     case VisualizerComponentType.HLIST: {
       visualizerElement = (
         <HorizontalListVisualizer
-          values={element.values.map((additionalElement) =>
-            convertToElement(additionalElement)
+          key={idElement}
+          values={element.values.map((additionalElement, index) =>
+            convertToElement(additionalElement, `${idElement}-${index}`)
           )}
           alignment={element.alignment}
         />
@@ -52,10 +54,11 @@ function convertToElement(element) {
     case VisualizerComponentType.VLIST: {
       visualizerElement = (
         <VerticalListVisualizer
+          id={idElement}
           size={element.size}
-          name={convertToElement(element.name)}
-          values={element.values.map((additionalElement) =>
-            convertToElement(additionalElement)
+          name={convertToElement(element.name, `${idElement}-vlist`)}
+          values={element.values.map((additionalElement, index) =>
+            convertToElement(additionalElement, `${idElement}-item${index}`)
           )}
           alignment={element.alignment}
           startOpen={element.startOpen}
@@ -67,10 +70,11 @@ function convertToElement(element) {
     case VisualizerComponentType.TITLE: {
       visualizerElement = (
         <TitleVisualizer
+          id={idElement}
           size={element.size}
           alignment={element.alignment}
-          title={convertToElement(element.title)}
-          value={convertToElement(element.value)}
+          title={convertToElement(element.title, `${idElement}-title`)}
+          value={convertToElement(element.value, `${idElement}-value`)}
         />
       );
       break;
@@ -78,6 +82,7 @@ function convertToElement(element) {
     default: {
       visualizerElement = (
         <BaseVisualizer
+          id={idElement}
           size={element.size}
           alignment={element.alignment}
           value={element.value}
@@ -126,7 +131,10 @@ export default function VisualizerReport({ visualizerReport }) {
 
   // convert data to elements
   const levels = validatedLevels.map((level) =>
-    convertToElement(level.elements)
+    convertToElement(
+      level.elements,
+      `page${visualizerReport.id}-level${level.level}`
+    )
   );
 
   console.debug("VisualizerReport - levels");

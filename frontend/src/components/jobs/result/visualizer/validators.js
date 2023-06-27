@@ -126,6 +126,7 @@ function parseElementFields(rawElement) {
       validatedFields.link = rawElement.link;
       validatedFields.bold = parseBool(rawElement.bold);
       validatedFields.italic = parseBool(rawElement.italic);
+      validatedFields.text = rawElement.text;
       break;
     }
   }

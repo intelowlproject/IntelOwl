@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { Badge } from "reactstrap";
+import { CopyToClipboardButton } from "@certego/certego-ui";
 
 export function BooleanVisualizer({
   size,
@@ -11,6 +12,7 @@ export function BooleanVisualizer({
   italic,
   activeColor,
   disable,
+  id,
 }) {
   let coreComponent = (
     <span className={`${italic ? "fst-italic" : ""}`}>
@@ -32,7 +34,9 @@ export function BooleanVisualizer({
         color={disable ? "gray" : activeColor}
         className={`w-100 text-wrap ${disable ? "opacity-25" : ""}`}
       >
-        {coreComponent}
+        <CopyToClipboardButton id={`${id}`} text={value}>
+          {coreComponent}
+        </CopyToClipboardButton>
       </Badge>
     </div>
   );
@@ -46,6 +50,7 @@ BooleanVisualizer.propTypes = {
   italic: PropTypes.bool,
   activeColor: PropTypes.string,
   disable: PropTypes.bool,
+  id: PropTypes.number.isRequired,
 };
 
 BooleanVisualizer.defaultProps = {

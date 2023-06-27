@@ -12,6 +12,11 @@ from api_app.playbooks_manager.models import PlaybookConfig
 
 
 class PlaybookConfigSerializer(rfs.ModelSerializer):
+    
+    class Meta:
+        model = PlaybookConfig
+        fields = rfs.ALL_FIELDS
+
 
     type = rfs.ListField(child=rfs.CharField(read_only=True), read_only=True)
     analyzers = rfs.PrimaryKeyRelatedField(
@@ -20,6 +25,8 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
     connectors = rfs.PrimaryKeyRelatedField(
         many=True, queryset=ConnectorConfig.objects.all(), required=True
     )
+    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
+    
     pivots = rfs.PrimaryKeyRelatedField(
         many=True, queryset=PivotConfig.objects.all(), required=True
     )

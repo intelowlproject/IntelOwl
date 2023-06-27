@@ -10,8 +10,8 @@ This page includes the most important things to know and understand when using I
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
-  - [Visualizers](#visualizers)
   - [Playbooks](#playbooks)
+  - [Visualizers](#visualizers)
 - [TLP Support](#tlp-support)
 
 ## Client
@@ -411,6 +411,47 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
   - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
   - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
+### Playbooks
+
+Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
+
+If you want to avoid to re-select/re-configure a particular combination of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
+
+This is a feature introduced since IntelOwl v4.1.0! Please provide feedback about it!
+
+#### Playbooks List
+
+The following is the list of the available pre-built playbooks. You can also navigate the same list via the
+
+- Graphical Interface: once your application is up and running, go to the "Plugins" section
+- [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-playbook-config`
+
+##### List of pre-built playbooks
+
+- `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
+- `Sample_Static_Analysis`: A playbook containing all analyzers that perform static analysis on files.
+- `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
+- `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
+- `Dns`: A playbook containing all dns providers
+
+#### Playbooks customization
+
+You can create new playbooks via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`
+
+The following are all the keys that you can leverage/change without touching the source code:
+
+- `analyzers`: list of analyzers to execute
+- `connectors`: list of connectors to execute
+- `disabled`: _similar to analyzers_
+- `description`: _similar to analyzers_
+- `type`: list of observable types or files supported
+- `runtime_configuration`: runtime configuration for each type of plugin
+
+Another chance to create a new playbook is to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
+In this way, after you have done an analysis, you can save the configuration of analyzers/connectors for re-use with a single click.
+
+Those are the only ways to do that for now. We are planning to provide more easier ways to add new playbooks in the future.
+
 ### Visualizers
 
 With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
@@ -419,11 +460,10 @@ You can leverage it as a framework to create _custom aggregated and simplified v
 Visualizers are designed to run after the analyzers and the connectors.
 The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
 
-Each visualizer must define a set of analyzers and connectors as requirement:
-in fact the visualizers can not be chosen at the time of Job creation (once you click into the `Scan` button) but every single visualizer that it is configured and that has its requirements satisfied will be automatically selected and executed.
+Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
 
 This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
-To simplify the process, take example from the pre-built analyzers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
+To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
 
 ##### List of pre-built Visualizers
 
@@ -447,46 +487,6 @@ The following are all the keys that you can change without touching the source c
   - `soft_time_limit`: _same as analyzers_
 - `analyzers`: List of analyzers that must be executed
 - `connectors`: List of connectors that must be executed
-
-### Playbooks
-
-Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
-
-If you want to avoid to re-select/re-configure a particular combination of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
-
-This is a feature introduced since IntelOwl v4.1.0! Please provide feedback about it!
-
-#### Playbooks List
-
-The following is the list of the available pre-built playbooks. You can also navigate the same list via the
-
-- Graphical Interface: once your application is up and running, go to the "Plugins" section
-- [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-playbook-config`
-
-##### List of pre-built playbooks
-
-- `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
-- `Sample_Static_Analysis`: A playbook containing all analyzers that perform static analysis on files.
-- `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
-- `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
-
-#### Playbooks customization
-
-You can create new playbooks via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`
-
-The following are all the keys that you can leverage/change without touching the source code:
-
-- `analyzers`: list of analyzers to execute
-- `connectors`: list of connectors to execute
-- `disabled`: _similar to analyzers_
-- `description`: _similar to analyzers_
-- `type`: list of observable types or files supported
-- `runtime_configuration`: runtime configuration for each type of plugin
-
-Another chance to create a new playbook is to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
-In this way, after you have done an analysis, you can save the configuration of analyzers/connectors for re-use with a single click.
-
-Those are the only ways to do that for now. We are planning to provide more easier ways to add new playbooks in the future.
 
 ---
 

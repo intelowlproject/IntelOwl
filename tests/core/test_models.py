@@ -12,17 +12,13 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.classes import Plugin
 from api_app.core.models import AbstractConfig, Parameter
 from api_app.models import Job, PluginConfig
+from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 
 
-@patch.multiple(
-    "api_app.visualizers_manager.models.VisualizerConfig",
-    analyzers=None,
-    connectors=None,
-)
 class AbstractConfigTestCase(CustomTestCase):
     def test_abstract(self):
         with self.assertRaises(TypeError):
@@ -39,6 +35,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         self.assertEqual(
             f"{settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH}.yara.Yara",
@@ -55,6 +52,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         try:
             pc = muc.python_class
@@ -72,6 +70,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="wrong_path.WrongPath",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
             muc.full_clean()
@@ -83,6 +82,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "wrongQueue"},
+            playbook=PlaybookConfig.objects.first(),
         )
         muc.full_clean()
         self.assertEqual(muc.queue, "default")
@@ -94,6 +94,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         result = muc._is_configured(self.user)
         self.assertTrue(result)
@@ -106,6 +107,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -126,6 +128,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -147,6 +150,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -172,6 +176,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -196,6 +201,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         self.assertTrue(muc.is_runnable(self.user))
         muc.delete()
@@ -207,6 +213,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         self.assertFalse(muc.is_runnable(self.user))
         muc.delete()
@@ -218,6 +225,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         org = Organization.objects.create(name="test_org")
 
@@ -242,6 +250,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
 
@@ -259,6 +268,7 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
         signature = muc.get_signature(job)
@@ -289,6 +299,7 @@ class ParameterTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
         )
         par = Parameter(
             name="test",

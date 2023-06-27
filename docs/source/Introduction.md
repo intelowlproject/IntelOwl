@@ -18,6 +18,7 @@ Main features:
 ## Publications and media
 To know more about the project and its growth over time, you may be interested in reading the following official blog posts and/or videos:
 
+- [HackinBo 2023 Presentation (in Italian)](https://www.youtube.com/watch?v=55GKEZoDBgU)
 - [Certego Blog: v.5.0.0 Announcement](https://www.certego.net/blog/intelowl-v5-released)
 - [Youtube demo](https://youtu.be/pHnh3qTzSeM)
 - [Certego Blog: v.4.0.0 Announcement](https://www.certego.net/en/news/intel-owl-release-v4-0-0/)

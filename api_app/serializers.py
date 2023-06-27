@@ -8,7 +8,7 @@ import json
 import logging
 import re
 import uuid
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Generator, List, Union
 
 import django.core.exceptions
 from django.db.models import Q
@@ -138,8 +138,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(
             attrs["connectors_requested"], attrs
         )
-        attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(
-            attrs["analyzers_to_execute"], attrs["connectors_to_execute"]
+        attrs["visualizers_to_execute"] = list(
+            self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
         )
         attrs["warnings"] = self.filter_warnings
 
@@ -147,24 +147,16 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def set_visualizers_to_execute(
         self,
-        analyzers_to_execute: List[AnalyzerConfig],
-        connectors_to_execute: List[ConnectorConfig],
-    ) -> List[VisualizerConfig]:
-        visualizers_to_execute = []
-
-        for visualizer in VisualizerConfig.objects.all():
-            visualizer: VisualizerConfig
-            if (
-                visualizer.is_runnable(self.context["request"].user)
-                # subsets
-                and set(visualizer.analyzers.all().values_list("pk", flat=True))
-                <= {analyzer.pk for analyzer in analyzers_to_execute}
-                and set(visualizer.connectors.all().values_list("pk", flat=True))
-                <= {connector.pk for connector in connectors_to_execute}
+        playbook_to_execute: PlaybookConfig = None,
+    ) -> Generator[VisualizerConfig, None, None]:
+        if playbook_to_execute:
+            for visualizer in VisualizerConfig.objects.filter(
+                playbook=playbook_to_execute
             ):
-                logger.info(f"Going to use {visualizer.name}")
-                visualizers_to_execute.append(visualizer)
-        return visualizers_to_execute
+                visualizer: VisualizerConfig
+                if visualizer.is_runnable(self.context["request"].user):
+                    logger.info(f"Going to use {visualizer.name}")
+                    yield visualizer
 
     def set_connectors_to_execute(
         self, connectors_requested: List[ConnectorConfig], serialized_data

@@ -57,6 +57,6 @@ urlpatterns = [
         GoogleLoginCallbackView.as_view(),
         name="oauth_google_callback",
     ),
-    path("configuration", checkConfiguration),
+    path("configuration", checkConfiguration, name="auth_configuration"),
     path("", include(router.urls)),
 ]

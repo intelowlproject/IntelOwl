@@ -262,7 +262,7 @@ export function JobInfoCard({ job }) {
           </Col>
         </Row>
       </ContentSection>
-      <Collapse isOpen={isOpen}>
+      <Collapse isOpen={isOpen} id="JobInfoCardCollapse">
         <ContentSection className="border-top-0 bg-body ps-0 pe-1 py-1">
           <ListGroup
             horizontal

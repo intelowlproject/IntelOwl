@@ -8,6 +8,7 @@ describe("BooleanVisualizer component", () => {
   test("required-only params", () => {
     const { container } = render(
       <BooleanVisualizer
+        id="test-id"
         size="col-1"
         value="test bool (required-only params)"
       />
@@ -30,11 +31,20 @@ describe("BooleanVisualizer component", () => {
     // check color
     const badgeElement = sizeComponent.firstChild;
     expect(badgeElement.className).toContain("bg-danger");
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
+    // check copyButton
+    const copyButton = screen.getByRole("button", {
+      name: "test bool (required-only params)",
+    });
+    expect(copyButton).toBeInTheDocument();
   });
 
   test("all params", () => {
     const { container } = render(
       <BooleanVisualizer
+        id="test-id"
         size="col-2"
         value="test bool (all params)"
         // this wrapper with div is required to access to the element in the assertions
@@ -60,6 +70,14 @@ describe("BooleanVisualizer component", () => {
     // check color
     const badgeElement = sizeComponent.firstChild;
     expect(badgeElement.className).toContain("bg-success");
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
+    // check copyButton
+    const copyButton = screen.getByRole("button", {
+      name: "test bool (all params)",
+    });
+    expect(copyButton).toBeInTheDocument();
   });
 
   test("test disable", () => {
@@ -67,8 +85,9 @@ describe("BooleanVisualizer component", () => {
 
     const { container } = render(
       <BooleanVisualizer
+        id="test-id"
         size="col-2"
-        value="test bool (all params)"
+        value="test bool (disable)"
         // this wrapper with div is required to access to the element in the assertions
         icon={<div role="img">{getIcon("like")}</div>}
         activeColor="success"
@@ -79,7 +98,7 @@ describe("BooleanVisualizer component", () => {
     );
 
     // chec text (inner span)
-    const innerPartComponent = screen.getByText("test bool (all params)");
+    const innerPartComponent = screen.getByText("test bool (disable)");
     expect(innerPartComponent).toBeInTheDocument();
     // check italic
     expect(innerPartComponent.className).toBe("fst-italic");
@@ -93,5 +112,13 @@ describe("BooleanVisualizer component", () => {
     // check color
     const badgeElement = sizeComponent.firstChild;
     expect(badgeElement.className).toContain("bg-gray");
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
+    // check copyButton
+    const copyButton = screen.getByRole("button", {
+      name: "test bool (disable)",
+    });
+    expect(copyButton).toBeInTheDocument();
   });
 });

@@ -28,7 +28,7 @@ export function BooleanVisualizer({
     );
   }
   return (
-    <div className={`${size}`}>
+    <div className={`${size}`} id={id}>
       <Badge
         pill
         color={disable ? "gray" : activeColor}
@@ -50,7 +50,7 @@ BooleanVisualizer.propTypes = {
   italic: PropTypes.bool,
   activeColor: PropTypes.string,
   disable: PropTypes.bool,
-  id: PropTypes.number.isRequired,
+  id: PropTypes.string.isRequired,
 };
 
 BooleanVisualizer.defaultProps = {

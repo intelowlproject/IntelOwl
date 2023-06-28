@@ -13,7 +13,7 @@ export function BaseVisualizer({
   italic,
   disable,
   id,
-  text,
+  copyText,
 }) {
   let coreComponent = (
     <span
@@ -33,21 +33,20 @@ export function BaseVisualizer({
     );
   }
 
-  let copyButton = true;
-  if (
+  const copyButton = !(
     id.split("-").indexOf("vlist") !== -1 ||
     id.split("-").indexOf("title") !== -1
-  )
-    copyButton = false;
+  );
 
   return (
     <div
       className={`${size} small d-flex align-items-center text-${alignment} justify-content-${alignment} ${
         disable ? "opacity-25" : ""
       } ${color}`}
+      id={id}
     >
       {copyButton ? (
-        <CopyToClipboardButton id={`${id}`} text={text || value}>
+        <CopyToClipboardButton id={`${id}`} text={copyText || value}>
           {coreComponent}
         </CopyToClipboardButton>
       ) : (
@@ -68,7 +67,7 @@ BaseVisualizer.propTypes = {
   bold: PropTypes.bool,
   italic: PropTypes.bool,
   disable: PropTypes.bool,
-  text: PropTypes.string,
+  copyText: PropTypes.string,
 };
 
 BaseVisualizer.defaultProps = {
@@ -79,5 +78,5 @@ BaseVisualizer.defaultProps = {
   bold: false,
   italic: false,
   disable: false,
-  text: "",
+  copyText: "",
 };

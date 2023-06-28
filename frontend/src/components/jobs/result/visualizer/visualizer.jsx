@@ -28,6 +28,7 @@ function convertToElement(element, idElement) {
       visualizerElement = (
         <BooleanVisualizer
           key={idElement}
+          id={idElement}
           size={element.size}
           value={element.value}
           link={element.link}
@@ -43,6 +44,7 @@ function convertToElement(element, idElement) {
       visualizerElement = (
         <HorizontalListVisualizer
           key={idElement}
+          id={idElement}
           values={element.values.map((additionalElement, index) =>
             convertToElement(additionalElement, `${idElement}-${index}`)
           )}
@@ -54,6 +56,7 @@ function convertToElement(element, idElement) {
     case VisualizerComponentType.VLIST: {
       visualizerElement = (
         <VerticalListVisualizer
+          key={idElement}
           id={idElement}
           size={element.size}
           name={convertToElement(element.name, `${idElement}-vlist`)}
@@ -70,6 +73,7 @@ function convertToElement(element, idElement) {
     case VisualizerComponentType.TITLE: {
       visualizerElement = (
         <TitleVisualizer
+          key={idElement}
           id={idElement}
           size={element.size}
           alignment={element.alignment}
@@ -82,6 +86,7 @@ function convertToElement(element, idElement) {
     default: {
       visualizerElement = (
         <BaseVisualizer
+          key={idElement}
           id={idElement}
           size={element.size}
           alignment={element.alignment}
@@ -92,6 +97,7 @@ function convertToElement(element, idElement) {
           bold={element.bold}
           italic={element.italic}
           disable={element.disable}
+          copyText={element.copyText}
         />
       );
       break;

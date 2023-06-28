@@ -75,7 +75,7 @@ class VisualizableBase(VisualizableObject):
         bold: bool = False,
         italic: bool = False,
         disable: bool = True,
-        text: str = "",
+        copy_text: str = "",
     ):
         super().__init__(size, alignment, disable)
         self.value = value
@@ -84,7 +84,7 @@ class VisualizableBase(VisualizableObject):
         self.icon = icon
         self.bold = bold
         self.italic = italic
-        self.text = text
+        self.copy_text = copy_text or value
 
     @property
     def attributes(self) -> List[str]:
@@ -95,7 +95,7 @@ class VisualizableBase(VisualizableObject):
             "icon",
             "bold",
             "italic",
-            "text",
+            "copy_text",
         ]
 
     @property

@@ -27,7 +27,7 @@ export function VerticalListVisualizer({
   const toggleList = () => setIsListOpen(!isListOpen);
 
   return (
-    <div className={`${size}`} key={id}>
+    <div className={`${size}`} id={id}>
       <Card className={`${disable ? "opacity-50" : ""}`}>
         <CardTitle className="p-1 mb-0">
           <Button
@@ -51,7 +51,7 @@ export function VerticalListVisualizer({
           <ListGroup flush>
             {values.map((listElement, index) => (
               <ListGroupItem
-                key={listElement.value}
+                key={`${id}-${listElement.props.value}`}
                 className={`text-break ${
                   index === values.length - 1 ? "rounded-bottom" : ""
                 } ${listElement.props.color}`}

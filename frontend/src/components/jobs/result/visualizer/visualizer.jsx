@@ -104,6 +104,7 @@ function convertToElement(element, idElement, isChild = false) {
           disable={element.disable}
           copyText={element.copyText}
           isChild={isChild}
+          copyText={element.copyText}
         />
       );
       break;

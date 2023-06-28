@@ -55,6 +55,7 @@ describe("BaseVisualizer component", () => {
         italic
         copyText="test base (copyText)"
         isChild
+        copyText="test base (copyText)"
       />
     );
 

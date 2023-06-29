@@ -94,7 +94,7 @@ export default function Login() {
             <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
             <div className="col-auto">
               <a
-                href={`${AUTH_BASE_URI}/gihutb`}
+                href={`${AUTH_BASE_URI}/github`}
                 onClick={(e) => {
                   e.preventDefault();
                   const url = `${AUTH_BASE_URI}/github`;

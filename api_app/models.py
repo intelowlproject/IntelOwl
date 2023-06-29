@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import base64
+import datetime
 import logging
 import typing
 import uuid
@@ -20,7 +21,9 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from api_app.choices import TLP, ObservableClassification, Status
+from api_app.core.choices import ScanMode
 from api_app.core.models import AbstractConfig, AbstractReport, Parameter
+from api_app.core.queryset import CleanOnCreateQuerySet
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from api_app.validators import validate_runtime_configuration
 from certego_saas.models import User
@@ -86,6 +89,9 @@ class Comment(models.Model):
 
 
 class Job(models.Model):
+
+    objects = CleanOnCreateQuerySet.as_manager()
+
     class Meta:
         indexes = [
             models.Index(
@@ -172,6 +178,16 @@ class Job(models.Model):
     )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
+
+    scan_mode = models.IntegerField(
+        choices=ScanMode.choices,
+        null=False,
+        blank=False,
+        default=ScanMode.CHECK_PREVIOUS_ANALYSIS.value,
+    )
+    scan_check_time = models.DurationField(
+        null=True, blank=True, default=datetime.timedelta(hours=24)
+    )
 
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
@@ -412,6 +428,27 @@ class Job(models.Model):
             .exclude(status=cls.Status.FAILED)
             .count()
         )
+
+    def clean(self) -> None:
+        self.clean_scan()
+
+    def clean_scan(self):
+        if (
+            self.scan_mode == ScanMode.FORCE_NEW_ANALYSIS.value
+            and self.scan_check_time is not None
+        ):
+            raise ValidationError(
+                f"You can't have set mode to {ScanMode.FORCE_NEW_ANALYSIS.name}"
+                " and have check_time set"
+            )
+        elif (
+            self.scan_mode == ScanMode.CHECK_PREVIOUS_ANALYSIS.value
+            and self.scan_check_time is None
+        ):
+            raise ValidationError(
+                f"You can't have set mode to {ScanMode.CHECK_PREVIOUS_ANALYSIS.name}"
+                " and not have check_time set"
+            )
 
 
 @receiver(models.signals.pre_delete, sender=Job)

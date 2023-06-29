@@ -26,6 +26,7 @@ from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 
 from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
+from .core.decorators import deprecated_endpoint
 from .core.models import AbstractConfig
 from .filters import JobFilter
 from .models import Comment, Job, PluginConfig, Tag
@@ -68,6 +69,7 @@ logger = logging.getLogger(__name__)
         ),
     },
 )
+@deprecated_endpoint(deprecation_date="01-07-2023")
 @api_view(["POST"])
 def ask_analysis_availability(request):
     serializer = JobAvailabilitySerializer(

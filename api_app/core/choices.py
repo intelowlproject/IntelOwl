@@ -4,6 +4,11 @@
 from django.db import models
 
 
+class ScanMode(models.IntegerChoices):
+    FORCE_NEW_ANALYSIS = 1
+    CHECK_PREVIOUS_ANALYSIS = 2
+
+
 class ReportStatus(models.TextChoices):
     FAILED = "FAILED"
     PENDING = "PENDING"

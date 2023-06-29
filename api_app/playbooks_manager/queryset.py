@@ -1,15 +1,15 @@
 import datetime
 from typing import Union
 
-from django.db import models
 from django.db.models import F, Func, OuterRef, QuerySet, Subquery, Value
 from django.utils.timezone import now
 
+from api_app.core.queryset import CleanOnCreateQuerySet
 from api_app.models import Job
 from certego_saas.apps.user.models import User
 
 
-class PlaybookConfigQuerySet(models.QuerySet):
+class PlaybookConfigQuerySet(CleanOnCreateQuerySet):
     @staticmethod
     def _subquery_user(user: User) -> Subquery:
         return Subquery(

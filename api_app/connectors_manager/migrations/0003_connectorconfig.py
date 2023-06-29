@@ -5,6 +5,7 @@
 
 from django.db import migrations, models
 
+import api_app.core.defaults
 import api_app.core.models
 import api_app.validators
 
@@ -24,7 +25,7 @@ class Migration(migrations.Migration):
                 ('python_module', models.CharField(max_length=120)),
                 ('description', models.TextField()),
                 ('disabled', models.BooleanField(default=False)),
-                ('config', models.JSONField(default=api_app.core.models.config_default,
+                ('config', models.JSONField(default=api_app.core.defaults.config_default,
                                             validators=[api_app.validators.validate_config])),
                 ('secrets',
                  models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_secrets])),

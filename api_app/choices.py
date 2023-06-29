@@ -1,8 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
 import typing
 
+import _operator
 from django.db import models
 
 
@@ -27,6 +27,18 @@ class TLP(models.TextChoices):
             cls.RED: 3,
         }
         return order[tlp]
+
+    def __compare(self, other, operator):
+        if not isinstance(other, TLP):
+            raise TypeError(f"Can sum {self.__class__.__name__} with {type(other)}")
+
+        return operator(self.get_priority(self), self.get_priority(other))
+
+    def __gt__(self, other):
+        return self.__compare(other, _operator.gt)
+
+    def __lt__(self, other):
+        return self.__compare(other, _operator.lt)
 
 
 class Status(models.TextChoices):

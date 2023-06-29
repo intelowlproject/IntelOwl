@@ -113,15 +113,16 @@ function SaveAsPlaybookIcon() {
 }
 
 export function SaveAsPlaybookButton({
-  analyzers,
-  connectors,
-  pivots,
-  runtimeConfiguration,
+  job
 }) {
-  initialValues.analyzers = analyzers;
-  initialValues.connectors = connectors;
-  initialValues.pivots = pivots;
-  initialValues.runtimeConfiguration = runtimeConfiguration;
+  initialValues.analyzers = job.analyzers;
+  initialValues.connectors = job.connectors;
+  initialValues.pivots = job.pivots;
+  initialValues.runtimeConfiguration = job.runtimeConfiguration;
+  initialValues.tags = job.tags;
+  initialValues.tlp = job.tlp;
+  initialValues.scan_mode = job.scan_mode;
+  initialValues.scan_check_time = job.scan_check_time;
   return (
     <PopupFormButton
       id="saveasplaybook"
@@ -138,10 +139,7 @@ SaveAsPlaybookForm.propTypes = {
 };
 
 SaveAsPlaybookButton.propTypes = {
-  analyzers: PropTypes.arrayOf(PropTypes.string).isRequired,
-  connectors: PropTypes.arrayOf(PropTypes.string).isRequired,
-  pivots: PropTypes.arrayOf(PropTypes.number).isRequired,
-  runtimeConfiguration: PropTypes.object.isRequired,
+  job: PropTypes.object.isRequired,
 };
 
 export default SaveAsPlaybookButton;

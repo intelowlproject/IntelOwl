@@ -29,6 +29,7 @@ from .choices import TLP
 from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
+from .core.choices import ScanMode
 from .core.models import Parameter
 from .helpers import calculate_md5, gen_random_colorhex
 from .models import Comment, Job, PluginConfig, Tag, default_runtime
@@ -73,7 +74,34 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     Base Serializer for ``Job`` model's ``create()``.
     """
 
-    tags_labels = rfs.ListField(default=list)
+    class Meta:
+        fields = (
+            "id",
+            "user",
+            "is_sample",
+            "md5",
+            "tlp",
+            "runtime_configuration",
+            "analyzers_requested",
+            "connectors_requested",
+            "playbook_requested",
+            "tags_labels",
+            "scan_mode",
+            "scan_check_time",
+        )
+
+    is_sample = rfs.HiddenField(write_only=True, default=False)
+    user = rfs.HiddenField(default=rfs.CurrentUserDefault())
+    scan_mode = rfs.ChoiceField(
+        choices=ScanMode.choices,
+        required=False,
+        default=ScanMode.CHECK_PREVIOUS_ANALYSIS.value,
+    )
+    scan_check_time = rfs.DurationField(
+        required=False, allow_null=True, default=datetime.timedelta(hours=24)
+    )
+
+    tags_labels = rfs.ListField(child=rfs.CharField(), default=list)
     runtime_configuration = rfs.JSONField(
         required=False, default=default_runtime, write_only=True
     )
@@ -92,6 +120,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             raise ValidationError({"detail": "Runtime Configuration Validation Failed"})
         return runtime_config
 
+    def validate_tags_labels(self, tags_labels):
+        for label in tags_labels:
+            yield Tag.objects.get_or_create(
+                label=label, defaults={"color": gen_random_colorhex()}
+            )[0]
+
     def validate_tlp(self, tlp: str):
         if tlp == "WHITE":
             return TLP.CLEAR.value
@@ -101,13 +135,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
         self.log_runnable = True
-        self.mtm_fields = {
-            "analyzers_requested": None,
-            "connectors_requested": None,
-            "analyzers_to_execute": None,
-            "connectors_to_execute": None,
-            "visualizers_to_execute": None,
-        }
 
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)
@@ -133,16 +160,16 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             attrs["connectors_requested"]
         )
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(
-            attrs["analyzers_requested"], attrs
+            attrs["analyzers_requested"], attrs["tlp"]
         )
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(
-            attrs["connectors_requested"], attrs
+            attrs["connectors_requested"], attrs["tlp"]
         )
         attrs["visualizers_to_execute"] = list(
             self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
         )
         attrs["warnings"] = self.filter_warnings
-
+        attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 
     def set_visualizers_to_execute(
@@ -159,18 +186,16 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     yield visualizer
 
     def set_connectors_to_execute(
-        self, connectors_requested: List[ConnectorConfig], serialized_data
+        self, connectors_requested: List[ConnectorConfig], tlp: str
     ) -> List[ConnectorConfig]:
-        tlp = serialized_data["tlp"]
         connectors_executed = self.plugins_to_execute(
             tlp, connectors_requested, not self.all_connectors
         )
         return connectors_executed
 
     def set_analyzers_to_execute(
-        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+        self, analyzers_requested: List[AnalyzerConfig], tlp: str
     ) -> List[AnalyzerConfig]:
-        tlp = serialized_data["tlp"]
         analyzers_executed = self.plugins_to_execute(
             tlp, analyzers_requested, not self.all_analyzers
         )
@@ -194,8 +219,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f"{plugin_config.name} won't run: is disabled or not configured"
                     )
 
-                if TLP.get_priority(tlp) > TLP.get_priority(
-                    plugin_config.maximum_tlp
+                if (
+                    TLP[tlp] > TLP[plugin_config.maximum_tlp]
                 ):  # check if job's tlp allows running
                     # e.g. if connector_tlp is GREEN(1),
                     # run for job_tlp CLEAR(0) & GREEN(1) only
@@ -228,33 +253,36 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             self.all_connectors = True
         return connectors
 
-    def create(self, validated_data: dict) -> Job:
-        # create ``Tag`` objects from tags_labels
-        tags_labels = validated_data.pop("tags_labels", None)
+    def check_previous_jobs(self, validated_data: Dict) -> Job:
+        if not validated_data["scan_check_time"]:
+            raise ValidationError("Scan check time can't be null")
+        status_to_exclude = [Job.Status.KILLED, Job.Status.FAILED]
+        if not validated_data.get("playbook_to_execute", None):
+            status_to_exclude.append(Job.Status.REPORTED_WITH_FAILS)
+        query = Q(md5=validated_data["md5"])
+        for analyzer in validated_data.get("analyzers_to_execute", []):
+            query &= Q(analyzers_requested__in=[analyzer])
+        return (
+            self.Meta.model.visible_for_user(self.context["request"].user)
+            .filter(
+                received_request_time__gte=now() - validated_data["scan_check_time"]
+            )
+            .filter(query)
+            .exclude(status__in=status_to_exclude)
+            .latest("received_request_time")
+        )
+
+    def create(self, validated_data: Dict) -> Job:
         validated_data.pop("warnings")
         send_task = validated_data.pop("send_task", False)
-        tags = [
-            Tag.objects.get_or_create(
-                label=label, defaults={"color": gen_random_colorhex()}
-            )[0]
-            for label in tags_labels
-        ]
-        for key in self.mtm_fields:
-            self.mtm_fields[key] = validated_data.pop(key)
+        if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
+            try:
+                job = self.check_previous_jobs(validated_data)
+            except self.Meta.model.DoesNotExist:
+                job = super().create(validated_data)
+        else:
+            job = super().create(validated_data)
 
-        job = Job(user=self.context["request"].user, **validated_data)
-        try:
-            job.full_clean()
-        except django.core.exceptions.ValidationError as e:
-            logger.info(e, stack_info=True)
-            raise ValidationError({"detail": "Validation model failed"})
-        job.save()
-        if tags:
-            job.tags.set(tags)
-
-        for key, value in self.mtm_fields.items():
-            mtm = getattr(job, key)
-            mtm.set(value)
         logger.info(f"Job {job.pk} created")
         if send_task:
             from intel_owl.tasks import job_pipeline
@@ -431,24 +459,13 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     file = rfs.FileField(required=True)
     file_name = rfs.CharField(required=False)
     file_mimetype = rfs.CharField(required=False)
-    is_sample = rfs.HiddenField(write_only=True, default=True)
 
     class Meta:
         model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
+        fields = _AbstractJobCreateSerializer.Meta.fields + (
             "file",
             "file_name",
             "file_mimetype",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbook_requested",
-            "tags_labels",
         )
 
     @classmethod
@@ -589,23 +606,12 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     observable_name = rfs.CharField(required=True)
     observable_classification = rfs.CharField(required=False)
-    is_sample = rfs.HiddenField(write_only=True, default=False)
 
     class Meta:
         model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
+        fields = _AbstractJobCreateSerializer.Meta.fields + (
             "observable_name",
             "observable_classification",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbook_requested",
-            "tags_labels",
         )
 
     @classmethod

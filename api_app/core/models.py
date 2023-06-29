@@ -15,6 +15,8 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 
 from api_app.core.choices import ParamTypes, ReportStatus
+from api_app.core.decorators import valid_value_for_test
+from api_app.core.defaults import config_default
 from api_app.validators import plugin_name_validator, validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
@@ -71,49 +73,6 @@ class AbstractReport(models.Model):
         self.errors.append(err_msg)
         if save:
             self.save(update_fields=["errors"])
-
-
-# This is required as a function (and not even a lambda)
-# because the default must be a callable
-def config_default():
-    return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
-
-
-def valid_value_for_test(func):
-    def wrapper(self, user=None):
-        try:
-            return func(self, user)
-        except RuntimeError:
-            from api_app.models import PluginConfig
-
-            if not settings.STAGE_CI:
-                raise
-            if "url" in self.name:
-
-                return PluginConfig.objects.get_or_create(
-                    value="https://intelowl.com",
-                    parameter=self,
-                    owner=None,
-                    for_organization=False,
-                )[0]
-            elif "pdns_credentials" == self.name:
-                return PluginConfig.objects.get_or_create(
-                    value="user|pwd",
-                    parameter=self,
-                    owner=None,
-                    for_organization=False,
-                )[0]
-            elif "test" in self.name:
-                raise
-            else:
-                return PluginConfig.objects.get_or_create(
-                    value="test",
-                    parameter=self,
-                    owner=None,
-                    for_organization=False,
-                )[0]
-
-    return wrapper
 
 
 class Parameter(models.Model):

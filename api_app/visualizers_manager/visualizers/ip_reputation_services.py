@@ -3,8 +3,8 @@ from typing import Dict, List
 
 from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.core.choices import ReportStatus
-from api_app.visualizers_manager.classes import (
-    Visualizer,
+from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.decorators import (
     visualizable_error_handler_with_params,
 )
 from api_app.visualizers_manager.enums import (

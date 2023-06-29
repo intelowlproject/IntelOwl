@@ -120,7 +120,7 @@ export default function Login() {
                 }}
               >
                 <img
-                  src={`${PUBLIC_URL}/icons8-github-48.png`}
+                  src={`${PUBLIC_URL}/icons8-github.svg`}
                   alt="Github Logo"
                   className="img-fluid"
                 />

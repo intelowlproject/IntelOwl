@@ -13,8 +13,15 @@ INTELOWL_WEB_CLIENT_DOMAIN=localhost
 LOCAL_STORAGE=True
 
 # OAuth2
+
+#google
 GOOGLE_CLIENT_ID=test_intelowl.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=the_supreme_secret
+
+#github
+GITHUB_CLIENT_ID=4a7aed5c9ee5a88afb5b
+GITHUB_CLIENT_SECRET=a486ba124a601920b559c472631d90a84863f83c
+
 
 # AWS
 AWS_STORAGE_BUCKET_NAME=

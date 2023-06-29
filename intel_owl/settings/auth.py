@@ -61,8 +61,8 @@ SITE_ID = 1
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
         "APP": {
-            "client_id": "4a7aed5c9ee5a88afb5b",
-            "secret": "a486ba124a601920b559c472631d90a84863f83c",
+            "client_id": secrets.get_secret("GITHUB_CLIENT_ID"),
+            "secret": secrets.get_secret("GITHUB_CLIENT_SECRET"),
         }
     }
 }

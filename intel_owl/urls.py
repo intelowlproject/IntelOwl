@@ -16,6 +16,7 @@ def render_reactapp(request):
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
     path("api/", include("api_app.urls")),
+    path("accounts/", include("allauth.urls")),
     re_path(r"^(?!api|silk)$", render_reactapp),
     re_path(r"^(?!api|silk)(?:.*)/?$", render_reactapp),
 ]

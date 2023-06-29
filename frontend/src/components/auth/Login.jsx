@@ -18,6 +18,8 @@ import useTitle from "react-use/lib/useTitle";
 import { addToast, ContentSection } from "@certego/certego-ui";
 import { AUTH_BASE_URI } from "../../constants/api";
 
+// import GitHubLoginButton from './GitHubLoginButton';
+
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
 
@@ -90,6 +92,56 @@ export default function Login() {
         <ContentSection>
           <Row>
             <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
+            <div className="col-auto">
+              <a
+                href={`${AUTH_BASE_URI}/gihutb`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const url = `${AUTH_BASE_URI}/github`;
+                  axios
+                    .get(`${url}?no_redirect=true`)
+                    .then(() => {
+                      window.location = url;
+                    })
+                    .catch((error) => {
+                      if (
+                        error?.response?.status === 401 &&
+                        error.parsedMsg.includes("OAuth is not configured.")
+                      )
+                        addToast(
+                          "Login failed!",
+                          "OAuth is not configured. " +
+                            "Check documentation to set it up.",
+                          "danger",
+                          true
+                        );
+                      else throw error;
+                    });
+                }}
+              >
+                <img
+                  src={`${PUBLIC_URL}/icons8-github-48.png`}
+                  alt="Github Logo"
+                  className="img-fluid"
+                />
+              </a>
+              <AiOutlineInfoCircle
+                style={{ verticalAlign: "top" }}
+                id="GithubInfoTooltip"
+                cursor="pointer"
+              />
+              <Tooltip
+                placement="top"
+                isOpen={isOpen}
+                target="GithubInfoTooltip"
+                toggle={() => {
+                  setIsOpen(!isOpen);
+                }}
+              >
+                Check the Authentication section in the documentation for
+                enabling Github Authentication.
+              </Tooltip>
+            </div>
             <div className="col-auto">
               <a
                 href={`${AUTH_BASE_URI}/google`}

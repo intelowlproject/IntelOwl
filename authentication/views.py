@@ -5,6 +5,12 @@ import logging
 from typing import List
 
 import rest_email_auth.views
+from allauth.socialaccount.helpers import perform_login
+
+# social-login
+from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
+from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from authlib.integrations.base_client import OAuthError
 from authlib.oauth2 import OAuth2Error
 from django.conf import settings
@@ -260,3 +266,42 @@ def check_registration_setup(request):
     if errors:
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
     return Response(status=status.HTTP_200_OK)
+
+
+class GitHubLoginCallbackView(LoginView):
+    def get(self, request):
+        code = request.GET.get("code")
+
+        if code:
+            github_adapter = GitHubOAuth2Adapter()
+            client = OAuth2Client(request)
+            access_token = github_adapter.access_token(request, client, code)
+
+            # Get user data
+            github_account = github_adapter.get_user_info(access_token)
+            user_email = github_account.get("email")
+            user_name = github_account.get("name")
+
+            # Check if user exists
+            try:
+                user = User.objects.get(email=user_email)
+            except User.DoesNotExist:
+                # Create new user
+                user = User.objects.create_user(email=user_email, username=user_name)
+
+            # Login user
+            account = SocialAccount(provider="github", user=user)
+            account.extra_data = {"access_token": access_token.token}
+            account.save()
+            token = SocialToken(account=account, token=access_token.token)
+            token.token_secret = access_token.token_secret
+            token.app = SocialApp.objects.get(provider="github")
+            token.save()
+
+            perform_login(
+                request, user, "allauth.account.auth_backends.AuthenticationBackend"
+            )
+
+            return redirect(self.request.build_absolute_uri(f"/login?token={token}"))
+
+        return redirect("http://localhost/login/")

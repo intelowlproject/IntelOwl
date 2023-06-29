@@ -16,6 +16,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    # sites
+    "django.contrib.sites",
     # admin
     "prettyjson",
     # celery, elasticsearch
@@ -43,6 +45,11 @@ INSTALLED_APPS = [
     "drf_recaptcha",
     # performance debugging
     "silk",
+    # all-auth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.github",
 ]
 
 from .auth import *  # lgtm [py/polluting-import]

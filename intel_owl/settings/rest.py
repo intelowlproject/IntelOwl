@@ -61,7 +61,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
     "VERSION": VERSION,
 }
-USE_RECAPTCHA = get_secret("USE_RECAPTCHA", "True") == "True"
+USE_RECAPTCHA = get_secret("USE_RECAPTCHA", False) == "True"
 # drf-recaptcha
 DRF_RECAPTCHA_SECRET_KEY = str(get_secret("RECAPTCHA_SECRET_KEY", ""))
 # this is necessary to avoid to have the related Django app to yell

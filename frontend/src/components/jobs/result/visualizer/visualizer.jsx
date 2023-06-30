@@ -19,6 +19,7 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * This is a recursive function: It's called by the component to convert the inner components.
  *
  * @param {object} element data used to generate the component
+ * @param {bool} isChild flag used in Title and VList to create a smaller children components.
  * @returns {Object} component to visualize
  */
 function convertToElement(element, isChild = false) {

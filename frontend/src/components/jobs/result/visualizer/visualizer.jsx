@@ -19,9 +19,10 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * This is a recursive function: It's called by the component to convert the inner components.
  *
  * @param {object} element data used to generate the component
+ * @param {bool} isChild flag used in Title and VList to create a smaller children components.
  * @returns {Object} component to visualize
  */
-function convertToElement(element, idElement) {
+function convertToElement(element, idElement, isChild = false) {
   let visualizerElement;
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
@@ -46,7 +47,11 @@ function convertToElement(element, idElement) {
           key={idElement}
           id={idElement}
           values={element.values.map((additionalElement, index) =>
-            convertToElement(additionalElement, `${idElement}-${index}`)
+            /* simply pass the isChild:
+          in case of this is the first element (level) we don't need to render the components as children (defaul false is ok).
+          in case this is a child (part of vlist) we pass isChild=true to its children
+          */
+            convertToElement(additionalElement, `${idElement}-${index}`, isChild)
           )}
           alignment={element.alignment}
         />
@@ -61,7 +66,7 @@ function convertToElement(element, idElement) {
           size={element.size}
           name={convertToElement(element.name, `${idElement}-vlist`)}
           values={element.values.map((additionalElement, index) =>
-            convertToElement(additionalElement, `${idElement}-item${index}`)
+            convertToElement(additionalElement, `${idElement}-item${index}`, true)
           )}
           alignment={element.alignment}
           startOpen={element.startOpen}
@@ -78,7 +83,7 @@ function convertToElement(element, idElement) {
           size={element.size}
           alignment={element.alignment}
           title={convertToElement(element.title, `${idElement}-title`)}
-          value={convertToElement(element.value, `${idElement}-value`)}
+          value={convertToElement(element.value, `${idElement}-value`, true)}
         />
       );
       break;
@@ -98,6 +103,7 @@ function convertToElement(element, idElement) {
           italic={element.italic}
           disable={element.disable}
           copyText={element.copyText}
+          isChild={isChild}
         />
       );
       break;

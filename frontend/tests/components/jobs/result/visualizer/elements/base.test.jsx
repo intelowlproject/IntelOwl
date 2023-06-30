@@ -20,7 +20,7 @@ describe("BaseVisualizer component", () => {
     );
     expect(innerPartComponent).toBeInTheDocument();
     // check no color, bold and italic
-    expect(innerPartComponent.className).toBe("  ");
+    expect(innerPartComponent.className).toBe("   ");
     // check no icon
     expect(screen.queryByRole("img")).toBeNull();
     // check no link
@@ -28,7 +28,7 @@ describe("BaseVisualizer component", () => {
     // check size and alignment
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
-      "col-1 small d-flex align-items-center text-center justify-content-center  "
+      "col-1  d-flex align-items-center text-center justify-content-center  "
     );
     // check id
     const idElement = container.querySelector("#test-id");
@@ -54,6 +54,7 @@ describe("BaseVisualizer component", () => {
         bold
         italic
         copyText="test base (copyText)"
+        isChild
       />
     );
 
@@ -61,7 +62,9 @@ describe("BaseVisualizer component", () => {
     const innerPartComponent = screen.getByText("test base (all params)");
     expect(innerPartComponent).toBeInTheDocument();
     // check color, bold and italic
-    expect(innerPartComponent.className).toBe("success fw-bold fst-italic");
+    expect(innerPartComponent.className).toBe(
+      "small success fw-bold fst-italic"
+    );
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check link is available
@@ -105,7 +108,7 @@ describe("BaseVisualizer component", () => {
     const innerPartComponent = screen.getByText("test base (disable)");
     expect(innerPartComponent).toBeInTheDocument();
     // check color, bold and italic
-    expect(innerPartComponent.className).toBe("success fw-bold fst-italic");
+    expect(innerPartComponent.className).toBe(" success fw-bold fst-italic");
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check link is available
@@ -113,7 +116,7 @@ describe("BaseVisualizer component", () => {
     // check optional elements (like bold, italic...)
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
-      "col-2 small d-flex align-items-center text-start justify-content-start opacity-25 success"
+      "col-2  d-flex align-items-center text-start justify-content-start opacity-25 success"
     );
     // check id
     const idElement = container.querySelector("#test-id");

@@ -47,12 +47,12 @@ export function VerticalListVisualizer({
             </div>
           </Button>
         </CardTitle>
-        <Collapse isOpen={isListOpen}>
-          <ListGroup flush>
+        <Collapse isOpen={isListOpen} className="small">
+          <ListGroup flush className="small">
             {values.map((listElement, index) => (
               <ListGroupItem
                 key={`${id}-${listElement.props.value}`}
-                className={`text-break ${
+                className={`small text-break ${
                   index === values.length - 1 ? "rounded-bottom" : ""
                 } ${listElement.props.color}`}
               >

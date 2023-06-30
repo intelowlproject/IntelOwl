@@ -12,12 +12,16 @@ export function BaseVisualizer({
   bold,
   italic,
   disable,
+<<<<<<< HEAD
   id,
   copyText,
+=======
+  isChild,
+>>>>>>> 9f32afe (Frontend improvements (#1772))
 }) {
   let coreComponent = (
     <span
-      className={`${color} ${bold ? "fw-bold" : ""} ${
+      className={`${isChild ? "small" : ""} ${color} ${bold ? "fw-bold" : ""} ${
         italic ? "fst-italic" : ""
       }`}
     >
@@ -40,7 +44,9 @@ export function BaseVisualizer({
 
   return (
     <div
-      className={`${size} small d-flex align-items-center text-${alignment} justify-content-${alignment} ${
+      className={`${size} ${
+        isChild ? "small" : ""
+      } d-flex align-items-center text-${alignment} justify-content-${alignment} ${
         disable ? "opacity-25" : ""
       } ${color}`}
       id={id}
@@ -68,6 +74,7 @@ BaseVisualizer.propTypes = {
   italic: PropTypes.bool,
   disable: PropTypes.bool,
   copyText: PropTypes.string,
+  isChild: PropTypes.bool,
 };
 
 BaseVisualizer.defaultProps = {
@@ -79,4 +86,5 @@ BaseVisualizer.defaultProps = {
   italic: false,
   disable: false,
   copyText: "",
+  isChild: false,
 };

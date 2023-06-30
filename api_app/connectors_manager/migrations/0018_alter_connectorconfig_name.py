@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('connectors_manager', '0017_alter_connectorconfig_options'),
+        ('visualizers_manager', '0022_remove_visualizerconfig_analyzers_and_more'),
     ]
 
     operations = [

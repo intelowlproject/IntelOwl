@@ -25,7 +25,8 @@ def migrate(apps, schema_editor):
         "https://github.com/Neo23x0/signature-base.git",
         "https://yaraify-api.abuse.ch/download/yaraify-rules.zip",
         "https://github.com/facebook/malware-detection",
-        "https://github.com/edelucia/rules/tree/main/yara",
+        "https://github.com/edelucia/rules",
+        "https://github.com/magicsword-io/LOLDrivers",
     ]
     pc.full_clean()
     pc.save()

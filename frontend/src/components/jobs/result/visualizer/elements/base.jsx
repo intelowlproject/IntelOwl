@@ -15,7 +15,7 @@ export function BaseVisualizer({
 }) {
   let coreComponent = (
     <span
-      className={`${color} ${bold ? "fw-bold" : ""} ${
+      className={`small ${color} ${bold ? "fw-bold" : ""} ${
         italic ? "fst-italic" : ""
       }`}
     >

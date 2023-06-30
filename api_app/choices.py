@@ -91,3 +91,25 @@ class ObservableClassification(models.TextChoices):
     HASH = "hash"
     GENERIC = "generic"
     EMPTY = ""
+
+
+class ScanMode(models.IntegerChoices):
+    FORCE_NEW_ANALYSIS = 1
+    CHECK_PREVIOUS_ANALYSIS = 2
+
+
+class ReportStatus(models.TextChoices):
+    FAILED = "FAILED"
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    SUCCESS = "SUCCESS"
+    KILLED = "KILLED"
+
+
+class ParamTypes(models.TextChoices):
+    INT = "int"
+    FLOAT = "float"
+    STR = "str"
+    BOOL = "bool"
+    LIST = "list"
+    DICT = "dict"

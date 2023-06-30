@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Type
 
-from api_app.core.models import AbstractConfig
+from api_app.models import AbstractConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 

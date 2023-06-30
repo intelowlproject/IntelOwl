@@ -4,8 +4,8 @@ from rest_framework import serializers as rfs
 
 from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import ScanMode
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.core.choices import ScanMode
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import TagSerializer

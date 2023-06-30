@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+import uuid
+from abc import ABCMeta, abstractmethod
 
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
@@ -11,8 +13,8 @@ from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -23,13 +25,22 @@ from certego_saas.apps.organization.permissions import (
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
+from intel_owl import tasks
+from intel_owl.celery import app as celery_app
 
 from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
-from .core.decorators import deprecated_endpoint
-from .core.models import AbstractConfig
+from .decorators import deprecated_endpoint
 from .filters import JobFilter
-from .models import Comment, Job, PluginConfig, Tag
+from .models import (
+    AbstractConfig,
+    AbstractReport,
+    Comment,
+    Job,
+    PluginConfig,
+    PythonConfig,
+    Tag,
+)
 from .permissions import IsObjectRealOwnerPermission
 from .pivots_manager.models import PivotConfig
 from .serializers import (
@@ -41,6 +52,7 @@ from .serializers import (
     JobSerializer,
     ObservableAnalysisSerializer,
     PluginConfigSerializer,
+    PythonConfigSerializer,
     TagSerializer,
 )
 
@@ -587,3 +599,201 @@ def plugin_state_viewer(request):
                     "plugin_type": plugin.plugin_type,
                 }
     return Response(result)
+
+
+class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
+
+    permission_classes = [
+        IsObjectOwnerOrSameOrgPermission,
+    ]
+
+    @classmethod
+    @property
+    @abstractmethod
+    def report_model(cls):
+        raise NotImplementedError()
+
+    def get_queryset(self):
+        return self.report_model.objects.all()
+
+    def get_object(self, job_id: int, report_id: int) -> AbstractReport:
+        """
+        overrides drf's get_object
+        get plugin report object by name and job_id
+        """
+        try:
+            obj = self.report_model.objects.get(
+                job_id=job_id,
+                pk=report_id,
+            )
+        except self.report_model.DoesNotExist:
+            raise NotFound()
+        else:
+            self.check_object_permissions(self.request, obj)
+            return obj
+
+    @staticmethod
+    def perform_kill(report: AbstractReport):
+        """
+        performs kill
+         override for callbacks after kill operation
+        """
+        from api_app.models import Job
+
+        # kill celery task
+        celery_app.control.revoke(report.task_id, terminate=True)
+        # update report
+        report.status = AbstractReport.Status.KILLED
+        report.save(update_fields=["status"])
+        # clean up job
+
+        job = Job.objects.get(pk=report.job.pk)
+        job.set_final_status()
+
+    @staticmethod
+    def perform_retry(report: AbstractReport):
+        signature = report.config.get_signature(
+            report.job,
+        )
+        runner = signature | tasks.job_set_final_status.signature(
+            args=[report.job.id],
+            kwargs={},
+            queue=report.config.queue,
+            soft_time_limit=10,
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
+        runner()
+
+    @add_docs(
+        description="Kill running plugin by closing celery task and marking as killed",
+        request=None,
+        responses={
+            204: None,
+        },
+    )
+    @action(detail=False, methods=["patch"])
+    def kill(self, request, job_id, report_id):
+        logger.info(
+            f"kill request from user {request.user}"
+            f" for job_id {job_id}, pk {report_id}"
+        )
+        # get report object or raise 404
+        report = self.get_object(job_id, report_id)
+        if report.status not in [
+            AbstractReport.Status.RUNNING,
+            AbstractReport.Status.PENDING,
+        ]:
+            raise ValidationError({"detail": "Plugin is not running or pending"})
+
+        self.perform_kill(report)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @add_docs(
+        description="Retry a plugin run if it failed/was killed previously",
+        request=None,
+        responses={
+            204: None,
+        },
+    )
+    @action(detail=False, methods=["patch"])
+    def retry(self, request, job_id, report_id):
+        logger.info(
+            f"retry request from user {request.user}"
+            f" for job_id {job_id}, report_id {report_id}"
+        )
+        # get report object or raise 404
+        report = self.get_object(job_id, report_id)
+        if report.status not in [
+            AbstractReport.Status.FAILED,
+            AbstractReport.Status.KILLED,
+        ]:
+            raise ValidationError(
+                {"detail": "Plugin status should be failed or killed"}
+            )
+
+        # retry with the same arguments
+        self.perform_retry(report)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
+    permission_classes = [IsAuthenticated]
+    ordering = ["name"]
+    lookup_field = "pk"
+
+    @add_docs(
+        description="Disable/Enable plugin for your organization",
+        request=None,
+        responses={201: {}, 202: {}},
+    )
+    @action(
+        methods=["post"],
+        detail=True,
+        url_path="organization",
+    )
+    def disable_in_org(self, request, pk=None):
+        logger.info(f"get disable_in_org from user {request.user}, name {pk}")
+        obj: AbstractConfig = self.get_object()
+        if not request.user.has_membership() or not request.user.membership.is_owner:
+            raise PermissionDenied()
+        organization = request.user.membership.organization
+        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+            raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
+        obj.disabled_in_organizations.add(organization)
+        return Response(status=status.HTTP_201_CREATED)
+
+    @disable_in_org.mapping.delete
+    def enable_in_org(self, request, pk=None):
+        logger.info(f"get enable_in_org from user {request.user}, name {pk}")
+        obj: AbstractConfig = self.get_object()
+        if not request.user.has_membership() or not request.user.membership.is_owner:
+            raise PermissionDenied()
+        organization = request.user.membership.organization
+        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+            raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
+        obj.disabled_in_organizations.remove(organization)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class PythonConfigViewSet(AbstractConfigViewSet):
+    serializer_class = PythonConfigSerializer
+
+    def get_queryset(self):
+        return self.serializer_class.Meta.model.objects.all()
+
+    @add_docs(
+        description="Health Check: "
+        "if server instance associated with plugin is up or not",
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="PluginHealthCheckSuccessResponse",
+                fields={
+                    "status": rfs.BooleanField(allow_null=True),
+                },
+            ),
+        },
+    )
+    @action(
+        methods=["get"],
+        detail=True,
+        url_path="health_check",
+        permission_classes=[IsAdminUser],
+    )
+    def health_check(self, request, pk=None):
+        logger.info(f"get healthcheck from user {request.user}, name {pk}")
+        obj: PythonConfig = self.get_object()
+        class_ = obj.python_class
+        try:
+            if not hasattr(class_, "health_check") or not callable(class_.health_check):
+                raise NotImplementedError()
+            try:
+                health_status = class_.health_check(obj.name, request.user)
+            except Exception as e:
+                logger.info(e, stack_info=True)
+                raise ValidationError({"detail": "Unexpected exception raised"})
+        except NotImplementedError:
+            raise ValidationError({"detail": "No healthcheck implemented"})
+        else:
+            return Response(data={"status": health_status}, status=status.HTTP_200_OK)

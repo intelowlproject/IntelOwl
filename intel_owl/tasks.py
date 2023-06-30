@@ -168,7 +168,7 @@ def run_plugin(
     runtime_configuration: dict,
     task_id: int,
 ):
-    from api_app.core.classes import Plugin
+    from api_app.classes import Plugin
 
     plugin_class: typing.Type[Plugin] = import_string(plugin_path)
     config = plugin_class.config_model.objects.get(pk=plugin_config_pk)

@@ -18,8 +18,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from api_app.core.models import Parameter
-from api_app.models import PluginConfig
+from api_app.models import Parameter, PluginConfig
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)

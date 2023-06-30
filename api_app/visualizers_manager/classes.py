@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Tuple, Type, Union
 from django.conf import settings
 from django.db.models import QuerySet
 
-from api_app.core.classes import Plugin
+from api_app.classes import Plugin
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,

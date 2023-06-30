@@ -3,8 +3,7 @@
 
 import logging
 
-from api_app.core.views import PluginActionViewSet, PythonConfigViewSet
-
+from ..views import PluginActionViewSet, PythonConfigViewSet
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 

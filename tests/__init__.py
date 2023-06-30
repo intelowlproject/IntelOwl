@@ -7,7 +7,7 @@ from django.db import connections
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from api_app.core.models import AbstractReport
+from api_app.models import AbstractReport
 
 User = get_user_model()
 

@@ -1,10 +1,10 @@
 import functools
-from logging import getLogger
+import logging
 
 from django.conf import settings
 from django.http import HttpResponse
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def deprecated_endpoint(deprecation_date=None, end_of_life_date=None):

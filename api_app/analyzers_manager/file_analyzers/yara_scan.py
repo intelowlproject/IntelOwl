@@ -17,8 +17,7 @@ from django.utils.functional import cached_property
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from api_app.core.models import Parameter
-from api_app.models import PluginConfig
+from api_app.models import Parameter, PluginConfig
 from intel_owl.settings._util import set_permissions
 
 logger = logging.getLogger(__name__)

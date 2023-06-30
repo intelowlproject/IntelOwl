@@ -4,8 +4,7 @@
 from rest_framework.reverse import reverse
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.core.models import Parameter
-from api_app.models import PluginConfig
+from api_app.models import PluginConfig, Parameter
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 

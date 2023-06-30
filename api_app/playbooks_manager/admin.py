@@ -3,8 +3,8 @@
 
 from django.contrib import admin
 
-from api_app.core.admin import AbstractConfigAdminView
-from api_app.core.choices import ScanMode
+from api_app.admin import AbstractConfigAdminView
+from api_app.choices import ScanMode
 from api_app.playbooks_manager.models import PlaybookConfig
 
 

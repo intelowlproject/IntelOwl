@@ -3,7 +3,7 @@
 
 import logging
 
-from api_app.core.views import PluginActionViewSet, PythonConfigViewSet
+from api_app.views import PluginActionViewSet, PythonConfigViewSet
 from api_app.visualizers_manager.models import VisualizerReport
 from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 

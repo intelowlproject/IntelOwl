@@ -7,10 +7,10 @@ from typing import Optional, Type
 import requests
 from django.conf import settings
 
-from api_app.core.classes import Plugin
 from certego_saas.apps.user.models import User
 
-from ..core.models import Parameter
+from ..classes import Plugin
+from ..models import Parameter
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorConfig, ConnectorReport
 

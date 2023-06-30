@@ -1,20 +1,15 @@
-# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
-# See the file 'LICENSE' for copying permission.
-
 import logging
 import traceback
 import typing
 from abc import ABCMeta, abstractmethod
 from pathlib import PosixPath
 
-from celery.exceptions import SoftTimeLimitExceeded
+from billiard.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.models import Job
-
-from .models import AbstractReport, PythonConfig
+from api_app.models import AbstractReport, Job, PythonConfig
 
 logger = logging.getLogger(__name__)
 

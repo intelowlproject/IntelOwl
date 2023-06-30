@@ -2,8 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-from api_app.core.models import Parameter
-from api_app.core.serializers import PythonListConfigSerializer
+from api_app.models import Parameter
+from api_app.serializers import PythonListConfigSerializer
 
 from .. import CustomTestCase
 from ..mock_utils import MockUpRequest

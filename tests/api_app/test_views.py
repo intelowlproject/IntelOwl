@@ -9,8 +9,7 @@ from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.core.models import Parameter
-from api_app.models import Comment, Job, PluginConfig, Tag
+from api_app.models import Comment, Job, PluginConfig, Tag, Parameter
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 

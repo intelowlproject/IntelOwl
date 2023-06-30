@@ -6,7 +6,7 @@ from django.db import models
 
 from api_app.choices import TLP
 from api_app.connectors_manager.exceptions import ConnectorConfigurationException
-from api_app.core.models import AbstractReport, PythonConfig
+from api_app.models import AbstractReport, PythonConfig
 
 
 class ConnectorReport(AbstractReport):

@@ -44,6 +44,7 @@ license terms.
 [elceef Yara Rules](https://github.com/elceef/yara-rulz),
 [Elastic Yara Rules](https://github.com/elastic/protections-artifacts), 
 [SIFalcon Yara Rules](https://github.com/SIFalcon/Detection/),
+[LOLDrivers Yara Rules](https://github.com/magicsword-io/LOLDrivers),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
 [Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),

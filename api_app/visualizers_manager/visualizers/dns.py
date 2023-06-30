@@ -91,7 +91,21 @@ class DNS(Visualizer):
 
     def run(self) -> List[Dict]:
 
-        first_level_elements = []
+        first_level_elements = [
+            # TODO: remove this mock
+            self.Title(
+                title=self.Base(
+                    value="evaluator", icon=self.Icon.QUAD_9, disable=False
+                ),
+                value=self.Base(
+                    value="malicious",
+                    icon=self.Icon.MALWARE,
+                    disable=False,
+                    color=self.Color.DANGER,
+                ),
+                disable=False,
+            )
+        ]
         second_level_elements = []
 
         for analyzer_report in self.analyzer_reports():

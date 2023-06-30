@@ -3,7 +3,7 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
-    pc = PluginConfig.objects.get(pk=232)
+    pc = PluginConfig.objects.get(pk=241)
     pc.value = [
         "https://github.com/dr4k0nia/yara-rules",
         "https://github.com/elastic/protections-artifacts",
@@ -30,10 +30,19 @@ def migrate(apps, schema_editor):
     pc.full_clean()
     pc.save()
 
+    # this fixes the wrong migration we had
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
+    # this is relationships_to_request for the VT analyzer
+    # and not the relationships for Yara
+    pc = PluginConfig.objects.get(pk=232)
+    pc.value = []
+    pc.full_clean()
+    pc.save()
+
 
 def reverse_migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
-    pc = PluginConfig.objects.get(pk=232)
+    pc = PluginConfig.objects.get(pk=241)
     pc.value = [
         "https://github.com/dr4k0nia/yara-rules",
         "https://github.com/elastic/protections-artifacts",
@@ -54,7 +63,6 @@ def reverse_migrate(apps, schema_editor):
         "https://github.com/Yara-Rules/rules.git",
         "https://github.com/Neo23x0/signature-base.git",
         "https://yaraify-api.abuse.ch/download/yaraify-rules.zip",
-        "https://github.com/facebook/malware-detection",
     ]
     pc.full_clean()
     pc.save()

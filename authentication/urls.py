@@ -5,11 +5,10 @@ from allauth.socialaccount.providers.github import views as github_views
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import (
+from .views import (  # GitHubLoginCallbackView,
     APIAccessTokenView,
     ChangePasswordView,
     EmailVerificationView,
-    GitHubLoginCallbackView,
     GoogleLoginCallbackView,
     LoginView,
     LogoutView,
@@ -60,11 +59,11 @@ urlpatterns = [
         name="oauth_google_callback",
     ),
     path("github", github_views.oauth2_login, name="oauth_github"),
-    path(
-        "github-callback",
-        GitHubLoginCallbackView.as_view(),
-        name="oauth_github_callback",
-    ),
+    # path(
+    #     "github-callback",
+    #     GitHubLoginCallbackView.as_view(),
+    #     name="oauth_github_callback",
+    # ),
     path("check_registration_setup", check_registration_setup),
     path("", include(router.urls)),
 ]

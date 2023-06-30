@@ -48,7 +48,9 @@ describe("BaseVisualizer component", () => {
     const innerPartComponent = screen.getByText("test base (all params)");
     expect(innerPartComponent).toBeInTheDocument();
     // check color, bold and italic
-    expect(innerPartComponent.className).toBe("small success fw-bold fst-italic");
+    expect(innerPartComponent.className).toBe(
+      "small success fw-bold fst-italic"
+    );
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check link is available

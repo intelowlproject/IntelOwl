@@ -15,6 +15,7 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 
 from api_app.core.choices import ParamTypes, ReportStatus
+from api_app.core.queryset import AbstractConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
@@ -226,6 +227,7 @@ class Parameter(models.Model):
 
 
 class AbstractConfig(models.Model):
+    objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,
@@ -262,13 +264,6 @@ class AbstractConfig(models.Model):
                 pk=user.membership.organization.pk
             ).exists()
         return False
-
-    @classmethod
-    def runnable(cls, user: User = None) -> QuerySet:
-        objs = cls.objects.filter(disabled=False)
-        if user and user.has_membership():
-            objs = objs.exclude(disabled_in_organization=user.membership.organization)
-        return objs
 
     def is_runnable(self, user: User = None):
         disabled_in_org = self._is_disabled_in_org(user)
@@ -384,10 +379,6 @@ class PythonConfig(AbstractConfig):
             if not param.values_for_user(user).exists():
                 return False
         return True
-
-    @classmethod
-    def runnable(cls, user: User = None) -> QuerySet:
-        raise NotImplementedError()
 
     def is_runnable(self, user: User = None):
         return super().is_runnable(user) and self._is_configured(user)

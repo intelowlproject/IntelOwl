@@ -1,6 +1,6 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { JobOverview } from "../../../../../src/components/jobs/result/utils";
@@ -122,6 +122,10 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(JobInfoCardSection).getByText("dns.google.com")
     ).toBeInTheDocument();
+    const JobInfoCardDropDown = within(JobInfoCardSection).getByRole("button", {
+      name: "",
+    });
+    expect(JobInfoCardDropDown.id).toBe("JobInfoCardDropDown");
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS")
@@ -176,6 +180,14 @@ describe("test JobOverview (job report)", () => {
     const user = userEvent.setup();
     await user.click(visualizerButton);
     expect(screen.getByText("No visualizers available.")).toBeInTheDocument();
+
+    // job metadata dropdown
+    const JobInfoCardCollapse = container.querySelector("#JobInfoCardCollapse");
+    expect(JobInfoCardCollapse.className).not.toContain("show");
+    await user.click(JobInfoCardDropDown);
+    await waitFor(() => {
+      expect(JobInfoCardCollapse.className).toContain("show");
+    });
   });
 
   test("visualizer error", () => {

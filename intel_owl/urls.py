@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.urls import include, path, re_path
 
-from authentication import views
+from authentication import views  # temporary solution
 
 
 def render_reactapp(request):
@@ -20,7 +20,7 @@ urlpatterns = [
     path("api/", include("api_app.urls")),
     path(
         "accounts/github/login/callback/",
-        views.GitHubLoginCallbackView,
+        views.GitHubLoginCallbackView.as_view(),
         name="github_callback",
     ),
     path("accounts/", include("allauth.urls")),

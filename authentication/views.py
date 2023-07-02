@@ -3,7 +3,9 @@
 
 import logging
 from typing import List
+from urllib.parse import parse_qs, urlparse
 
+# all-auth required
 import requests
 import rest_email_auth.views
 from authlib.integrations.base_client import OAuthError
@@ -267,20 +269,80 @@ def check_registration_setup(request):
     return Response(status=status.HTTP_200_OK)
 
 
-def GitHubLoginCallbackView(request):
-    code = request.GET.get("code")
+class GitHubLoginCallbackView(LoginView):
 
-    url = "https://github.com/login/oauth/access_token"
+    access_token = None
 
-    params = {
-        "client_id": secrets.get_secret("GITHUB_CLIENT_ID"),
-        "client_secret": secrets.get_secret("GITHUB_CLIENT_SECRET"),
-        "code": code,
-        "redirect_uri": "http://localhost/accounts/github/login/callback/",
-    }
+    def get_code(self, url):
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        code = query_params.get("code")
+        if code:
+            return code[0]
+        return None
 
-    response = requests.post(url, params=params)
-    if response.status_code == 200:
-        return HttpResponse(f"result: {response.text}")
+    def dispatch(self, request, *args, **kwargs):
+        current_url = request.build_absolute_uri()
+        code = self.get_code(current_url)
+        if code:
+            url = "https://github.com/login/oauth/access_token"
 
-    return HttpResponse("failed")
+            headers = {"Accept": "application/json"}
+
+            params = {
+                "client_id": secrets.get_secret("GITHUB_CLIENT_ID"),
+                "client_secret": secrets.get_secret("GITHUB_CLIENT_SECRET"),
+                "code": code,
+                "redirect_uri": "http://localhost/accounts/github/login/callback/",
+            }
+
+            response = requests.post(url, params=params, headers=headers)
+            response_data = response.json()
+            access_token = response_data["access_token"]
+            return self.validate_and_return_user(request, access_token)
+        else:
+            # Handle case when code is not present
+            return HttpResponse("Code not found")
+
+    @staticmethod
+    def validate_and_return_user(request, access_token):
+        try:
+            token = access_token
+        except (
+            OAuthError,
+            OAuth2Error,
+        ):
+            # Not giving out the actual error as we risk exposing the client secret
+            raise AuthenticationFailed("OAuth authentication error.")
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github.v3+json",
+        }
+        response = requests.get("https://api.github.com/user", headers=headers)
+        user_data = response.json()
+        user_name = user_data.get("name")
+        user_email = user_data.get("email")
+        try:
+            return User.objects.get(email=user_email)
+        except User.DoesNotExist:
+            logging.info("[Github Oauth] User does not exist. Creating new user.")
+            return User.objects.create_user(
+                email=user_email, username=user_name, password=None
+            )
+
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        response = super().post(*args, **kwargs)
+        token = response.data["token"]
+        # Uncomment this for local testing
+        # return redirect(f"http://localhost:3001/login?token={token}")
+        return redirect(self.request.build_absolute_uri(f"/login?token={token}"))
+
+    @staticmethod
+    def get_post_response_data(request, token_obj) -> dict:
+        data = {
+            "token": token_obj.token,
+        }
+        return data

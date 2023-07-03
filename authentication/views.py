@@ -270,9 +270,6 @@ def check_registration_setup(request):
 
 
 class GitHubLoginCallbackView(LoginView):
-
-    access_token = None
-
     def get_code(self, url):
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
@@ -302,7 +299,8 @@ class GitHubLoginCallbackView(LoginView):
             return self.validate_and_return_user(request, access_token)
         else:
             # Handle case when code is not present
-            return HttpResponse("Code not found")
+            logger.warning("Failed to retrive code")
+            return HttpResponse("OAuth authentication failed", status=400)
 
     @staticmethod
     def validate_and_return_user(request, access_token):

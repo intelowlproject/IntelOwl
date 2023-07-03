@@ -18,8 +18,6 @@ import useTitle from "react-use/lib/useTitle";
 import { addToast, ContentSection } from "@certego/certego-ui";
 import { AUTH_BASE_URI } from "../../constants/api";
 
-// import GitHubLoginButton from './GitHubLoginButton';
-
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
 

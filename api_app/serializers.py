@@ -25,24 +25,14 @@ from intel_owl.celery import DEFAULT_QUEUE
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.models import AnalyzerConfig, MimeTypes
-from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .choices import TLP, ScanMode
 from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
-from .connectors_manager.serializers import ConnectorReportSerializer
+from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
-from .models import (
-    AbstractReport,
-    Comment,
-    Job,
-    Parameter,
-    PluginConfig,
-    Tag,
-    default_runtime,
-)
+from .models import AbstractReport, Comment, Job, Parameter, PluginConfig, Tag
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
-from .visualizers_manager.serializers import VisualizerReportSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +102,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     runtime_configuration = rfs.JSONField(
         required=False, default=default_runtime, write_only=True
     )
-    md5 = rfs.HiddenField(default=None)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
 
     def validate_runtime_configuration(self, runtime_config: Dict):
@@ -270,7 +259,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         for analyzer in validated_data.get("analyzers_to_execute", []):
             query &= Q(analyzers_requested__in=[analyzer])
         return (
-            self.Meta.model.visible_for_user(self.context["request"].user)
+            self.Meta.model.objects.visible_for_user(self.context["request"].user)
             .filter(
                 received_request_time__gte=now() - validated_data["scan_check_time"]
             )
@@ -324,7 +313,7 @@ class CommentSerializer(rfs.ModelSerializer):
         user = self.context["request"].user
         job = attrs.get("job")
         try:
-            Job.visible_for_user(user).get(pk=job.pk)
+            Job.objects.visible_for_user(user).get(pk=job.pk)
         except Job.DoesNotExist:
             raise ValidationError(
                 {"detail": f"You have no permission to comment on job {job.pk}"}
@@ -355,18 +344,28 @@ class JobSerializer(_AbstractJobViewSerializer):
         model = Job
         exclude = ("file",)
 
-    analyzer_reports = AnalyzerReportSerializer(
-        many=True, read_only=True, source="analyzerreports"
-    )
-    connector_reports = ConnectorReportSerializer(
-        many=True, read_only=True, source="connectorreports"
-    )
-    visualizer_reports = VisualizerReportSerializer(
-        many=True, read_only=True, source="visualizerreports"
-    )
     comments = CommentSerializer(many=True, read_only=True)
 
     permissions = rfs.SerializerMethodField()
+
+    def get_fields(self):
+        # this is required for a cyclic import
+        from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
+        from api_app.connectors_manager.serializers import ConnectorReportSerializer
+        from api_app.visualizers_manager.serializers import VisualizerReportSerializer
+
+        assert hasattr(self, "_declared_fields")
+
+        self._declared_fields["analyzer_reports"] = AnalyzerReportSerializer(
+            many=True, read_only=True, source="analyzerreports"
+        )
+        self._declared_fields["connector_reports"] = ConnectorReportSerializer(
+            many=True, read_only=True, source="connectorreports"
+        )
+        self._declared_fields["visualizer_reports"] = VisualizerReportSerializer(
+            many=True, read_only=True, source="visualizerreports"
+        )
+        return super().get_fields()
 
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
         request = self.context.get("request", None)
@@ -829,7 +828,7 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
             query &= Q(received_request_time__gte=minutes_ago_time)
 
         last_job_for_md5 = (
-            Job.visible_for_user(self.context["request"].user)
+            Job.objects.visible_for_user(self.context["request"].user)
             .filter(query)
             .only("pk")
             .latest("received_request_time")
@@ -993,7 +992,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
         enabled_plugins = plugins.filter(disabled=False)
 
         # get the values for that configurations
-        configurations = PluginConfig.visible_for_user(user).filter(
+        configurations = PluginConfig.objects.visible_for_user(user).filter(
             **{f"parameter__{self.child.Meta.model.snake_case_name}__pk__in": plugins}
         )
         # value for owner

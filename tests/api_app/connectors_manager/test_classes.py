@@ -8,7 +8,7 @@ from kombu import uuid
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.exceptions import ConnectorRunException
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job, PluginConfig, Parameter
+from api_app.models import Job, Parameter, PluginConfig
 from tests import CustomTestCase
 
 

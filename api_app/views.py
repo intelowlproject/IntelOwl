@@ -248,7 +248,9 @@ class CommentViewSet(ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        jobs = Job.visible_for_user(self.request.user).values_list("pk", flat=True)
+        jobs = Job.objects.visible_for_user(self.request.user).values_list(
+            "pk", flat=True
+        )
         return queryset.filter(job__id__in=jobs)
 
 
@@ -286,7 +288,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             f"user: {user} request the jobs with params: {self.request.query_params}"
         )
         return (
-            Job.visible_for_user(user)
+            Job.objects.visible_for_user(user)
             .prefetch_related("tags")
             .order_by("-received_request_time")
         )
@@ -550,7 +552,7 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # the .exclude is to remove the default values
         return (
-            PluginConfig.visible_for_user(self.request.user)
+            PluginConfig.objects.visible_for_user(self.request.user)
             .exclude(owner__isnull=True)
             .order_by("id")
         )

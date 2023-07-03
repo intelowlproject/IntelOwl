@@ -5,7 +5,7 @@ from typing import Type
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomViewSetTestCase
-from tests.core.test_views import AbstractConfigViewSetTestCaseMixin
+from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
 class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):

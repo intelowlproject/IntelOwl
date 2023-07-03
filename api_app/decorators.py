@@ -9,11 +9,14 @@ logger = logging.getLogger(__name__)
 
 def deprecated_endpoint(deprecation_date=None, end_of_life_date=None):
     """
-    Returns a decorator which informs requester that the decorated endpoint has been deprecated.
+    Returns a decorator which informs requester that
+    the decorated endpoint has been deprecated.
     """
 
     def decorator_deprecated(func):
-        """Amend the request with information that the endpoint has been deprecated and when it will be removed"""
+        """Amend the request with information that
+        the endpoint has been deprecated and when it will be removed
+        """
 
         @functools.wraps(func)
         def wrapper_deprecated(*args, **kwargs):

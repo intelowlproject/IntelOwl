@@ -7,18 +7,35 @@ from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job
+from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+from api_app.models import Job, Parameter
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
     FileAnalysisSerializer,
     JobResponseSerializer,
+    JobSerializer,
     ObservableAnalysisSerializer,
+    PythonListConfigSerializer,
     _AbstractJobCreateSerializer,
 )
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
+
+
+class JobSerializerTestCase(CustomTestCase):
+    def test_validate(self):
+        job = Job.objects.create(
+            observable_name="test.com",
+            observable_classification="domain",
+            user=self.user,
+        )
+        js = JobSerializer(job)
+        self.assertIn("analyzer_reports", js.data)
+        self.assertIn("connector_reports", js.data)
+        self.assertIn("visualizer_reports", js.data)
+        job.delete()
 
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
@@ -383,3 +400,62 @@ class JobResponseSerializerTestCase(CustomTestCase):
         self.assertEqual(result["results"][0]["job_id"], job1.id)
         job1.delete()
         job2.delete()
+
+
+class AbstractListConfigSerializerTestCase(CustomTestCase):
+    def test_to_representation(self):
+        cc = ConnectorConfig.objects.create(
+            name="test",
+            python_module="misp.MISP",
+            description="test",
+            disabled=False,
+            config={"soft_time_limit": 100, "queue": "default"},
+            maximum_tlp="CLEAR",
+        )
+        ccs = PythonListConfigSerializer(
+            context={"request": MockUpRequest(self.user)},
+            child=ConnectorConfigSerializer(),
+        )
+        result = ccs.to_representation([cc])
+        self.assertEqual(1, len(result))
+        result = result[0]
+        self.assertIn("verification", result)
+        self.assertIn("configured", result["verification"])
+        self.assertTrue(result["verification"]["configured"])
+        self.assertIn("missing_secrets", result["verification"])
+        self.assertFalse(result["verification"]["missing_secrets"])
+        cc.delete()
+
+        cc = ConnectorConfig.objects.create(
+            name="test",
+            python_module="misp.MISP",
+            description="test",
+            disabled=False,
+            config={"soft_time_limit": 100, "queue": "default"},
+            maximum_tlp="CLEAR",
+        )
+        param: Parameter = Parameter.objects.create(
+            connector_config=cc,
+            name="test",
+            type="str",
+            required=True,
+            is_secret=True,
+        )
+        with self.assertRaises(RuntimeError):
+            param.get_first_value(self.user)
+        ccs = PythonListConfigSerializer(
+            context={"request": MockUpRequest(self.user)},
+            child=ConnectorConfigSerializer(),
+        )
+        result = ccs.to_representation([cc])
+        self.assertEqual(1, len(result))
+        result = result[0]
+
+        self.assertIn("verification", result)
+        self.assertIn("configured", result["verification"])
+        self.assertFalse(result["verification"]["configured"])
+        self.assertIn("missing_secrets", result["verification"])
+        self.assertEqual(1, len(result["verification"]["missing_secrets"]))
+        self.assertEqual("test", result["verification"]["missing_secrets"][0])
+        param.delete()
+        cc.delete()

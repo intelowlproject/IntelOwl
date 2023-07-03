@@ -5,7 +5,7 @@
 
 from django.db import migrations, models
 
-from api_app.models import default_runtime
+from api_app.defaults import default_runtime
 from api_app.validators import validate_runtime_configuration
 
 

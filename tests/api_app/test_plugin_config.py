@@ -4,7 +4,7 @@
 from rest_framework.reverse import reverse
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.models import PluginConfig, Parameter
+from api_app.models import Parameter, PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -40,7 +40,9 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
     def test_get(self):
         self.assertTrue(
-            PluginConfig.visible_for_user(self.superuser).filter(pk=self.pc.pk).exists()
+            PluginConfig.objects.visible_for_user(self.superuser)
+            .filter(pk=self.pc.pk)
+            .exists()
         )
         response = self.client.get(f"{custom_config_uri}/{self.pc.pk}")
         self.assertEqual(response.status_code, 404)

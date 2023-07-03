@@ -1,12 +1,11 @@
 import datetime
 from typing import Union
 
-from django.db import models
 from django.db.models import F, Func, OuterRef, QuerySet, Subquery, Value
 from django.utils.timezone import now
 
-from api_app.queryset import AbstractConfigQuerySet
 from api_app.models import Job
+from api_app.queryset import AbstractConfigQuerySet
 from certego_saas.apps.user.models import User
 
 

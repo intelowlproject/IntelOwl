@@ -9,11 +9,11 @@ from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.models import Comment, Job, PluginConfig, Tag, Parameter
+from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
-from .. import CustomViewSetTestCase
+from .. import CustomViewSetTestCase, ViewSetTestCaseMixin
 
 User = get_user_model()
 
@@ -417,3 +417,93 @@ class TagViewsetTests(CustomViewSetTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Tag.objects.count(), 0)
+
+
+class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin):
+    def test_organization_disable(self):
+        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        org, _ = Organization.objects.get_or_create(name="test")
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        # permission denied
+        self.assertEqual(response.status_code, 403, response.json())
+        result = response.json()
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+        m, _ = Membership.objects.get_or_create(
+            user=self.user, organization=org, is_owner=False
+        )
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        # permission denied
+        self.assertEqual(response.status_code, 403, response.json())
+        result = response.json()
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+
+        m.is_owner = True
+        m.save()
+        plugin = self.model_class.objects.get(pk=plugin_pk)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(plugin.disabled_in_organizations.all().exists())
+
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 400, response.json())
+        self.assertEqual(1, plugin.disabled_in_organizations.all().count())
+        result = response.json()
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {plugin.name} already disabled"
+        )
+        plugin.disabled_in_organizations.set([])
+        m.delete()
+        org.delete()
+
+    def test_organization_enable(self):
+        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        org, _ = Organization.objects.get_or_create(name="test")
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        # permission denied
+        self.assertEqual(response.status_code, 403, response.json())
+        result = response.json()
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+        m, _ = Membership.objects.get_or_create(
+            user=self.user, organization=org, is_owner=False
+        )
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        result = response.json()
+        # permission denied
+        self.assertEqual(response.status_code, 403, result)
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+
+        m.is_owner = True
+        m.save()
+        plugin = self.model_class.objects.get(pk=plugin_pk)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        result = response.json()
+        self.assertEqual(response.status_code, 400, result)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
+        )
+
+        plugin.disabled_in_organizations.add(org)
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 202)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        m.delete()
+        org.delete()

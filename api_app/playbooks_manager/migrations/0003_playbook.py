@@ -5,6 +5,7 @@
 
 from django.db import migrations, models
 
+import api_app.defaults
 import api_app.fields
 import api_app.models
 import api_app.validators
@@ -30,7 +31,7 @@ class Migration(migrations.Migration):
                  ),
                 ('description', models.TextField()),
                 ('disabled', models.BooleanField(default=False)),
-                ('runtime_configuration', models.JSONField(blank=True, default=api_app.models.default_runtime, validators=[
+                ('runtime_configuration', models.JSONField(blank=True, default=api_app.defaults.default_runtime, validators=[
 
 
                     api_app.validators.validate_runtime_configuration])),

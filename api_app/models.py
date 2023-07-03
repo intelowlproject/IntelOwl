@@ -14,8 +14,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from django.db.models import Manager, Q, QuerySet
-from django.dispatch import receiver
+from django.db.models import Manager, QuerySet
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -30,34 +29,20 @@ from api_app.choices import (
     Status,
 )
 from api_app.decorators import valid_value_for_test
-from api_app.defaults import config_default
+from api_app.defaults import config_default, default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
-from api_app.queryset import CleanOnCreateQuerySet
+from api_app.queryset import JobQuerySet, ParameterQuerySet, PluginConfigQuerySet
 from api_app.validators import (
     plugin_name_validator,
     validate_config,
     validate_runtime_configuration,
 )
 from certego_saas.apps.organization.organization import Organization
-from certego_saas.apps.user.models import User
 from certego_saas.models import User
 from intel_owl import tasks
 from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
-
-
-def file_directory_path(instance, filename):
-    now = timezone.now().strftime("%Y_%m_%d_%H_%M_%S")
-    return f"job_{now}_{filename}"
-
-
-def default_runtime():
-    return {
-        "analyzers": {},
-        "connectors": {},
-        "visualizers": {},
-    }
 
 
 class Tag(models.Model):
@@ -104,7 +89,7 @@ class Comment(models.Model):
 
 class Job(models.Model):
 
-    objects = CleanOnCreateQuerySet.as_manager()
+    objects = JobQuerySet.as_manager()
 
     class Meta:
         indexes = [
@@ -212,15 +197,21 @@ class Job(models.Model):
 
     @cached_property
     def sha256(self) -> str:
-        return calculate_sha256(self.file.read())
+        return calculate_sha256(
+            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
+        )
 
     @cached_property
     def sha1(self) -> str:
-        return calculate_sha1(self.file.read())
+        return calculate_sha1(
+            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
+        )
 
     @cached_property
     def b64(self) -> str:
-        return base64.b64encode(self.file.read()).decode("utf-8")
+        return base64.b64encode(
+            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
+        ).decode("utf-8")
 
     def get_absolute_url(self):
         return reverse("jobs-detail", args=[self.pk])
@@ -230,6 +221,7 @@ class Job(models.Model):
         return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
     def retry(self):
+
         self.update_status(Job.Status.RUNNING)
         failed_analyzers_reports = self.analyzerreports.filter(
             status=AbstractReport.Status.FAILED.value
@@ -303,16 +295,16 @@ class Job(models.Model):
         if save:
             self.save(update_fields=["status"])
 
-    def _get_config_reports(self, config: typing.Type[AbstractConfig]) -> QuerySet:
+    def _get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
 
-    def _get_config_to_execute(self, config: typing.Type[AbstractConfig]) -> QuerySet:
+    def _get_config_to_execute(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(
             self, f"{config.__name__.split('Config')[0].lower()}s_to_execute"
         )
 
     def _get_single_config_reports_stats(
-        self, config: typing.Type[AbstractConfig]
+        self, config: typing.Type["AbstractConfig"]
     ) -> typing.Dict:
         reports = self._get_config_reports(config)
         aggregators = {
@@ -346,6 +338,7 @@ class Job(models.Model):
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
+
             reports = self._get_config_reports(config).filter(
                 status__in=[
                     AbstractReport.Status.PENDING,
@@ -391,7 +384,7 @@ class Job(models.Model):
         )
         runner()
 
-    def get_config_runtime_configuration(self, config: AbstractConfig) -> typing.Dict:
+    def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
             self._get_config_to_execute(config.__class__).get(name=config.name)
         except config.DoesNotExist:
@@ -402,25 +395,6 @@ class Job(models.Model):
         return self.runtime_configuration[config.runtime_configuration_key].get(
             config.name, {}
         )
-
-    @classmethod
-    def visible_for_user(cls, user: User):
-        """
-        User has access to:
-        - jobs with TLP = CLEAR or GREEN
-        - jobs with TLP = AMBER or RED and
-        created by a member of their organization.
-        """
-        if user.has_membership():
-            user_query = Q(user=user) | Q(
-                user__membership__organization_id=user.membership.organization_id
-            )
-        else:
-            user_query = Q(user=user)
-        query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (
-            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
-        )
-        return cls.objects.all().filter(query)
 
     # user methods
 
@@ -465,177 +439,10 @@ class Job(models.Model):
             )
 
 
-@receiver(models.signals.pre_delete, sender=Job)
-def delete_file(sender, instance: Job, **kwargs):
-    if instance.file:
-        instance.file.delete()
-
-
-class PluginConfig(models.Model):
-    value = models.JSONField(blank=True, null=True)
-    for_organization = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="custom_configs",
-        null=True,
-        blank=True,
-    )
-    parameter = models.ForeignKey(
-        Parameter, on_delete=models.CASCADE, null=False, related_name="values"
-    )
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ["owner", "for_organization", "parameter"]
-        indexes = [
-            models.Index(fields=["owner", "for_organization", "parameter"]),
-            models.Index(
-                fields=[
-                    "owner",
-                    "for_organization",
-                ]
-            ),
-            models.Index(
-                fields=[
-                    "owner",
-                ]
-            ),
-        ]
-
-    @classmethod
-    def visible_for_user(cls, user: User = None) -> QuerySet:
-        from certego_saas.apps.organization.membership import Membership
-
-        configs = cls.objects.all()
-        if user:
-            # User-level custom configs should override organization-level configs,
-            # we need to get the organization-level configs, if any, first.
-            try:
-                membership = Membership.objects.get(user=user)
-            except Membership.DoesNotExist:
-                # If user is not a member of any organization,
-                # we don't need to do anything.
-                configs = configs.filter(Q(owner=user) | Q(owner__isnull=True))
-            else:
-                configs = configs.filter(
-                    (Q(for_organization=True) & Q(owner=membership.organization.owner))
-                    | Q(owner=user)
-                    | Q(owner__isnull=True)
-                )
-        else:
-            configs = configs.filter(owner__isnull=True)
-
-        return configs
-
-    def clean_for_organization(self):
-        if self.for_organization and (
-            self.owner.has_membership()
-            and self.owner.membership.organization.owner != self.owner
-        ):
-            raise ValidationError(
-                "Only organization owner can create configuration at the org level"
-            )
-
-    def clean_value(self):
-        from django.forms.fields import JSONString
-
-        if isinstance(self.value, JSONString):
-            self.value = str(self.value)
-        if type(self.value).__name__ != self.parameter.type:
-            raise ValidationError(
-                f"Type {type(self.value).__name__} is wrong:"
-                f" should be {self.parameter.type}"
-            )
-
-    def clean(self):
-        super().clean()
-        self.clean_value()
-        self.clean_for_organization()
-
-    @property
-    def attribute(self):
-        return self.parameter.name
-
-    def is_secret(self):
-        return self.parameter.is_secret
-
-    @property
-    def plugin_name(self):
-        return self.config.name
-
-    @property
-    def config(self):
-        return self.parameter.config
-
-    @property
-    def type(self):
-        # TODO retrocompatibility
-        return self.config.plugin_type
-
-    @cached_property
-    def organization(self):
-        if self.for_organization:
-            return self.owner.membership.organization.name
-        return None
-
-    @property
-    def config_type(self):
-        # TODO retrocompatibility
-        return "2" if self.is_secret() else "1"
-
-
-class AbstractReport(models.Model):
-    # constants
-    Status = ReportStatus
-
-    # fields
-    status = models.CharField(max_length=50, choices=Status.choices)
-    report = models.JSONField(default=dict)
-    errors = pg_fields.ArrayField(
-        models.CharField(max_length=512), default=list, blank=True
-    )
-    start_time = models.DateTimeField(default=timezone.now)
-    end_time = models.DateTimeField(default=timezone.now)
-    task_id = models.UUIDField()  # tracks celery task id
-
-    job = models.ForeignKey(
-        "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
-    )
-    # meta
-
-    class Meta:
-        abstract = True
-
-    @classmethod
-    @property
-    def config(cls) -> "AbstractConfig":
-        raise NotImplementedError()
-
-    @property
-    def runtime_configuration(self):
-        return self.job.get_config_runtime_configuration(self.config)
-
-    def __str__(self):
-        return f"{self.__class__.__name__}(job:#{self.job_id}, {self.config.name})"
-
-    # properties
-    @property
-    def user(self) -> models.Model:
-        return self.job.user
-
-    @property
-    def process_time(self) -> float:
-        secs = (self.end_time - self.start_time).total_seconds()
-        return round(secs, 2)
-
-    def append_error(self, err_msg: str, save=True):
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
-
-
 class Parameter(models.Model):
+
+    objects = ParameterQuerySet.as_manager()
+
     name = models.CharField(null=False, blank=False, max_length=50)
     type = models.CharField(
         choices=ParamTypes.choices, max_length=10, null=False, blank=False
@@ -707,7 +514,7 @@ class Parameter(models.Model):
     def values_for_user(self, user: User = None) -> QuerySet:
         from api_app.models import PluginConfig
 
-        return PluginConfig.visible_for_user(user).filter(parameter=self)
+        return PluginConfig.objects.visible_for_user(user).filter(parameter=self)
 
     @valid_value_for_test
     def get_first_value(self, user: User):
@@ -742,6 +549,107 @@ class Parameter(models.Model):
                     "Unable to find a valid value for parameter"
                     f" {self.name} for configuration {self.config.name}"
                 )
+
+
+class PluginConfig(models.Model):
+
+    objects = PluginConfigQuerySet.as_manager()
+
+    value = models.JSONField(blank=True, null=True)
+    for_organization = models.BooleanField(default=False)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="custom_configs",
+        null=True,
+        blank=True,
+    )
+    parameter = models.ForeignKey(
+        Parameter, on_delete=models.CASCADE, null=False, related_name="values"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ["owner", "for_organization", "parameter"]
+        indexes = [
+            models.Index(fields=["owner", "for_organization", "parameter"]),
+            models.Index(
+                fields=[
+                    "owner",
+                    "for_organization",
+                ]
+            ),
+            models.Index(
+                fields=[
+                    "owner",
+                ]
+            ),
+        ]
+
+    def clean_for_organization(self):
+        if self.for_organization and not self.owner:
+            raise ValidationError(
+                "You can't set `for_organization` and not have an owner"
+            )
+        if self.for_organization and not self.owner.has_membership():
+            raise ValidationError(
+                f"You can't create `for_organization` {self.__class__.__name__}"
+                " if you do not have an organization"
+            )
+        if self.for_organization and (
+            self.owner.has_membership()
+            and self.owner.membership.organization.owner != self.owner
+        ):
+            raise ValidationError(
+                "Only organization owner can create configuration at the org level"
+            )
+
+    def clean_value(self):
+        from django.forms.fields import JSONString
+
+        if isinstance(self.value, JSONString):
+            self.value = str(self.value)
+        if type(self.value).__name__ != self.parameter.type:
+            raise ValidationError(
+                f"Type {type(self.value).__name__} is wrong:"
+                f" should be {self.parameter.type}"
+            )
+
+    def clean(self):
+        super().clean()
+        self.clean_value()
+        self.clean_for_organization()
+
+    @property
+    def attribute(self):
+        return self.parameter.name
+
+    def is_secret(self):
+        return self.parameter.is_secret
+
+    @property
+    def plugin_name(self):
+        return self.config.name
+
+    @property
+    def config(self):
+        return self.parameter.config
+
+    @property
+    def type(self):
+        # TODO retrocompatibility
+        return self.config.plugin_type
+
+    @cached_property
+    def organization(self):
+        if self.for_organization:
+            return self.owner.membership.organization.name
+        return None
+
+    @property
+    def config_type(self):
+        # TODO retrocompatibility
+        return "2" if self.is_secret() else "1"
 
 
 class AbstractConfig(models.Model):
@@ -786,6 +694,55 @@ class AbstractConfig(models.Model):
         disabled_in_org = self._is_disabled_in_org(user)
         logger.debug(f"{disabled_in_org=}, {self.disabled=}")
         return not disabled_in_org and not self.disabled
+
+
+class AbstractReport(models.Model):
+    # constants
+    Status = ReportStatus
+
+    # fields
+    status = models.CharField(max_length=50, choices=Status.choices)
+    report = models.JSONField(default=dict)
+    errors = pg_fields.ArrayField(
+        models.CharField(max_length=512), default=list, blank=True
+    )
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(default=timezone.now)
+    task_id = models.UUIDField()  # tracks celery task id
+
+    job = models.ForeignKey(
+        "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        abstract = True
+
+    @classmethod
+    @property
+    def config(cls) -> "AbstractConfig":
+        raise NotImplementedError()
+
+    @property
+    def runtime_configuration(self):
+        return self.job.get_config_runtime_configuration(self.config)
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(job:#{self.job_id}, {self.config.name})"
+
+    # properties
+    @property
+    def user(self) -> models.Model:
+        return self.job.user
+
+    @property
+    def process_time(self) -> float:
+        secs = (self.end_time - self.start_time).total_seconds()
+        return round(secs, 2)
+
+    def append_error(self, err_msg: str, save=True):
+        self.errors.append(err_msg)
+        if save:
+            self.save(update_fields=["errors"])
 
 
 class PythonConfig(AbstractConfig):

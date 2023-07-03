@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta, abstractmethod
+from typing import Type
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -7,7 +8,7 @@ from django.db import connections
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from api_app.models import AbstractReport
+from api_app.models import AbstractConfig, AbstractReport
 
 User = get_user_model()
 
@@ -168,3 +169,64 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         response = self.client.patch(f"/api/jobs/999/{self.plugin_type}/999/retry")
 
         self.assertEqual(response.status_code, 404)
+
+
+class ViewSetTestCaseMixin:
+    @classmethod
+    @property
+    @abstractmethod
+    def model_class(cls) -> Type[AbstractConfig]:
+        raise NotImplementedError()
+
+    def test_list(self):
+        response = self.client.get(self.URL)
+        result = response.json()
+        self.assertEqual(response.status_code, 200, result)
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], self.model_class.objects.all().count())
+        self.assertIn("results", result)
+        self.assertTrue(isinstance(result["results"], list))
+
+        self.client.force_authenticate(None)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 401, response.json())
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200, response.json())
+
+    def test_get(self):
+        plugin = self.model_class.objects.order_by("?").first().pk
+        response = self.client.get(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 200, response.json())
+
+        self.client.force_authenticate(None)
+        response = self.client.get(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 401, response.json())
+
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 200, response.json())
+
+    def test_get_non_existent(self):
+        response = self.client.get(f"{self.URL}/NON_EXISTENT")
+        self.assertEqual(response.status_code, 404, response.json())
+
+    def test_update(self):
+        plugin = self.model_class.objects.order_by("?").first().pk
+        response = self.client.patch(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 405, response.json())
+        self.client.force_authenticate(self.superuser)
+        response = self.client.patch(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 405, response.json())
+
+    def test_delete(self):
+        plugin = self.model_class.objects.order_by("?").first().pk
+        response = self.client.delete(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 405, response.json())
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 405, response.json())
+
+    def test_create(self):
+        response = self.client.post(self.URL)
+        self.assertEqual(response.status_code, 405, response.json())

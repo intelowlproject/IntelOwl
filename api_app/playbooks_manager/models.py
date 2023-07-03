@@ -7,8 +7,9 @@ from django.db import models
 
 from api_app.analyzers_manager.constants import AllTypes
 from api_app.choices import TLP, ScanMode
+from api_app.defaults import default_runtime
 from api_app.fields import ChoiceArrayField
-from api_app.models import AbstractConfig, Tag, default_runtime
+from api_app.models import AbstractConfig, Tag
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 

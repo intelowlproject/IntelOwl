@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from kombu import uuid
 
+from api_app.classes import Plugin
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.classes import Plugin
 from api_app.models import Job
 from tests import CustomTestCase
 

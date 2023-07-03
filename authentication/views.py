@@ -306,27 +306,27 @@ class GitHubLoginCallbackView(LoginView):
     def validate_and_return_user(request, access_token):
         try:
             token = access_token
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Accept": "application/vnd.github.v3+json",
+            }
+            response = requests.get("https://api.github.com/user", headers=headers)
+            user_data = response.json()
+            user_name = user_data.get("name")
+            user_email = user_data.get("email")
+            try:
+                return User.objects.get(email=user_email)
+            except User.DoesNotExist:
+                logging.info("[Github Oauth] User does not exist. Creating new user.")
+                return User.objects.create_user(
+                    email=user_email, username=user_name, password=None
+                )
         except (
             OAuthError,
             OAuth2Error,
         ):
             # Not giving out the actual error as we risk exposing the client secret
             raise AuthenticationFailed("OAuth authentication error.")
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github.v3+json",
-        }
-        response = requests.get("https://api.github.com/user", headers=headers)
-        user_data = response.json()
-        user_name = user_data.get("name")
-        user_email = user_data.get("email")
-        try:
-            return User.objects.get(email=user_email)
-        except User.DoesNotExist:
-            logging.info("[Github Oauth] User does not exist. Creating new user.")
-            return User.objects.create_user(
-                email=user_email, username=user_name, password=None
-            )
 
     def get(self, *args, **kwargs):
         return self.post(*args, **kwargs)

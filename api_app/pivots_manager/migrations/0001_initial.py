@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('visualizers_manager', '0022_alter_visualizerconfig_name'),
+        ('visualizers_manager', '0023_alter_visualizerconfig_name'),
         ('certego_saas_organization', '0001_initial'),
         ('api_app', '0033_alter_parameter_unique_together'),
         ('analyzers_manager', '0031_alter_analyzerconfig_name'),

@@ -9,12 +9,18 @@ export default function StatusTag(props) {
   const statusLower = status.toLowerCase();
 
   const color = STATUS_COLORMAP?.[statusLower] || "light";
-  const divClass = classnames("status-tag", `bg-${color}`, className);
+  const divClass = classnames(`bg-${color}`, className);
 
   return (
-    <span className={`text-break ${divClass}`} title={status} {...rest}>
-      {status.toUpperCase().replaceAll("_", " ")}
-    </span>
+    <div className={`p-1 ${divClass}`}>
+      <span
+        className="text-break text-center status-tag"
+        title={status}
+        {...rest}
+      >
+        {status.toUpperCase().replaceAll("_", " ")}
+      </span>
+    </div>
   );
 }
 

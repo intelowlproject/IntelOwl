@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('analyzers_manager', '0031_alter_analyzerconfig_name'),
-        ('visualizers_manager', '0022_alter_visualizerconfig_name'),
+        ('visualizers_manager', '0023_alter_visualizerconfig_name'),
         ('connectors_manager', '0018_alter_connectorconfig_name'),
         ('api_app', '0032_alter_job_status'),
     ]

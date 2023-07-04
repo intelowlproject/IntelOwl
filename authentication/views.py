@@ -290,7 +290,7 @@ class GitHubLoginCallbackView(LoginView):
                 "client_id": secrets.get_secret("GITHUB_CLIENT_ID"),
                 "client_secret": secrets.get_secret("GITHUB_CLIENT_SECRET"),
                 "code": code,
-                "redirect_uri": "http://localhost/accounts/github/login/callback/",
+                "redirect_uri": "http://localhost/api/auth/github-callback",
             }
 
             response = requests.post(url, params=params, headers=headers)
@@ -304,29 +304,30 @@ class GitHubLoginCallbackView(LoginView):
 
     @staticmethod
     def validate_and_return_user(request, access_token):
+        token = access_token
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+        }
+        response = requests.get("https://api.github.com/user", headers=headers)
+        user_data = response.json()
+        user_name = user_data.get("login")
+        user_email = user_data.get("email")
+        logging.info(f"received data from github:{response}")
         try:
-            token = access_token
-            headers = {
-                "Authorization": f"Bearer {token}",
-                "Accept": "application/vnd.github.v3+json",
-            }
-            response = requests.get("https://api.github.com/user", headers=headers)
-            user_data = response.json()
-            user_name = user_data.get("name")
-            user_email = user_data.get("email")
-            try:
-                return User.objects.get(email=user_email)
-            except User.DoesNotExist:
+            # Check if user with the provided email already exists
+            user = User.objects.get(email=user_email)
+            if user:
+                logging.info("[Github Oauth] User already exists.")
+                return user
+            else:
                 logging.info("[Github Oauth] User does not exist. Creating new user.")
                 return User.objects.create_user(
                     email=user_email, username=user_name, password=None
                 )
-        except (
-            OAuthError,
-            OAuth2Error,
-        ):
-            # Not giving out the actual error as we risk exposing the client secret
-            raise AuthenticationFailed("OAuth authentication error.")
+        except Exception as e:
+            logging.error(f"Error creating or retrieving user: {str(e)}")
+            raise AuthenticationFailed("Error creating or retrieving user.")
 
     def get(self, *args, **kwargs):
         return self.post(*args, **kwargs)

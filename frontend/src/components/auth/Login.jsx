@@ -92,7 +92,8 @@ export default function Login() {
             <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
             <div className="col-auto">
               <a
-                href={`${AUTH_BASE_URI}/github`}
+                // href={`${AUTH_BASE_URI}/github`}
+                href="https://github.com/login/oauth/authorize?client_id=4a7aed5c9ee5a88afb5b"
                 onClick={(e) => {
                   e.preventDefault();
                   const url = `${AUTH_BASE_URI}/github`;
@@ -253,6 +254,11 @@ export default function Login() {
         <Row className="d-flex flex-column align-items-end g-0">
           <ForgotPasswordButton />
           <ResendVerificationEmailButton />
+          <button type="button">
+            <a href="https://github.com/login/oauth/authorize?client_id=4a7aed5c9ee5a88afb5b&redriect_uri=http://localhost/api/auth/github-callback">
+              github
+            </a>
+          </button>
         </Row>
       </Container>
     </ContentSection>

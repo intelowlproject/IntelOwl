@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.urls import include, path, re_path
 
-from authentication import views  # temporary solution
+# from authentication import views  # temporary solution
 
 
 def render_reactapp(request):
@@ -18,12 +18,6 @@ def render_reactapp(request):
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
     path("api/", include("api_app.urls")),
-    path(
-        "accounts/github/login/callback/",
-        views.GitHubLoginCallbackView.as_view(),
-        name="github_callback",
-    ),
-    path("accounts/", include("allauth.urls")),
     re_path(r"^(?!api|silk)$", render_reactapp),
     re_path(r"^(?!api|silk)(?:.*)/?$", render_reactapp),
 ]

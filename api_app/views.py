@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import datetime
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
@@ -7,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
+from django.utils.timezone import now
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -297,6 +299,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         pks = (
             Job.objects.filter(md5=request.data["md5"])
             .visible_for_user(self.request.user)
+            .filter(finished_analysis_time__gte=now() - datetime.timedelta(days=14))
             .annotate_importance(request.user)
             .order_by("-importance", "-finished_analysis_time")
             .values_list("pk", flat=True)

@@ -287,11 +287,21 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         logger.info(
             f"user: {user} request the jobs with params: {self.request.query_params}"
         )
-        return (
-            Job.objects.visible_for_user(user)
-            .prefetch_related("tags")
-            .order_by("-received_request_time")
+        return Job.objects.visible_for_user(user).order_by("-received_request_time")
+
+    @action(detail=False, methods=["post"])
+    def recent_scans(self, request):
+        if "md5" not in request.data:
+            raise ValidationError({"detail": "md5 is required"})
+
+        pks = (
+            Job.objects.filter(md5=request.data["md5"])
+            .visible_for_user(self.request.user)
+            .annotate_importance(request.user)
+            .order_by("-importance", "-finished_analysis_time")
+            .values_list("pk", flat=True)
         )
+        return Response({"jobs": pks}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["patch"])
     def retry(self, request, pk=None):

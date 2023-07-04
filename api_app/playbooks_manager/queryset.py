@@ -43,8 +43,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
     def _subquery_other(user: User) -> Subquery:
         if user.has_membership():
             return Subquery(
-                Job.objects.prefetch_related("user")
-                .filter(
+                Job.objects.filter(
                     playbook_to_execute=OuterRef("pk"),
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
                 )

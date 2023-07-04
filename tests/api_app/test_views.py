@@ -1,9 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
-import os
+import datetime
 
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
@@ -186,8 +186,9 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class JobViewsetTests(CustomViewSetTestCase):
+class JobViewSetTests(CustomViewSetTestCase):
     jobs_list_uri = reverse("jobs-list")
+    jobs_recent_scans_uri = reverse("jobs-recent-scans")
     agg_status_uri = reverse("jobs-aggregate-status")
     agg_type_uri = reverse("jobs-aggregate-type")
     agg_observable_classification_uri = reverse(
@@ -203,8 +204,7 @@ class JobViewsetTests(CustomViewSetTestCase):
             **{
                 "user": self.superuser,
                 "is_sample": False,
-                "observable_name": os.environ.get("TEST_IP"),
-                "md5": os.environ.get("TEST_MD5"),
+                "observable_name": "1.2.3.4",
                 "observable_classification": "ip",
             }
         )
@@ -217,6 +217,37 @@ class JobViewsetTests(CustomViewSetTestCase):
                 "file_mimetype": "application/x-dosexec",
             }
         )
+
+    def test_recent_scan(self):
+        j1 = Job.objects.create(
+            **{
+                "user": self.user,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(days=2),
+            }
+        )
+        j2 = Job.objects.create(
+            **{
+                "user": self.user,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(hours=2),
+            }
+        )
+        response = self.client.post(self.jobs_recent_scans_uri, data={"md5": j1.md5})
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(200, response.status_code, msg=msg)
+        self.assertIn("jobs", content, msg=msg)
+        jobs = content["jobs"]
+        self.assertEqual(j2.pk, jobs[0])
+        self.assertEqual(j1.pk, jobs[1])
+
+        j1.delete()
+        j2.delete()
 
     def test_list_200(self):
         response = self.client.get(self.jobs_list_uri)

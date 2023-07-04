@@ -1,15 +1,26 @@
+import datetime
 import uuid
 from typing import Generator
 
 from celery.canvas import Signature
 from django.db import models
-from django.db.models import Exists, F, IntegerField, OuterRef, Q, QuerySet
+from django.db.models import (
+    Case,
+    Exists,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
 from django.db.models.aggregates import Count
 from django.db.models.functions import Cast
 from django.db.models.lookups import Exact
+from django.utils.timezone import now
 
 from api_app.choices import TLP
-from api_app.models import Job, PythonConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
 
@@ -61,6 +72,46 @@ class JobQuerySet(CleanOnCreateQuerySet):
             Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
         )
         return self.filter(query)
+
+    def _annotate_importance_date(self) -> QuerySet:
+        # the scans in the last day get a 3x
+        # the scans in the last week get a 2x
+
+        return self.annotate(
+            date_weight=Case(
+                When(
+                    finished_analysis_time__gte=now() - datetime.timedelta(hours=24),
+                    then=Value(3),
+                ),
+                When(
+                    finished_analysis_time__gte=now() - datetime.timedelta(days=7),
+                    then=Value(2),
+                ),
+                default=Value(0),
+            ),
+        )
+
+    def _annotate_importance_user(self, user: User) -> QuerySet:
+        # the scans from the user get a 3x
+        # the scans from the same org get a 2x
+        user_case = Case(When(user__pk=user.pk, then=Value(3)), default=Value(0))
+        if user.has_membership():
+            user_case.cases.append(
+                When(
+                    user__membership__organization__pk=user.membership.organization.pk,
+                    then=Value(2),
+                )
+            )
+
+        return self.annotate(user_weight=user_case)
+
+    def annotate_importance(self, user: User) -> QuerySet:
+
+        return (
+            self._annotate_importance_date()
+            ._annotate_importance_user(user)
+            .annotate(importance=F("date_weight") + F("user_weight"))
+        )
 
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
@@ -152,10 +203,13 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             )
         )
 
-    def get_signatures(self, job: Job) -> Generator[Signature, None, None]:
+    def get_signatures(self, job) -> Generator[Signature, None, None]:
+        from api_app.models import Job, PythonConfig
         from intel_owl import tasks
 
+        job: Job
         for config in self:
+
             config: PythonConfig
             if not hasattr(config, "runnable"):
                 raise RuntimeError(

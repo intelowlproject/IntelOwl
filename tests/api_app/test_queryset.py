@@ -4,8 +4,8 @@ from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 
-class PythonConfiguQuerySetTestCase(CustomTestCase):
 
+class PythonConfiguQuerySetTestCase(CustomTestCase):
     def test_runnable_valid(self):
         ac = AnalyzerConfig.objects.create(
             name="test",
@@ -23,7 +23,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter",
             is_secret=False,
             required=True,
-            analyzer_config=ac
+            analyzer_config=ac,
         )
         pc = PluginConfig.objects.create(
             value="myperfecttest",
@@ -31,7 +31,9 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             owner=self.user,
             parameter=param,
         )
-        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(name="test")
+        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
+            name="test"
+        )
 
         self.assertTrue(ac_retrieved.runnable)
         self.assertEqual(1, ac_retrieved.configured_required_params)
@@ -57,16 +59,17 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter",
             is_secret=False,
             required=True,
-            analyzer_config=ac
+            analyzer_config=ac,
         )
 
-        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(name="test")
+        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
+            name="test"
+        )
         self.assertFalse(ac_retrieved.runnable)
         self.assertEqual(0, ac_retrieved.configured_required_params)
         self.assertFalse(ac_retrieved.configured)
         param.delete()
         ac.delete()
-
 
     def test_runnable_disabled(self):
         ac = AnalyzerConfig.objects.create(
@@ -78,7 +81,9 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             type="file",
             run_hash=False,
         )
-        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(name="test")
+        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
+            name="test"
+        )
         self.assertFalse(ac_retrieved.runnable)
         self.assertTrue(ac_retrieved.configured)
         self.assertEqual(0, ac_retrieved.configured_required_params)
@@ -86,7 +91,6 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
 
 
 class ParameterQuerySetTestCase(CustomTestCase):
-
     def test_configured_for_user(self):
         param = Parameter.objects.create(
             name="testparameter",
@@ -94,7 +98,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
             description="test parameter",
             is_secret=False,
             required=False,
-            analyzer_config=AnalyzerConfig.objects.first()
+            analyzer_config=AnalyzerConfig.objects.first(),
         )
         pc = PluginConfig.objects.create(
             value="myperfecttest",
@@ -103,15 +107,24 @@ class ParameterQuerySetTestCase(CustomTestCase):
             parameter=param,
         )
 
-        self.assertFalse(Parameter.objects.configured_for_user(self.user).get(name="testparameter").configured)
+        self.assertFalse(
+            Parameter.objects.annotate_configured(self.user)
+            .get(name="testparameter")
+            .configured
+        )
 
         pc.owner = self.user
         pc.save()
 
-        self.assertTrue(Parameter.objects.configured_for_user(self.user).get(name="testparameter").configured)
+        self.assertTrue(
+            Parameter.objects.annotate_configured(self.user)
+            .get(name="testparameter")
+            .configured
+        )
 
         pc.delete()
         param.delete()
+
 
 class PluginConfigQuerySetTestCase(CustomTestCase):
     def test_visible_for_user_owner(self):

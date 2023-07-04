@@ -18,6 +18,9 @@ class CleanOnCreateQuerySet(models.QuerySet):
     def create(self, **kwargs):
         obj = self.model(**kwargs)
         obj: models.Model
+        # we are forcing the clean method call.
+        # django rest framework DOES NOT do that by default,
+        # and I want to be sure that it is actually caled
         obj.clean()
         self._for_write = True
         obj.save(force_insert=True, using=self.db)
@@ -26,6 +29,9 @@ class CleanOnCreateQuerySet(models.QuerySet):
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
     def annotate_runnable(self, user: User = None) -> QuerySet:
+        # the plugin is runnable IF
+        # - it is not disabled
+        # - the user is not inside an organization that have disabled the plugin
         qs = self.filter(
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
@@ -58,9 +64,12 @@ class JobQuerySet(CleanOnCreateQuerySet):
 
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
-    def configured_for_user(self, user: User) -> QuerySet:
+    def annotate_configured(self, user: User = None) -> QuerySet:
         from api_app.models import PluginConfig
 
+        # A parameter it is configured for a user if
+        # there is a PluginConfig that is visible for the user
+        # If the user is None, we only retrieve default parameters
         return self.annotate(
             configured=Exists(
                 PluginConfig.objects.filter(parameter=OuterRef("pk")).visible_for_user(
@@ -95,7 +104,9 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
     def annotate_configured(self, user: User = None) -> QuerySet:
         from api_app.models import Parameter
 
+        # a Python plugin is configured only if every required parameter is configured
         return (
+            # we retrieve the number or required parameters
             self.annotate(
                 required_params=Count(
                     Parameter.objects.filter(
@@ -103,14 +114,16 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                     ).values_list("pk", flat=True)
                 )
             )
+            # how many of them are configured
             .annotate(
                 configured_required_params=Count(
                     Parameter.objects.filter(analyzer_config=OuterRef("pk"))
-                    .configured_for_user(user)
+                    .annotate_configured(user)
                     .filter(configured=True, required=True)
                     .values_list("pk", flat=True)
                 )
             )
+            # and we save the difference
             .annotate(
                 configured=Exact(
                     F("required_params") - F("configured_required_params"), 0
@@ -119,12 +132,19 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def annotate_runnable(self, user: User = None) -> QuerySet:
+        # we save the `configured` attribute in the queryset
         qs = self.annotate_configured(user)
         return (
+            # this super call parameters are required
             super(PythonConfigQuerySet, qs)
+            # we set the parent `runnable` attribute
             .annotate_runnable()
+            # and we do the logic AND between the two fields
             .annotate(
                 runnable=Exact(
+                    # I have no idea how to do the compare
+                    # of two boolean field in a subquery.
+                    # this is the same as runnable =`configured` AND `runnable`
                     Cast(F("configured"), IntegerField())
                     * Cast(F("runnable"), IntegerField()),
                     1,

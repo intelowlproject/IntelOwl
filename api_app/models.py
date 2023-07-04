@@ -31,7 +31,13 @@ from api_app.choices import (
 from api_app.decorators import valid_value_for_test
 from api_app.defaults import config_default, default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
-from api_app.queryset import JobQuerySet, ParameterQuerySet, PluginConfigQuerySet
+from api_app.queryset import (
+    AbstractConfigQuerySet,
+    JobQuerySet,
+    ParameterQuerySet,
+    PluginConfigQuerySet,
+    PythonConfigQuerySet,
+)
 from api_app.validators import (
     plugin_name_validator,
     validate_config,
@@ -653,6 +659,7 @@ class PluginConfig(models.Model):
 
 
 class AbstractConfig(models.Model):
+    objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,
@@ -746,7 +753,7 @@ class AbstractReport(models.Model):
 
 
 class PythonConfig(AbstractConfig):
-
+    objects = PythonConfigQuerySet.as_manager()
     parameters: Manager
 
     python_module = models.CharField(null=False, max_length=120, db_index=True)

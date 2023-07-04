@@ -111,7 +111,7 @@ class Plugin(metaclass=ABCMeta):
 
         if self._job.playbook_to_execute:
             for pivot in self._config.pivots.runnable(self._job.user).filter(
-                used_by_playbooks=self._job.playbook_to_execute
+                used_by_playbooks=self._job.playbook_to_execute, runnable=True
             ):
                 pivot: PivotConfig
                 pivot.pivot_job(self._job)

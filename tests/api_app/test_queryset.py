@@ -1,8 +1,117 @@
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.models import Job, Parameter, PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 
+class PythonConfiguQuerySetTestCase(CustomTestCase):
+
+    def test_runnable_valid(self):
+        ac = AnalyzerConfig.objects.create(
+            name="test",
+            python_module="yara_scan.YaraScan",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=False,
+            type="file",
+            run_hash=False,
+        )
+
+        param = Parameter.objects.create(
+            name="testparameter",
+            type="str",
+            description="test parameter",
+            is_secret=False,
+            required=True,
+            analyzer_config=ac
+        )
+        pc = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+        )
+        ac_retrieved = AnalyzerConfig.objects.runnable(self.user).get(name="test")
+
+        self.assertTrue(ac_retrieved.runnable)
+        self.assertEqual(1, ac_retrieved.configured_required_params)
+        self.assertTrue(ac_retrieved.configured_params)
+        pc.delete()
+        param.delete()
+        ac.delete()
+
+    def test_runnable_not_configured(self):
+        ac = AnalyzerConfig.objects.create(
+            name="test",
+            python_module="yara_scan.YaraScan",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=False,
+            type="file",
+            run_hash=False,
+        )
+
+        param = Parameter.objects.create(
+            name="testparameter",
+            type="str",
+            description="test parameter",
+            is_secret=False,
+            required=True,
+            analyzer_config=ac
+        )
+
+        ac_retrieved = AnalyzerConfig.objects.runnable(self.user).get(name="test")
+        self.assertFalse(ac_retrieved.runnable)
+        self.assertEqual(0, ac_retrieved.configured_required_params)
+        self.assertFalse(ac_retrieved.configured_params)
+        param.delete()
+        ac.delete()
+
+
+    def test_runnable_disabled(self):
+        ac = AnalyzerConfig.objects.create(
+            name="test",
+            python_module="yara_scan.YaraScan",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=True,
+            type="file",
+            run_hash=False,
+        )
+        ac_retrieved = AnalyzerConfig.objects.runnable(self.user).get(name="test")
+        self.assertFalse(ac_retrieved.runnable)
+        self.assertTrue(ac_retrieved.configured_params)
+        self.assertEqual(0, ac_retrieved.configured_required_params)
+        ac.delete()
+
+
+class ParameterQuerySetTestCase(CustomTestCase):
+
+    def test_configured_for_user(self):
+        param = Parameter.objects.create(
+            name="testparameter",
+            type="str",
+            description="test parameter",
+            is_secret=False,
+            required=False,
+            analyzer_config=AnalyzerConfig.objects.first()
+        )
+        pc = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=self.superuser,
+            parameter=param,
+        )
+
+        self.assertFalse(Parameter.objects.configured_for_user(self.user).get(name="testparameter").configured)
+
+        pc.owner = self.user
+        pc.save()
+
+        self.assertTrue(Parameter.objects.configured_for_user(self.user).get(name="testparameter").configured)
+
+        pc.delete()
+        param.delete()
 
 class PluginConfigQuerySetTestCase(CustomTestCase):
     def test_visible_for_user_owner(self):

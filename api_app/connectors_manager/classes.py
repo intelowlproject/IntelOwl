@@ -88,7 +88,11 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-        ccs = cls.config_model.objects.filter(name=connector_name).annotate_runnable()
+        ccs = (
+            cls.config_model.objects.filter(name=connector_name)
+            .annotate_runnable()
+            .filter(runnable=True)
+        )
         if not ccs.count():
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
         for cc in ccs:

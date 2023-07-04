@@ -21,6 +21,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             name="test",
             is_secret=True,
             required=True,
+            type="str",
         )
         self.org = Organization.objects.create(name="testorg")
         Membership.objects.create(

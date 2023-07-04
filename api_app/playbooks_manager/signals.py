@@ -16,6 +16,11 @@ def m2m_changed_playbook_config(
                 "maximum_tlp", flat=True
             )
         ]
-
+        # analyzer -> amber
+        # playbook -> green  => analyzer it is executed
+        # --------------
+        # analyzer -> amber
+        # playbook -> red => analyzer it is not executed
+        # ========> the playbook tlp is the minimum of all tlp of all plugins
         instance.tlp = min(tlps + [TLP[instance.tlp]], default=TLP.CLEAR).value
     return instance

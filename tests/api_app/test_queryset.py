@@ -50,7 +50,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
 
         self.assertFalse(ac_retrieved.runnable)
         self.assertEqual(2, ac_retrieved.required_params)
-        self.assertEqual(1, ac_retrieved.configured_required_params)
+        self.assertEqual(1, ac_retrieved.required_configured_params)
         self.assertFalse(ac_retrieved.configured)
         pc.delete()
         param1.delete()
@@ -87,7 +87,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
         )
 
         self.assertTrue(ac_retrieved.runnable)
-        self.assertEqual(1, ac_retrieved.configured_required_params)
+        self.assertEqual(1, ac_retrieved.required_configured_params)
         self.assertTrue(ac_retrieved.configured)
         pc.delete()
         param.delete()
@@ -117,7 +117,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             name="test"
         )
         self.assertFalse(ac_retrieved.runnable)
-        self.assertEqual(0, ac_retrieved.configured_required_params)
+        self.assertEqual(0, ac_retrieved.required_configured_params)
         self.assertFalse(ac_retrieved.configured)
         param.delete()
         ac.delete()
@@ -137,7 +137,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
         )
         self.assertFalse(ac_retrieved.runnable)
         self.assertTrue(ac_retrieved.configured)
-        self.assertEqual(0, ac_retrieved.configured_required_params)
+        self.assertEqual(0, ac_retrieved.required_configured_params)
         ac.delete()
 
 
@@ -217,7 +217,7 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
     def test_visible_for_user_organization(self):
         pc = PluginConfig.objects.create(
             value="myperfecttest",
-            for_organization=True,
+            for_organization=False,
             owner=self.superuser,
             parameter=Parameter.objects.first(),
         )
@@ -242,7 +242,8 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             user=self.user,
             organization=org,
         )
-
+        pc.for_organization = True
+        pc.save()
         self.assertEqual(
             1,
             PluginConfig.objects.filter(value="myperfecttest")

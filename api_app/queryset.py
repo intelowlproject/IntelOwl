@@ -50,7 +50,7 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
         if user and user.has_membership():
             qs = qs.exclude(
-                disabled_in_organization=user.membership.organization,
+                disabled_in_organizations=user.membership.organization,
             )
         return self.annotate(runnable=Exists(qs))
 
@@ -162,7 +162,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             self.annotate(
                 required_params=Subquery(
                     Parameter.objects.filter(
-                        analyzer_config=OuterRef("pk"), required=True
+                        **{self.model.snake_case_name: OuterRef("pk")}, required=True
                     )
                     # count them
                     .annotate(count=Func(F("pk"), function="Count")).values("count")
@@ -170,9 +170,9 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             )
             # how many of them are configured
             .annotate(
-                configured_required_params=Subquery(
+                required_configured_params=Subquery(
                     Parameter.objects.filter(
-                        analyzer_config=OuterRef("pk"), required=True
+                        **{self.model.snake_case_name: OuterRef("pk")}, required=True
                     )
                     # set the configured param
                     .annotate_configured(user)
@@ -185,7 +185,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             # and we save the difference
             .annotate(
                 configured=Exact(
-                    F("required_params") - F("configured_required_params"), 0
+                    F("required_params") - F("required_configured_params"), 0
                 )
             )
         )
@@ -197,7 +197,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             # this super call parameters are required
             super(PythonConfigQuerySet, qs)
             # we set the parent `runnable` attribute
-            .annotate_runnable()
+            .annotate_runnable(user)
             # and we do the logic AND between the two fields
             .annotate(
                 runnable=Exact(

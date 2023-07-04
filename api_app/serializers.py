@@ -76,7 +76,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "id",
             "user",
             "is_sample",
-            "md5",
             "tlp",
             "runtime_configuration",
             "analyzers_requested",
@@ -87,6 +86,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "scan_check_time",
         )
 
+    md5 = rfs.HiddenField(default=None)
     is_sample = rfs.HiddenField(write_only=True, default=False)
     user = rfs.HiddenField(default=rfs.CurrentUserDefault())
     scan_mode = rfs.ChoiceField(
@@ -101,7 +101,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     runtime_configuration = rfs.JSONField(
         required=False, default=default_runtime, write_only=True
     )
-    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"])
+    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
 
     def validate_runtime_configuration(self, runtime_config: Dict):
         from api_app.validators import validate_runtime_configuration
@@ -170,9 +170,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["connectors_requested"] = self.filter_connectors_requested(
             attrs["connectors_requested"]
         )
-        attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(
-            attrs["analyzers_requested"], attrs["tlp"]
-        )
+        attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(
             attrs["connectors_requested"], attrs["tlp"]
         )
@@ -201,7 +199,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return connectors_executed
 
     def set_analyzers_to_execute(
-        self, analyzers_requested: List[AnalyzerConfig], tlp: str
+        self, analyzers_requested: List[AnalyzerConfig], tlp: str, **kwargs
     ) -> List[AnalyzerConfig]:
         analyzers_executed = list(
             self.plugins_to_execute(tlp, analyzers_requested, not self.all_analyzers)
@@ -527,6 +525,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         tlp: str,
         file_mimetype: str,
         file_name: str,
+        **kwargs,
     ) -> List[AnalyzerConfig]:
         analyzers_to_execute = analyzers_requested.copy()
 
@@ -706,6 +705,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         analyzers_requested: List[AnalyzerConfig],
         tlp: str,
         observable_classification: str,
+        **kwargs,
     ) -> List[AnalyzerConfig]:
         analyzers_to_execute = analyzers_requested.copy()
 

@@ -862,12 +862,8 @@ class PythonConfig(AbstractConfig):
 
     @deprecated("Please use the queryset method `annotate_configured`.")
     def _is_configured(self, user: User = None) -> bool:
-        return (
-            self.__class__.objects.filter(pk=self.pk)
-            .annotate_configured(user)
-            .first()
-            .configured
-        )
+        pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
+        return pc.configured
 
     @cached_property
     def queue(self):
@@ -915,9 +911,9 @@ class PythonConfig(AbstractConfig):
         return result
 
     @deprecated("Please use the queryset method `get_signatures`.")
-    def get_signature(self, job):
-        return (
+    def get_signature(self, job) -> Signature:
+        return next(
             self.__class__.objects.filter(pk=self.pk)
             .annotate_runnable(job.user)
-            .get_signatures(job)[0]
+            .get_signatures(job)
         )

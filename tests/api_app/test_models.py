@@ -28,7 +28,7 @@ class AbstractConfigTestCase(CustomTestCase):
         python_base_path=settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH,
     )
     def test_python_class_wrong(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -42,10 +42,9 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         with self.assertRaises(ImportError):
             muc.python_class
-        muc.delete()
 
     def test_python_class(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -59,8 +58,6 @@ class AbstractConfigTestCase(CustomTestCase):
             self.fail(e)
         else:
             self.assertTrue(issubclass(pc, Plugin))
-        finally:
-            muc.delete()
 
     def test_clean_python_module(self):
         muc: VisualizerConfig = VisualizerConfig(
@@ -169,7 +166,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_configured__secret_present_not_user(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -194,7 +191,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_runnable(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -206,7 +203,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_runnable_disabled(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -218,7 +215,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_runnable_disabled_by_org(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -228,13 +225,14 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         org = Organization.objects.create(name="test_org")
 
-        m = Membership.objects.create(
-            user=self.user,
-            organization=org,
-        )
+        m = Membership.objects.create(user=self.user, organization=org, is_owner=True)
         muc: VisualizerConfig
         muc.disabled_in_organizations.add(org)
-
+        self.assertFalse(
+            VisualizerConfig.objects.filter(name="test")
+            .exclude(disabled=True)
+            .exclude(disabled_in_organizations=self.user.membership.organization)
+        )
         self.assertFalse(muc.is_runnable(self.user))
 
         muc.delete()
@@ -281,14 +279,15 @@ class ParameterTestCase(CustomTestCase):
         ac, _ = AnalyzerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module="yara_scan.YaraScan",
             disabled=False,
+            type="file",
             config={"soft_time_limit": 100, "queue": "default"},
         )
         cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module="misp.MISP",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
@@ -372,10 +371,6 @@ class ParameterTestCase(CustomTestCase):
         )
         self.assertEqual("testdefault", par.get_first_value(self.user).value)
 
-        pc2 = PluginConfig.objects.create(
-            value="testorg", owner=self.superuser, for_organization=True, parameter=par
-        )
-
         org = Organization.objects.create(name="test_org")
         m1 = Membership.objects.create(
             user=self.superuser, organization=org, is_owner=True
@@ -384,10 +379,14 @@ class ParameterTestCase(CustomTestCase):
             user=self.user,
             organization=org,
         )
+        pc2 = PluginConfig.objects.create(
+            value="testorg", owner=self.superuser, for_organization=True, parameter=par
+        )
+
         self.assertEqual("testorg", par.get_first_value(self.user).value)
 
         pc3 = PluginConfig.objects.create(
-            value="testowner", owner=self.user, for_organization=True, parameter=par
+            value="testowner", owner=self.user, for_organization=False, parameter=par
         )
         self.assertEqual("testowner", par.get_first_value(self.user).value)
         m1.delete()

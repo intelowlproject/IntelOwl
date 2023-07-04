@@ -56,20 +56,34 @@ class ConnectorActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTest
     def plugin_type(self):
         return "connector"
 
+    def setUp(self):
+        super().setUp()
+        self.config = ConnectorConfig.objects.create(
+            name="test",
+            python_module="misp.MISP",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=False,
+            maximum_tlp="CLEAR",
+        )
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        self.config.delete()
+
     def init_report(self, status: str, user) -> ConnectorReport:
-        config = ConnectorConfig.objects.get(name="MISP")
         _job = Job.objects.create(
             user=user,
             status=Job.Status.REPORTED_WITHOUT_FAILS,
             observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
         )
-        _job.connectors_to_execute.set([config])
+        _job.connectors_to_execute.set([self.config])
         _report, _ = ConnectorReport.objects.get_or_create(
             **{
                 "job_id": _job.id,
                 "status": status,
-                "config": config,
+                "config": self.config,
                 "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
             }
         )

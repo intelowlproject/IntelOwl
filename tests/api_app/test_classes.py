@@ -20,7 +20,7 @@ class PluginTestCase(CustomTestCase):
         )
         self.cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
-            python_module="yara.Yara",
+            python_module="misp.MISP",
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},

@@ -56,7 +56,7 @@ pyhashlookup==1.2.0
 pyimpfuzzy==0.5
 pymisp==2.4.168.1
 git+https://github.com/DissectMalware/pyOneNote@74d7b05966b9948b408a8de484e6c4e40a220de0
-pypdns==1.5.2
+pypdns==2.1.0
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1

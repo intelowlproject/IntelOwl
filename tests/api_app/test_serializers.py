@@ -105,10 +105,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         connectors = self.ajcs.set_connectors_to_execute(
             [], {"tlp": "CLEAR", "connectors_requested": []}
         )
-        total = 0
-        for connector in ConnectorConfig.objects.all():
-            if connector.is_runnable(self.user):
-                total += 1
+        total = ConnectorConfig.objects.annotate_runnable(self.user).filter(runnable=True).count()
         self.assertEqual(len(connectors), total)
 
     def test_filter_connectors_is_runnable(self):

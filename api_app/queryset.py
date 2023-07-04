@@ -1,10 +1,15 @@
+import uuid
+from typing import Generator
+
+from celery.canvas import Signature
 from django.db import models
-from django.db.models import Exists, F, OuterRef, Q, QuerySet, BooleanField, ExpressionWrapper, IntegerField
+from django.db.models import Exists, F, IntegerField, OuterRef, Q, QuerySet
 from django.db.models.aggregates import Count
 from django.db.models.functions import Cast
-from django.db.models.lookups import LessThan, Exact, GreaterThan
+from django.db.models.lookups import Exact
 
 from api_app.choices import TLP
+from api_app.models import Job, PythonConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
 
@@ -20,7 +25,7 @@ class CleanOnCreateQuerySet(models.QuerySet):
 
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
-    def runnable(self, user: User = None) -> QuerySet:
+    def annotate_runnable(self, user: User = None) -> QuerySet:
         qs = self.filter(
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
@@ -87,25 +92,76 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
-    def runnable(self, user: User = None) -> QuerySet:
+    def annotate_configured(self, user: User = None) -> QuerySet:
         from api_app.models import Parameter
 
-        subquery = Count(
-            Parameter.objects.filter(analyzer_config=OuterRef("pk"))
-            .configured_for_user(user)
-            .filter(configured=True, required=True)
-            .values_list("pk", flat=True)
-        )
         return (
-            super().runnable(user).annotate(configured_required_params=subquery)
-        ).annotate(
-            required_params=Count(
-                Parameter.objects.filter(
-                    analyzer_config=OuterRef("pk"), required=True
-                ).values_list("pk", flat=True)
+            self.annotate(
+                required_params=Count(
+                    Parameter.objects.filter(
+                        analyzer_config=OuterRef("pk"), required=True
+                    ).values_list("pk", flat=True)
+                )
             )
-        ).annotate(
-            configured_params=Exact(F("required_params")- F("configured_required_params"), 0)
-        ).annotate(
-            runnable=Exact(Cast(F("configured_params"), IntegerField()) * Cast(F("runnable"), IntegerField()) , 1)
+            .annotate(
+                configured_required_params=Count(
+                    Parameter.objects.filter(analyzer_config=OuterRef("pk"))
+                    .configured_for_user(user)
+                    .filter(configured=True, required=True)
+                    .values_list("pk", flat=True)
+                )
+            )
+            .annotate(
+                configured=Exact(
+                    F("required_params") - F("configured_required_params"), 0
+                )
+            )
         )
+
+    def annotate_runnable(self, user: User = None) -> QuerySet:
+        qs = self.annotate_configured(user)
+        return (
+            super(PythonConfigQuerySet, qs)
+            .annotate_runnable()
+            .annotate(
+                runnable=Exact(
+                    Cast(F("configured"), IntegerField())
+                    * Cast(F("runnable"), IntegerField()),
+                    1,
+                )
+            )
+        )
+
+    def get_signatures(self, job: Job) -> Generator[Signature, None, None]:
+        from intel_owl import tasks
+
+        for config in self:
+            config: PythonConfig
+            if not hasattr(config, "runnable"):
+                raise RuntimeError(
+                    "You have to call `annotate_runnable`"
+                    " before being able to call `get_signature`"
+                )
+            # gen new task_id
+            if not config.runnable:
+                raise RuntimeWarning(
+                    "You are trying to get the signature of a not runnable plugin"
+                )
+
+            task_id = str(uuid.uuid4())
+            args = [
+                job.pk,
+                config.python_complete_path,
+                config.pk,
+                job.get_config_runtime_configuration(config),
+                task_id,
+            ]
+            yield tasks.run_plugin.signature(
+                args,
+                {},
+                queue=config.queue,
+                soft_time_limit=config.soft_time_limit,
+                task_id=task_id,
+                immutable=True,
+                MessageGroupId=str(task_id),
+            )

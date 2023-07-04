@@ -173,27 +173,23 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         playbook_to_execute: PlaybookConfig = None,
     ) -> Generator[VisualizerConfig, None, None]:
         if playbook_to_execute:
-            for visualizer in VisualizerConfig.objects.filter(
+            yield from VisualizerConfig.objects.filter(
                 playbook=playbook_to_execute
-            ):
-                visualizer: VisualizerConfig
-                if visualizer.is_runnable(self.context["request"].user):
-                    logger.info(f"Going to use {visualizer.name}")
-                    yield visualizer
+            ).annotate_runnable(self.context["request"].user).filter(annotate=True)
 
     def set_connectors_to_execute(
         self, connectors_requested: List[ConnectorConfig], tlp: str
     ) -> List[ConnectorConfig]:
-        connectors_executed = self.plugins_to_execute(
-            tlp, connectors_requested, not self.all_connectors
+        connectors_executed = list(
+            self.plugins_to_execute(tlp, connectors_requested, not self.all_connectors)
         )
         return connectors_executed
 
     def set_analyzers_to_execute(
         self, analyzers_requested: List[AnalyzerConfig], tlp: str
     ) -> List[AnalyzerConfig]:
-        analyzers_executed = self.plugins_to_execute(
-            tlp, analyzers_requested, not self.all_analyzers
+        analyzers_executed = list(
+            self.plugins_to_execute(tlp, analyzers_requested, not self.all_analyzers)
         )
         if not analyzers_executed:
             raise ValidationError(
@@ -206,11 +202,19 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         tlp,
         plugins_requested: List[Union[AnalyzerConfig, ConnectorConfig]],
         add_warning: bool = False,
-    ) -> List[Union[AnalyzerConfig, ConnectorConfig]]:
-        plugins_to_execute = plugins_requested.copy()
-        for plugin_config in plugins_requested:
+    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig], None, None]:
+        if not plugins_requested:
+            return
+        qs = (
+            plugins_requested[0]
+            .__class__.objects.filter(
+                pk__in=[plugin.pk for plugin in plugins_requested]
+            )
+            .annotate_runnable(self.context["request"].user)
+        )
+        for plugin_config in qs:
             try:
-                if not plugin_config.is_runnable(self.context["request"].user):
+                if not plugin_config.runnable:
                     raise NotRunnableConnector(
                         f"{plugin_config.name} won't run: is disabled or not configured"
                     )
@@ -226,14 +230,13 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f" maximum_tlp ('{plugin_config.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
-                plugins_to_execute.remove(plugin_config)
                 if add_warning:
                     logger.info(e)
                     self.filter_warnings.append(str(e))
                 else:
                     logger.debug(e)
-
-        return plugins_to_execute
+            else:
+                yield plugin_config
 
     def filter_analyzers_requested(self, analyzers):
         self.all_analyzers = False

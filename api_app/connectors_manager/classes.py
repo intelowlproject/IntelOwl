@@ -88,47 +88,43 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-        ccs = cls.config_model.objects.filter(name=connector_name, disabled=False)
+        ccs = cls.config_model.objects.filter(name=connector_name).annotate_runnable()
         if not ccs.count():
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
         for cc in ccs:
-            cc: ConnectorConfig
-            if cc.is_runnable(user):
-                logger.info(
-                    f"Found connector runnable {cc.name} for user {user.username}"
-                )
-                param: Parameter = cc.parameters.filter(name__startswith="url").first()
-                logger.info(
-                    f"Url retrieved to verify is {param.name} for connector {cc.name}"
-                )
-                if param:
-                    try:
-                        plugin_config = param.get_first_value(user)
-                    except RuntimeError:
-                        continue
-                    else:
-                        url = plugin_config.value
-                        if url.startswith("http"):
-                            logger.info(f"Checking url {url} for connector {cc.name}")
-                            if settings.STAGE_CI:
-                                return True
-                            try:
-                                # momentarily set this to False to
-                                # avoid fails for https services
-                                requests.head(url, timeout=10, verify=False)
-                            except (
-                                requests.exceptions.ConnectionError,
-                                requests.exceptions.Timeout,
-                            ) as e:
-                                logger.info(
-                                    f"Health check failed: url {url}"
-                                    f" for connector {cc.name}. Error: {e}"
-                                )
-                                health_status = False
-                            else:
-                                health_status = True
+            logger.info(f"Found connector runnable {cc.name} for user {user.username}")
+            param: Parameter = cc.parameters.filter(name__startswith="url").first()
+            logger.info(
+                f"Url retrieved to verify is {param.name} for connector {cc.name}"
+            )
+            if param:
+                try:
+                    plugin_config = param.get_first_value(user)
+                except RuntimeError:
+                    continue
+                else:
+                    url = plugin_config.value
+                    if url.startswith("http"):
+                        logger.info(f"Checking url {url} for connector {cc.name}")
+                        if settings.STAGE_CI:
+                            return True
+                        try:
+                            # momentarily set this to False to
+                            # avoid fails for https services
+                            requests.head(url, timeout=10, verify=False)
+                        except (
+                            requests.exceptions.ConnectionError,
+                            requests.exceptions.Timeout,
+                        ) as e:
+                            logger.info(
+                                f"Health check failed: url {url}"
+                                f" for connector {cc.name}. Error: {e}"
+                            )
+                            health_status = False
+                        else:
+                            health_status = True
 
-                            return health_status
+                        return health_status
         raise ConnectorRunException(
             f"Unable to find configured connector {connector_name}"
         )

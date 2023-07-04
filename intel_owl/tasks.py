@@ -98,20 +98,18 @@ def update(python_module: str, queue: str = None):
     analyzer_configs = AnalyzerConfig.objects.filter(python_module=python_module)
     if queue:
         analyzer_configs = analyzer_configs.filter(config__queue=queue)
-    for analyzer_config in analyzer_configs:
-        analyzer_config: AnalyzerConfig
-        if analyzer_config.is_runnable():
-            class_ = analyzer_config.python_class
-            if hasattr(class_, "_update") and callable(class_._update):  # noqa
-                if settings.NFS:
-                    update_plugin(None, analyzer_config.python_complete_path)
-                else:
-                    broadcast(
-                        update_plugin,
-                        queue=analyzer_config.queue,
-                        arguments={"plugin_path": analyzer_config.python_complete_path},
-                    )
-                return True
+    for analyzer_config in analyzer_configs.annotate_runnable().filter(runnable=True):
+        class_ = analyzer_config.python_class
+        if hasattr(class_, "_update") and callable(class_._update):  # noqa
+            if settings.NFS:
+                update_plugin(None, analyzer_config.python_complete_path)
+            else:
+                broadcast(
+                    update_plugin,
+                    queue=analyzer_config.queue,
+                    arguments={"plugin_path": analyzer_config.python_complete_path},
+                )
+            return True
     logger.error(f"Unable to update {python_module}")
     return False
 

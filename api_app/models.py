@@ -30,7 +30,7 @@ from api_app.choices import (
 )
 from api_app.decorators import valid_value_for_test
 from api_app.defaults import config_default, default_runtime, file_directory_path
-from api_app.helpers import calculate_sha1, calculate_sha256, get_now
+from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
     JobQuerySet,
@@ -364,7 +364,9 @@ class Job(models.Model):
 
     def _get_signatures(self, queryset: QuerySet) -> Signature:
         config_class = queryset.model
-        signatures = [plugin.get_signature(self) for plugin in queryset]
+        signatures = list(
+            queryset.annotate_runnable(self.user).filter(runnable=True).get_signatures()
+        )
         logger.info(f"{config_class} signatures are {signatures}")
 
         return (
@@ -697,10 +699,13 @@ class AbstractConfig(models.Model):
             ).exists()
         return False
 
-    def is_runnable(self, user: User = None):
-        disabled_in_org = self._is_disabled_in_org(user)
-        logger.debug(f"{disabled_in_org=}, {self.disabled=}")
-        return not disabled_in_org and not self.disabled
+    def is_runnable(self, user: User = None) -> bool:
+        return (
+            self.__class__.objects.filter(pk=self.pk)
+            .annotate_runnable(user)
+            .first()
+            .runnable
+        )
 
 
 class AbstractReport(models.Model):
@@ -854,15 +859,14 @@ class PythonConfig(AbstractConfig):
     def required_parameters(self) -> QuerySet:
         return self.parameters.filter(required=True)
 
+    @deprecated("Please use the queryset method `annotate_configured`.")
     def _is_configured(self, user: User = None) -> bool:
-        for param in self.required_parameters:
-            param: Parameter
-            if not param.values_for_user(user).exists():
-                return False
-        return True
-
-    def is_runnable(self, user: User = None):
-        return super().is_runnable(user) and self._is_configured(user)
+        return (
+            self.__class__.objects.filter(pk=self.pk)
+            .annotate_configured(user)
+            .first()
+            .configured
+        )
 
     @cached_property
     def queue(self):
@@ -909,31 +913,10 @@ class PythonConfig(AbstractConfig):
                         raise e
         return result
 
+    @deprecated("Please use the queryset method `get_signatures`.")
     def get_signature(self, job):
-        from api_app.models import Job
-        from intel_owl import tasks
-
-        job: Job
-        if self.is_runnable(job.user):
-            # gen new task_id
-            task_id = str(uuid.uuid4())
-            args = [
-                job.pk,
-                self.python_complete_path,
-                self.pk,
-                job.get_config_runtime_configuration(self),
-                task_id,
-            ]
-
-            return tasks.run_plugin.signature(
-                args,
-                {},
-                queue=self.queue,
-                soft_time_limit=self.soft_time_limit,
-                task_id=task_id,
-                immutable=True,
-                MessageGroupId=str(task_id),
-            )
-        raise RuntimeError(
-            f"Unable to create signature, config {self.name} is not runnable"
+        return (
+            self.__class__.objects.filter(pk=self.pk)
+            .annotate_runnable(job.user)
+            .get_signatures(job)[0]
         )

@@ -31,11 +31,11 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             owner=self.user,
             parameter=param,
         )
-        ac_retrieved = AnalyzerConfig.objects.runnable(self.user).get(name="test")
+        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(name="test")
 
         self.assertTrue(ac_retrieved.runnable)
         self.assertEqual(1, ac_retrieved.configured_required_params)
-        self.assertTrue(ac_retrieved.configured_params)
+        self.assertTrue(ac_retrieved.configured)
         pc.delete()
         param.delete()
         ac.delete()
@@ -60,10 +60,10 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             analyzer_config=ac
         )
 
-        ac_retrieved = AnalyzerConfig.objects.runnable(self.user).get(name="test")
+        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(name="test")
         self.assertFalse(ac_retrieved.runnable)
         self.assertEqual(0, ac_retrieved.configured_required_params)
-        self.assertFalse(ac_retrieved.configured_params)
+        self.assertFalse(ac_retrieved.configured)
         param.delete()
         ac.delete()
 
@@ -78,9 +78,9 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             type="file",
             run_hash=False,
         )
-        ac_retrieved = AnalyzerConfig.objects.runnable(self.user).get(name="test")
+        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(name="test")
         self.assertFalse(ac_retrieved.runnable)
-        self.assertTrue(ac_retrieved.configured_params)
+        self.assertTrue(ac_retrieved.configured)
         self.assertEqual(0, ac_retrieved.configured_required_params)
         ac.delete()
 

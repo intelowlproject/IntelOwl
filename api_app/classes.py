@@ -110,7 +110,7 @@ class Plugin(metaclass=ABCMeta):
         from api_app.pivots_manager.models import PivotConfig
 
         if self._job.playbook_to_execute:
-            for pivot in self._config.pivots.runnable(self._job.user).filter(
+            for pivot in self._config.pivots.annotate_runnable(self._job.user).filter(
                 used_by_playbooks=self._job.playbook_to_execute, runnable=True
             ):
                 pivot: PivotConfig

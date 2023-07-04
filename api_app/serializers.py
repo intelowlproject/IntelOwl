@@ -92,17 +92,16 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     scan_mode = rfs.ChoiceField(
         choices=ScanMode.choices,
         required=False,
-        default=ScanMode.CHECK_PREVIOUS_ANALYSIS.value,
     )
-    scan_check_time = rfs.DurationField(
-        required=False, allow_null=True, default=datetime.timedelta(hours=24)
-    )
+    scan_check_time = rfs.DurationField(required=False, allow_null=True)
 
-    tags_labels = rfs.ListField(child=rfs.CharField(), default=list)
+    tags_labels = rfs.ListField(
+        child=rfs.CharField(required=True), default=list, required=False
+    )
     runtime_configuration = rfs.JSONField(
         required=False, default=default_runtime, write_only=True
     )
-    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
+    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"])
 
     def validate_runtime_configuration(self, runtime_config: Dict):
         from api_app.validators import validate_runtime_configuration
@@ -132,7 +131,23 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self.filter_warnings = []
         self.log_runnable = True
 
+    @staticmethod
+    def set_default_value_from_playbook(attrs: Dict) -> None:
+        # we are changing attrs in place
+        for attribute, default_value in [
+            ("scan_mode", ScanMode.CHECK_PREVIOUS_ANALYSIS.value),
+            ("scan_check_time", datetime.timedelta(hours=24)),
+            ("tlp", TLP.CLEAR.value),
+            ("tags", []),
+        ]:
+            if not attrs.get(attribute):
+                if playbook := attrs.get("playbook_requested"):
+                    attrs[attribute] = getattr(playbook, attribute)
+                else:
+                    attrs[attribute] = default_value
+
     def validate(self, attrs: dict) -> dict:
+        self.set_default_value_from_playbook(attrs)
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
             if attrs.get("analyzers_requested", []) or attrs.get(
@@ -175,7 +190,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         if playbook_to_execute:
             yield from VisualizerConfig.objects.filter(
                 playbook=playbook_to_execute
-            ).annotate_runnable(self.context["request"].user).filter(annotate=True)
+            ).annotate_runnable(self.context["request"].user).filter(runnable=True)
 
     def set_connectors_to_execute(
         self, connectors_requested: List[ConnectorConfig], tlp: str
@@ -205,14 +220,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     ) -> Generator[Union[AnalyzerConfig, ConnectorConfig], None, None]:
         if not plugins_requested:
             return
-        qs = (
-            plugins_requested[0]
-            .__class__.objects.filter(
-                pk__in=[plugin.pk for plugin in plugins_requested]
-            )
-            .annotate_runnable(self.context["request"].user)
+        qs = plugins_requested[0].__class__.objects.filter(
+            pk__in=[plugin.pk for plugin in plugins_requested]
         )
-        for plugin_config in qs:
+        for plugin_config in qs.annotate_runnable(self.context["request"].user):
             try:
                 if not plugin_config.runnable:
                     raise NotRunnableConnector(
@@ -511,7 +522,11 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         return attrs
 
     def set_analyzers_to_execute(
-        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+        self,
+        analyzers_requested: List[AnalyzerConfig],
+        tlp: str,
+        file_mimetype: str,
+        file_name: str,
     ) -> List[AnalyzerConfig]:
         analyzers_to_execute = analyzers_requested.copy()
 
@@ -519,14 +534,13 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
             pk__in=[config.pk for config in analyzers_to_execute]
         )
-        file_mimetype = serialized_data["file_mimetype"]
         if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP1.value]:
             EXCEL_OFFICE_FILES = r"\.[xl]\w{0,3}$"
             DOC_OFFICE_FILES = r"\.[doc]\w{0,3}$"
-            if re.search(DOC_OFFICE_FILES, serialized_data["file_name"]):
+            if re.search(DOC_OFFICE_FILES, file_name):
                 # its an excel file
                 file_mimetype = MimeTypes.DOC.value
-            elif re.search(EXCEL_OFFICE_FILES, serialized_data["file_name"]):
+            elif re.search(EXCEL_OFFICE_FILES, file_name):
                 # its an excel file
                 file_mimetype = MimeTypes.EXCEL1.value
             else:
@@ -553,7 +567,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             else:
                 logger.info(message)
                 self.filter_warnings.append(message)
-        return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
+        return super().set_analyzers_to_execute(analyzers_to_execute, tlp)
 
 
 class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
@@ -688,7 +702,10 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         return value
 
     def set_analyzers_to_execute(
-        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+        self,
+        analyzers_requested: List[AnalyzerConfig],
+        tlp: str,
+        observable_classification: str,
     ) -> List[AnalyzerConfig]:
         analyzers_to_execute = analyzers_requested.copy()
 
@@ -697,9 +714,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         )
         for analyzer in partially_filtered_analyzers_qs.exclude(
             type=TypeChoices.OBSERVABLE,
-            observable_supported__contains=[
-                serialized_data["observable_classification"]
-            ],
+            observable_supported__contains=[observable_classification],
         ):
             analyzers_to_execute.remove(analyzer)
             message = (
@@ -712,7 +727,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 logger.info(message)
                 self.filter_warnings.append(message)
 
-        return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
+        return super().set_analyzers_to_execute(analyzers_to_execute, tlp)
 
 
 class JobEnvelopeSerializer(rfs.ListSerializer):

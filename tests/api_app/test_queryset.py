@@ -10,6 +10,53 @@ from tests import CustomTestCase
 
 
 class PythonConfiguQuerySetTestCase(CustomTestCase):
+    def test_annotate_configured_multiple_parameter(self):
+        ac = AnalyzerConfig.objects.create(
+            name="test",
+            python_module="yara_scan.YaraScan",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=False,
+            type="file",
+            run_hash=False,
+        )
+
+        param1 = Parameter.objects.create(
+            name="testparameter",
+            type="str",
+            description="test parameter",
+            is_secret=False,
+            required=True,
+            analyzer_config=ac,
+        )
+        param2 = Parameter.objects.create(
+            name="testparameter2",
+            type="str",
+            description="test parameter2",
+            is_secret=False,
+            required=True,
+            analyzer_config=ac,
+        )
+
+        pc = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=self.user,
+            parameter=param1,
+        )
+        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
+            name="test"
+        )
+
+        self.assertFalse(ac_retrieved.runnable)
+        self.assertEqual(2, ac_retrieved.required_params)
+        self.assertEqual(1, ac_retrieved.configured_required_params)
+        self.assertFalse(ac_retrieved.configured)
+        pc.delete()
+        param1.delete()
+        param2.delete()
+        ac.delete()
+
     def test_runnable_valid(self):
         ac = AnalyzerConfig.objects.create(
             name="test",

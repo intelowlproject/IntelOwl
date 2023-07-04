@@ -699,6 +699,7 @@ class AbstractConfig(models.Model):
             ).exists()
         return False
 
+    @deprecated("Please use `runnable` method on queryset")
     def is_runnable(self, user: User = None) -> bool:
         return (
             self.__class__.objects.filter(pk=self.pk)

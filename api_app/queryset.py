@@ -8,14 +8,15 @@ from django.db.models import (
     Case,
     Exists,
     F,
+    Func,
     IntegerField,
     OuterRef,
     Q,
     QuerySet,
+    Subquery,
     Value,
     When,
 )
-from django.db.models.aggregates import Count
 from django.db.models.functions import Cast
 from django.db.models.lookups import Exact
 from django.utils.timezone import now
@@ -159,19 +160,26 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         return (
             # we retrieve the number or required parameters
             self.annotate(
-                required_params=Count(
+                required_params=Subquery(
                     Parameter.objects.filter(
                         analyzer_config=OuterRef("pk"), required=True
-                    ).values_list("pk", flat=True)
+                    )
+                    # count them
+                    .annotate(count=Func(F("pk"), function="Count")).values("count")
                 )
             )
             # how many of them are configured
             .annotate(
-                configured_required_params=Count(
-                    Parameter.objects.filter(analyzer_config=OuterRef("pk"))
+                configured_required_params=Subquery(
+                    Parameter.objects.filter(
+                        analyzer_config=OuterRef("pk"), required=True
+                    )
+                    # set the configured param
                     .annotate_configured(user)
-                    .filter(configured=True, required=True)
-                    .values_list("pk", flat=True)
+                    .filter(configured=True)
+                    # count them
+                    .annotate(count=Func(F("pk"), function="Count"))
+                    .values("count")
                 )
             )
             # and we save the difference

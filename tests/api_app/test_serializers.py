@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from unittest.mock import patch
 
 from rest_framework.exceptions import ValidationError
 
@@ -46,12 +45,20 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         self.ajcs.all_analyzers = False
         self.ajcs.all_connectors = False
 
+    def test_set_default_value_from_playbook(self):
+        data = {"playbook_requested": PlaybookConfig.objects.first()}
+        self.ajcs.set_default_value_from_playbook(data)
+        self.assertIn("scan_mode", data)
+        self.assertIn("scan_check_time", data)
+        self.assertIn("tlp", data)
+        self.assertIn("tags", data)
+
     def test_validate_playbook_and_analyzers(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
         with self.assertRaises(ValidationError):
             self.ajcs.validate(
                 {
-                    "playbook_requested": [PlaybookConfig.objects.first()],
+                    "playbook_requested": PlaybookConfig.objects.first(),
                     "analyzers_requested": [a],
                     "tlp": "CLEAR",
                 }
@@ -75,72 +82,71 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_analyzers_not_runnable(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.disabled = True
+        a.save()
         with self.assertRaises(ValidationError):
-            self.ajcs.set_analyzers_to_execute(
-                [a], {"tlp": "CLEAR", "analyzers_requested": [a]}
-            )
+            self.ajcs.set_analyzers_to_execute([a], "CLEAR")
         a.disabled = False
-        analyzers = self.ajcs.set_analyzers_to_execute(
-            [a], {"tlp": "CLEAR", "analyzers_requested": [a]}
-        )
+        a.save()
+        analyzers = self.ajcs.set_analyzers_to_execute([a], "CLEAR")
         self.assertCountEqual(analyzers, [a])
 
     def test_filter_analyzers_maximum_tlp(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
+        previous_tlp = a.maximum_tlp
         a.maximum_tlp = "CLEAR"
+        a.save()
         self.ajcs.all_analyzers = False
         with self.assertRaises(ValidationError):
-            self.ajcs.set_analyzers_to_execute(
-                [a], {"tlp": "GREEN", "analyzers_requested": [a]}
-            )
+            self.ajcs.set_analyzers_to_execute([a], "GREEN")
 
         a.maximum_tlp = "GREEN"
-        analyzers = self.ajcs.set_analyzers_to_execute(
-            [a], {"tlp": "GREEN", "analyzers_requested": [a]}
-        )
+        a.save()
+        analyzers = self.ajcs.set_analyzers_to_execute([a], "GREEN")
+        a.maximum_tlp = previous_tlp
+        a.save()
         self.assertCountEqual(analyzers, [a])
 
-    def test_filter_connectors_all(self):
-
-        connectors = self.ajcs.set_connectors_to_execute(
-            [], {"tlp": "CLEAR", "connectors_requested": []}
-        )
-        total = (
-            ConnectorConfig.objects.annotate_runnable(self.user)
-            .filter(runnable=True)
-            .count()
-        )
-        self.assertEqual(len(connectors), total)
-
     def test_filter_connectors_is_runnable(self):
-        c = ConnectorConfig.objects.get(name="MISP")
-        c.maximum_tlp = "CLEAR"
+        cc = ConnectorConfig.objects.create(
+            name="test",
+            python_module="misp.MISP",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=True,
+            maximum_tlp="CLEAR",
+        )
 
-        self.assertFalse(c.is_runnable(self.user))
+        self.assertFalse(cc.is_runnable(self.user))
         connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-            self.ajcs, [c], {"tlp": "CLEAR", "connectors_requested": [c]}
+            self.ajcs, [cc], "CLEAR"
         )
         self.assertEqual(0, len(connectors))
-        with patch.object(c, "is_runnable") as is_runnable:
-            is_runnable.return_value = True
-            connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-                self.ajcs, [c], {"tlp": "CLEAR", "connectors_requested": [c]}
-            )
-            self.assertCountEqual(connectors, [c])
+        cc.disabled = False
+        cc.save()
+        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
+            self.ajcs, [cc], "CLEAR"
+        )
+        self.assertCountEqual(connectors, [cc])
+        cc.delete()
 
     def test_filter_connectors_tlp(self):
-        c = ConnectorConfig.objects.get(name="MISP")
-        c.maximum_tlp = "CLEAR"
-        with patch.object(c, "is_runnable") as is_runnable:
-            is_runnable.return_value = True
-            connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-                self.ajcs, [c], {"tlp": "GREEN", "connectors_requested": [c]}
-            )
-            self.assertEqual(0, len(connectors))
-            connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-                self.ajcs, [c], {"tlp": "CLEAR", "connectors_requested": [c]}
-            )
-            self.assertCountEqual(connectors, [c])
+        cc = ConnectorConfig.objects.create(
+            name="test",
+            python_module="misp.MISP",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=False,
+            maximum_tlp="CLEAR",
+        )
+        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
+            self.ajcs, [cc], "GREEN"
+        )
+        self.assertEqual(0, len(connectors))
+        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
+            self.ajcs, [cc], "CLEAR"
+        )
+        self.assertCountEqual(connectors, [cc])
+        cc.delete()
 
     def test_filter_visualizers_all(self):
         v = VisualizerConfig.objects.get(name="Yara")
@@ -163,12 +169,14 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs, pc
         )
         self.assertCountEqual(visualizers, [v])
-        with patch.object(VisualizerConfig, "is_runnable") as is_runnable:
-            is_runnable.return_value = False
-            visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-                self.ajcs, pc
-            )
-            self.assertCountEqual(visualizers, [])
+        v.disabled = True
+        v.save()
+        visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
+            self.ajcs, pc
+        )
+        self.assertCountEqual(visualizers, [])
+        v.disabled = False
+        v.save()
         pc.delete()
 
     def test_runtime_configuration_empty(self):
@@ -203,13 +211,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
 
         with self.assertRaises(ValidationError):
             FileAnalysisSerializer.set_analyzers_to_execute(
-                self.fas,
-                [a],
-                {
-                    "tlp": "CLEAR",
-                    "file_mimetype": "text/html",
-                    "analyzers_requested": [a],
-                },
+                self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
             )
         a.type = "file"
         a.save()
@@ -219,33 +221,29 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
             ).exists()
         )
         analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
-            self.fas,
-            [a],
-            {"tlp": "CLEAR", "file_mimetype": "text/html", "analyzers_requested": [a]},
+            self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
         )
         self.assertCountEqual(analyzers, [a])
 
     def test_filter_analyzer_mimetype(self):
-        a = AnalyzerConfig.objects.get(name="Tranco")
-        a.type = "file"
-        a.supported_filetypes = ["text/rtf"]
-        a.save()
+        a = AnalyzerConfig.objects.create(
+            name="test",
+            python_module="yara_scan.YaraScan",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=False,
+            supported_filetypes=["text/rtf"],
+            type="file",
+            run_hash=False,
+        )
 
         with self.assertRaises(ValidationError):
             FileAnalysisSerializer.set_analyzers_to_execute(
-                self.fas,
-                [a],
-                {
-                    "tlp": "CLEAR",
-                    "file_mimetype": "text/html",
-                    "analyzers_requested": [a],
-                },
+                self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
             )
 
         analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
-            self.fas,
-            [a],
-            {"tlp": "CLEAR", "file_mimetype": "text/rtf", "analyzers_requested": [a]},
+            self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
         )
         self.assertCountEqual(analyzers, [a])
 
@@ -255,21 +253,14 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
 
         with self.assertRaises(ValidationError):
             FileAnalysisSerializer.set_analyzers_to_execute(
-                self.fas,
-                [a],
-                {
-                    "tlp": "CLEAR",
-                    "file_mimetype": "text/html",
-                    "analyzers_requested": [a],
-                },
+                self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
             )
 
         analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
-            self.fas,
-            [a],
-            {"tlp": "CLEAR", "file_mimetype": "text/rtf", "analyzers_requested": [a]},
+            self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
         )
         self.assertCountEqual(analyzers, [a])
+        a.delete()
 
 
 class ObservableJobCreateSerializerTestCase(CustomTestCase):
@@ -287,24 +278,12 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         a.save()
         with self.assertRaises(ValidationError):
             ObservableAnalysisSerializer.set_analyzers_to_execute(
-                self.oass,
-                [a],
-                {
-                    "tlp": "CLEAR",
-                    "analyzers_requested": [a],
-                    "observable_classification": "domain",
-                },
+                self.oass, [a], tlp="CLEAR", observable_classification="domain"
             )
         a.type = "observable"
         a.save()
         analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(
-            self.oass,
-            [a],
-            {
-                "tlp": "CLEAR",
-                "analyzers_requested": [a],
-                "observable_classification": "domain",
-            },
+            self.oass, [a], tlp="CLEAR", observable_classification="domain"
         )
         self.assertCountEqual(analyzers, [a])
 
@@ -315,24 +294,12 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         a.save()
         with self.assertRaises(ValidationError):
             ObservableAnalysisSerializer.set_analyzers_to_execute(
-                self.oass,
-                [a],
-                {
-                    "tlp": "CLEAR",
-                    "analyzers_requested": [a],
-                    "observable_classification": "domain",
-                },
+                self.oass, [a], tlp="CLEAR", observable_classification="domain"
             )
         a.observable_supported = ["domain"]
         a.save()
         analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(
-            self.oass,
-            [a],
-            {
-                "tlp": "CLEAR",
-                "analyzers_requested": [a],
-                "observable_classification": "domain",
-            },
+            self.oass, [a], tlp="CLEAR", observable_classification="domain"
         )
         self.assertCountEqual(analyzers, [a])
 

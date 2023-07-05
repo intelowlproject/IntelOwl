@@ -4,7 +4,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import (  # github_login,
+from .views import (
     APIAccessTokenView,
     ChangePasswordView,
     EmailVerificationView,
@@ -18,6 +18,7 @@ from .views import (  # github_login,
     ResendVerificationView,
     TokenSessionsViewSet,
     check_registration_setup,
+    github_login,
     google_login,
 )
 
@@ -58,7 +59,7 @@ urlpatterns = [
         GoogleLoginCallbackView.as_view(),
         name="oauth_google_callback",
     ),
-    # path("github", github_login, name="oauth_github"),
+    path("github", github_login, name="oauth_github"),
     path(
         "github-callback",
         GitHubLoginCallbackView.as_view(),

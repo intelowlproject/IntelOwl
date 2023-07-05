@@ -16,8 +16,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-    # sites required for the all-auth
-    "django.contrib.sites",
     # admin
     "prettyjson",
     # celery, elasticsearch

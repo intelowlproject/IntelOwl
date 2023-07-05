@@ -3,9 +3,7 @@
 
 import logging
 from typing import List
-from urllib.parse import parse_qs, urlparse
 
-# all-auth required
 import requests
 import rest_email_auth.views
 from authlib.integrations.base_client import OAuthError
@@ -13,7 +11,6 @@ from authlib.oauth2 import OAuth2Error
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.hashers import check_password
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
@@ -203,8 +200,10 @@ class GoogleLoginCallbackView(LoginView):
         user = token.get("userinfo")
         user_email = user.get("email")
         user_name = user.get("name")
+
         try:
             return User.objects.get(email=user_email)
+
         except User.DoesNotExist:
             logging.info("[Google Oauth] User does not exist. Creating new user.")
             return User.objects.create_user(
@@ -269,65 +268,46 @@ def check_registration_setup(request):
     return Response(status=status.HTTP_200_OK)
 
 
-class GitHubLoginCallbackView(LoginView):
-    def get_code(self, url):
-        parsed_url = urlparse(url)
-        query_params = parse_qs(parsed_url.query)
-        code = query_params.get("code")
-        if code:
-            return code[0]
-        return None
+def github_login(request):
+    client_id = secrets.get_secret("GITHUB_CLIENT_ID")
+    return redirect(f"https://github.com/login/oauth/authorize?client_id={client_id}")
 
-    def dispatch(self, request, *args, **kwargs):
-        current_url = request.build_absolute_uri()
-        code = self.get_code(current_url)
+
+class GitHubLoginCallbackView(LoginView):
+    @staticmethod
+    def validate_and_return_user(request):
+        code = request.GET.get("code")
         if code:
             url = "https://github.com/login/oauth/access_token"
-
             headers = {"Accept": "application/json"}
-
             params = {
                 "client_id": secrets.get_secret("GITHUB_CLIENT_ID"),
                 "client_secret": secrets.get_secret("GITHUB_CLIENT_SECRET"),
                 "code": code,
                 "redirect_uri": "http://localhost/api/auth/github-callback",
             }
-
             response = requests.post(url, params=params, headers=headers)
             response_data = response.json()
-            access_token = response_data["access_token"]
-            return self.validate_and_return_user(request, access_token)
-        else:
-            # Handle case when code is not present
-            logger.warning("Failed to retrive code")
-            return HttpResponse("OAuth authentication failed", status=400)
-
-    @staticmethod
-    def validate_and_return_user(request, access_token):
-        token = access_token
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/json",
-        }
-        response = requests.get("https://api.github.com/user", headers=headers)
-        user_data = response.json()
-        user_name = user_data.get("login")
-        user_email = user_data.get("email")
-        logging.info(f"received data from github:{response}")
-        try:
-            # Check if user with the provided email already exists
-            user = User.objects.get(email=user_email)
-            if user:
-                logging.info("[Github Oauth] User already exists.")
-                return user
-            else:
-                logging.info("[Github Oauth] User does not exist. Creating new user.")
-                return User.objects.create_user(
-                    email=user_email, username=user_name, password=None
-                )
-        except Exception as e:
-            logging.error(f"Error creating or retrieving user: {str(e)}")
-            raise AuthenticationFailed("Error creating or retrieving user.")
+            access_token = response_data.get("access_token")
+            if access_token:
+                headers = {
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/json",
+                }
+                response = requests.get("https://api.github.com/user", headers=headers)
+                user_data = response.json()
+                user_name = user_data.get("login")
+                user_email = user_data.get("email")
+                try:
+                    return User.objects.get(username=user_name)
+                except User.DoesNotExist:
+                    logging.info(
+                        "[GitHub OAuth] User does not exist. Creating new user."
+                    )
+                    return User.objects.create_user(
+                        email=user_email, username=user_name, password=None
+                    )
+        raise AuthenticationFailed("GitHub OAuth authentication error.")
 
     def get(self, *args, **kwargs):
         return self.post(*args, **kwargs)

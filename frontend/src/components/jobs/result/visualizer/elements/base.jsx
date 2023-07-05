@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { CopyToClipboardButton } from "@certego/certego-ui";
+import { VisualizerTooltip } from "../VisualizerTooltip";
 
 export function BaseVisualizer({
   size,
@@ -15,12 +15,14 @@ export function BaseVisualizer({
   id,
   copyText,
   isChild,
+  description,
 }) {
   let coreComponent = (
     <span
       className={`${isChild ? "small" : ""} ${color} ${bold ? "fw-bold" : ""} ${
         italic ? "fst-italic" : ""
       }`}
+      id={`${id}-tooltip`}
     >
       {value} {icon}
     </span>
@@ -28,16 +30,9 @@ export function BaseVisualizer({
   // link added only in case is available and the component is not disabled, or it will be clickable
   if (link && !disable) {
     coreComponent = (
-      <a href={link} target="_blank" rel="noreferrer">
-        {coreComponent}
-      </a>
+      <div style={{ textDecoration: "underline dotted" }}>{coreComponent}</div>
     );
   }
-
-  const copyButton = !(
-    id.split("-").indexOf("vlist") !== -1 ||
-    id.split("-").indexOf("title") !== -1
-  );
 
   return (
     <div
@@ -48,13 +43,14 @@ export function BaseVisualizer({
       } ${color}`}
       id={id}
     >
-      {copyButton ? (
-        <CopyToClipboardButton id={`${id}`} text={copyText || value}>
-          {coreComponent}
-        </CopyToClipboardButton>
-      ) : (
-        coreComponent
-      )}
+      {coreComponent}
+      <VisualizerTooltip
+        idElement={`${id}-tooltip`}
+        copyText={copyText}
+        link={link}
+        disable={disable}
+        description={description}
+      />
     </div>
   );
 }
@@ -72,6 +68,7 @@ BaseVisualizer.propTypes = {
   disable: PropTypes.bool,
   copyText: PropTypes.string,
   isChild: PropTypes.bool,
+  description: PropTypes.string,
 };
 
 BaseVisualizer.defaultProps = {
@@ -84,4 +81,5 @@ BaseVisualizer.defaultProps = {
   disable: false,
   copyText: "",
   isChild: false,
+  description: "",
 };

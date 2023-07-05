@@ -1,11 +1,12 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
 import { getIcon } from "../../../../../../src/components/jobs/result/visualizer/icons";
 
 describe("BaseVisualizer component", () => {
-  test("required-only params", () => {
+  test("required-only params", async () => {
     const { container } = render(
       <BaseVisualizer
         size="col-1"
@@ -14,6 +15,9 @@ describe("BaseVisualizer component", () => {
       />
     );
 
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
     // chec text (inner span)
     const innerPartComponent = screen.getByText(
       "test base (required-only params)"
@@ -24,23 +28,25 @@ describe("BaseVisualizer component", () => {
     // check no icon
     expect(screen.queryByRole("img")).toBeNull();
     // check no link
-    expect(innerPartComponent.closest("a")).toBeNull();
+    expect(innerPartComponent.closest("div").style).not.toHaveProperty(
+      "text-decoration",
+      "underline dotted"
+    );
     // check size and alignment
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
       "col-1  d-flex align-items-center text-center justify-content-center  "
     );
-    // check id
-    const idElement = container.querySelector("#test-id");
-    expect(idElement).toBeInTheDocument();
-    // check copyButton
-    const copyButton = screen.getByRole("button", {
-      name: "test base (required-only params)",
+    // check tooltip
+    const user = userEvent.setup();
+    await user.hover(innerPartComponent);
+    await waitFor(() => {
+      const tooltipElement = screen.getByRole("tooltip");
+      expect(tooltipElement).toBeInTheDocument();
     });
-    expect(copyButton).toBeInTheDocument();
   });
 
-  test("all params", () => {
+  test("all params", async () => {
     const { container } = render(
       <BaseVisualizer
         id="test-id"
@@ -55,10 +61,13 @@ describe("BaseVisualizer component", () => {
         italic
         copyText="test base (copyText)"
         isChild
-        copyText="test base (copyText)"
+        description="description test all params"
       />
     );
 
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
     // chec text (inner span)
     const innerPartComponent = screen.getByText("test base (all params)");
     expect(innerPartComponent).toBeInTheDocument();
@@ -69,23 +78,24 @@ describe("BaseVisualizer component", () => {
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check link is available
-    expect(innerPartComponent.closest("a").href).toBe("https://google.com/");
+    expect(innerPartComponent.closest("div").style).toHaveProperty(
+      "text-decoration",
+      "underline dotted"
+    );
     // check optional elements (like bold, italic...)
-    const outerPartComponent = innerPartComponent.closest("div");
-    expect(outerPartComponent.className).toBe(
+    expect(idElement.className).toBe(
       "col-2 small d-flex align-items-center text-start justify-content-start  success"
     );
-    // check id
-    const idElement = container.querySelector("#test-id");
-    expect(idElement).toBeInTheDocument();
-    // check copyButton
-    const copyButton = screen.getByRole("button", {
-      name: "test base (all params)",
+    // check tooltip
+    const user = userEvent.setup();
+    await user.hover(innerPartComponent);
+    await waitFor(() => {
+      const tooltipElement = screen.getByRole("tooltip");
+      expect(tooltipElement).toBeInTheDocument();
     });
-    expect(copyButton).toBeInTheDocument();
   });
 
-  test("test disable", () => {
+  test("test disable", async () => {
     // it's a special case because change the style, but also the interactions
 
     const { container } = render(
@@ -105,6 +115,9 @@ describe("BaseVisualizer component", () => {
       />
     );
 
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
     // chec text (inner span)
     const innerPartComponent = screen.getByText("test base (disable)");
     expect(innerPartComponent).toBeInTheDocument();
@@ -112,58 +125,22 @@ describe("BaseVisualizer component", () => {
     expect(innerPartComponent.className).toBe(" success fw-bold fst-italic");
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
-    // check link is available
-    expect(innerPartComponent.closest("a")).toBeNull();
+    // check no link
+    expect(innerPartComponent.closest("div").style).not.toHaveProperty(
+      "text-decoration",
+      "underline dotted"
+    );
     // check optional elements (like bold, italic...)
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
       "col-2  d-flex align-items-center text-start justify-content-start opacity-25 success"
     );
-    // check id
-    const idElement = container.querySelector("#test-id");
-    expect(idElement).toBeInTheDocument();
-    // check copyButton
-    const copyButton = screen.getByRole("button", {
-      name: "test base (disable)",
+    // check tooltip
+    const user = userEvent.setup();
+    await user.hover(innerPartComponent);
+    await waitFor(() => {
+      const tooltipElement = screen.getByRole("tooltip");
+      expect(tooltipElement).toBeInTheDocument();
     });
-    expect(copyButton).toBeInTheDocument();
-  });
-
-  test("test no copyButton", () => {
-    const { container } = render(
-      <BaseVisualizer
-        id="test-id-title"
-        size="col-2"
-        value="test no copyButton"
-        alignment="start"
-        // this wrapper with div is required to access to the element in the assertions
-        icon={<div role="img">{getIcon("like")}</div>}
-        color="success"
-        link="https://google.com"
-        bold
-        italic
-      />
-    );
-
-    // chec text (inner span)
-    const innerPartComponent = screen.getByText("test no copyButton");
-    expect(innerPartComponent).toBeInTheDocument();
-    // check color, bold and italic
-    expect(innerPartComponent.className).toBe("success fw-bold fst-italic");
-    // check icon
-    expect(screen.getByRole("img")).toBeInTheDocument();
-    // check link is available
-    expect(innerPartComponent.closest("a").href).toBe("https://google.com/");
-    // check optional elements (like bold, italic...)
-    const outerPartComponent = innerPartComponent.closest("div");
-    expect(outerPartComponent.className).toBe(
-      "col-2 small d-flex align-items-center text-start justify-content-start  success"
-    );
-    // check id
-    const idElement = container.querySelector("#test-id-title");
-    expect(idElement).toBeInTheDocument();
-    // check copyButton
-    const copyButton = container.querySelector("#copyBtn-test-id-title");
-    expect(copyButton).not.toBeInTheDocument();
   });
 });

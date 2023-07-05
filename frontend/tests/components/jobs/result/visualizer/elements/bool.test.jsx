@@ -1,11 +1,12 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { getIcon } from "../../../../../../src/components/jobs/result/visualizer/icons";
 import { BooleanVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/bool";
 
 describe("BooleanVisualizer component", () => {
-  test("required-only params", () => {
+  test("required-only params", async () => {
     const { container } = render(
       <BooleanVisualizer
         id="test-id"
@@ -23,8 +24,11 @@ describe("BooleanVisualizer component", () => {
     expect(innerPartComponent.className).not.toContain("fst-italic");
     // check icon
     expect(screen.queryByRole("img")).toBeNull();
-    // check link is available
-    expect(innerPartComponent.closest("a")).toBeNull();
+    // check no link
+    expect(innerPartComponent.closest("div").style).not.toHaveProperty(
+      "text-decoration",
+      "underline dotted"
+    );
     // check size
     const sizeComponent = container.firstChild;
     expect(sizeComponent.className).toBe("col-1");
@@ -34,14 +38,16 @@ describe("BooleanVisualizer component", () => {
     // check id
     const idElement = container.querySelector("#test-id");
     expect(idElement).toBeInTheDocument();
-    // check copyButton
-    const copyButton = screen.getByRole("button", {
-      name: "test bool (required-only params)",
+    // check tooltip
+    const user = userEvent.setup();
+    await user.hover(innerPartComponent);
+    await waitFor(() => {
+      const tooltipElement = screen.getByRole("tooltip");
+      expect(tooltipElement).toBeInTheDocument();
     });
-    expect(copyButton).toBeInTheDocument();
   });
 
-  test("all params", () => {
+  test("all params", async () => {
     const { container } = render(
       <BooleanVisualizer
         id="test-id"
@@ -52,6 +58,7 @@ describe("BooleanVisualizer component", () => {
         activeColor="success"
         link="https://google.com"
         italic
+        description="description"
       />
     );
 
@@ -63,7 +70,10 @@ describe("BooleanVisualizer component", () => {
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check link is available
-    expect(innerPartComponent.closest("a").href).toBe("https://google.com/");
+    expect(innerPartComponent.closest("div").style).toHaveProperty(
+      "text-decoration",
+      "underline dotted"
+    );
     // check size
     const sizeComponent = container.firstChild;
     expect(sizeComponent.className).toBe("col-2");
@@ -73,14 +83,16 @@ describe("BooleanVisualizer component", () => {
     // check id
     const idElement = container.querySelector("#test-id");
     expect(idElement).toBeInTheDocument();
-    // check copyButton
-    const copyButton = screen.getByRole("button", {
-      name: "test bool (all params)",
+    /// check tooltip
+    const user = userEvent.setup();
+    await user.hover(innerPartComponent);
+    await waitFor(() => {
+      const tooltipElement = screen.getByRole("tooltip");
+      expect(tooltipElement).toBeInTheDocument();
     });
-    expect(copyButton).toBeInTheDocument();
   });
 
-  test("test disable", () => {
+  test("test disable", async () => {
     // it's a special case because change the style, but also the interactions
 
     const { container } = render(
@@ -94,6 +106,7 @@ describe("BooleanVisualizer component", () => {
         link="https://google.com"
         italic
         disable
+        description=""
       />
     );
 
@@ -104,8 +117,11 @@ describe("BooleanVisualizer component", () => {
     expect(innerPartComponent.className).toBe("fst-italic");
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
-    // check link is available
-    expect(innerPartComponent.closest("a")).toBeNull();
+    // check no link
+    expect(innerPartComponent.closest("div").style).not.toHaveProperty(
+      "text-decoration",
+      "underline dotted"
+    );
     // check size
     const sizeComponent = container.firstChild;
     expect(sizeComponent.className).toBe("col-2");
@@ -115,10 +131,12 @@ describe("BooleanVisualizer component", () => {
     // check id
     const idElement = container.querySelector("#test-id");
     expect(idElement).toBeInTheDocument();
-    // check copyButton
-    const copyButton = screen.getByRole("button", {
-      name: "test bool (disable)",
+    // check tooltip
+    const user = userEvent.setup();
+    await user.hover(innerPartComponent);
+    await waitFor(() => {
+      const tooltipElement = screen.getByRole("tooltip");
+      expect(tooltipElement).toBeInTheDocument();
     });
-    expect(copyButton).toBeInTheDocument();
   });
 });

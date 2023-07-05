@@ -37,6 +37,8 @@ function convertToElement(element, idElement, isChild = false) {
           disable={element.disable}
           icon={getIcon(element.icon)}
           italic={element.italic}
+          copyText={element.copyText}
+          description={element.description}
         />
       );
       break;
@@ -51,7 +53,11 @@ function convertToElement(element, idElement, isChild = false) {
           in case of this is the first element (level) we don't need to render the components as children (defaul false is ok).
           in case this is a child (part of vlist) we pass isChild=true to its children
           */
-            convertToElement(additionalElement, `${idElement}-${index}`, isChild)
+            convertToElement(
+              additionalElement,
+              `${idElement}-${index}`,
+              isChild
+            )
           )}
           alignment={element.alignment}
         />
@@ -66,7 +72,11 @@ function convertToElement(element, idElement, isChild = false) {
           size={element.size}
           name={convertToElement(element.name, `${idElement}-vlist`)}
           values={element.values.map((additionalElement, index) =>
-            convertToElement(additionalElement, `${idElement}-item${index}`, true)
+            convertToElement(
+              additionalElement,
+              `${idElement}-item${index}`,
+              true
+            )
           )}
           alignment={element.alignment}
           startOpen={element.startOpen}
@@ -104,7 +114,7 @@ function convertToElement(element, idElement, isChild = false) {
           disable={element.disable}
           copyText={element.copyText}
           isChild={isChild}
-          copyText={element.copyText}
+          description={element.description}
         />
       );
       break;

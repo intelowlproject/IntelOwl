@@ -101,6 +101,8 @@ function parseElementFields(rawElement) {
       validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.link = rawElement.link;
       validatedFields.activeColor = parseColor(rawElement.color, "danger");
+      validatedFields.copyText = rawElement.copy_text;
+      validatedFields.description = rawElement.description;
       break;
     }
     case VisualizerComponentType.HLIST: {
@@ -127,6 +129,7 @@ function parseElementFields(rawElement) {
       validatedFields.bold = parseBool(rawElement.bold);
       validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.copyText = rawElement.copy_text;
+      validatedFields.description = rawElement.description;
       break;
     }
   }

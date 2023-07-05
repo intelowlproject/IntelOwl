@@ -166,6 +166,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [elceef Yara Rules](https://github.com/elceef/yara-rulz)
   * [dr4k0nia Yara rules](https://github.com/dr4k0nia/yara-rules)
   * [Facebook Yara rules](https://github.com/facebook/malware-detection)
+  * [edelucia Yara rules](https://github.com/edelucia/rules/tree/main/yara)
+  * [LOLDrivers Yara Rules](https://github.com/magicsword-io/LOLDrivers)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 
 ###### External services

@@ -40,9 +40,6 @@ def reverse_migrate(apps, schema_editor):
 
     def _body_template(self, app):
         return """
-from django.db import migrations
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -66,6 +63,7 @@ class Migration(migrations.Migration):
 
     def _migration_file(self, obj, app):
         return """
+from django.db import migrations
 {0}
 {1}
 {2}

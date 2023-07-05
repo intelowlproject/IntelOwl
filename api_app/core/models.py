@@ -275,7 +275,7 @@ class PythonConfig(AbstractConfig):
 
     parameters: Manager
 
-    python_module = models.CharField(null=False, max_length=120, db_index=True)
+    python_module = models.CharField(max_length=120, db_index=True)
 
     config = models.JSONField(
         blank=False,

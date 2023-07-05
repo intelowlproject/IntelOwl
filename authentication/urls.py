@@ -64,7 +64,7 @@ urlpatterns = [
         "github-callback",
         GitHubLoginCallbackView.as_view(),
         name="oauth_github_callback",
-    ),  # the callback url is not taking this value need to find a way around
+    ),
     path("check_registration_setup", check_registration_setup),
     path("", include(router.urls)),
 ]

@@ -18,7 +18,6 @@ djangorestframework==3.14.0
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.26.1
 django-rest-email-auth==4.0.0
-django-allauth==0.54.0
 
 uWSGI==2.0.20
 uwsgitop==0.11

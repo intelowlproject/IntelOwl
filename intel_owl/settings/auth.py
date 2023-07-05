@@ -54,15 +54,3 @@ if (
         "client_id": secrets.get_secret("GOOGLE_CLIENT_ID"),
         "client_secret": secrets.get_secret("GOOGLE_CLIENT_SECRET"),
     }
-
-SITE_ID = 1
-
-# Provider specific settings
-SOCIALACCOUNT_PROVIDERS = {
-    "github": {
-        "APP": {
-            "client_id": secrets.get_secret("GITHUB_CLIENT_ID"),
-            "secret": secrets.get_secret("GITHUB_CLIENT_SECRET"),
-        }
-    }
-}

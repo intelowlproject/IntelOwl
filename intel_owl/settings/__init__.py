@@ -43,11 +43,6 @@ INSTALLED_APPS = [
     "drf_recaptcha",
     # performance debugging
     "silk",
-    # all-auth
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.github",
 ]
 
 from .auth import *  # lgtm [py/polluting-import]

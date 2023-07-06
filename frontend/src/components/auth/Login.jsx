@@ -93,7 +93,7 @@ export default function Login() {
             <div className="col-auto">
               <a href={`${AUTH_BASE_URI}/github`}>
                 <img
-                  src={`${PUBLIC_URL}/icons8-github-60.svg`}
+                  src={`${PUBLIC_URL}/github-logo.svg`}
                   alt="Github Logo"
                   className="img-fluid"
                 />

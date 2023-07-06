@@ -270,10 +270,9 @@ After having written the new python module, you have to remember to:
       3. *description
       4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
       5. default:  default value provided for the parameter
-   6. *Analyzers: List of analyzers that **must** have run to execute the visualizer
-   7. *Connectors: List of connectors that **must** have run to execute the visualizer
+   6. *Playbook: Playbook that **must** have run to execute the visualizer
 
-4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
    1. You can use the django management command `dumpplugin` to automatically create the migration file for your new visualizer (you will find it under `api_app/visualizers_manager/migrations`). The script will create the following models:
       1. VisualizerConfig
       2. Parameter
@@ -296,6 +295,16 @@ To do so, some utility classes have been made:
 
 Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
 At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
+
+The best way to create a visualizer is to define several methods, one for each `Visualizable` you want to show in the UI, in your new visualizer and decore them with `visualizable_error_handler_with_params`. This decorator handles exceptions: in case there is a bug during the generation of a Visualizable element, it will be show an error instead of this component and all the other Visualizable are safe and will render correctly. Be careful using it because is a function returning a decorator! This means you need to use a syntax like this:
+```
+@visualizable_error_handler_with_params(error_name="custom visualizable", error_size=VisualizableSize.S_2)
+def custom_visualizable(self):
+   ...
+```
+
+instead of the syntax of other decorators that doesn't need the function call.
+
 
 You may want to look at a few existing examples to start to build a new one:
 
@@ -324,7 +333,7 @@ Default value of plugins are saved as `PluginConfig` objects. To change its valu
 2. At the bottom of the page, change the value and copy/remember/save it/print the primary key (small number under **Value**)
 3. Use `manage.py dumppluginconfig INSERT_THE_PK`
 4. If you want, you can enter in the `reverse_migration` function the previous value
-5. Commit the file!
+5. Commit the created file as a migration file under `api_app/migration` folder!
 
 ## How to modify/delete a plugin
 

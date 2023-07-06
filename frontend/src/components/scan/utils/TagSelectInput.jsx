@@ -18,7 +18,7 @@ import {
 } from "@certego/certego-ui";
 
 import JobTag from "../../common/JobTag";
-import useTagsStore from "../../../stores/useTagsStore";
+import { useTagsStore } from "../../../stores";
 
 // constants
 const onFormValidate = (values) => {

@@ -11,10 +11,11 @@ export function BaseVisualizer({
   bold,
   italic,
   disable,
+  isChild,
 }) {
   let coreComponent = (
     <span
-      className={`${color} ${bold ? "fw-bold" : ""} ${
+      className={`${isChild ? "small" : ""} ${color} ${bold ? "fw-bold" : ""} ${
         italic ? "fst-italic" : ""
       }`}
     >
@@ -31,7 +32,9 @@ export function BaseVisualizer({
   }
   return (
     <div
-      className={`${size} small d-flex align-items-center text-${alignment} justify-content-${alignment} ${
+      className={`${size} ${
+        isChild ? "small" : ""
+      } d-flex align-items-center text-${alignment} justify-content-${alignment} ${
         disable ? "opacity-25" : ""
       } ${color}`}
     >
@@ -50,6 +53,7 @@ BaseVisualizer.propTypes = {
   bold: PropTypes.bool,
   italic: PropTypes.bool,
   disable: PropTypes.bool,
+  isChild: PropTypes.bool,
 };
 
 BaseVisualizer.defaultProps = {
@@ -60,4 +64,5 @@ BaseVisualizer.defaultProps = {
   bold: false,
   italic: false,
   disable: false,
+  isChild: false,
 };

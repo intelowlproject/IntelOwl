@@ -14,7 +14,7 @@ from django.utils.functional import cached_property
 
 from api_app.models import Job
 
-from .models import AbstractConfig, AbstractReport
+from .models import AbstractReport, PythonConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class Plugin(metaclass=ABCMeta):
 
     def __init__(
         self,
-        config: AbstractConfig,
+        config: PythonConfig,
         job_id: int,
         runtime_configuration: dict,
         task_id: int,
@@ -41,7 +41,7 @@ class Plugin(metaclass=ABCMeta):
 
         self.kwargs = kwargs
         # some post init processing
-        self.report = self.init_report_object()
+        self.report: AbstractReport = self.init_report_object()
         # monkeypatch if in test suite
         if settings.STAGE_CI:
             self._monkeypatch()
@@ -111,6 +111,16 @@ class Plugin(metaclass=ABCMeta):
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
 
+    def execute_pivots(self) -> None:
+        from api_app.pivots_manager.models import PivotConfig
+
+        if self._job.playbook_to_execute:
+            for pivot in self._config.pivots.runnable(self._job.user).filter(
+                used_by_playbooks=self._job.playbook_to_execute
+            ):
+                pivot: PivotConfig
+                pivot.pivot_job(self._job)
+
     def log_error(self, e):
         if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):
             error_message = self.get_error_message(e)
@@ -140,7 +150,7 @@ class Plugin(metaclass=ABCMeta):
     @classmethod
     @property
     @abstractmethod
-    def config_model(cls) -> typing.Type[AbstractConfig]:
+    def config_model(cls) -> typing.Type[PythonConfig]:
         """
         Returns Model to be used for *init_report_object*
         """
@@ -187,6 +197,7 @@ class Plugin(metaclass=ABCMeta):
             self.after_run_failed(e)
         else:
             self.after_run_success(_result)
+            self.execute_pivots()
         finally:
             # add end time of process
             self.after_run()

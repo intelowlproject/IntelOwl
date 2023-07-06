@@ -3,7 +3,7 @@
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.core.models import Parameter
-from api_app.core.serializers import AbstractListConfigSerializer
+from api_app.core.serializers import PythonListConfigSerializer
 
 from .. import CustomTestCase
 from ..mock_utils import MockUpRequest
@@ -19,7 +19,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
         )
-        ccs = AbstractListConfigSerializer(
+        ccs = PythonListConfigSerializer(
             context={"request": MockUpRequest(self.user)},
             child=ConnectorConfigSerializer(),
         )
@@ -50,7 +50,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
         )
         with self.assertRaises(RuntimeError):
             param.get_first_value(self.user)
-        ccs = AbstractListConfigSerializer(
+        ccs = PythonListConfigSerializer(
             context={"request": MockUpRequest(self.user)},
             child=ConnectorConfigSerializer(),
         )

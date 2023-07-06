@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.utils.module_loading import import_string
 from django.utils.timezone import now
 
+from api_app.choices import Status
 from intel_owl import secrets
 from intel_owl.celery import DEFAULT_QUEUE, app, get_queue_name
 
@@ -128,14 +129,25 @@ def update_notifications_with_releases():
     )
 
 
-@app.task(name="continue_job_pipeline", soft_time_limit=20)
-def continue_job_pipeline(job_id: int):
-
+@app.task(name="job_set_final_status", soft_time_limit=20)
+def job_set_final_status(job_id: int):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
-    job.job_cleanup()
+    job.set_final_status()
+
+
+@app.task(name="job_set_pipeline_status", soft_time_limit=20)
+def job_set_pipeline_status(job_id: int, status: str):
+    from api_app.models import Job
+
+    job = Job.objects.get(pk=job_id)
+    if status not in Status.running_statuses() + Status.partial_statuses():
+        logger.error(f"Unable to set job status to {status}")
+    else:
+        job.status = status
+        job.save(update_fields=["status"])
 
 
 @app.task(name="job_pipeline", soft_time_limit=100)
@@ -177,15 +189,24 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")
     if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
-        for python_module in [
-            "maxmind.Maxmind",
-            "talos.Talos",
-            "tor.Tor",
-            "yara_scan.YaraScan",
-            "quark_engine.QuarkEngine",
-            "phishing_army.PhishingArmy",
+        from api_app.analyzers_manager.file_analyzers.quark_engine import QuarkEngine
+        from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
+        from api_app.analyzers_manager.observable_analyzers.maxmind import Maxmind
+        from api_app.analyzers_manager.observable_analyzers.phishing_army import (
+            PhishingArmy,
+        )
+        from api_app.analyzers_manager.observable_analyzers.talos import Talos
+        from api_app.analyzers_manager.observable_analyzers.tor import Tor
+
+        for class_ in [
+            Maxmind,
+            Talos,
+            Tor,
+            YaraScan,
+            QuarkEngine,
+            PhishingArmy,
         ]:
-            update(python_module, queue=queue)
+            update(class_.python_module, queue=queue)
 
 
 # set logger

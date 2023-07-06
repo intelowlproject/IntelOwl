@@ -3,9 +3,9 @@
 
 
 from api_app.core.serializers import (
-    AbstractConfigSerializer,
-    AbstractListConfigSerializer,
     AbstractReportSerializer,
+    PythonConfigSerializer,
+    PythonListConfigSerializer,
 )
 
 from .models import AnalyzerConfig, AnalyzerReport
@@ -21,8 +21,8 @@ class AnalyzerReportSerializer(AbstractReportSerializer):
         fields = AbstractReportSerializer.Meta.fields
 
 
-class AnalyzerConfigSerializer(AbstractConfigSerializer):
+class AnalyzerConfigSerializer(PythonConfigSerializer):
     class Meta:
         model = AnalyzerConfig
         exclude = ["disabled_in_organizations"]
-        list_serializer_class = AbstractListConfigSerializer
+        list_serializer_class = PythonListConfigSerializer

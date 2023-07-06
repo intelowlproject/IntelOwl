@@ -17,7 +17,7 @@ from .views import (
     RegistrationView,
     ResendVerificationView,
     TokenSessionsViewSet,
-    check_registration_setup,
+    checkConfiguration,
     github_login,
     google_login,
 )
@@ -65,6 +65,6 @@ urlpatterns = [
         GitHubLoginCallbackView.as_view(),
         name="oauth_github_callback",
     ),
-    path("check_registration_setup", check_registration_setup),
+    path("configuration", checkConfiguration, name="auth_configuration"),
     path("", include(router.urls)),
 ]

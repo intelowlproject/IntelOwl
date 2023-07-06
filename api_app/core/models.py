@@ -1,8 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+import uuid
 from typing import Any, Dict, Type
 
+from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
@@ -11,9 +13,9 @@ from django.db.models import Manager, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
-from kombu import uuid
 
-from api_app.core.choices import ParamTypes, Status
+from api_app.core.choices import ParamTypes, ReportStatus
+from api_app.core.queryset import AbstractConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
@@ -24,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class AbstractReport(models.Model):
     # constants
-    Status = Status
+    Status = ReportStatus
 
     # fields
     status = models.CharField(max_length=50, choices=Status.choices)
@@ -78,6 +80,43 @@ def config_default():
     return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
 
 
+def valid_value_for_test(func):
+    def wrapper(self, user=None):
+        try:
+            return func(self, user)
+        except RuntimeError:
+            from api_app.models import PluginConfig
+
+            if not settings.STAGE_CI:
+                raise
+            if "url" in self.name:
+
+                return PluginConfig.objects.get_or_create(
+                    value="https://intelowl.com",
+                    parameter=self,
+                    owner=None,
+                    for_organization=False,
+                )[0]
+            elif "pdns_credentials" == self.name:
+                return PluginConfig.objects.get_or_create(
+                    value="user|pwd",
+                    parameter=self,
+                    owner=None,
+                    for_organization=False,
+                )[0]
+            elif "test" in self.name:
+                raise
+            else:
+                return PluginConfig.objects.get_or_create(
+                    value="test",
+                    parameter=self,
+                    owner=None,
+                    for_organization=False,
+                )[0]
+
+    return wrapper
+
+
 class Parameter(models.Model):
     name = models.CharField(null=False, blank=False, max_length=50)
     type = models.CharField(
@@ -110,7 +149,9 @@ class Parameter(models.Model):
 
     class Meta:
         unique_together = [
-            ("name", "analyzer_config", "connector_config", "visualizer_config")
+            ("name", "analyzer_config"),
+            ("name", "connector_config"),
+            ("name", "visualizer_config"),
         ]
         indexes = [
             models.Index(fields=["analyzer_config", "is_secret"]),
@@ -150,6 +191,7 @@ class Parameter(models.Model):
 
         return PluginConfig.visible_for_user(user).filter(parameter=self)
 
+    @valid_value_for_test
     def get_first_value(self, user: User):
         from api_app.models import PluginConfig
 
@@ -178,31 +220,6 @@ class Parameter(models.Model):
                 logger.info(f"Retrieved {result.value=}, default value")
                 return result
             except PluginConfig.DoesNotExist:
-                if settings.STAGE_CI:
-                    if "url" in self.name:
-                        return PluginConfig.objects.get_or_create(
-                            value="https://intelowl.com",
-                            parameter=self,
-                            owner=None,
-                            for_organization=False,
-                        )[0]
-                    elif "pdns_credentials" == self.name:
-                        return PluginConfig.objects.get_or_create(
-                            value="user|pwd",
-                            parameter=self,
-                            owner=None,
-                            for_organization=False,
-                        )[0]
-                    elif "test" in self.name:
-                        pass
-                    else:
-                        return PluginConfig.objects.get_or_create(
-                            value="test",
-                            parameter=self,
-                            owner=None,
-                            for_organization=False,
-                        )[0]
-
                 raise RuntimeError(
                     "Unable to find a valid value for parameter"
                     f" {self.name} for configuration {self.config.name}"
@@ -210,27 +227,60 @@ class Parameter(models.Model):
 
 
 class AbstractConfig(models.Model):
-
-    parameters: Manager
-
+    objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
-        max_length=50,
+        max_length=100,
         null=False,
         unique=True,
         primary_key=True,
         validators=[plugin_name_validator],
     )
-    python_module = models.CharField(null=False, max_length=120, db_index=True)
     description = models.TextField(null=False)
+
     disabled = models.BooleanField(null=False, default=False)
+    disabled_in_organizations = models.ManyToManyField(
+        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
+    )
+
+    class Meta:
+        indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
+        abstract = True
+
+    @classmethod
+    @property
+    def runtime_configuration_key(cls) -> str:
+        return f"{cls.__name__.split('Config')[0].lower()}s"
+
+    @classmethod
+    @property
+    def snake_case_name(cls) -> str:
+        import re
+
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
+
+    def _is_disabled_in_org(self, user: User = None):
+        if user and user.has_membership():
+            return self.disabled_in_organizations.filter(
+                pk=user.membership.organization.pk
+            ).exists()
+        return False
+
+    def is_runnable(self, user: User = None):
+        disabled_in_org = self._is_disabled_in_org(user)
+        logger.debug(f"{disabled_in_org=}, {self.disabled=}")
+        return not disabled_in_org and not self.disabled
+
+
+class PythonConfig(AbstractConfig):
+
+    parameters: Manager
+
+    python_module = models.CharField(null=False, max_length=120, db_index=True)
 
     config = models.JSONField(
         blank=False,
         default=config_default,
         validators=[validate_config],
-    )
-    disabled_in_organizations = models.ManyToManyField(
-        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
 
     class Meta:
@@ -242,17 +292,47 @@ class AbstractConfig(models.Model):
 
     @classmethod
     @property
-    def snake_case_name(cls) -> str:
-        import re
-
-        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
-
-    @classmethod
-    @property
     def plugin_type(cls) -> str:
         # retro compatibility
 
         raise NotImplementedError()
+
+    @classmethod
+    @property
+    def stage_status_complete(cls) -> str:
+        from api_app.choices import Status
+
+        name_plugin = cls.__name__.split("Config")[0]
+        return getattr(Status, f"{name_plugin.upper()}S_COMPLETED").value
+
+    @classmethod
+    @property
+    def stage_status_running(cls) -> str:
+        from api_app.choices import Status
+
+        name_plugin = cls.__name__.split("Config")[0]
+        return getattr(Status, f"{name_plugin.upper()}S_RUNNING").value
+
+    @classmethod
+    def signature_pipeline_running(cls, job) -> Signature:
+        return cls._signature_pipeline_status(job, cls.stage_status_running)
+
+    @classmethod
+    def signature_pipeline_completed(cls, job) -> Signature:
+        return cls._signature_pipeline_status(job, cls.stage_status_complete)
+
+    @classmethod
+    def _signature_pipeline_status(cls, job, status: str) -> Signature:
+        from intel_owl import tasks
+
+        return tasks.job_set_pipeline_status.signature(
+            args=[job.pk, status],
+            kwargs={},
+            queue=get_queue_name(DEFAULT_QUEUE),
+            soft_time_limit=10,
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
 
     @property
     def python_base_path(self) -> str:
@@ -300,18 +380,8 @@ class AbstractConfig(models.Model):
                 return False
         return True
 
-    def _is_disabled_in_org(self, user: User = None):
-        if user and user.has_membership():
-            return self.disabled_in_organizations.filter(
-                pk=user.membership.organization.pk
-            ).exists()
-        return False
-
     def is_runnable(self, user: User = None):
-        configured = self._is_configured(user)
-        disabled_in_org = self._is_disabled_in_org(user)
-        logger.debug(f"{configured=}, {disabled_in_org=}, {self.disabled=}")
-        return configured and not disabled_in_org and not self.disabled
+        return super().is_runnable(user) and self._is_configured(user)
 
     @cached_property
     def queue(self):
@@ -365,7 +435,7 @@ class AbstractConfig(models.Model):
         job: Job
         if self.is_runnable(job.user):
             # gen new task_id
-            task_id = uuid()
+            task_id = str(uuid.uuid4())
             args = [
                 job.pk,
                 self.python_complete_path,

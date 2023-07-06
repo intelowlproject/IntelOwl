@@ -19,6 +19,7 @@ verify_email_uri = reverse("auth_verify-email")
 resend_verificaton_uri = reverse("auth_resend-verification")
 request_pwd_reset_uri = reverse("auth_request-password-reset")
 reset_pwd_uri = reverse("auth_reset-password")
+configuration = reverse("auth_configuration")
 
 
 @tag("api", "user")
@@ -49,8 +50,12 @@ class TestUserAuth(CustomOAuthTestCase):
 
     def test_login_200(self):
         self.assertEqual(AuthToken.objects.count(), 0)
+        body = {
+            **self.creds,
+            "recaptcha": "testkey",
+        }
 
-        response = self.client.post(login_uri, self.creds)
+        response = self.client.post(login_uri, body)
         content = response.json()
         msg = (response, content)
 
@@ -337,71 +342,103 @@ class TestUserAuth(CustomOAuthTestCase):
         )
 
 
-class CheckRegistrationSetupTestCase(CustomOAuthTestCase):
-    def test_200_local_setup(self):
-        with self.settings(
-            DEFAULT_FROM_EMAIL="fake@email.it",
-            DEFAULT_EMAIL="fake@email.it",
-            STAGE_LOCAL="true",
-        ):
-            response = self.client.get("/api/auth/check_registration_setup")
-            self.assertEqual(response.status_code, 200)
+class CheckConfigurationTestCase(CustomOAuthTestCase):
+    def setUp(self):
+        self.assertEqual(reverse("auth_configuration"), "/api/auth/configuration")
 
-    def test_200_prod_smtp_setup(self):
+    def test_default_from(self):
+        with self.settings(DEFAULT_FROM_EMAIL="", DEFAULT_EMAIL=""):
+            response = self.client.get(f"{configuration}?page=register")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertIn("errors", data)
+            self.assertIn("DEFAULT_FROM_EMAIL", data["errors"])
+            self.assertIn("DEFAULT_EMAIL", data["errors"])
+
         with self.settings(
             DEFAULT_FROM_EMAIL="fake@email.it",
             DEFAULT_EMAIL="fake@email.it",
-            STAGE_PRODUCTION="true",
             EMAIL_HOST="test",
             EMAIL_HOST_USER="test",
             EMAIL_HOST_PASSWORD="test",
             EMAIL_PORT="test",
-            DRF_RECAPTCHA_SECRET_KEY="recaptchakey",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get(f"{configuration}?page=register")
             self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertNotIn("errors", data)
+            response = self.client.get(f"{configuration}?page=login")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertNotIn("errors", data)
 
-    def test_200_prod_ses_setup(self):
+    def test_smtp_setup(self):
         with self.settings(
             DEFAULT_FROM_EMAIL="fake@email.it",
             DEFAULT_EMAIL="fake@email.it",
-            STAGE_PRODUCTION="true",
+            EMAIL_HOST="test",
+            EMAIL_HOST_USER="test",
+            EMAIL_HOST_PASSWORD="test",
+            EMAIL_PORT="test",
+        ):
+            response = self.client.get(f"{configuration}?page=register")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertNotIn("errors", data)
+
+        with self.settings(
+            DEFAULT_FROM_EMAIL="fake@email.it",
+            DEFAULT_EMAIL="fake@email.it",
+            EMAIL_HOST="",
+            EMAIL_HOST_USER="",
+            EMAIL_HOST_PASSWORD="",
+            EMAIL_PORT="",
+        ):
+            response = self.client.get(f"{configuration}?page=register")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertIn("errors", data)
+            self.assertIn("SMTP backend", data["errors"])
+
+    def test_ses_setup(self):
+        with self.settings(
+            DEFAULT_FROM_EMAIL="fake@email.it",
+            DEFAULT_EMAIL="fake@email.it",
             AWS_SES="true",
             AWS_ACCESS_KEY_ID="test",
             AWS_SECRET_ACCESS_KEY="test",
             DRF_RECAPTCHA_SECRET_KEY="recaptchakey",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
+            response = self.client.get(f"{configuration}?page=register")
             self.assertEqual(response.status_code, 200)
-
-    def test_501_local_setup(self):
-        with self.settings(DEFAULT_FROM_EMAIL="", DEFAULT_EMAIL="", STAGE_LOCAL="true"):
-            response = self.client.get("/api/auth/check_registration_setup")
-            self.assertEqual(response.status_code, 501)
-
-    def test_501_prod_smtp_setup(self):
+            data = response.json()
+            self.assertNotIn("errors", data)
         with self.settings(
             DEFAULT_FROM_EMAIL="fake@email.it",
             DEFAULT_EMAIL="fake@email.it",
-            STAGE_PRODUCTION="true",
-            EMAIL_HOST="",
-            EMAIL_HOST_USER="",
-            EMAIL_HOST_PASSWORD="",
-            EMAIL_PORT="",
-            DRF_RECAPTCHA_SECRET_KEY="fake",
-        ):
-            response = self.client.get("/api/auth/check_registration_setup")
-            self.assertEqual(response.status_code, 501)
-
-    def test_501_prod_ses_setup(self):
-        with self.settings(
-            DEFAULT_FROM_EMAIL="fake@email.it",
-            DEFAULT_EMAIL="fake@email.it",
-            STAGE_PRODUCTION="true",
             AWS_SES="true",
             AWS_ACCESS_KEY_ID="",
             AWS_SECRET_ACCESS_KEY="",
+        ):
+            response = self.client.get(f"{configuration}?page=register")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertIn("errors", data)
+            self.assertIn("AWS SES backend", data["errors"])
+
+    def test_recaptcha(self):
+        with self.settings(
+            USE_RECAPTCHA="true",
             DRF_RECAPTCHA_SECRET_KEY="fake",
         ):
-            response = self.client.get("/api/auth/check_registration_setup")
-            self.assertEqual(response.status_code, 501)
+
+            response = self.client.get(f"{configuration}?page=register")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertIn("errors", data)
+            self.assertIn("RECAPTCHA_SECRET_KEY", data["errors"])
+            response = self.client.get(f"{configuration}?page=login")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertIn("errors", data)
+            self.assertIn("RECAPTCHA_SECRET_KEY", data["errors"])

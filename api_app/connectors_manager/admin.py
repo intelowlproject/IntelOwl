@@ -5,7 +5,7 @@ from django.contrib import admin
 
 from api_app.connectors_manager.forms import ConnectorConfigAdminForm
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
-from api_app.core.admin import AbstractConfigAdminView, AbstractReportAdminView
+from api_app.core.admin import AbstractReportAdminView, PythonConfigAdminView
 
 
 @admin.register(ConnectorReport)
@@ -14,8 +14,8 @@ class ConnectorReportAdminView(AbstractReportAdminView):
 
 
 @admin.register(ConnectorConfig)
-class ConnectorConfigAdminView(AbstractConfigAdminView):
-    list_display = AbstractConfigAdminView.list_display + (
+class ConnectorConfigAdminView(PythonConfigAdminView):
+    list_display = PythonConfigAdminView.list_display + (
         "maximum_tlp",
         "run_on_failure",
     )

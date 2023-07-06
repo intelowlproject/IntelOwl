@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from api_app.analyzers_manager.forms import AnalyzerConfigAdminForm
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-from api_app.core.admin import AbstractConfigAdminView, AbstractReportAdminView
+from api_app.core.admin import AbstractReportAdminView, PythonConfigAdminView
 
 
 @admin.register(AnalyzerReport)
@@ -13,8 +13,8 @@ class AnalyzerReportAdminView(AbstractReportAdminView):
 
 
 @admin.register(AnalyzerConfig)
-class AnalyzerConfigAdminView(AbstractConfigAdminView):
-    list_display = AbstractConfigAdminView.list_display + (
+class AnalyzerConfigAdminView(PythonConfigAdminView):
+    list_display = PythonConfigAdminView.list_display + (
         "type",
         "docker_based",
         "maximum_tlp",

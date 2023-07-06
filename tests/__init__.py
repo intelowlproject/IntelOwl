@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import connections
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -21,6 +22,10 @@ def get_logger() -> logging.Logger:
 
 
 class CustomTestCase(TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        settings.DEBUG = True
+
     @classmethod
     def setUpTestData(cls):
         try:
@@ -41,8 +46,12 @@ class CustomTestCase(TestCase):
                 password="test",
             )
 
+    @staticmethod
+    def query_count_all() -> int:
+        return sum(len(c.queries) for c in connections.all())
 
-class CustomAPITestCase(CustomTestCase):
+
+class CustomViewSetTestCase(CustomTestCase):
     def setUp(self):
         super().setUp()
         self.client = APIClient()
@@ -84,7 +93,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         self.assertEqual(response.status_code, 400, msg=msg)
         self.assertDictEqual(
             content["errors"],
-            {"detail": "Plugin call is not running or pending"},
+            {"detail": "Plugin is not running or pending"},
             msg=msg,
         )
 
@@ -142,7 +151,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         self.assertEqual(response.status_code, 400, msg=msg)
         self.assertDictEqual(
             content["errors"],
-            {"detail": "Plugin call status should be failed or killed"},
+            {"detail": "Plugin status should be failed or killed"},
             msg=msg,
         )
 

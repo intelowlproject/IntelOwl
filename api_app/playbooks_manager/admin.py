@@ -3,12 +3,12 @@
 
 from django.contrib import admin
 
-from api_app.core.admin import JsonViewerAdminView
+from api_app.core.admin import AbstractConfigAdminView
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
 @admin.register(PlaybookConfig)
-class PlaybookConfigAdminView(JsonViewerAdminView):
+class PlaybookConfigAdminView(AbstractConfigAdminView):
     list_display = (
         "name",
         "type",
@@ -16,10 +16,9 @@ class PlaybookConfigAdminView(JsonViewerAdminView):
         "disabled",
         "get_analyzers",
         "get_connectors",
+        "get_visualizers",
         "runtime_configuration",
     )
-    # allow to clone the object
-    save_as = True
 
     def _get_plugins(self, qs):  # noqa
         return [elem.name for elem in qs]
@@ -29,3 +28,6 @@ class PlaybookConfigAdminView(JsonViewerAdminView):
 
     def get_connectors(self, obj: PlaybookConfig):
         return self._get_plugins(obj.connectors.all())
+
+    def get_visualizers(self, obj: PlaybookConfig):
+        return self._get_plugins(obj.visualizers.all())

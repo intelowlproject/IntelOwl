@@ -26,6 +26,13 @@ export const TLP_DESCRIPTION_MAP = {
 export const JOB_STATUS_COLOR_MAP = {
   pending: "light",
   running: "secondary",
+  analyzers_running: "secondary",
+  connectors_running: "secondary",
+  visualizers_running: "secondary",
+
+  analyzers_completed: "secondary",
+  connectors_completed: "secondary",
+  visualizers_completed: "secondary",
   killed: "gray",
   reported_with_fails: "warning",
   reported_without_fails: "success",
@@ -45,6 +52,12 @@ export const STATUS_COLORMAP = {
 export const JOB_STATUSES = [
   "pending",
   "running",
+  "analyzers_running",
+  "connectors_running",
+  "visualizers_running",
+  "analyzers_completed",
+  "connectors_completed",
+  "visualizers_completed",
   "reported_with_fails",
   "reported_without_fails",
   "killed",

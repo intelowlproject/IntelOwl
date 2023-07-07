@@ -313,7 +313,7 @@ class GitHubLoginCallbackView(LoginView):
                 user_data = response.json()
                 user_name = user_data.get("login")
                 user_email = user_data.get("email")
-                logging.info(f"received userinfo from github: {response}")
+                logger.debug(f"response status: {response.status_code}")
                 try:
                     return User.objects.get(username=user_name)
                 except User.DoesNotExist:

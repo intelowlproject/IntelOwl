@@ -8,8 +8,6 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.urls import include, path, re_path
 
-# from authentication import views  # temporary solution
-
 
 def render_reactapp(request):
     return render(request, "index.html")

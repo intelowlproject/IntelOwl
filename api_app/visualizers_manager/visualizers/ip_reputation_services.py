@@ -175,11 +175,14 @@ class IPReputationServices(Visualizer):
                 disable=disabled,
             )
 
-            disabled = analyzer_report.status != ReportStatus.SUCCESS or not data
             categories_extracted = []
             for c in data.get("reports", []):
                 categories_extracted.extend(c.get("categories_human_readable", []))
             categories_extracted = list(set(categories_extracted))
+            disabled = (
+                analyzer_report.status != ReportStatus.SUCCESS
+                or not categories_extracted
+            )
             abuse_categories_report = self.VList(
                 name=self.Base(
                     value="AbuseIPDB Categories",
@@ -239,9 +242,8 @@ class IPReputationServices(Visualizer):
             classifications = analyzer_report.report.get("classifications", [])
             sub_classifications = classifications.get("classifications", [])
             false_positives = classifications.get("false_positives", [])
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS or not classifications
-            )
+            all_class = sub_classifications + false_positives
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not all_class
             crowdsec_classification_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Classifications",
@@ -250,8 +252,7 @@ class IPReputationServices(Visualizer):
                     disable=disabled,
                 ),
                 value=[
-                    self.Base(c.get("label", ""), disable=disabled)
-                    for c in sub_classifications + false_positives
+                    self.Base(c.get("label", ""), disable=disabled) for c in all_class
                 ],
                 open=True,
                 max_elements_number=5,

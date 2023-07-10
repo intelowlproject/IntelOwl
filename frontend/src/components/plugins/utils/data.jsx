@@ -17,6 +17,7 @@ import {
   PluginHealthCheckButton,
   PluginInfoPopoverIcon,
   PluginVerificationIcon,
+  PlaybooksCollapse,
 } from "./utils";
 
 /* This function is available in the certego-ui, but it doesn't works:
@@ -273,7 +274,7 @@ const playbookTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 300,
+    minWidth: 200,
   },
   {
     Header: "Type",
@@ -282,18 +283,14 @@ const playbookTableColumns = [
     Cell: ({ value }) => <code>{JSON.stringify(value, null, 2)}</code>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 250,
+    minWidth: 180,
   },
   {
     Header: "Analyzers executed",
     id: "analyzers_executed",
     accessor: (row) => Object.keys(row.analyzers),
     Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
+      <PlaybooksCollapse value={value} pluginType_="analyzers" />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -303,11 +300,7 @@ const playbookTableColumns = [
     id: "connectors_executed",
     accessor: (row) => Object.keys(row.connectors),
     Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
+      <PlaybooksCollapse value={value} pluginType_="connectors" />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,

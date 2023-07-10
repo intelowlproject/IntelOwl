@@ -10,6 +10,8 @@ import {
   CardBody,
   Badge,
   UncontrolledPopover,
+  Button,
+  Collapse,
 } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
 import {
@@ -18,7 +20,7 @@ import {
   MdOutlineHideSource,
 } from "react-icons/md";
 
-import { IconButton, BooleanIcon } from "@certego/certego-ui";
+import { IconButton, BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
 
 import { markdownToHtml, TLPTag } from "../../common";
 import {
@@ -311,6 +313,32 @@ export function OrganizationPluginStateToggle({
   );
 }
 
+export function PlaybooksCollapse({ value, pluginType_ }) {
+  // local state
+  const [isOpen, setIsOpen] = React.useState(false);
+  return (
+    <div>
+      <Button
+        className="bg-transparent border-0"
+        onClick={() => setIsOpen(!isOpen)}
+        id="PlaybooksCollapse"
+      >
+        <small>
+          {value?.length} {pluginType_}{" "}
+        </small>
+        <ArrowToggleIcon isExpanded={isOpen} />
+      </Button>
+      <Collapse isOpen={isOpen} id="PlaybooksCollapse">
+        <ul className="d-flex flex-column align-items-start">
+          {value?.sort().map((v) => (
+            <li key={v}>{v}</li>
+          ))}
+        </ul>
+      </Collapse>
+    </div>
+  );
+}
+
 OrganizationPluginStateToggle.propTypes = {
   disabled: PropTypes.bool.isRequired,
   pluginName: PropTypes.string.isRequired,
@@ -334,4 +362,9 @@ PluginVerificationIcon.propTypes = {
 PluginHealthCheckButton.propTypes = {
   pluginName: PropTypes.string.isRequired,
   pluginType_: PropTypes.oneOf(["analyzer", "connector"]).isRequired,
+};
+
+PlaybooksCollapse.propTypes = {
+  value: PropTypes.array.isRequired,
+  pluginType_: PropTypes.oneOf(["analyzers", "connectors"]).isRequired,
 };

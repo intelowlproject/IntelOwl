@@ -313,7 +313,7 @@ export function OrganizationPluginStateToggle({
   );
 }
 
-export function PlaybooksCollapse({ value }) {
+export function PlaybooksCollapse({ value, pluginType_ }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
   return (
@@ -323,6 +323,9 @@ export function PlaybooksCollapse({ value }) {
         onClick={() => setIsOpen(!isOpen)}
         id="PlaybooksCollapse"
       >
+        <small>
+          {value?.length} {pluginType_}{" "}
+        </small>
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
       <Collapse isOpen={isOpen} id="PlaybooksCollapse">
@@ -363,4 +366,5 @@ PluginHealthCheckButton.propTypes = {
 
 PlaybooksCollapse.propTypes = {
   value: PropTypes.string.isRequired,
+  pluginType_: PropTypes.oneOf(["analyzers", "connectors"]).isRequired,
 };

@@ -289,7 +289,9 @@ const playbookTableColumns = [
     Header: "Analyzers executed",
     id: "analyzers_executed",
     accessor: (row) => Object.keys(row.analyzers),
-    Cell: ({ value }) => <PlaybooksCollapse value={value} />,
+    Cell: ({ value }) => (
+      <PlaybooksCollapse value={value} pluginType_="analyzers" />
+    ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
   },
@@ -297,7 +299,9 @@ const playbookTableColumns = [
     Header: "Connectors executed",
     id: "connectors_executed",
     accessor: (row) => Object.keys(row.connectors),
-    Cell: ({ value }) => <PlaybooksCollapse value={value} />,
+    Cell: ({ value }) => (
+      <PlaybooksCollapse value={value} pluginType_="connectors" />
+    ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
   },

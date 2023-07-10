@@ -365,6 +365,6 @@ PluginHealthCheckButton.propTypes = {
 };
 
 PlaybooksCollapse.propTypes = {
-  value: PropTypes.string.isRequired,
+  value: PropTypes.array.isRequired,
   pluginType_: PropTypes.oneOf(["analyzers", "connectors"]).isRequired,
 };

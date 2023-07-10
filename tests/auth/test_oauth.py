@@ -72,3 +72,28 @@ class TestOAuth(CustomOAuthTestCase):
             ).exists(),
             msg=msg,
         )
+
+
+class TestGitHubOAuth(CustomOAuthTestCase):
+    github_auth_uri = reverse("oauth_github")
+    github_auth_callback_uri = reverse("oauth_github_callback")
+
+    def test_github_disabled(self):
+        response = self.client.get(self.github_auth_uri)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.json(), {"detail": "GitHub OAuth is not configured."})
+
+    @patch("authentication.views.GitHubLoginCallbackView.validate_and_return_user")
+    def test_github_callback(self, mock_validate_and_return_user: Mock):
+        mock_validate_and_return_user.return_value = self.user
+        response = self.client.get(self.github_auth_callback_uri, follow=False)
+        msg = response.url
+        self.assertEqual(response.status_code, 302, msg)
+        response_redirect = urlparse(response.url)
+        response_redirect_query = parse_qs(response_redirect.query)
+        self.assertTrue(
+            AuthToken.objects.filter(
+                token=response_redirect_query.get("token")[0], user=self.user
+            ).exists(),
+            msg=msg,
+        )

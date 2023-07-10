@@ -300,8 +300,6 @@ def github_login(request: Request):
             return Response(status=status.HTTP_200_OK)
         return response
     except AttributeError as error:
-        if "No such client: " in str(error):
-            raise AuthenticationFailed("GitHub OAuth is not configured.")
         raise error
 
 

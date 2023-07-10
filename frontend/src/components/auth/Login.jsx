@@ -122,7 +122,32 @@ export default function Login() {
           <Row>
             <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
             <div className="col-auto">
-              <a href={`${AUTH_BASE_URI}/github`}>
+              <a
+                href={`${AUTH_BASE_URI}/github`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const url = `${AUTH_BASE_URI}/github`;
+                  axios
+                    .get(`${url}?no_redirect=true`)
+                    .then(() => {
+                      window.location = url;
+                    })
+                    .catch((error) => {
+                      if (
+                        error?.response?.status === 401 &&
+                        error.parsedMsg.includes("OAuth is not configured.")
+                      )
+                        addToast(
+                          "Login failed!",
+                          "OAuth is not configured. " +
+                            "Check documentation to set it up.",
+                          "danger",
+                          true
+                        );
+                      else throw error;
+                    });
+                }}
+              >
                 <img
                   src={`${PUBLIC_URL}/github-logo.svg`}
                   alt="Github Logo"

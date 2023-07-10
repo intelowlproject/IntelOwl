@@ -283,9 +283,26 @@ def checkConfiguration(request):
     )
 
 
-def github_login(request):
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def github_login(request: Request):
+    """
+    Redirect to Google OAuth login
+    """
     client_id = secrets.get_secret("GITHUB_CLIENT_ID")
-    return redirect(f"https://github.com/login/oauth/authorize?client_id={client_id}")
+    if not client_id:
+        raise AuthenticationFailed("GitHub OAuth is not configured.")
+    try:
+        response = redirect(
+            f"https://github.com/login/oauth/authorize?client_id={client_id}"
+        )
+        if request.query_params.get("no_redirect") == "true":
+            return Response(status=status.HTTP_200_OK)
+        return response
+    except AttributeError as error:
+        if "No such client: " in str(error):
+            raise AuthenticationFailed("GitHub OAuth is not configured.")
+        raise error
 
 
 class GitHubLoginCallbackView(LoginView):

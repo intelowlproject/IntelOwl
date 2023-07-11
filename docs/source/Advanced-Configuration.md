@@ -68,9 +68,9 @@ While configuring Google Auth2 you can choose either to enable access to the all
 <a href="https://support.google.com/cloud/answer/10311615#user-type&zippy=%2Cinternal%2Cexternal" target="_blank">Reference</a>
 </div>
 
-#### Github OAuth
+#### GitHub OAuth
 
-Create a new OAuth app on [Github](https://github.com/settings/applications/new), set the `Authorization callback URL` as the `http://localhost/api/auth/github-callback` and then generate the `Client ID` and `Client secret`.
+Create a new OAuth app on [GitHub](https://github.com/settings/applications/new), set the `Authorization callback URL` as the `http://localhost/api/auth/github-callback` and then generate the `Client ID` and `Client secret`.
 
 After that, specify the client ID and Client secret as `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables.
 

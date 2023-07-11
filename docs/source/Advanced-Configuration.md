@@ -51,6 +51,7 @@ This will build and populate all existing job objects into the `jobs` index.
 IntelOwl provides support for some of the most common authentication methods:
 
 - [Google Oauth2](#google-oauth2)
+- [Github Oauth](#github-oauth)
 - [LDAP](#ldap)
 - [RADIUS](#radius-authentication)
 
@@ -66,6 +67,12 @@ After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_C
 While configuring Google Auth2 you can choose either to enable access to the all users with a Google Account ("External" mode) or to enable access to only the users of your organization ("Internal" mode).
 <a href="https://support.google.com/cloud/answer/10311615#user-type&zippy=%2Cinternal%2Cexternal" target="_blank">Reference</a>
 </div>
+
+#### Github OAuth
+
+Create a new OAuth app on [Github](https://github.com/settings/applications/new), set the `Authorization callback URL` as the `http://localhost/api/auth/github-callback` and then generate the `Client ID` and `Client secret`.
+
+After that, specify the client ID and Client secret as `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables.
 
 #### LDAP
 

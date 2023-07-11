@@ -28,8 +28,7 @@ export function VisualizerTooltip({
             rel="noreferrer"
             style={{ textDecoration: "none" }}
           >
-            {" "}
-            Link
+            &nbsp;Link
           </a>
         </Button>
       </div>

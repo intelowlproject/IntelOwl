@@ -135,12 +135,5 @@ describe("BaseVisualizer component", () => {
     expect(outerPartComponent.className).toBe(
       "col-2  d-flex align-items-center text-start justify-content-start opacity-25 success"
     );
-    // check tooltip
-    const user = userEvent.setup();
-    await user.hover(innerPartComponent);
-    await waitFor(() => {
-      const tooltipElement = screen.getByRole("tooltip");
-      expect(tooltipElement).toBeInTheDocument();
-    });
   });
 });

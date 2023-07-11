@@ -44,13 +44,15 @@ export function BaseVisualizer({
       id={id}
     >
       {coreComponent}
-      <VisualizerTooltip
-        idElement={`${id}-tooltip`}
-        copyText={copyText}
-        link={link}
-        disable={disable}
-        description={description}
-      />
+      {!disable && (
+        <VisualizerTooltip
+          idElement={`${id}-tooltip`}
+          copyText={copyText}
+          link={link}
+          disable={disable}
+          description={description}
+        />
+      )}
     </div>
   );
 }

@@ -131,12 +131,5 @@ describe("BooleanVisualizer component", () => {
     // check id
     const idElement = container.querySelector("#test-id");
     expect(idElement).toBeInTheDocument();
-    // check tooltip
-    const user = userEvent.setup();
-    await user.hover(innerPartComponent);
-    await waitFor(() => {
-      const tooltipElement = screen.getByRole("tooltip");
-      expect(tooltipElement).toBeInTheDocument();
-    });
   });
 });

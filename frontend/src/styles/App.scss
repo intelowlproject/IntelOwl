@@ -173,6 +173,12 @@ section.fixed-bottom {
   opacity: 1 !important;
 }
 
+.bs-tooltip-auto {
+  &[data-popper-placement^="right"] {
+    left: 0.5rem !important;
+  }
+}
+
 .dropdown-divider {
   border-top: 3px solid rgba(0, 0, 0, 30%);
 }

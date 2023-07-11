@@ -290,8 +290,10 @@ def github_login(request: Request):
     Redirect to Google OAuth login
     """
     client_id = secrets.get_secret("GITHUB_CLIENT_ID")
-    if not client_id:
+
+    if client_id is None or client_id == "":
         raise AuthenticationFailed("GitHub OAuth is not configured.")
+
     try:
         response = redirect(
             f"https://github.com/login/oauth/authorize?client_id={client_id}"

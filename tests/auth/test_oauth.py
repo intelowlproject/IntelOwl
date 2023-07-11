@@ -83,6 +83,24 @@ class TestGitHubOAuth(CustomOAuthTestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(), {"detail": "GitHub OAuth is not configured."})
 
+    def test_github_enabled(self):
+        response = self.client.get(self.github_auth_uri, follow=False)
+        self.assertEqual(response.status_code, 302)
+        msg = response.url
+        expected_redirect_url = urlparse("https://github.com/login/oauth/authorize")
+        response_redirect = urlparse(response.url)
+        self.assertEqual(response_redirect.scheme, expected_redirect_url.scheme, msg)
+        self.assertEqual(response_redirect.netloc, expected_redirect_url.netloc, msg)
+        # path does not matches i tried it manually though it should fail right?
+        self.assertEqual(response_redirect.path, expected_redirect_url.path, msg)
+        response_redirect_query = parse_qs(response_redirect.query)
+        if secrets.get_secret("GITHUB_CLIENT_ID"):
+            self.assertListEqual(
+                response_redirect_query.get("client_id"),
+                [secrets.get_secret("GITHUB_CLIENT_ID")],
+                msg=msg,
+            )
+
     @patch("authentication.views.GitHubLoginCallbackView.validate_and_return_user")
     def test_github_callback(self, mock_validate_and_return_user: Mock):
         mock_validate_and_return_user.return_value = self.user

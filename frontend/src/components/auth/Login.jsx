@@ -57,7 +57,8 @@ const onValidate = (values) => {
 export default function Login() {
   console.debug("Login rendered!");
 
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isGithubOpen, setIsGithubOpen] = React.useState(false);
+  const [isGoogleOpen, setIsGoogleOpen] = React.useState(false);
 
   // page title
   useTitle("IntelOwl | Login", { restoreOnUnmount: true });
@@ -158,13 +159,15 @@ export default function Login() {
                 style={{ verticalAlign: "top" }}
                 id="GithubInfoTooltip"
                 cursor="pointer"
+                onMouseEnter={() => setIsGithubOpen(true)}
+                onMouseLeave={() => setIsGithubOpen(false)}
               />
               <Tooltip
                 placement="top"
-                isOpen={isOpen}
+                isOpen={isGithubOpen}
                 target="GithubInfoTooltip"
                 toggle={() => {
-                  setIsOpen(!isOpen);
+                  setIsGithubOpen(!isGithubOpen);
                 }}
               >
                 Check the Authentication section in the documentation for
@@ -208,13 +211,15 @@ export default function Login() {
                 style={{ verticalAlign: "top" }}
                 id="GoogleInfoTooltip"
                 cursor="pointer"
+                onMouseEnter={() => setIsGoogleOpen(true)}
+                onMouseLeave={() => setIsGoogleOpen(false)}
               />
               <Tooltip
                 placement="top"
-                isOpen={isOpen}
+                isOpen={isGoogleOpen}
                 target="GoogleInfoTooltip"
                 toggle={() => {
-                  setIsOpen(!isOpen);
+                  setIsGoogleOpen(!isGoogleOpen);
                 }}
               >
                 Check the Authentication section in the documentation for

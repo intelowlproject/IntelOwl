@@ -74,6 +74,7 @@ class TestOAuth(CustomOAuthTestCase):
         )
 
 
+@tag("oauth")
 class TestGitHubOAuth(CustomOAuthTestCase):
     github_auth_uri = reverse("oauth_github")
     github_auth_callback_uri = reverse("oauth_github_callback")

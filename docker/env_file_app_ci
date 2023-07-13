@@ -18,6 +18,10 @@ LOCAL_STORAGE=True
 GOOGLE_CLIENT_ID=test_intelowl.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=the_supreme_secret
 
+#github
+GITHUB_CLIENT_ID=type_something_meaningless
+GITHUB_CLIENT_SECRET=unknown_entity
+
 
 # AWS
 AWS_STORAGE_BUCKET_NAME=

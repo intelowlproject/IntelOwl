@@ -287,7 +287,7 @@ def checkConfiguration(request):
 @permission_classes([AllowAny])
 def github_login(request: Request):
     """
-    Redirect to Google OAuth login
+    Redirect to Github OAuth login
     """
     client_id = secrets.get_secret("GITHUB_CLIENT_ID")
 

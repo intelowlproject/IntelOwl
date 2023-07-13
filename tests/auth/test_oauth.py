@@ -79,7 +79,9 @@ class TestGitHubOAuth(CustomOAuthTestCase):
     github_auth_uri = reverse("oauth_github")
     github_auth_callback_uri = reverse("oauth_github_callback")
 
-    def test_github_disabled(self):
+    @patch("authentication.views.secrets.get_secret")
+    def test_github_disabled(self, mock_get_secret):
+        mock_get_secret.return_value = None
         response = self.client.get(self.github_auth_uri)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(), {"detail": "GitHub OAuth is not configured."})

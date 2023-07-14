@@ -96,7 +96,6 @@ class TestGitHubOAuth(CustomOAuthTestCase):
         response_redirect = urlparse(response.url)
         self.assertEqual(response_redirect.scheme, expected_redirect_url.scheme, msg)
         self.assertEqual(response_redirect.netloc, expected_redirect_url.netloc, msg)
-        # path does not matches i tried it manually though it should fail right?
         self.assertEqual(response_redirect.path, expected_redirect_url.path, msg)
         response_redirect_query = parse_qs(response_redirect.query)
         if secrets.get_secret("GITHUB_CLIENT_ID"):

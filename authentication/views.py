@@ -285,16 +285,16 @@ def checkConfiguration(request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def github_login(request: Request):
+def github_login(request):
     """
     Redirect to Github OAuth login
     """
     client_id = secrets.get_secret("GITHUB_CLIENT_ID")
 
-    if client_id is None or client_id == "":
-        raise AuthenticationFailed("GitHub OAuth is not configured.")
-
     try:
+        if client_id is None or client_id == "":
+            raise AuthenticationFailed("GitHub OAuth is not configured.")
+
         response = redirect(
             f"https://github.com/login/oauth/authorize?client_id={client_id}"
         )

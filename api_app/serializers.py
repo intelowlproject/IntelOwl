@@ -140,7 +140,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             ("tlp", TLP.CLEAR.value),
             ("tags", []),
         ]:
-            if not attrs.get(attribute):
+            if attribute not in attrs:
                 if playbook := attrs.get("playbook_requested"):
                     attrs[attribute] = getattr(playbook, attribute)
                 else:
@@ -262,6 +262,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return connectors
 
     def check_previous_jobs(self, validated_data: Dict) -> Job:
+        logger.info(
+            f"Checking previous jobs before {validated_data['scan_check_time']}"
+        )
         if not validated_data["scan_check_time"]:
             raise ValidationError("Scan check time can't be null")
         status_to_exclude = [Job.Status.KILLED, Job.Status.FAILED]

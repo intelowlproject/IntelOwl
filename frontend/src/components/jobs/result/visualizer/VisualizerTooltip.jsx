@@ -15,21 +15,22 @@ export function VisualizerTooltip({
   return (
     <UncontrolledTooltip target={idElement} placement="right" autohide={false}>
       <div className="p-0 my-2 d-flex justify-content-start">
-        <Button className="mx-1 p-2" size="sm">
-          <CopyToClipboardButton id={idElement} text={copyText}>
-            <MdContentCopy /> Copy
-          </CopyToClipboardButton>
-        </Button>
-        <Button className="mx-1 p-2" size="sm" disabled={disable || !link}>
-          <AiOutlineLink />
-          <a
-            href={link}
-            target="_blank"
-            rel="noreferrer"
-            style={{ textDecoration: "none" }}
-          >
-            &nbsp;Link
-          </a>
+        <CopyToClipboardButton
+          id={idElement}
+          text={copyText}
+          className="mx-1 p-2 btn btn-secondary btn-sm"
+        >
+          <MdContentCopy /> Copy
+        </CopyToClipboardButton>
+        <Button
+          className="mx-1 p-2"
+          size="sm"
+          disabled={disable || !link}
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <AiOutlineLink /> Link
         </Button>
       </div>
       {description && (

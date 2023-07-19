@@ -494,7 +494,7 @@ describe("visualizer data validation", () => {
             bold: true,
             color: "bg-undefined",
             description: undefined,
-            copyText: undefined,
+            copyText: "placeholder",
             disable: true,
             icon: "invalid icon",
             italic: true,

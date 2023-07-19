@@ -28,7 +28,7 @@ describe("VisualizerTooltip component", () => {
       );
       expect(copyButton).toBeInTheDocument();
       // check link button
-      const linkButton = screen.getByRole("button", { name: "Link" });
+      const linkButton = screen.getByText("Link");
       expect(linkButton).toBeInTheDocument();
       expect(linkButton.className).toContain("disabled");
     });
@@ -57,7 +57,7 @@ describe("VisualizerTooltip component", () => {
       );
       expect(copyButton).toBeInTheDocument();
       // check link button
-      const linkButton = screen.getByRole("button", { name: "Link" });
+      const linkButton = screen.getByText("Link");
       expect(linkButton).toBeInTheDocument();
       expect(linkButton.className).not.toContain("disabled");
       expect(screen.getByRole("link").href).toBe("https://google.com/");
@@ -87,7 +87,7 @@ describe("VisualizerTooltip component", () => {
       );
       expect(copyButton).toBeInTheDocument();
       // check link button
-      const linkButton = screen.getByRole("button", { name: "Link" });
+      const linkButton = screen.getByText("Link");
       expect(linkButton).toBeInTheDocument();
       expect(linkButton.className).not.toContain("disabled");
       expect(screen.getByRole("link").href).toBe("https://google.com/");

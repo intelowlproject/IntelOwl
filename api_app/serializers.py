@@ -205,8 +205,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             self.plugins_to_execute(tlp, analyzers_requested, not self.all_analyzers)
         )
         if not analyzers_executed:
+            warnings = "\n".join(self.filter_warnings)
             raise ValidationError(
-                {"detail": "No Analyzers can be run after filtering."}
+                {"detail": f"No Analyzers can be run after filtering:\n{warnings}"}
             )
         return analyzers_executed
 
@@ -234,8 +235,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     # e.g. if connector_tlp is GREEN(1),
                     # run for job_tlp CLEAR(0) & GREEN(1) only
                     raise NotRunnableConnector(
-                        f"{plugin_config.name} won't run: "
-                        f"job.tlp ('{tlp}') >"
+                        f"{plugin_config.name} won't run because "
+                        f"job.tlp is '{tlp}') while plugin"
                         f" maximum_tlp ('{plugin_config.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:

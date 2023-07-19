@@ -1,7 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import datetime
 
-
+from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -42,8 +43,67 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         self.ajcs = _AbstractJobCreateSerializer(
             data={}, context={"request": MockUpRequest(self.user)}
         )
+        self.ajcs.Meta.model = Job
         self.ajcs.all_analyzers = False
         self.ajcs.all_connectors = False
+
+    def test_check_previous_job(self):
+        Job.objects.all().delete()
+        a1 = AnalyzerConfig.objects.order_by("?").first()
+        a2 = AnalyzerConfig.objects.order_by("?").exclude(pk=a1.pk).first()
+        a3 = AnalyzerConfig.objects.order_by("?").exclude(pk__in=[a1.pk, a2.pk]).first()
+        j1 = Job.objects.create(
+            observable_name="test.com",
+            observable_classification="domain",
+            user=self.user,
+            md5="72cf478e87b031233091d8c00a38ce00",
+            status=Job.Status.REPORTED_WITHOUT_FAILS,
+            received_request_time=now() - datetime.timedelta(hours=3),
+        )
+        j1.analyzers_requested.add(a1)
+        j1.analyzers_requested.add(a2)
+
+        self.ajcs = _AbstractJobCreateSerializer(
+            data={}, context={"request": MockUpRequest(self.user)}
+        )
+        self.assertEqual(
+            j1,
+            self.ajcs.check_previous_jobs(
+                validated_data={
+                    "scan_check_time": datetime.timedelta(days=1),
+                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzers_to_execute": [],
+                }
+            ),
+        )
+        self.assertEqual(
+            j1,
+            self.ajcs.check_previous_jobs(
+                validated_data={
+                    "scan_check_time": datetime.timedelta(days=1),
+                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzers_to_execute": [a1],
+                }
+            ),
+        )
+        self.assertEqual(
+            j1,
+            self.ajcs.check_previous_jobs(
+                validated_data={
+                    "scan_check_time": datetime.timedelta(days=1),
+                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzers_to_execute": [a1, a2],
+                }
+            ),
+        )
+        with self.assertRaises(Job.DoesNotExist):
+            self.ajcs.check_previous_jobs(
+                validated_data={
+                    "scan_check_time": datetime.timedelta(days=1),
+                    "md5": "72cf478e87b031233091d8c00a38ce00",
+                    "analyzers_to_execute": [a1, a2, a3],
+                }
+            )
 
     def test_set_default_value_from_playbook(self):
         data = {"playbook_requested": PlaybookConfig.objects.first()}

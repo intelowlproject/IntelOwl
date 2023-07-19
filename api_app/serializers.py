@@ -262,26 +262,22 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return connectors
 
     def check_previous_jobs(self, validated_data: Dict) -> Job:
-        logger.info(
-            f"Checking previous jobs before {validated_data['scan_check_time']}"
-        )
+        logger.info("Checking previous jobs")
         if not validated_data["scan_check_time"]:
             raise ValidationError("Scan check time can't be null")
         status_to_exclude = [Job.Status.KILLED, Job.Status.FAILED]
         if not validated_data.get("playbook_to_execute", None):
             status_to_exclude.append(Job.Status.REPORTED_WITH_FAILS)
-        query = Q(md5=validated_data["md5"])
-        for analyzer in validated_data.get("analyzers_to_execute", []):
-            query &= Q(analyzers_requested__in=[analyzer])
-        return (
+        qs = (
             self.Meta.model.objects.visible_for_user(self.context["request"].user)
             .filter(
                 received_request_time__gte=now() - validated_data["scan_check_time"]
             )
-            .filter(query)
-            .exclude(status__in=status_to_exclude)
-            .latest("received_request_time")
+            .filter(Q(md5=validated_data["md5"]))
         )
+        for analyzer in validated_data.get("analyzers_to_execute", []):
+            qs = qs.filter(analyzers_requested__in=[analyzer])
+        return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
 
     def create(self, validated_data: Dict) -> Job:
         validated_data.pop("warnings")

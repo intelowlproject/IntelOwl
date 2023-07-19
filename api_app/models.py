@@ -437,7 +437,7 @@ class Job(models.Model):
         ):
             raise ValidationError(
                 f"You can't have set mode to {ScanMode.FORCE_NEW_ANALYSIS.name}"
-                " and have check_time set"
+                f" and have check_time set to {self.scan_check_time}"
             )
         elif (
             self.scan_mode == ScanMode.CHECK_PREVIOUS_ANALYSIS.value

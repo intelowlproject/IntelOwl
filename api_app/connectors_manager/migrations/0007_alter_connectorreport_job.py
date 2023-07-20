@@ -10,14 +10,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0019_mitm_configs'),
-        ('connectors_manager', '0006_connectorconfig_disabled_in_org'),
+        ("api_app", "0019_mitm_configs"),
+        ("connectors_manager", "0006_connectorconfig_disabled_in_org"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='connectorreport',
-            name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='connectorreports', to='api_app.job'),
+            model_name="connectorreport",
+            name="job",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="connectorreports",
+                to="api_app.job",
+            ),
         ),
     ]

@@ -7,48 +7,52 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pivots_manager', '0001_initial'),
+        ("pivots_manager", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameIndex(
-            model_name='pivot',
-            new_name='pivots_mana_startin_694120_idx',
-            old_name='pivot_manag_startin_21e74a_idx',
+            model_name="pivot",
+            new_name="pivots_mana_startin_694120_idx",
+            old_name="pivot_manag_startin_21e74a_idx",
         ),
         migrations.RenameIndex(
-            model_name='pivot',
-            new_name='pivots_mana_pivot_c_c45692_idx',
-            old_name='pivot_manag_pivot_c_e1027b_idx',
+            model_name="pivot",
+            new_name="pivots_mana_pivot_c_c45692_idx",
+            old_name="pivot_manag_pivot_c_e1027b_idx",
         ),
         migrations.RenameIndex(
-            model_name='pivot',
-            new_name='pivots_mana_ending__913ba6_idx',
-            old_name='pivot_manag_ending__6d1c06_idx',
+            model_name="pivot",
+            new_name="pivots_mana_ending__913ba6_idx",
+            old_name="pivot_manag_ending__6d1c06_idx",
         ),
         migrations.RenameIndex(
-            model_name='pivotconfig',
-            new_name='pivots_mana_analyze_30afa2_idx',
-            old_name='pivot_manag_analyze_4e863b_idx',
+            model_name="pivotconfig",
+            new_name="pivots_mana_analyze_30afa2_idx",
+            old_name="pivot_manag_analyze_4e863b_idx",
         ),
         migrations.RenameIndex(
-            model_name='pivotconfig',
-            new_name='pivots_mana_connect_255ab8_idx',
-            old_name='pivot_manag_connect_2afb9a_idx',
+            model_name="pivotconfig",
+            new_name="pivots_mana_connect_255ab8_idx",
+            old_name="pivot_manag_connect_2afb9a_idx",
         ),
         migrations.RenameIndex(
-            model_name='pivotconfig',
-            new_name='pivots_mana_visuali_eb376f_idx',
-            old_name='pivot_manag_visuali_44b587_idx',
+            model_name="pivotconfig",
+            new_name="pivots_mana_visuali_eb376f_idx",
+            old_name="pivot_manag_visuali_44b587_idx",
         ),
         migrations.RenameIndex(
-            model_name='pivotconfig',
-            new_name='pivots_mana_playboo_a73263_idx',
-            old_name='pivot_manag_playboo_119fe0_idx',
+            model_name="pivotconfig",
+            new_name="pivots_mana_playboo_a73263_idx",
+            old_name="pivot_manag_playboo_119fe0_idx",
         ),
         migrations.AlterField(
-            model_name='pivot',
-            name='pivot_config',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='pivots', to='pivots_manager.pivotconfig'),
+            model_name="pivot",
+            name="pivot_config",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="pivots",
+                to="pivots_manager.pivotconfig",
+            ),
         ),
     ]

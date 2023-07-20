@@ -12,48 +12,67 @@ def migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     for playbook in PlaybookConfig.objects.all():
         analyzers_tlps = (
-            TLP[x] for x in playbook.analyzers.all().values_list("maximum_tlp", flat=True)
+            TLP[x]
+            for x in playbook.analyzers.all().values_list("maximum_tlp", flat=True)
         )
         connectors_tlps = (
-            TLP[x] for x in playbook.connectors.all().values_list("maximum_tlp", flat=True)
+            TLP[x]
+            for x in playbook.connectors.all().values_list("maximum_tlp", flat=True)
         )
         tlps = chain(analyzers_tlps, connectors_tlps)
 
         playbook.tlp = min(tlps).value
         playbook.save()
 
-def reverse_migrate(apps, schema_editor): ...
+
+def reverse_migrate(apps, schema_editor):
+    ...
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0034_job_scan_check_time_job_scan_mode'),
-        ('playbooks_manager', '0017_playbookconfig_pivots'),
+        ("api_app", "0034_job_scan_check_time_job_scan_mode"),
+        ("playbooks_manager", "0017_playbookconfig_pivots"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='playbookconfig',
-            name='scan_check_time',
-            field=models.DurationField(blank=True, default=datetime.timedelta(days=1), null=True),
+            model_name="playbookconfig",
+            name="scan_check_time",
+            field=models.DurationField(
+                blank=True, default=datetime.timedelta(days=1), null=True
+            ),
         ),
         migrations.AddField(
-            model_name='playbookconfig',
-            name='scan_mode',
-            field=models.IntegerField(choices=[(1, 'Force New Analysis'), (2, 'Check Previous Analysis')], default=2),
+            model_name="playbookconfig",
+            name="scan_mode",
+            field=models.IntegerField(
+                choices=[(1, "Force New Analysis"), (2, "Check Previous Analysis")],
+                default=2,
+            ),
         ),
         migrations.AddField(
-            model_name='playbookconfig',
-            name='tags',
-            field=models.ManyToManyField(blank=True, related_name='playbooks', to='api_app.tag'),
+            model_name="playbookconfig",
+            name="tags",
+            field=models.ManyToManyField(
+                blank=True, related_name="playbooks", to="api_app.tag"
+            ),
         ),
         migrations.AddField(
-            model_name='playbookconfig',
-            name='tlp',
-            field=models.CharField(choices=[('CLEAR', 'Clear'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='AMBER', max_length=8),
+            model_name="playbookconfig",
+            name="tlp",
+            field=models.CharField(
+                choices=[
+                    ("CLEAR", "Clear"),
+                    ("GREEN", "Green"),
+                    ("AMBER", "Amber"),
+                    ("RED", "Red"),
+                ],
+                default="AMBER",
+                max_length=8,
+            ),
             preserve_default=False,
         ),
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
+        migrations.RunPython(migrate, reverse_migrate),
     ]

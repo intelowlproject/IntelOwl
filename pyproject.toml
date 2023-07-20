@@ -2,7 +2,6 @@
 exclude = '''
 /(
   venv
-  | migrations
   | frontend
   | node_modules
 )/

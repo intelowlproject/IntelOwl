@@ -9,14 +9,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('visualizers_manager', '0009_remove_parent_playbook'),
-        ('api_app', '0023_runtime_config'),
+        ("visualizers_manager", "0009_remove_parent_playbook"),
+        ("api_app", "0023_runtime_config"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='visualizerreport',
-            name="runtime_configuration"
+            model_name="visualizerreport", name="runtime_configuration"
         )
-
     ]

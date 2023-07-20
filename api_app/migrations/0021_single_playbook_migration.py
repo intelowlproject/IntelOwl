@@ -37,15 +37,12 @@ def reverse_migrate_playbooks(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0020_single_playbook_pre_migration'),
+        ("api_app", "0020_single_playbook_pre_migration"),
         ("analyzers_manager", "00011_vt_url_subpath"),
         ("connectors_manager", "0009_parent_playbook_foreign_key"),
         ("visualizers_manager", "0008_parent_playbook_foreign_key"),
     ]
 
     operations = [
-        migrations.RunPython(
-            migrate_playbooks, reverse_migrate_playbooks
-        ),
-
+        migrations.RunPython(migrate_playbooks, reverse_migrate_playbooks),
     ]

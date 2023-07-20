@@ -9,14 +9,14 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0016_add_index'),
-        ('visualizers_manager', '0005_visualizerconfig_disabled_in_org'),
-        ('connectors_manager', '0006_connectorconfig_disabled_in_org'),
-        ('analyzers_manager', '0006_analyzerconfig_disabled_in_org'),
+        ("api_app", "0016_add_index"),
+        ("visualizers_manager", "0005_visualizerconfig_disabled_in_org"),
+        ("connectors_manager", "0006_connectorconfig_disabled_in_org"),
+        ("analyzers_manager", "0006_analyzerconfig_disabled_in_org"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='OrganizationPluginState',
+            name="OrganizationPluginState",
         ),
     ]

@@ -14,24 +14,31 @@ def migrate(apps, schema_editor):
         report.config = VisualizerConfig.objects.get(name=report.name)
         report.save()
 
+
 def backwards_migrate(apps, schema_editor):
     VisualizerReport = apps.get_model("visualizers_manager", "VisualizerReport")
     for report in VisualizerReport.objects.all():
         report.name = report.config.name
         report.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0019_mitm_configs'),
-        ('visualizers_manager', '0006_alter_visualizerreport_job'),
+        ("api_app", "0019_mitm_configs"),
+        ("visualizers_manager", "0006_alter_visualizerreport_job"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='visualizerreport',
-            name='config',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='reports', to='visualizers_manager.visualizerconfig'),
+            model_name="visualizerreport",
+            name="config",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reports",
+                to="visualizers_manager.visualizerconfig",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
@@ -39,22 +46,22 @@ class Migration(migrations.Migration):
             name="name",
             field=models.CharField(max_length=128, null=True),
         ),
-        migrations.RunPython(
-            migrate, backwards_migrate
-        ),
+        migrations.RunPython(migrate, backwards_migrate),
         migrations.AlterField(
-            model_name='visualizerreport',
+            model_name="visualizerreport",
             name="config",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reports',
-                                    to='visualizers_manager.visualizerconfig'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reports",
+                to="visualizers_manager.visualizerconfig",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='visualizerreport',
-            unique_together={('config', 'job')},
+            name="visualizerreport",
+            unique_together={("config", "job")},
         ),
-
         migrations.RemoveField(
-            model_name='visualizerreport',
-            name='name',
+            model_name="visualizerreport",
+            name="name",
         ),
     ]

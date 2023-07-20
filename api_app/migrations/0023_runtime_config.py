@@ -19,13 +19,19 @@ def migrate_runtime_config(apps, schema_editor):
 
         for report in AnalyzerReport.objects.filter(job=job):
             if report.runtime_configuration:
-                job.runtime_configuration["analyzers"][report.config.name] = report.runtime_configuration
+                job.runtime_configuration["analyzers"][
+                    report.config.name
+                ] = report.runtime_configuration
         for report in ConnectorReport.objects.filter(job=job):
             if report.runtime_configuration:
-                job.runtime_configuration["connectors"][report.config.name] = report.runtime_configuration
+                job.runtime_configuration["connectors"][
+                    report.config.name
+                ] = report.runtime_configuration
         for report in VisualizerReport.objects.filter(job=job):
             if report.runtime_configuration:
-                job.runtime_configuration["visualizers"][report.config.name] = report.runtime_configuration
+                job.runtime_configuration["visualizers"][
+                    report.config.name
+                ] = report.runtime_configuration
         job.save()
 
 
@@ -33,20 +39,26 @@ def reverse_migrate_runtime_config(apps, schema_editor):
     Job = apps.get_model("api_app", "Job")
     for job in Job.objects.all():
         for report in job.analyzerreports.all():
-            report.runtime_configuration = job.runtime_configuration["analyzers"].get(report.config.pk, None)
+            report.runtime_configuration = job.runtime_configuration["analyzers"].get(
+                report.config.pk, None
+            )
             report.save()
         for report in job.connectorreports.all():
-            report.runtime_configuration = job.runtime_configuration["connectors"].get(report.config.pk, None)
+            report.runtime_configuration = job.runtime_configuration["connectors"].get(
+                report.config.pk, None
+            )
             report.save()
         for report in job.visualizerreports.all():
-            report.runtime_configuration = job.runtime_configuration["visualizers"].get(report.config.pk, None)
+            report.runtime_configuration = job.runtime_configuration["visualizers"].get(
+                report.config.pk, None
+            )
             report.save()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0022_single_playbook_post_migration'),
+        ("api_app", "0022_single_playbook_post_migration"),
         ("analyzers_manager", "00012_remove_parent_playbook"),
         ("connectors_manager", "0010_remove_parent_playbook"),
         ("visualizers_manager", "0009_remove_parent_playbook"),
@@ -61,10 +73,7 @@ class Migration(migrations.Migration):
                 default=default_runtime,
                 null=False,
                 validators=[validate_runtime_configuration],
-            )
+            ),
         ),
-        migrations.RunPython(
-            migrate_runtime_config, reverse_migrate_runtime_config
-        ),
-
+        migrations.RunPython(migrate_runtime_config, reverse_migrate_runtime_config),
     ]

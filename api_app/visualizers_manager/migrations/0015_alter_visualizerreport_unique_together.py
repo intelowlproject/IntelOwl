@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('visualizers_manager', '0014_alter_visualizerreport_report'),
+        ("visualizers_manager", "0014_alter_visualizerreport_report"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='visualizerreport',
+            name="visualizerreport",
             unique_together=set(),
         ),
     ]

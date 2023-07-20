@@ -7,25 +7,42 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0024_tlp'),
-        ('certego_saas_organization', '0001_initial'),
-        ('connectors_manager', '0013_tlp_clear'),
+        ("api_app", "0024_tlp"),
+        ("certego_saas_organization", "0001_initial"),
+        ("connectors_manager", "0013_tlp_clear"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='connectorconfig',
-            name='disabled_in_organizations',
-            field=models.ManyToManyField(blank=True, related_name='%(app_label)s_%(class)s_disabled', to='certego_saas_organization.organization'),
+            model_name="connectorconfig",
+            name="disabled_in_organizations",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(app_label)s_%(class)s_disabled",
+                to="certego_saas_organization.organization",
+            ),
         ),
         migrations.AlterField(
-            model_name='connectorconfig',
-            name='maximum_tlp',
-            field=models.CharField(choices=[('CLEAR', 'Clear'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='CLEAR', max_length=50),
+            model_name="connectorconfig",
+            name="maximum_tlp",
+            field=models.CharField(
+                choices=[
+                    ("CLEAR", "Clear"),
+                    ("GREEN", "Green"),
+                    ("AMBER", "Amber"),
+                    ("RED", "Red"),
+                ],
+                default="CLEAR",
+                max_length=50,
+            ),
         ),
         migrations.AlterField(
-            model_name='connectorreport',
-            name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='api_app.job'),
+            model_name="connectorreport",
+            name="job",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)ss",
+                to="api_app.job",
+            ),
         ),
     ]

@@ -9,23 +9,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0023_runtime_config'),
+        ("api_app", "0023_runtime_config"),
     ]
 
     operations = [
         migrations.AlterField(
             model_name="job",
             name="tlp",
-            field= models.CharField(max_length=8,
-                                    choices=[
-                                        ("CLEAR", "Clear"),
-                                        ("GREEN", "Green"),
-                                        ("AMBER", "Amber"),
-                                        ("RED", "Red"),
-                                    ],
-                                    default="CLEAR",
-
-            )
+            field=models.CharField(
+                max_length=8,
+                choices=[
+                    ("CLEAR", "Clear"),
+                    ("GREEN", "Green"),
+                    ("AMBER", "Amber"),
+                    ("RED", "Red"),
+                ],
+                default="CLEAR",
+            ),
         )
-
     ]

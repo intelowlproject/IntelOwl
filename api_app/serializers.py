@@ -36,20 +36,6 @@ from .visualizers_manager.models import VisualizerConfig
 
 logger = logging.getLogger(__name__)
 
-__all__ = [
-    "TagSerializer",
-    "JobAvailabilitySerializer",
-    "JobListSerializer",
-    "JobSerializer",
-    "FileAnalysisSerializer",
-    "ObservableAnalysisSerializer",
-    "JobResponseSerializer",
-    "MultipleFileAnalysisSerializer",
-    "MultipleObservableAnalysisSerializer",
-    "PluginConfigSerializer",
-    "CommentSerializer",
-]
-
 
 class TagSerializer(rfs.ModelSerializer):
     class Meta:
@@ -999,7 +985,6 @@ class PythonListConfigSerializer(rfs.ListSerializer):
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation(self, data):
-        from api_app.models import PluginConfig
 
         plugins = self.child.Meta.model.objects.filter(
             pk__in=[plugin.pk for plugin in data]

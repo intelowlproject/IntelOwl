@@ -653,8 +653,6 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         performs kill
          override for callbacks after kill operation
         """
-        from api_app.models import Job
-
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report

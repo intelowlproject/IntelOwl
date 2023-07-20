@@ -363,7 +363,7 @@ class Job(models.Model):
         self.update_status(self.Status.KILLED)
 
     def _get_signatures(self, queryset: QuerySet) -> Signature:
-        config_class = queryset.model
+        config_class: PythonConfig = queryset.model
         signatures = list(
             queryset.annotate_runnable(self.user).filter(runnable=True).get_signatures()
         )
@@ -520,13 +520,10 @@ class Parameter(models.Model):
         return self.analyzer_config or self.connector_config or self.visualizer_config
 
     def values_for_user(self, user: User = None) -> QuerySet:
-        from api_app.models import PluginConfig
-
         return PluginConfig.objects.visible_for_user(user).filter(parameter=self)
 
     @valid_value_for_test
     def get_first_value(self, user: User):
-        from api_app.models import PluginConfig
 
         # priority for value retrieved
         # 1 - Owner
@@ -786,32 +783,23 @@ class PythonConfig(AbstractConfig):
 
     @classmethod
     @property
-    def stage_status_complete(cls) -> str:
-        from api_app.choices import Status
-
-        name_plugin = cls.__name__.split("Config")[0]
-        return getattr(Status, f"{name_plugin.upper()}S_COMPLETED").value
-
-    @classmethod
-    @property
-    def stage_status_running(cls) -> str:
-        from api_app.choices import Status
-
-        name_plugin = cls.__name__.split("Config")[0]
-        return getattr(Status, f"{name_plugin.upper()}S_RUNNING").value
+    def plugin_name(cls) -> str:
+        return cls.__name__.split("Config")[0]
 
     @classmethod
     def signature_pipeline_running(cls, job) -> Signature:
-        return cls._signature_pipeline_status(job, cls.stage_status_running)
+        return cls._signature_pipeline_status(
+            job, getattr(Status, f"{cls.plugin_name.upper()}S_RUNNING").value
+        )
 
     @classmethod
     def signature_pipeline_completed(cls, job) -> Signature:
-        return cls._signature_pipeline_status(job, cls.stage_status_complete)
+        return cls._signature_pipeline_status(
+            job, getattr(Status, f"{cls.plugin_name.upper()}S_COMPLETED").value
+        )
 
     @classmethod
     def _signature_pipeline_status(cls, job, status: str) -> Signature:
-        from intel_owl import tasks
-
         return tasks.job_set_pipeline_status.signature(
             args=[job.pk, status],
             kwargs={},
@@ -849,11 +837,11 @@ class PythonConfig(AbstractConfig):
         self.clean_config_queue()
 
     @property
-    def options(self):
+    def options(self) -> QuerySet:
         return self.parameters.filter(is_secret=False)
 
     @property
-    def secrets(self):
+    def secrets(self) -> QuerySet:
         return self.parameters.filter(is_secret=True)
 
     @property
@@ -893,7 +881,7 @@ class PythonConfig(AbstractConfig):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def read_params(self, job) -> Dict[Parameter, Any]:
+    def read_params(self, job: Job) -> Dict[Parameter, Any]:
         # priority
         # 1 - Runtime config
         # 2 - Value inside the db
@@ -911,7 +899,7 @@ class PythonConfig(AbstractConfig):
         return result
 
     @deprecated("Please use the queryset method `get_signatures`.")
-    def get_signature(self, job) -> Signature:
+    def get_signature(self, job: Job) -> Signature:
         return next(
             self.__class__.objects.filter(pk=self.pk)
             .annotate_runnable(job.user)

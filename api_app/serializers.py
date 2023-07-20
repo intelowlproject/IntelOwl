@@ -361,12 +361,10 @@ class JobSerializer(_AbstractJobViewSerializer):
     permissions = rfs.SerializerMethodField()
 
     def get_fields(self):
-        # this is required for a cyclic import
+        # this method override is required for a cyclic import
         from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
         from api_app.connectors_manager.serializers import ConnectorReportSerializer
         from api_app.visualizers_manager.serializers import VisualizerReportSerializer
-
-        assert hasattr(self, "_declared_fields")
 
         self._declared_fields["analyzer_reports"] = AnalyzerReportSerializer(
             many=True, read_only=True, source="analyzerreports"

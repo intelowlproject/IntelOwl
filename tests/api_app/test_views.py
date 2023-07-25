@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import abc
 import datetime
 
 from django.contrib.auth import get_user_model
@@ -450,7 +451,7 @@ class TagViewsetTests(CustomViewSetTestCase):
         self.assertEqual(Tag.objects.count(), 0)
 
 
-class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin):
+class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABCMeta):
     def test_organization_disable(self):
         plugin_pk = self.model_class.objects.order_by("?").first().pk
         org, _ = Organization.objects.get_or_create(name="test")

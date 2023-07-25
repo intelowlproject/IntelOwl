@@ -665,8 +665,10 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 
     @staticmethod
     def perform_retry(report: AbstractReport):
-        signature = report.config.get_signature(
-            report.job,
+        signature = next(
+            report.config.__class__.objects.filter(pk=report.config.pk).get_signatures(
+                report.job,
+            )
         )
         runner = signature | tasks.job_set_final_status.signature(
             args=[report.job.id],
@@ -726,7 +728,12 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             )
 
         # retry with the same arguments
-        self.perform_retry(report)
+        try:
+            self.perform_retry(report)
+        except StopIteration:
+            logger.exception(f"Unable to find signature for report {report.pk}")
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

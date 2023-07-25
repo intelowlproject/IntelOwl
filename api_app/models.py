@@ -28,7 +28,6 @@ from api_app.choices import (
     ScanMode,
     Status,
 )
-from api_app.decorators import valid_value_for_test
 from api_app.defaults import config_default, default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.queryset import (
@@ -519,8 +518,34 @@ class Parameter(models.Model):
     def config(self):
         return self.analyzer_config or self.connector_config or self.visualizer_config
 
-    def values_for_user(self, user: User = None) -> QuerySet:
-        return PluginConfig.objects.visible_for_user(user).filter(parameter=self)
+    def get_valid_value_for_test(self):
+        if not settings.STAGE_CI:
+            raise PluginConfig.DoesNotExist
+        if "url" in self.name:
+
+            return PluginConfig.objects.get_or_create(
+                value="https://intelowl.com",
+                parameter=self,
+                owner=None,
+                for_organization=False,
+            )[0]
+        elif "pdns_credentials" == self.name:
+            return PluginConfig.objects.get_or_create(
+                value="user|pwd",
+                parameter=self,
+                owner=None,
+                for_organization=False,
+            )[0]
+        elif "test" in self.name:
+            raise PluginConfig.DoesNotExist
+        else:
+            return PluginConfig.objects.get_or_create(
+                value="test",
+                parameter=self,
+                owner=None,
+                for_organization=False,
+            )[0]
+
 
     @valid_value_for_test
     def get_first_value(self, user: User):
@@ -885,23 +910,18 @@ class PythonConfig(AbstractConfig):
         # priority
         # 1 - Runtime config
         # 2 - Value inside the db
+        config_runtime = job.get_config_runtime_configuration(self)
         result = {}
-        for param in self.parameters.all():
+        for param in self.parameters.annotate_first_value_for_user(job.user):
             param: Parameter
-            if param.name in job.get_config_runtime_configuration(self):
-                result[param] = job.get_config_runtime_configuration(self)[param.name]
+            if param.name in config_runtime:
+                result[param] = config_runtime[param.name]
             else:
-                try:
-                    result[param] = param.get_first_value(job.user).value
-                except RuntimeError as e:
+                if param.first_value:
+                    result[param] = PluginConfig.objects.get(pk=param.first_value).value
+                else:
+                    if settings.STAGE_CI:
+                        result[param] = param.get_valid_value_for_test()
                     if param.required:
-                        raise e
+                        raise TypeError(f"Required param {param.pk} does not have a valid value for job {job.pk}")
         return result
-
-    @deprecated("Please use the queryset method `get_signatures`.")
-    def get_signature(self, job: Job) -> Signature:
-        return next(
-            self.__class__.objects.filter(pk=self.pk)
-            .annotate_runnable(job.user)
-            .get_signatures(job)
-        )

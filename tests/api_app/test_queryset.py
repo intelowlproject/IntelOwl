@@ -176,6 +176,89 @@ class ParameterQuerySetTestCase(CustomTestCase):
         pc.delete()
         param.delete()
 
+    def test_annotate_values_for_user(self):
+        param = Parameter.objects.create(
+            name="testparameter",
+            type="str",
+            description="test parameter",
+            is_secret=False,
+            required=False,
+            analyzer_config=AnalyzerConfig.objects.first(),
+        )
+        pc2 = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+        )
+
+        pc = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+        )
+        param = Parameter.objects.annotate_values_for_user(self.user).get(pk=param.pk)
+        self.assertTrue(hasattr(param, "visible_values"))
+        self.assertCountEqual(param.visible_values, [pc.pk])
+
+        pc.delete()
+        pc2.delete()
+        param.delete()
+
+    def test_annotate_first_value_for_user(self):
+        param = Parameter.objects.create(
+            name="testparameter",
+            type="str",
+            description="test parameter",
+            is_secret=False,
+            required=False,
+            analyzer_config=AnalyzerConfig.objects.first(),
+        )
+        pc = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+        )
+        pc2 = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=None,
+            parameter=param,
+        )
+        org = Organization.objects.create(name="test_org")
+
+        m1 = Membership.objects.create(
+            user=self.superuser, organization=org, is_owner=True
+        )
+        m2 = Membership.objects.create(
+            user=self.user,
+            organization=org,
+        )
+        pc3 = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=True,
+            owner=self.superuser,
+            parameter=param,
+        )
+
+        param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
+        self.assertFalse(hasattr(param, "owner_value"))
+        self.assertFalse(hasattr(param, "org_value"))
+        self.assertFalse(hasattr(param, "default_value"))
+        self.assertTrue(hasattr(param, "first_value"))
+        self.assertEqual(param.first_value, pc.pk)
+        pc.delete()
+        pc2.delete()
+        pc3.delete()
+        param.delete()
+        m1.delete()
+        m2.delete()
+        org.delete()
+
+
+
 
 class PluginConfigQuerySetTestCase(CustomTestCase):
     def test_visible_for_user_owner(self):

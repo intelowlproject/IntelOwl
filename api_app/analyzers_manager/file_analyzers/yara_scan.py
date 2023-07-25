@@ -314,12 +314,12 @@ class YaraScan(FileAnalyzer):
 
     def _get_owner_and_key(self, url: str) -> Tuple[Union[str, None], Union[str, None]]:
         if url in self._private_repositories:
-            valid_value: PluginConfig = Parameter.objects.get(
+            valid_value: PluginConfig = Parameter.objects.filter(
                 analyzer_config=self._config,
                 is_secret=True,
                 name="private_repositories",
-            ).get_first_value(self._job.user)
-            if valid_value.for_organization:
+            ).annotate_first_value_for_user(self._job.user).first().first_value
+            if valid_value and valid_value.for_organization:
                 if self._job.user.has_membership():
                     owner = (
                         f"{self._job.user.membership.organization.name}"
@@ -367,9 +367,7 @@ class YaraScan(FileAnalyzer):
         for config in AnalyzerConfig.objects.filter(
             python_module=cls.python_module, disabled=False
         ):
-            for plugin in config.parameters.get(
-                name="private_repositories"
-            ).values_for_user():
+            for plugin in PluginConfig.objects.filter(parameter__name="private_repositories", parameter__analyzer_config__pk=config.pk):
                 if not plugin.value:
                     continue
                 owner = (
@@ -382,7 +380,7 @@ class YaraScan(FileAnalyzer):
                     storage.add_repo(url, owner, ssh_key)
 
             # we are downloading even custom signatures for each analyzer
-            for plugin in config.parameters.get(name="repositories").values_for_user():
+            for plugin in PluginConfig.objects.filter(parameter__name="repositories", parameter__analyzer_config__pk=config.pk):
                 new_urls = plugin.value
                 logger.info(f"Adding personal urls {new_urls}")
                 for url in new_urls:

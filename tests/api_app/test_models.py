@@ -250,9 +250,9 @@ class AbstractConfigTestCase(CustomTestCase):
             playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
-
-        with self.assertRaises(Exception):
-            muc.get_signature(job)
+        gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
+        with self.assertRaises(StopIteration):
+            next(gen_signature)
 
         muc.delete()
         job.delete()
@@ -268,7 +268,11 @@ class AbstractConfigTestCase(CustomTestCase):
             playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
-        signature = muc.get_signature(job)
+        gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
+        try:
+            signature = next(gen_signature)
+        except StopIteration as e:
+            self.fail(e)
         self.assertIsInstance(signature, Signature)
         muc.delete()
         job.delete()

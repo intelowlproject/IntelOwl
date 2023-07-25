@@ -10,7 +10,7 @@ from django.conf import settings
 from certego_saas.apps.user.models import User
 
 from ..classes import Plugin
-from ..models import Parameter
+from ..models import Parameter, PluginConfig
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorConfig, ConnectorReport
 
@@ -97,38 +97,36 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
         for cc in ccs:
             logger.info(f"Found connector runnable {cc.name} for user {user.username}")
-            param: Parameter = cc.parameters.filter(name__startswith="url").first()
-            logger.info(
-                f"Url retrieved to verify is {param.name} for connector {cc.name}"
-            )
-            if param:
-                try:
-                    plugin_config = param.get_first_value(user)
-                except RuntimeError:
+            for param in cc.parameters.filter(name__startswith="url").annotate_first_value_for_user():
+                if not param.first_value:
                     continue
-                else:
-                    url = plugin_config.value
-                    if url.startswith("http"):
-                        logger.info(f"Checking url {url} for connector {cc.name}")
-                        if settings.STAGE_CI:
-                            return True
-                        try:
-                            # momentarily set this to False to
-                            # avoid fails for https services
-                            requests.head(url, timeout=10, verify=False)
-                        except (
-                            requests.exceptions.ConnectionError,
-                            requests.exceptions.Timeout,
-                        ) as e:
-                            logger.info(
-                                f"Health check failed: url {url}"
-                                f" for connector {cc.name}. Error: {e}"
-                            )
-                            health_status = False
-                        else:
-                            health_status = True
+                pc = PluginConfig.objects.get(pk=param.first_value)
+                url = pc.value
+                logger.info(
+                    f"Url retrieved to verify is {param.name} for connector {cc.name}"
+                )
 
-                        return health_status
+                if url.startswith("http"):
+                    logger.info(f"Checking url {url} for connector {cc.name}")
+                    if settings.STAGE_CI:
+                        return True
+                    try:
+                        # momentarily set this to False to
+                        # avoid fails for https services
+                        requests.head(url, timeout=10, verify=False)
+                    except (
+                        requests.exceptions.ConnectionError,
+                        requests.exceptions.Timeout,
+                    ) as e:
+                        logger.info(
+                            f"Health check failed: url {url}"
+                            f" for connector {cc.name}. Error: {e}"
+                        )
+                        health_status = False
+                    else:
+                        health_status = True
+
+                    return health_status
         raise ConnectorRunException(
             f"Unable to find configured connector {connector_name}"
         )

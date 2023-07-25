@@ -15,7 +15,7 @@ from django.db.models import (
     QuerySet,
     Subquery,
     Value,
-    When,
+    When, Prefetch,
 )
 from django.db.models.functions import Cast
 from django.db.models.lookups import Exact
@@ -56,7 +56,7 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class JobQuerySet(CleanOnCreateQuerySet):
-    def visible_for_user(self, user: User) -> QuerySet:
+    def visible_for_user(self, user: User) -> "JobQuerySet":
         """
         User has access to:
         - jobs with TLP = CLEAR or GREEN
@@ -74,7 +74,7 @@ class JobQuerySet(CleanOnCreateQuerySet):
         )
         return self.filter(query)
 
-    def _annotate_importance_date(self) -> QuerySet:
+    def _annotate_importance_date(self) -> "JobQuerySet":
         # the scans in the last day get a 3x
         # the scans in the last week get a 2x
 
@@ -92,7 +92,7 @@ class JobQuerySet(CleanOnCreateQuerySet):
             ),
         )
 
-    def _annotate_importance_user(self, user: User) -> QuerySet:
+    def _annotate_importance_user(self, user: User) -> "JobQuerySet":
         # the scans from the user get a 3x
         # the scans from the same org get a 2x
         user_case = Case(When(user__pk=user.pk, then=Value(3)), default=Value(0))
@@ -116,13 +116,13 @@ class JobQuerySet(CleanOnCreateQuerySet):
 
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
-    def annotate_configured(self, user: User = None) -> QuerySet:
+    def annotate_configured(self, user: User = None) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
         # A parameter it is configured for a user if
         # there is a PluginConfig that is visible for the user
         # If the user is None, we only retrieve default parameters
-        return self.annotate(
+        return self.alias(
             configured=Exists(
                 PluginConfig.objects.filter(parameter=OuterRef("pk")).visible_for_user(
                     user
@@ -130,9 +130,61 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             )
         )
 
+    def _alias_owner_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+        from api_app.models import PluginConfig
+
+        return self.alias(
+            owner_value=Subquery(
+                PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
+                .visible_for_user(user)
+                .filter(owner=user)
+                .values_list("pk", flat=True)[:1]
+            )
+        )
+
+    def _alias_org_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+        from api_app.models import PluginConfig
+
+        return self.alias(
+            org_value=Subquery(
+                PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
+                .visible_for_user(user)
+                .filter(for_organization=True, owner=user.membership.organization.owner)
+                .values_list("pk", flat=True)[:1]
+            )
+            if user and user.has_membership()
+            else Value(0),
+        )
+
+    def _alias_default_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+        from api_app.models import PluginConfig
+
+        return self.alias(
+            default_value=Subquery(
+                PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
+                .visible_for_user(user)
+                .filter(owner__isnull=True)
+                .values_list("pk", flat=True)[:1]
+            )
+        )
+
+    def annotate_first_value_for_user(self, user: User) -> "ParameterQuerySet":
+        from api_app.models import PluginConfig
+
+        return (
+            self._alias_owner_value_for_user(user)
+            ._alias_org_value_for_user(user)
+            ._alias_default_value_for_user(user)
+            # importance order
+            .annotate(
+                first_value=F("owner_value") or F("org_value") or F("default_value")
+            ).prefetch_related(Prefetch("first_value", queryset=PluginConfig.objects.all()))
+
+        )
+
 
 class PluginConfigQuerySet(CleanOnCreateQuerySet):
-    def visible_for_user(self, user: User = None) -> QuerySet:
+    def visible_for_user(self, user: User = None) -> "PluginConfigQuerySet":
         if user:
             # User-level custom configs should override organization-level configs,
             # we need to get the organization-level configs, if any, first.
@@ -153,7 +205,7 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
-    def annotate_configured(self, user: User = None) -> QuerySet:
+    def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
         from api_app.models import Parameter
 
         # a Python plugin is configured only if every required parameter is configured
@@ -190,7 +242,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             )
         )
 
-    def annotate_runnable(self, user: User = None) -> QuerySet:
+    def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
         # we save the `configured` attribute in the queryset
         qs = self.annotate_configured(user)
         return (

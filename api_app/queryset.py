@@ -133,7 +133,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_owner_value_for_user(self, user: User = None) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
-        return self.annotate(
+        return self.alias(
             owner_value=Subquery(
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
@@ -145,7 +145,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_org_value_for_user(self, user: User = None) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
-        return self.annotate(
+        return self.alias(
             org_value=Subquery(
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
@@ -153,13 +153,13 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 .values_list("pk", flat=True)[:1]
             )
             if user and user.has_membership()
-            else Value(0),
+            else Value(None, output_field=IntegerField()),
         )
 
     def _alias_default_value_for_user(self, user: User = None) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
-        return self.annotate(
+        return self.alias(
             default_value=Subquery(
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
@@ -177,17 +177,11 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             .annotate(
                 first_value=Case(
                     When(owner_value__isnull=False, then=F("owner_value")),
-                    When(org_value__isnull=False, org_value__ne=0, then=F("org_value")),
+                    When(org_value__isnull=False , then=F("org_value")),
                     default=F("default_value")
                     )
                 )
             )
-            # .annotate(
-            #     first_value=Subquery(
-            #         PluginConfig.objects.get(pk=OuterRef("first_value"))
-            #     )
-            # )
-
 
 class PluginConfigQuerySet(CleanOnCreateQuerySet):
     def visible_for_user(self, user: User = None) -> "PluginConfigQuerySet":

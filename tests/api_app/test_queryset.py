@@ -232,12 +232,11 @@ class ParameterQuerySetTestCase(CustomTestCase):
         )
 
         param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
-        # self.assertFalse(hasattr(param, "owner_value"))
-        # self.assertFalse(hasattr(param, "org_value"))
-        # self.assertFalse(hasattr(param, "default_value"))
+        self.assertFalse(hasattr(param, "owner_value"))
+        self.assertFalse(hasattr(param, "org_value"))
+        self.assertFalse(hasattr(param, "default_value"))
         self.assertTrue(hasattr(param, "first_value"))
         # default value
-        print(param.default_value)
         self.assertEqual(param.first_value, pc2.pk)
 
         pc3 = PluginConfig.objects.create(
@@ -256,6 +255,8 @@ class ParameterQuerySetTestCase(CustomTestCase):
             owner=self.user,
             parameter=param,
         )
+        param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
+
         # user value
         self.assertEqual(param.first_value, pc.pk)
 

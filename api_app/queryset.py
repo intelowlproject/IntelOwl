@@ -168,7 +168,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             )
         )
 
-    def annotate_first_value_for_user(self, user: User) -> "ParameterQuerySet":
+    def annotate_first_value_for_user(self, user: User=None) -> "ParameterQuerySet":
         return (
             self._alias_owner_value_for_user(user)
             ._alias_org_value_for_user(user)

@@ -26,6 +26,7 @@ import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
 import VisualizerReport from "../visualizer/visualizer";
 import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
+import { pluginStatuses } from "../../../../constants/constants";
 
 const LOADING_VISUALIZER_UI_ELEMENT_CODE = -2;
 const NO_VISUALIZER_UI_ELEMENT_CODE = -1;
@@ -123,22 +124,34 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     console.debug("JobOverview - create/update visualizer components");
     console.debug(job);
 
-    // 1) generate UI elements in case visualizers terminated
-    const newUIElements = job.visualizer_reports.map((visualizerReport) => ({
+    // 1) generate UI elements in case visualizers are running
+    let newUIElements = job.visualizer_reports.map((visualizerReport) => ({
       id: visualizerReport.id,
       nav: (
         <div className="d-flex-center">
           <strong>{visualizerReport.name}</strong>
+          {visualizerReport.status !== pluginStatuses.SUCCESS && (
+            <StatusIcon className="ms-2" status={visualizerReport.status} />
+          )}
         </div>
       ),
       report: <VisualizerReport visualizerReport={visualizerReport} />,
     }));
+    console.debug("case 1");
 
-    // 2) in case visualizers are running put a loader
-    if (newUIElements.length === 0 && job.visualizers_to_execute.length > 0) {
-      newUIElements.push({
+    // 2) in case all visualizers are waiting for running put a loader
+    if (
+      job.visualizer_reports.length === 0 &&
+      job.visualizers_to_execute.length > 0
+    ) {
+      newUIElements = job.visualizers_to_execute.map((visualizerToExecute) => ({
         id: LOADING_VISUALIZER_UI_ELEMENT_CODE,
-        nav: null,
+        nav: (
+          <div className="d-flex-center">
+            <strong>{visualizerToExecute}</strong>
+            <StatusIcon className="ms-2" status={pluginStatuses.RUNNING} />
+          </div>
+        ),
         report: (
           <div
             className="d-flex justify-content-center"
@@ -147,15 +160,20 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
             <Spinner />
           </div>
         ),
-      });
+      }));
     }
 
     // 3) in case there are no visualizers add a "no data" visualizer
-    if (newUIElements.length === 0) {
+    if (job.visualizers_to_execute.length === 0) {
       newUIElements.push({
         id: NO_VISUALIZER_UI_ELEMENT_CODE,
         nav: null,
-        report: <p className="text-center">No visualizers available.</p>,
+        report: (
+          <p className="text-center">
+            No visualizers available. You can consult the results in the raw
+            format.{" "}
+          </p>
+        ),
       });
     }
 

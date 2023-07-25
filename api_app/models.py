@@ -364,7 +364,9 @@ class Job(models.Model):
     def _get_signatures(self, queryset: QuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
         signatures = list(
-            queryset.annotate_runnable(self.user).filter(runnable=True).get_signatures(self)
+            queryset.annotate_runnable(self.user)
+            .filter(runnable=True)
+            .get_signatures(self)
         )
         logger.info(f"{config_class} signatures are {signatures}")
 

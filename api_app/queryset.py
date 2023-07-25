@@ -15,7 +15,7 @@ from django.db.models import (
     QuerySet,
     Subquery,
     Value,
-    When, Prefetch,
+    When, Prefetch, ExpressionWrapper, ForeignKey,
 )
 from django.db.models.functions import Cast
 from django.db.models.lookups import Exact
@@ -133,7 +133,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_owner_value_for_user(self, user: User = None) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
-        return self.alias(
+        return self.annotate(
             owner_value=Subquery(
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
@@ -145,7 +145,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_org_value_for_user(self, user: User = None) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
-        return self.alias(
+        return self.annotate(
             org_value=Subquery(
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
@@ -159,7 +159,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_default_value_for_user(self, user: User = None) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
-        return self.alias(
+        return self.annotate(
             default_value=Subquery(
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
@@ -169,18 +169,24 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
     def annotate_first_value_for_user(self, user: User) -> "ParameterQuerySet":
-        from api_app.models import PluginConfig
-
         return (
             self._alias_owner_value_for_user(user)
             ._alias_org_value_for_user(user)
             ._alias_default_value_for_user(user)
             # importance order
             .annotate(
-                first_value=F("owner_value") or F("org_value") or F("default_value")
-            ).prefetch_related(Prefetch("first_value", queryset=PluginConfig.objects.all()))
-
-        )
+                first_value=Case(
+                    When(owner_value__isnull=False, then=F("owner_value")),
+                    When(org_value__isnull=False, org_value__ne=0, then=F("org_value")),
+                    default=F("default_value")
+                    )
+                )
+            )
+            # .annotate(
+            #     first_value=Subquery(
+            #         PluginConfig.objects.get(pk=OuterRef("first_value"))
+            #     )
+            # )
 
 
 class PluginConfigQuerySet(CleanOnCreateQuerySet):

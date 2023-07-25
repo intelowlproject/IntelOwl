@@ -547,40 +547,6 @@ class Parameter(models.Model):
             )[0]
 
 
-    @valid_value_for_test
-    def get_first_value(self, user: User):
-
-        # priority for value retrieved
-        # 1 - Owner
-        # 2 - Organization
-        # 3 - Default
-        qs = self.values_for_user(user)
-        try:
-            result = qs.get(owner=user)
-            logger.info(f"Retrieved {result.value=} owned by the user")
-            return result
-        except PluginConfig.DoesNotExist:
-            if user.has_membership():
-                try:
-                    result = qs.get(
-                        for_organization=True,
-                        owner=user.membership.organization.owner,
-                    )
-                    logger.info(f"Retrieved {result.value=} owned by the organization")
-                    return result
-                except PluginConfig.DoesNotExist:
-                    ...
-            try:
-                result = qs.get(owner__isnull=True)
-                logger.info(f"Retrieved {result.value=}, default value")
-                return result
-            except PluginConfig.DoesNotExist:
-                raise RuntimeError(
-                    "Unable to find a valid value for parameter"
-                    f" {self.name} for configuration {self.config.name}"
-                )
-
-
 class PluginConfig(models.Model):
 
     objects = PluginConfigQuerySet.as_manager()

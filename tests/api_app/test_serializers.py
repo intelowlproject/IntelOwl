@@ -469,8 +469,6 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             required=True,
             is_secret=True,
         )
-        with self.assertRaises(RuntimeError):
-            param.get_first_value(self.user)
         ccs = PythonListConfigSerializer(
             context={"request": MockUpRequest(self.user)},
             child=ConnectorConfigSerializer(),

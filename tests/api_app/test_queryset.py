@@ -215,12 +215,6 @@ class ParameterQuerySetTestCase(CustomTestCase):
             required=False,
             analyzer_config=AnalyzerConfig.objects.first(),
         )
-        pc = PluginConfig.objects.create(
-            value="myperfecttest",
-            for_organization=False,
-            owner=self.user,
-            parameter=param,
-        )
         pc2 = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=False,
@@ -236,19 +230,35 @@ class ParameterQuerySetTestCase(CustomTestCase):
             user=self.user,
             organization=org,
         )
+
+        param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
+        # self.assertFalse(hasattr(param, "owner_value"))
+        # self.assertFalse(hasattr(param, "org_value"))
+        # self.assertFalse(hasattr(param, "default_value"))
+        self.assertTrue(hasattr(param, "first_value"))
+        # default value
+        print(param.default_value)
+        self.assertEqual(param.first_value, pc2.pk)
+
         pc3 = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=True,
             owner=self.superuser,
             parameter=param,
         )
-
         param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
-        self.assertFalse(hasattr(param, "owner_value"))
-        self.assertFalse(hasattr(param, "org_value"))
-        self.assertFalse(hasattr(param, "default_value"))
-        self.assertTrue(hasattr(param, "first_value"))
+        # org value
+        self.assertEqual(param.first_value, pc3.pk)
+
+        pc = PluginConfig.objects.create(
+            value="myperfecttest",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+        )
+        # user value
         self.assertEqual(param.first_value, pc.pk)
+
         pc.delete()
         pc2.delete()
         pc3.delete()

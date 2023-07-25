@@ -15,7 +15,7 @@ from django.db.models import (
     QuerySet,
     Subquery,
     Value,
-    When, Prefetch, ExpressionWrapper, ForeignKey,
+    When,
 )
 from django.db.models.functions import Cast
 from django.db.models.lookups import Exact
@@ -177,11 +177,12 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             .annotate(
                 first_value=Case(
                     When(owner_value__isnull=False, then=F("owner_value")),
-                    When(org_value__isnull=False , then=F("org_value")),
-                    default=F("default_value")
-                    )
+                    When(org_value__isnull=False, then=F("org_value")),
+                    default=F("default_value"),
                 )
             )
+        )
+
 
 class PluginConfigQuerySet(CleanOnCreateQuerySet):
     def visible_for_user(self, user: User = None) -> "PluginConfigQuerySet":
@@ -211,7 +212,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         # a Python plugin is configured only if every required parameter is configured
         return (
             # we retrieve the number or required parameters
-            self.annotate(
+            self.alias(
                 required_params=Subquery(
                     Parameter.objects.filter(
                         **{self.model.snake_case_name: OuterRef("pk")}, required=True
@@ -221,7 +222,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 )
             )
             # how many of them are configured
-            .annotate(
+            .alias(
                 required_configured_params=Subquery(
                     Parameter.objects.filter(
                         **{self.model.snake_case_name: OuterRef("pk")}, required=True

@@ -889,5 +889,8 @@ class PythonConfig(AbstractConfig):
                     if settings.STAGE_CI:
                         result[param] = param.get_valid_value_for_test()
                     if param.required:
-                        raise TypeError(f"Required param {param.pk} does not have a valid value for job {job.pk}")
+                        raise TypeError(
+                            f"Required param {param.pk} does not have a "
+                            f"valid value for job {job.pk}"
+                        )
         return result

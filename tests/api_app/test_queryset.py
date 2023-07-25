@@ -231,7 +231,9 @@ class ParameterQuerySetTestCase(CustomTestCase):
             organization=org,
         )
 
-        param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
+        param = Parameter.objects.annotate_first_value_for_user(self.user).get(
+            pk=param.pk
+        )
         self.assertFalse(hasattr(param, "owner_value"))
         self.assertFalse(hasattr(param, "org_value"))
         self.assertFalse(hasattr(param, "default_value"))
@@ -245,7 +247,9 @@ class ParameterQuerySetTestCase(CustomTestCase):
             owner=self.superuser,
             parameter=param,
         )
-        param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
+        param = Parameter.objects.annotate_first_value_for_user(self.user).get(
+            pk=param.pk
+        )
         # org value
         self.assertEqual(param.first_value, pc3.pk)
 
@@ -255,7 +259,9 @@ class ParameterQuerySetTestCase(CustomTestCase):
             owner=self.user,
             parameter=param,
         )
-        param = Parameter.objects.annotate_first_value_for_user(self.user).get(pk=param.pk)
+        param = Parameter.objects.annotate_first_value_for_user(self.user).get(
+            pk=param.pk
+        )
 
         # user value
         self.assertEqual(param.first_value, pc.pk)
@@ -267,8 +273,6 @@ class ParameterQuerySetTestCase(CustomTestCase):
         m1.delete()
         m2.delete()
         org.delete()
-
-
 
 
 class PluginConfigQuerySetTestCase(CustomTestCase):

@@ -56,12 +56,12 @@ function isValidEntry(item, valueType) {
 function filterEmptyData(plugins, dataName) {
   return plugins
     .filter(
-      (plugin) => plugin[dataName] && Object.keys(plugin[dataName]).length > 0
+      (plugin) => plugin[dataName] && Object.keys(plugin[dataName]).length > 0,
     )
     .reduce(
       (filteredPlugins, plugin) =>
         Object.assign(filteredPlugins, { [plugin.name]: plugin }),
-      {}
+      {},
     );
 }
 
@@ -127,7 +127,7 @@ export function PluginData({
         });
       }
       return pluginConfigs;
-    }
+    },
   );
 
   // download the configs and again the analyzers with the update values
@@ -171,7 +171,7 @@ export function PluginData({
                               plugins[configuration.plugin_name]
                             )
                               attributeList = Object.keys(
-                                plugins[configuration.plugin_name][dataName]
+                                plugins[configuration.plugin_name][dataName],
                               );
                             if (
                               attributeList.length > 0 &&
@@ -243,7 +243,7 @@ export function PluginData({
                                         >
                                           {pluginElement.name}
                                         </option>
-                                      )
+                                      ),
                                     )}
                                   </Field>
                                 </div>
@@ -292,7 +292,7 @@ export function PluginData({
                                         if (
                                           !isValidEntry(
                                             configuration,
-                                            valueType
+                                            valueType,
                                           )
                                         )
                                           return;
@@ -302,33 +302,33 @@ export function PluginData({
                                         };
                                         if (newConfiguration.create)
                                           createCustomConfig(
-                                            newConfiguration
+                                            newConfiguration,
                                           ).then(() => {
                                             setFieldValue(
                                               `entry.${index}.edit`,
-                                              false
+                                              false,
                                             );
                                             setFieldValue(
                                               `entry.${index}.create`,
-                                              false
+                                              false,
                                             );
                                             refetchAll();
                                           });
                                         else
                                           updateCustomConfig(
                                             newConfiguration.value,
-                                            newConfiguration.id
+                                            newConfiguration.id,
                                           ).then(() => {
                                             setFieldValue(
                                               `entry.${index}.edit`,
-                                              false
+                                              false,
                                             );
                                             refetchAll();
                                           });
                                       } else
                                         setFieldValue(
                                           `entry.${index}.edit`,
-                                          true
+                                          true,
                                         );
                                     }}
                                   >
@@ -356,7 +356,7 @@ export function PluginData({
                                       if (configuration.create) remove(index);
                                       else
                                         deleteCustomConfig(
-                                          configuration.id
+                                          configuration.id,
                                         ).then(() => {
                                           remove(index);
                                           refetchAll();

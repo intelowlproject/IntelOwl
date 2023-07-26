@@ -12,7 +12,7 @@ describe("BaseVisualizer component", () => {
         size="col-1"
         value="test base (required-only params)"
         id="test-id"
-      />
+      />,
     );
 
     // check id
@@ -20,7 +20,7 @@ describe("BaseVisualizer component", () => {
     expect(idElement).toBeInTheDocument();
     // chec text (inner span)
     const innerPartComponent = screen.getByText(
-      "test base (required-only params)"
+      "test base (required-only params)",
     );
     expect(innerPartComponent).toBeInTheDocument();
     // check no color, bold and italic
@@ -30,12 +30,12 @@ describe("BaseVisualizer component", () => {
     // check no link
     expect(innerPartComponent.closest("div").style).not.toHaveProperty(
       "text-decoration",
-      "underline dotted"
+      "underline dotted",
     );
     // check size and alignment
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
-      "col-1  d-flex align-items-center text-center justify-content-center  "
+      "col-1  d-flex align-items-center text-center justify-content-center  ",
     );
     // check tooltip
     const user = userEvent.setup();
@@ -62,7 +62,7 @@ describe("BaseVisualizer component", () => {
         copyText="test base (copyText)"
         isChild
         description="description test all params"
-      />
+      />,
     );
 
     // check id
@@ -73,18 +73,18 @@ describe("BaseVisualizer component", () => {
     expect(innerPartComponent).toBeInTheDocument();
     // check color, bold and italic
     expect(innerPartComponent.className).toBe(
-      "small success fw-bold fst-italic"
+      "small success fw-bold fst-italic",
     );
     // check icon
     expect(screen.getByRole("img")).toBeInTheDocument();
     // check link is available
     expect(innerPartComponent.closest("div").style).toHaveProperty(
       "text-decoration",
-      "underline dotted"
+      "underline dotted",
     );
     // check optional elements (like bold, italic...)
     expect(idElement.className).toBe(
-      "col-2 small d-flex align-items-center text-start justify-content-start  success"
+      "col-2 small d-flex align-items-center text-start justify-content-start  success",
     );
     // check tooltip
     const user = userEvent.setup();
@@ -112,7 +112,7 @@ describe("BaseVisualizer component", () => {
         italic
         disable
         copyText="test base (copyText)"
-      />
+      />,
     );
 
     // check id
@@ -128,12 +128,12 @@ describe("BaseVisualizer component", () => {
     // check no link
     expect(innerPartComponent.closest("div").style).not.toHaveProperty(
       "text-decoration",
-      "underline dotted"
+      "underline dotted",
     );
     // check optional elements (like bold, italic...)
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
-      "col-2  d-flex align-items-center text-start justify-content-start opacity-25 success"
+      "col-2  d-flex align-items-center text-start justify-content-start opacity-25 success",
     );
   });
 });

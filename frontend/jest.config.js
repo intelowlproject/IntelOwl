@@ -89,6 +89,8 @@ module.exports = {
     "^test-utils$": "<rootDir>/tests/testing-utils",
     "^lodash-es$": "lodash",
     "d3-(.*)$": "<rootDir>/node_modules/d3-$1/dist/d3-$1.min.js",
+    "react-markdown":
+      "<rootDir>/node_modules/react-markdown/react-markdown.min.js",
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

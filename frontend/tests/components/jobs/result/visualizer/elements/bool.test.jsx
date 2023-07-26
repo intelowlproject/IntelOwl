@@ -12,12 +12,12 @@ describe("BooleanVisualizer component", () => {
         id="test-id"
         size="col-1"
         value="test bool (required-only params)"
-      />
+      />,
     );
 
     // chec text (inner span)
     const innerPartComponent = screen.getByText(
-      "test bool (required-only params)"
+      "test bool (required-only params)",
     );
     expect(innerPartComponent).toBeInTheDocument();
     // check italic
@@ -27,7 +27,7 @@ describe("BooleanVisualizer component", () => {
     // check no link
     expect(innerPartComponent.closest("div").style).not.toHaveProperty(
       "text-decoration",
-      "underline dotted"
+      "underline dotted",
     );
     // check size
     const sizeComponent = container.firstChild;
@@ -59,7 +59,7 @@ describe("BooleanVisualizer component", () => {
         link="https://google.com"
         italic
         description="description"
-      />
+      />,
     );
 
     // chec text (inner span)
@@ -72,7 +72,7 @@ describe("BooleanVisualizer component", () => {
     // check link is available
     expect(innerPartComponent.closest("div").style).toHaveProperty(
       "text-decoration",
-      "underline dotted"
+      "underline dotted",
     );
     // check size
     const sizeComponent = container.firstChild;
@@ -107,7 +107,7 @@ describe("BooleanVisualizer component", () => {
         italic
         disable
         description=""
-      />
+      />,
     );
 
     // chec text (inner span)
@@ -120,7 +120,7 @@ describe("BooleanVisualizer component", () => {
     // check no link
     expect(innerPartComponent.closest("div").style).not.toHaveProperty(
       "text-decoration",
-      "underline dotted"
+      "underline dotted",
     );
     // check size
     const sizeComponent = container.firstChild;

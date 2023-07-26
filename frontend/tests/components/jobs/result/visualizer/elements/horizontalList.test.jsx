@@ -44,7 +44,7 @@ describe("HorizontalListVisualizer component", () => {
             ]}
           />,
         ]}
-      />
+      />,
     );
 
     screen.debug();
@@ -55,7 +55,7 @@ describe("HorizontalListVisualizer component", () => {
     expect(screen.getByText("bool element")).toBeInTheDocument();
     expect(screen.getByText("title element - title")).toBeInTheDocument();
     expect(
-      screen.getByText("vertical list element - name")
+      screen.getByText("vertical list element - name"),
     ).toBeInTheDocument();
     // check id
     const idElement = container.querySelector("#test-id");
@@ -100,7 +100,7 @@ describe("HorizontalListVisualizer component", () => {
           />,
         ]}
         alignment="between"
-      />
+      />,
     );
 
     screen.debug();
@@ -111,7 +111,7 @@ describe("HorizontalListVisualizer component", () => {
     expect(screen.getByText("bool element")).toBeInTheDocument();
     expect(screen.getByText("title element - title")).toBeInTheDocument();
     expect(
-      screen.getByText("vertical list element - name")
+      screen.getByText("vertical list element - name"),
     ).toBeInTheDocument();
     // check id
     const idElement = container.querySelector("#test-id");

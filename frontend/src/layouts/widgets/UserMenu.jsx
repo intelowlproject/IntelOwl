@@ -29,7 +29,7 @@ export default function UserMenu(props) {
       </DropdownToggle>
       <DropdownMenu end className="bg-dark" data-bs-popper>
         <DropdownItem text>
-          logged in as <b>{`${user?.username}`}</b>
+          logged in as <b>{user?.username}</b>
         </DropdownItem>
         <DropdownItem divider />
         {/* Django Admin Interface */}

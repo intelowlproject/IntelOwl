@@ -9,7 +9,7 @@ import {
   NavbarToggler,
 } from "reactstrap";
 import { NavLink as RRNavLink } from "react-router-dom";
-import { GoDashboard } from "react-icons/go";
+import { AiOutlineDashboard } from "react-icons/ai";
 import { SiHackaday } from "react-icons/si";
 import { MdHome } from "react-icons/md";
 import { RiFileListFill, RiPlugFill, RiBookReadFill } from "react-icons/ri";
@@ -29,7 +29,7 @@ const authLinks = (
   <>
     <NavItem>
       <NavLink className="d-flex-start-center" end to="/dashboard">
-        <GoDashboard />
+        <AiOutlineDashboard />
         <span className="ms-1">Dashboard</span>
       </NavLink>
     </NavItem>
@@ -96,7 +96,7 @@ function AppHeader() {
 
   // auth store
   const isAuthenticated = useAuthStore(
-    React.useCallback((s) => s.isAuthenticated(), [])
+    React.useCallback((s) => s.isAuthenticated(), []),
   );
 
   return (

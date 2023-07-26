@@ -154,7 +154,7 @@ export default function ScanForm() {
       const formValues = {
         ...values,
         observable_names: values.observable_names.map((observable) =>
-          sanitizeObservable(observable)
+          sanitizeObservable(observable),
         ),
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         analyzers: values.analyzers.map((x) => x.value),
@@ -207,13 +207,13 @@ export default function ScanForm() {
   }, [formik.values]);
 
   const [scanType, setScanType] = React.useState(
-    formik.values.analysisOptionValues
+    formik.values.analysisOptionValues,
   );
 
   const [isModalOpen, setModalOpen] = React.useState(false);
   const toggleModal = React.useCallback(
     () => setModalOpen((o) => !o),
-    [setModalOpen]
+    [setModalOpen],
   );
 
   const [isAdvancedSettingsOpen, toggleAdvancedSettings] =
@@ -315,9 +315,9 @@ export default function ScanForm() {
         }))
         .sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
         ),
-    [analyzersGrouped, formik.values.classification]
+    [analyzersGrouped, formik.values.classification],
   );
   const connectorOptions = React.useMemo(
     () =>
@@ -344,9 +344,9 @@ export default function ScanForm() {
         }))
         .sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
         ),
-    [connectors]
+    [connectors],
   );
 
   const playbookOptions = (classification) =>
@@ -368,7 +368,7 @@ export default function ScanForm() {
       }))
       .sort((a, b) =>
         // eslint-disable-next-line no-nested-ternary
-        a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+        a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
       );
 
   const ValidatePlaybooks = React.useCallback(
@@ -391,7 +391,7 @@ export default function ScanForm() {
       }
       return errors;
     },
-    [playbooksError]
+    [playbooksError],
   );
 
   const startPlaybooks = React.useCallback(
@@ -399,7 +399,7 @@ export default function ScanForm() {
       const formValues = {
         ...values,
         observable_names: values.observable_names.map((observable) =>
-          sanitizeObservable(observable)
+          sanitizeObservable(observable),
         ),
         tlp: values.tlp,
         tags_labels: values.tags.map((optTag) => optTag.value.label),
@@ -426,7 +426,7 @@ export default function ScanForm() {
         refetchQuota();
       }
     },
-    [navigate, refetchQuota, ValidatePlaybooks]
+    [navigate, refetchQuota, ValidatePlaybooks],
   );
 
   console.debug(`classification: ${formik.values.classification}`);
@@ -467,20 +467,20 @@ export default function ScanForm() {
                           formik.setFieldValue(
                             "observableType",
                             event.target.value,
-                            false
+                            false,
                           );
                           formik.setFieldValue(
                             "classification",
                             event.target.value === "observable"
                               ? "generic"
-                              : "file"
+                              : "file",
                           );
                           formik.setFieldValue("observable_names", [""], false);
                           formik.setFieldValue("files", [""], false);
                           formik.setFieldValue(
                             "analysisOptionValues",
                             scanTypes.playbooks,
-                            false
+                            false,
                           );
                           setScanType(scanTypes.playbooks);
                           formik.setFieldValue("playbooks", [], false); // reset
@@ -528,7 +528,7 @@ export default function ScanForm() {
                                   invalid={
                                     Boolean(
                                       formik.errors.observable_names &&
-                                        formik.errors.observable_names[index]
+                                        formik.errors.observable_names[index],
                                     ) &&
                                     formik.touched.observable_names &&
                                     formik.touched.observable_names[index]
@@ -539,13 +539,13 @@ export default function ScanForm() {
                                         formik.values.classification;
                                       let newClassification = "generic";
                                       Object.entries(
-                                        observableType2RegExMap
+                                        observableType2RegExMap,
                                       ).forEach(([typeName, typeRegEx]) => {
                                         if (
                                           new RegExp(typeRegEx).test(
                                             sanitizeObservable(
-                                              event.target.value
-                                            )
+                                              event.target.value,
+                                            ),
                                           )
                                         ) {
                                           newClassification = typeName;
@@ -554,7 +554,7 @@ export default function ScanForm() {
                                       formik.setFieldValue(
                                         "classification",
                                         newClassification,
-                                        false
+                                        false,
                                       );
                                       // in case a palybook is available and i changed classification or no playbooks is selected i select a playbook
                                       if (
@@ -568,10 +568,10 @@ export default function ScanForm() {
                                           "playbooks",
                                           [
                                             playbookOptions(
-                                              newClassification
+                                              newClassification,
                                             )[0],
                                           ],
-                                          false
+                                          false,
                                         );
                                       }
                                     }
@@ -581,7 +581,7 @@ export default function ScanForm() {
                                     formik.setFieldValue(
                                       "observable_names",
                                       observableNames,
-                                      false
+                                      false,
                                     );
                                   }}
                                 />
@@ -625,7 +625,7 @@ export default function ScanForm() {
                       formik.setFieldValue(
                         "files",
                         event.currentTarget.files,
-                        false
+                        false,
                       );
                       formik.setFieldValue("classification", "file", false);
                       if (
@@ -635,7 +635,7 @@ export default function ScanForm() {
                         formik.setFieldValue(
                           "playbooks",
                           [playbookOptions("file")[0]],
-                          false
+                          false,
                         );
                       }
                     }}
@@ -817,7 +817,7 @@ export default function ScanForm() {
                     >
                       {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
                         "TLP: ",
-                        ""
+                        "",
                       )}
                     </span>
                   </FormText>

@@ -17,7 +17,7 @@ export function BooleanVisualizer({
   description,
 }) {
   let coreComponent = (
-    <span className={`${italic ? "fst-italic" : ""}`} id={`${id}-tooltip`}>
+    <span className={italic ? "fst-italic" : ""} id={`${id}-tooltip`}>
       {value} {icon}
     </span>
   );
@@ -28,7 +28,7 @@ export function BooleanVisualizer({
     );
   }
   return (
-    <div className={`${size}`} id={id}>
+    <div className={size} id={id}>
       <Badge
         pill
         color={disable ? "gray" : activeColor}

@@ -40,7 +40,7 @@ function EmailFormPopoverBody(formProps) {
   return FormPopoverBody(
     formProps,
     "We will shoot you an email with instructions to verify your email address.",
-    resendVerificationMail
+    resendVerificationMail,
   );
 }
 
@@ -67,7 +67,7 @@ function PasswordFormPopoverBody(formProps) {
   return FormPopoverBody(
     formProps,
     "We will shoot you an email with instructions to reset your password.",
-    requestPasswordReset
+    requestPasswordReset,
   );
 }
 

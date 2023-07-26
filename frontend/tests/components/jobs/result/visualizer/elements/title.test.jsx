@@ -24,16 +24,16 @@ describe("TitleVisualizer component", () => {
             id="test-id-value"
           />
         }
-      />
+      />,
     );
 
     // check title
     expect(
-      screen.getByText("title (required-only params)")
+      screen.getByText("title (required-only params)"),
     ).toBeInTheDocument();
     // check value
     expect(
-      screen.getByText("value (required-only params)")
+      screen.getByText("value (required-only params)"),
     ).toBeInTheDocument();
     // check size and alignment
     const mainComponent = container.firstChild;
@@ -64,7 +64,7 @@ describe("TitleVisualizer component", () => {
           />
         }
         alignment="start"
-      />
+      />,
     );
 
     // check title

@@ -21,7 +21,7 @@ export async function verifyEmail(body) {
       "Your email has been succesfully verified!",
       null,
       "success",
-      true
+      true,
     );
     return resp;
   } catch (err) {
@@ -45,7 +45,7 @@ export async function requestPasswordReset(body) {
   try {
     const resp = await axios.post(
       `${AUTH_BASE_URI}/request-password-reset`,
-      body
+      body,
     );
     addToast("Email sent!", null, "success");
     return resp;

@@ -20,7 +20,7 @@ export default function Parameters({
         configFilter={(resp) =>
           resp.filter(
             (item) =>
-              filterFunction(item) && item.config_type === configType.PARAMETER
+              filterFunction(item) && item.config_type === configType.PARAMETER,
           )
         }
         additionalConfigData={{

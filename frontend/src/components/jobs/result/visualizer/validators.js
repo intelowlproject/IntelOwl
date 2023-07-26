@@ -79,7 +79,7 @@ function parseAlignment(alignment) {
 // parse list of Elements
 function parseElementList(rawElementList) {
   return rawElementList?.map((additionalElementrawData) =>
-    parseElementFields(additionalElementrawData)
+    parseElementFields(additionalElementrawData),
   );
 }
 

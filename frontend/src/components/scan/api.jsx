@@ -72,7 +72,7 @@ export async function createPlaybookJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running"
+          element.status === "accepted" || element.status === "running",
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
@@ -94,7 +94,7 @@ export async function createPlaybookJob(formValues) {
         </div>,
         "success",
         true,
-        10000
+        10000,
       );
       return Promise.resolve(jobIds);
     }
@@ -154,11 +154,11 @@ export async function createJob(formValues) {
     respData.forEach((x) => {
       if (x.analyzers_running)
         x.analyzers_running.forEach((analyzer) =>
-          analyzersRunning.add(analyzer)
+          analyzersRunning.add(analyzer),
         );
       if (x.connectors_running)
         x.connectors_running.forEach((connector) =>
-          connectorsRunning.add(connector)
+          connectorsRunning.add(connector),
         );
       if (x.warnings) warnings.push(...x.warnings);
     });
@@ -166,7 +166,7 @@ export async function createJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running"
+          element.status === "accepted" || element.status === "running",
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
@@ -194,7 +194,7 @@ export async function createJob(formValues) {
         </div>,
         "success",
         true,
-        10000
+        10000,
       );
       return Promise.resolve(jobIds);
     }
@@ -260,7 +260,7 @@ async function _askAnalysisAvailability(formValues) {
   try {
     const response = await axios.post(
       ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
-      payload
+      payload,
     );
     const answer = response.data;
     if (answer.count === 0) {
@@ -273,7 +273,7 @@ async function _askAnalysisAvailability(formValues) {
     addToast(
       `Found similar scan with job ID(s) #${jobIds.join(", ")}`,
       null,
-      "info"
+      "info",
     );
     return jobIds;
   } catch (e) {
@@ -312,7 +312,7 @@ async function _analyzeFile(formValues) {
   ) {
     body.append(
       "runtime_configuration",
-      JSON.stringify(formValues.runtime_configuration)
+      JSON.stringify(formValues.runtime_configuration),
     );
   }
   console.debug("_analyzeFile");
@@ -329,7 +329,7 @@ async function _startPlaybookFile(formValues) {
     body.append("tags_labels", tagObject.value.label);
   });
   formValues.playbooks.map((playbook) =>
-    body.append("playbooks_requested", playbook)
+    body.append("playbooks_requested", playbook),
   );
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);
 }

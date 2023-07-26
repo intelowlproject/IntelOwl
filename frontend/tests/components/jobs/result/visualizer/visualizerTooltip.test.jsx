@@ -15,7 +15,7 @@ describe("VisualizerTooltip component", () => {
           link=""
           description=""
         />
-      </>
+      </>,
     );
     const user = userEvent.setup();
     await user.hover(screen.getByText("Test"));
@@ -24,7 +24,7 @@ describe("VisualizerTooltip component", () => {
       expect(tooltipElement).toBeInTheDocument();
       // check copy button
       const copyButton = tooltipElement.querySelector(
-        "#copyBtn-test-id-tooltip"
+        "#copyBtn-test-id-tooltip",
       );
       expect(copyButton).toBeInTheDocument();
       // check link button
@@ -44,7 +44,7 @@ describe("VisualizerTooltip component", () => {
           link="https://google.com/"
           description=""
         />
-      </>
+      </>,
     );
     const user = userEvent.setup();
     await user.hover(screen.getByText("Test"));
@@ -53,7 +53,7 @@ describe("VisualizerTooltip component", () => {
       expect(tooltipElement).toBeInTheDocument();
       // check copy button
       const copyButton = tooltipElement.querySelector(
-        "#copyBtn-test-id-tooltip"
+        "#copyBtn-test-id-tooltip",
       );
       expect(copyButton).toBeInTheDocument();
       // check link button
@@ -74,7 +74,7 @@ describe("VisualizerTooltip component", () => {
           link="https://google.com/"
           description="description tooltip"
         />
-      </>
+      </>,
     );
     const user = userEvent.setup();
     await user.hover(screen.getByText("Test"));
@@ -83,7 +83,7 @@ describe("VisualizerTooltip component", () => {
       expect(tooltipElement).toBeInTheDocument();
       // check copy button
       const copyButton = tooltipElement.querySelector(
-        "#copyBtn-test-id-tooltip"
+        "#copyBtn-test-id-tooltip",
       );
       expect(copyButton).toBeInTheDocument();
       // check link button

@@ -41,18 +41,18 @@ describe("VerticalListVisualizer component", () => {
             ]}
           />,
         ]}
-      />
+      />,
     );
 
     // check title
     expect(
-      screen.getByText("title (required-only params)")
+      screen.getByText("title (required-only params)"),
     ).toBeInTheDocument();
     // check values
     expect(screen.getByText("first line - single element")).toBeInTheDocument();
     expect(screen.getByText("second line - first element")).toBeInTheDocument();
     expect(
-      screen.getByText("second line - second element")
+      screen.getByText("second line - second element"),
     ).toBeInTheDocument();
     // check size
     const mainComponent = container.firstChild;
@@ -106,7 +106,7 @@ describe("VerticalListVisualizer component", () => {
         ]}
         alignment="start"
         startOpen
-      />
+      />,
     );
 
     // check title
@@ -115,7 +115,7 @@ describe("VerticalListVisualizer component", () => {
     expect(screen.getByText("first line - single element")).toBeInTheDocument();
     expect(screen.getByText("second line - first element")).toBeInTheDocument();
     expect(
-      screen.getByText("second line - second element")
+      screen.getByText("second line - second element"),
     ).toBeInTheDocument();
     // check size
     const mainComponent = container.firstChild;
@@ -170,18 +170,18 @@ describe("VerticalListVisualizer component", () => {
         alignment="start"
         startOpen
         disable
-      />
+      />,
     );
 
     // check title
     expect(
-      screen.getByText("title (all params - disable)")
+      screen.getByText("title (all params - disable)"),
     ).toBeInTheDocument();
     // check values
     expect(screen.getByText("first line - single element")).toBeInTheDocument();
     expect(screen.getByText("second line - first element")).toBeInTheDocument();
     expect(
-      screen.getByText("second line - second element")
+      screen.getByText("second line - second element"),
     ).toBeInTheDocument();
     // check size
     const mainComponent = container.firstChild;

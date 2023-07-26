@@ -10,7 +10,6 @@ from django.conf import settings
 from certego_saas.apps.user.models import User
 
 from ..classes import Plugin
-from ..models import PluginConfig
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorConfig, ConnectorReport
 
@@ -97,13 +96,14 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
         for cc in ccs:
             logger.info(f"Found connector runnable {cc.name} for user {user.username}")
-            for param in cc.parameters.filter(
-                name__startswith="url"
-            ).annotate_first_value_for_user():
-                if not param.first_value:
+            for param in (
+                cc.parameters.filter(name__startswith="url")
+                .annotate_configured()
+                .annotate_value_for_user()
+            ):
+                if not param.configured or not param.first_value:
                     continue
-                pc = PluginConfig.objects.get(pk=param.first_value)
-                url = pc.value
+                url = param.first_value
                 logger.info(
                     f"Url retrieved to verify is {param.name} for connector {cc.name}"
                 )

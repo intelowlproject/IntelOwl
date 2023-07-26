@@ -12,12 +12,13 @@ from collections import defaultdict
 from typing import Any, Dict, Generator, List, Union
 
 import django.core.exceptions
-from django.db.models import OuterRef, Q, Subquery
+from django.db.models import Q
 from django.http import QueryDict
 from django.utils.timezone import now
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import SerializerMethodField
 
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
@@ -974,10 +975,19 @@ class ParameterCompleteSerializer(rfs.ModelSerializer):
 
 
 class ParameterSerializer(rfs.ModelSerializer):
+
+    value = SerializerMethodField()
+
     class Meta:
         model = Parameter
-        fields = ["name", "type", "description", "required"]
+        fields = ["name", "type", "description", "required", "value"]
         list_serializer_class = ParamListSerializer
+
+    def get_value(self, param: Parameter):
+        if hasattr(param, "value"):
+            if param.is_secret and param.is_from_org:
+                return "redacted"
+            return param.value
 
 
 class PythonListConfigSerializer(rfs.ListSerializer):
@@ -988,56 +998,30 @@ class PythonListConfigSerializer(rfs.ListSerializer):
 
         plugins = self.child.Meta.model.objects.filter(
             pk__in=[plugin.pk for plugin in data]
-        )
+        ).prefetch_related("parameters")
         user = self.context["request"].user
         enabled_plugins = plugins.filter(disabled=False)
 
         # get the values for that configurations
-        configurations = PluginConfig.objects.visible_for_user(user).filter(
-            **{f"parameter__{self.child.Meta.model.snake_case_name}__pk__in": plugins}
-        )
-        # value for owner
-        subquery_owner = Subquery(
-            configurations.filter(
-                parameter=OuterRef("pk"), owner=user, for_organization=False
-            ).values("value")[:1]
-        )
-        # value for default
-        subquery_default = Subquery(
-            configurations.filter(parameter=OuterRef("pk"))
-            .filter(owner__isnull=True)
-            .values("value")[:1]
-        )
-        # value for org
         if user and user.has_membership():
-            subquery_org = Subquery(
-                configurations.filter(parameter=OuterRef("pk"))
-                .filter(for_organization=True, owner=user.membership.organization.owner)
-                .values("value")[:1]
-            )
+            enabled_plugins.prefetch_related("disabled_in_organizations")
             logger.debug("Excluding plugins disabled in organization")
             enabled_plugins = enabled_plugins.exclude(
                 disabled_in_organizations=user.membership.organization.pk
             )
         else:
-            from django.db.models import Value
-
             logger.debug(
                 f"User {user.username} is not a member of an organization,"
                 "meaning that there are no disabled plugins"
             )
-            subquery_org = Value(False)
         # annotate if the params are configured or not with the subquery
         params = (
             Parameter.objects.filter(
                 **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
             )
             .prefetch_related(self.child.Meta.model.snake_case_name)
-            .annotate(
-                value_owner=subquery_owner,
-                value_default=subquery_default,
-                value_organization=subquery_org,
-            )
+            .annotate_value_for_user(user)
+            .annotate_configured(user)
         )
         parsed = defaultdict(list)
         # populate the result for every plugin (even the ones without parameters)
@@ -1054,7 +1038,6 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                 ]
             )
         )
-        result = []
         # we can finally construct our result
         for plugin in plugins:
             plugin_representation = self.child.to_representation(plugin)
@@ -1067,19 +1050,13 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                 # 1 owner
                 # 2 organization
                 # 3 default
-                value = (
-                    param.value_owner or param.value_organization or param.value_default
-                )
-                if param.required and not bool(value):
+                if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data
-                if param.is_secret and value == param.value_organization:
-                    value = "redacted"
                 logger.debug(
                     f"Parameter {param.name} for plugin {plugin.name} "
-                    f"has value {value} for user {user.username}"
+                    f"has value {param.value} for user {user.username}"
                 )
-                param_representation["value"] = value
                 param_representation.pop("name")
                 if param.is_secret:
                     plugin_representation["secrets"][param.name] = param_representation
@@ -1100,21 +1077,13 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                     f"of {total_parameter} satisfied)"
                 )
                 configured = False
-            if plugin in enabled_plugins:
-                logger.debug(f"Plugin {plugin.name} is disabled")
-                disabled = False
-            else:
-                logger.debug(f"Plugin {plugin.name} is enabled")
-                disabled = True
-            plugin_representation["disabled"] = disabled
+            plugin_representation["disabled"] = plugin not in enabled_plugins
             plugin_representation["verification"] = {
                 "configured": configured,
                 "details": details,
                 "missing_secrets": parameter_required_not_configured,
             }
-            result.append(plugin_representation)
-
-        return result
+            yield plugin_representation
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):

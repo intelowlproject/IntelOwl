@@ -206,7 +206,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
         pc2.delete()
         param.delete()
 
-    def test_annotate_first_value_for_user(self):
+    def test_annotate_value_for_user(self):
         param = Parameter.objects.create(
             name="testparameter",
             type="str",
@@ -216,7 +216,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
             analyzer_config=AnalyzerConfig.objects.first(),
         )
         pc2 = PluginConfig.objects.create(
-            value="myperfecttest",
+            value="myperfecttest2",
             for_organization=False,
             owner=None,
             parameter=param,
@@ -231,40 +231,34 @@ class ParameterQuerySetTestCase(CustomTestCase):
             organization=org,
         )
 
-        param = Parameter.objects.annotate_first_value_for_user(self.user).get(
-            pk=param.pk
-        )
+        param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
         self.assertFalse(hasattr(param, "owner_value"))
         self.assertFalse(hasattr(param, "org_value"))
         self.assertFalse(hasattr(param, "default_value"))
         self.assertTrue(hasattr(param, "first_value"))
         # default value
-        self.assertEqual(param.first_value, pc2.pk)
+        self.assertEqual(param.value, "myperfecttest2")
 
         pc3 = PluginConfig.objects.create(
-            value="myperfecttest",
+            value="myperfecttest3",
             for_organization=True,
             owner=self.superuser,
             parameter=param,
         )
-        param = Parameter.objects.annotate_first_value_for_user(self.user).get(
-            pk=param.pk
-        )
+        param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
         # org value
-        self.assertEqual(param.first_value, pc3.pk)
+        self.assertEqual(param.value, "myperfecttest3")
 
         pc = PluginConfig.objects.create(
-            value="myperfecttest",
+            value="myperfecttest1",
             for_organization=False,
             owner=self.user,
             parameter=param,
         )
-        param = Parameter.objects.annotate_first_value_for_user(self.user).get(
-            pk=param.pk
-        )
+        param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
 
         # user value
-        self.assertEqual(param.first_value, pc.pk)
+        self.assertEqual(param.value, "myperfecttest1")
 
         pc.delete()
         pc2.delete()

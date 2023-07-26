@@ -10,6 +10,7 @@ from django.db.models import (
     F,
     Func,
     IntegerField,
+    JSONField,
     OuterRef,
     Q,
     QuerySet,
@@ -122,7 +123,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         # A parameter it is configured for a user if
         # there is a PluginConfig that is visible for the user
         # If the user is None, we only retrieve default parameters
-        return self.alias(
+        return self.annotate(
             configured=Exists(
                 PluginConfig.objects.filter(parameter=OuterRef("pk")).visible_for_user(
                     user
@@ -138,7 +139,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
                 .filter(owner=user)
-                .values_list("pk", flat=True)[:1]
+                .values("value")[:1]
             )
         )
 
@@ -150,10 +151,10 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
                 .filter(for_organization=True, owner=user.membership.organization.owner)
-                .values_list("pk", flat=True)[:1]
+                .values("value")[:1]
             )
             if user and user.has_membership()
-            else Value(None, output_field=IntegerField()),
+            else Value(None, output_field=JSONField()),
         )
 
     def _alias_default_value_for_user(self, user: User = None) -> "ParameterQuerySet":
@@ -164,11 +165,11 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
                 .visible_for_user(user)
                 .filter(owner__isnull=True)
-                .values_list("pk", flat=True)[:1]
+                .values("value")[:1]
             )
         )
 
-    def annotate_first_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+    def annotate_value_for_user(self, user: User = None) -> "ParameterQuerySet":
         return (
             self.prefetch_related("values")
             ._alias_owner_value_for_user(user)
@@ -176,11 +177,19 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             ._alias_default_value_for_user(user)
             # importance order
             .annotate(
-                first_value=Case(
+                value=Case(
                     When(owner_value__isnull=False, then=F("owner_value")),
                     When(org_value__isnull=False, then=F("org_value")),
                     default=F("default_value"),
-                )
+                ),
+                is_from_org=Case(
+                    When(
+                        org_value__isnull=True,
+                        owner_value__isnull=False,
+                        then=Value(True),
+                    ),
+                    default=Value(False),
+                ),
             )
         )
 

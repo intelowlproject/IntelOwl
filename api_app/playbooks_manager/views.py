@@ -29,7 +29,7 @@ class PlaybookConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):
     def get_queryset(self):
         return self.serializer_class.Meta.model.objects.ordered_for_user(
             self.request.user
-        )
+        ).prefetch_related("analyzers", "connectors", "visualizers", "tags", "pivots")
 
     @add_docs(
         description="This endpoint allows to start a Job related to an observable",

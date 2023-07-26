@@ -19,13 +19,13 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
           runtime_configuration: {},
           type: "visualizer",
         }}
-      />
+      />,
     );
 
     // check error
     expect(screen.getByText("Error!")).toBeInTheDocument();
     expect(
-      screen.getByText("An error occurred during the rendering")
+      screen.getByText("An error occurred during the rendering"),
     ).toBeInTheDocument();
     expect(screen.getByText("division by zero")).toBeInTheDocument();
   });
@@ -162,7 +162,7 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
           runtime_configuration: {},
           type: "visualizer",
         }}
-      />
+      />,
     );
 
     // check level id
@@ -172,18 +172,18 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
     expect(secondLevelId).toBeInTheDocument();
     // check the first line has vlist and title and NOT base and bool
     const vListComponent = within(container.firstChild.firstChild).getByText(
-      "vlist title"
+      "vlist title",
     );
     expect(vListComponent).toBeInTheDocument();
     const titleComponent = within(container.firstChild.firstChild).getByText(
-      "title title"
+      "title title",
     );
     expect(titleComponent).toBeInTheDocument();
     expect(
-      within(container.firstChild.firstChild).queryByText("base component")
+      within(container.firstChild.firstChild).queryByText("base component"),
     ).toBeNull();
     expect(
-      within(container.firstChild.firstChild).queryByText("bool component")
+      within(container.firstChild.firstChild).queryByText("bool component"),
     ).toBeNull();
     // check base and bool are still present in the document
     expect(screen.getByText("base component")).toBeInTheDocument();

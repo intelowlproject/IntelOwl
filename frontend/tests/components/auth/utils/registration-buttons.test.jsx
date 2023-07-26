@@ -15,7 +15,7 @@ describe("registration-button", () => {
     render(
       <BrowserRouter>
         <ResendVerificationEmailButton />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     const buttonElement = screen.getByRole("button");
@@ -26,7 +26,7 @@ describe("registration-button", () => {
 
     await waitFor(() => {
       const popOverElement = screen.getByText(
-        "We will shoot you an email with instructions to verify your email address."
+        "We will shoot you an email with instructions to verify your email address.",
       );
       expect(popOverElement).toBeInTheDocument();
     });
@@ -37,7 +37,7 @@ describe("registration-button", () => {
     render(
       <BrowserRouter>
         <ForgotPasswordButton />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     const buttonElement = screen.getByRole("button");
@@ -48,7 +48,7 @@ describe("registration-button", () => {
 
     await waitFor(() => {
       const popOverElement = screen.getByText(
-        "We will shoot you an email with instructions to reset your password."
+        "We will shoot you an email with instructions to reset your password.",
       );
       expect(popOverElement).toBeInTheDocument();
     });

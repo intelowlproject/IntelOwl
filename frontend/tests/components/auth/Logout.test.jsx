@@ -16,7 +16,7 @@ describe("Logout component", () => {
     render(
       <BrowserRouter>
         <Logout />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(axios.post).toHaveBeenCalledWith(`${AUTH_BASE_URI}/logout`, null, {

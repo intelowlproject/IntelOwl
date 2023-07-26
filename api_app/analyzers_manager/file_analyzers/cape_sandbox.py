@@ -3,9 +3,9 @@
 
 import logging
 import time
-
 import requests
 
+from tempfile import NamedTemporaryFile
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
@@ -22,10 +22,15 @@ class CAPEsandbox(FileAnalyzer):
     max_tries: int
     poll_distance: int
     _url_key_name: str
+    _certificate: str
 
     def config(self):
         super().config()
+        self.__cert_file = NamedTemporaryFile(mode='w')
+        self.__cert_file.write(self._certificate)
+        self.__cert_file.flush()
         self.__session = requests.Session()
+        self.__session.verify = self.__cert_file.name
         self.__session.headers = {
             "Authorization": f"Token {self._api_key_name}",
         }

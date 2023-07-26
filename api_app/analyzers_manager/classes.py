@@ -221,8 +221,8 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             )
         return self.__filepath
 
-    def before_run(self, *args, **kwargs):
-        super().before_run(**kwargs)
+    def before_run(self):
+        super().before_run()
         logger.info(
             f"STARTED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"

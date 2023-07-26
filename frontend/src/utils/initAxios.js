@@ -55,6 +55,6 @@ export default function initAxios() {
         service.forceLogout();
       }
       return Promise.reject(err);
-    }
+    },
   );
 }

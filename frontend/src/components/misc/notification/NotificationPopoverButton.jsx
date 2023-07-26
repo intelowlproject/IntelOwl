@@ -14,7 +14,7 @@ export default function NotificationPopoverButton() {
       url: NOTIFICATION_BASE_URI,
       params: { page_size: 4, read: false },
     },
-    (respData) => respData?.results
+    (respData) => respData?.results,
   );
 
   const [readNotifs, Loader2, refetch2] = useAxiosComponentLoader(
@@ -22,7 +22,7 @@ export default function NotificationPopoverButton() {
       url: NOTIFICATION_BASE_URI,
       params: { page_size: 4, read: true },
     },
-    (respData) => respData?.results
+    (respData) => respData?.results,
   );
 
   const refetchFn = React.useCallback(async () => {

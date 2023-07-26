@@ -39,7 +39,7 @@ jest.mock("../../../src/stores", () => ({
         logoutUser: () => {},
         forceLogout: () => {},
       },
-    })
+    }),
   ),
   useTagsStore: jest.fn((state) =>
     state({
@@ -55,7 +55,7 @@ jest.mock("../../../src/stores", () => ({
       list: () => {},
       create: () => {},
       update: () => {},
-    })
+    }),
   ),
   usePluginConfigurationStore: jest.fn((state) =>
     state({
@@ -215,7 +215,7 @@ jest.mock("../../../src/stores", () => ({
       retrieveVisualizersConfiguration: () => {},
       retrievePlaybooksConfiguration: () => {},
       checkPluginHealth: () => {},
-    })
+    }),
   ),
 }));
 describe("test ScanForm component", () => {
@@ -225,7 +225,7 @@ describe("test ScanForm component", () => {
 
   beforeAll(() => {
     axios.post.mockImplementation(() =>
-      Promise.resolve({ data: { results: [], count: 0 } })
+      Promise.resolve({ data: { results: [], count: 0 } }),
     );
   });
 
@@ -233,7 +233,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
@@ -246,7 +246,7 @@ describe("test ScanForm component", () => {
     const { container } = render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // no observable and playbook
@@ -261,7 +261,7 @@ describe("test ScanForm component", () => {
     /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
     const testPlaybookButton = container.querySelector(
-      `#${playbookDropdownButton.id.replace("-input", "")}-option-0`
+      `#${playbookDropdownButton.id.replace("-input", "")}-option-0`,
     );
     expect(testPlaybookButton).toBeInTheDocument();
     await user.click(testPlaybookButton);
@@ -277,7 +277,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // no observable and playbook
@@ -306,7 +306,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     const firstObservableInputElement = screen.getByRole("textbox", {
@@ -327,7 +327,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select analyzers
@@ -354,7 +354,7 @@ describe("test ScanForm component", () => {
     const { container } = render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     const firstObservableInputElement = screen.getByRole("textbox", {
@@ -376,7 +376,7 @@ describe("test ScanForm component", () => {
     expect(analyzerDropdownButton).toBeInTheDocument();
     await user.click(analyzerDropdownButton);
     const testAnalyzerButton = container.querySelector(
-      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
     );
     expect(testAnalyzerButton).toBeInTheDocument();
     await user.click(testAnalyzerButton);
@@ -394,7 +394,7 @@ describe("test ScanForm component", () => {
     const { container } = render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     const firstObservableInputElement = screen.getByRole("textbox", {
@@ -417,7 +417,7 @@ describe("test ScanForm component", () => {
     expect(analyzerDropdownButton).toBeInTheDocument();
     await user.click(analyzerDropdownButton);
     const testAnalyzerButton = container.querySelector(
-      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
     );
     expect(testAnalyzerButton).toBeInTheDocument();
     await user.click(testAnalyzerButton);
@@ -434,7 +434,7 @@ describe("test ScanForm component", () => {
     const { container } = render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select file section
@@ -449,7 +449,7 @@ describe("test ScanForm component", () => {
     expect(playbookDropdownButton).toBeInTheDocument();
     await user.click(playbookDropdownButton);
     const testAnalyzerButton = container.querySelector(
-      `#${playbookDropdownButton.id.replace("-input", "")}-option-0`
+      `#${playbookDropdownButton.id.replace("-input", "")}-option-0`,
     );
     expect(testAnalyzerButton).toBeInTheDocument();
     await user.click(testAnalyzerButton);
@@ -467,7 +467,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select file section
@@ -507,7 +507,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select file section
@@ -538,7 +538,7 @@ describe("test ScanForm component", () => {
     const { container } = render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select file section
@@ -560,7 +560,7 @@ describe("test ScanForm component", () => {
     expect(analyzerDropdownButton).toBeInTheDocument();
     await user.click(analyzerDropdownButton);
     const testAnalyzerButton = container.querySelector(
-      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
     );
     expect(testAnalyzerButton).toBeInTheDocument();
     await user.click(testAnalyzerButton);
@@ -578,7 +578,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select file section
@@ -616,7 +616,7 @@ describe("test ScanForm component", () => {
     const { container } = render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select file section
@@ -648,7 +648,7 @@ describe("test ScanForm component", () => {
     expect(analyzerDropdownButton).toBeInTheDocument();
     await user.click(analyzerDropdownButton);
     const testAnalyzerButton = container.querySelector(
-      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
     );
     expect(testAnalyzerButton).toBeInTheDocument();
     await user.click(testAnalyzerButton);
@@ -668,7 +668,7 @@ describe("test ScanForm component", () => {
       render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
       // advanced settings
       const advancedSettingsButton = screen.getByRole("button", {
@@ -709,7 +709,7 @@ describe("test ScanForm component", () => {
         );
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -720,7 +720,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       // select analyzer
@@ -756,7 +756,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -786,7 +786,7 @@ describe("test ScanForm component", () => {
         );
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -797,7 +797,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       // select an observable
@@ -813,7 +813,7 @@ describe("test ScanForm component", () => {
       expect(tagsDropdown).toBeInTheDocument();
       await user.click(tagsDropdown);
       const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`
+        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
       );
       expect(testTagButton).toBeInTheDocument();
       await user.click(testTagButton);
@@ -856,7 +856,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -867,7 +867,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       // select file type
@@ -893,7 +893,7 @@ describe("test ScanForm component", () => {
       expect(tagsDropdown).toBeInTheDocument();
       await user.click(tagsDropdown);
       const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`
+        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
       );
       expect(testTagButton).toBeInTheDocument();
       await user.click(testTagButton);
@@ -922,7 +922,7 @@ describe("test ScanForm component", () => {
         // no call to the API to check old analysis (one of the advanced settings)
         expect(axios.post.mock.calls.length).toBe(1);
         expect(axios.post.mock.calls[0][0]).toEqual(
-          PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI
+          PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
         );
         expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
           files: new File([], ""),
@@ -934,7 +934,7 @@ describe("test ScanForm component", () => {
         });
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -945,7 +945,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       // select an observable
@@ -968,7 +968,7 @@ describe("test ScanForm component", () => {
       expect(tagsDropdown).toBeInTheDocument();
       await user.click(tagsDropdown);
       const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`
+        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
       );
       expect(testTagButton).toBeInTheDocument();
       await user.click(testTagButton);
@@ -992,7 +992,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1024,7 +1024,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1035,7 +1035,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       // select file type
@@ -1072,7 +1072,7 @@ describe("test ScanForm component", () => {
       expect(tagsDropdown).toBeInTheDocument();
       await user.click(tagsDropdown);
       const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`
+        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
       );
       expect(testTagButton).toBeInTheDocument();
       await user.click(testTagButton);
@@ -1092,7 +1092,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1118,7 +1118,7 @@ describe("test ScanForm component", () => {
         });
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1129,7 +1129,7 @@ describe("test ScanForm component", () => {
       render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1178,7 +1178,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1189,7 +1189,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1222,7 +1222,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1257,7 +1257,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1268,7 +1268,7 @@ describe("test ScanForm component", () => {
       render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1317,7 +1317,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1328,7 +1328,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1361,7 +1361,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1396,7 +1396,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1407,7 +1407,7 @@ describe("test ScanForm component", () => {
       render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1426,7 +1426,7 @@ describe("test ScanForm component", () => {
       // doubled braked are required by user-event library
       await user.type(
         secondObservableInputElement,
-        "https://microsoft[[.]]com"
+        "https://microsoft[[.]]com",
       );
 
       // check playbooks has been loaded
@@ -1459,7 +1459,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1470,7 +1470,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1489,7 +1489,7 @@ describe("test ScanForm component", () => {
       // doubled braked are required by user-event library
       await user.type(
         secondObservableInputElement,
-        "https://microsoft[[.]]com"
+        "https://microsoft[[.]]com",
       );
 
       // select analyzer
@@ -1506,7 +1506,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1541,7 +1541,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1552,7 +1552,7 @@ describe("test ScanForm component", () => {
       render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1560,7 +1560,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(
         firstObservableInputElement,
-        "1d5920f4b44b27a802bd77c4f0536f5a"
+        "1d5920f4b44b27a802bd77c4f0536f5a",
       );
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
@@ -1574,7 +1574,7 @@ describe("test ScanForm component", () => {
       // doubled braked are required by user-event library
       await user.type(
         secondObservableInputElement,
-        "ff5c054c7cd6924c570f944007ccf076"
+        "ff5c054c7cd6924c570f944007ccf076",
       );
 
       // check playbooks has been loaded
@@ -1607,7 +1607,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1618,7 +1618,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1626,7 +1626,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(
         firstObservableInputElement,
-        "1d5920f4b44b27a802bd77c4f0536f5a"
+        "1d5920f4b44b27a802bd77c4f0536f5a",
       );
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
@@ -1640,7 +1640,7 @@ describe("test ScanForm component", () => {
       // doubled braked are required by user-event library
       await user.type(
         secondObservableInputElement,
-        "ff5c054c7cd6924c570f944007ccf076"
+        "ff5c054c7cd6924c570f944007ccf076",
       );
 
       // select analyzer
@@ -1657,7 +1657,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1692,7 +1692,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1703,7 +1703,7 @@ describe("test ScanForm component", () => {
       render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1752,7 +1752,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test(
@@ -1763,7 +1763,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       const firstObservableInputElement = screen.getByRole("textbox", {
@@ -1796,7 +1796,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1831,7 +1831,7 @@ describe("test ScanForm component", () => {
         ]);
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 
   test("file playbook analysis", async () => {
@@ -1840,7 +1840,7 @@ describe("test ScanForm component", () => {
     render(
       <BrowserRouter>
         <ScanForm />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // select file type
@@ -1900,7 +1900,7 @@ describe("test ScanForm component", () => {
       const { container } = render(
         <BrowserRouter>
           <ScanForm />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       // select file type
@@ -1942,7 +1942,7 @@ describe("test ScanForm component", () => {
       expect(analyzerDropdownButton).toBeInTheDocument();
       await user.click(analyzerDropdownButton);
       const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`
+        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
@@ -1968,6 +1968,6 @@ describe("test ScanForm component", () => {
         });
       });
     },
-    15 * 1000
+    15 * 1000,
   );
 });

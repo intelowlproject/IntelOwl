@@ -184,9 +184,9 @@ class Plugin(metaclass=ABCMeta):
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
-        self.config()
         try:
             self.before_run()
+            self.config()
             _result = self.run()
         except Exception as e:
             self.after_run_failed(e)

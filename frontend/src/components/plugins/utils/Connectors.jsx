@@ -14,7 +14,7 @@ export default function Connectors() {
       state.connectors,
       state.retrieveConnectorsConfiguration,
     ],
-    []
+    [],
   );
 
   return (

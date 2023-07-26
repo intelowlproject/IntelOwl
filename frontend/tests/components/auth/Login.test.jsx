@@ -34,7 +34,7 @@ describe("Login component", () => {
     render(
       <BrowserRouter>
         <Login />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // page before login
@@ -47,7 +47,7 @@ describe("Login component", () => {
     const forgotPassowrdElement = screen.getByText("Forgot Password?");
     expect(forgotPassowrdElement).toBeInTheDocument();
     const verificationEmailElement = screen.getByText(
-      "Need Verification Email?"
+      "Need Verification Email?",
     );
     expect(verificationEmailElement).toBeInTheDocument();
 
@@ -61,7 +61,7 @@ describe("Login component", () => {
       expect(axios.post).toHaveBeenCalledWith(
         `${AUTH_BASE_URI}/login`,
         { password: "dummyPwd1", username: "test_user", recaptcha: "noKey" },
-        { certegoUIenableProgressBar: false }
+        { certegoUIenableProgressBar: false },
       );
     });
   });

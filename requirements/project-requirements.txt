@@ -1,7 +1,7 @@
 # django libs
-Django==4.1.9
+Django==4.1.10
 psycopg2-binary==2.9.6
-django-auth-ldap==4.3.0
+django-auth-ldap==4.4.0
 django-radius==1.5.0
 django-filter==23.2
 django-storages==1.13.1
@@ -11,7 +11,7 @@ django-ses == 3.5.0
 django-iam-dbauth==0.1.4
 django-prettyjson==0.4.1
 django-silk==5.0.3
-jsonschema==4.17.3
+jsonschema==4.18.0
 # django rest framework libs
 Authlib==1.2.0
 djangorestframework==3.14.0
@@ -33,14 +33,14 @@ flower==2.0.0
 
 # plugins
 GitPython==3.1.30
-checkdmarc==4.5.0
-dnspython==2.3.0
+checkdmarc==4.7.0
+dnspython==2.4.0
 dnstwist[full]==20230509
 google>=3.0.0
 google-cloud-webrisk==1.12.0
-intezer-sdk==1.17.2
+intezer-sdk==1.18.4
 lief==0.13.1
-maxminddb==2.3.0
+maxminddb==2.4.0
 mwdblib==4.4.0
 oletools==0.60
 OTXv2==1.5.12
@@ -48,20 +48,20 @@ peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2023.2.7
 Pillow==9.5.0
-pycti==5.8.2
+pycti==5.9.0
 pydeep==0.4
 pyelftools==0.29
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
-pymisp==2.4.168.1
+pymisp==2.4.172
 git+https://github.com/DissectMalware/pyOneNote@74d7b05966b9948b408a8de484e6c4e40a220de0
-pypdns==1.5.2
+pypdns==2.1.0
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==23.5.1
+quark-engine==23.7.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.3.0

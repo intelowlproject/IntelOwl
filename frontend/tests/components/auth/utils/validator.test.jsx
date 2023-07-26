@@ -125,10 +125,16 @@ describe("Profile fields", () => {
   });
   test("Too long profile", () => {
     expect(
-      ProfileValidator("company_name", "company_nametoolongcompany_nametoolong")
+      ProfileValidator(
+        "company_name",
+        "company_nametoolongcompany_nametoolong",
+      ),
     ).toEqual({ company_name: "Must be 30 characters or less" });
     expect(
-      ProfileValidator("company_role", "company_roletoolongcompany_roletoolong")
+      ProfileValidator(
+        "company_role",
+        "company_roletoolongcompany_roletoolong",
+      ),
     ).toEqual({ company_role: "Must be 30 characters or less" });
   });
 });

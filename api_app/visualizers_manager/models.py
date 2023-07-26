@@ -25,8 +25,6 @@ class VisualizerConfig(PythonConfig):
     playbook = models.ForeignKey(
         PlaybookConfig,
         related_name="visualizers",
-        blank=False,
-        null=False,
         on_delete=models.CASCADE,
     )
 

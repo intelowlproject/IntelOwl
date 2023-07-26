@@ -333,7 +333,7 @@ Default value of plugins are saved as `PluginConfig` objects. To change its valu
 2. At the bottom of the page, change the value and copy/remember/save it/print the primary key (small number under **Value**)
 3. Use `manage.py dumppluginconfig INSERT_THE_PK`
 4. If you want, you can enter in the `reverse_migration` function the previous value
-5. Commit the file!
+5. Commit the created file as a migration file under `api_app/migration` folder!
 
 ## How to modify/delete a plugin
 

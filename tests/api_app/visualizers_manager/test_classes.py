@@ -51,6 +51,7 @@ class VisualizableBaseTestCase(CustomTestCase):
             color=VisualizableColor.DARK,
             link="https://test.com",
             disable=True,
+            description="description-test",
         )
         expected_result = {
             "alignment": "center",
@@ -63,6 +64,8 @@ class VisualizableBaseTestCase(CustomTestCase):
             "size": "auto",
             "link": "https://test.com",
             "icon": "",
+            "copy_text": "test",
+            "description": "description-test",
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -95,6 +98,8 @@ class VisualizableBaseTestCase(CustomTestCase):
             "size": "3",
             "link": "https://test.com",
             "icon": "",
+            "copy_text": "",
+            "description": "",
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -111,6 +116,8 @@ class VisualizableBoolTestCase(CustomTestCase):
             "italic": False,
             "size": "auto",
             "disable": False,
+            "copy_text": "test",
+            "description": "",
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -199,6 +206,8 @@ class VisualizableVerticalListTestCase(CustomTestCase):
                     "size": "auto",
                     "type": "base",
                     "value": "no data available",
+                    "copy_text": "no data available",
+                    "description": "",
                 }
             ],
         }
@@ -352,6 +361,8 @@ class ErrorHandlerTestCase(CustomTestCase):
                 "icon": "",
                 "italic": False,
                 "type": "bool",
+                "copy_text": "test",
+                "description": "",
             },
         )
 
@@ -374,6 +385,8 @@ class ErrorHandlerTestCase(CustomTestCase):
                     "bold": False,
                     "italic": False,
                     "type": "base",
+                    "copy_text": "error component",
+                    "description": "",
                 },
                 "value": {
                     "size": "auto",
@@ -386,6 +399,8 @@ class ErrorHandlerTestCase(CustomTestCase):
                     "bold": False,
                     "italic": False,
                     "type": "base",
+                    "copy_text": "error",
+                    "description": "",
                 },
                 "type": "title",
             },

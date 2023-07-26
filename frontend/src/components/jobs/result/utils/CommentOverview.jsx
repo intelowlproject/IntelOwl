@@ -64,7 +64,7 @@ export default function CommentOverview({ job, refetchComments }) {
   };
 
   job.comments.sort(
-    (first, second) => new Date(second.created_at) - new Date(first.created_at)
+    (first, second) => new Date(second.created_at) - new Date(first.created_at),
   );
 
   return (

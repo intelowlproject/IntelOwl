@@ -21,13 +21,11 @@ class Pivot(models.Model):
         Job,
         on_delete=models.CASCADE,
         related_name="pivot_children",
-        null=False,
         editable=False,
     )
     pivot_config = models.ForeignKey(
         "PivotConfig",
         on_delete=models.PROTECT,
-        null=False,
         related_name="pivots",
         editable=False,
     )
@@ -35,7 +33,6 @@ class Pivot(models.Model):
         Job,
         on_delete=models.CASCADE,
         related_name="pivot_parents",
-        null=False,
         editable=False,
     )
 
@@ -65,7 +62,6 @@ class Pivot(models.Model):
 class PivotConfig(AbstractConfig):
     name = models.CharField(
         max_length=100,
-        null=False,
         validators=[pivot_regex_validator],
     )
     analyzer_config = models.ForeignKey(
@@ -92,8 +88,6 @@ class PivotConfig(AbstractConfig):
 
     field = models.CharField(
         max_length=256,
-        null=False,
-        blank=False,
         help_text="Dotted path to the field",
         validators=[pivot_regex_validator],
     )
@@ -101,7 +95,6 @@ class PivotConfig(AbstractConfig):
         "playbooks_manager.PlaybookConfig",
         on_delete=models.PROTECT,
         related_name="executed_by_pivot",
-        null=False,
     )
 
     class Meta:

@@ -22,12 +22,14 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * @param {bool} isChild flag used in Title and VList to create a smaller children components.
  * @returns {Object} component to visualize
  */
-function convertToElement(element, isChild = false) {
+function convertToElement(element, idElement, isChild = false) {
   let visualizerElement;
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
       visualizerElement = (
         <BooleanVisualizer
+          key={idElement}
+          id={idElement}
           size={element.size}
           value={element.value}
           link={element.link}
@@ -35,6 +37,8 @@ function convertToElement(element, isChild = false) {
           disable={element.disable}
           icon={getIcon(element.icon)}
           italic={element.italic}
+          copyText={element.copyText}
+          description={element.description}
         />
       );
       break;
@@ -42,12 +46,18 @@ function convertToElement(element, isChild = false) {
     case VisualizerComponentType.HLIST: {
       visualizerElement = (
         <HorizontalListVisualizer
-          values={element.values.map((additionalElement) =>
+          key={idElement}
+          id={idElement}
+          values={element.values.map((additionalElement, index) =>
             /* simply pass the isChild:
           in case of this is the first element (level) we don't need to render the components as children (defaul false is ok).
           in case this is a child (part of vlist) we pass isChild=true to its children
           */
-            convertToElement(additionalElement, isChild)
+            convertToElement(
+              additionalElement,
+              `${idElement}-${index}`,
+              isChild
+            )
           )}
           alignment={element.alignment}
         />
@@ -57,10 +67,16 @@ function convertToElement(element, isChild = false) {
     case VisualizerComponentType.VLIST: {
       visualizerElement = (
         <VerticalListVisualizer
+          key={idElement}
+          id={idElement}
           size={element.size}
-          name={convertToElement(element.name)}
-          values={element.values.map((additionalElement) =>
-            convertToElement(additionalElement, true)
+          name={convertToElement(element.name, `${idElement}-vlist`)}
+          values={element.values.map((additionalElement, index) =>
+            convertToElement(
+              additionalElement,
+              `${idElement}-item${index}`,
+              true
+            )
           )}
           alignment={element.alignment}
           startOpen={element.startOpen}
@@ -72,10 +88,12 @@ function convertToElement(element, isChild = false) {
     case VisualizerComponentType.TITLE: {
       visualizerElement = (
         <TitleVisualizer
+          key={idElement}
+          id={idElement}
           size={element.size}
           alignment={element.alignment}
-          title={convertToElement(element.title)}
-          value={convertToElement(element.value, true)}
+          title={convertToElement(element.title, `${idElement}-title`)}
+          value={convertToElement(element.value, `${idElement}-value`, true)}
         />
       );
       break;
@@ -83,6 +101,8 @@ function convertToElement(element, isChild = false) {
     default: {
       visualizerElement = (
         <BaseVisualizer
+          key={idElement}
+          id={idElement}
           size={element.size}
           alignment={element.alignment}
           value={element.value}
@@ -92,7 +112,9 @@ function convertToElement(element, isChild = false) {
           bold={element.bold}
           italic={element.italic}
           disable={element.disable}
+          copyText={element.copyText}
           isChild={isChild}
+          description={element.description}
         />
       );
       break;
@@ -132,7 +154,10 @@ export default function VisualizerReport({ visualizerReport }) {
 
   // convert data to elements
   const levels = validatedLevels.map((level) =>
-    convertToElement(level.elements)
+    convertToElement(
+      level.elements,
+      `page${visualizerReport.id}-level${level.level}`
+    )
   );
 
   console.debug("VisualizerReport - levels");

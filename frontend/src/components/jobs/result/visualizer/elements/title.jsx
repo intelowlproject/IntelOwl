@@ -1,9 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-export function TitleVisualizer({ size, title, value, alignment }) {
+export function TitleVisualizer({ size, title, value, alignment, id }) {
   return (
-    <div className={`${size} d-flex flex-column align-items-${alignment}`}>
+    <div
+      className={`${size} d-flex flex-column align-items-${alignment}`}
+      id={id}
+    >
       <div className="mb-1 text-capitalize">{title}</div>
       <div className="p-1">{value}</div>
     </div>
@@ -15,6 +18,7 @@ TitleVisualizer.propTypes = {
   title: PropTypes.element.isRequired,
   value: PropTypes.element.isRequired,
   alignment: PropTypes.string,
+  id: PropTypes.string.isRequired,
 };
 
 TitleVisualizer.defaultProps = {

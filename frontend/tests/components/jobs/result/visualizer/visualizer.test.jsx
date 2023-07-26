@@ -56,6 +56,8 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                     value: "base component",
                     italic: false,
                     disable: true,
+                    copy_text: "base component",
+                    description: "description",
                   },
                   {
                     icon: "",
@@ -66,6 +68,7 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                     value: "bool component",
                     italic: false,
                     disable: true,
+                    description: "description",
                   },
                 ],
                 alignment: "around",
@@ -88,6 +91,8 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                       italic: false,
                       disable: false,
                       alignment: "center",
+                      copy_text: "",
+                      description: "description",
                     },
                     open: true,
                     size: "auto",
@@ -104,6 +109,8 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                         italic: false,
                         disable: false,
                         alignment: "center",
+                        copy_text: "vlist element - copy text",
+                        description: "description",
                       },
                     ],
                     disable: false,
@@ -121,6 +128,8 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                       italic: false,
                       disable: false,
                       alignment: "center",
+                      copy_text: "",
+                      description: "description",
                     },
                     size: "auto",
                     type: "title",
@@ -135,6 +144,8 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                       italic: false,
                       disable: false,
                       alignment: "center",
+                      copy_text: "title value - copy text",
+                      description: "description",
                     },
                     disable: false,
                     alignment: "center",
@@ -154,6 +165,11 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
       />
     );
 
+    // check level id
+    const firstLevelId = container.querySelector("#page105-level1");
+    expect(firstLevelId).toBeInTheDocument();
+    const secondLevelId = container.querySelector("#page105-level2");
+    expect(secondLevelId).toBeInTheDocument();
     // check the first line has vlist and title and NOT base and bool
     const vListComponent = within(container.firstChild.firstChild).getByText(
       "vlist title"

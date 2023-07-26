@@ -56,7 +56,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
         )
 
-    def before_run(self, *args, **kwargs):
+    def before_run(self):
         super().before_run()
         logger.info(f"STARTED connector: {self.__repr__()}")
         self._config: ConnectorConfig

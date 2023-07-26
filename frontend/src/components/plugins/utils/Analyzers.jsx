@@ -14,7 +14,7 @@ export default function Analyzers() {
       state.analyzers,
       state.retrieveAnalyzersConfiguration,
     ],
-    []
+    [],
   );
 
   return (

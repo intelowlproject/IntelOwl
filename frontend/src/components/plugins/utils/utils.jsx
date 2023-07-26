@@ -214,7 +214,7 @@ export function PluginVerificationIcon({ pluginName, verification }) {
           {
             "bg-success text-darker": verification.configured,
             "bg-danger text-darker": !verification.configured,
-          }
+          },
         )}
       >
         {verification.details}
@@ -276,8 +276,8 @@ export function OrganizationPluginStateToggle({
         isUserOwner: state.isUserOwner,
         organization: state.organization,
       }),
-      []
-    )
+      [],
+    ),
   );
   let title = disabled ? "Enable" : "Disable";
   if (!organization.name) title = "You're not a part of any organization";

@@ -33,23 +33,23 @@ export default function RuntimeConfigurationModal(props) {
           ...configurationsToDisplay,
           // find the config of the selected analyzer and add it
           [analyzerName]: analyzers.find(
-            (analyzer) => analyzer.name === analyzerName
+            (analyzer) => analyzer.name === analyzerName,
           )?.params,
         }),
-        {}
+        {},
       ),
       // same for the connectors
       ...formik.values.connectors.reduce(
         (configurationsToDisplay, { value: connectorName }) => ({
           ...configurationsToDisplay,
           [connectorName]: connectors.find(
-            (connector) => connector.name === connectorName
+            (connector) => connector.name === connectorName,
           )?.params,
         }),
-        {}
+        {},
       ),
     }),
-    [formik.values.analyzers, formik.values.connectors, analyzers, connectors]
+    [formik.values.analyzers, formik.values.connectors, analyzers, connectors],
   );
 
   console.debug("RuntimeConfigurationModal - combinedParamsMap:");
@@ -67,12 +67,12 @@ export default function RuntimeConfigurationModal(props) {
               ...singlePluginConfig,
               [paramName]: paramValue,
             }),
-            {}
+            {},
           ),
         }),
-        {}
+        {},
       ),
-    [combinedParamsMap]
+    [combinedParamsMap],
   );
 
   console.debug("RuntimeConfigurationModal - defaultNameParamsMap:");
@@ -122,7 +122,7 @@ export default function RuntimeConfigurationModal(props) {
           JSON.stringify(defaultNameParamsMap[name]) !== JSON.stringify(params)
             ? { ...acc, [name]: params }
             : acc,
-        {}
+        {},
       );
       console.debug("RuntimeConfigurationModal - saved runtimeCfg:");
       console.debug(runtimeCfg);

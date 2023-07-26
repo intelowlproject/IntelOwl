@@ -91,7 +91,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
           }}
         />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // utility bar
@@ -100,27 +100,27 @@ describe("test JobOverview (job report)", () => {
     const goBackButton = within(utilitiesRow).getByRole("button", { name: "" });
     expect(goBackButton.id).toBe("gobackbutton");
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Comments (1)" })
+      within(utilitiesRow).getByRole("button", { name: "Comments (1)" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Delete Job" })
+      within(utilitiesRow).getByRole("button", { name: "Delete Job" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Rescan" })
+      within(utilitiesRow).getByRole("button", { name: "Rescan" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" })
+      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Raw JSON" })
+      within(utilitiesRow).getByRole("button", { name: "Raw JSON" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Share" })
+      within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
     // metadata - first line
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
     expect(
-      within(JobInfoCardSection).getByText("dns.google.com")
+      within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
     const JobInfoCardDropDown = within(JobInfoCardSection).getByRole("button", {
       name: "",
@@ -128,7 +128,7 @@ describe("test JobOverview (job report)", () => {
     expect(JobInfoCardDropDown.id).toBe("JobInfoCardDropDown");
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS")
+      within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("TLP")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("AMBER")).toBeInTheDocument();
@@ -136,31 +136,31 @@ describe("test JobOverview (job report)", () => {
     expect(within(JobInfoCardSection).getByText("test")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("MD5")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903")
+      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Process Time (mm:ss)")
+      within(JobInfoCardSection).getByText("Process Time (mm:ss)"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("00:00")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Start Time")
+      within(JobInfoCardSection).getByText("Start Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("End Time")
+      within(JobInfoCardSection).getByText("End Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023"),
     ).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Error(s)")
+      within(JobInfoCardSection).getByText("Error(s)"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Playbook")
+      within(JobInfoCardSection).getByText("Playbook"),
     ).toBeInTheDocument();
     // visualizable selector (check RAW is selected)
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
@@ -288,7 +288,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["test visualizer"],
           }}
         />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // utility bar
@@ -297,31 +297,31 @@ describe("test JobOverview (job report)", () => {
     const goBackButton = within(utilitiesRow).getByRole("button", { name: "" });
     expect(goBackButton.id).toBe("gobackbutton");
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Comments (1)" })
+      within(utilitiesRow).getByRole("button", { name: "Comments (1)" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Delete Job" })
+      within(utilitiesRow).getByRole("button", { name: "Delete Job" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Rescan" })
+      within(utilitiesRow).getByRole("button", { name: "Rescan" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" })
+      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Raw JSON" })
+      within(utilitiesRow).getByRole("button", { name: "Raw JSON" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Share" })
+      within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
     // metadata - first line
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
     expect(
-      within(JobInfoCardSection).getByText("dns.google.com")
+      within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS")
+      within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("TLP")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("AMBER")).toBeInTheDocument();
@@ -329,31 +329,31 @@ describe("test JobOverview (job report)", () => {
     expect(within(JobInfoCardSection).getByText("test")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("MD5")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903")
+      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Process Time (mm:ss)")
+      within(JobInfoCardSection).getByText("Process Time (mm:ss)"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("00:00")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Start Time")
+      within(JobInfoCardSection).getByText("Start Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("End Time")
+      within(JobInfoCardSection).getByText("End Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023"),
     ).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Error(s)")
+      within(JobInfoCardSection).getByText("Error(s)"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Playbook")
+      within(JobInfoCardSection).getByText("Playbook"),
     ).toBeInTheDocument();
     // visualizable selector (check Visualizers is selected)
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
@@ -526,7 +526,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["test visualizer"],
           }}
         />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // utility bar
@@ -535,31 +535,31 @@ describe("test JobOverview (job report)", () => {
     const goBackButton = within(utilitiesRow).getByRole("button", { name: "" });
     expect(goBackButton.id).toBe("gobackbutton");
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Comments (1)" })
+      within(utilitiesRow).getByRole("button", { name: "Comments (1)" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Delete Job" })
+      within(utilitiesRow).getByRole("button", { name: "Delete Job" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Rescan" })
+      within(utilitiesRow).getByRole("button", { name: "Rescan" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" })
+      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Raw JSON" })
+      within(utilitiesRow).getByRole("button", { name: "Raw JSON" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Share" })
+      within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
     // metadata - first line
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
     expect(
-      within(JobInfoCardSection).getByText("dns.google.com")
+      within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS")
+      within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("TLP")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("AMBER")).toBeInTheDocument();
@@ -567,31 +567,31 @@ describe("test JobOverview (job report)", () => {
     expect(within(JobInfoCardSection).getByText("test")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("MD5")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903")
+      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Process Time (mm:ss)")
+      within(JobInfoCardSection).getByText("Process Time (mm:ss)"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("00:00")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Start Time")
+      within(JobInfoCardSection).getByText("Start Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("End Time")
+      within(JobInfoCardSection).getByText("End Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023"),
     ).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Error(s)")
+      within(JobInfoCardSection).getByText("Error(s)"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Playbook")
+      within(JobInfoCardSection).getByText("Playbook"),
     ).toBeInTheDocument();
     // visualizable selector (check Visualizers is selected)
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
@@ -876,7 +876,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["test visualizer"],
           }}
         />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // utility bar
@@ -885,27 +885,27 @@ describe("test JobOverview (job report)", () => {
     const goBackButton = within(utilitiesRow).getByRole("button", { name: "" });
     expect(goBackButton.id).toBe("gobackbutton");
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Comments (0)" })
+      within(utilitiesRow).getByRole("button", { name: "Comments (0)" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Delete Job" })
+      within(utilitiesRow).getByRole("button", { name: "Delete Job" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Rescan" })
+      within(utilitiesRow).getByRole("button", { name: "Rescan" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" })
+      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Raw JSON" })
+      within(utilitiesRow).getByRole("button", { name: "Raw JSON" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Share" })
+      within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
     // metadata - first line
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
     expect(
-      within(JobInfoCardSection).getByText("dns.google.com")
+      within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("ANALYZERS RUNNING")).toBeInTheDocument();
@@ -915,29 +915,29 @@ describe("test JobOverview (job report)", () => {
     expect(within(JobInfoCardSection).getByText("test")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("MD5")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903")
+      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Process Time (mm:ss)")
+      within(JobInfoCardSection).getByText("Process Time (mm:ss)"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("00:00")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Start Time")
+      within(JobInfoCardSection).getByText("Start Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("End Time")
+      within(JobInfoCardSection).getByText("End Time"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("-")).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Error(s)")
+      within(JobInfoCardSection).getByText("Error(s)"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Playbook")
+      within(JobInfoCardSection).getByText("Playbook"),
     ).toBeInTheDocument();
     // visualizable selector (check Visualizers is selected)
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
@@ -960,7 +960,7 @@ describe("test JobOverview (job report)", () => {
     expect(within(visualizersRunning).getByText("reported 0/1").className).toContain("info"); // visualizers waiting
     // spinner
     expect(
-      container.querySelector("#visualizerLoadingSpinner")
+      container.querySelector("#visualizerLoadingSpinner"),
     ).toBeInTheDocument();
     // raw data section not rendered
     expect(screen.queryByText("Analyzers Report")).toBeNull();
@@ -1162,7 +1162,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["test visualizer"],
           }}
         />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
@@ -1180,10 +1180,10 @@ describe("test JobOverview (job report)", () => {
     const secondVisualizerMenuElement = screen.getByText("test visualizer 2");
     expect(secondVisualizerMenuElement).toBeInTheDocument();
     expect(firstVisualizerMenuElement.closest("a").className).toContain(
-      "active"
+      "active",
     );
     expect(secondVisualizerMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     // check tabs selection
     const firstVisualizerBody = container.querySelector("#jobReportTab105");
@@ -1193,10 +1193,10 @@ describe("test JobOverview (job report)", () => {
 
     // check visualizer are in the correct tab
     expect(
-      within(firstVisualizerBody).getByText("Classic DNS (2)")
+      within(firstVisualizerBody).getByText("Classic DNS (2)"),
     ).toBeInTheDocument();
     expect(
-      within(secondVisualizerBody).getByText("test component visualizer 2")
+      within(secondVisualizerBody).getByText("test component visualizer 2"),
     ).toBeInTheDocument();
 
     /** check the the "test visualizer 2" visualizer UI */
@@ -1206,10 +1206,10 @@ describe("test JobOverview (job report)", () => {
     expect(rawButton.className).toContain("btn-outline-tertiary"); // not selected
     // check nav
     expect(firstVisualizerMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     expect(secondVisualizerMenuElement.closest("a").className).toContain(
-      "active"
+      "active",
     );
     // check tabs
     expect(firstVisualizerBody.className).not.toContain("active");
@@ -1228,13 +1228,13 @@ describe("test JobOverview (job report)", () => {
     const visualizersReportMenuElement = screen.getByText("Visualizers Report");
     expect(visualizersReportMenuElement).toBeInTheDocument();
     expect(analyzerReportMenuElement.closest("a").className).toContain(
-      "active"
+      "active",
     );
     expect(connectorsReportMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     expect(visualizersReportMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     // check tabs
     const analyzerReportBody = container.querySelector("#jobReportTab1");
@@ -1251,13 +1251,13 @@ describe("test JobOverview (job report)", () => {
     expect(rawButton.className).toContain("btn-primary"); // not selected
     // check nav
     expect(analyzerReportMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     expect(connectorsReportMenuElement.closest("a").className).toContain(
-      "active"
+      "active",
     );
     expect(visualizersReportMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     // check tabs
     expect(analyzerReportBody.className).not.toContain("active");
@@ -1271,13 +1271,13 @@ describe("test JobOverview (job report)", () => {
     expect(rawButton.className).toContain("btn-primary"); // not selected
     // check nav
     expect(analyzerReportMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     expect(connectorsReportMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     expect(visualizersReportMenuElement.closest("a").className).toContain(
-      "active"
+      "active",
     );
     // check tabs
     expect(analyzerReportBody.className).not.toContain("active");
@@ -1291,10 +1291,10 @@ describe("test JobOverview (job report)", () => {
     expect(rawButton.className).toContain("btn-outline-tertiary"); // selected
     // check navs
     expect(firstVisualizerMenuElement.closest("a").className).toContain(
-      "active"
+      "active",
     );
     expect(secondVisualizerMenuElement.closest("a").className).not.toContain(
-      "active"
+      "active",
     );
     // check tabs selection
     expect(firstVisualizerBody.className).toContain("active");

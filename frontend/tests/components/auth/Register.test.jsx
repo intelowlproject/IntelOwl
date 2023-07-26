@@ -17,7 +17,7 @@ describe("Registration component", () => {
     render(
       <BrowserRouter>
         <Register />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
   });
 
@@ -40,7 +40,7 @@ describe("Registration component", () => {
       screen.getByLabelText("Confirm Password");
     expect(confirmPasswordInputElement).toBeInTheDocument();
     const companyNameInputElement = screen.getByLabelText(
-      "Company/ Organization"
+      "Company/ Organization",
     );
     expect(companyNameInputElement).toBeInTheDocument();
     const companyRoleInputElement = screen.getByLabelText("Role");

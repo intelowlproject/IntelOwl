@@ -9,81 +9,104 @@ describe("VerticalListVisualizer component", () => {
   test("required-only params", () => {
     const { container } = render(
       <VerticalListVisualizer
+        id="test-id"
         size="col-2"
         name={
           <BaseVisualizer
             size="auto"
             value="title (required-only params)"
             color="warning"
+            id="test-id-vlist"
           />
         }
         values={[
-          <BaseVisualizer size="auto" value="first line - single element" />,
+          <BaseVisualizer
+            size="auto"
+            value="first line - single element"
+            id="test-id-base"
+          />,
           <HorizontalListVisualizer
+            id="test-id-hlist"
             values={[
               <BaseVisualizer
                 size="auto"
                 value="second line - first element"
+                id="test-id-hlist-1"
               />,
               <BaseVisualizer
                 size="auto"
                 value="second line - second element"
+                id="test-id-hlist-2"
               />,
             ]}
           />,
         ]}
-      />
+      />,
     );
 
     // check title
     expect(
-      screen.getByText("title (required-only params)")
+      screen.getByText("title (required-only params)"),
     ).toBeInTheDocument();
     // check values
     expect(screen.getByText("first line - single element")).toBeInTheDocument();
     expect(screen.getByText("second line - first element")).toBeInTheDocument();
     expect(
-      screen.getByText("second line - second element")
+      screen.getByText("second line - second element"),
     ).toBeInTheDocument();
     // check size
     const mainComponent = container.firstChild;
     expect(mainComponent.className).toContain("col-2");
     expect(mainComponent.firstChild.className).toContain("card");
     // check button
-    const dropdownButton = screen.getByRole("button");
+    const dropdownButton = screen.getByRole("button", {
+      name: "title (required-only params)",
+    });
     expect(dropdownButton).toBeInTheDocument();
     expect(dropdownButton.className).toContain("btn-warning");
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
   });
 
   test("all params", () => {
     const { container } = render(
       <VerticalListVisualizer
+        id="test-id"
         size="col-2"
         name={
           <BaseVisualizer
             size="auto"
             value="title (all params)"
             color="success"
+            id="test-id-vlist"
           />
         }
         values={[
-          <BaseVisualizer size="auto" value="first line - single element" />,
+          <BaseVisualizer
+            size="auto"
+            value="first line - single element"
+            id="test-id-base"
+          />,
           <HorizontalListVisualizer
+            id="test-id-hlist"
             values={[
               <BaseVisualizer
                 size="auto"
                 value="second line - first element"
+                id="test-id-hlist-1"
               />,
               <BaseVisualizer
                 size="auto"
                 value="second line - second element"
+                id="test-id-hlist-2"
               />,
             ]}
           />,
         ]}
         alignment="start"
         startOpen
-      />
+      />,
     );
 
     // check title
@@ -92,40 +115,54 @@ describe("VerticalListVisualizer component", () => {
     expect(screen.getByText("first line - single element")).toBeInTheDocument();
     expect(screen.getByText("second line - first element")).toBeInTheDocument();
     expect(
-      screen.getByText("second line - second element")
+      screen.getByText("second line - second element"),
     ).toBeInTheDocument();
     // check size
     const mainComponent = container.firstChild;
     expect(mainComponent.className).toContain("col-2");
     expect(mainComponent.firstChild.className).toContain("card");
     // check button
-    const dropdownButton = screen.getByRole("button");
+    const dropdownButton = screen.getByRole("button", {
+      name: "title (all params)",
+    });
     expect(dropdownButton).toBeInTheDocument();
     expect(dropdownButton.className).toContain("btn-success");
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
   });
 
   test("all params - disable", () => {
     const { container } = render(
       <VerticalListVisualizer
+        id="test-id"
         size="col-2"
         name={
           <BaseVisualizer
             size="auto"
-            value="title (all params)"
+            value="title (all params - disable)"
             color="success"
+            id="test-id-vlist"
           />
         }
         values={[
-          <BaseVisualizer size="auto" value="first line - single element" />,
+          <BaseVisualizer
+            size="auto"
+            value="first line - single element"
+            id="test-id-base"
+          />,
           <HorizontalListVisualizer
+            id="test-id-hlist"
             values={[
               <BaseVisualizer
                 size="auto"
                 value="second line - first element"
+                id="test-id-hlist-1"
               />,
               <BaseVisualizer
                 size="auto"
                 value="second line - second element"
+                id="test-id-hlist-2"
               />,
             ]}
           />,
@@ -133,16 +170,18 @@ describe("VerticalListVisualizer component", () => {
         alignment="start"
         startOpen
         disable
-      />
+      />,
     );
 
     // check title
-    expect(screen.getByText("title (all params)")).toBeInTheDocument();
+    expect(
+      screen.getByText("title (all params - disable)"),
+    ).toBeInTheDocument();
     // check values
     expect(screen.getByText("first line - single element")).toBeInTheDocument();
     expect(screen.getByText("second line - first element")).toBeInTheDocument();
     expect(
-      screen.getByText("second line - second element")
+      screen.getByText("second line - second element"),
     ).toBeInTheDocument();
     // check size
     const mainComponent = container.firstChild;
@@ -150,8 +189,13 @@ describe("VerticalListVisualizer component", () => {
     expect(mainComponent.firstChild.className).toContain("card");
     expect(mainComponent.firstChild.className).toContain("opacity-50");
     // check button
-    const dropdownButton = screen.getByRole("button");
+    const dropdownButton = screen.getByRole("button", {
+      name: "title (all params - disable)",
+    });
     expect(dropdownButton).toBeInTheDocument();
     expect(dropdownButton.className).toContain("btn-success");
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
   });
 });

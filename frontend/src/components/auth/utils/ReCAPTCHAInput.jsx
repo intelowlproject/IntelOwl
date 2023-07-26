@@ -14,7 +14,7 @@ export default function ReCAPTCHAInput(props) {
   // callbacks
   const onChange = React.useCallback(
     (value) => setFieldValue("recaptcha", value),
-    [setFieldValue]
+    [setFieldValue],
   );
 
   // side-effect

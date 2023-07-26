@@ -45,7 +45,7 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
         formik.setSubmitting(false);
       }
     },
-    [onFormSubmit]
+    [onFormSubmit],
   );
 
   return (

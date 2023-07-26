@@ -103,7 +103,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       AnalyzerDenominator,
       ConnectorDenominator,
       VisualizerDenominator,
-    ]
+    ],
   );
 
   // state
@@ -126,7 +126,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       setIsSelectedUI(isUI);
       setActiveElement((isUI ? UIElements : rawElements)[0].id);
     },
-    [UIElements, rawElements, setActiveElement, setIsSelectedUI]
+    [UIElements, rawElements, setActiveElement, setIsSelectedUI],
   );
 
   // NOTE: use effect order is important! Reset MUST BE defined before the other!
@@ -211,7 +211,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         selectUISection(false);
       } else {
         console.debug(
-          `set default visualizer to: ${firstVisualizer.name} (id: ${firstVisualizer.id})`
+          `set default visualizer to: ${firstVisualizer.name} (id: ${firstVisualizer.id})`,
         );
         setActiveElement(firstVisualizer.id);
       }
@@ -294,7 +294,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
                             {componentsObject.nav}
                           </NavLink>
                         </NavItem>
-                      )
+                      ),
                   )}
                 </Nav>
               </div>

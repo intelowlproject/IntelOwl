@@ -1,7 +1,7 @@
 # django libs
 Django==4.1.10
 psycopg2-binary==2.9.6
-django-auth-ldap==4.3.0
+django-auth-ldap==4.4.0
 django-radius==1.5.0
 django-filter==23.2
 django-storages==1.13.1
@@ -34,11 +34,11 @@ flower==2.0.0
 # plugins
 GitPython==3.1.30
 checkdmarc==4.7.0
-dnspython==2.3.0
+dnspython==2.4.0
 dnstwist[full]==20230509
 google>=3.0.0
 google-cloud-webrisk==1.12.0
-intezer-sdk==1.17.2
+intezer-sdk==1.18.4
 lief==0.13.1
 maxminddb==2.4.0
 mwdblib==4.4.0
@@ -61,7 +61,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==23.6.1
+quark-engine==23.7.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.3.0

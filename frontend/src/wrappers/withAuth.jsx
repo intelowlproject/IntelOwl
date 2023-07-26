@@ -17,13 +17,13 @@ function withAuth(WrappedComponent) {
     const [isAuthenticated, fetchUserAccess] = useAuthStore(
       React.useCallback(
         (s) => [s.isAuthenticated(), s.service.fetchUserAccess],
-        []
-      )
+        [],
+      ),
     );
 
     // check if the data about plugins have been downloaded or not.
     const [fetchPluginsConf] = usePluginConfigurationStore(
-      React.useCallback((s) => [s.hydrate], [])
+      React.useCallback((s) => [s.hydrate], []),
     );
 
     React.useLayoutEffect(() => {

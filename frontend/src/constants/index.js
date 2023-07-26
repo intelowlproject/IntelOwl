@@ -51,7 +51,7 @@ export const STATUS_COLORMAP = {
 };
 export const TLP_CHOICES = Object.keys(TLP_COLOR_MAP);
 export const OBSERVABLE_TYPES = Object.keys(
-  OBSERVABLE_CLASSIFICATION_COLOR_MAP
+  OBSERVABLE_CLASSIFICATION_COLOR_MAP,
 );
 
 export const scanTypes = {

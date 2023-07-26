@@ -1,19 +1,18 @@
 /* eslint-disable no-underscore-dangle */
 import React from "react";
 import axios from "axios";
-import md5 from "md5";
 
 import { ContentSection, addToast } from "@certego/certego-ui";
 
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
-  ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
   COMMENT_BASE_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
+import { scanMode } from "../../constants/constants";
 
 const { append: appendToRecentScans } = useRecentScansStore.getState();
 
@@ -46,12 +45,6 @@ function prettifyErrors(errorResponse) {
 }
 
 export async function createPlaybookJob(formValues) {
-  // check existing
-  if (formValues.check !== "force_new") {
-    const jobId = await _askAnalysisAvailability(formValues);
-    if (jobId) return Promise.resolve(jobId);
-  }
-
   // new scan
   const resp =
     formValues.classification === "file"
@@ -135,12 +128,6 @@ export async function deleteComment(commentId) {
 
 export async function createJob(formValues) {
   try {
-    // check existing
-    if (formValues.check !== "force_new") {
-      const jobId = await _askAnalysisAvailability(formValues);
-      if (jobId) return Promise.resolve(jobId);
-    }
-
     // new scan
     const resp =
       formValues.classification === "file"
@@ -210,77 +197,6 @@ export async function createJob(formValues) {
   }
 }
 
-async function _askAnalysisAvailability(formValues) {
-  console.debug("_askAnalysisAvailability - formValues");
-  console.debug(formValues);
-
-  const payload = [];
-  const minutesAgo = formValues.hoursAgo * 60;
-
-  if (formValues.classification === "file") {
-    const promises = [];
-    // with .forEach is not possible (we should await an async)
-    // eslint-disable-next-line no-restricted-syntax
-    for (const file of Array.from(formValues.files)) {
-      const body = {
-        analyzers: formValues.analyzers,
-        playbooks: formValues.playbooks,
-        // eslint-disable-next-line no-await-in-loop
-        md5: md5(await file.text()),
-      };
-      if (minutesAgo) {
-        body.minutes_ago = minutesAgo;
-      }
-      promises.push(body.md5);
-      if (formValues.check === "running_only") {
-        body.running_only = "True";
-      }
-      payload.push(body);
-    }
-    await Promise.all(promises);
-  } else {
-    formValues.observable_names.forEach((ObservableName) => {
-      const body = {
-        analyzers: formValues.analyzers,
-        playbooks: formValues.playbooks,
-        md5: md5(ObservableName),
-      };
-      if (minutesAgo) {
-        body.minutes_ago = minutesAgo;
-      }
-      if (formValues.check === "running_only") {
-        body.running_only = "True";
-      }
-      payload.push(body);
-    });
-  }
-
-  console.debug("_askAnalysisAvailability - payload");
-  console.debug(payload);
-  try {
-    const response = await axios.post(
-      ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
-      payload
-    );
-    const answer = response.data;
-    if (answer.count === 0) {
-      return 0;
-    }
-    const jobIds = answer.results.map((x) => x.job_id);
-    jobIds.forEach((jobId) => {
-      appendToRecentScans(jobId, "secondary");
-    });
-    addToast(
-      `Found similar scan with job ID(s) #${jobIds.join(", ")}`,
-      null,
-      "info"
-    );
-    return jobIds;
-  } catch (e) {
-    return Promise.reject(e);
-  }
-}
-
 async function _analyzeObservable(formValues) {
   const observables = [];
   formValues.observable_names.forEach((ObservableName) => {
@@ -293,7 +209,13 @@ async function _analyzeObservable(formValues) {
     tlp: formValues.tlp,
     runtime_configuration: formValues.runtime_configuration,
     tags_labels: formValues.tags_labels,
+    scan_mode: parseInt(formValues.scan_mode, 10),
   };
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
+  } else {
+    body.scan_check_time = null;
+  }
   return axios.post(ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }
 
@@ -315,7 +237,13 @@ async function _analyzeFile(formValues) {
       JSON.stringify(formValues.runtime_configuration)
     );
   }
-  console.debug("_analyzeFile");
+  body.append("scan_mode", formValues.scan_mode);
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+  } else {
+    body.append("scan_check_time", null);
+  }
+  console.debug("_analyzeFile", body);
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
@@ -328,9 +256,14 @@ async function _startPlaybookFile(formValues) {
   formValues.tags.forEach((tagObject) => {
     body.append("tags_labels", tagObject.value.label);
   });
-  formValues.playbooks.map((playbook) =>
-    body.append("playbooks_requested", playbook)
-  );
+  body.append("playbook_requested", formValues.playbook);
+  body.append("scan_mode", parseInt(formValues.scan_mode, 10));
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+  } else {
+    body.append("scan_check_time", null);
+  }
+  console.debug("_analyzeFile", body);
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
@@ -342,10 +275,16 @@ async function _startPlaybookObservable(formValues) {
 
   const body = {
     observables,
-    playbooks_requested: formValues.playbooks,
+    playbook_requested: formValues.playbook,
     tags_labels: formValues.tags_labels,
     tlp: formValues.tlp,
+    scan_mode: parseInt(formValues.scan_mode, 10),
   };
-
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
+  } else {
+    body.scan_check_time = null;
+  }
+  console.debug("_analyzeObservable", body);
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }

@@ -174,9 +174,7 @@ export function JobActionsBar({ job, refetch }) {
         className="me-2"
       />
 
-      <SaveAsPlaybookButton
-        job={job}
-      />
+      <SaveAsPlaybookButton job={job} />
       {job?.is_sample && (
         <Button
           size="sm"

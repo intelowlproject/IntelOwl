@@ -112,9 +112,7 @@ function SaveAsPlaybookIcon() {
   );
 }
 
-export function SaveAsPlaybookButton({
-  job
-}) {
+export function SaveAsPlaybookButton({ job }) {
   initialValues.analyzers = job.analyzers;
   initialValues.connectors = job.connectors;
   initialValues.pivots = job.pivots;

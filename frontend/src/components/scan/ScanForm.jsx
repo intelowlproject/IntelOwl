@@ -88,6 +88,7 @@ export default function ScanForm() {
       files: [],
       analyzers: [],
       connectors: [],
+      // playbook is an object, but if we use {} as default the UI component to select playbooks doesn's show the placeholder
       playbook: "",
       tlp: "AMBER",
       runtime_configuration: {},

@@ -583,25 +583,25 @@ export default function ScanForm() {
                                         formik.setFieldValue(
                                           "playbook",
                                           playbookOptions(newClassification)[0],
-                                          false
+                                          false,
                                         );
                                         formik.setFieldValue(
                                           "tags",
                                           playbookOptions(newClassification)[0]
                                             .tags,
-                                          false
+                                          false,
                                         );
                                         formik.setFieldValue(
                                           "tlp",
                                           playbookOptions(newClassification)[0]
                                             .tlp,
-                                          false
+                                          false,
                                         );
                                         formik.setFieldValue(
                                           "scan_mode",
                                           playbookOptions(newClassification)[0]
                                             .scan_mode,
-                                          false
+                                          false,
                                         );
                                       }
                                     }
@@ -667,22 +667,22 @@ export default function ScanForm() {
                         formik.setFieldValue(
                           "playbook",
                           playbookOptions("file")[0],
-                          false
+                          false,
                         );
                         formik.setFieldValue(
                           "tags",
                           playbookOptions("file")[0].tags,
-                          false
+                          false,
                         );
                         formik.setFieldValue(
                           "tlp",
                           playbookOptions("file")[0].tlp,
-                          false
+                          false,
                         );
                         formik.setFieldValue(
                           "scan_mode",
                           playbookOptions("file")[0].scan_mode,
-                          false
+                          false,
                         );
                       }
                     }}
@@ -713,23 +713,23 @@ export default function ScanForm() {
                           formik.setFieldValue(
                             "playbook",
                             formik.initialValues.playbook,
-                            false
+                            false,
                           ); // reset playbook
                           // reset advanced configuration
                           formik.setFieldValue(
                             "tags",
                             formik.initialValues.tags,
-                            false
+                            false,
                           );
                           formik.setFieldValue(
                             "tlp",
                             formik.initialValues.tlp,
-                            false
+                            false,
                           );
                           formik.setFieldValue(
                             "scan_mode",
                             formik.initialValues.scan_mode,
-                            false
+                            false,
                           );
                         }}
                       />

@@ -705,7 +705,7 @@ describe("test ScanForm component", () => {
               scan_mode: 2,
               scan_check_time: "10:00:00",
             },
-          ]
+          ],
         );
       });
     },
@@ -782,7 +782,7 @@ describe("test ScanForm component", () => {
               scan_mode: 2,
               scan_check_time: "10:00:00",
             },
-          ]
+          ],
         );
       });
     },
@@ -1880,7 +1880,7 @@ describe("test ScanForm component", () => {
       expect(axios.post.mock.calls.length).toBe(1);
       // axios call: start new analysis
       expect(axios.post.mock.calls[0][0]).toEqual(
-        PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI
+        PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
       );
       expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
         files: new File([], ""),

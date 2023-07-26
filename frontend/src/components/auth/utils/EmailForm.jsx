@@ -41,7 +41,7 @@ export default function EmailForm({ onFormSubmit, apiCallback, ...restProps }) {
         // error will be handled by apiCallback
       }
     },
-    [apiCallback, onFormSubmit]
+    [apiCallback, onFormSubmit],
   );
 
   return (

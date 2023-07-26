@@ -58,7 +58,7 @@ export async function killJob(jobId) {
         Failed. Operation: <em>kill job #{jobId}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -80,7 +80,7 @@ export async function deleteJob(jobId) {
         Failed. Operation: <em>delete job #{jobId}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -106,14 +106,14 @@ export async function saveJobAsPlaybook(values) {
           Playbook with name {response.data.name} created with success
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
     addToast(
       <span>Failed creation of playbook with name {values.name}</span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -121,13 +121,13 @@ export async function saveJobAsPlaybook(values) {
 
 export async function killPlugin(jobId, plugin) {
   const sure = await areYouSureConfirmDialog(
-    `kill ${plugin.type} '${plugin.name}'`
+    `kill ${plugin.type} '${plugin.name}'`,
   );
   if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.patch(
-      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/kill`
+      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/kill`,
     );
     success = response.status === 204;
     if (success) {
@@ -136,7 +136,7 @@ export async function killPlugin(jobId, plugin) {
           Kill request sent for {plugin.type} <em>{plugin.name}</em>
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
@@ -145,7 +145,7 @@ export async function killPlugin(jobId, plugin) {
         Failed. Operation: kill {plugin.type} <em>{plugin.name}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -153,13 +153,13 @@ export async function killPlugin(jobId, plugin) {
 
 export async function retryPlugin(jobId, plugin) {
   const sure = await areYouSureConfirmDialog(
-    `retry ${plugin.type} '${plugin.name}'`
+    `retry ${plugin.type} '${plugin.name}'`,
   );
   if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.patch(
-      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/retry`
+      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/retry`,
     );
     success = response.status === 204;
     if (success) {
@@ -168,7 +168,7 @@ export async function retryPlugin(jobId, plugin) {
           Retry request sent for {plugin.type} <em>{plugin.name}</em>
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
@@ -177,7 +177,7 @@ export async function retryPlugin(jobId, plugin) {
         Failed. Operation: retry {plugin.type} <em>{plugin.name}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;

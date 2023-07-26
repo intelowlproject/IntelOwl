@@ -14,7 +14,7 @@ export default function Visualizers() {
       state.visualizers,
       state.retrieveConnectorsConfiguration,
     ],
-    []
+    [],
   );
 
   return (

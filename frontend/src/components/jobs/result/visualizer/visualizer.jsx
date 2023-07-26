@@ -56,8 +56,8 @@ function convertToElement(element, idElement, isChild = false) {
             convertToElement(
               additionalElement,
               `${idElement}-${index}`,
-              isChild
-            )
+              isChild,
+            ),
           )}
           alignment={element.alignment}
         />
@@ -75,8 +75,8 @@ function convertToElement(element, idElement, isChild = false) {
             convertToElement(
               additionalElement,
               `${idElement}-item${index}`,
-              true
-            )
+              true,
+            ),
           )}
           alignment={element.alignment}
           startOpen={element.startOpen}
@@ -143,10 +143,10 @@ export default function VisualizerReport({ visualizerReport }) {
 
   // validate data
   const validatedLevels = visualizerReport.report.map((levelElement) =>
-    validateLevel(levelElement)
+    validateLevel(levelElement),
   );
   validatedLevels.sort(
-    (firstLevel, secondLevel) => firstLevel.level - secondLevel.level
+    (firstLevel, secondLevel) => firstLevel.level - secondLevel.level,
   );
 
   console.debug("VisualizerReport - validatedLevels");
@@ -156,8 +156,8 @@ export default function VisualizerReport({ visualizerReport }) {
   const levels = validatedLevels.map((level) =>
     convertToElement(
       level.elements,
-      `page${visualizerReport.id}-level${level.level}`
-    )
+      `page${visualizerReport.id}-level${level.level}`,
+    ),
   );
 
   console.debug("VisualizerReport - levels");

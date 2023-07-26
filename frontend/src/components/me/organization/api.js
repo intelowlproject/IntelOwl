@@ -13,7 +13,7 @@ async function createOrganization(body) {
       `You are now the owner of ${resp?.data?.name} organization.`,
       null,
       "success",
-      true
+      true,
     );
     return resp;
   } catch (e) {
@@ -30,7 +30,7 @@ async function deleteOrganization(orgName) {
       null,
       "success",
       true,
-      6000
+      6000,
     );
     return resp;
   } catch (e) {
@@ -48,7 +48,7 @@ async function removeMemberFromOrg(username) {
       `User @${username} was removed as a member.`,
       null,
       "success",
-      true
+      true,
     );
     return resp;
   } catch (e) {
@@ -64,7 +64,7 @@ async function leaveOrganization(orgName) {
       `You are no longer a member of the ${orgName} organization.`,
       null,
       "success",
-      true
+      true,
     );
     return resp;
   } catch (e) {
@@ -94,7 +94,7 @@ async function acceptInvitation(invId, orgName) {
       `You are now a member of the ${orgName} organization`,
       "success",
       true,
-      6000
+      6000,
     );
     return resp;
   } catch (e) {
@@ -110,7 +110,7 @@ async function declineInvitation(invId, orgName) {
       `Invitation from ${orgName} organization was declined.`,
       null,
       "info",
-      true
+      true,
     );
     return resp;
   } catch (e) {
@@ -126,7 +126,7 @@ async function deleteInvitation(invId, username) {
       `Invitation to user @${username} was deleted.`,
       null,
       "success",
-      true
+      true,
     );
     return resp;
   } catch (e) {

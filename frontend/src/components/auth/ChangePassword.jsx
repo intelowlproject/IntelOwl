@@ -43,7 +43,7 @@ export default function ChangePassword() {
 
   // auth store
   const changePassword = useAuthStore(
-    React.useCallback((s) => s.service.changePassword, [])
+    React.useCallback((s) => s.service.changePassword, []),
   );
 
   // callback
@@ -58,7 +58,7 @@ export default function ChangePassword() {
         setSubmitting(false);
       }
     },
-    [changePassword]
+    [changePassword],
   );
 
   return (

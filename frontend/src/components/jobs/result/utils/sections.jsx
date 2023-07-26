@@ -357,17 +357,17 @@ export function JobIsRunningAlert({ job }) {
   const analizersReported = job.analyzer_reports
     .map((report) => report.status)
     .filter((status) =>
-      Object.values(pluginFinalStatuses).includes(status)
+      Object.values(pluginFinalStatuses).includes(status),
     ).length;
   const connectorsReported = job.connector_reports
     .map((report) => report.status)
     .filter((status) =>
-      Object.values(pluginFinalStatuses).includes(status)
+      Object.values(pluginFinalStatuses).includes(status),
     ).length;
   const visualizersReported = job.visualizer_reports
     .map((report) => report.status)
     .filter((status) =>
-      Object.values(pluginFinalStatuses).includes(status)
+      Object.values(pluginFinalStatuses).includes(status),
     ).length;
 
   /* Check if analyzers/connectors/visualizers are completed

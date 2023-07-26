@@ -179,7 +179,11 @@ describe("test JobOverview (job report)", () => {
     // in case the visualizers are not available and the use goes to the visualizer section shows a message
     const user = userEvent.setup();
     await user.click(visualizerButton);
-    expect(screen.getByText("No visualizers available. You can consult the results in the raw format.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "No visualizers available. You can consult the results in the raw format.",
+      ),
+    ).toBeInTheDocument();
 
     // job metadata dropdown
     const JobInfoCardCollapse = container.querySelector("#JobInfoCardCollapse");
@@ -720,7 +724,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["test visualizer", "test2 visualizer"],
           }}
         />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // utility bar
@@ -729,31 +733,31 @@ describe("test JobOverview (job report)", () => {
     const goBackButton = within(utilitiesRow).getByRole("button", { name: "" });
     expect(goBackButton.id).toBe("gobackbutton");
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Comments (1)" })
+      within(utilitiesRow).getByRole("button", { name: "Comments (1)" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Delete Job" })
+      within(utilitiesRow).getByRole("button", { name: "Delete Job" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Rescan" })
+      within(utilitiesRow).getByRole("button", { name: "Rescan" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" })
+      within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Raw JSON" })
+      within(utilitiesRow).getByRole("button", { name: "Raw JSON" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Share" })
+      within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
     // metadata - first line
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
     expect(
-      within(JobInfoCardSection).getByText("dns.google.com")
+      within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("VISUALIZERS RUNNING")
+      within(JobInfoCardSection).getByText("VISUALIZERS RUNNING"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("TLP")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("AMBER")).toBeInTheDocument();
@@ -761,31 +765,31 @@ describe("test JobOverview (job report)", () => {
     expect(within(JobInfoCardSection).getByText("test")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("MD5")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903")
+      within(JobInfoCardSection).getByText("f9bc35a57b22f82c94dbcc420f71b903"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Process Time (mm:ss)")
+      within(JobInfoCardSection).getByText("Process Time (mm:ss)"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("00:00")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Start Time")
+      within(JobInfoCardSection).getByText("Start Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:03 AM May 31st, 2023"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("End Time")
+      within(JobInfoCardSection).getByText("End Time"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023")
+      within(JobInfoCardSection).getByText("08:19:04 AM May 31st, 2023"),
     ).toBeInTheDocument();
     // metadata - second line
     expect(within(JobInfoCardSection).getByText("Tags")).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Error(s)")
+      within(JobInfoCardSection).getByText("Error(s)"),
     ).toBeInTheDocument();
     expect(
-      within(JobInfoCardSection).getByText("Playbook")
+      within(JobInfoCardSection).getByText("Playbook"),
     ).toBeInTheDocument();
     // visualizable selector (check Visualizers is selected)
     const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
@@ -795,20 +799,34 @@ describe("test JobOverview (job report)", () => {
     expect(rawButton).toBeInTheDocument();
     expect(rawButton.className).toContain("btn-outline-tertiary"); // not selected
     // JobIsRunningAlert
-    const JobIsRunningAlert = container.querySelector("#jobisrunningalert-iconalert");
+    const JobIsRunningAlert = container.querySelector(
+      "#jobisrunningalert-iconalert",
+    );
     expect(JobIsRunningAlert).toBeInTheDocument();
-    const analyzersRunning = within(JobIsRunningAlert).getByText("STEP 1: ANALYZERS RUNNING -");
+    const analyzersRunning = within(JobIsRunningAlert).getByText(
+      "STEP 1: ANALYZERS RUNNING -",
+    );
     expect(analyzersRunning).toBeInTheDocument();
-    expect(within(analyzersRunning).getByText("reported 1/1").className).toContain("success"); // analyzers completed
-    const connectorsRunning = within(JobIsRunningAlert).getByText("STEP 2: CONNECTORS RUNNING -");
+    expect(
+      within(analyzersRunning).getByText("reported 1/1").className,
+    ).toContain("success"); // analyzers completed
+    const connectorsRunning = within(JobIsRunningAlert).getByText(
+      "STEP 2: CONNECTORS RUNNING -",
+    );
     expect(connectorsRunning).toBeInTheDocument();
-    expect(within(connectorsRunning).getByText("reported 0/0").className).toContain("success"); // connectors completed
-    const visualizersRunning = within(JobIsRunningAlert).getByText("STEP 3: VISUALIZERS RUNNING -");
+    expect(
+      within(connectorsRunning).getByText("reported 0/0").className,
+    ).toContain("success"); // connectors completed
+    const visualizersRunning = within(JobIsRunningAlert).getByText(
+      "STEP 3: VISUALIZERS RUNNING -",
+    );
     expect(visualizersRunning).toBeInTheDocument();
-    expect(within(visualizersRunning).getByText("reported 0/2").className).toContain("info"); // visualizers running
+    expect(
+      within(visualizersRunning).getByText("reported 0/2").className,
+    ).toContain("info"); // visualizers running
     // spinenr
     expect(
-      container.querySelector("#visualizerLoadingSpinner")
+      container.querySelector("#visualizerLoadingSpinner"),
     ).toBeInTheDocument();
     // raw data section not rendered
     expect(screen.queryByText("Analyzers Report")).toBeNull();
@@ -908,7 +926,9 @@ describe("test JobOverview (job report)", () => {
       within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
-    expect(within(JobInfoCardSection).getByText("ANALYZERS RUNNING")).toBeInTheDocument();
+    expect(
+      within(JobInfoCardSection).getByText("ANALYZERS RUNNING"),
+    ).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("TLP")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("AMBER")).toBeInTheDocument();
     expect(within(JobInfoCardSection).getByText("User")).toBeInTheDocument();
@@ -947,17 +967,31 @@ describe("test JobOverview (job report)", () => {
     expect(rawButton).toBeInTheDocument();
     expect(rawButton.className).toContain("btn-outline-tertiary"); // not selected
     // JobIsRunningAlert
-    const JobIsRunningAlert = container.querySelector("#jobisrunningalert-iconalert");
+    const JobIsRunningAlert = container.querySelector(
+      "#jobisrunningalert-iconalert",
+    );
     expect(JobIsRunningAlert).toBeInTheDocument();
-    const analyzersRunning = within(JobIsRunningAlert).getByText("STEP 1: ANALYZERS RUNNING -");
+    const analyzersRunning = within(JobIsRunningAlert).getByText(
+      "STEP 1: ANALYZERS RUNNING -",
+    );
     expect(analyzersRunning).toBeInTheDocument();
-    expect(within(analyzersRunning).getByText("reported 0/1").className).toContain("info"); // analyzers running
-    const connectorsRunning = within(JobIsRunningAlert).getByText("STEP 2: CONNECTORS RUNNING -");
+    expect(
+      within(analyzersRunning).getByText("reported 0/1").className,
+    ).toContain("info"); // analyzers running
+    const connectorsRunning = within(JobIsRunningAlert).getByText(
+      "STEP 2: CONNECTORS RUNNING -",
+    );
     expect(connectorsRunning).toBeInTheDocument();
-    expect(within(connectorsRunning).getByText("reported 0/0").className).toContain("info"); // connectors waiting
-    const visualizersRunning = within(JobIsRunningAlert).getByText("STEP 3: VISUALIZERS RUNNING -");
+    expect(
+      within(connectorsRunning).getByText("reported 0/0").className,
+    ).toContain("info"); // connectors waiting
+    const visualizersRunning = within(JobIsRunningAlert).getByText(
+      "STEP 3: VISUALIZERS RUNNING -",
+    );
     expect(visualizersRunning).toBeInTheDocument();
-    expect(within(visualizersRunning).getByText("reported 0/1").className).toContain("info"); // visualizers waiting
+    expect(
+      within(visualizersRunning).getByText("reported 0/1").className,
+    ).toContain("info"); // visualizers waiting
     // spinner
     expect(
       container.querySelector("#visualizerLoadingSpinner"),

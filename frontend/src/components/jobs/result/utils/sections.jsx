@@ -40,6 +40,10 @@ import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
 import { createJob, createPlaybookJob } from "../../../scan/api";
+import {
+  pluginFinalStatuses,
+  jobStatuses,
+} from "../../../../constants/constants";
 
 function DeleteIcon() {
   return (
@@ -165,6 +169,7 @@ export function JobActionsBar({ job, refetch }) {
         />
       )}
       <IconButton
+        id="rescanbtn"
         Icon={retryJobIcon}
         onClick={handleRetry}
         color="light"
@@ -348,6 +353,65 @@ export function JobInfoCard({ job }) {
 }
 
 export function JobIsRunningAlert({ job }) {
+  // number of analyzers/connectors/visualizers reported (status: killed/succes/failed)
+  const analizersReported = job.analyzer_reports
+    .map((report) => report.status)
+    .filter((status) =>
+      Object.values(pluginFinalStatuses).includes(status)
+    ).length;
+  const connectorsReported = job.connector_reports
+    .map((report) => report.status)
+    .filter((status) =>
+      Object.values(pluginFinalStatuses).includes(status)
+    ).length;
+  const visualizersReported = job.visualizer_reports
+    .map((report) => report.status)
+    .filter((status) =>
+      Object.values(pluginFinalStatuses).includes(status)
+    ).length;
+
+  /* Check if analyzers/connectors/visualizers are completed
+    The analyzers are completed from the "analyzers_completed" status (index=3) to the last status 
+    The connectors are completed from the "connectors_completed" status (index=5) to the last status 
+    The visualizers are completed from the "visualizers_completed" status (index=7) to the last status 
+  */
+  const analyzersCompleted = Object.values(jobStatuses)
+    .slice(3)
+    .includes(job.status);
+  const connectorsCompleted = Object.values(jobStatuses)
+    .slice(5)
+    .includes(job.status);
+  const visualizersCompleted = Object.values(jobStatuses)
+    .slice(7)
+    .includes(job.status);
+
+  const alertElements = [
+    {
+      step: 1,
+      type: "ANALYZERS",
+      completed:
+        analizersReported === job.analyzers_to_execute.length &&
+        analyzersCompleted,
+      report: `${analizersReported}/${job.analyzers_to_execute.length}`,
+    },
+    {
+      step: 2,
+      type: "CONNECTORS",
+      completed:
+        connectorsReported === job.connectors_to_execute.length &&
+        connectorsCompleted,
+      report: `${connectorsReported}/${job.connectors_to_execute.length}`,
+    },
+    {
+      step: 3,
+      type: "VISUALIZERS",
+      completed:
+        visualizersReported === job.visualizers_to_execute.length &&
+        visualizersCompleted,
+      report: `${visualizersReported}/${job.visualizers_to_execute.length}`,
+    },
+  ];
+
   return (
     <Fade className="d-flex-center mx-auto">
       <IconAlert
@@ -359,6 +423,16 @@ export function JobIsRunningAlert({ job }) {
           This job is currently <strong className="text-accent">running</strong>
           .
         </h6>
+        {alertElements.map((element) => (
+          <div className="text-white">
+            STEP {element.step}: {element.type} RUNNING -
+            <strong
+              className={`text-${element.completed ? "success" : "info"}`}
+            >
+              &nbsp;reported {element.report}
+            </strong>
+          </div>
+        ))}
         {job.permissions?.kill && (
           <IconButton
             id="jobisrunningalert-iconbutton"
@@ -368,6 +442,7 @@ export function JobIsRunningAlert({ job }) {
             color="danger"
             titlePlacement="top"
             onClick={() => killJob(job.id)}
+            className="mt-2"
           />
         )}
         <div className="text-gray">

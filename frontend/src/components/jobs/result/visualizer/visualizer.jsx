@@ -1,5 +1,4 @@
 import React from "react";
-import { Spinner } from "reactstrap";
 import PropTypes from "prop-types";
 import { ContentSection, ErrorAlert } from "@certego/certego-ui";
 
@@ -14,7 +13,6 @@ import { VisualizerComponentType } from "./elements/const";
 import { getIcon } from "./icons";
 
 import { HorizontalListVisualizer } from "./elements/horizontalList";
-import { pluginStatuses } from "../../../../constants/constants";
 
 /**
  * Convert the validated data into a VisualizerElement.
@@ -118,22 +116,6 @@ export default function VisualizerReport({ visualizerReport }) {
           parsedMsg: visualizerReport.errors,
         }}
       />
-    );
-  }
-
-  // in case visualizer is running or pending, show spinner
-  if (
-    [pluginStatuses.PENDING, pluginStatuses.RUNNING].includes(
-      visualizerReport.status
-    )
-  ) {
-    return (
-      <div
-        className="d-flex justify-content-center"
-        id="visualizerLoadingSpinner"
-      >
-        <Spinner />
-      </div>
     );
   }
 

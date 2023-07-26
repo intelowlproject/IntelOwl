@@ -13,8 +13,8 @@ import {
 } from "@certego/certego-ui";
 
 import { StatusTag } from "../../../common";
-import { PLUGIN_STATUSES } from "../../../../constants";
 import { killPlugin, retryPlugin } from "../api";
+import { pluginStatuses } from "../../../../constants/constants";
 
 const tableProps = {
   columns: [
@@ -61,7 +61,7 @@ const tableProps = {
       accessor: "status",
       Cell: ({ value }) => <StatusTag status={value} />,
       Filter: SelectOptionsFilter,
-      selectOptions: PLUGIN_STATUSES,
+      selectOptions: Object.values(pluginStatuses),
       maxWidth: 50,
     },
     {

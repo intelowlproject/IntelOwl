@@ -4,7 +4,6 @@
 """CloudFlare DNS resolutions"""
 
 import logging
-import time
 from urllib.parse import urlparse
 
 import requests
@@ -47,7 +46,6 @@ class CloudFlareDNSResolver(classes.ObservableAnalyzer):
             raise AnalyzerRunException(
                 f"An error occurred during the connection to CloudFlare: {error}"
             )
-        time.sleep(15)
         return dns_resolver_response(self.observable_name, resolutions)
 
     @classmethod

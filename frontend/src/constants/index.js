@@ -49,27 +49,6 @@ export const STATUS_COLORMAP = {
   ...JOB_STATUS_COLOR_MAP,
   ...REPORT_STATUS_COLOR_MAP,
 };
-export const JOB_STATUSES = [
-  "pending",
-  "running",
-  "analyzers_running",
-  "connectors_running",
-  "visualizers_running",
-  "analyzers_completed",
-  "connectors_completed",
-  "visualizers_completed",
-  "reported_with_fails",
-  "reported_without_fails",
-  "killed",
-  "failed",
-];
-export const PLUGIN_STATUSES = [
-  "PENDING",
-  "RUNNING",
-  "KILLED",
-  "SUCCESS",
-  "FAILED",
-];
 export const TLP_CHOICES = Object.keys(TLP_COLOR_MAP);
 export const OBSERVABLE_TYPES = Object.keys(
   OBSERVABLE_CLASSIFICATION_COLOR_MAP

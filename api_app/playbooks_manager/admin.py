@@ -22,7 +22,8 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
         "scan_mode",
     )
 
-    def _get_plugins(self, qs):  # noqa
+    @staticmethod
+    def _get_plugins(qs):
         return [elem.name for elem in qs]
 
     def get_analyzers(self, obj: PlaybookConfig):
@@ -37,5 +38,6 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
     def get_pivots(self, obj: PlaybookConfig):
         return self._get_plugins(obj.pivots.all())
 
-    def scan_mode(self, obj: PlaybookConfig) -> str:
+    @staticmethod
+    def scan_mode(obj: PlaybookConfig) -> str:
         return ScanMode(obj.scan_configuration.mode).name

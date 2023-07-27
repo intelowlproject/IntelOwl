@@ -665,13 +665,16 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 
     @staticmethod
     def perform_retry(report: AbstractReport):
-        signature = next(
-            report.config.__class__.objects.filter(pk=report.config.pk)
-            .annotate_runnable(report.job.user)
-            .get_signatures(
-                report.job,
+        try:
+            signature = next(
+                report.config.__class__.objects.filter(pk=report.config.pk)
+                .annotate_runnable(report.job.user)
+                .get_signatures(
+                    report.job,
+                )
             )
-        )
+        except StopIteration:
+            raise RuntimeError(f"Unable to find signature for report {report.pk}")
         runner = signature | tasks.job_set_final_status.signature(
             args=[report.job.id],
             kwargs={},

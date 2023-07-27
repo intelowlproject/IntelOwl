@@ -252,7 +252,10 @@ class AbstractConfigTestCase(CustomTestCase):
         job.visualizers_to_execute.set([muc])
         gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
         with self.assertRaises(RuntimeError):
-            next(gen_signature)
+            try:
+                next(gen_signature)
+            except StopIteration:
+                self.fail("Stop iteration should not be raised")
         muc.delete()
         job.delete()
 
@@ -273,7 +276,10 @@ class AbstractConfigTestCase(CustomTestCase):
             .get_signatures(job)
         )
         with self.assertRaises(RuntimeWarning):
-            next(gen_signature)
+            try:
+                next(gen_signature)
+            except StopIteration:
+                self.fail("Stop iteration should not be raised")
         muc.delete()
         job.delete()
 

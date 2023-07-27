@@ -19,7 +19,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
                 playbook_to_execute=OuterRef("pk"),
                 finished_analysis_time__gte=now() - datetime.timedelta(days=30),
             )
-            .alias(count=Func(F("pk"), function="Count"))
+            .annotate(count=Func(F("pk"), function="Count"))
             .values("count")
         )
 
@@ -34,7 +34,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
                 )
                 .exclude(user__pk=user.pk)
-                .alias(count=Func(F("pk"), function="Count"))
+                .annotate(count=Func(F("pk"), function="Count"))
                 .values("count")
             )
         return Value(0)
@@ -50,14 +50,14 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
                 .exclude(
                     user__membership__organization__pk=user.membership.organization.pk
                 )
-                .alias(count=Func(F("pk"), function="Count"))
+                .annotate(count=Func(F("pk"), function="Count"))
                 .values("count")
             )
         return Subquery(
             Job.objects.prefetch_related("user")
             .filter(playbook_to_execute=OuterRef("pk"))
             .exclude(user__pk=user.pk)
-            .alias(count=Func(F("pk"), function="Count"))
+            .annotate(count=Func(F("pk"), function="Count"))
             .values("count")
         )
 

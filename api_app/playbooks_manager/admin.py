@@ -40,4 +40,4 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
 
     @staticmethod
     def scan_mode(obj: PlaybookConfig) -> str:
-        return ScanMode(obj.scan_configuration.mode).name
+        return ScanMode(obj.scan_mode).name

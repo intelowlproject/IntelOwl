@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-from api_app.core.admin import AbstractReportAdminView, PythonConfigAdminView
+from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
 from api_app.visualizers_manager.forms import VisualizerConfigAdminForm
 from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 

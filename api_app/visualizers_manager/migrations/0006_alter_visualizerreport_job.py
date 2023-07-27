@@ -10,14 +10,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0019_mitm_configs'),
-        ('visualizers_manager', '0005_visualizerconfig_disabled_in_org'),
+        ("api_app", "0019_mitm_configs"),
+        ("visualizers_manager", "0005_visualizerconfig_disabled_in_org"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='visualizerreport',
-            name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visualizerreports', to='api_app.job'),
+            model_name="visualizerreport",
+            name="job",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="visualizerreports",
+                to="api_app.job",
+            ),
         ),
     ]

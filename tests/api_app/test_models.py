@@ -8,10 +8,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.classes import Plugin
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.core.classes import Plugin
-from api_app.core.models import AbstractConfig, Parameter
-from api_app.models import Job, PluginConfig
+from api_app.models import AbstractConfig, Job, Parameter, PluginConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
@@ -29,7 +28,7 @@ class AbstractConfigTestCase(CustomTestCase):
         python_base_path=settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH,
     )
     def test_python_class_wrong(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -43,10 +42,9 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         with self.assertRaises(ImportError):
             muc.python_class
-        muc.delete()
 
     def test_python_class(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -60,8 +58,6 @@ class AbstractConfigTestCase(CustomTestCase):
             self.fail(e)
         else:
             self.assertTrue(issubclass(pc, Plugin))
-        finally:
-            muc.delete()
 
     def test_clean_python_module(self):
         muc: VisualizerConfig = VisualizerConfig(
@@ -170,7 +166,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_configured__secret_present_not_user(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -195,7 +191,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_runnable(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -207,7 +203,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_runnable_disabled(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -219,7 +215,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
 
     def test_is_runnable_disabled_by_org(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
             python_module="yara.Yara",
@@ -229,18 +225,39 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         org = Organization.objects.create(name="test_org")
 
-        m = Membership.objects.create(
-            user=self.user,
-            organization=org,
-        )
+        m = Membership.objects.create(user=self.user, organization=org, is_owner=True)
         muc: VisualizerConfig
         muc.disabled_in_organizations.add(org)
-
+        self.assertFalse(
+            VisualizerConfig.objects.filter(name="test")
+            .exclude(disabled=True)
+            .exclude(disabled_in_organizations=self.user.membership.organization)
+        )
         self.assertFalse(muc.is_runnable(self.user))
 
         muc.delete()
         m.delete()
         org.delete()
+
+    def test_get_signature_without_runnable(self):
+        job, _ = Job.objects.get_or_create(user=self.user)
+        muc, _ = VisualizerConfig.objects.get_or_create(
+            name="test",
+            description="test",
+            python_module="yara.Yara",
+            disabled=True,
+            config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
+        )
+        job.visualizers_to_execute.set([muc])
+        gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
+        with self.assertRaises(RuntimeError):
+            try:
+                next(gen_signature)
+            except StopIteration:
+                self.fail("Stop iteration should not be raised")
+        muc.delete()
+        job.delete()
 
     def test_get_signature_disabled(self):
         job, _ = Job.objects.get_or_create(user=self.user)
@@ -253,10 +270,16 @@ class AbstractConfigTestCase(CustomTestCase):
             playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
-
-        with self.assertRaises(Exception):
-            muc.get_signature(job)
-
+        gen_signature = (
+            VisualizerConfig.objects.filter(pk=muc.pk)
+            .annotate_runnable(self.user)
+            .get_signatures(job)
+        )
+        with self.assertRaises(RuntimeWarning):
+            try:
+                next(gen_signature)
+            except StopIteration:
+                self.fail("Stop iteration should not be raised")
         muc.delete()
         job.delete()
 
@@ -271,7 +294,15 @@ class AbstractConfigTestCase(CustomTestCase):
             playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
-        signature = muc.get_signature(job)
+        gen_signature = (
+            VisualizerConfig.objects.filter(pk=muc.pk)
+            .annotate_runnable(self.user)
+            .get_signatures(job)
+        )
+        try:
+            signature = next(gen_signature)
+        except StopIteration as e:
+            self.fail(e)
         self.assertIsInstance(signature, Signature)
         muc.delete()
         job.delete()
@@ -282,14 +313,15 @@ class ParameterTestCase(CustomTestCase):
         ac, _ = AnalyzerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module="yara_scan.YaraScan",
             disabled=False,
+            type="file",
             config={"soft_time_limit": 100, "queue": "default"},
         )
         cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module="misp.MISP",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
@@ -354,45 +386,3 @@ class ParameterTestCase(CustomTestCase):
             type="str",
         )
         par.full_clean()
-
-    def test_get_first_value(self):
-        par = Parameter(
-            name="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            is_secret=False,
-            required=False,
-            type="str",
-        )
-        par.full_clean()
-        par.save()
-        with self.assertRaises(RuntimeError):
-            par.get_first_value(self.user)
-
-        pc1 = PluginConfig.objects.create(
-            value="testdefault", owner=None, for_organization=False, parameter=par
-        )
-        self.assertEqual("testdefault", par.get_first_value(self.user).value)
-
-        pc2 = PluginConfig.objects.create(
-            value="testorg", owner=self.superuser, for_organization=True, parameter=par
-        )
-
-        org = Organization.objects.create(name="test_org")
-        m1 = Membership.objects.create(
-            user=self.superuser, organization=org, is_owner=True
-        )
-        m2 = Membership.objects.create(
-            user=self.user,
-            organization=org,
-        )
-        self.assertEqual("testorg", par.get_first_value(self.user).value)
-
-        pc3 = PluginConfig.objects.create(
-            value="testowner", owner=self.user, for_organization=True, parameter=par
-        )
-        self.assertEqual("testowner", par.get_first_value(self.user).value)
-        m1.delete()
-        m2.delete()
-        pc1.delete()
-        pc2.delete()
-        pc3.delete()

@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from kombu import uuid
 
+from api_app.classes import Plugin
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.core.classes import Plugin
 from api_app.models import Job
 from tests import CustomTestCase
 
@@ -20,12 +20,13 @@ class PluginTestCase(CustomTestCase):
         )
         self.cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
-            python_module="yara.Yara",
+            python_module="misp.MISP",
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             run_on_failure=False,
         )
+        self.job.connectors_to_execute.set([self.cc])
 
     def tearDown(self) -> None:
         self.job.delete()

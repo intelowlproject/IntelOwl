@@ -7,7 +7,7 @@ visualizers = {
     "DNS": {
         "disabled": False,
         "description": "Visualize information about DNS resolvers "
-                       "and DNS malicious detectors",
+        "and DNS malicious detectors",
         "python_module": "dns.DNS",
         "analyzers": [
             "Classic_DNS",

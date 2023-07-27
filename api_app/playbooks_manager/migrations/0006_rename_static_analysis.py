@@ -20,15 +20,12 @@ def reverse_migrate(apps, schema_editor):
     PlaybookConfig.objects.get(name="Sample Static Analysis").delete()
 
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('playbooks_manager', '0005_static_analysis'),
+        ("playbooks_manager", "0005_static_analysis"),
     ]
 
     operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        ),
+        migrations.RunPython(migrate, reverse_migrate),
     ]

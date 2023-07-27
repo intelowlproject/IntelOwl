@@ -1,20 +1,20 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
-import os
+import abc
+import datetime
 
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.core.models import Parameter
-from api_app.models import Comment, Job, PluginConfig, Tag
+from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
-from .. import CustomViewSetTestCase
+from .. import CustomViewSetTestCase, ViewSetTestCaseMixin
 
 User = get_user_model()
 
@@ -187,8 +187,9 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class JobViewsetTests(CustomViewSetTestCase):
+class JobViewSetTests(CustomViewSetTestCase):
     jobs_list_uri = reverse("jobs-list")
+    jobs_recent_scans_uri = reverse("jobs-recent-scans")
     agg_status_uri = reverse("jobs-aggregate-status")
     agg_type_uri = reverse("jobs-aggregate-type")
     agg_observable_classification_uri = reverse(
@@ -204,8 +205,7 @@ class JobViewsetTests(CustomViewSetTestCase):
             **{
                 "user": self.superuser,
                 "is_sample": False,
-                "observable_name": os.environ.get("TEST_IP"),
-                "md5": os.environ.get("TEST_MD5"),
+                "observable_name": "1.2.3.4",
                 "observable_classification": "ip",
             }
         )
@@ -218,6 +218,37 @@ class JobViewsetTests(CustomViewSetTestCase):
                 "file_mimetype": "application/x-dosexec",
             }
         )
+
+    def test_recent_scan(self):
+        j1 = Job.objects.create(
+            **{
+                "user": self.user,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(days=2),
+            }
+        )
+        j2 = Job.objects.create(
+            **{
+                "user": self.user,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(hours=2),
+            }
+        )
+        response = self.client.post(self.jobs_recent_scans_uri, data={"md5": j1.md5})
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(200, response.status_code, msg=msg)
+        self.assertIn("jobs", content, msg=msg)
+        jobs = content["jobs"]
+        self.assertEqual(j2.pk, jobs[0])
+        self.assertEqual(j1.pk, jobs[1])
+
+        j1.delete()
+        j2.delete()
 
     def test_list_200(self):
         response = self.client.get(self.jobs_list_uri)
@@ -418,3 +449,93 @@ class TagViewsetTests(CustomViewSetTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Tag.objects.count(), 0)
+
+
+class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABCMeta):
+    def test_organization_disable(self):
+        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        org, _ = Organization.objects.get_or_create(name="test")
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        # permission denied
+        self.assertEqual(response.status_code, 403, response.json())
+        result = response.json()
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+        m, _ = Membership.objects.get_or_create(
+            user=self.user, organization=org, is_owner=False
+        )
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        # permission denied
+        self.assertEqual(response.status_code, 403, response.json())
+        result = response.json()
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+
+        m.is_owner = True
+        m.save()
+        plugin = self.model_class.objects.get(pk=plugin_pk)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(plugin.disabled_in_organizations.all().exists())
+
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 400, response.json())
+        self.assertEqual(1, plugin.disabled_in_organizations.all().count())
+        result = response.json()
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {plugin.name} already disabled"
+        )
+        plugin.disabled_in_organizations.set([])
+        m.delete()
+        org.delete()
+
+    def test_organization_enable(self):
+        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        org, _ = Organization.objects.get_or_create(name="test")
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        # permission denied
+        self.assertEqual(response.status_code, 403, response.json())
+        result = response.json()
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+        m, _ = Membership.objects.get_or_create(
+            user=self.user, organization=org, is_owner=False
+        )
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        result = response.json()
+        # permission denied
+        self.assertEqual(response.status_code, 403, result)
+        self.assertIn("detail", result)
+        self.assertEqual(
+            result["detail"], "You do not have permission to perform this action."
+        )
+
+        m.is_owner = True
+        m.save()
+        plugin = self.model_class.objects.get(pk=plugin_pk)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        result = response.json()
+        self.assertEqual(response.status_code, 400, result)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
+        )
+
+        plugin.disabled_in_organizations.add(org)
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 202)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        m.delete()
+        org.delete()

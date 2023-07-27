@@ -9,17 +9,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('connectors_manager', '0004_datamigration'),
+        ("connectors_manager", "0004_datamigration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='connectorconfig',
-            name='python_module',
+            model_name="connectorconfig",
+            name="python_module",
             field=models.CharField(db_index=True, max_length=120),
         ),
         migrations.AddIndex(
-            model_name='connectorconfig',
-            index=models.Index(fields=['python_module', 'disabled'], name='connectors__python__0fb146_idx'),
+            model_name="connectorconfig",
+            index=models.Index(
+                fields=["python_module", "disabled"],
+                name="connectors__python__0fb146_idx",
+            ),
         ),
     ]

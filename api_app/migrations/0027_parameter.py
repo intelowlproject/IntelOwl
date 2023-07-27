@@ -10,10 +10,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0026_pluginconfig_api_app_plu_organiz_0867bd_idx'),
-        ('analyzers_manager', '0015_alter_analyzerconfig_disabled_in_organizations_and_more'),
-        ('connectors_manager', '0014_alter_connectorconfig_disabled_in_organizations_and_more'),
-        ('visualizers_manager', '0012_alter_visualizerconfig_disabled_in_organizations_and_more'),
+        ("api_app", "0026_pluginconfig_api_app_plu_organiz_0867bd_idx"),
+        (
+            "analyzers_manager",
+            "0015_alter_analyzerconfig_disabled_in_organizations_and_more",
+        ),
+        (
+            "connectors_manager",
+            "0014_alter_connectorconfig_disabled_in_organizations_and_more",
+        ),
+        (
+            "visualizers_manager",
+            "0012_alter_visualizerconfig_disabled_in_organizations_and_more",
+        ),
     ]
 
     operations = [
@@ -29,53 +38,61 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
+                ("name", models.CharField(null=False, blank=False, max_length=50)),
                 (
-                    "name", models.CharField(null=False, blank=False, max_length=50)
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("int", "Int"),
+                            ("float", "Float"),
+                            ("str", "Str"),
+                            ("bool", "Bool"),
+                            ("list", "List"),
+                            ("dict", "Dict"),
+                        ],
+                        max_length=10,
+                    ),
                 ),
+                ("description", models.TextField(default="", blank=True)),
+                ("is_secret", models.BooleanField()),
+                ("required", models.BooleanField()),
                 (
-                    "type", models.CharField(choices=[('int', 'Int'), ('float', 'Float'), ('str', 'Str'), ('bool', 'Bool'), ('list', 'List'), ('dict', 'Dict')], max_length=10)
-                ),
-                (
-                    "description", models.TextField(
-                        default="", blank=True
-                    )
-                ),
-                (
-                    "is_secret", models.BooleanField(
-                    )
-                ),
-                (
-                    "required", models.BooleanField(
-                    )
-                ),
-                (
-                    "analyzer_config",models.ForeignKey(
+                    "analyzer_config",
+                    models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="parameters",
                         to="analyzers_manager.analyzerconfig",
-                        null=True, blank=True
+                        null=True,
+                        blank=True,
                     ),
                 ),
                 (
-                    "connector_config", models.ForeignKey(
+                    "connector_config",
+                    models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="parameters",
                         to="connectors_manager.connectorconfig",
-                        null=True, blank=True
+                        null=True,
+                        blank=True,
                     ),
                 ),
                 (
-                    "visualizer_config", models.ForeignKey(
+                    "visualizer_config",
+                    models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="parameters",
                         to="visualizers_manager.visualizerconfig",
-                        null=True, blank=True
+                        null=True,
+                        blank=True,
                     ),
-                )
+                ),
             ],
-            options={"unique_together": {("name", "analyzer_config", "connector_config", "visualizer_config")}},
+            options={
+                "unique_together": {
+                    ("name", "analyzer_config", "connector_config", "visualizer_config")
+                }
+            },
         ),
-
         migrations.AlterField(
             model_name="pluginconfig",
             name="owner",
@@ -84,7 +101,7 @@ class Migration(migrations.Migration):
                 related_name="custom_configs",
                 to=settings.AUTH_USER_MODEL,
                 null=True,
-                blank=True
+                blank=True,
             ),
         ),
     ]

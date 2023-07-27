@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('visualizers_manager', '0015_alter_visualizerreport_unique_together'),
+        ("visualizers_manager", "0015_alter_visualizerreport_unique_together"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='visualizerreport',
-            name='name',
+            model_name="visualizerreport",
+            name="name",
             field=models.CharField(blank=True, default=None, max_length=50, null=True),
         ),
     ]

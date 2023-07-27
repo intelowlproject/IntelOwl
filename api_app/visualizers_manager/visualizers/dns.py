@@ -29,9 +29,8 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.quad9_dns_
 )
 from api_app.choices import ObservableClassification
 from api_app.models import Job
-from api_app.visualizers_manager.classes import (
-    VisualizableObject,
-    Visualizer,
+from api_app.visualizers_manager.classes import VisualizableObject, Visualizer
+from api_app.visualizers_manager.decorators import (
     visualizable_error_handler_with_params,
 )
 

@@ -7,20 +7,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0024_tlp'),
-        ('certego_saas_organization', '0001_initial'),
-        ('visualizers_manager', '00011_dns_visualizer'),
+        ("api_app", "0024_tlp"),
+        ("certego_saas_organization", "0001_initial"),
+        ("visualizers_manager", "00011_dns_visualizer"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='visualizerconfig',
-            name='disabled_in_organizations',
-            field=models.ManyToManyField(blank=True, related_name='%(app_label)s_%(class)s_disabled', to='certego_saas_organization.organization'),
+            model_name="visualizerconfig",
+            name="disabled_in_organizations",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(app_label)s_%(class)s_disabled",
+                to="certego_saas_organization.organization",
+            ),
         ),
         migrations.AlterField(
-            model_name='visualizerreport',
-            name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='api_app.job'),
+            model_name="visualizerreport",
+            name="job",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)ss",
+                to="api_app.job",
+            ),
         ),
     ]

@@ -6,3 +6,7 @@ from django.apps import AppConfig
 
 class PivotManagerConfig(AppConfig):
     name = "api_app.pivots_manager"
+
+    @staticmethod
+    def ready() -> None:
+        from . import signals  # noqa

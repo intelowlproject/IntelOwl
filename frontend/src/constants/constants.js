@@ -45,3 +45,8 @@ export const configType = Object.freeze({
   PARAMETER: "1",
   SECRET: "2",
 });
+
+export const scanMode = Object.freeze({
+  FORCE_NEW_ANALYSIS: "1",
+  CHECK_PREVIOUS_ANALYSIS: "2",
+});

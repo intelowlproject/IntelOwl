@@ -2,12 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 
-from api_app.core.serializers import (
+from ..serializers import (
     AbstractReportSerializer,
     PythonConfigSerializer,
     PythonListConfigSerializer,
 )
-
 from .models import AnalyzerConfig, AnalyzerReport
 
 

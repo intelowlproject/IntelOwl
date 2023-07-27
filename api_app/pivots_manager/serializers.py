@@ -3,10 +3,10 @@ from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job
 from api_app.pivots_manager.models import Pivot, PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
+from api_app.serializers import AbstractConfigSerializer
 from api_app.visualizers_manager.models import VisualizerConfig
 
 

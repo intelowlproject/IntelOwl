@@ -6,9 +6,8 @@ from unittest.mock import patch
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.models import Job
-
-from .. import CustomViewSetTestCase, PluginActionViewsetTestCase
-from ..core.test_views import AbstractConfigViewSetTestCaseMixin
+from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
+from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
 class AnalyzerConfigViewSetTestCase(

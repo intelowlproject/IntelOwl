@@ -13,30 +13,33 @@ def migrate_disabled_config(apps, schema_editor):
         config = AnalyzerConfig.objects.get(name=plugin_state.plugin_name)
         config.disabled_in_organizations.add(plugin_state.organization)
 
+
 def backwards_migrate_disabled_config(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     OrganizationPluginState = apps.get_model("api_app", "OrganizationPluginState")
     for config in AnalyzerConfig.objects.all():
         for org in config.disabled_in_organizations.all():
             OrganizationPluginState.objects.create(
-                plugin_name=config.name,
-                type="1",
-                organization=org,
-                disabled=True
+                plugin_name=config.name, type="1", organization=org, disabled=True
             )
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('certego_saas_organization', '0001_initial'),
-        ('analyzers_manager', '0005_auto_20230301_1415'),
+        ("certego_saas_organization", "0001_initial"),
+        ("analyzers_manager", "0005_auto_20230301_1415"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='analyzerconfig',
-            name='disabled_in_organizations',
-            field=models.ManyToManyField(blank=True, related_name='analyzers_manager_analyzerconfig_disabled', to='certego_saas_organization.Organization'),
+            model_name="analyzerconfig",
+            name="disabled_in_organizations",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="analyzers_manager_analyzerconfig_disabled",
+                to="certego_saas_organization.Organization",
+            ),
         ),
         migrations.RunPython(
             migrate_disabled_config, backwards_migrate_disabled_config

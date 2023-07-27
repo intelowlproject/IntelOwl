@@ -8,13 +8,16 @@ import api_app.visualizers_manager.validators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('visualizers_manager', '0013_params'),
+        ("visualizers_manager", "0013_params"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='visualizerreport',
-            name='report',
-            field=models.JSONField(default=list, validators=[api_app.visualizers_manager.validators.validate_report]),
+            model_name="visualizerreport",
+            name="report",
+            field=models.JSONField(
+                default=list,
+                validators=[api_app.visualizers_manager.validators.validate_report],
+            ),
         ),
     ]

@@ -3,9 +3,9 @@
 
 from django.contrib import admin
 
+from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
 from api_app.connectors_manager.forms import ConnectorConfigAdminForm
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
-from api_app.core.admin import AbstractReportAdminView, PythonConfigAdminView
 
 
 @admin.register(ConnectorReport)

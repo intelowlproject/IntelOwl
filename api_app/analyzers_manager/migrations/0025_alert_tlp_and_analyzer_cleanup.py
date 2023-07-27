@@ -143,7 +143,9 @@ def reverse_migrate(apps, schema_editor):
             "tor.Tor",
         ]
     ).update(maximum_tlp=TLP.AMBER.value)
-    AnalyzerConfig.objects.filter(python_module="sublime.Sublime").update(maximum_tlp=TLP.RED.value)
+    AnalyzerConfig.objects.filter(python_module="sublime.Sublime").update(
+        maximum_tlp=TLP.RED.value
+    )
     config = AnalyzerConfig.objects.get(name="UnpacMe")
     config.name = "UnpacMe_EXE_Unpacker"
     new_config = config.save()
@@ -185,5 +187,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(migrate, reverse_migrate),
-
     ]

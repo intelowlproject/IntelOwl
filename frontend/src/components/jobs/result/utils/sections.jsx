@@ -179,12 +179,7 @@ export function JobActionsBar({ job, refetch }) {
         className="me-2"
       />
 
-      <SaveAsPlaybookButton
-        analyzers={job.analyzers_to_execute}
-        connectors={job.connectors_to_execute}
-        pivots={[]}
-        runtimeConfiguration={job.runtime_configuration}
-      />
+      <SaveAsPlaybookButton job={job} />
       {job?.is_sample && (
         <Button
           size="sm"

@@ -12,10 +12,13 @@ def migrate(apps, schema_editor):
     ConnectorReport = apps.get_model("connectors_manager", "ConnectorReport")
     for report in ConnectorReport.objects.all():
         if report.parent_playbook:
-            report.parent_playbook2 = PlaybookConfig.objects.get(name=report.parent_playbook)
+            report.parent_playbook2 = PlaybookConfig.objects.get(
+                name=report.parent_playbook
+            )
         else:
             report.parent_playbook2 = None
         report.save()
+
 
 def backwards_migrate(apps, schema_editor):
     ConnectorReport = apps.get_model("connectors_manager", "ConnectorReport")
@@ -30,26 +33,29 @@ def backwards_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('playbooks_manager', '0004_datamigration'),
-        ('connectors_manager', '0008_auto_20230308_1623'),
+        ("playbooks_manager", "0004_datamigration"),
+        ("connectors_manager", "0008_auto_20230308_1623"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='connectorreport',
-            name='parent_playbook2',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='connectorreports', to='playbooks_manager.playbookconfig'),
+            model_name="connectorreport",
+            name="parent_playbook2",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="connectorreports",
+                to="playbooks_manager.playbookconfig",
+            ),
         ),
-        migrations.RunPython(
-            migrate, backwards_migrate
-        ),
+        migrations.RunPython(migrate, backwards_migrate),
         migrations.RemoveField(
-            model_name='connectorreport',
-            name='parent_playbook',
+            model_name="connectorreport",
+            name="parent_playbook",
         ),
         migrations.RenameField(
-            model_name='connectorreport',
+            model_name="connectorreport",
             old_name="parent_playbook2",
-            new_name="parent_playbook"
-        )
+            new_name="parent_playbook",
+        ),
     ]

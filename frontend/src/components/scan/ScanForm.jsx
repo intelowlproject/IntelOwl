@@ -24,6 +24,7 @@ import {
   ErrorMessage,
 } from "formik";
 import useTitle from "react-use/lib/useTitle";
+import ReactSelect from "react-select";
 
 import {
   ContentSection,
@@ -31,6 +32,7 @@ import {
   Loader,
   MultiSelectDropdownInput,
   addToast,
+  selectStyles,
 } from "@certego/certego-ui";
 
 import {
@@ -45,7 +47,8 @@ import {
   TLP_DESCRIPTION_MAP,
   scanTypes,
 } from "../../constants";
-import { TLPTag, markdownToHtml } from "../common";
+import { scanMode } from "../../constants/constants";
+import { TLPTag, markdownToHtml, JobTag } from "../common";
 import {
   RuntimeConfigurationModal,
   RecentScans,
@@ -85,11 +88,12 @@ export default function ScanForm() {
       files: [],
       analyzers: [],
       connectors: [],
-      playbooks: [],
+      // playbook is an object, but if we use {} as default the UI component to select playbooks doesn's show the placeholder
+      playbook: "",
       tlp: "AMBER",
       runtime_configuration: {},
       tags: [],
-      check: "check_all",
+      scan_mode: scanMode.CHECK_PREVIOUS_ANALYSIS,
       analysisOptionValues: scanTypes.playbooks,
       hoursAgo: 24,
     },
@@ -127,12 +131,12 @@ export default function ScanForm() {
         errors.tlp = "Invalid choice";
       }
 
-      // check playbooks or analyzer selections based on the user selection
+      // check playbook or analyzer selections based on the user selection
       if (
         values.analysisOptionValues === scanTypes.playbooks &&
-        values.playbooks.length === 0
+        Object.keys(values.playbook).length === 0
       ) {
-        errors.playbooks = "playbooks required";
+        errors.playbook = "playbook required";
       }
       if (
         values.analysisOptionValues === scanTypes.analyzers_and_connectors &&
@@ -284,6 +288,7 @@ export default function ScanForm() {
       // filter on basis of type
       obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
     });
+    console.debug("Playbooks", grouped);
     return grouped;
   }, [playbooks]);
 
@@ -365,6 +370,12 @@ export default function ScanForm() {
           </div>
         ),
         labelDisplay: v.name,
+        tags: v.tags.map((tag) => ({
+          value: tag,
+          label: <JobTag tag={tag} />,
+        })),
+        tlp: v.tlp,
+        scan_mode: `${v.scan_mode}`,
       }))
       .sort((a, b) =>
         // eslint-disable-next-line no-nested-ternary
@@ -375,9 +386,9 @@ export default function ScanForm() {
     (values) => {
       const errors = {};
       if (playbooksError) {
-        errors.playbooks = playbooksError;
+        errors.playbook = playbooksError;
       }
-      if (values.playbooks.length === 0) {
+      if (Object.keys(values.playbook).length === 0) {
         return `Please select a playbook!`;
       }
       if (values.classification === "file") {
@@ -403,7 +414,9 @@ export default function ScanForm() {
         ),
         tlp: values.tlp,
         tags_labels: values.tags.map((optTag) => optTag.value.label),
-        playbooks: values.playbooks.map((x) => x.value),
+        playbook: values.playbook.value,
+        scan_mode: values.scan_mode,
+        hoursAgo: values.hoursAgo,
       };
 
       const errors = ValidatePlaybooks(values);
@@ -483,7 +496,7 @@ export default function ScanForm() {
                             false,
                           );
                           setScanType(scanTypes.playbooks);
-                          formik.setFieldValue("playbooks", [], false); // reset
+                          formik.setFieldValue("playbook", "", false); // reset
                           formik.setFieldValue("analyzers", [], false); // reset
                           formik.setFieldValue("connectors", [], false); // reset
                         }}
@@ -556,21 +569,38 @@ export default function ScanForm() {
                                         newClassification,
                                         false,
                                       );
-                                      // in case a palybook is available and i changed classification or no playbooks is selected i select a playbook
+                                      // in case a palybook is available and i changed classification or no playbook is selected i select a playbook
                                       if (
                                         playbookOptions(newClassification)
                                           .length > 0 &&
                                         (oldClassification !==
                                           newClassification ||
-                                          formik.values.playbooks.length === 0)
+                                          Object.keys(formik.values.playbook)
+                                            .length === 0) &&
+                                        formik.values.analysisOptionValues ===
+                                          scanTypes.playbooks
                                       ) {
                                         formik.setFieldValue(
-                                          "playbooks",
-                                          [
-                                            playbookOptions(
-                                              newClassification,
-                                            )[0],
-                                          ],
+                                          "playbook",
+                                          playbookOptions(newClassification)[0],
+                                          false,
+                                        );
+                                        formik.setFieldValue(
+                                          "tags",
+                                          playbookOptions(newClassification)[0]
+                                            .tags,
+                                          false,
+                                        );
+                                        formik.setFieldValue(
+                                          "tlp",
+                                          playbookOptions(newClassification)[0]
+                                            .tlp,
+                                          false,
+                                        );
+                                        formik.setFieldValue(
+                                          "scan_mode",
+                                          playbookOptions(newClassification)[0]
+                                            .scan_mode,
                                           false,
                                         );
                                       }
@@ -629,12 +659,29 @@ export default function ScanForm() {
                       );
                       formik.setFieldValue("classification", "file", false);
                       if (
-                        formik.values.playbooks.length === 0 &&
-                        playbookOptions("file").length > 0
+                        Object.keys(formik.values.playbook).length === 0 &&
+                        playbookOptions("file").length > 0 &&
+                        formik.values.analysisOptionValues ===
+                          scanTypes.playbooks
                       ) {
                         formik.setFieldValue(
-                          "playbooks",
-                          [playbookOptions("file")[0]],
+                          "playbook",
+                          playbookOptions("file")[0],
+                          false,
+                        );
+                        formik.setFieldValue(
+                          "tags",
+                          playbookOptions("file")[0].tags,
+                          false,
+                        );
+                        formik.setFieldValue(
+                          "tlp",
+                          playbookOptions("file")[0].tlp,
+                          false,
+                        );
+                        formik.setFieldValue(
+                          "scan_mode",
+                          playbookOptions("file")[0].scan_mode,
                           false,
                         );
                       }
@@ -663,7 +710,27 @@ export default function ScanForm() {
                         value={type_}
                         onClick={() => {
                           setScanType(type_);
-                          formik.setFieldValue("playbooks", [], false); // reset
+                          formik.setFieldValue(
+                            "playbook",
+                            formik.initialValues.playbook,
+                            false,
+                          ); // reset playbook
+                          // reset advanced configuration
+                          formik.setFieldValue(
+                            "tags",
+                            formik.initialValues.tags,
+                            false,
+                          );
+                          formik.setFieldValue(
+                            "tlp",
+                            formik.initialValues.tlp,
+                            false,
+                          );
+                          formik.setFieldValue(
+                            "scan_mode",
+                            formik.initialValues.scan_mode,
+                            false,
+                          );
                         }}
                       />
                       <Label check>{type_}</Label>
@@ -744,19 +811,24 @@ export default function ScanForm() {
             )}
             {scanType === scanTypes.playbooks && (
               <FormGroup row>
-                <Label sm={3} htmlFor="playbooks">
-                  Select Playbooks
+                <Label sm={3} htmlFor="playbook">
+                  Select Playbook
                 </Label>
                 {!(playbooksLoading || playbooksError) && (
                   <Col sm={9}>
-                    <MultiSelectDropdownInput
+                    <ReactSelect
+                      isClearable={false}
                       options={playbookOptions(formik.values.classification)}
-                      value={formik.values.playbooks}
-                      onChange={(v) =>
-                        formik.setFieldValue("playbooks", v, false)
-                      }
+                      styles={selectStyles}
+                      value={formik.values.playbook}
+                      onChange={(v) => {
+                        formik.setFieldValue("playbook", v, false);
+                        formik.setFieldValue("tags", v.tags, false);
+                        formik.setFieldValue("tlp", v.tlp, false);
+                        formik.setFieldValue("scan_mode", v.scan_mode, false);
+                      }}
                     />
-                    {DangerErrorMessage("playbooks")}
+                    {DangerErrorMessage("playbook")}
                   </Col>
                 )}
               </FormGroup>
@@ -831,8 +903,8 @@ export default function ScanForm() {
                       as={Input}
                       id="checkchoice__check_all"
                       type="radio"
-                      name="check"
-                      value="check_all"
+                      name="scan_mode"
+                      value={scanMode.CHECK_PREVIOUS_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <div className="d-flex align-items-center">
@@ -880,8 +952,8 @@ export default function ScanForm() {
                       as={Input}
                       id="checkchoice__force_new"
                       type="radio"
-                      name="check"
-                      value="force_new"
+                      name="scan_mode"
+                      value={scanMode.FORCE_NEW_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <Label check for="checkchoice__force_new">

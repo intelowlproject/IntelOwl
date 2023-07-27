@@ -7,6 +7,7 @@ import django.contrib.postgres.fields
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 
+import api_app.defaults
 import api_app.models
 
 
@@ -111,7 +112,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        blank=True, upload_to=api_app.models.file_directory_path
+                        blank=True, upload_to=api_app.defaults.file_directory_path
                     ),
                 ),
                 (

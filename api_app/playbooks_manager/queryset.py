@@ -4,8 +4,8 @@ from typing import Union
 from django.db.models import F, Func, OuterRef, QuerySet, Subquery, Value
 from django.utils.timezone import now
 
-from api_app.core.queryset import AbstractConfigQuerySet
 from api_app.models import Job
+from api_app.queryset import AbstractConfigQuerySet
 from certego_saas.apps.user.models import User
 
 
@@ -43,8 +43,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
     def _subquery_other(user: User) -> Subquery:
         if user.has_membership():
             return Subquery(
-                Job.objects.prefetch_related("user")
-                .filter(
+                Job.objects.filter(
                     playbook_to_execute=OuterRef("pk"),
                     finished_analysis_time__gte=now() - datetime.timedelta(days=30),
                 )

@@ -17,9 +17,9 @@ class ApiAppConfig(AppConfig):
         # flake8: noqa
         from django.core.cache import cache
 
-        import api_app.core.signals  # noqa
-        import api_app.signals  # noqa
         from authentication.views import DurinAuthenticationScheme  # noqa
+
+        from . import signals  # noqa
 
         logger.info("Cleaning cache")
         try:

@@ -9,11 +9,14 @@ def migrate(apps, schema_editor):
     PlaybookConfig.objects.get(name="Sample Static Analysis").delete()
 
 
-
 def reverse_migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
 
-    pc = PlaybookConfig.objects.create(type=["file"], name="Sample Static Analysis", description="Execute a static analysis")
+    pc = PlaybookConfig.objects.create(
+        type=["file"],
+        name="Sample Static Analysis",
+        description="Execute a static analysis",
+    )
     pc.save()
     pc.analyzers.set(
         [
@@ -33,8 +36,6 @@ def reverse_migrate(apps, schema_editor):
             "Quark_Engine",
         ]
     )
-
-
 
 
 class Migration(migrations.Migration):

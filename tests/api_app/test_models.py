@@ -272,7 +272,7 @@ class AbstractConfigTestCase(CustomTestCase):
             .annotate_runnable(self.user)
             .get_signatures(job)
         )
-        with self.assertRaises(StopIteration):
+        with self.assertRaises(RuntimeWarning):
             next(gen_signature)
         muc.delete()
         job.delete()

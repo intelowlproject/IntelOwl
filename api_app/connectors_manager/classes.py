@@ -87,19 +87,15 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-        ccs = (
-            cls.config_model.objects.filter(name=connector_name)
-            .annotate_runnable()
-            .filter(runnable=True)
-        )
+        ccs = cls.config_model.objects.filter(name=connector_name)
         if not ccs.count():
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
         for cc in ccs:
             logger.info(f"Found connector runnable {cc.name} for user {user.username}")
             for param in (
                 cc.parameters.filter(name__startswith="url")
-                .annotate_configured()
-                .annotate_value_for_user()
+                .annotate_configured(user)
+                .annotate_value_for_user(user)
             ):
                 if not param.configured or not param.value:
                     continue

@@ -444,7 +444,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             context={"request": MockUpRequest(self.user)},
             child=ConnectorConfigSerializer(),
         )
-        result = ccs.to_representation([cc])
+        result = list(ccs.to_representation([cc]))
         self.assertEqual(1, len(result))
         result = result[0]
         self.assertIn("verification", result)
@@ -473,7 +473,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             context={"request": MockUpRequest(self.user)},
             child=ConnectorConfigSerializer(),
         )
-        result = ccs.to_representation([cc])
+        result = list(ccs.to_representation([cc]))
         self.assertEqual(1, len(result))
         result = result[0]
 

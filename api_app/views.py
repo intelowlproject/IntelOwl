@@ -666,7 +666,9 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     @staticmethod
     def perform_retry(report: AbstractReport):
         signature = next(
-            report.config.__class__.objects.filter(pk=report.config.pk).get_signatures(
+            report.config.__class__.objects.filter(pk=report.config.pk)
+            .annotate_runnable(report.job.user)
+            .get_signatures(
                 report.job,
             )
         )

@@ -239,7 +239,7 @@ class AbstractConfigTestCase(CustomTestCase):
         m.delete()
         org.delete()
 
-    def test_get_signature_disabled(self):
+    def test_get_signature_without_runnable(self):
         job, _ = Job.objects.get_or_create(user=self.user)
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
@@ -251,9 +251,29 @@ class AbstractConfigTestCase(CustomTestCase):
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
+        with self.assertRaises(RuntimeError):
+            next(gen_signature)
+        muc.delete()
+        job.delete()
+
+    def test_get_signature_disabled(self):
+        job, _ = Job.objects.get_or_create(user=self.user)
+        muc, _ = VisualizerConfig.objects.get_or_create(
+            name="test",
+            description="test",
+            python_module="yara.Yara",
+            disabled=True,
+            config={"soft_time_limit": 100, "queue": "default"},
+            playbook=PlaybookConfig.objects.first(),
+        )
+        job.visualizers_to_execute.set([muc])
+        gen_signature = (
+            VisualizerConfig.objects.filter(pk=muc.pk)
+            .annotate_runnable(self.user)
+            .get_signatures(job)
+        )
         with self.assertRaises(StopIteration):
             next(gen_signature)
-
         muc.delete()
         job.delete()
 
@@ -268,7 +288,11 @@ class AbstractConfigTestCase(CustomTestCase):
             playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
-        gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
+        gen_signature = (
+            VisualizerConfig.objects.filter(pk=muc.pk)
+            .annotate_runnable(self.user)
+            .get_signatures(job)
+        )
         try:
             signature = next(gen_signature)
         except StopIteration as e:

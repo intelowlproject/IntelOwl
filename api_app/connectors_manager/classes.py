@@ -101,9 +101,9 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
                 .annotate_configured()
                 .annotate_value_for_user()
             ):
-                if not param.configured or not param.first_value:
+                if not param.configured or not param.value:
                     continue
-                url = param.first_value
+                url = param.value
                 logger.info(
                     f"Url retrieved to verify is {param.name} for connector {cc.name}"
                 )

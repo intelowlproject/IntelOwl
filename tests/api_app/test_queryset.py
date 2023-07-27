@@ -1,5 +1,6 @@
 import datetime
 
+from django.db.models import F
 from django.utils.timezone import now
 
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -44,8 +45,13 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             owner=self.user,
             parameter=param1,
         )
-        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
-            name="test"
+        ac_retrieved = (
+            AnalyzerConfig.objects.annotate_runnable(self.user)
+            .annotate(
+                required_configured_params=F("required_configured_params"),
+                required_params=F("required_params"),
+            )
+            .get(name="test")
         )
 
         self.assertFalse(ac_retrieved.runnable)
@@ -82,8 +88,13 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             owner=self.user,
             parameter=param,
         )
-        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
-            name="test"
+        ac_retrieved = (
+            AnalyzerConfig.objects.annotate_runnable(self.user)
+            .annotate(
+                required_configured_params=F("required_configured_params"),
+                required_params=F("required_params"),
+            )
+            .get(name="test")
         )
 
         self.assertTrue(ac_retrieved.runnable)
@@ -113,8 +124,13 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             analyzer_config=ac,
         )
 
-        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
-            name="test"
+        ac_retrieved = (
+            AnalyzerConfig.objects.annotate_runnable(self.user)
+            .annotate(
+                required_configured_params=F("required_configured_params"),
+                required_params=F("required_params"),
+            )
+            .get(name="test")
         )
         self.assertFalse(ac_retrieved.runnable)
         self.assertEqual(0, ac_retrieved.required_configured_params)
@@ -132,8 +148,13 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             type="file",
             run_hash=False,
         )
-        ac_retrieved = AnalyzerConfig.objects.annotate_runnable(self.user).get(
-            name="test"
+        ac_retrieved = (
+            AnalyzerConfig.objects.annotate_runnable(self.user)
+            .annotate(
+                required_configured_params=F("required_configured_params"),
+                required_params=F("required_params"),
+            )
+            .get(name="test")
         )
         self.assertFalse(ac_retrieved.runnable)
         self.assertTrue(ac_retrieved.configured)
@@ -235,7 +256,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
         self.assertFalse(hasattr(param, "owner_value"))
         self.assertFalse(hasattr(param, "org_value"))
         self.assertFalse(hasattr(param, "default_value"))
-        self.assertTrue(hasattr(param, "first_value"))
+        self.assertTrue(hasattr(param, "value"))
         # default value
         self.assertEqual(param.value, "myperfecttest2")
 

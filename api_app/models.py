@@ -880,15 +880,15 @@ class PythonConfig(AbstractConfig):
         # 2 - Value inside the db
         config_runtime = job.get_config_runtime_configuration(self)
         result = {}
-        for param in self.parameters.annotate_configured().annotate_value_for_user(
+        for param in self.parameters.annotate_configured(
             job.user
-        ):
+        ).annotate_value_for_user(job.user):
             param: Parameter
             if param.name in config_runtime:
                 result[param] = config_runtime[param.name]
             else:
                 if param.configured:
-                    result[param] = PluginConfig.objects.get(pk=param.first_value).value
+                    result[param] = param.value
                 else:
                     if settings.STAGE_CI:
                         result[param] = param.get_valid_value_for_test()

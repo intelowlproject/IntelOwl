@@ -115,8 +115,9 @@ class MimeTypes(models.TextChoices):
             try:
                 mimetype = cls(mimetype)
             except ValueError:
-                logger.error(
+                logger.info(
                     f"Unable to valid a {cls.__name__} for mimetype {mimetype}"
+                    f" for file {file_name}"
                 )
             else:
                 mimetype = mimetype.value

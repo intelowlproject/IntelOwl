@@ -892,6 +892,7 @@ class PythonConfig(AbstractConfig):
                 else:
                     if settings.STAGE_CI:
                         result[param] = param.get_valid_value_for_test()
+                        continue
                     if param.required:
                         raise TypeError(
                             f"Required param {param.name} of plugin {param.config.name}"

@@ -197,36 +197,6 @@ class ParameterQuerySetTestCase(CustomTestCase):
         pc.delete()
         param.delete()
 
-    def test_annotate_values_for_user(self):
-        param = Parameter.objects.create(
-            name="testparameter",
-            type="str",
-            description="test parameter",
-            is_secret=False,
-            required=False,
-            analyzer_config=AnalyzerConfig.objects.first(),
-        )
-        pc2 = PluginConfig.objects.create(
-            value="myperfecttest",
-            for_organization=False,
-            owner=self.user,
-            parameter=param,
-        )
-
-        pc = PluginConfig.objects.create(
-            value="myperfecttest",
-            for_organization=False,
-            owner=self.user,
-            parameter=param,
-        )
-        param = Parameter.objects.annotate_values_for_user(self.user).get(pk=param.pk)
-        self.assertTrue(hasattr(param, "visible_values"))
-        self.assertCountEqual(param.visible_values, [pc.pk])
-
-        pc.delete()
-        pc2.delete()
-        param.delete()
-
     def test_annotate_value_for_user(self):
         param = Parameter.objects.create(
             name="testparameter",

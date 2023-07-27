@@ -58,18 +58,10 @@ class ConnectorActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTest
 
     def setUp(self):
         super().setUp()
-        self.config = ConnectorConfig.objects.create(
-            name="test",
-            python_module="misp.MISP",
-            description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
-            disabled=False,
-            maximum_tlp="CLEAR",
-        )
+        self.config = ConnectorConfig.objects.get(name="MISP")
 
     def tearDown(self) -> None:
         super().tearDown()
-        self.config.delete()
 
     def init_report(self, status: str, user) -> ConnectorReport:
         _job = Job.objects.create(

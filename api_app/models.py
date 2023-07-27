@@ -894,7 +894,7 @@ class PythonConfig(AbstractConfig):
                         result[param] = param.get_valid_value_for_test()
                     if param.required:
                         raise TypeError(
-                            f"Required param {param.name} of plugin {param.config.name} does not have a "
-                            f"valid value for job {job.pk}"
+                            f"Required param {param.name} of plugin {param.config.name}"
+                            f" does not have a valid value for job {job.pk}"
                         )
         return result

@@ -90,7 +90,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     return jobs_id_stuck
 
 
-@shared_task(soft_time_limit=60)
+@shared_task(soft_time_limit=150)
 def update(python_module: str, queue: str = None):
     from api_app.analyzers_manager.models import AnalyzerConfig
     from intel_owl.celery import broadcast

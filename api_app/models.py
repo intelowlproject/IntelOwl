@@ -524,29 +524,13 @@ class Parameter(models.Model):
         if not settings.STAGE_CI:
             raise PluginConfig.DoesNotExist
         if "url" in self.name:
-
-            return PluginConfig.objects.get_or_create(
-                value="https://intelowl.com",
-                parameter=self,
-                owner=None,
-                for_organization=False,
-            )[0]
+            return "https://intelowl.com"
         elif "pdns_credentials" == self.name:
-            return PluginConfig.objects.get_or_create(
-                value="user|pwd",
-                parameter=self,
-                owner=None,
-                for_organization=False,
-            )[0]
+            return "user|pwd"
         elif "test" in self.name:
             raise PluginConfig.DoesNotExist
         else:
-            return PluginConfig.objects.get_or_create(
-                value="test",
-                parameter=self,
-                owner=None,
-                for_organization=False,
-            )[0]
+            return "test"
 
 
 class PluginConfig(models.Model):

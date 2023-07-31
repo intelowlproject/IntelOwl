@@ -30,6 +30,21 @@ def update_plugin(state, plugin_path):
     plugin.update()
 
 
+@shared_task(soft_time_limit=120)
+def execute_ingestor(config_pk:str):
+    from api_app.ingestors_manager.models import IngestorConfig
+    from api_app.ingestors_manager.classes import Ingestor
+
+    config: IngestorConfig = IngestorConfig.objects.get(pk=config_pk)
+    if config.disabled:
+        logger.info(f"Not executing ingestor {config.name} because disabled")
+    else:
+        class_ = config.python_class
+        obj: Ingestor = class_(config=config, runtime_configuration={})
+        obj.start()
+        logger.info(f"Executing ingestor {config.name}")
+
+
 @shared_task(soft_time_limit=10000)
 def remove_old_jobs():
     """

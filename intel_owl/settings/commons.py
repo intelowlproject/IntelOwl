@@ -32,7 +32,9 @@ PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 # used for generating links to web client e.g. job results page
 WEB_CLIENT_DOMAIN = get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
 
-
+BASE_INGESTOR_PYTHON_PATH = PosixPath(
+    get_secret("BASE_INGESTOR_PYTHON_PATH", "api_app.ingestors_manager.ingestors")
+)
 BASE_VISUALIZER_PYTHON_PATH = PosixPath(
     get_secret("BASE_VISUALIZER_PYTHON_PATH", "api_app.visualizers_manager.visualizers")
 )

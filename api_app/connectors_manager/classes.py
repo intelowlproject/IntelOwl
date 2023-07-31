@@ -29,10 +29,6 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     def python_base_path(cls):
         return settings.BASE_CONNECTOR_PYTHON_PATH
 
-    @property
-    def connector_name(self) -> str:
-        return self._config.name
-
     @classmethod
     @property
     def report_model(cls) -> Type[ConnectorReport]:
@@ -48,12 +44,6 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             ConnectorConfigurationException,
             ConnectorRunException,
         ]
-
-    def get_error_message(self, err, is_base_err=False):
-        return (
-            f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
-        )
 
     def before_run(self):
         super().before_run()

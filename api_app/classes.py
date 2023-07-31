@@ -66,11 +66,18 @@ class Plugin(metaclass=ABCMeta):
     def _job(self) -> "Job":
         return Job.objects.get(pk=self.job_id)
 
+    @cached_property
+    def _user(self):
+        return self._job.user
+
     def __repr__(self):
         return f"({self.__class__.__name__}, job: #{self.job_id})"
 
+    def _get_params(self) -> typing.Dict:
+        return self._config.read_params(self._user, self.runtime_configuration)
+
     def config(self):
-        for param, value in self._config.read_params(self._job).items():
+        for param, value in self._get_params().items():
             attribute_name = f"_{param.name}" if param.is_secret else param.name
             setattr(self, attribute_name, value)
             logger.debug(
@@ -101,7 +108,9 @@ class Plugin(metaclass=ABCMeta):
         self.report.end_time = timezone.now()
         self.report.save()
 
-    def after_run_success(self, content):
+    def after_run_success(self, content: typing.Union[typing.Dict, typing.Iterable]):
+        if isinstance(content, typing.Generator):
+            content = list(content)
         self.report.report = content
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
@@ -151,7 +160,7 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    def init_report_object(self):
+    def init_report_object(self) -> AbstractReport:
         """
         Returns report object set in *__init__* fn
         """
@@ -174,9 +183,15 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @staticmethod
-    def get_error_message(exc, is_base_err=False):
-        return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
+    def get_error_message(self, err, is_base_err=False):
+        """
+        Returns error message for
+        *_handle_analyzer_exception* and *_handle_base_exception* fn
+        """
+        return (
+            f"{self.__repr__()}."
+            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
+        )
 
     def start(self, *args, **kwargs):
         """

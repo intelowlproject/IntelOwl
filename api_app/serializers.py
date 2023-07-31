@@ -165,6 +165,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
         )
         attrs["warnings"] = self.filter_warnings
+        self.filter_warnings.clear()
         attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 

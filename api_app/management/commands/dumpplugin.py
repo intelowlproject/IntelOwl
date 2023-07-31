@@ -9,6 +9,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+from api_app.ingestors_manager.models import IngestorConfig
+from api_app.ingestors_manager.serializers import IngestorConfigSerializer
 from api_app.models import PluginConfig
 from api_app.serializers import (
     ParameterCompleteSerializer,
@@ -31,6 +33,7 @@ class Command(BaseCommand):
                 AnalyzerConfig.__name__,
                 ConnectorConfig.__name__,
                 VisualizerConfig.__name__,
+                IngestorConfig.__name__,
             ],
         )
         parser.add_argument(
@@ -61,12 +64,31 @@ class Command(BaseCommand):
     @staticmethod
     def _imports() -> str:
         return """from django.db import migrations
-from django.db.models.fields.related_descriptors import ManyToManyDescriptor
+from django.db.models.fields.related_descriptors import (
+    ForwardManyToOneDescriptor,
+    ForwardOneToOneDescriptor,
+    ManyToManyDescriptor,
+)
 """
 
     @staticmethod
     def _migrate_template():
         return """
+def _get_real_obj(Model, field, value):
+    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]:
+        other_model = getattr(Model, field).get_queryset().model
+        # in case is a dictionary, we have to retrieve the object with every key
+        if isinstance(value, dict):
+            real_vals = {}
+            for key, real_val in value.items():
+                real_vals[key] = _get_real_obj(other_model, key, real_val)
+            value = other_model.objects.get_or_create(**real_vals)[0]
+        # it is just the primary key serialized
+        else:
+            value = other_model.objects.get(pk=value)
+    return value
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")    
@@ -77,8 +99,8 @@ def migrate(apps, schema_editor):
         if type(getattr(Model, field)) == ManyToManyDescriptor:
             mtm[field] = value
         else:
+            value = _get_real_obj(Model, field ,value)
             no_mtm[field] = value
-            
     o = Model(**no_mtm)
     o.full_clean()
     o.save()
@@ -89,7 +111,7 @@ def migrate(apps, schema_editor):
     }
     for param in params:
         param_id = param.pop("id")
-        for key in ["analyzer_config", "connector_config", "visualizer_config"]:
+        for key in ["analyzer_config", "connector_config", "visualizer_config", "ingestor_config"]:
             if param[key]:
                 param[key] = o
                 break    
@@ -171,7 +193,7 @@ values = {3}
             self._get_last_migration(app)
         )
         return (
-            f"{str(int(last_migration_number)+1).rjust(4, '0')}"
+            f"{str(int(last_migration_number) + 1).rjust(4, '0')}"
             f"_{obj.snake_case_name}.py"
         )
 
@@ -197,6 +219,8 @@ values = {3}
             else (ConnectorConfig, ConnectorConfigSerializer)
             if config_class == ConnectorConfig.__name__
             else (VisualizerConfig, VisualizerConfigSerializer)
+            if config_class == VisualizerConfig.__name__
+            else (IngestorConfig, IngestorConfigSerializer)
         )
         obj = class_.objects.get(name=config_name)
         app = obj._meta.app_label

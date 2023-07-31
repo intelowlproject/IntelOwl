@@ -2,9 +2,12 @@ import datetime
 
 from django.db.models import F
 from django.utils.timezone import now
+from django_celery_beat.models import CrontabSchedule
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.ingestors_manager.models import IngestorConfig
 from api_app.models import Job, Parameter, PluginConfig
+from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
@@ -539,4 +542,28 @@ class JobQuerySetTestCase(CustomTestCase):
         m1.delete()
         m2.delete()
         org.delete()
+        j.delete()
+
+    def test_visible_for_user_ingestor(self):
+        schedule = CrontabSchedule.objects.create()
+        ingestor = IngestorConfig.objects.create(
+            name="test",
+            python_module="threatfox.ThreatFox",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            disabled=False,
+            schedule=schedule,
+            playbook_to_execute=PlaybookConfig.objects.first(),
+        )
+        j = Job.objects.create(
+            tlp="RED",
+            user=ingestor.user,
+            observable_name="test.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+        )
+        self.assertEqual(1, Job.objects.visible_for_user(self.superuser).count())
+        self.assertEqual(0, Job.objects.visible_for_user(self.user).count())
+        ingestor.delete()
+        schedule.delete()
         j.delete()

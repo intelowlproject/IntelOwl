@@ -112,7 +112,7 @@ class PivotConfigTestCase(CustomTestCase):
         )
         report = AnalyzerReport(report={"test": "abc"}, config=ac)
         try:
-            value = next(pc.get_value(report))
+            value = next(pc.get_values(report))
         except StopIteration:
             self.fail("No value to retrieve")
         self.assertEqual("abc", value)
@@ -125,10 +125,10 @@ class PivotConfigTestCase(CustomTestCase):
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         report = AnalyzerReport(report={"test": ["abc", "edf"]}, config=ac)
-        self.assertCountEqual(["abc", "edf"], list(pc.get_value(report)))
+        self.assertCountEqual(["abc", "edf"], list(pc.get_values(report)))
         pc.field = "test.0"
         try:
-            value = next(pc.get_value(report))
+            value = next(pc.get_values(report))
         except StopIteration:
             self.fail("No value to retrieve")
         self.assertEqual("abc", value)
@@ -144,12 +144,12 @@ class PivotConfigTestCase(CustomTestCase):
 
         with self.assertRaises(ValueError):
             try:
-                next(pc.get_value(report))
+                next(pc.get_values(report))
             except StopIteration:
                 self.fail("No value to retrieve")
         pc.field = "test.test2"
         try:
-            value = next(pc.get_value(report))
+            value = next(pc.get_values(report))
         except StopIteration:
             self.fail("No value to retrieve")
         self.assertEqual("abc", value)
@@ -164,7 +164,7 @@ class PivotConfigTestCase(CustomTestCase):
         report = AnalyzerReport(report={"test": b"abc"}, config=ac)
 
         try:
-            next(pc.get_value(report))
+            next(pc.get_values(report))
         except StopIteration:
             self.fail("No value to retrieve")
         except ValueError:
@@ -187,7 +187,9 @@ class PivotConfigTestCase(CustomTestCase):
         report = AnalyzerReport(
             report={"test": ["something", "something2"]}, config=ac, job=job
         )
-        jobs = list(pc._create_jobs(report, send_task=False))
+        jobs = list(
+            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
+        )
         self.assertEqual(2, len(jobs))
         self.assertEqual("something", jobs[0].observable_name)
         self.assertEqual("generic", jobs[0].observable_classification)
@@ -207,7 +209,9 @@ class PivotConfigTestCase(CustomTestCase):
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
         report = AnalyzerReport(report={"test": [content]}, config=ac, job=job)
-        jobs = list(pc._create_jobs(report, send_task=False))
+        jobs = list(
+            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
+        )
         self.assertEqual(1, len(jobs))
         self.assertEqual("test.0", jobs[0].file_name)
         self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
@@ -221,7 +225,9 @@ class PivotConfigTestCase(CustomTestCase):
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
         report = AnalyzerReport(report={"test": "google.com"}, config=ac, job=job)
-        jobs = list(pc._create_jobs(report, send_task=False))
+        jobs = list(
+            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
+        )
         self.assertEqual(1, len(jobs))
         self.assertEqual("google.com", jobs[0].observable_name)
         self.assertEqual("domain", jobs[0].observable_classification)

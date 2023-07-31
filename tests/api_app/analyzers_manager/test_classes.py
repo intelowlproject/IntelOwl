@@ -75,9 +75,15 @@ class FileAnalyzerTestCase(CustomTestCase):
         self._create_jobs()
         for subclass in FileAnalyzer.all_subclasses():
             print(f"\nTesting Analyzer {subclass.__name__}")
-            for config in AnalyzerConfig.objects.filter(
+            configs = AnalyzerConfig.objects.filter(
                 python_module=subclass.python_module
-            ):
+            )
+            if not configs.exists():
+                self.fail(
+                    f"There is a python module {subclass.python_module}"
+                    " without any configuration"
+                )
+            for config in configs:
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 30)
                 print(f"\tTesting with config {config.name}")

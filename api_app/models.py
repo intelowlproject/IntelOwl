@@ -480,17 +480,26 @@ class Parameter(models.Model):
         null=True,
         blank=True,
     )
+    ingestor_config = models.ForeignKey(
+        "ingestors_manager.IngestorConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         unique_together = [
             ("name", "analyzer_config"),
             ("name", "connector_config"),
             ("name", "visualizer_config"),
+            ("name", "ingestor_config"),
         ]
         indexes = [
             models.Index(fields=["analyzer_config", "is_secret"]),
             models.Index(fields=["connector_config", "is_secret"]),
             models.Index(fields=["visualizer_config", "is_secret"]),
+            models.Index(fields=["ingestor_config", "is_secret"]),
         ]
 
     def clean_config(self):
@@ -498,6 +507,7 @@ class Parameter(models.Model):
             bool(self.analyzer_config)
             + bool(self.connector_config)
             + bool(self.visualizer_config)
+            + bool(self.ingestor_config)
         )
 
         if count_configs > 1:
@@ -518,7 +528,12 @@ class Parameter(models.Model):
 
     @cached_property
     def config(self):
-        return self.analyzer_config or self.connector_config or self.visualizer_config
+        return (
+            self.analyzer_config
+            or self.connector_config
+            or self.visualizer_config
+            or self.ingestor_config
+        )
 
     def get_valid_value_for_test(self):
         if not settings.STAGE_CI:
@@ -665,13 +680,6 @@ class AbstractConfig(models.Model):
         import re
 
         return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
-
-    def _is_disabled_in_org(self, user: User = None):
-        if user and user.has_membership():
-            return self.disabled_in_organizations.filter(
-                pk=user.membership.organization.pk
-            ).exists()
-        return False
 
     @deprecated("Please use `runnable` method on queryset")
     def is_runnable(self, user: User = None) -> bool:
@@ -858,15 +866,16 @@ class PythonConfig(AbstractConfig):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def read_params(self, job: Job) -> Dict[Parameter, Any]:
+    def read_params(
+        self, user: User = None, config_runtime: Dict = None
+    ) -> Dict[Parameter, Any]:
         # priority
         # 1 - Runtime config
         # 2 - Value inside the db
-        config_runtime = job.get_config_runtime_configuration(self)
         result = {}
-        for param in self.parameters.annotate_configured(
-            job.user
-        ).annotate_value_for_user(job.user):
+        for param in self.parameters.annotate_configured(user).annotate_value_for_user(
+            user
+        ):
             param: Parameter
             if param.name in config_runtime:
                 result[param] = config_runtime[param.name]
@@ -880,6 +889,6 @@ class PythonConfig(AbstractConfig):
                     if param.required:
                         raise TypeError(
                             f"Required param {param.name} of plugin {param.config.name}"
-                            f" does not have a valid value for job {job.pk}"
+                            " does not have a valid value"
                         )
         return result

@@ -75,7 +75,7 @@ class PluginCredentialAdminView(admin.ModelAdmin):
     @staticmethod
     def owner_name(instance: PluginConfig):
         if instance.owner:
-            return instance.owner.name
+            return instance.owner.username
         return None
 
 

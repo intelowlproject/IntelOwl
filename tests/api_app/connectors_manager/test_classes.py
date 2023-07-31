@@ -103,9 +103,15 @@ class ConnectorTestCase(CustomTestCase):
         subclasses = Connector.all_subclasses()
         for subclass in subclasses:
             print("\n" f"Testing Connector {subclass.__name__}")
-            for config in ConnectorConfig.objects.filter(
+            configs = ConnectorConfig.objects.filter(
                 python_module=subclass.python_module
-            ):
+            )
+            if not configs.exists():
+                self.fail(
+                    f"There is a python module {subclass.python_module}"
+                    " without any configuration"
+                )
+            for config in configs:
                 job.connectors_to_execute.set([config])
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)

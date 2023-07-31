@@ -17,12 +17,22 @@ class CAPEsandbox(FileAnalyzer):
     class ContinuePolling(Exception):
         pass
 
-    _api_key_name: str
-    VM_NAME: str
-    max_tries: int
-    poll_distance: int
-    _url_key_name: str
-    _certificate: str
+    options: str  # Specify options for the analysis package (e.g. "name=value,name2=value2").
+    package: str  # Specify an analysis package.
+    timeout: int  # Specify an analysis timeout.
+    priority: int  # Specify a priority for the analysis (1=low, 2=medium, 3=high).
+    machine: str  # Specify the identifier of a machine you want to use (empty = first available).
+    platform: str  # Specify the operating system platform you want to use (windows/darwin/linux).
+    memory: bool  # Enable to take a memory dump of the analysis machine.
+    enforce_timeout: bool  # Enable to force the analysis to run for the full timeout period.
+    custom: str  # Specify any custom value.
+    tags: str  # Specify tags identifier of a machine you want to use.
+    route: str  # Specify an analysis route.
+    max_tries: int  # Number of max tries while trying to poll the CAPESandbox API.
+    poll_distance: int  # Seconds to wait before moving on to the next poll attempt.
+    _api_key_name: str  # Token for Token Auth.
+    _url_key_name: str  # URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.
+    _certificate: str  # CapeSandbox SSL certificate (multiline string).
 
     def config(self):
         super().config()
@@ -38,11 +48,22 @@ class CAPEsandbox(FileAnalyzer):
     def run(self):
         api_url: str = self._url_key_name + "/apiv2/tasks/create/file/"
         to_respond = {}
-
         logger.info(f"Job: {self.job_id} -> " "Starting file upload.")
-        data = {}
-        if self.VM_NAME:
-            data["machine"] = self.VM_NAME
+
+        cape_params_name = [
+            "options",
+            "package",
+            "timeout",
+            "priority",
+            "machine",
+            "platform",
+            "memory",
+            "enforce_timeout",
+            "custom",
+            "tags",
+            "route"
+        ]
+        data = {name: getattr(self, name) for name in cape_params_name if getattr(self, name, None) is not None}
 
         try:
             response = self.__session.post(

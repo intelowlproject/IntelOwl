@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     # performance debugging
     "silk",
     # celery
-    "django_celery_beat"
+    "django_celery_beat",
 ]
 
 from .auth import *  # lgtm [py/polluting-import]

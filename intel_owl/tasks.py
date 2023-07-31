@@ -31,9 +31,9 @@ def update_plugin(state, plugin_path):
 
 
 @shared_task(soft_time_limit=120)
-def execute_ingestor(config_pk:str):
-    from api_app.ingestors_manager.models import IngestorConfig
+def execute_ingestor(config_pk: str):
     from api_app.ingestors_manager.classes import Ingestor
+    from api_app.ingestors_manager.models import IngestorConfig
 
     config: IngestorConfig = IngestorConfig.objects.get(pk=config_pk)
     if config.disabled:

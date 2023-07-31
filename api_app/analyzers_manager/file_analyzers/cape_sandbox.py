@@ -61,11 +61,10 @@ class CAPEsandbox(FileAnalyzer):
         response_error = response_json.get("error", False)
 
         if not response_error:
-            to_respond["result_url"] = response_json.get("url")
             task_id = response_json.get("data").get("task_ids")[0]
             result = self.__poll_for_result(task_id=task_id)
+            to_respond["result_url"] = self._url_key_name + f"/submit/status/{task_id}/"
             to_respond["response"] = result
-
             logger.info(
                 f"Job: {self.job_id} -> "
                 "File uploaded successfully without any errors."

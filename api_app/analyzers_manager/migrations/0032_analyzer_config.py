@@ -11,7 +11,7 @@ params_old = [{'id': 52, 'name': 'VM_NAME', 'type': 'str', 'description': 'The V
 values_old = [{'id': 28, 'value': '', 'for_organization': False, 'updated_at': '2023-07-31T16:39:05.902099Z', 'owner': None, 'parameter': 52}, {'id': 29, 'value': 50, 'for_organization': False, 'updated_at': '2023-07-31T16:39:05.904421Z', 'owner': None, 'parameter': 53}, {'id': 30, 'value': 30, 'for_organization': False, 'updated_at': '2023-07-31T16:39:05.906768Z', 'owner': None, 'parameter': 54}, {'id': 31, 'value': 'https://www.capesandbox.com', 'for_organization': False, 'updated_at': '2023-07-31T16:39:05.909124Z', 'owner': None, 'parameter': 56}]
 
 
-def _clean_and_restore_snapshot(Parameter, PluginConfig, Model, params, values):
+def _clean_and_restore_snapshot(Parameter, PluginConfig, Model, _params, _values):
     o = Model.objects.get(name=plugin["name"])
     o.full_clean()
     o.save()
@@ -19,7 +19,7 @@ def _clean_and_restore_snapshot(Parameter, PluginConfig, Model, params, values):
 
     param_maps = {
     }
-    for param in params:
+    for param in _params:
         param_id = param.pop("id")
         for key in ["analyzer_config", "connector_config", "visualizer_config"]:
             if param[key]:
@@ -29,7 +29,7 @@ def _clean_and_restore_snapshot(Parameter, PluginConfig, Model, params, values):
         par.full_clean()
         par.save()
         param_maps[param_id] = par
-    for value in values:
+    for value in _values:
         value.pop("id")
         parameter = param_maps[value["parameter"]]
         value["parameter"] = parameter

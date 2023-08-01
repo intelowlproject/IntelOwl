@@ -11,8 +11,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from api_app.core.views import PluginActionViewSet, PythonConfigViewSet
-
+from ..views import PluginActionViewSet, PythonConfigViewSet
 from .filters import AnalyzerConfigFilter
 from .models import AnalyzerConfig, AnalyzerReport
 from .serializers import AnalyzerConfigSerializer

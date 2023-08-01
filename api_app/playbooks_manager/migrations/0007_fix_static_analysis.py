@@ -10,7 +10,24 @@ def migrate(apps, schema_editor):
     pc.type = ["file"]
     pc.description = "Execute a static analysis"
     pc.disabled = False
-    pc.analyzers.set(["Rtf_Info", "APKiD", "Doc_Info", "ClamAV", "Cymru_Hash_Registry_Get_File", "OneNote_Info", "MalwareBazaar_Get_File", "YARAify_File_Search", "PDF_Info", "BoxJS", "HybridAnalysis_Get_File", "Yara", "OTX_Check_Hash", "Quark_Engine"])
+    pc.analyzers.set(
+        [
+            "Rtf_Info",
+            "APKiD",
+            "Doc_Info",
+            "ClamAV",
+            "Cymru_Hash_Registry_Get_File",
+            "OneNote_Info",
+            "MalwareBazaar_Get_File",
+            "YARAify_File_Search",
+            "PDF_Info",
+            "BoxJS",
+            "HybridAnalysis_Get_File",
+            "Yara",
+            "OTX_Check_Hash",
+            "Quark_Engine",
+        ]
+    )
     pc.full_clean()
     pc.save()
 
@@ -23,15 +40,12 @@ def reverse_migrate(apps, schema_editor):
     pc.save()
 
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('playbooks_manager', '0006_rename_static_analysis'),
+        ("playbooks_manager", "0006_rename_static_analysis"),
     ]
 
     operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        ),
+        migrations.RunPython(migrate, reverse_migrate),
     ]

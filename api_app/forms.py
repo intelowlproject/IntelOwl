@@ -1,7 +1,6 @@
 from django import forms
 
-from api_app.core.models import Parameter
-from api_app.models import PluginConfig
+from api_app.models import Parameter, PluginConfig
 
 
 class MultilineJSONField(forms.JSONField):

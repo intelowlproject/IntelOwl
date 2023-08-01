@@ -46,7 +46,6 @@ class CloudFlareDNSResolver(classes.ObservableAnalyzer):
             raise AnalyzerRunException(
                 f"An error occurred during the connection to CloudFlare: {error}"
             )
-
         return dns_resolver_response(self.observable_name, resolutions)
 
     @classmethod

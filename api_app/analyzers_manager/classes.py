@@ -10,11 +10,11 @@ from typing import Tuple
 import requests
 from django.conf import settings
 
-from api_app.core.classes import Plugin
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
-from ..core.models import AbstractConfig
+from ..classes import Plugin
+from ..models import AbstractConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from .models import AnalyzerConfig, AnalyzerReport

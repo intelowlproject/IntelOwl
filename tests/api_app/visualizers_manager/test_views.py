@@ -3,9 +3,8 @@
 from typing import Type
 
 from api_app.visualizers_manager.models import VisualizerConfig
-
-from .. import CustomViewSetTestCase
-from ..core.test_views import AbstractConfigViewSetTestCaseMixin
+from tests import CustomViewSetTestCase
+from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
 class VisualizerConfigViewSetTestCase(

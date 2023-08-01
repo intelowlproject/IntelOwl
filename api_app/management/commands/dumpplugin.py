@@ -9,9 +9,11 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-from api_app.core.serializers import ParameterCompleteSerializer
 from api_app.models import PluginConfig
-from api_app.serializers import PluginConfigCompleteSerializer
+from api_app.serializers import (
+    ParameterCompleteSerializer,
+    PluginConfigCompleteSerializer,
+)
 from api_app.visualizers_manager.models import VisualizerConfig
 from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 

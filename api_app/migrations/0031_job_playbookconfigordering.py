@@ -6,12 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0030_pluginconfig_repositories'),
+        ("api_app", "0030_pluginconfig_repositories"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='job',
-            index=models.Index(fields=['playbook_to_execute', 'finished_analysis_time', 'user'], name='PlaybookConfigOrdering'),
+            model_name="job",
+            index=models.Index(
+                fields=["playbook_to_execute", "finished_analysis_time", "user"],
+                name="PlaybookConfigOrdering",
+            ),
         ),
     ]

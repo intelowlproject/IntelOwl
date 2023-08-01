@@ -4,6 +4,7 @@
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import ScanMode
 from api_app.playbooks_manager.serializers import PlaybookConfigSerializer
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
@@ -76,6 +77,8 @@ class PlaybookConfigSerializerTestCase(CustomTestCase):
                 "pivots": [],
                 "name": "test",
                 "description": "test",
+                "scan_mode": ScanMode.FORCE_NEW_ANALYSIS,
+                "scan_check_time": None,
             },
             context={"request": MockUpRequest(self.user)},
         )

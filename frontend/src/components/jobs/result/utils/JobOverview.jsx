@@ -26,6 +26,10 @@ import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
 import VisualizerReport from "../visualizer/visualizer";
 import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
+import {
+  jobFinalStatuses,
+  pluginStatuses,
+} from "../../../../constants/constants";
 
 const LOADING_VISUALIZER_UI_ELEMENT_CODE = -2;
 const NO_VISUALIZER_UI_ELEMENT_CODE = -1;
@@ -36,6 +40,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   // raw elements
   let AnalyzerDenominator = job.analyzers_to_execute?.length || "all";
   let ConnectorDenominator = job.connectors_to_execute?.length || "all";
+  let VisualizerDenominator = job.visualizers_to_execute?.lenght || "all";
 
   if (job.playbook_to_execute) {
     AnalyzerDenominator = job.analyzers_to_execute.length;
@@ -43,6 +48,11 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       ConnectorDenominator = "0";
     } else {
       ConnectorDenominator = job.connectors_to_execute.length;
+    }
+    if (job.visualizers_to_execute?.length === 0) {
+      VisualizerDenominator = "0";
+    } else {
+      VisualizerDenominator = job.visualizers_to_execute.length;
     }
   }
   const rawElements = React.useMemo(
@@ -79,14 +89,21 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>
             <Badge className="ms-2">
-              {job.visualizers_to_execute?.length} /&nbsp; all
+              {job.visualizers_to_execute?.length} /&nbsp;
+              {VisualizerDenominator}
             </Badge>
           </div>
         ),
         report: <VisualizersReportTable job={job} refetch={refetch} />,
       },
     ],
-    [job, refetch, AnalyzerDenominator, ConnectorDenominator],
+    [
+      job,
+      refetch,
+      AnalyzerDenominator,
+      ConnectorDenominator,
+      VisualizerDenominator,
+    ],
   );
 
   // state
@@ -122,20 +139,32 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   useEffect(() => {
     console.debug("JobOverview - create/update visualizer components");
     console.debug(job);
+    let newUIElements = [];
 
-    // 1) generate UI elements in case visualizers terminated
-    const newUIElements = job.visualizer_reports.map((visualizerReport) => ({
-      id: visualizerReport.id,
-      nav: (
-        <div className="d-flex-center">
-          <strong>{visualizerReport.name}</strong>
-        </div>
-      ),
-      report: <VisualizerReport visualizerReport={visualizerReport} />,
-    }));
+    // 1) generate UI elements in case all visualizers are completed
+    if (
+      Object.values(jobFinalStatuses).includes(job.status) &&
+      job.visualizers_to_execute.length > 0
+    ) {
+      newUIElements = job.visualizer_reports.map((visualizerReport) => ({
+        id: visualizerReport.id,
+        nav: (
+          <div className="d-flex-center">
+            <strong>{visualizerReport.name}</strong>
+            {visualizerReport.status !== pluginStatuses.SUCCESS && (
+              <StatusIcon className="ms-2" status={visualizerReport.status} />
+            )}
+          </div>
+        ),
+        report: <VisualizerReport visualizerReport={visualizerReport} />,
+      }));
+    }
 
     // 2) in case visualizers are running put a loader
-    if (newUIElements.length === 0 && job.visualizers_to_execute.length > 0) {
+    if (
+      !Object.values(jobFinalStatuses).includes(job.status) &&
+      job.visualizers_to_execute.length > 0
+    ) {
       newUIElements.push({
         id: LOADING_VISUALIZER_UI_ELEMENT_CODE,
         nav: null,
@@ -151,11 +180,16 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     }
 
     // 3) in case there are no visualizers add a "no data" visualizer
-    if (newUIElements.length === 0) {
+    if (job.visualizers_to_execute.length === 0) {
       newUIElements.push({
         id: NO_VISUALIZER_UI_ELEMENT_CODE,
         nav: null,
-        report: <p className="text-center">No visualizers available.</p>,
+        report: (
+          <p className="text-center">
+            No visualizers available. You can consult the results in the raw
+            format.{" "}
+          </p>
+        ),
       });
     }
 

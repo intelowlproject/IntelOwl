@@ -15,6 +15,7 @@ def migrate(apps, schema_editor):
             config.maximum_tlp = "GREEN"
         config.save()
 
+
 def backwards_migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     for config in AnalyzerConfig.objects.all():
@@ -33,31 +34,36 @@ def backwards_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0009_parent_playbook_foreign_key'),
+        ("analyzers_manager", "0009_parent_playbook_foreign_key"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='analyzerconfig',
-            name='maximum_tlp',
-            field=models.CharField(choices=[('CLEAR', 'Clear'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='RED', max_length=50)
+            model_name="analyzerconfig",
+            name="maximum_tlp",
+            field=models.CharField(
+                choices=[
+                    ("CLEAR", "Clear"),
+                    ("GREEN", "Green"),
+                    ("AMBER", "Amber"),
+                    ("RED", "Red"),
+                ],
+                default="RED",
+                max_length=50,
+            ),
         ),
         migrations.AlterField(
             model_name="analyzerconfig",
             name="leaks_info",
-            field=models.BooleanField(null=True)
+            field=models.BooleanField(null=True),
         ),
-        migrations.RunPython(
-            migrate, backwards_migrate
+        migrations.RunPython(migrate, backwards_migrate),
+        migrations.RemoveField(
+            model_name="analyzerconfig",
+            name="leaks_info",
         ),
         migrations.RemoveField(
-            model_name='analyzerconfig',
-            name='leaks_info',
+            model_name="analyzerconfig",
+            name="external_service",
         ),
-        migrations.RemoveField(
-            model_name='analyzerconfig',
-            name='external_service',
-        ),
-
-
     ]

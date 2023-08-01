@@ -16,6 +16,8 @@ from api_app.visualizers_manager.classes import (
     VisualizableTitle,
     VisualizableVerticalList,
     Visualizer,
+)
+from api_app.visualizers_manager.decorators import (
     visualizable_error_handler_with_params,
 )
 from api_app.visualizers_manager.enums import VisualizableColor, VisualizableSize

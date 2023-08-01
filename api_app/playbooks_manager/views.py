@@ -9,13 +9,13 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api_app.core.views import AbstractConfigViewSet
 from api_app.playbooks_manager.serializers import PlaybookConfigSerializer
 from api_app.serializers import (
     FileAnalysisSerializer,
     JobResponseSerializer,
     ObservableAnalysisSerializer,
 )
+from api_app.views import AbstractConfigViewSet
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class PlaybookConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):
     def get_queryset(self):
         return self.serializer_class.Meta.model.objects.ordered_for_user(
             self.request.user
-        )
+        ).prefetch_related("analyzers", "connectors", "visualizers", "tags", "pivots")
 
     @add_docs(
         description="This endpoint allows to start a Job related to an observable",

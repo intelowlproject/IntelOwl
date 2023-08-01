@@ -6,3 +6,7 @@ from django.apps import AppConfig
 
 class ConnectorsManagerConfig(AppConfig):
     name = "api_app.connectors_manager"
+
+    @staticmethod
+    def ready() -> None:
+        from . import signals  # noqa

@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('visualizers_manager', '0020_visualizer_config'),
+        ("visualizers_manager", "0020_visualizer_config"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='visualizerconfig',
-            options={'ordering': ['name', 'disabled']},
+            name="visualizerconfig",
+            options={"ordering": ["name", "disabled"]},
         ),
     ]

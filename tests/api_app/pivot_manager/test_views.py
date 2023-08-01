@@ -5,11 +5,8 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
 from api_app.pivots_manager.models import Pivot, PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
-from tests import CustomViewSetTestCase
-from tests.core.test_views import (
-    AbstractConfigViewSetTestCaseMixin,
-    ViewSetTestCaseMixin,
-)
+from tests import CustomViewSetTestCase, ViewSetTestCaseMixin
+from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
 class PivotViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):

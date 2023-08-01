@@ -6,15 +6,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0031_alter_analyzerconfig_name'),
-        ('visualizers_manager', '0023_alter_visualizerconfig_name'),
-        ('connectors_manager', '0018_alter_connectorconfig_name'),
-        ('api_app', '0032_alter_job_status'),
+        ("analyzers_manager", "0031_alter_analyzerconfig_name"),
+        ("visualizers_manager", "0023_alter_visualizerconfig_name"),
+        ("connectors_manager", "0018_alter_connectorconfig_name"),
+        ("api_app", "0032_alter_job_status"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='parameter',
-            unique_together={('name', 'analyzer_config'), ('name', 'visualizer_config'), ('name', 'connector_config')},
+            name="parameter",
+            unique_together={
+                ("name", "analyzer_config"),
+                ("name", "visualizer_config"),
+                ("name", "connector_config"),
+            },
         ),
     ]

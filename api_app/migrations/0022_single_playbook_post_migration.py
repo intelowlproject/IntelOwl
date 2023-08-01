@@ -10,26 +10,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0021_single_playbook_migration'),
+        ("api_app", "0021_single_playbook_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='job',
-            name='playbooks_requested',
+            model_name="job",
+            name="playbooks_requested",
         ),
         migrations.RemoveField(
-            model_name='job',
-            name='playbooks_to_execute',
+            model_name="job",
+            name="playbooks_to_execute",
         ),
         migrations.AlterField(
-            model_name='job',
-            name='playbook_requested',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='requested_in_jobs', to='playbooks_manager.playbookconfig'),
+            model_name="job",
+            name="playbook_requested",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="requested_in_jobs",
+                to="playbooks_manager.playbookconfig",
+            ),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='playbook_to_execute',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='executed_in_jobs', to='playbooks_manager.playbookconfig'),
+            model_name="job",
+            name="playbook_to_execute",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="executed_in_jobs",
+                to="playbooks_manager.playbookconfig",
+            ),
         ),
     ]

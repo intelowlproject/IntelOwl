@@ -15,8 +15,8 @@ from api_app.analyzers_manager.constants import (
 )
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.choices import TLP
-from api_app.core.models import AbstractReport, PythonConfig
 from api_app.fields import ChoiceArrayField
+from api_app.models import AbstractReport, PythonConfig
 
 logger = getLogger(__name__)
 
@@ -115,8 +115,9 @@ class MimeTypes(models.TextChoices):
             try:
                 mimetype = cls(mimetype)
             except ValueError:
-                logger.error(
+                logger.info(
                     f"Unable to valid a {cls.__name__} for mimetype {mimetype}"
+                    f" for file {file_name}"
                 )
             else:
                 mimetype = mimetype.value

@@ -8,6 +8,7 @@ import ipaddress
 import logging
 import random
 import re
+import warnings
 
 from django.utils import timezone
 
@@ -72,3 +73,14 @@ def get_hash_type(hash_value):
             detected_hash_type = hash_type
             break
     return detected_hash_type  # stays None if no matches
+
+
+def deprecated(message: str):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

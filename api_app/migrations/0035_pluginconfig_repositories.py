@@ -72,7 +72,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api_app", "0033_alter_parameter_unique_together"),
+        ("api_app", "0034_job_scan_check_time_job_scan_mode"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

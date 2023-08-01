@@ -7,13 +7,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('visualizers_manager', '0022_remove_visualizerconfig_analyzers_and_more'),
+        ("visualizers_manager", "0022_remove_visualizerconfig_analyzers_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='visualizerconfig',
-            name='name',
-            field=models.CharField(max_length=100, primary_key=True, serialize=False, unique=True, validators=[django.core.validators.RegexValidator('^\\w+$', 'Your name should match the [A-Za-z0-9_] characters')]),
+            model_name="visualizerconfig",
+            name="name",
+            field=models.CharField(
+                max_length=100,
+                primary_key=True,
+                serialize=False,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        "^\\w+$", "Your name should match the [A-Za-z0-9_] characters"
+                    )
+                ],
+            ),
         ),
     ]

@@ -5,7 +5,7 @@ import jsonschema
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
-from api_app.core.choices import ParamTypes
+from api_app.choices import ParamTypes
 
 plugin_name_validator = RegexValidator(
     r"^\w+$", "Your name should match the [A-Za-z0-9_] characters"

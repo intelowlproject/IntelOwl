@@ -5,36 +5,70 @@
 
 from django.db import migrations, models
 
-import api_app.core.models
+import api_app.defaults
 import api_app.validators
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('connectors_manager', '0002_connectorreport_parent_playbook'),
-        ('api_app', '0010_custom_config_playbooks'),
+        ("connectors_manager", "0002_connectorreport_parent_playbook"),
+        ("api_app", "0010_custom_config_playbooks"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ConnectorConfig',
+            name="ConnectorConfig",
             fields=[
-                ('name', models.CharField(max_length=50, primary_key=True, serialize=False, unique=True)),
-                ('python_module', models.CharField(max_length=120)),
-                ('description', models.TextField()),
-                ('disabled', models.BooleanField(default=False)),
-                ('config', models.JSONField(default=api_app.core.models.config_default,
-                                            validators=[api_app.validators.validate_config])),
-                ('secrets',
-                 models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_secrets])),
-                ('params',
-                 models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_params])),
-                ('maximum_tlp', models.CharField(choices=[('CLEAR', 'Clear'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='CLEAR', max_length=50)),
-                ('run_on_failure', models.BooleanField(default=True)),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=50, primary_key=True, serialize=False, unique=True
+                    ),
+                ),
+                ("python_module", models.CharField(max_length=120)),
+                ("description", models.TextField()),
+                ("disabled", models.BooleanField(default=False)),
+                (
+                    "config",
+                    models.JSONField(
+                        default=api_app.defaults.config_default,
+                        validators=[api_app.validators.validate_config],
+                    ),
+                ),
+                (
+                    "secrets",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        validators=[api_app.validators.validate_secrets],
+                    ),
+                ),
+                (
+                    "params",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        validators=[api_app.validators.validate_params],
+                    ),
+                ),
+                (
+                    "maximum_tlp",
+                    models.CharField(
+                        choices=[
+                            ("CLEAR", "Clear"),
+                            ("GREEN", "Green"),
+                            ("AMBER", "Amber"),
+                            ("RED", "Red"),
+                        ],
+                        default="CLEAR",
+                        max_length=50,
+                    ),
+                ),
+                ("run_on_failure", models.BooleanField(default=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

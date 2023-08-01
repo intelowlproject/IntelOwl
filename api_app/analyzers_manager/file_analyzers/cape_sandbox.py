@@ -3,9 +3,10 @@
 
 import logging
 import time
+from tempfile import NamedTemporaryFile
+
 import requests
 
-from tempfile import NamedTemporaryFile
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
@@ -17,26 +18,42 @@ class CAPEsandbox(FileAnalyzer):
     class ContinuePolling(Exception):
         pass
 
-    options: str  # Specify options for the analysis package (e.g. "name=value,name2=value2").
-    package: str  # Specify an analysis package.
-    timeout: int  # Specify an analysis timeout.
-    priority: int  # Specify a priority for the analysis (1=low, 2=medium, 3=high).
-    machine: str  # Specify the identifier of a machine you want to use (empty = first available).
-    platform: str  # Specify the operating system platform you want to use (windows/darwin/linux).
-    memory: bool  # Enable to take a memory dump of the analysis machine.
-    enforce_timeout: bool  # Enable to force the analysis to run for the full timeout period.
-    custom: str  # Specify any custom value.
-    tags: str  # Specify tags identifier of a machine you want to use.
-    route: str  # Specify an analysis route.
-    max_tries: int  # Number of max tries while trying to poll the CAPESandbox API.
-    poll_distance: int  # Seconds to wait before moving on to the next poll attempt.
-    _api_key_name: str  # Token for Token Auth.
-    _url_key_name: str  # URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.
-    _certificate: str  # CapeSandbox SSL certificate (multiline string).
+    # Specify options for the analysis package (e.g. "name=value,name2=value2").
+    options: str
+    # Specify an analysis package.
+    package: str
+    # Specify an analysis timeout.
+    timeout: int
+    # Specify a priority for the analysis (1=low, 2=medium, 3=high).
+    priority: int
+    # Specify the identifier of a machine you want to use (empty = first available).
+    machine: str
+    # Specify the operating system platform you want to use (windows/darwin/linux).
+    platform: str
+    # Enable to take a memory dump of the analysis machine.
+    memory: bool
+    # Enable to force the analysis to run for the full timeout period.
+    enforce_timeout: bool
+    # Specify any custom value.
+    custom: str
+    # Specify tags identifier of a machine you want to use.
+    tags: str
+    # Specify an analysis route.
+    route: str
+    # Number of max tries while trying to poll the CAPESandbox API.
+    max_tries: int
+    # Seconds to wait before moving on to the next poll attempt.
+    poll_distance: int
+    # Token for Token Auth.
+    _api_key_name: str
+    # URL for the CapeSandbox instance.
+    _url_key_name: str
+    # CapeSandbox SSL certificate (multiline string).
+    _certificate: str
 
     def config(self):
         super().config()
-        self.__cert_file = NamedTemporaryFile(mode='w')
+        self.__cert_file = NamedTemporaryFile(mode="w")
         self.__cert_file.write(self._certificate)
         self.__cert_file.flush()
         self.__session = requests.Session()
@@ -61,9 +78,13 @@ class CAPEsandbox(FileAnalyzer):
             "enforce_timeout",
             "custom",
             "tags",
-            "route"
+            "route",
         ]
-        data = {name: getattr(self, name) for name in cape_params_name if getattr(self, name, None) is not None}
+        data = {
+            name: getattr(self, name)
+            for name in cape_params_name
+            if getattr(self, name, None) is not None
+        }
 
         try:
             response = self.__session.post(

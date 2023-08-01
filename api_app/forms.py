@@ -8,11 +8,11 @@ class MultilineJSONField(forms.JSONField):
         if value is not None and "\n" in value:
             cleaned_value = []
             for line in value.splitlines():
-                line.replace('\r', '')
-                line.replace('\"', '')
+                line.replace("\r", "")
+                line.replace('"', "")
                 line = line + "\\n"
                 cleaned_value.append(line)
-            value = "\"" + "".join(cleaned_value) + "\""
+            value = '"' + "".join(cleaned_value) + '"'
         return value
 
     def to_python(self, value):

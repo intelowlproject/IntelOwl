@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class CreateJobsFromPlaybookInterface:
 
     playbook_to_execute: PlaybookConfig
+    name: str
 
     @abc.abstractmethod
     def get_values(self, report: AbstractReport) -> Generator[Any, None, None]:
@@ -53,7 +54,7 @@ class CreateJobsFromPlaybookInterface:
         from tests.mock_utils import MockUpRequest
 
         files = [
-            File(io.BytesIO(data), name=f"{self.__class__.__name__}.{i}")
+            File(io.BytesIO(data), name=f"{self.name}.{i}")
             for i, data in enumerate(values)
         ]
         query_dict = QueryDict(mutable=True)

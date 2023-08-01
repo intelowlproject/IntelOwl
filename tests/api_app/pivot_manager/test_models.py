@@ -202,6 +202,7 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
+            name="PivotOnTest",
             analyzer_config=ac,
             field="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["file"]).first(),
@@ -213,7 +214,7 @@ class PivotConfigTestCase(CustomTestCase):
             pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
         )
         self.assertEqual(1, len(jobs))
-        self.assertEqual("test.0", jobs[0].file_name)
+        self.assertEqual("PivotOnTest.0", jobs[0].file_name)
         self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
 
     def test_create_job(self):

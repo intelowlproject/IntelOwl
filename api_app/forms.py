@@ -4,7 +4,8 @@ from api_app.models import Parameter, PluginConfig
 
 
 class MultilineJSONField(forms.JSONField):
-    def _cleaning_and_multiline(self, value):
+    @staticmethod
+    def _cleaning_and_multiline(value):
         if value is not None and "\n" in value:
             cleaned_value = []
             for line in value.splitlines():

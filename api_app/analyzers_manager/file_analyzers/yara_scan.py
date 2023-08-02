@@ -324,7 +324,12 @@ class YaraScan(FileAnalyzer):
                 .annotate_value_for_user(self._job.user)
                 .first()
             )
-            if parameter and parameter.configured and parameter.value and parameter.is_from_org:
+            if (
+                parameter
+                and parameter.configured
+                and parameter.value
+                and parameter.is_from_org
+            ):
                 if self._job.user.has_membership():
                     owner = (
                         f"{self._job.user.membership.organization.name}"

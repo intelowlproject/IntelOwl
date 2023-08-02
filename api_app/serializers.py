@@ -80,7 +80,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         choices=ScanMode.choices,
         required=False,
     )
-    scan_check_time = rfs.DurationField(required=False, allow_null=True)
+    scan_check_time = rfs.DurationField(required=False, allow_null=True, default=None)
 
     tags_labels = rfs.ListField(
         child=rfs.CharField(required=True), default=list, required=False

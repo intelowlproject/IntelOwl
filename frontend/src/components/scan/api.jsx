@@ -221,13 +221,29 @@ async function _analyzeObservable(formValues) {
 
 async function _analyzeFile(formValues) {
   const body = new FormData();
+  // file
   Array.from(formValues.files).forEach((file) => {
     body.append("files", file, file.name);
   });
-  formValues.tags_labels.map((x) => body.append("tags_labels", x));
-  formValues.analyzers.map((x) => body.append("analyzers_requested", x));
-  formValues.connectors.map((x) => body.append("connectors_requested", x));
+  // tags
+  if (formValues.tags_labels.length) {
+    formValues.tags_labels.forEach((tag) => body.append("tags_labels", tag));
+  }
+  // analyzers
+  if (formValues.analyzers.length) {
+    formValues.analyzers.forEach((analyzer) =>
+      body.append("analyzers_requested", analyzer),
+    );
+  }
+  // connectors
+  if (formValues.connectors.length) {
+    formValues.connectors.forEach((connector) =>
+      body.append("connectors_requested", connector),
+    );
+  }
+  // tlp
   body.append("tlp", formValues.tlp);
+  // runtime configuration
   if (
     formValues.runtime_configuration != null &&
     Object.keys(formValues.runtime_configuration).length
@@ -237,11 +253,11 @@ async function _analyzeFile(formValues) {
       JSON.stringify(formValues.runtime_configuration),
     );
   }
+  // scan mode
   body.append("scan_mode", formValues.scan_mode);
+  // scan check time
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
     body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
-  } else {
-    body.append("scan_check_time", null);
   }
   console.debug("_analyzeFile", body);
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
@@ -249,19 +265,23 @@ async function _analyzeFile(formValues) {
 
 async function _startPlaybookFile(formValues) {
   const body = new FormData();
+  // file
   Array.from(formValues.files).forEach((file) => {
     body.append("files", file, file.name);
   });
+  // tlp
   body.append("tlp", formValues.tlp);
-  formValues.tags.forEach((tagObject) => {
-    body.append("tags_labels", tagObject.value.label);
-  });
+  // tags
+  if (formValues.tags_labels.length) {
+    formValues.tags_labels.forEach((tag) => body.append("tags_labels", tag));
+  }
+  // playbook requested
   body.append("playbook_requested", formValues.playbook);
-  body.append("scan_mode", parseInt(formValues.scan_mode, 10));
+  // scan mode
+  body.append("scan_mode", formValues.scan_mode);
+  // scan check time
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
     body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
-  } else {
-    body.append("scan_check_time", null);
   }
   console.debug("_analyzeFile", body);
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);

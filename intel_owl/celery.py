@@ -11,6 +11,7 @@ from typing import Dict
 from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
+from django_celery_beat.models import PeriodicTask
 from kombu import Queue
 from kombu.common import Broadcast
 
@@ -214,7 +215,7 @@ app.conf.beat_schedule = {
             "queue": get_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
         },
-    },
+    }
 }
 
 

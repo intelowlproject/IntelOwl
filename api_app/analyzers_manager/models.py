@@ -7,6 +7,7 @@ from typing import Optional
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
 from api_app.analyzers_manager.constants import (
     HashChoices,
@@ -153,6 +154,12 @@ class AnalyzerConfig(PythonConfig):
         models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
         default=list,
         blank=True,
+    )
+    update_schedule = models.ForeignKey(
+        CrontabSchedule, on_delete=models.SET_NULL, null=True, blank=True, related_name="analyzers"
+    )
+    update_task = models.ForeignKey(
+        PeriodicTask, on_delete=models.SET_NULL, null=True, blank=True, related_name="analyzers"
     )
 
     def clean_observable_supported(self):

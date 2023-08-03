@@ -18,7 +18,7 @@ def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
             name=f"{instance.name}PeriodicTask",
             task="intel_owl.tasks.execute_ingestor",
             kwargs=json.dumps({"config_pk": instance.pk}),
-            queue=instance.config["queue"],
+            queue=instance.queue,
             enabled=False,
         )
         periodic_task.full_clean()

@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("django_celery_beat", "0018_improve_crontab_helptext"),
-        ("analyzers_manager", "0031_alter_analyzerconfig_name"),
+        ("analyzers_manager", "0032_analyzer_config"),
     ]
 
     operations = [

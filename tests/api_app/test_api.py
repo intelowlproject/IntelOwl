@@ -124,9 +124,9 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(file_name, job.file_name)
         self.assertEqual(file_mimetype, job.file_mimetype)
         self.assertEqual(md5, job.md5)
-        # there is only Suricata right now
+
         self.assertCountEqual(
-            ["Suricata"],
+            ["Suricata", "CapeSandbox"],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
 

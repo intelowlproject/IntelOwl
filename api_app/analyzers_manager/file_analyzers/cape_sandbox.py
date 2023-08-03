@@ -3,6 +3,7 @@
 
 import logging
 import time
+from tempfile import NamedTemporaryFile
 
 import requests
 
@@ -17,15 +18,46 @@ class CAPEsandbox(FileAnalyzer):
     class ContinuePolling(Exception):
         pass
 
-    _api_key_name: str
-    VM_NAME: str
+    # Specify options for the analysis package (e.g. "name=value,name2=value2").
+    options: str
+    # Specify an analysis package.
+    package: str
+    # Specify an analysis timeout.
+    timeout: int
+    # Specify a priority for the analysis (1=low, 2=medium, 3=high).
+    priority: int
+    # Specify the identifier of a machine you want to use (empty = first available).
+    machine: str
+    # Specify the operating system platform you want to use (windows/darwin/linux).
+    platform: str
+    # Enable to take a memory dump of the analysis machine.
+    memory: bool
+    # Enable to force the analysis to run for the full timeout period.
+    enforce_timeout: bool
+    # Specify any custom value.
+    custom: str
+    # Specify tags identifier of a machine you want to use.
+    tags: str
+    # Specify an analysis route.
+    route: str
+    # Number of max tries while trying to poll the CAPESandbox API.
     max_tries: int
+    # Seconds to wait before moving on to the next poll attempt.
     poll_distance: int
+    # Token for Token Auth.
+    _api_key_name: str
+    # URL for the CapeSandbox instance.
     _url_key_name: str
+    # CapeSandbox SSL certificate (multiline string).
+    _certificate: str
 
     def config(self):
         super().config()
+        self.__cert_file = NamedTemporaryFile(mode="w")
+        self.__cert_file.write(self._certificate)
+        self.__cert_file.flush()
         self.__session = requests.Session()
+        self.__session.verify = self.__cert_file.name
         self.__session.headers = {
             "Authorization": f"Token {self._api_key_name}",
         }
@@ -33,11 +65,26 @@ class CAPEsandbox(FileAnalyzer):
     def run(self):
         api_url: str = self._url_key_name + "/apiv2/tasks/create/file/"
         to_respond = {}
-
         logger.info(f"Job: {self.job_id} -> " "Starting file upload.")
-        data = {}
-        if self.VM_NAME:
-            data["machine"] = self.VM_NAME
+
+        cape_params_name = [
+            "options",
+            "package",
+            "timeout",
+            "priority",
+            "machine",
+            "platform",
+            "memory",
+            "enforce_timeout",
+            "custom",
+            "tags",
+            "route",
+        ]
+        data = {
+            name: getattr(self, name)
+            for name in cape_params_name
+            if getattr(self, name, None) is not None
+        }
 
         try:
             response = self.__session.post(
@@ -56,11 +103,10 @@ class CAPEsandbox(FileAnalyzer):
         response_error = response_json.get("error", False)
 
         if not response_error:
-            to_respond["result_url"] = response_json.get("url")
             task_id = response_json.get("data").get("task_ids")[0]
             result = self.__poll_for_result(task_id=task_id)
+            to_respond["result_url"] = self._url_key_name + f"/submit/status/{task_id}/"
             to_respond["response"] = result
-
             logger.info(
                 f"Job: {self.job_id} -> "
                 "File uploaded successfully without any errors."

@@ -137,6 +137,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self.set_default_value_from_playbook(attrs)
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
+            playbook: PlaybookConfig
+            if not attrs.get("scan_mode"):
+                attrs["scan_mode"] = playbook.scan_mode
+            if not attrs.get("scan_check_time"):
+                attrs["scan_check_time"] = playbook.scan_check_time
             if attrs.get("analyzers_requested", []) or attrs.get(
                 "connectors_requested", []
             ):
@@ -463,6 +468,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     file = rfs.FileField(required=True)
     file_name = rfs.CharField(required=False)
     file_mimetype = rfs.CharField(required=False)
+    is_sample = rfs.HiddenField(write_only=True, default=True)
 
     class Meta:
         model = Job
@@ -608,6 +614,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     observable_name = rfs.CharField(required=True)
     observable_classification = rfs.CharField(required=False)
+    is_sample = rfs.HiddenField(write_only=True, default=False)
 
     class Meta:
         model = Job

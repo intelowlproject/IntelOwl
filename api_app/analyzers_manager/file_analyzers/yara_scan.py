@@ -314,7 +314,7 @@ class YaraScan(FileAnalyzer):
 
     def _get_owner_and_key(self, url: str) -> Tuple[Union[str, None], Union[str, None]]:
         if url in self._private_repositories:
-            pc: PluginConfig = (
+            parameter: Parameter = (
                 Parameter.objects.filter(
                     analyzer_config=self._config,
                     is_secret=True,
@@ -324,7 +324,12 @@ class YaraScan(FileAnalyzer):
                 .annotate_value_for_user(self._job.user)
                 .first()
             )
-            if pc and pc.configured and pc.value and pc.for_organization:
+            if (
+                parameter
+                and parameter.configured
+                and parameter.value
+                and parameter.is_from_org
+            ):
                 if self._job.user.has_membership():
                     owner = (
                         f"{self._job.user.membership.organization.name}"

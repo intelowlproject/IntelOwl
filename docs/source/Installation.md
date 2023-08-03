@@ -37,14 +37,14 @@ cp docker/env_file_integrations_template docker/env_file_integrations
 cp frontend/public/env_template.js frontend/public/env.js
 
 # verify installed dependencies
-./initialize.sh
+sudo ./initialize.sh
 
 # start the app
-python3 start.py prod up
+sudo python3 start.py prod up
 
 # now the application is running on http://localhost:80
 # create a super user 
-docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
+sudo docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
 # now you can login with the created user form http://localhost:80
 
@@ -91,7 +91,7 @@ cp docker/env_file_postgres_template docker/env_file_postgres
 cp docker/env_file_integrations_template docker/env_file_integrations
 cp frontend/public/env_template.js frontend/public/env.js
 
-./initialize.sh
+sudo ./initialize.sh
 ```
 
 ### Environment configuration (required)

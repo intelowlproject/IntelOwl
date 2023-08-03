@@ -12,8 +12,7 @@ logger = getLogger(__name__)
 class ApiAppConfig(AppConfig):
     name = "api_app"
 
-    @staticmethod
-    def ready():
+    def ready(self):
         # flake8: noqa
         from django.core.cache import cache
 

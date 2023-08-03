@@ -57,8 +57,15 @@ class TagAdminView(admin.ModelAdmin):
 
 
 @admin.register(PluginConfig)
-class PluginCredentialAdminView(admin.ModelAdmin):
-    list_display = ("id", "value", "parameter_name", "for_organization", "owner_name")
+class PluginConfigAdminView(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "value",
+        "parameter_name",
+        "for_organization",
+        "owner_name",
+        "plugin",
+    )
     search_fields = ["parameter__name", "value"]
     list_filter = (
         "for_organization",
@@ -67,6 +74,10 @@ class PluginCredentialAdminView(admin.ModelAdmin):
         "parameter__connector_config__name",
         "parameter__visualizer_config__name",
     )
+
+    @staticmethod
+    def plugin(instance: PluginConfig):
+        return instance.parameter.config.name
 
     @staticmethod
     def parameter_name(instance: PluginConfig):
@@ -107,14 +118,26 @@ class ParameterAdminView(admin.ModelAdmin):
     inlines = [PluginConfigInline]
     search_fields = ["name"]
     list_filter = ["is_secret"]
-    list_display = ParameterInlineForm.Meta.fields
+    list_display = ParameterInlineForm.Meta.fields + ["plugin"]
     fields = list_display
+
+    @staticmethod
+    def plugin(obj: Parameter):
+        config = (
+            obj.analyzer_config
+            or obj.connector_config
+            or obj.visualizer_config
+            or obj.ingestor_config
+        )
+        return config.name
 
 
 class ParameterInline(admin.TabularInline):
     model = Parameter
-    list_display = ParameterAdminView.list_display
-    fields = list_display + ("default",)
+    list_display = ParameterInlineForm.Meta.fields
+    fields = list_display + [
+        "default",
+    ]
     extra = 0
     show_change_link = True
     form = ParameterInlineForm

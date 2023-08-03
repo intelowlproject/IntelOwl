@@ -14,6 +14,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils.module_loading import import_string
 from django.utils.timezone import now
+from django_celery_beat.models import PeriodicTask
 
 from api_app.choices import Status
 from intel_owl import secrets
@@ -106,26 +107,23 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
 
 @shared_task(soft_time_limit=150)
-def update(python_module: str, queue: str = None):
+def update(config_pk:str):
     from api_app.analyzers_manager.models import AnalyzerConfig
     from intel_owl.celery import broadcast
 
-    analyzer_configs = AnalyzerConfig.objects.filter(python_module=python_module)
-    if queue:
-        analyzer_configs = analyzer_configs.filter(config__queue=queue)
-    for analyzer_config in analyzer_configs.annotate_runnable().filter(runnable=True):
-        class_ = analyzer_config.python_class
-        if hasattr(class_, "_update") and callable(class_._update):  # noqa
-            if settings.NFS:
-                update_plugin(None, analyzer_config.python_complete_path)
-            else:
-                broadcast(
-                    update_plugin,
-                    queue=analyzer_config.queue,
-                    arguments={"plugin_path": analyzer_config.python_complete_path},
-                )
-            return True
-    logger.error(f"Unable to update {python_module}")
+    analyzer_config = AnalyzerConfig.objects.get(pk=config_pk)
+    class_ = analyzer_config.python_class
+    if hasattr(class_, "_update") and callable(class_._update):  # noqa
+        if settings.NFS:
+            update_plugin(None, analyzer_config.python_complete_path)
+        else:
+            broadcast(
+                update_plugin,
+                queue=analyzer_config.queue,
+                arguments={"plugin_path": analyzer_config.python_complete_path},
+            )
+        return True
+    logger.error(f"Unable to update {analyzer_config.python_complete_path}")
     return False
 
 
@@ -202,24 +200,10 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")
     if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
-        from api_app.analyzers_manager.file_analyzers.quark_engine import QuarkEngine
-        from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
-        from api_app.analyzers_manager.observable_analyzers.maxmind import Maxmind
-        from api_app.analyzers_manager.observable_analyzers.phishing_army import (
-            PhishingArmy,
-        )
-        from api_app.analyzers_manager.observable_analyzers.talos import Talos
-        from api_app.analyzers_manager.observable_analyzers.tor import Tor
-
-        for class_ in [
-            Maxmind,
-            Talos,
-            Tor,
-            YaraScan,
-            QuarkEngine,
-            PhishingArmy,
-        ]:
-            update(class_.python_module, queue=queue)
+        for task in PeriodicTask.objects.filter(enabled=True, queue=queue, task="intel_owl.tasks.update"):
+            config_pk = task.kwargs["config_pk"]
+            logger.info(f"Updating {config_pk}")
+            update(config_pk)
 
 
 # set logger

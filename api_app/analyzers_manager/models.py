@@ -7,7 +7,7 @@ from typing import Optional
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django_celery_beat.models import PeriodicTask, CrontabSchedule
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.analyzers_manager.constants import (
     HashChoices,
@@ -156,10 +156,18 @@ class AnalyzerConfig(PythonConfig):
         blank=True,
     )
     update_schedule = models.ForeignKey(
-        CrontabSchedule, on_delete=models.SET_NULL, null=True, blank=True, related_name="analyzers"
+        CrontabSchedule,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="analyzers",
     )
-    update_task = models.ForeignKey(
-        PeriodicTask, on_delete=models.SET_NULL, null=True, blank=True, related_name="analyzers"
+    update_task = models.OneToOneField(
+        PeriodicTask,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="analyzer",
     )
 
     def clean_observable_supported(self):
@@ -190,11 +198,22 @@ class AnalyzerConfig(PythonConfig):
         if self.run_hash and not self.run_hash_type:
             raise ValidationError("run_hash_type must be populated if run_hash is True")
 
+    def clean_update_schedule(self):
+        if (
+            not hasattr(self.python_class, "_update")
+            or not callable(self.python_class._update)
+        ) and (self.update_schedule or self.update_task):
+            raise ValidationError(
+                "You can't configure an update schedule if"
+                " the python class does not support that."
+            )
+
     def clean(self):
         super().clean()
         self.clean_run_hash_type()
         self.clean_observable_supported()
         self.clean_filetypes()
+        self.clean_update_schedule()
 
     @classmethod
     @property

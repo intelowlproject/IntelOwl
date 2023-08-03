@@ -5,7 +5,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
-import uuid
 from typing import Dict
 
 from celery import Celery

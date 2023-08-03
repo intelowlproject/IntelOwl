@@ -107,7 +107,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
 
 @shared_task(soft_time_limit=150)
-def update(config_pk:str):
+def update(config_pk: str):
     from api_app.analyzers_manager.models import AnalyzerConfig
     from intel_owl.celery import broadcast
 
@@ -200,7 +200,9 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")
     if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
-        for task in PeriodicTask.objects.filter(enabled=True, queue=queue, task="intel_owl.tasks.update"):
+        for task in PeriodicTask.objects.filter(
+            enabled=True, queue=queue, task="intel_owl.tasks.update"
+        ):
             config_pk = task.kwargs["config_pk"]
             logger.info(f"Updating {config_pk}")
             update(config_pk)

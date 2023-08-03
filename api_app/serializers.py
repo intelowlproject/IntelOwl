@@ -80,7 +80,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         choices=ScanMode.choices,
         required=False,
     )
-    scan_check_time = rfs.DurationField(required=False, allow_null=True, default=None)
+    scan_check_time = rfs.DurationField(required=False, allow_null=True)
 
     tags_labels = rfs.ListField(
         child=rfs.CharField(required=True), default=list, required=False
@@ -137,6 +137,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self.set_default_value_from_playbook(attrs)
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
+            playbook: PlaybookConfig
+            if not attrs.get("scan_mode"):
+                attrs["scan_mode"] = playbook.scan_mode
+            if not attrs.get("scan_check_time"):
+                attrs["scan_check_time"] = playbook.scan_check_time
             if attrs.get("analyzers_requested", []) or attrs.get(
                 "connectors_requested", []
             ):

@@ -53,6 +53,32 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         org.delete()
         pc.delete()
 
+    def test_create(self):
+        org = Organization.objects.create(name="test_org")
+
+        m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
+
+        payload = {
+            "create": True,
+            "edit": True,
+            "type": "1",
+            "plugin_name": "DNS0_EU",
+            "attribute": "query_type",
+            "value": "AA",
+            "organization": "test_org",
+            "config_type": "1",
+        }
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.user)},
+        )
+        serializer.is_valid(raise_exception=True)
+        pc: PluginConfig = serializer.save()
+        self.assertTrue(pc.for_organization)
+        m1.delete()
+        org.delete()
+        pc.delete()
+
 
 class JobSerializerTestCase(CustomTestCase):
     def test_validate(self):

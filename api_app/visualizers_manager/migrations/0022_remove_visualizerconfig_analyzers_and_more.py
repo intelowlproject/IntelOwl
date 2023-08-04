@@ -3,6 +3,41 @@
 from django.db import migrations, models
 
 
+def _migrate_custom_visualizers(apps):
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    for i, vc in enumerate(
+        VisualizerConfig.objects.exclude(
+            name__in=["Domain_Reputation", "IP_Reputation", "DNS", "Yara"]
+        )
+    ):
+        try:
+            pc = PlaybookConfig.objects.get(
+                analyzers__in=vc.analyzers.all(),
+                connectors__in=vc.connectors.all(),
+            )
+        except PlaybookConfig.DoesNotExist:
+            pc = PlaybookConfig.objects.create(
+                name=f"CustomPlaybook{i}",
+                type=["ip", "url", "domain", "hash", "generic", "file"],
+            )
+            pc.analyzers.set(vc.analyzers.all())
+            pc.connectors.set(vc.connectors.all())
+        vc.playbook = pc
+        vc.save()
+
+
+def _reverse_migrate_custom_visualizers(apps):
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    for vc in VisualizerConfig.objects.exclude(
+        name__in=["Domain_Reputation", "IP_Reputation", "DNS", "Yara"]
+    ):
+        pc = vc.playbook
+        vc.analyzers = pc.analyzers
+        vc.connectors = pc.connectors
+        vc.save()
+
+
 def _migrate_domain_reputation(apps):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
@@ -122,6 +157,7 @@ def migrate(apps, schema_editor):
     _migrate_dns(apps)
     _migrate_ip_reputation(apps)
     _migrate_domain_reputation(apps)
+    _migrate_custom_visualizers(apps)
 
 
 def reverse_migrate(apps, schema_editor):
@@ -129,6 +165,7 @@ def reverse_migrate(apps, schema_editor):
     _reverse_migrate_dns(apps)
     _reverse_migrate_ip_reputation(apps)
     _reverse_migrate_domain_reputation(apps)
+    _reverse_migrate_custom_visualizers(apps)
 
 
 class Migration(migrations.Migration):

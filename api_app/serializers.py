@@ -892,7 +892,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                 return json.dumps(result)
             return result
 
-    type = rfs.ChoiceField(choices=["1", "2", "3"])  # retrocompatibility
+    type = rfs.ChoiceField(choices=["1", "2", "3", "4"])  # retrocompatibility
     config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()

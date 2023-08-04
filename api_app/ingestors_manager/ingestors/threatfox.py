@@ -60,15 +60,15 @@ class ThreatFox(Ingestor):
                                     "malware": "win.dridex",
                                     "malware_printable": "Dridex",
                                     "malware_alias": None,
-                                    "malware_malpedia": "https:\/\/malpedia.caad."
+                                    "malware_malpedia": r"https://malpedia.caad."
                                     "fkie.fraunhofer.de"
-                                    "\/details\/win.dridex",
+                                    r"/details/win.dridex",
                                     "confidence_level": 50,
                                     "first_seen": "2020-12-08 13:36:27 UTC",
                                     "last_seen": None,
                                     "reporter": "abuse_ch",
-                                    "reference": "https:\/\/twitter.com\/JAMESWT_MHT"
-                                    "\/status\/1336229725082177536",
+                                    "reference": r"https://twitter.com/JAMESWT_MHT"
+                                    r"/status/1336229725082177536",
                                     "tags": ["exe", "test"],
                                 }
                             ],

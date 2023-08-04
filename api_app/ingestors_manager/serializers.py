@@ -51,14 +51,20 @@ class IngestorConfigSerializer(PythonConfigSerializer):
         fields = rfs.ALL_FIELDS
         list_serializer_class = PythonListConfigSerializer
 
+    def to_internal_value(self, data):
+        raise NotImplementedError()
+
 
 class IngestorReportSerializer(AbstractReportSerializer):
     name = rfs.SerializerMethodField()
+
+    class Meta:
+        model = IngestorReport
+        fields = AbstractReportSerializer.Meta.fields
 
     @classmethod
     def get_name(cls, instance: IngestorReport):
         return instance.name or instance.config.pk
 
-    class Meta:
-        model = IngestorReport
-        fields = AbstractReportSerializer.Meta.fields
+    def to_internal_value(self, data):
+        raise NotImplementedError()

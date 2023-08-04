@@ -89,7 +89,7 @@ def migrate(apps, schema_editor):
     Model = apps.get_model(*python_path.split("."))
     mtm, no_mtm = {}, {}
     for field, value in plugin.items():
-        if type(getattr(Model, field)) == ManyToManyDescriptor:
+        if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
             value = _get_real_obj(Model, field, value)

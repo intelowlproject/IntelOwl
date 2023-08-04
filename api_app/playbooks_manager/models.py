@@ -82,6 +82,4 @@ class PlaybookConfig(AbstractConfig):
         self.clean_scan()
 
     def is_sample(self) -> bool:
-        from api_app.analyzers_manager.constants import AllTypes
-
         return AllTypes.FILE.value in self.type

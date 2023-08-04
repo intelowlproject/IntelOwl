@@ -20,7 +20,7 @@ class CreateJobsFromPlaybookInterface:
 
     @abc.abstractmethod
     def get_values(self, report: AbstractReport) -> Generator[Any, None, None]:
-        ...
+        raise NotImplementedError()
 
     def _get_serializer(self, report: AbstractReport, tlp: str, user: User):
 

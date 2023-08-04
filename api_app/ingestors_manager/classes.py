@@ -37,7 +37,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def run(self) -> typing.Iterator[Any]:
-        ...
+        raise NotImplementedError()
 
     @classmethod
     @property

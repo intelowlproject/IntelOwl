@@ -19,7 +19,7 @@ class AnalyzerConfigTestCase(CustomTestCase):
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
-            type="file",
+            type="observable",
             run_hash=False,
             update_schedule=crontab,
         )

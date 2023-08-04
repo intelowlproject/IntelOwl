@@ -90,7 +90,7 @@ jobs:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
-          REPO_DOWNLOADER_ENABLED: False
+          REPO_DOWNLOADER_ENABLED: false
 
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
@@ -100,7 +100,7 @@ jobs:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
-          REPO_DOWNLOADER_ENABLED: False
+          REPO_DOWNLOADER_ENABLED: false
 
       - name: Docker debug
         run: |

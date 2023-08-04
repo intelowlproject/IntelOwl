@@ -12,7 +12,7 @@ from tests import CustomTestCase
 
 class AnalyzerConfigTestCase(CustomTestCase):
     def test_clean_update_schedule(self):
-        crontab, created = CrontabSchedule.objects.get_or_create(minute=10)
+        crontab, created = CrontabSchedule.objects.get_or_create(minute=19)
         ac = AnalyzerConfig(
             name="test",
             python_module="tranco.Tranco",

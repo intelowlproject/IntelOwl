@@ -6,11 +6,11 @@ from pathlib import PosixPath
 from django.core.management import BaseCommand
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializerForMigration
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.ingestors_manager.models import IngestorConfig
-from api_app.ingestors_manager.serializers import IngestorConfigSerializer
+from api_app.ingestors_manager.serializers import IngestorConfigSerializerForMigration
 from api_app.models import PluginConfig
 from api_app.serializers import (
     ParameterCompleteSerializer,
@@ -214,13 +214,13 @@ values = {3}
         config_class = options["plugin_class"]
 
         class_, serializer_class = (
-            (AnalyzerConfig, AnalyzerConfigSerializer)
+            (AnalyzerConfig, AnalyzerConfigSerializerForMigration)
             if config_class == AnalyzerConfig.__name__
             else (ConnectorConfig, ConnectorConfigSerializer)
             if config_class == ConnectorConfig.__name__
             else (VisualizerConfig, VisualizerConfigSerializer)
             if config_class == VisualizerConfig.__name__
-            else (IngestorConfig, IngestorConfigSerializer)
+            else (IngestorConfig, IngestorConfigSerializerForMigration)
         )
         obj = class_.objects.get(name=config_name)
         app = obj._meta.app_label

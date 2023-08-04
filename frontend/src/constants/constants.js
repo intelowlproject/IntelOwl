@@ -2,6 +2,7 @@ export const pluginType = Object.freeze({
   ANALYZER: "1",
   CONNECTOR: "2",
   VISUALIZER: "3",
+  INGESTOR: "4",
 });
 
 export const pluginStatuses = Object.freeze({

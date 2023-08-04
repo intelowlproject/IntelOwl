@@ -15,6 +15,7 @@ import django.core.exceptions
 from django.db.models import Q
 from django.http import QueryDict
 from django.utils.timezone import now
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
@@ -1006,11 +1007,14 @@ class PythonListConfigSerializer(rfs.ListSerializer):
 
         # get the values for that configurations
         if user and user.has_membership():
-            enabled_plugins.prefetch_related("disabled_in_organizations")
-            logger.debug("Excluding plugins disabled in organization")
-            enabled_plugins = enabled_plugins.exclude(
-                disabled_in_organizations=user.membership.organization.pk
-            )
+            if self.child.Meta.model.disabled_in_organizations:
+                enabled_plugins.prefetch_related("disabled_in_organizations")
+                logger.debug("Excluding plugins disabled in organization")
+                enabled_plugins = enabled_plugins.exclude(
+                    disabled_in_organizations=user.membership.organization.pk
+                )
+            else:
+                logger.debug("Plugin is system-wide.")
         else:
             logger.debug(
                 f"User {user.username} is not a member of an organization,"
@@ -1128,3 +1132,30 @@ class AbstractReportSerializer(rfs.ModelSerializer):
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
+class CrontabScheduleSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = CrontabSchedule
+        fields = [
+            "minute",
+            "hour",
+            "day_of_week",
+            "day_of_month",
+            "month_of_year",
+        ]
+
+
+class PeriodicTaskSerializer(rfs.ModelSerializer):
+    crontab = CrontabScheduleSerializer(read_only=True)
+
+    class Meta:
+        model = PeriodicTask
+        fields = [
+            "crontab",
+            "name",
+            "task",
+            "kwargs",
+            "queue",
+            "enabled",
+        ]

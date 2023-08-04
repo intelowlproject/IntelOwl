@@ -357,9 +357,55 @@ const visualizerTableColumns = [
     maxWidth: 145,
   },
 ];
+// Visualizers columns: these columns are shown for the visualizers
+const ingestorTableColumns = [
+  ...pluginTableColumns,
+  {
+    Header: "Configured",
+    id: "configured",
+    accessor: "verification.configured",
+    Cell: ({ row: { original } }) => (
+      <PluginVerificationIcon
+        pluginName={original?.name}
+        verification={original?.verification}
+      />
+    ),
+    Filter: SelectOptionsFilter,
+    selectOptions: ["true", "false"],
+    disableSortBy: true,
+    maxWidth: 100,
+  },
+  {
+    Header: "Description",
+    id: "description",
+    accessor: "description",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 300,
+  },
+  {
+    Header: "Playbook executed",
+    id: "playbook",
+    accessor: "playbook_to_execute",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    Filter: SelectColumnFilter,
+    maxWidth: 145,
+  },
+  {
+    Header: "Schedule",
+    id: "schedule",
+    accessor: "schedule",
+    Cell: ({ value }) => <span>{value.minute} {value.hour} {value.day_of_week} {value.day_of_month} {value.month_of_year}</span>,
+    disableSortBy: true,
+    maxWidth: 145,
+  },
+];
+
 export {
   analyzersTableColumns,
   connectorTableColumns,
-  playbookTableColumns,
   visualizerTableColumns,
+  ingestorTableColumns,
+  playbookTableColumns,
 };

@@ -47,14 +47,12 @@ class ParameterInlineForm(forms.ModelForm):
 
     def save(self, commit: bool = ...):
         instance = super().save(commit=commit)
-        if self.cleaned_data["default"] is not None:
-            pc = PluginConfig(
-                value=self.cleaned_data["default"],
+        if (default_value := self.cleaned_data["default"]) is not None:
+            PluginConfig.objects.update_or_create(
                 owner=None,
                 for_organization=False,
                 parameter=instance,
+                defaults={"value": default_value},
             )
-            pc.full_clean()
-            pc.save()
 
         return instance

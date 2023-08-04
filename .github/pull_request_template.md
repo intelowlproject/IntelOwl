@@ -16,7 +16,7 @@ Please delete options that are not relevant.
 
 - [ ] I have read and understood the rules about [how to Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html) to this project
 - [ ] The pull request is for the branch `develop`
-- [ ] A new plugin (analyzer, connector, visualizer or playbook) was added or changed, in which case:
+- [ ] A new plugin (analyzer, connector, visualizer, playbook or ingestor) was added or changed, in which case:
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
     - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (in case the plugin provides additional optional configuration).
     - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.

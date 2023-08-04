@@ -12,6 +12,7 @@ This page includes the most important things to know and understand when using I
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
   - [Playbooks](#playbooks)
   - [Visualizers](#visualizers)
+  - [Ingestors](#ingestors)
 - [TLP Support](#tlp-support)
 
 ## Client
@@ -491,16 +492,17 @@ The following are all the keys that you can change without touching the source c
 - `analyzers`: List of analyzers that must be executed
 - `connectors`: List of connectors that must be executed
 
-
-
-
 ### Ingestors
 
-The latest plugin is the `Ingestor` class.
+With Intel v5.1.0 we introduced the `Ingestor` class.
+
 Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
-Ingestors are system-wide and disabled by default, meaning that only administrator are able to configure them and enable them. 
 
+Ingestors are system-wide and disabled by default, meaning that only the administrator are able to configure them and enable them. 
+Ingestors can be _spammy_ so be careful about enabling them.
+
+A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
 
 #### List of pre-build Ingestors
 - `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
@@ -520,9 +522,6 @@ The following are all the keys that you can change without touching the source c
 - `playbook_to_execute`: Playbook that will be used for every IOC retrieved from the ingestor
 - `schedule`: Crontab schedule of its execution
 
----
-
-To contribute to the project, see [Contribute](./Contribute.md).
 
 ## TLP Support
 The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 
@@ -540,3 +539,6 @@ These is how every available TLP value behaves once selected for an analysis exe
 3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
 4. `RED` (default): disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
 
+---
+
+To contribute to the project, see [Contribute](./Contribute.md).

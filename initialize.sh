@@ -47,7 +47,7 @@ semantic_version_comp () {
 }
 
 echo "This script will check (and possibly guide you through) the installation of dependencies for IntelOwl!"
-echo "CARE! This script is delivered AS IS and could not work correctly in every possible environment. In the case you face any error, you should just follow the official documentation and do all the required operation manually."
+echo "CARE! This script is delivered AS IS and could not work correctly in every possible environment. It has been tested on Ubuntu 20.04. In the case you face any error, you should just follow the official documentation and do all the required operation manually."
 
 # Check if docker is installed
 if ! [ -x "$(command -v docker)" ]; then
@@ -114,7 +114,7 @@ fi
 
 # Check if python is installed
 if ! [ -x "$(command -v python3)" ]; then
-  echo 'Error: python3 is not installed.' >&2
+  echo 'Error: Python3 is not installed. Please install it.' >&2
   exit 1
 else
   python_version=$(python3 --version| awk '{print $NF}')
@@ -126,24 +126,25 @@ else
   fi
 fi
 
-# Check if pip is installed
-if ! [ -x "$(command -v pip3)" ]; then
-  echo 'Error: pip3 is not installed.' >&2
-  exit 1
+if [ -d "venv" ]; then
+  echo "Found virtual environment \`venv\`"
 else
-  echo "pip3 is installed"
+  echo "Creating virtual environment \`venv\`"
+  python3 -m venv venv
 fi
-
+echo "Activating virtual environment \`venv\`"
+source venv/bin/activate
 echo "Installing python dependencies using pip..."
 #pip requires --user flag for gentoo
-pip3 install --user -r requirements/pre-requirements.txt
+pip3 install -r requirements/pre-requirements.txt
 echo "Python dependencies installed!"
 
 echo "Adding Logrotate configuration to Systems logrotate"
 cd ./docker/scripts
 ./install_logrotate.sh
 echo "Added Logrotate configuration to Systems logrotate"
+echo "Moving to root of the project"
 cd -
 
 echo "Looks like you're ready to go!"
-echo "Now you can start IntelOwl by running the start.py file (eg: \`python3 start.py prod up\` for production environment)"
+echo "Now you can start IntelOwl by activating the virtual env with \`source venv/bin/activate\` running the start.py file (eg: \`sudo python3 start.py prod up\` for production environment)"

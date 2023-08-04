@@ -43,9 +43,8 @@ Then, please create a new branch based on the **develop** branch that contains t
 Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit/pre-commit) to force linters on every commits you perform
 
 ```bash
-# from the project directory
-# create virtualenv to host pre-commit installation
-python3 -m venv venv
+# From the project directory
+# You should already have a virtualenv from the installation phase. Otherwise you can create one with `python3 -m venv venv`
 source venv/bin/activate
 # from the project base directory
 pip install pre-commit

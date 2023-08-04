@@ -66,7 +66,7 @@ const routes = [
       </Suspense>
     ),
   },
-    {
+  {
     key: "plugins-ingestors",
     location: "ingestors",
     Title: () => (

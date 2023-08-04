@@ -396,7 +396,12 @@ const ingestorTableColumns = [
     Header: "Schedule",
     id: "schedule",
     accessor: "schedule",
-    Cell: ({ value }) => <span>{value.minute} {value.hour} {value.day_of_week} {value.day_of_month} {value.month_of_year}</span>,
+    Cell: ({ value }) => (
+      <span>
+        {value.minute} {value.hour} {value.day_of_week} {value.day_of_month}{" "}
+        {value.month_of_year}
+      </span>
+    ),
     disableSortBy: true,
     maxWidth: 145,
   },

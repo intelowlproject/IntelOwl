@@ -8,7 +8,8 @@ import {
   ANALYZERS_CONFIG_URI,
   CONNECTORS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
-  PLAYBOOKS_CONFIG_URI, INGESTORS_CONFIG_URI,
+  PLAYBOOKS_CONFIG_URI,
+  INGESTORS_CONFIG_URI,
 } from "../constants/api";
 
 async function downloadAllPlugin(pluginUrl) {

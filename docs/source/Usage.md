@@ -319,7 +319,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 
 #### Analyzers Customization
 
-You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerreport/`.
+You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerconfig/`.
 
 The following are all the keys that you can change without touching the source code:
 - `name`: Name of the analyzer
@@ -363,7 +363,7 @@ The following is the list of the available connectors. You can also navigate the
 #### Connectors customization
 
 Connectors being optional are `enabled` by default.
-You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorreport/`.
+You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorconfig/`.
 
 
 The following are all the keys that you can change without touching the source code:
@@ -508,7 +508,7 @@ A very powerful use is case is to **combine Ingestors with Connectors** to autom
 - `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
 
 #### Ingestors customization
-You can either enable or create new ingestors based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/ingestors_manager/visualizerreport/`.
+You can either enable or create new ingestors based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/ingestors_manager/ingestorconfig/`.
 
 The following are all the keys that you can change without touching the source code:
  

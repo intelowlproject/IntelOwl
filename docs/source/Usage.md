@@ -333,6 +333,7 @@ The following are all the keys that you can change without touching the source c
 - `config`:
   - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
   - `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
 Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
 A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
@@ -476,7 +477,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 
 
 #### Visualizers customization
-You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
+You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerconfig/`.
 
 The following are all the keys that you can change without touching the source code:
  
@@ -489,6 +490,35 @@ The following are all the keys that you can change without touching the source c
   - `soft_time_limit`: _same as analyzers_
 - `analyzers`: List of analyzers that must be executed
 - `connectors`: List of connectors that must be executed
+
+
+
+
+### Ingestors
+
+The latest plugin is the `Ingestor` class.
+Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
+Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
+Ingestors are system-wide and disabled by default, meaning that only administrator are able to configure them and enable them. 
+
+
+#### List of pre-build Ingestors
+- `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
+
+#### Ingestors customization
+You can either enable or create new ingestors based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/ingestors_manager/visualizerreport/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `playbook_to_execute`: Playbook that will be used for every IOC retrieved from the ingestor
+- `schedule`: Crontab schedule of its execution
 
 ---
 

@@ -7,7 +7,7 @@ from intel_owl.celery import get_queue_name
 
 def _create_periodic_task(PeriodicTask, analyzer, crontab):
     pt = PeriodicTask.objects.create(
-        name=f"{analyzer.name}PeriodicTask",
+        name=f"{analyzer.name.title()}Analyzer",
         task="intel_owl.tasks.update",
         crontab=crontab,
         queue=get_queue_name(analyzer.config["queue"]),

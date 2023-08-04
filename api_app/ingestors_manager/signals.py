@@ -11,22 +11,20 @@ from certego_saas.apps.user.models import User
 @receiver(pre_save, sender=IngestorConfig)
 def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
     instance.user = User.objects.get_or_create(
-        username=f"Ingestor{instance.name.title()}"
+        username=f"{instance.name.title()}Ingestor"
     )[0]
 
     periodic_task = PeriodicTask.objects.update_or_create(
-        name=f"{instance.name}PeriodicTask",
+        name=f"{instance.name.title()}Ingestor",
         task="intel_owl.tasks.execute_ingestor",
         defaults={
             "crontab": instance.schedule,
             "queue": instance.queue,
             "kwargs": json.dumps({"config_pk": instance.pk}),
+            "enabled": not instance.disabled,
         },
     )[0]
-    if not hasattr(instance, "periodic_task") or not instance.periodic_task:
-        periodic_task.enabled = False
-        periodic_task.save()
-    instance.periodic_task = periodic_task
+    instance.periodic_tacosk = periodic_task
     return instance
 
 

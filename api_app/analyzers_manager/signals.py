@@ -15,7 +15,7 @@ def pre_save_analyzer_config(sender, instance: AnalyzerConfig, *args, **kwargs):
     ):
         if hasattr(instance, "update_schedule") and instance.update_schedule:
             periodic_task = PeriodicTask.objects.update_or_create(
-                name=f"{instance.name}PeriodicTask",
+                name=f"{instance.name.title()}Analyzer",
                 task="intel_owl.tasks.update",
                 defaults={
                     "crontab": instance.update_schedule,

@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-from api_app.models import Job, Parameter
+from api_app.models import Job, Parameter, PluginConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
@@ -16,12 +16,42 @@ from api_app.serializers import (
     JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
+    PluginConfigSerializer,
     PythonListConfigSerializer,
     _AbstractJobCreateSerializer,
 )
 from api_app.visualizers_manager.models import VisualizerConfig
+from certego_saas.apps.organization.membership import Membership
+from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
+
+
+class PluginConfigSerializerTestCase(CustomTestCase):
+    def test_to_representation(self):
+        org = Organization.objects.create(name="test_org")
+
+        m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
+        pc = PluginConfig.objects.create(
+            value="https://intelowl.com",
+            owner=self.user,
+            parameter=Parameter.objects.first(),
+            for_organization=True,
+        )
+        data = PluginConfigSerializer(pc).data
+        self.assertEqual(org.name, data["organization"])
+        pc.delete()
+        pc = PluginConfig.objects.create(
+            value="https://intelowl.com",
+            owner=self.user,
+            parameter=Parameter.objects.first(),
+            for_organization=False,
+        )
+        data = PluginConfigSerializer(pc).data
+        self.assertIsNone(data["organization"])
+        m1.delete()
+        org.delete()
+        pc.delete()
 
 
 class JobSerializerTestCase(CustomTestCase):

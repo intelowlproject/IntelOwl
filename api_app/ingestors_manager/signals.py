@@ -24,7 +24,7 @@ def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
             "enabled": not instance.disabled,
         },
     )[0]
-    instance.periodic_tacosk = periodic_task
+    instance.periodic_task = periodic_task
     return instance
 
 

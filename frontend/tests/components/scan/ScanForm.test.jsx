@@ -930,7 +930,6 @@ describe("test ScanForm component", () => {
           tags_labels: "test tag",
           tlp: "GREEN",
           scan_mode: "1",
-          scan_check_time: "null",
         });
       });
     },
@@ -1114,7 +1113,6 @@ describe("test ScanForm component", () => {
           tlp: "GREEN",
           tags_labels: "test tag",
           scan_mode: "1",
-          scan_check_time: "null",
         });
       });
     },
@@ -1887,7 +1885,6 @@ describe("test ScanForm component", () => {
         playbook_requested: "TEST_PLAYBOOK_FILE",
         tlp: "AMBER",
         scan_mode: "1",
-        scan_check_time: "null",
       });
     });
   });

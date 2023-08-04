@@ -896,9 +896,13 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-
-    organization = rfs.PrimaryKeyRelatedField(
-        queryset=Organization.objects.all(), required=False, allow_null=True
+    for_organization = rfs.BooleanField(read_only=True)
+    organization = rfs.SlugRelatedField(
+        queryset=Organization.objects.all(),
+        required=False,
+        allow_null=True,
+        slug_field="name",
+        write_only=True,
     )
     value = CustomValueField()
 
@@ -915,13 +919,13 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         if self.partial:
             # we are in an update
             return attrs
-        if (
-            "organization" in attrs
-            and attrs["organization"]
-            and (attrs.pop("organization").owner != attrs["owner"])
-        ):
-            attrs["for_organization"] = True
-            raise ValidationError({"detail": "You are not owner of the organization"})
+        if "organization" in attrs and attrs["organization"]:
+            if attrs.pop("organization").owner != attrs["owner"]:
+                raise ValidationError(
+                    {"detail": "You are not owner of the organization"}
+                )
+            else:
+                attrs["for_organization"] = True
 
         _value = attrs["value"]
         # retro compatibility
@@ -947,6 +951,11 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     def update(self, instance, validated_data):
         self.validate_value_type(validated_data["value"], instance.parameter)
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance: PluginConfig):
+        result = super().to_representation(instance)
+        result["organization"] = instance.organization
+        return result
 
 
 class _ConfigSerializer(rfs.Serializer):

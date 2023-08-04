@@ -896,7 +896,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-    for_organization = rfs.BooleanField(read_only=True)
     organization = rfs.SlugRelatedField(
         queryset=Organization.objects.all(),
         required=False,

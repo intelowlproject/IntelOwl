@@ -52,10 +52,10 @@ class AnalyzerConfigTestCase(CustomTestCase):
     def test_update(self):
         from intel_owl import tasks
 
-        result = tasks.update("yara_scan.YaraScan2")
-        self.assertFalse(result)
+        with self.assertRaises(AnalyzerConfig.DoesNotExist):
+            tasks.update("yara_scan.YaraScan2")
 
-        ac = AnalyzerConfig(
+        ac = AnalyzerConfig.objects.create(
             name="test",
             python_module="xlm_macro_deobfuscator.XlmMacroDeobfuscator",
             description="test",
@@ -63,11 +63,11 @@ class AnalyzerConfigTestCase(CustomTestCase):
             disabled=False,
             type="file",
         )
-        result = tasks.update("xlm_macro_deobfuscator.XlmMacroDeobfuscator")
+        result = tasks.update("test")
         self.assertFalse(result)
         ac.delete()
 
-        ac = AnalyzerConfig(
+        ac = AnalyzerConfig.objects.create(
             name="test",
             python_module="yara_scan.YaraScan",
             description="test",
@@ -76,6 +76,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
             type="file",
         )
         with patch("intel_owl.celery.broadcast"):
-            result = tasks.update("yara_scan.YaraScan")
+            result = tasks.update("test")
         self.assertTrue(result)
         ac.delete()

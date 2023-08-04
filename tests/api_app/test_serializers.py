@@ -332,7 +332,7 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         self.oass.all_connectors = False
 
     def test_filter_analyzers_type(self):
-        a = AnalyzerConfig.objects.get(name="Tranco")
+        a = AnalyzerConfig.objects.get(name="Yara")
         a.observable_supported = ["domain"]
         a.type = "file"
         a.save()

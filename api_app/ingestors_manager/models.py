@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class IngestorReport(AbstractReport):
     config = models.ForeignKey(
-        "IngestorConfig", related_name="reports", null=False, on_delete=models.CASCADE
+        "IngestorConfig", related_name="reports", on_delete=models.CASCADE
     )
     report = models.JSONField(default=list, validators=[])
     name = models.CharField(null=True, blank=True, default=None, max_length=50)

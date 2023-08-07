@@ -44,7 +44,7 @@ def migrate_config(apps, schema_editor):
     yara = AnalyzerConfig.objects.get(python_module="yara_scan.YaraScan")
     _create_periodic_task(PeriodicTask, yara, c5)
 
-    c6 = CrontabSchedule.objects.get_or_create(minute=0, hour=0, day_of_week=[2, 5])[0]
+    c6 = CrontabSchedule.objects.get_or_create(minute=0, hour=0, day_of_week="2,5")[0]
     quark = AnalyzerConfig.objects.get(python_module="quark_engine.QuarkEngine")
     _create_periodic_task(PeriodicTask, quark, c6)
 

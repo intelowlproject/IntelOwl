@@ -62,6 +62,7 @@ class JobQuerySet(CleanOnCreateQuerySet):
         User has access to:
         - jobs with TLP = CLEAR or GREEN
         - jobs with TLP = AMBER or RED and
+        - jobs made by ingestors if the user is an admin
         created by a member of their organization.
         """
         if user.has_membership():
@@ -70,8 +71,11 @@ class JobQuerySet(CleanOnCreateQuerySet):
             )
         else:
             user_query = Q(user=user)
+        if user.is_superuser:
+            user_query |= Q(user__ingestors__isnull=False)
+
         query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (
-            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
+            Q(tlp__in=[TLP.AMBER, TLP.RED]) & user_query
         )
         return self.filter(query)
 
@@ -310,3 +314,14 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 immutable=True,
                 MessageGroupId=str(task_id),
             )
+
+
+class IngestorQuerySet(PythonConfigQuerySet):
+    def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
+        # the plugin is runnable IF
+        # - it is not disabled
+        qs = self.filter(
+            pk=OuterRef("pk"),
+        ).exclude(disabled=True)
+
+        return self.annotate(runnable=Exists(qs))

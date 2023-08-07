@@ -68,7 +68,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && rm -rf /root/.local \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff
-    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh \
+    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 
 
 # quarkengine calls

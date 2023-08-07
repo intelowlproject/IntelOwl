@@ -80,3 +80,6 @@ class PlaybookConfig(AbstractConfig):
     def clean(self) -> None:
         super().clean()
         self.clean_scan()
+
+    def is_sample(self) -> bool:
+        return AllTypes.FILE.value in self.type

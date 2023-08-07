@@ -1,14 +1,12 @@
-import io
 import logging
 from typing import Any, Generator, List
 
-from django.core.files import File
 from django.db import models
-from django.http import QueryDict
 from django.utils.functional import cached_property
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
+from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.models import AbstractConfig, AbstractReport, Job
 from api_app.pivots_manager.validators import pivot_regex_validator
 from api_app.visualizers_manager.models import VisualizerConfig
@@ -59,7 +57,7 @@ class Pivot(models.Model):
         return self.starting_job.user.username
 
 
-class PivotConfig(AbstractConfig):
+class PivotConfig(AbstractConfig, CreateJobsFromPlaybookInterface):
     name = models.CharField(
         max_length=100,
         validators=[pivot_regex_validator],
@@ -148,7 +146,7 @@ class PivotConfig(AbstractConfig):
     def config(self) -> AbstractConfig:
         return self.analyzer_config or self.connector_config or self.visualizer_config
 
-    def get_value(self, report: AbstractReport) -> Generator[Any, None, None]:
+    def get_values(self, report: AbstractReport) -> Generator[Any, None, None]:
         value = report.report
 
         for key in self.field.split("."):
@@ -168,75 +166,6 @@ class PivotConfig(AbstractConfig):
         else:
             logger.info(f"Config {self.name} retrieved value {value}")
             yield value
-
-    def _is_sample(self) -> bool:
-        from api_app.analyzers_manager.constants import AllTypes
-
-        return AllTypes.FILE.value in self.playbook_to_execute.type
-
-    def _get_serializer(self, report: AbstractReport):
-
-        values = self.get_value(report)
-        if self._is_sample():
-            return self._get_file_serializer(values, report.job.tlp, report.job.user)
-        else:
-            return self._get_observable_serializer(
-                values, report.job.tlp, report.job.user
-            )
-
-    def _get_observable_serializer(
-        self, values: Generator[Any, None, None], tlp: str, user
-    ):
-        from api_app.serializers import ObservableAnalysisSerializer
-        from tests.mock_utils import MockUpRequest
-
-        return ObservableAnalysisSerializer(
-            data={
-                "playbooks_requested": [self.playbook_to_execute_id],
-                "observables": [(None, value) for value in values],
-                "send_task": True,
-                "tlp": tlp,
-            },
-            context={"request": MockUpRequest(user=user)},
-            many=True,
-        )
-
-    def _get_file_serializer(
-        self, values: Generator[bytes, None, None], tlp: str, user
-    ):
-        from api_app.serializers import FileAnalysisSerializer
-        from tests.mock_utils import MockUpRequest
-
-        files = [
-            File(io.BytesIO(data), name=f"{self.field}.{i}")
-            for i, data in enumerate(values)
-        ]
-        querydict = QueryDict(mutable=True)
-        data = {
-            "playbooks_requested": self.playbook_to_execute_id,
-            "send_task": True,
-            "tlp": tlp,
-        }
-        querydict.update(data)
-        querydict.setlist("files", files)
-        return FileAnalysisSerializer(
-            data=querydict,
-            context={"request": MockUpRequest(user=user)},
-            many=True,
-        )
-
-    def _create_jobs(
-        self, report: AbstractReport, send_task: bool = True
-    ) -> Generator[Job, None, None]:
-
-        try:
-            serializer = self._get_serializer(report)
-        except ValueError as e:
-            logger.exception(e)
-            raise
-        else:
-            serializer.is_valid(raise_exception=True)
-            yield from serializer.save(send_task=send_task)
 
     def pivot_job(self, starting_job: Job) -> List[Pivot]:
         from rest_framework.exceptions import ValidationError
@@ -260,7 +189,9 @@ class PivotConfig(AbstractConfig):
             )
             return []
 
-        ending_jobs = self._create_jobs(report)
+        ending_jobs = self._create_jobs(
+            report, report.job.tlp, report.job.user, send_task=True
+        )
 
         pivots = []
         logger.info(f"Jobs created from pivot are {ending_jobs}")

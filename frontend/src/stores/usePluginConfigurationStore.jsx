@@ -9,6 +9,7 @@ import {
   CONNECTORS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
   PLAYBOOKS_CONFIG_URI,
+  INGESTORS_CONFIG_URI,
 } from "../constants/api";
 
 async function downloadAllPlugin(pluginUrl) {
@@ -47,14 +48,17 @@ const usePluginConfigurationStore = create((set, get) => ({
   analyzersLoading: true,
   connectorsLoading: true,
   visualizersLoading: true,
+  ingestorsLoading: true,
   playbooksLoading: true,
   analyzersError: null,
   connectorsError: null,
-  playbooksError: null,
   visualizersError: null,
+  ingestorsError: null,
+  playbooksError: null,
   analyzers: [],
   connectors: [],
   visualizers: [],
+  ingestors: [],
   playbooks: [],
   hydrate: () => {
     // this function is called to check if we need to download the data related to the plugins or not
@@ -66,6 +70,9 @@ const usePluginConfigurationStore = create((set, get) => ({
     }
     if (get().visualizersLoading) {
       get().retrieveVisualizersConfiguration();
+    }
+    if (get().ingestorsLoading) {
+      get().retrieveIngestorsConfiguration();
     }
     if (get().playbooksLoading) {
       get().retrievePlaybooksConfiguration();
@@ -120,6 +127,23 @@ const usePluginConfigurationStore = create((set, get) => ({
       });
     } catch (e) {
       set({ visualizersError: e, visualizersLoading: false });
+    }
+  },
+  retrieveIngestorsConfiguration: async () => {
+    try {
+      set({ ingestorsLoading: true });
+      const ingestors = await downloadAllPlugin(INGESTORS_CONFIG_URI);
+      console.debug(
+        "usePluginConfigurationStore - retrieveIngestorsConfiguration: ",
+      );
+      console.debug(ingestors);
+      set({
+        ingestorsError: null,
+        ingestors,
+        ingestorsLoading: false,
+      });
+    } catch (e) {
+      set({ ingestorsError: e, ingestorsLoading: false });
     }
   },
   retrievePlaybooksConfiguration: async () => {

@@ -43,3 +43,19 @@ services:
       - uwsgi
     <<: *no-healthcheck
 
+  celery_worker_ingestor:
+    image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
+    container_name: intelowl_celery_worker_ingestor
+    restart: unless-stopped
+    stop_grace_period: 3m
+    volumes:
+      - ../configuration:/opt/deploy/intel_owl/configuration
+      - generic_logs:/var/log/intel_owl
+      - shared_files:/opt/deploy/files_required
+    entrypoint:
+      - ./docker/entrypoints/celery_ingestor.sh
+    env_file:
+      - env_file_app
+    depends_on:
+      - uwsgi
+    <<: *no-healthcheck

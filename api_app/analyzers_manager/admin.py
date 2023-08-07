@@ -18,5 +18,7 @@ class AnalyzerConfigAdminView(PythonConfigAdminView):
         "type",
         "docker_based",
         "maximum_tlp",
+        "update_schedule",
     )
     form = AnalyzerConfigAdminForm
+    exclude = ["update_task"]

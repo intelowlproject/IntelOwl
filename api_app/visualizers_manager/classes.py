@@ -303,10 +303,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     def python_base_path(cls):
         return settings.BASE_VISUALIZER_PYTHON_PATH
 
-    @property
-    def visualizer_name(self) -> str:
-        return self._config.name
-
     @classmethod
     @property
     def report_model(cls):
@@ -322,12 +318,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
             VisualizerConfigurationException,
             VisualizerRunException,
         ]
-
-    def get_error_message(self, err, is_base_err=False):
-        return (
-            f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
-        )
 
     def before_run(self):
         super().before_run()

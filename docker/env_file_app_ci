@@ -58,3 +58,5 @@ BROKER_URL=amqp://guest:guest@rabbitmq:5672
 # drf-recaptcha
 USE_RECAPTCHA=False
 RECAPTCHA_SECRET_KEY="testkey"
+# crons
+REPO_DOWNLOADER_ENABLED=False

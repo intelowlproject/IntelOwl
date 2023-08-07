@@ -12,6 +12,7 @@ This page includes the most important things to know and understand when using I
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
   - [Playbooks](#playbooks)
   - [Visualizers](#visualizers)
+  - [Ingestors](#ingestors)
 - [TLP Support](#tlp-support)
 
 ## Client
@@ -318,7 +319,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 
 #### Analyzers Customization
 
-You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerreport/`.
+You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerconfig/`.
 
 The following are all the keys that you can change without touching the source code:
 - `name`: Name of the analyzer
@@ -333,6 +334,7 @@ The following are all the keys that you can change without touching the source c
 - `config`:
   - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
   - `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
 Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
 A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
@@ -361,7 +363,7 @@ The following is the list of the available connectors. You can also navigate the
 #### Connectors customization
 
 Connectors being optional are `enabled` by default.
-You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorreport/`.
+You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorconfig/`.
 
 
 The following are all the keys that you can change without touching the source code:
@@ -476,7 +478,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 
 
 #### Visualizers customization
-You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
+You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerconfig/`.
 
 The following are all the keys that you can change without touching the source code:
  
@@ -490,9 +492,36 @@ The following are all the keys that you can change without touching the source c
 - `analyzers`: List of analyzers that must be executed
 - `connectors`: List of connectors that must be executed
 
----
+### Ingestors
 
-To contribute to the project, see [Contribute](./Contribute.md).
+With Intel v5.1.0 we introduced the `Ingestor` class.
+
+Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
+Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
+
+Ingestors are system-wide and disabled by default, meaning that only the administrator are able to configure them and enable them. 
+Ingestors can be _spammy_ so be careful about enabling them.
+
+A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
+
+#### List of pre-build Ingestors
+- `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
+
+#### Ingestors customization
+You can either enable or create new ingestors based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/ingestors_manager/ingestorconfig/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `playbook_to_execute`: Playbook that will be used for every IOC retrieved from the ingestor
+- `schedule`: Crontab schedule of its execution
+
 
 ## TLP Support
 The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 
@@ -510,3 +539,6 @@ These is how every available TLP value behaves once selected for an analysis exe
 3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
 4. `RED` (default): disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
 
+---
+
+To contribute to the project, see [Contribute](./Contribute.md).

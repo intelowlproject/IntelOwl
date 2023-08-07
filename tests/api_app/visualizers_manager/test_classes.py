@@ -307,9 +307,15 @@ class VisualizerTestCase(CustomTestCase):
         subclasses = Visualizer.all_subclasses()
         for subclass in subclasses:
             print("\n" f"Testing Visualizer {subclass.__name__}")
-            for config in VisualizerConfig.objects.filter(
+            configs = VisualizerConfig.objects.filter(
                 python_module=subclass.python_module
-            ):
+            )
+            if not configs.exists():
+                self.fail(
+                    f"There is a python module {subclass.python_module}"
+                    " without any configuration"
+                )
+            for config in configs:
                 job.visualizers_to_execute.set([config])
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)

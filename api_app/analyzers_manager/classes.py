@@ -66,16 +66,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             AnalyzerRunException,
         )
 
-    def get_error_message(self, err, is_base_err=False):
-        """
-        Returns error message for
-        *_handle_analyzer_exception* and *_handle_base_exception* fn
-        """
-        return (
-            f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
-        )
-
     def _validate_result(self, result, level=0, max_recursion=190):
         """
         function to validate result, allowing to store inside postgres without errors.

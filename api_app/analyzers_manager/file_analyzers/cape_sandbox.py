@@ -52,7 +52,7 @@ class CAPEsandbox(FileAnalyzer):
     _certificate: str
 
     @staticmethod
-    def _clean_certificate(self, cert):
+    def _clean_certificate(cert):
         return (
             cert.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN_CERTIFICATE-----")
             .replace("-----END CERTIFICATE-----", "-----END_CERTIFICATE-----")

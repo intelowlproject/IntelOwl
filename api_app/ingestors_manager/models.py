@@ -21,7 +21,7 @@ class IngestorReport(AbstractReport):
         "IngestorConfig", related_name="reports", on_delete=models.CASCADE
     )
     report = models.JSONField(default=list, validators=[])
-    name = models.CharField(null=True, blank=True, default=None, max_length=50)
+    name = models.CharField(blank=True, default="", max_length=50)
     task_id = models.UUIDField(null=True, blank=True)
     job = models.ForeignKey(
         "api_app.Job",

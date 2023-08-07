@@ -7,8 +7,9 @@ With this release we announce our new official site created by [Abheek Tripathy]
 Feel free to check it out! Official [blog post here](https://intelowlproject.github.io/blogs/official_site_revamped)!
 
 **Important changes**
+* We added a new type of Plugin called [Ingestor](https://intelowl.readthedocs.io/en/latest/Usage.html#ingestors). **Ingestors** allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 * Visualizers are not connected anymore to Analyzers/Connectors. They are connected to a single Playbook instead. This allows the users to create and manage the Visualizers in an easier way.
-* We added the new "Pivot" framework in the backend which allows to connect jobs to each other. This is the first step to give the chance to the users to create more broader and complex investigation in IntelOwl. The next step will be to add the Frontend changes that allows the user to fully leverage the framework 
+* We added the new **Pivot** framework in the backend which allows to connect jobs to each other and to _pivot_ from one indicator to another. This is the first step to give the chance to the users to create more broader and complex investigation in IntelOwl. The next step will be to add the Frontend changes that allows the user to fully leverage the framework 
 
 **New/Improved Plugins:**
 * Added new `DNS` playbook that collects the analyzers which performs DNS queries to various providers

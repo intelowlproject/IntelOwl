@@ -314,7 +314,7 @@ You may want to look at a few existing examples to start to build a new one:
 ## Hot to add a new Ingestor
 1. Put the module in the `ingestors` directory
 2. Remember to use `_monkeypatch()` in its class to create automated tests for the new ingestor. This is a trick to have tests in the same class of its ingestor.
-3. Create the configuration inside django admin in `Ingestors_manager/IngetorConfigs` (* = mandatory, ~ = mandatory on conditions)
+3. Create the configuration inside django admin in `Ingestors_manager/IngestorConfigs` (* = mandatory, ~ = mandatory on conditions)
    1. *Name: specific name of the configuration
    2. *Python module: <module_name>.<class_name>
    3. *Description: description of the configuration

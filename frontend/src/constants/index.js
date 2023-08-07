@@ -26,6 +26,13 @@ export const TLP_DESCRIPTION_MAP = {
 export const JOB_STATUS_COLOR_MAP = {
   pending: "light",
   running: "secondary",
+  analyzers_running: "secondary",
+  connectors_running: "secondary",
+  visualizers_running: "secondary",
+
+  analyzers_completed: "secondary",
+  connectors_completed: "secondary",
+  visualizers_completed: "secondary",
   killed: "gray",
   reported_with_fails: "warning",
   reported_without_fails: "success",
@@ -42,24 +49,9 @@ export const STATUS_COLORMAP = {
   ...JOB_STATUS_COLOR_MAP,
   ...REPORT_STATUS_COLOR_MAP,
 };
-export const JOB_STATUSES = [
-  "pending",
-  "running",
-  "reported_with_fails",
-  "reported_without_fails",
-  "killed",
-  "failed",
-];
-export const PLUGIN_STATUSES = [
-  "PENDING",
-  "RUNNING",
-  "KILLED",
-  "SUCCESS",
-  "FAILED",
-];
 export const TLP_CHOICES = Object.keys(TLP_COLOR_MAP);
 export const OBSERVABLE_TYPES = Object.keys(
-  OBSERVABLE_CLASSIFICATION_COLOR_MAP
+  OBSERVABLE_CLASSIFICATION_COLOR_MAP,
 );
 
 export const scanTypes = {

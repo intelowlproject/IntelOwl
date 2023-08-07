@@ -2,20 +2,19 @@
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import (
-    AbstractConfigSerializer,
-    AbstractListConfigSerializer,
+from ..serializers import (
     AbstractReportSerializer,
+    PythonConfigSerializer,
+    PythonListConfigSerializer,
 )
-
 from .models import ConnectorConfig, ConnectorReport
 
 
-class ConnectorConfigSerializer(AbstractConfigSerializer):
+class ConnectorConfigSerializer(PythonConfigSerializer):
     class Meta:
         model = ConnectorConfig
         fields = rfs.ALL_FIELDS
-        list_serializer_class = AbstractListConfigSerializer
+        list_serializer_class = PythonListConfigSerializer
 
 
 class ConnectorReportSerializer(AbstractReportSerializer):

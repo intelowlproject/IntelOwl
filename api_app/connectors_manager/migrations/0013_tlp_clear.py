@@ -9,15 +9,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('connectors_manager', '0012_slack'),
+        ("connectors_manager", "0012_slack"),
     ]
 
     operations = [
         migrations.AlterField(
             model_name="connectorconfig",
-            name='maximum_tlp',
-            field=models.CharField(choices=[
-                ('WHITE', 'White'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='CLEAR', max_length=50)
-
+            name="maximum_tlp",
+            field=models.CharField(
+                choices=[
+                    ("WHITE", "White"),
+                    ("GREEN", "Green"),
+                    ("AMBER", "Amber"),
+                    ("RED", "Red"),
+                ],
+                default="CLEAR",
+                max_length=50,
+            ),
         )
     ]

@@ -38,11 +38,15 @@ INSTALLED_APPS = [
     "api_app.connectors_manager",
     "api_app.visualizers_manager",
     "api_app.playbooks_manager",
+    "api_app.pivots_manager",
+    "api_app.ingestors_manager",
     # auth
     "rest_email_auth",
     "drf_recaptcha",
     # performance debugging
     "silk",
+    # celery
+    "django_celery_beat",
 ]
 
 from .auth import *  # lgtm [py/polluting-import]

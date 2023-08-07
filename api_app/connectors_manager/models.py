@@ -6,7 +6,7 @@ from django.db import models
 
 from api_app.choices import TLP
 from api_app.connectors_manager.exceptions import ConnectorConfigurationException
-from api_app.core.models import AbstractConfig, AbstractReport
+from api_app.models import AbstractReport, PythonConfig
 
 
 class ConnectorReport(AbstractReport):
@@ -18,7 +18,7 @@ class ConnectorReport(AbstractReport):
         unique_together = [("config", "job")]
 
 
-class ConnectorConfig(AbstractConfig):
+class ConnectorConfig(PythonConfig):
     maximum_tlp = models.CharField(
         null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50
     )

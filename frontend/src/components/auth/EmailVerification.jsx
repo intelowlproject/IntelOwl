@@ -26,7 +26,7 @@ export default function EmailVerification() {
           verifyEmail({ key })
             .then(() => setIsVerified(true))
             .catch(() => setIsKeyValid(false)),
-        500
+        500,
       );
     } else {
       setIsKeyValid(false);

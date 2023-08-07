@@ -3,7 +3,17 @@
 /* eslint-disable camelcase */
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, ListGroup, ListGroupItem, Badge, Fade } from "reactstrap";
+import {
+  Button,
+  ListGroup,
+  ListGroupItem,
+  Badge,
+  Fade,
+  Collapse,
+  Row,
+  Col,
+  UncontrolledTooltip,
+} from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
@@ -22,6 +32,7 @@ import {
   IconButton,
   addToast,
   CopyToClipboardButton,
+  ArrowToggleIcon,
 } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
@@ -29,6 +40,10 @@ import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
 import { createJob, createPlaybookJob } from "../../../scan/api";
+import {
+  pluginFinalStatuses,
+  jobStatuses,
+} from "../../../../constants/constants";
 
 function DeleteIcon() {
   return (
@@ -89,12 +104,12 @@ export function JobActionsBar({ job, refetch }) {
       null,
       "spinner",
       false,
-      2000
+      2000,
     );
     const url = window.URL.createObjectURL(
       new Blob([JSON.stringify(job, null, 2)], {
         type: "application/json",
-      })
+      }),
     );
     setTimeout(() => window.open(url, "rel=noopener,noreferrer"), 250);
   };
@@ -154,6 +169,7 @@ export function JobActionsBar({ job, refetch }) {
         />
       )}
       <IconButton
+        id="rescanbtn"
         Icon={retryJobIcon}
         onClick={handleRetry}
         color="light"
@@ -163,7 +179,7 @@ export function JobActionsBar({ job, refetch }) {
         className="me-2"
       />
 
-      <SaveAsPlaybookButton jobId={job.id} />
+      <SaveAsPlaybookButton job={job} />
       {job?.is_sample && (
         <Button
           size="sm"
@@ -194,121 +210,203 @@ export function JobInfoCard({ job }) {
     .toISOString()
     .substring(14, 19);
 
+  // local state
+  const [isOpen, setIsOpen] = React.useState(false);
+
   return (
     <div id="JobInfoCardSection">
-      <ContentSection className="mb-0 bg-darker d-flex-center">
-        <div className="d-flex-start-start">
-          <h3>
-            {job.is_sample ? (
-              <VscFile className="me-1" />
-            ) : (
-              <VscGlobe className="me-1" />
-            )}
-
-            {job.is_sample ? (
-              <CopyToClipboardButton
-                showOnHover
-                id="file_name"
-                text={job.file_name}
-              >
-                {job.file_name}
-              </CopyToClipboardButton>
-            ) : (
-              <CopyToClipboardButton
-                showOnHover
-                id="observable_name"
-                text={job.observable_name}
-              >
-                {job.observable_name}
-              </CopyToClipboardButton>
-            )}
-          </h3>
-          <Badge className="ms-1 float-end" color="info">
-            {job.is_sample
-              ? `file: ${job.file_mimetype}`
-              : job.observable_classification}
-          </Badge>
-        </div>
-      </ContentSection>
-      <ContentSection className="border-top-0 bg-body ps-0 pe-1 py-1">
-        <ListGroup
-          horizontal
-          className="align-items-start flex-wrap flex-lg-nowrap"
-        >
-          {[
-            ["Status", <StatusTag status={job.status} />],
-            ["TLP", <TLPTag value={job.tlp} />],
-            ["User", job.user?.username],
-            ["MD5", job.md5],
-            ["Process Time (mm:ss)", process_time_mmss],
-            [
-              "Start Time",
-              <DateHoverable
-                id={`overview-received_request_time__${job.id}`}
-                value={job.received_request_time}
-                format="hh:mm:ss a MMM do, yyyy"
-              />,
-            ],
-            [
-              "End Time",
-              job.finished_analysis_time ? (
-                <DateHoverable
-                  id={`overview-finished_analysis_time__${job.id}`}
-                  value={job.finished_analysis_time}
-                  format="hh:mm:ss a MMM do, yyyy"
-                />
+      <ContentSection className="mb-0 bg-darker">
+        <Row>
+          <Col
+            className="d-flex-start-start justify-content-center offset-md-1"
+            sm={12}
+            md={10}
+          >
+            <h3>
+              {job.is_sample ? (
+                <VscFile className="me-1" />
               ) : (
-                "-"
-              ),
-            ],
-          ].map(([key, value]) => (
-            <ListGroupItem key={key}>
-              <small className="fw-bold text-light">{key}</small>
-              <div className="bg-dark p-1 text-light">{value}</div>
-            </ListGroupItem>
-          ))}
-        </ListGroup>
-        <ListGroup
-          horizontal
-          className="align-items-start flex-wrap flex-lg-nowrap"
-        >
-          {[
-            [
-              "Tags",
-              job.tags.map((tag) => (
-                <JobTag key={tag.label} tag={tag} className="me-2" />
-              )),
-            ],
-            [
-              "Error(s)",
-              <textarea
-                disabled
-                value={job.errors}
-                className="text-danger"
-                hidden={!job.errors.length}
-              />,
-            ],
-            [
-              "Playbook",
-              <PlaybookTag
-                key={job.playbook_to_execute}
-                playbook={job.playbook_to_execute}
-                className="mr-2"
-              />,
-            ],
-          ].map(([key, value]) => (
-            <ListGroupItem key={key}>
-              <small className="fw-bold text-light">{key}</small>
-              <div className="bg-dark p-1">{value}</div>
-            </ListGroupItem>
-          ))}
-        </ListGroup>
+                <VscGlobe className="me-1" />
+              )}
+
+              {job.is_sample ? (
+                <CopyToClipboardButton
+                  showOnHover
+                  id="file_name"
+                  text={job.file_name}
+                >
+                  {job.file_name}
+                </CopyToClipboardButton>
+              ) : (
+                <CopyToClipboardButton
+                  showOnHover
+                  id="observable_name"
+                  text={job.observable_name}
+                >
+                  {job.observable_name}
+                </CopyToClipboardButton>
+              )}
+            </h3>
+            <Badge className="ms-1 float-end" color="info">
+              {job.is_sample
+                ? `file: ${job.file_mimetype}`
+                : job.observable_classification}
+            </Badge>
+          </Col>
+          <Col sm={12} md={1} className="d-flex justify-content-end">
+            <Button
+              className="bg-darker border-0"
+              onClick={() => setIsOpen(!isOpen)}
+              id="JobInfoCardDropDown"
+            >
+              <ArrowToggleIcon isExpanded={isOpen} />
+            </Button>
+            <UncontrolledTooltip placement="left" target="JobInfoCardDropDown">
+              Toggle Job Metadata
+            </UncontrolledTooltip>
+          </Col>
+        </Row>
       </ContentSection>
+      <Collapse isOpen={isOpen} id="JobInfoCardCollapse">
+        <ContentSection className="border-top-0 bg-body ps-0 pe-1 py-1">
+          <ListGroup
+            horizontal
+            className="align-items-start flex-wrap flex-lg-nowrap"
+          >
+            {[
+              ["Status", <StatusTag status={job.status} />],
+              ["TLP", <TLPTag value={job.tlp} />],
+              ["User", job.user?.username],
+              ["MD5", job.md5],
+              ["Process Time (mm:ss)", process_time_mmss],
+              [
+                "Start Time",
+                <DateHoverable
+                  id={`overview-received_request_time__${job.id}`}
+                  value={job.received_request_time}
+                  format="hh:mm:ss a MMM do, yyyy"
+                />,
+              ],
+              [
+                "End Time",
+                job.finished_analysis_time ? (
+                  <DateHoverable
+                    id={`overview-finished_analysis_time__${job.id}`}
+                    value={job.finished_analysis_time}
+                    format="hh:mm:ss a MMM do, yyyy"
+                  />
+                ) : (
+                  "-"
+                ),
+              ],
+            ].map(([key, value]) => (
+              <ListGroupItem key={key}>
+                <small className="fw-bold text-light">{key}</small>
+                <div className="bg-dark p-1 text-light">{value}</div>
+              </ListGroupItem>
+            ))}
+          </ListGroup>
+          <ListGroup
+            horizontal
+            className="align-items-start flex-wrap flex-lg-nowrap"
+          >
+            {[
+              [
+                "Tags",
+                job.tags.map((tag) => (
+                  <JobTag key={tag.label} tag={tag} className="me-2" />
+                )),
+              ],
+              [
+                "Error(s)",
+                <textarea
+                  disabled
+                  value={job.errors}
+                  className="text-danger"
+                  hidden={!job.errors.length}
+                />,
+              ],
+              [
+                "Playbook",
+                <PlaybookTag
+                  key={job.playbook_to_execute}
+                  playbook={job.playbook_to_execute}
+                  className="mr-2"
+                />,
+              ],
+            ].map(([key, value]) => (
+              <ListGroupItem key={key}>
+                <small className="fw-bold text-light">{key}</small>
+                <div className="bg-dark p-1">{value}</div>
+              </ListGroupItem>
+            ))}
+          </ListGroup>
+        </ContentSection>
+      </Collapse>
     </div>
   );
 }
 
 export function JobIsRunningAlert({ job }) {
+  // number of analyzers/connectors/visualizers reported (status: killed/succes/failed)
+  const analizersReported = job.analyzer_reports
+    .map((report) => report.status)
+    .filter((status) =>
+      Object.values(pluginFinalStatuses).includes(status),
+    ).length;
+  const connectorsReported = job.connector_reports
+    .map((report) => report.status)
+    .filter((status) =>
+      Object.values(pluginFinalStatuses).includes(status),
+    ).length;
+  const visualizersReported = job.visualizer_reports
+    .map((report) => report.status)
+    .filter((status) =>
+      Object.values(pluginFinalStatuses).includes(status),
+    ).length;
+
+  /* Check if analyzers/connectors/visualizers are completed
+    The analyzers are completed from the "analyzers_completed" status (index=3) to the last status 
+    The connectors are completed from the "connectors_completed" status (index=5) to the last status 
+    The visualizers are completed from the "visualizers_completed" status (index=7) to the last status 
+  */
+  const analyzersCompleted = Object.values(jobStatuses)
+    .slice(3)
+    .includes(job.status);
+  const connectorsCompleted = Object.values(jobStatuses)
+    .slice(5)
+    .includes(job.status);
+  const visualizersCompleted = Object.values(jobStatuses)
+    .slice(7)
+    .includes(job.status);
+
+  const alertElements = [
+    {
+      step: 1,
+      type: "ANALYZERS",
+      completed:
+        analizersReported === job.analyzers_to_execute.length &&
+        analyzersCompleted,
+      report: `${analizersReported}/${job.analyzers_to_execute.length}`,
+    },
+    {
+      step: 2,
+      type: "CONNECTORS",
+      completed:
+        connectorsReported === job.connectors_to_execute.length &&
+        connectorsCompleted,
+      report: `${connectorsReported}/${job.connectors_to_execute.length}`,
+    },
+    {
+      step: 3,
+      type: "VISUALIZERS",
+      completed:
+        visualizersReported === job.visualizers_to_execute.length &&
+        visualizersCompleted,
+      report: `${visualizersReported}/${job.visualizers_to_execute.length}`,
+    },
+  ];
+
   return (
     <Fade className="d-flex-center mx-auto">
       <IconAlert
@@ -320,6 +418,16 @@ export function JobIsRunningAlert({ job }) {
           This job is currently <strong className="text-accent">running</strong>
           .
         </h6>
+        {alertElements.map((element) => (
+          <div className="text-white">
+            STEP {element.step}: {element.type} RUNNING -
+            <strong
+              className={`text-${element.completed ? "success" : "info"}`}
+            >
+              &nbsp;reported {element.report}
+            </strong>
+          </div>
+        ))}
         {job.permissions?.kill && (
           <IconButton
             id="jobisrunningalert-iconbutton"
@@ -329,6 +437,7 @@ export function JobIsRunningAlert({ job }) {
             color="danger"
             titlePlacement="top"
             onClick={() => killJob(job.id)}
+            className="mt-2"
           />
         )}
         <div className="text-gray">

@@ -4,7 +4,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import ConnectorActionViewSet, ConnectorConfigAPI
+from .views import ConnectorActionViewSet, ConnectorConfigViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
@@ -13,7 +13,7 @@ router.register(
     ConnectorActionViewSet,
     basename="connectorreport",
 )
-router.register(r"connector", ConnectorConfigAPI, basename="connector")
+router.register(r"connector", ConnectorConfigViewSet, basename="connector")
 
 urlpatterns = [
     path(r"", include(router.urls)),

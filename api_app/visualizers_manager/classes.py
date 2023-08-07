@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Tuple, Type, Union
 from django.conf import settings
 from django.db.models import QuerySet
 
-from api_app.core.classes import Plugin
+from api_app.classes import Plugin
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,
@@ -75,6 +75,8 @@ class VisualizableBase(VisualizableObject):
         bold: bool = False,
         italic: bool = False,
         disable: bool = True,
+        copy_text: str = "",
+        description: str = "",
     ):
         super().__init__(size, alignment, disable)
         self.value = value
@@ -83,6 +85,8 @@ class VisualizableBase(VisualizableObject):
         self.icon = icon
         self.bold = bold
         self.italic = italic
+        self.copy_text = copy_text or value
+        self.description = description
 
     @property
     def attributes(self) -> List[str]:
@@ -93,6 +97,8 @@ class VisualizableBase(VisualizableObject):
             "icon",
             "bold",
             "italic",
+            "copy_text",
+            "description",
         ]
 
     @property
@@ -297,10 +303,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     def python_base_path(cls):
         return settings.BASE_VISUALIZER_PYTHON_PATH
 
-    @property
-    def visualizer_name(self) -> str:
-        return self._config.name
-
     @classmethod
     @property
     def report_model(cls):
@@ -316,12 +318,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
             VisualizerConfigurationException,
             VisualizerRunException,
         ]
-
-    def get_error_message(self, err, is_base_err=False):
-        return (
-            f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
-        )
 
     def before_run(self):
         super().before_run()
@@ -362,20 +358,9 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     def analyzer_reports(self) -> QuerySet:
         from api_app.analyzers_manager.models import AnalyzerReport
 
-        self._config: VisualizerConfig
-        configs = self._config.analyzers.all()
-        queryset = AnalyzerReport.objects.filter(job=self._job)
-        if configs:
-            queryset = queryset.filter(config__in=configs)
-        return queryset
+        return AnalyzerReport.objects.filter(job=self._job)
 
     def connector_reports(self) -> QuerySet:
         from api_app.connectors_manager.models import ConnectorReport
 
-        self._config: VisualizerConfig
-        configs = self._config.connectors.all()
-
-        queryset = ConnectorReport.objects.filter(job=self._job)
-        if configs:
-            queryset = queryset.filter(config__in=configs)
-        return queryset
+        return ConnectorReport.objects.filter(job=self._job)

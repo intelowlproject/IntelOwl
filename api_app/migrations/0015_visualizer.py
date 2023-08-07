@@ -10,23 +10,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0014_add_job_process_time'),
+        ("api_app", "0014_add_job_process_time"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='visualizers_to_execute',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=128), blank=True, default=list, size=None),
+            model_name="job",
+            name="visualizers_to_execute",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=128),
+                blank=True,
+                default=list,
+                size=None,
+            ),
         ),
         migrations.AlterField(
-            model_name='organizationpluginstate',
-            name='type',
-            field=models.CharField(choices=[('1', 'Analyzer'), ('2', 'Connector'), ('3', 'Visualizer')], max_length=2),
+            model_name="organizationpluginstate",
+            name="type",
+            field=models.CharField(
+                choices=[("1", "Analyzer"), ("2", "Connector"), ("3", "Visualizer")],
+                max_length=2,
+            ),
         ),
         migrations.AlterField(
-            model_name='pluginconfig',
-            name='type',
-            field=models.CharField(choices=[('1', 'Analyzer'), ('2', 'Connector'), ('3', 'Visualizer')], max_length=2),
+            model_name="pluginconfig",
+            name="type",
+            field=models.CharField(
+                choices=[("1", "Analyzer"), ("2", "Connector"), ("3", "Visualizer")],
+                max_length=2,
+            ),
         ),
     ]

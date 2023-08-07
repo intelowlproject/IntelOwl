@@ -12,9 +12,9 @@ export default function Visualizers() {
       state.visualizersLoading,
       state.visualizersError,
       state.visualizers,
-      state.retrieveConnectorsConfiguration,
+      state.retrieveVisualizersConfiguration,
     ],
-    []
+    [],
   );
 
   return (

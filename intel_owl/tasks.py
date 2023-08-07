@@ -14,7 +14,9 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils.module_loading import import_string
 from django.utils.timezone import now
+from django_celery_beat.models import PeriodicTask
 
+from api_app.choices import Status
 from intel_owl import secrets
 from intel_owl.celery import DEFAULT_QUEUE, app, get_queue_name
 
@@ -27,6 +29,21 @@ logger = logging.getLogger(__name__)
 def update_plugin(state, plugin_path):
     plugin = import_string(plugin_path)
     plugin.update()
+
+
+@shared_task(soft_time_limit=300)
+def execute_ingestor(config_pk: str):
+    from api_app.ingestors_manager.classes import Ingestor
+    from api_app.ingestors_manager.models import IngestorConfig
+
+    config: IngestorConfig = IngestorConfig.objects.get(pk=config_pk)
+    if config.disabled:
+        logger.info(f"Not executing ingestor {config.name} because disabled")
+    else:
+        class_ = config.python_class
+        obj: Ingestor = class_(config=config, runtime_configuration={})
+        obj.start()
+        logger.info(f"Executing ingestor {config.name}")
 
 
 @shared_task(soft_time_limit=10000)
@@ -89,29 +106,24 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     return jobs_id_stuck
 
 
-@shared_task(soft_time_limit=60)
-def update(python_module: str, queue: str = None):
+@shared_task(soft_time_limit=150)
+def update(config_pk: str):
     from api_app.analyzers_manager.models import AnalyzerConfig
     from intel_owl.celery import broadcast
 
-    analyzer_configs = AnalyzerConfig.objects.filter(python_module=python_module)
-    if queue:
-        analyzer_configs = analyzer_configs.filter(config__queue=queue)
-    for analyzer_config in analyzer_configs:
-        analyzer_config: AnalyzerConfig
-        if analyzer_config.is_runnable():
-            class_ = analyzer_config.python_class
-            if hasattr(class_, "_update") and callable(class_._update):  # noqa
-                if settings.NFS:
-                    update_plugin(None, analyzer_config.python_complete_path)
-                else:
-                    broadcast(
-                        update_plugin,
-                        queue=analyzer_config.queue,
-                        arguments={"plugin_path": analyzer_config.python_complete_path},
-                    )
-                return True
-    logger.error(f"Unable to update {python_module}")
+    analyzer_config = AnalyzerConfig.objects.get(pk=config_pk)
+    class_ = analyzer_config.python_class
+    if hasattr(class_, "_update") and callable(class_._update):  # noqa
+        if settings.NFS:
+            update_plugin(None, analyzer_config.python_complete_path)
+        else:
+            broadcast(
+                update_plugin,
+                queue=analyzer_config.queue,
+                arguments={"plugin_path": analyzer_config.python_complete_path},
+            )
+        return True
+    logger.error(f"Unable to update {analyzer_config.python_complete_path}")
     return False
 
 
@@ -128,14 +140,25 @@ def update_notifications_with_releases():
     )
 
 
-@app.task(name="continue_job_pipeline", soft_time_limit=20)
-def continue_job_pipeline(job_id: int):
-
+@app.task(name="job_set_final_status", soft_time_limit=20)
+def job_set_final_status(job_id: int):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
-    job.job_cleanup()
+    job.set_final_status()
+
+
+@app.task(name="job_set_pipeline_status", soft_time_limit=20)
+def job_set_pipeline_status(job_id: int, status: str):
+    from api_app.models import Job
+
+    job = Job.objects.get(pk=job_id)
+    if status not in Status.running_statuses() + Status.partial_statuses():
+        logger.error(f"Unable to set job status to {status}")
+    else:
+        job.status = status
+        job.save(update_fields=["status"])
 
 
 @app.task(name="job_pipeline", soft_time_limit=100)
@@ -156,7 +179,7 @@ def run_plugin(
     runtime_configuration: dict,
     task_id: int,
 ):
-    from api_app.core.classes import Plugin
+    from api_app.classes import Plugin
 
     plugin_class: typing.Type[Plugin] = import_string(plugin_path)
     config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
@@ -177,15 +200,12 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")
     if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
-        for python_module in [
-            "maxmind.Maxmind",
-            "talos.Talos",
-            "tor.Tor",
-            "yara_scan.YaraScan",
-            "quark_engine.QuarkEngine",
-            "phishing_army.PhishingArmy",
-        ]:
-            update(python_module, queue=queue)
+        for task in PeriodicTask.objects.filter(
+            enabled=True, queue=queue, task="intel_owl.tasks.update"
+        ):
+            config_pk = task.kwargs["config_pk"]
+            logger.info(f"Updating {config_pk}")
+            update(config_pk)
 
 
 # set logger

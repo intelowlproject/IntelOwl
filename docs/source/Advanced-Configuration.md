@@ -58,7 +58,12 @@ IntelOwl provides support for some of the most common authentication methods:
 
 The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
 
-After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.
+It is important to add the correct callback in the "Authorized redirect URIs" section to allow the application to redirect properly after the successful login. Add this:
+```commandline
+http://<localhost|yourowndomain>/api/auth/google-callback
+```
+
+After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables and restart IntelOwl to see the applied changes.
 
 
 <div class="admonition note">

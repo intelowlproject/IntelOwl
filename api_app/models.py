@@ -1,45 +1,53 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import base64
+import datetime
 import logging
 import typing
 import uuid
-from typing import Optional
+from typing import Any, Dict, Optional, Type
 
 from celery import group
+from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from django.db.models import Q, QuerySet
-from django.dispatch import receiver
+from django.db.models import Manager, QuerySet
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.module_loading import import_string
 
-from api_app.choices import TLP, ObservableClassification, Status
-from api_app.core.models import AbstractConfig, AbstractReport, Parameter
-from api_app.helpers import calculate_sha1, calculate_sha256, get_now
-from api_app.validators import validate_runtime_configuration
+from api_app.choices import (
+    TLP,
+    ObservableClassification,
+    ParamTypes,
+    ReportStatus,
+    ScanMode,
+    Status,
+)
+from api_app.defaults import config_default, default_runtime, file_directory_path
+from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
+from api_app.queryset import (
+    AbstractConfigQuerySet,
+    JobQuerySet,
+    ParameterQuerySet,
+    PluginConfigQuerySet,
+    PythonConfigQuerySet,
+)
+from api_app.validators import (
+    plugin_name_validator,
+    validate_config,
+    validate_runtime_configuration,
+)
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
 from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
-
-
-def file_directory_path(instance, filename):
-    now = timezone.now().strftime("%Y_%m_%d_%H_%M_%S")
-    return f"job_{now}_{filename}"
-
-
-def default_runtime():
-    return {
-        "analyzers": {},
-        "connectors": {},
-        "visualizers": {},
-    }
 
 
 class Tag(models.Model):
@@ -85,6 +93,9 @@ class Comment(models.Model):
 
 
 class Job(models.Model):
+
+    objects = JobQuerySet.as_manager()
+
     class Meta:
         indexes = [
             models.Index(
@@ -92,6 +103,10 @@ class Job(models.Model):
                     "md5",
                     "status",
                 ]
+            ),
+            models.Index(
+                fields=["playbook_to_execute", "finished_analysis_time", "user"],
+                name="PlaybookConfigOrdering",
             ),
         ]
 
@@ -168,6 +183,16 @@ class Job(models.Model):
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
+    scan_mode = models.IntegerField(
+        choices=ScanMode.choices,
+        null=False,
+        blank=False,
+        default=ScanMode.CHECK_PREVIOUS_ANALYSIS.value,
+    )
+    scan_check_time = models.DurationField(
+        null=True, blank=True, default=datetime.timedelta(hours=24)
+    )
+
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
 
@@ -177,15 +202,21 @@ class Job(models.Model):
 
     @cached_property
     def sha256(self) -> str:
-        return calculate_sha256(self.file.read())
+        return calculate_sha256(
+            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
+        )
 
     @cached_property
     def sha1(self) -> str:
-        return calculate_sha1(self.file.read())
+        return calculate_sha1(
+            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
+        )
 
     @cached_property
     def b64(self) -> str:
-        return base64.b64encode(self.file.read()).decode("utf-8")
+        return base64.b64encode(
+            self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
+        ).decode("utf-8")
 
     def get_absolute_url(self):
         return reverse("jobs-detail", args=[self.pk])
@@ -195,87 +226,63 @@ class Job(models.Model):
         return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
     def retry(self):
+
         self.update_status(Job.Status.RUNNING)
-        failed_analyzer_reports = self.analyzerreports.filter(
+        failed_analyzers_reports = self.analyzerreports.filter(
             status=AbstractReport.Status.FAILED.value
         ).values_list("pk", flat=True)
-        analyzers_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.analyzers_to_execute.filter(
-                pk__in=failed_analyzer_reports
-            )
-        ]
-        logger.info(f"Analyzer signatures are {analyzers_signatures}")
-        failed_connectors_reports = self.connectorreports.filter(
+        failed_connector_reports = self.connectorreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+        failed_visualizer_reports = self.visualizerreports.filter(
             status=AbstractReport.Status.FAILED.value
         ).values_list("pk", flat=True)
 
-        connectors_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.connectors_to_execute.filter(
-                pk__in=failed_connectors_reports
+        runner = (
+            self._get_signatures(
+                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
             )
-        ]
-        logger.info(f"Connector signatures are {connectors_signatures}")
-        failed_visualizers_reports = self.visualizerreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("pk", flat=True)
-
-        visualizers_signatures = [
-            plugin.get_signature(self)
-            for plugin in self.visualizers_to_execute.filter(
-                pk__in=failed_visualizers_reports
+            | self._get_signatures(
+                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
             )
-        ]
-        logger.info(f"Visualizer signatures are {visualizers_signatures}")
-        return self._execute_signatures(
-            analyzers_signatures, connectors_signatures, visualizers_signatures
+            | self._get_signatures(
+                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
+            )
         )
+        return runner()
 
-    def job_cleanup(self) -> None:
-        logger.info(f"[STARTING] job_cleanup for <-- {self}.")
-        status_to_set = self.Status.RUNNING
+    def set_final_status(self) -> None:
+        logger.info(f"[STARTING] set_final_status for <-- {self}.")
 
-        try:
-            if self.status == self.Status.FAILED:
-                logger.error(
-                    f"[REPORT] {self}, status: failed. " "Do not process the report"
-                )
-            else:
-                stats = self.get_analyzer_reports_stats()
-
-                logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
-
-                if self.analyzers_to_execute.all().count() == stats["all"]:
-                    if stats["running"] > 0 or stats["pending"] > 0:
-                        status_to_set = self.Status.RUNNING
-                    elif stats["success"] == stats["all"]:
-                        status_to_set = self.Status.REPORTED_WITHOUT_FAILS
-                    elif stats["failed"] == stats["all"]:
-                        status_to_set = self.Status.FAILED
-                    elif stats["failed"] >= 1 or stats["killed"] >= 1:
-                        status_to_set = self.Status.REPORTED_WITH_FAILS
-                    elif stats["killed"] == stats["all"]:
-                        status_to_set = self.Status.KILLED
-
-        except Exception as e:
-            logger.exception(f"job_id: {self.pk}, Error: {e}")
-            self.append_error(str(e), save=False)
-
-        finally:
-            if not (self.status == self.Status.FAILED and self.finished_analysis_time):
-                self.finished_analysis_time = get_now()
-                self.process_time = self.calculate_process_time()
-            logger.info(f"{self.__repr__()} setting status to {status_to_set}")
-            self.status = status_to_set
-            self.save(
-                update_fields=[
-                    "status",
-                    "errors",
-                    "finished_analysis_time",
-                    "process_time",
-                ]
+        if self.status == self.Status.FAILED:
+            logger.error(
+                f"[REPORT] {self}, status: failed. " "Do not process the report"
             )
+        else:
+            stats = self._get_config_reports_stats()
+            logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
+
+            if stats["success"] == stats["all"]:
+                self.status = self.Status.REPORTED_WITHOUT_FAILS
+            elif stats["failed"] == stats["all"]:
+                self.status = self.Status.FAILED
+            elif stats["killed"] == stats["all"]:
+                self.status = self.Status.KILLED
+            elif stats["failed"] >= 1 or stats["killed"] >= 1:
+                self.status = self.Status.REPORTED_WITH_FAILS
+
+        if not self.finished_analysis_time:
+            self.finished_analysis_time = get_now()
+            self.process_time = self.calculate_process_time()
+        logger.info(f"{self.__repr__()} setting status to {self.status}")
+        self.save(
+            update_fields=[
+                "status",
+                "errors",
+                "finished_analysis_time",
+                "process_time",
+            ]
+        )
 
     def calculate_process_time(self) -> Optional[float]:
         if not self.finished_analysis_time:
@@ -283,87 +290,99 @@ class Job(models.Model):
         td = self.finished_analysis_time - self.received_request_time
         return round(td.total_seconds(), 2)
 
-    def append_error(self, err_msg: str, save=True):
+    def append_error(self, err_msg: str, save=True) -> None:
         self.errors.append(err_msg)
         if save:
             self.save(update_fields=["errors"])
 
-    def update_status(self, status: str, save=True):
+    def update_status(self, status: str, save=True) -> None:
         self.status = status
         if save:
             self.save(update_fields=["status"])
 
-    def get_analyzer_reports_stats(self) -> dict:
+    def _get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
+        return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
+
+    def _get_config_to_execute(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
+        return getattr(
+            self, f"{config.__name__.split('Config')[0].lower()}s_to_execute"
+        )
+
+    def _get_single_config_reports_stats(
+        self, config: typing.Type["AbstractConfig"]
+    ) -> typing.Dict:
+        reports = self._get_config_reports(config)
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
             for s in AbstractReport.Status.values
         }
-        return self.analyzerreports.aggregate(
+        return reports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
 
-    def get_connector_reports_stats(self) -> dict:
-        aggregators = {
-            s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in AbstractReport.Status.values
-        }
-        return self.connectorreports.aggregate(
-            all=models.Count("status"),
-            **aggregators,
-        )
+    def _get_config_reports_stats(self) -> typing.Dict:
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+        from api_app.visualizers_manager.models import VisualizerConfig
+
+        result = {}
+        for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
+            partial_result = self._get_single_config_reports_stats(config)
+            # merge them
+            result = {
+                k: result.get(k, 0) + partial_result.get(k, 0)
+                for k in set(result) | set(partial_result)
+            }
+        return result
 
     def kill_if_ongoing(self):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+        from api_app.visualizers_manager.models import VisualizerConfig
         from intel_owl.celery import app as celery_app
 
-        statuses_to_filter = [
-            AbstractReport.Status.PENDING,
-            AbstractReport.Status.RUNNING,
-        ]
-        qs = self.analyzerreports.filter(status__in=statuses_to_filter)
-        task_ids_analyzers = list(qs.values_list("task_id", flat=True))
-        qs2 = self.connectorreports.filter(status__in=statuses_to_filter)
+        for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
 
-        task_ids_connectors = list(qs2.values_list("task_id", flat=True))
-        # kill celery tasks using task ids
-        celery_app.control.revoke(
-            task_ids_analyzers + task_ids_connectors, terminate=True
-        )
+            reports = self._get_config_reports(config).filter(
+                status__in=[
+                    AbstractReport.Status.PENDING,
+                    AbstractReport.Status.RUNNING,
+                ]
+            )
 
-        # update report statuses
-        qs.update(status=self.Status.KILLED)
+            ids = list(reports.values_list("task_id", flat=True))
+            logger.info(f"We are going to kill tasks {ids}")
+            # kill celery tasks using task ids
+            celery_app.control.revoke(ids, terminate=True)
+
+            reports.update(status=self.Status.KILLED)
+
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def execute(self):
-        self.update_status(Job.Status.RUNNING)
-        analyzers_signatures = [
-            plugin.get_signature(self) for plugin in self.analyzers_to_execute.all()
-        ]
-        logger.info(f"Analyzer signatures are {analyzers_signatures}")
+    def _get_signatures(self, queryset: QuerySet) -> Signature:
+        config_class: PythonConfig = queryset.model
+        signatures = list(
+            queryset.annotate_runnable(self.user)
+            .filter(runnable=True)
+            .get_signatures(self)
+        )
+        logger.info(f"{config_class} signatures are {signatures}")
 
-        connectors_signatures = [
-            plugin.get_signature(self) for plugin in self.connectors_to_execute.all()
-        ]
-        logger.info(f"Connector signatures are {connectors_signatures}")
-
-        visualizers_signatures = [
-            plugin.get_signature(self) for plugin in self.visualizers_to_execute.all()
-        ]
-        logger.info(f"Visualizer signatures are {visualizers_signatures}")
-        return self._execute_signatures(
-            analyzers_signatures, connectors_signatures, visualizers_signatures
+        return (
+            config_class.signature_pipeline_running(self)
+            | group(signatures)
+            | config_class.signature_pipeline_completed(self)
         )
 
-    def _execute_signatures(
-        self,
-        analyzers_signatures: typing.List,
-        connectors_signatures: typing.List,
-        visualizers_signatures: typing.List,
-    ):
+    def execute(self):
+        self.update_status(Job.Status.RUNNING)
         runner = (
-            group(analyzers_signatures)
-            | tasks.continue_job_pipeline.signature(
+            self._get_signatures(self.analyzers_to_execute.all())
+            | self._get_signatures(self.connectors_to_execute.all())
+            | self._get_signatures(self.visualizers_to_execute.all())
+            | tasks.job_set_final_status.signature(
                 args=[self.pk],
                 kwargs={},
                 queue=get_queue_name(DEFAULT_QUEUE),
@@ -371,62 +390,20 @@ class Job(models.Model):
                 immutable=True,
                 MessageGroupId=str(uuid.uuid4()),
             )
-            | group(connectors_signatures)
-            | group(visualizers_signatures)
         )
         runner()
 
-    def get_config_runtime_configuration(self, config: AbstractConfig) -> typing.Dict:
-        from api_app.analyzers_manager.models import AnalyzerConfig
-        from api_app.connectors_manager.models import ConnectorConfig
-        from api_app.visualizers_manager.models import VisualizerConfig
-
-        if isinstance(config, AnalyzerConfig):
-            key = "analyzers"
-            try:
-                self.analyzers_to_execute.get(name=config.name)
-            except AnalyzerConfig.DoesNotExist:
-                raise TypeError(
-                    f"Analyzer {config.name} is not configured inside job {self.pk}"
-                )
-        elif isinstance(config, ConnectorConfig):
-            key = "connectors"
-            try:
-                self.connectors_to_execute.get(name=config.name)
-            except ConnectorConfig.DoesNotExist:
-                raise TypeError(
-                    f"Connector {config.name} is not configured inside job {self.pk}"
-                )
-        elif isinstance(config, VisualizerConfig):
-            key = "visualizers"
-            try:
-                self.visualizers_to_execute.get(name=config.name)
-            except VisualizerConfig.DoesNotExist:
-                raise TypeError(
-                    f"Visualizer {config.name} is not configured inside job {self.pk}"
-                )
-        else:
-            raise TypeError(f"Config {type(config)} is not supported")
-        return self.runtime_configuration[key].get(config.name, {})
-
-    @classmethod
-    def visible_for_user(cls, user: User):
-        """
-        User has access to:
-        - jobs with TLP = CLEAR or GREEN
-        - jobs with TLP = AMBER or RED and
-        created by a member of their organization.
-        """
-        if user.has_membership():
-            user_query = Q(user=user) | Q(
-                user__membership__organization_id=user.membership.organization_id
+    def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
+        try:
+            self._get_config_to_execute(config.__class__).get(name=config.name)
+        except config.DoesNotExist:
+            raise TypeError(
+                f"{config.__class__.__name__} {config.name} "
+                f"is not configured inside job {self.pk}"
             )
-        else:
-            user_query = Q(user=user)
-        query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (
-            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
+        return self.runtime_configuration[config.runtime_configuration_key].get(
+            config.name, {}
         )
-        return cls.objects.all().filter(query)
 
     # user methods
 
@@ -449,14 +426,132 @@ class Job(models.Model):
             .count()
         )
 
+    def clean(self) -> None:
+        self.clean_scan()
 
-@receiver(models.signals.pre_delete, sender=Job)
-def delete_file(sender, instance: Job, **kwargs):
-    if instance.file:
-        instance.file.delete()
+    def clean_scan(self):
+        if (
+            self.scan_mode == ScanMode.FORCE_NEW_ANALYSIS.value
+            and self.scan_check_time is not None
+        ):
+            raise ValidationError(
+                f"You can't have set mode to {ScanMode.FORCE_NEW_ANALYSIS.name}"
+                f" and have check_time set to {self.scan_check_time}"
+            )
+        elif (
+            self.scan_mode == ScanMode.CHECK_PREVIOUS_ANALYSIS.value
+            and self.scan_check_time is None
+        ):
+            raise ValidationError(
+                f"You can't have set mode to {ScanMode.CHECK_PREVIOUS_ANALYSIS.name}"
+                " and not have check_time set"
+            )
+
+
+class Parameter(models.Model):
+
+    objects = ParameterQuerySet.as_manager()
+
+    name = models.CharField(null=False, blank=False, max_length=50)
+    type = models.CharField(
+        choices=ParamTypes.choices, max_length=10, null=False, blank=False
+    )
+    description = models.TextField(blank=True, default="")
+    is_secret = models.BooleanField(null=False)
+    required = models.BooleanField(null=False)
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    ingestor_config = models.ForeignKey(
+        "ingestors_manager.IngestorConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        unique_together = [
+            ("name", "analyzer_config"),
+            ("name", "connector_config"),
+            ("name", "visualizer_config"),
+            ("name", "ingestor_config"),
+        ]
+        indexes = [
+            models.Index(fields=["analyzer_config", "is_secret"]),
+            models.Index(fields=["connector_config", "is_secret"]),
+            models.Index(fields=["visualizer_config", "is_secret"]),
+            models.Index(fields=["ingestor_config", "is_secret"]),
+        ]
+
+    def clean_config(self):
+        count_configs = (
+            bool(self.analyzer_config)
+            + bool(self.connector_config)
+            + bool(self.visualizer_config)
+            + bool(self.ingestor_config)
+        )
+
+        if count_configs > 1:
+            msg = (
+                "You can't have the same parameter on more than one"
+                " configuration at the time"
+            )
+            logger.error(msg)
+            raise ValidationError(msg)
+        elif count_configs == 0:
+            msg = "The parameter must be set to at least a configuration"
+            logger.error(msg)
+            raise ValidationError(msg)
+
+    def clean(self) -> None:
+        super().clean()
+        self.clean_config()
+
+    @cached_property
+    def config(self):
+        return (
+            self.analyzer_config
+            or self.connector_config
+            or self.visualizer_config
+            or self.ingestor_config
+        )
+
+    def get_valid_value_for_test(self):
+        if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
+            raise PluginConfig.DoesNotExist
+        if "url" in self.name:
+            return "https://intelowl.com"
+        elif "pdns_credentials" == self.name:
+            return "user|pwd"
+        elif "test" in self.name:
+            raise PluginConfig.DoesNotExist
+        else:
+            return "test"
 
 
 class PluginConfig(models.Model):
+
+    objects = PluginConfigQuerySet.as_manager()
+
     value = models.JSONField(blank=True, null=True)
     for_organization = models.BooleanField(default=False)
     owner = models.ForeignKey(
@@ -488,32 +583,16 @@ class PluginConfig(models.Model):
             ),
         ]
 
-    @classmethod
-    def visible_for_user(cls, user: User = None) -> QuerySet:
-        from certego_saas.apps.organization.membership import Membership
-
-        configs = cls.objects.all()
-        if user:
-            # User-level custom configs should override organization-level configs,
-            # we need to get the organization-level configs, if any, first.
-            try:
-                membership = Membership.objects.get(user=user)
-            except Membership.DoesNotExist:
-                # If user is not a member of any organization,
-                # we don't need to do anything.
-                configs = configs.filter(Q(owner=user) | Q(owner__isnull=True))
-            else:
-                configs = configs.filter(
-                    (Q(for_organization=True) & Q(owner=membership.organization.owner))
-                    | Q(owner=user)
-                    | Q(owner__isnull=True)
-                )
-        else:
-            configs = configs.filter(owner__isnull=True)
-
-        return configs
-
     def clean_for_organization(self):
+        if self.for_organization and not self.owner:
+            raise ValidationError(
+                "You can't set `for_organization` and not have an owner"
+            )
+        if self.for_organization and not self.owner.has_membership():
+            raise ValidationError(
+                f"You can't create `for_organization` {self.__class__.__name__}"
+                " if you do not have an organization"
+            )
         if self.for_organization and (
             self.owner.has_membership()
             and self.owner.membership.organization.owner != self.owner
@@ -568,3 +647,248 @@ class PluginConfig(models.Model):
     def config_type(self):
         # TODO retrocompatibility
         return "2" if self.is_secret() else "1"
+
+
+class AbstractConfig(models.Model):
+    objects = AbstractConfigQuerySet.as_manager()
+    name = models.CharField(
+        max_length=100,
+        null=False,
+        unique=True,
+        primary_key=True,
+        validators=[plugin_name_validator],
+    )
+    description = models.TextField(null=False)
+
+    disabled = models.BooleanField(null=False, default=False)
+    disabled_in_organizations = models.ManyToManyField(
+        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
+    )
+
+    class Meta:
+        indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
+        abstract = True
+
+    @classmethod
+    @property
+    def runtime_configuration_key(cls) -> str:
+        return f"{cls.__name__.split('Config')[0].lower()}s"
+
+    @classmethod
+    @property
+    def snake_case_name(cls) -> str:
+        import re
+
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
+
+    @deprecated("Please use `runnable` method on queryset")
+    def is_runnable(self, user: User = None) -> bool:
+        return (
+            self.__class__.objects.filter(pk=self.pk)
+            .annotate_runnable(user)
+            .first()
+            .runnable
+        )
+
+
+class AbstractReport(models.Model):
+    # constants
+    Status = ReportStatus
+
+    # fields
+    status = models.CharField(max_length=50, choices=Status.choices)
+    report = models.JSONField(default=dict)
+    errors = pg_fields.ArrayField(
+        models.CharField(max_length=512), default=list, blank=True
+    )
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(default=timezone.now)
+    task_id = models.UUIDField()  # tracks celery task id
+
+    job = models.ForeignKey(
+        "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(job:#{self.job_id}, {self.config.name})"
+
+    @classmethod
+    @property
+    def config(cls) -> "AbstractConfig":
+        raise NotImplementedError()
+
+    @property
+    def runtime_configuration(self):
+        return self.job.get_config_runtime_configuration(self.config)
+
+    # properties
+    @property
+    def user(self) -> models.Model:
+        return self.job.user
+
+    @property
+    def process_time(self) -> float:
+        secs = (self.end_time - self.start_time).total_seconds()
+        return round(secs, 2)
+
+    def append_error(self, err_msg: str, save=True):
+        self.errors.append(err_msg)
+        if save:
+            self.save(update_fields=["errors"])
+
+
+class PythonConfig(AbstractConfig):
+    objects = PythonConfigQuerySet.as_manager()
+    parameters: Manager
+
+    python_module = models.CharField(null=False, max_length=120, db_index=True)
+
+    config = models.JSONField(
+        blank=False,
+        default=config_default,
+        validators=[validate_config],
+    )
+
+    class Meta:
+        abstract = True
+        indexes = [
+            models.Index(fields=("python_module", "disabled")),
+        ]
+        ordering = ["name", "disabled"]
+
+    @classmethod
+    @property
+    def plugin_type(cls) -> str:
+        # retro compatibility
+
+        raise NotImplementedError()
+
+    @classmethod
+    @property
+    def plugin_name(cls) -> str:
+        return cls.__name__.split("Config")[0]
+
+    @classmethod
+    def signature_pipeline_running(cls, job) -> Signature:
+        return cls._signature_pipeline_status(
+            job, getattr(Status, f"{cls.plugin_name.upper()}S_RUNNING").value
+        )
+
+    @classmethod
+    def signature_pipeline_completed(cls, job) -> Signature:
+        return cls._signature_pipeline_status(
+            job, getattr(Status, f"{cls.plugin_name.upper()}S_COMPLETED").value
+        )
+
+    @classmethod
+    def _signature_pipeline_status(cls, job, status: str) -> Signature:
+        return tasks.job_set_pipeline_status.signature(
+            args=[job.pk, status],
+            kwargs={},
+            queue=get_queue_name(DEFAULT_QUEUE),
+            soft_time_limit=10,
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
+
+    @property
+    def python_base_path(self) -> str:
+        raise NotImplementedError()
+
+    def clean_python_module(self):
+        try:
+            _ = self.python_class
+        except ImportError as exc:
+            raise ValidationError(
+                "`python_module` incorrect, "
+                f"{self.python_complete_path} couldn't be imported"
+            ) from exc
+
+    def clean_config_queue(self):
+        queue = self.config["queue"]
+        if queue not in settings.CELERY_QUEUES:
+            logger.warning(
+                f"Analyzer {self.name} has a wrong queue."
+                f" Setting to `{DEFAULT_QUEUE}`"
+            )
+            self.config["queue"] = DEFAULT_QUEUE
+
+    def clean(self):
+        super().clean()
+        self.clean_python_module()
+        self.clean_config_queue()
+
+    @property
+    def options(self) -> QuerySet:
+        return self.parameters.filter(is_secret=False)
+
+    @property
+    def secrets(self) -> QuerySet:
+        return self.parameters.filter(is_secret=True)
+
+    @property
+    def required_parameters(self) -> QuerySet:
+        return self.parameters.filter(required=True)
+
+    @deprecated("Please use the queryset method `annotate_configured`.")
+    def _is_configured(self, user: User = None) -> bool:
+        pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
+        return pc.configured
+
+    @cached_property
+    def queue(self):
+        queue = self.config["queue"]
+        if queue not in settings.CELERY_QUEUES:
+            queue = DEFAULT_QUEUE
+        return get_queue_name(queue)
+
+    @cached_property
+    def routing_key(self):
+        return self.config["queue"]
+
+    @cached_property
+    def soft_time_limit(self):
+        return self.config["soft_time_limit"]
+
+    @cached_property
+    def python_complete_path(self) -> str:
+        return f"{self.python_base_path}.{self.python_module}"
+
+    @cached_property
+    def python_class(self) -> Type:
+        return import_string(self.python_complete_path)
+
+    @classmethod
+    @property
+    def config_exception(cls):
+        raise NotImplementedError()
+
+    def read_params(
+        self, user: User = None, config_runtime: Dict = None
+    ) -> Dict[Parameter, Any]:
+        # priority
+        # 1 - Runtime config
+        # 2 - Value inside the db
+        result = {}
+        for param in self.parameters.annotate_configured(user).annotate_value_for_user(
+            user
+        ):
+            param: Parameter
+            if param.name in config_runtime:
+                result[param] = config_runtime[param.name]
+            else:
+                if param.configured:
+                    result[param] = param.value
+                else:
+                    if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+                        result[param] = param.get_valid_value_for_test()
+                        continue
+                    if param.required:
+                        raise TypeError(
+                            f"Required param {param.name} of plugin {param.config.name}"
+                            " does not have a valid value"
+                        )
+        return result

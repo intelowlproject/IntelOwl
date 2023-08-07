@@ -21,9 +21,9 @@ import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import {
   AfterRegistrationModalAlert,
   InviteOnlyAlert,
-  RegistrationSetUpModalAlert,
+  ConfigurationModalAlert,
 } from "./utils/registration-alert";
-import { registerUser, checkRegistrationSetup } from "./api";
+import { registerUser, checkConfiguration } from "./api";
 import {
   EmailValidator,
   PasswordValidator,
@@ -118,7 +118,7 @@ const onValidate = (values) => {
       password: "",
       confirmPassword: "",
       recaptcha: "noKey",
-    })
+    }),
   );
   Object.keys(initialValues).forEach((key) => {
     initialValues[key] = values[key];
@@ -135,7 +135,7 @@ const onValidate = (values) => {
   }
   const comparePasswordErrors = ComparePassword(
     values.password,
-    values.confirmPassword
+    values.confirmPassword,
   );
   if (comparePasswordErrors.password) {
     errors.password = comparePasswordErrors.password;
@@ -164,20 +164,23 @@ export default function Register() {
   // local state
   const [showAfterRegistrationModal, setShowAfterRegistrationModal] =
     React.useState(false);
-  const [showRegistrationSetupModal, setShowRegistrationSetupModal] =
+  const [showConfigurationModal, setShowConfigurationModal] =
     React.useState(false);
   const [passwordShown, setPasswordShown] = React.useState(false);
 
   console.debug("showAfterRegistrationModal:", showAfterRegistrationModal);
 
   React.useEffect(() => {
-    checkRegistrationSetup().catch(() => {
-      setShowRegistrationSetupModal(true);
+    checkConfiguration({
+      params: {
+        page: "register",
+      },
+    }).catch(() => {
+      setShowConfigurationModal(true);
     });
   }, []);
 
-  console.debug("showRegistrationSetupModal:", showRegistrationSetupModal);
-
+  console.debug("showConfigurationModal:", showConfigurationModal);
   // callbacks
   const onSubmit = React.useCallback(
     async (values) => {
@@ -209,15 +212,16 @@ export default function Register() {
         // handled inside registerUser
       }
     },
-    [setShowAfterRegistrationModal]
+    [setShowAfterRegistrationModal],
   );
 
   return (
     <ContentSection className="bg-body">
-      {showRegistrationSetupModal && (
-        <RegistrationSetUpModalAlert
-          isOpen={showRegistrationSetupModal}
-          setIsOpen={setShowRegistrationSetupModal}
+      {showConfigurationModal && (
+        <ConfigurationModalAlert
+          isOpen={showConfigurationModal}
+          setIsOpen={setShowConfigurationModal}
+          title="The Registration Feature has not been configured!"
         />
       )}
       {showAfterRegistrationModal && (

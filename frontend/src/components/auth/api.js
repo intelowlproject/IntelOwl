@@ -21,7 +21,7 @@ export async function verifyEmail(body) {
       "Your email has been succesfully verified!",
       null,
       "success",
-      true
+      true,
     );
     return resp;
   } catch (err) {
@@ -45,7 +45,7 @@ export async function requestPasswordReset(body) {
   try {
     const resp = await axios.post(
       `${AUTH_BASE_URI}/request-password-reset`,
-      body
+      body,
     );
     addToast("Email sent!", null, "success");
     return resp;
@@ -66,11 +66,16 @@ export async function resetPassword(body) {
   }
 }
 
-export async function checkRegistrationSetup() {
+export async function checkConfiguration(body) {
   try {
-    const resp = await axios.get(`${AUTH_BASE_URI}/check_registration_setup`);
+    const resp = await axios.get(`${AUTH_BASE_URI}/configuration`, body);
+    const { errors } = resp.data;
+    if (errors) {
+      return Promise.reject(errors);
+    }
     return resp;
   } catch (err) {
+    // this API always return 200, this catch should never ne triggered, but it's better to be safe
     return Promise.reject(err);
   }
 }

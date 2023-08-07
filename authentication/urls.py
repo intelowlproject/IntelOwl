@@ -6,6 +6,7 @@ from rest_framework import routers
 
 from .views import (
     APIAccessTokenView,
+    ChangePasswordView,
     EmailVerificationView,
     GoogleLoginCallbackView,
     LoginView,
@@ -15,7 +16,7 @@ from .views import (
     RegistrationView,
     ResendVerificationView,
     TokenSessionsViewSet,
-    check_registration_setup,
+    checkConfiguration,
     google_login,
 )
 
@@ -48,6 +49,7 @@ urlpatterns = [
     # auth
     path("login", LoginView.as_view(), name="auth_login"),
     path("logout", LogoutView.as_view(), name="auth_logout"),
+    path("changepassword", ChangePasswordView.as_view(), name="auth_changepassword"),
     path("apiaccess", APIAccessTokenView.as_view(), name="auth_apiaccess"),
     path("google", google_login, name="oauth_google"),
     path(
@@ -55,6 +57,6 @@ urlpatterns = [
         GoogleLoginCallbackView.as_view(),
         name="oauth_google_callback",
     ),
-    path("check_registration_setup", check_registration_setup),
+    path("configuration", checkConfiguration, name="auth_configuration"),
     path("", include(router.urls)),
 ]

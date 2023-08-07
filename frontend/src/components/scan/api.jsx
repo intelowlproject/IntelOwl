@@ -1,18 +1,18 @@
 /* eslint-disable no-underscore-dangle */
 import React from "react";
 import axios from "axios";
-import md5 from "md5";
 
-import { ContentSection, readFileAsync, addToast } from "@certego/certego-ui";
+import { ContentSection, addToast } from "@certego/certego-ui";
 
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
-  ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
-  API_BASE_URI,
   COMMENT_BASE_URI,
+  PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
+  PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
+import { scanMode } from "../../constants/constants";
 
 const { append: appendToRecentScans } = useRecentScansStore.getState();
 
@@ -45,12 +45,6 @@ function prettifyErrors(errorResponse) {
 }
 
 export async function createPlaybookJob(formValues) {
-  // check existing
-  if (formValues.check !== "force_new") {
-    const jobId = await _askAnalysisAvailability(formValues);
-    if (jobId) return Promise.resolve(jobId);
-  }
-
   // new scan
   const resp =
     formValues.classification === "file"
@@ -71,7 +65,7 @@ export async function createPlaybookJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running"
+          element.status === "accepted" || element.status === "running",
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
@@ -93,7 +87,7 @@ export async function createPlaybookJob(formValues) {
         </div>,
         "success",
         true,
-        10000
+        10000,
       );
       return Promise.resolve(jobIds);
     }
@@ -134,12 +128,6 @@ export async function deleteComment(commentId) {
 
 export async function createJob(formValues) {
   try {
-    // check existing
-    if (formValues.check !== "force_new") {
-      const jobId = await _askAnalysisAvailability(formValues);
-      if (jobId) return Promise.resolve(jobId);
-    }
-
     // new scan
     const resp =
       formValues.classification === "file"
@@ -153,11 +141,11 @@ export async function createJob(formValues) {
     respData.forEach((x) => {
       if (x.analyzers_running)
         x.analyzers_running.forEach((analyzer) =>
-          analyzersRunning.add(analyzer)
+          analyzersRunning.add(analyzer),
         );
       if (x.connectors_running)
         x.connectors_running.forEach((connector) =>
-          connectorsRunning.add(connector)
+          connectorsRunning.add(connector),
         );
       if (x.warnings) warnings.push(...x.warnings);
     });
@@ -165,7 +153,7 @@ export async function createJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running"
+          element.status === "accepted" || element.status === "running",
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
@@ -193,7 +181,7 @@ export async function createJob(formValues) {
         </div>,
         "success",
         true,
-        10000
+        10000,
       );
       return Promise.resolve(jobIds);
     }
@@ -205,74 +193,6 @@ export async function createJob(formValues) {
   } catch (e) {
     console.error(e);
     addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
-  }
-}
-
-async function _askAnalysisAvailability(formValues) {
-  console.debug("_askAnalysisAvailability - formValues");
-  console.debug(formValues);
-
-  const payload = [];
-  const minutesAgo = formValues.hoursAgo * 60;
-
-  if (formValues.classification === "file") {
-    const promises = [];
-    Array.from(formValues.files).forEach((file) => {
-      const body = {
-        analyzers: formValues.analyzers,
-        playbooks: formValues.playbooks,
-        md5: md5(readFileAsync(file)),
-      };
-      if (minutesAgo) {
-        body.minutes_ago = minutesAgo;
-      }
-      promises.push(body.md5);
-      if (formValues.check === "running_only") {
-        body.running_only = "True";
-      }
-      payload.push(body);
-    });
-    await Promise.all(promises);
-  } else {
-    formValues.observable_names.forEach((ObservableName) => {
-      const body = {
-        analyzers: formValues.analyzers,
-        playbooks: formValues.playbooks,
-        md5: md5(ObservableName),
-      };
-      if (minutesAgo) {
-        body.minutes_ago = minutesAgo;
-      }
-      if (formValues.check === "running_only") {
-        body.running_only = "True";
-      }
-      payload.push(body);
-    });
-  }
-
-  console.debug("_askAnalysisAvailability - payload");
-  console.debug(payload);
-  try {
-    const response = await axios.post(
-      ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
-      payload
-    );
-    const answer = response.data;
-    if (answer.count === 0) {
-      return 0;
-    }
-    const jobIds = answer.results.map((x) => x.job_id);
-    jobIds.forEach((jobId) => {
-      appendToRecentScans(jobId, "secondary");
-    });
-    addToast(
-      `Found similar scan with job ID(s) #${jobIds.join(", ")}`,
-      null,
-      "info"
-    );
-    return jobIds;
-  } catch (e) {
     return Promise.reject(e);
   }
 }
@@ -289,40 +209,82 @@ async function _analyzeObservable(formValues) {
     tlp: formValues.tlp,
     runtime_configuration: formValues.runtime_configuration,
     tags_labels: formValues.tags_labels,
+    scan_mode: parseInt(formValues.scan_mode, 10),
   };
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
+  } else {
+    body.scan_check_time = null;
+  }
   return axios.post(ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }
 
 async function _analyzeFile(formValues) {
   const body = new FormData();
+  // file
   Array.from(formValues.files).forEach((file) => {
     body.append("files", file, file.name);
   });
-  formValues.tags_labels.map((x) => body.append("tags_labels", x));
-  formValues.analyzers.map((x) => body.append("analyzers_requested", x));
-  formValues.connectors.map((x) => body.append("connectors_requested", x));
+  // tags
+  if (formValues.tags_labels.length) {
+    formValues.tags_labels.forEach((tag) => body.append("tags_labels", tag));
+  }
+  // analyzers
+  if (formValues.analyzers.length) {
+    formValues.analyzers.forEach((analyzer) =>
+      body.append("analyzers_requested", analyzer),
+    );
+  }
+  // connectors
+  if (formValues.connectors.length) {
+    formValues.connectors.forEach((connector) =>
+      body.append("connectors_requested", connector),
+    );
+  }
+  // tlp
   body.append("tlp", formValues.tlp);
+  // runtime configuration
   if (
     formValues.runtime_configuration != null &&
     Object.keys(formValues.runtime_configuration).length
   ) {
     body.append(
       "runtime_configuration",
-      JSON.stringify(formValues.runtime_configuration)
+      JSON.stringify(formValues.runtime_configuration),
     );
   }
+  // scan mode
+  body.append("scan_mode", formValues.scan_mode);
+  // scan check time
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+  }
+  console.debug("_analyzeFile", body);
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
 async function _startPlaybookFile(formValues) {
-  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
   const body = new FormData();
+  // file
   Array.from(formValues.files).forEach((file) => {
     body.append("files", file, file.name);
   });
-  formValues.tags.map((x) => body.append("tags_labels", x));
-  formValues.playbooks.map((x) => body.append("playbooks_requested", x));
-  return axios.post(playbookURI, body);
+  // tlp
+  body.append("tlp", formValues.tlp);
+  // tags
+  if (formValues.tags_labels.length) {
+    formValues.tags_labels.forEach((tag) => body.append("tags_labels", tag));
+  }
+  // playbook requested
+  body.append("playbook_requested", formValues.playbook);
+  // scan mode
+  body.append("scan_mode", formValues.scan_mode);
+  // scan check time
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+  }
+  console.debug("_analyzeFile", body);
+  return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
 async function _startPlaybookObservable(formValues) {
@@ -331,12 +293,18 @@ async function _startPlaybookObservable(formValues) {
     observables.push([formValues.classification, ObservableName]);
   });
 
-  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_observables`;
   const body = {
     observables,
-    playbooks_requested: formValues.playbooks,
+    playbook_requested: formValues.playbook,
     tags_labels: formValues.tags_labels,
+    tlp: formValues.tlp,
+    scan_mode: parseInt(formValues.scan_mode, 10),
   };
-
-  return axios.post(playbookURI, body);
+  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
+  } else {
+    body.scan_check_time = null;
+  }
+  console.debug("_analyzeObservable", body);
+  return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }

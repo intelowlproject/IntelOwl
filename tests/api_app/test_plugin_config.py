@@ -4,17 +4,16 @@
 from rest_framework.reverse import reverse
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.core.models import Parameter
-from api_app.models import PluginConfig
+from api_app.models import Parameter, PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
-from .. import CustomAPITestCase
+from .. import CustomViewSetTestCase
 
 custom_config_uri = reverse("plugin-config-list")
 
 
-class PluginConfigViewSetTestCase(CustomAPITestCase):
+class PluginConfigViewSetTestCase(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
         self.param = Parameter.objects.create(
@@ -22,6 +21,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
             name="test",
             is_secret=True,
             required=True,
+            type="str",
         )
         self.org = Organization.objects.create(name="testorg")
         Membership.objects.create(
@@ -41,7 +41,9 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
 
     def test_get(self):
         self.assertTrue(
-            PluginConfig.visible_for_user(self.superuser).filter(pk=self.pc.pk).exists()
+            PluginConfig.objects.visible_for_user(self.superuser)
+            .filter(pk=self.pc.pk)
+            .exists()
         )
         response = self.client.get(f"{custom_config_uri}/{self.pc.pk}")
         self.assertEqual(response.status_code, 404)

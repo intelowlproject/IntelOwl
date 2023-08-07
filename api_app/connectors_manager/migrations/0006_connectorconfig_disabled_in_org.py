@@ -13,31 +13,33 @@ def migrate_disabled_config(apps, schema_editor):
         config = ConnectorConfig.objects.get(name=plugin_state.plugin_name)
         config.disabled_in_organizations.add(plugin_state.organization)
 
+
 def backwards_migrate_disabled_config(apps, schema_editor):
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     OrganizationPluginState = apps.get_model("api_app", "OrganizationPluginState")
     for config in ConnectorConfig.objects.all():
         for org in config.disabled_in_organizations.all():
             OrganizationPluginState.objects.create(
-                plugin_name=config.name,
-                type="2",
-                organization=org,
-                disabled=True
+                plugin_name=config.name, type="2", organization=org, disabled=True
             )
+
 
 class Migration(migrations.Migration):
 
-
     dependencies = [
-        ('certego_saas_organization', '0001_initial'),
-        ('connectors_manager', '0005_auto_20230301_1415'),
+        ("certego_saas_organization", "0001_initial"),
+        ("connectors_manager", "0005_auto_20230301_1415"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='connectorconfig',
-            name='disabled_in_organizations',
-            field=models.ManyToManyField(blank=True, related_name='connectors_manager_connectorconfig_disabled', to='certego_saas_organization.Organization'),
+            model_name="connectorconfig",
+            name="disabled_in_organizations",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="connectors_manager_connectorconfig_disabled",
+                to="certego_saas_organization.Organization",
+            ),
         ),
         migrations.RunPython(
             migrate_disabled_config, backwards_migrate_disabled_config

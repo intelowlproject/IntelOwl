@@ -10,8 +10,9 @@ This page includes the most important things to know and understand when using I
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
-  - [Visualizers](#visualizers)
   - [Playbooks](#playbooks)
+  - [Visualizers](#visualizers)
+  - [Ingestors](#ingestors)
 - [TLP Support](#tlp-support)
 
 ## Client
@@ -91,7 +92,7 @@ The Registration Page contains a Recaptcha form from Google. By default, that Re
 
 If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE).
 
-Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY_IO_PUBLIC` value in the `env_file_app` file. Plus you would need to remember to set to `True` the `PUBLIC_DEPLOYMENT` variable too.
+Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY` value in the `env_file_app` file.
 
 Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `frontend/public/env.js` file.
 In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
@@ -166,6 +167,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [elceef Yara Rules](https://github.com/elceef/yara-rulz)
   * [dr4k0nia Yara rules](https://github.com/dr4k0nia/yara-rules)
   * [Facebook Yara rules](https://github.com/facebook/malware-detection)
+  * [edelucia Yara rules](https://github.com/edelucia/rules/tree/main/yara)
+  * [LOLDrivers Yara Rules](https://github.com/magicsword-io/LOLDrivers)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 
 ###### External services
@@ -316,7 +319,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 
 #### Analyzers Customization
 
-You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerreport/`.
+You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerconfig/`.
 
 The following are all the keys that you can change without touching the source code:
 - `name`: Name of the analyzer
@@ -331,6 +334,7 @@ The following are all the keys that you can change without touching the source c
 - `config`:
   - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
   - `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
 Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
 A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
@@ -359,7 +363,7 @@ The following is the list of the available connectors. You can also navigate the
 #### Connectors customization
 
 Connectors being optional are `enabled` by default.
-You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorreport/`.
+You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorconfig/`.
 
 
 The following are all the keys that you can change without touching the source code:
@@ -411,43 +415,6 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
   - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
   - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
-### Visualizers
-
-With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
-You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
-
-Visualizers are designed to run after the analyzers and the connectors.
-The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
-
-Each visualizer must define a set of analyzers and connectors as requirement:
-in fact the visualizers can not be chosen at the time of Job creation (once you click into the `Scan` button) but every single visualizer that it is configured and that has its requirements satisfied will be automatically selected and executed.
-
-This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
-To simplify the process, take example from the pre-built analyzers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
-
-##### List of pre-built Visualizers
-
-- `DNS`: displays the aggregation of every DNS analyzer report
-- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
-- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
-- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
-
-
-#### Visualizers customization
-You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
-
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
-- `analyzers`: List of analyzers that must be executed
-- `connectors`: List of connectors that must be executed
-
 ### Playbooks
 
 Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
@@ -469,6 +436,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Sample_Static_Analysis`: A playbook containing all analyzers that perform static analysis on files.
 - `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
 - `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
+- `Dns`: A playbook containing all dns providers
 
 #### Playbooks customization
 
@@ -488,9 +456,72 @@ In this way, after you have done an analysis, you can save the configuration of 
 
 Those are the only ways to do that for now. We are planning to provide more easier ways to add new playbooks in the future.
 
----
+### Visualizers
 
-To contribute to the project, see [Contribute](./Contribute.md).
+With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
+You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
+
+Visualizers are designed to run after the analyzers and the connectors.
+The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
+
+Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
+
+This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
+To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
+
+##### List of pre-built Visualizers
+
+- `DNS`: displays the aggregation of every DNS analyzer report
+- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
+- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
+- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
+
+
+#### Visualizers customization
+You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerconfig/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `analyzers`: List of analyzers that must be executed
+- `connectors`: List of connectors that must be executed
+
+### Ingestors
+
+With Intel v5.1.0 we introduced the `Ingestor` class.
+
+Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
+Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
+
+Ingestors are system-wide and disabled by default, meaning that only the administrator are able to configure them and enable them. 
+Ingestors can be _spammy_ so be careful about enabling them.
+
+A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
+
+#### List of pre-build Ingestors
+- `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
+
+#### Ingestors customization
+You can either enable or create new ingestors based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/ingestors_manager/ingestorconfig/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `playbook_to_execute`: Playbook that will be used for every IOC retrieved from the ingestor
+- `schedule`: Crontab schedule of its execution
+
 
 ## TLP Support
 The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 
@@ -508,3 +539,6 @@ These is how every available TLP value behaves once selected for an analysis exe
 3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
 4. `RED` (default): disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
 
+---
+
+To contribute to the project, see [Contribute](./Contribute.md).

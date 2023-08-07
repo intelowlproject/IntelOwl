@@ -2,6 +2,28 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.1.0)
+With this release we announce our new official site created by [Abheek Tripathy](https://twitter.com/abheekblahblah)!
+Feel free to check it out! Official [blog post here](https://intelowlproject.github.io/blogs/official_site_revamped)!
+
+**Important changes**
+* We added a new type of Plugin called [Ingestor](https://intelowl.readthedocs.io/en/latest/Usage.html#ingestors). **Ingestors** allow to automatically insert IOC streams from outside sources to IntelOwl itself.
+* Visualizers are not connected anymore to Analyzers/Connectors. They are connected to a single Playbook instead. This allows the users to create and manage the Visualizers in an easier way.
+* We added the new **Pivot** framework in the backend which allows to connect jobs to each other and to _pivot_ from one indicator to another. This is the first step to give the chance to the users to create more broader and complex investigation in IntelOwl. The next step will be to add the Frontend changes that allows the user to fully leverage the framework 
+
+**New/Improved Plugins:**
+* Added new `DNS` playbook that collects the analyzers which performs DNS queries to various providers
+* Added more option for `CapeSandbox` analyzer
+
+**Fixes / adjusts / minor changes**
+* added chance to change the password of the account from the personal section in the application
+* added a lot of Frontend tests for the "Scan" page to improve stability
+* some frontend changes to improve overall experience (#1743, #1741, #1754, #1772, #1780, #1807, #1806)
+* added new partial statuses for the Job which allow to better track the job progression [#1740)]
+* Added new public Yara rules
+* updated installation instructions
+* upgraded a lot of packages
+
 ## [v5.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.0.1)
 
 **Bug fixing for the v5.0.0 release**

@@ -5,7 +5,7 @@ import { IoMdWarning } from "react-icons/io";
 
 import { addToast, confirm } from "@certego/certego-ui";
 
-import { API_BASE_URI, JOB_BASE_URI } from "../../../constants/api";
+import { PLAYBOOKS_CONFIG_URI, JOB_BASE_URI } from "../../../constants/api";
 
 // constants
 
@@ -58,7 +58,7 @@ export async function killJob(jobId) {
         Failed. Operation: <em>kill job #{jobId}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -80,7 +80,7 @@ export async function deleteJob(jobId) {
         Failed. Operation: <em>delete job #{jobId}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -91,28 +91,33 @@ export async function saveJobAsPlaybook(values) {
   const data = {
     name: values.name,
     description: values.description,
-    job: values.jobId,
+    analyzers: values.analyzers,
+    connectors: values.connectors,
+    pivots: values.pivots,
+    runtime_configuration: values.runtimeConfiguration,
+    tags: values.tags,
+    tlp: values.tlp,
+    scan_mode: values.scan_mode,
+    scan_check_time: values.scan_check_time,
   };
   try {
-    const response = await axios.post(`${API_BASE_URI}/playbook`, data);
+    const response = await axios.post(PLAYBOOKS_CONFIG_URI, data);
 
     success = response.status === 200;
     if (success) {
       addToast(
         <span>
-          Saved Job #{values.jobId} as Playbook with name {response.data.name}!
+          Playbook with name {response.data.name} created with success
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
     addToast(
-      <span>
-        Failed. Operation: <em>Saving Job #${values.jobId} as playbook</em>
-      </span>,
+      <span>Failed creation of playbook with name {values.name}</span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -120,13 +125,13 @@ export async function saveJobAsPlaybook(values) {
 
 export async function killPlugin(jobId, plugin) {
   const sure = await areYouSureConfirmDialog(
-    `kill ${plugin.type} '${plugin.name}'`
+    `kill ${plugin.type} '${plugin.name}'`,
   );
   if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.patch(
-      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/kill`
+      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/kill`,
     );
     success = response.status === 204;
     if (success) {
@@ -135,7 +140,7 @@ export async function killPlugin(jobId, plugin) {
           Kill request sent for {plugin.type} <em>{plugin.name}</em>
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
@@ -144,7 +149,7 @@ export async function killPlugin(jobId, plugin) {
         Failed. Operation: kill {plugin.type} <em>{plugin.name}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -152,13 +157,13 @@ export async function killPlugin(jobId, plugin) {
 
 export async function retryPlugin(jobId, plugin) {
   const sure = await areYouSureConfirmDialog(
-    `retry ${plugin.type} '${plugin.name}'`
+    `retry ${plugin.type} '${plugin.name}'`,
   );
   if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.patch(
-      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/retry`
+      `${JOB_BASE_URI}/${jobId}/${plugin.type}/${plugin.id}/retry`,
     );
     success = response.status === 204;
     if (success) {
@@ -167,7 +172,7 @@ export async function retryPlugin(jobId, plugin) {
           Retry request sent for {plugin.type} <em>{plugin.name}</em>
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
@@ -176,7 +181,7 @@ export async function retryPlugin(jobId, plugin) {
         Failed. Operation: retry {plugin.type} <em>{plugin.name}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;

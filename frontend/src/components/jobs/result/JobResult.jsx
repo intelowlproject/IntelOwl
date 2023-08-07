@@ -38,22 +38,32 @@ export default function JobResult() {
 
   console.debug(
     `JobResult - initialLoading: ${initialLoading}, isRunning: ${isRunning}, ` +
-      `notified: ${notified}, toNotify: ${toNotify}, jobTerminated: ${jobTerminated}`
+      `notified: ${notified}, toNotify: ${toNotify}, jobTerminated: ${jobTerminated}`,
   );
 
   // HTTP polling only in case the job is running
   useInterval(
     refetch,
-    isRunning ? 5 * 1000 : null // 5 seconds
+    isRunning ? 5 * 1000 : null, // 5 seconds
   );
 
   // every time the job data are downloaded we check if it terminated or not
   React.useEffect(
     () =>
       setIsRunning(
-        job === undefined || ["pending", "running"].includes(job.status)
+        job === undefined ||
+          [
+            "pending",
+            "running",
+            "analyzers_running",
+            "connectors_running",
+            "visualizers_running",
+            "analyzers_completed",
+            "connectors_completed",
+            "visualizers_completed",
+          ].includes(job.status),
       ),
-    [job]
+    [job],
   );
 
   // In case the job terminated and it's not to notify, it means the user waited the result, notification is not needed.
@@ -93,7 +103,7 @@ export default function JobResult() {
       // eslint-disable-next-line no-nested-ternary
       job ? (job.is_sample ? job.file_name : job.observable_name) : ""
     })`,
-    { restoreOnUnmount: true }
+    { restoreOnUnmount: true },
   );
 
   return (

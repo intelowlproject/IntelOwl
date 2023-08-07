@@ -3,20 +3,19 @@
 
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import (
-    AbstractConfigSerializer,
-    AbstractListConfigSerializer,
+from ..serializers import (
     AbstractReportSerializer,
+    PythonConfigSerializer,
+    PythonListConfigSerializer,
 )
-
 from .models import VisualizerConfig, VisualizerReport
 
 
-class VisualizerConfigSerializer(AbstractConfigSerializer):
+class VisualizerConfigSerializer(PythonConfigSerializer):
     class Meta:
         model = VisualizerConfig
         fields = rfs.ALL_FIELDS
-        list_serializer_class = AbstractListConfigSerializer
+        list_serializer_class = PythonListConfigSerializer
 
 
 class VisualizerReportSerializer(AbstractReportSerializer):

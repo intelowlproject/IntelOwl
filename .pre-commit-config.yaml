@@ -36,7 +36,7 @@ repos:
         args: ["--fix"]
         files: frontend/src/
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.6.2
+    rev: v3.0.0
     hooks:
       - id: prettier
         files: frontend/src/

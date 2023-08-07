@@ -10,11 +10,11 @@ from typing import Tuple
 import requests
 from django.conf import settings
 
-from api_app.core.classes import Plugin
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
-from ..core.models import AbstractConfig
+from ..classes import Plugin
+from ..models import AbstractConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from .models import AnalyzerConfig, AnalyzerReport
@@ -64,16 +64,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return (
             AnalyzerConfigurationException,
             AnalyzerRunException,
-        )
-
-    def get_error_message(self, err, is_base_err=False):
-        """
-        Returns error message for
-        *_handle_analyzer_exception* and *_handle_base_exception* fn
-        """
-        return (
-            f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
         )
 
     def _validate_result(self, result, level=0, max_recursion=190):
@@ -221,8 +211,8 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             )
         return self.__filepath
 
-    def before_run(self, *args, **kwargs):
-        super().before_run(**kwargs)
+    def before_run(self):
+        super().before_run()
         logger.info(
             f"STARTED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"

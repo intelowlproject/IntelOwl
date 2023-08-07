@@ -11,21 +11,40 @@ describe("HorizontalListVisualizer component", () => {
   test("required-only params", () => {
     const { container } = render(
       <HorizontalListVisualizer
+        id="test-id"
         values={[
-          <BaseVisualizer value="base element" />,
-          <BooleanVisualizer value="bool element" />,
+          <BaseVisualizer value="base element" id="test-id-base" />,
+          <BooleanVisualizer value="bool element" id="test-id-bool" />,
           <TitleVisualizer
-            title={<BaseVisualizer value="title element - title" />}
-            value={<BaseVisualizer value="title element - value" />}
+            title={
+              <BaseVisualizer
+                value="title element - title"
+                id="test-id-title"
+              />
+            }
+            value={
+              <BaseVisualizer
+                value="title element - value"
+                id="test-id-value"
+              />
+            }
           />,
           <VerticalListVisualizer
-            name={<BaseVisualizer value="vertical list element - name" />}
+            name={
+              <BaseVisualizer
+                value="vertical list element - name"
+                id="test-id-vlist"
+              />
+            }
             values={[
-              <BaseVisualizer value="vertical list element - first element" />,
+              <BaseVisualizer
+                value="vertical list element - first element"
+                id="test-id-value"
+              />,
             ]}
           />,
         ]}
-      />
+      />,
     );
 
     screen.debug();
@@ -36,29 +55,52 @@ describe("HorizontalListVisualizer component", () => {
     expect(screen.getByText("bool element")).toBeInTheDocument();
     expect(screen.getByText("title element - title")).toBeInTheDocument();
     expect(
-      screen.getByText("vertical list element - name")
+      screen.getByText("vertical list element - name"),
     ).toBeInTheDocument();
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
   });
 
   test("all params", () => {
     const { container } = render(
       <HorizontalListVisualizer
+        id="test-id"
         values={[
-          <BaseVisualizer value="base element" />,
-          <BooleanVisualizer value="bool element" />,
+          <BaseVisualizer value="base element" id="test-id-base" />,
+          <BooleanVisualizer value="bool element" id="test-id-bool" />,
           <TitleVisualizer
-            title={<BaseVisualizer value="title element - title" />}
-            value={<BaseVisualizer value="title element - value" />}
+            title={
+              <BaseVisualizer
+                value="title element - title"
+                id="test-id-title"
+              />
+            }
+            value={
+              <BaseVisualizer
+                value="title element - value"
+                id="test-id-value"
+              />
+            }
           />,
           <VerticalListVisualizer
-            name={<BaseVisualizer value="vertical list element - name" />}
+            id="test-id-list"
+            name={
+              <BaseVisualizer
+                value="vertical list element - name"
+                id="test-id-vlist"
+              />
+            }
             values={[
-              <BaseVisualizer value="vertical list element - first element" />,
+              <BaseVisualizer
+                value="vertical list element - first element"
+                id="test-id-value"
+              />,
             ]}
           />,
         ]}
         alignment="between"
-      />
+      />,
     );
 
     screen.debug();
@@ -69,7 +111,10 @@ describe("HorizontalListVisualizer component", () => {
     expect(screen.getByText("bool element")).toBeInTheDocument();
     expect(screen.getByText("title element - title")).toBeInTheDocument();
     expect(
-      screen.getByText("vertical list element - name")
+      screen.getByText("vertical list element - name"),
     ).toBeInTheDocument();
+    // check id
+    const idElement = container.querySelector("#test-id");
+    expect(idElement).toBeInTheDocument();
   });
 });

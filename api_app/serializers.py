@@ -8,15 +8,18 @@ import json
 import logging
 import re
 import uuid
-from typing import Any, Dict, List, Union
+from collections import defaultdict
+from typing import Any, Dict, Generator, List, Union
 
 import django.core.exceptions
 from django.db.models import Q
 from django.http import QueryDict
 from django.utils.timezone import now
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import SerializerMethodField
 
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
@@ -24,33 +27,16 @@ from intel_owl.celery import DEFAULT_QUEUE
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.models import AnalyzerConfig, MimeTypes
-from .analyzers_manager.serializers import AnalyzerReportSerializer
-from .choices import TLP
+from .choices import TLP, ScanMode
 from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
-from .connectors_manager.serializers import ConnectorReportSerializer
-from .core.models import Parameter
+from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
-from .models import Comment, Job, PluginConfig, Tag, default_runtime
+from .models import AbstractReport, Comment, Job, Parameter, PluginConfig, Tag
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
-from .visualizers_manager.serializers import VisualizerReportSerializer
 
 logger = logging.getLogger(__name__)
-
-__all__ = [
-    "TagSerializer",
-    "JobAvailabilitySerializer",
-    "JobListSerializer",
-    "JobSerializer",
-    "FileAnalysisSerializer",
-    "ObservableAnalysisSerializer",
-    "JobResponseSerializer",
-    "MultipleFileAnalysisSerializer",
-    "MultipleObservableAnalysisSerializer",
-    "PluginConfigSerializer",
-    "CommentSerializer",
-]
 
 
 class TagSerializer(rfs.ModelSerializer):
@@ -73,12 +59,37 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     Base Serializer for ``Job`` model's ``create()``.
     """
 
-    tags_labels = rfs.ListField(default=list)
+    class Meta:
+        fields = (
+            "id",
+            "user",
+            "is_sample",
+            "tlp",
+            "runtime_configuration",
+            "analyzers_requested",
+            "connectors_requested",
+            "playbook_requested",
+            "tags_labels",
+            "scan_mode",
+            "scan_check_time",
+        )
+
+    md5 = rfs.HiddenField(default=None)
+    is_sample = rfs.HiddenField(write_only=True, default=False)
+    user = rfs.HiddenField(default=rfs.CurrentUserDefault())
+    scan_mode = rfs.ChoiceField(
+        choices=ScanMode.choices,
+        required=False,
+    )
+    scan_check_time = rfs.DurationField(required=False, allow_null=True)
+
+    tags_labels = rfs.ListField(
+        child=rfs.CharField(required=True), default=list, required=False
+    )
     runtime_configuration = rfs.JSONField(
         required=False, default=default_runtime, write_only=True
     )
-    md5 = rfs.HiddenField(default=None)
-    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
+    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
 
     def validate_runtime_configuration(self, runtime_config: Dict):
         from api_app.validators import validate_runtime_configuration
@@ -92,6 +103,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             raise ValidationError({"detail": "Runtime Configuration Validation Failed"})
         return runtime_config
 
+    def validate_tags_labels(self, tags_labels):
+        for label in tags_labels:
+            yield Tag.objects.get_or_create(
+                label=label, defaults={"color": gen_random_colorhex()}
+            )[0]
+
     def validate_tlp(self, tlp: str):
         if tlp == "WHITE":
             return TLP.CLEAR.value
@@ -101,17 +118,31 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
         self.log_runnable = True
-        self.mtm_fields = {
-            "analyzers_requested": None,
-            "connectors_requested": None,
-            "analyzers_to_execute": None,
-            "connectors_to_execute": None,
-            "visualizers_to_execute": None,
-        }
+
+    @staticmethod
+    def set_default_value_from_playbook(attrs: Dict) -> None:
+        # we are changing attrs in place
+        for attribute, default_value in [
+            ("scan_mode", ScanMode.CHECK_PREVIOUS_ANALYSIS.value),
+            ("scan_check_time", datetime.timedelta(hours=24)),
+            ("tlp", TLP.CLEAR.value),
+            ("tags", []),
+        ]:
+            if attribute not in attrs:
+                if playbook := attrs.get("playbook_requested"):
+                    attrs[attribute] = getattr(playbook, attribute)
+                else:
+                    attrs[attribute] = default_value
 
     def validate(self, attrs: dict) -> dict:
+        self.set_default_value_from_playbook(attrs)
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
+            playbook: PlaybookConfig
+            if not attrs.get("scan_mode"):
+                attrs["scan_mode"] = playbook.scan_mode
+            if not attrs.get("scan_check_time"):
+                attrs["scan_check_time"] = playbook.scan_check_time
             if attrs.get("analyzers_requested", []) or attrs.get(
                 "connectors_requested", []
             ):
@@ -132,59 +163,45 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["connectors_requested"] = self.filter_connectors_requested(
             attrs["connectors_requested"]
         )
-        attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(
-            attrs["analyzers_requested"], attrs
-        )
+        attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(
-            attrs["connectors_requested"], attrs
+            attrs["connectors_requested"], attrs["tlp"]
         )
-        attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(
-            attrs["analyzers_to_execute"], attrs["connectors_to_execute"]
+        attrs["visualizers_to_execute"] = list(
+            self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
         )
         attrs["warnings"] = self.filter_warnings
-
+        self.filter_warnings.clear()
+        attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 
     def set_visualizers_to_execute(
         self,
-        analyzers_to_execute: List[AnalyzerConfig],
-        connectors_to_execute: List[ConnectorConfig],
-    ) -> List[VisualizerConfig]:
-        visualizers_to_execute = []
-
-        for visualizer in VisualizerConfig.objects.all():
-            visualizer: VisualizerConfig
-            if (
-                visualizer.is_runnable(self.context["request"].user)
-                # subsets
-                and set(visualizer.analyzers.all().values_list("pk", flat=True))
-                <= {analyzer.pk for analyzer in analyzers_to_execute}
-                and set(visualizer.connectors.all().values_list("pk", flat=True))
-                <= {connector.pk for connector in connectors_to_execute}
-            ):
-                logger.info(f"Going to use {visualizer.name}")
-                visualizers_to_execute.append(visualizer)
-        return visualizers_to_execute
+        playbook_to_execute: PlaybookConfig = None,
+    ) -> Generator[VisualizerConfig, None, None]:
+        if playbook_to_execute:
+            yield from VisualizerConfig.objects.filter(
+                playbook=playbook_to_execute
+            ).annotate_runnable(self.context["request"].user).filter(runnable=True)
 
     def set_connectors_to_execute(
-        self, connectors_requested: List[ConnectorConfig], serialized_data
+        self, connectors_requested: List[ConnectorConfig], tlp: str
     ) -> List[ConnectorConfig]:
-        tlp = serialized_data["tlp"]
-        connectors_executed = self.plugins_to_execute(
-            tlp, connectors_requested, not self.all_connectors
+        connectors_executed = list(
+            self.plugins_to_execute(tlp, connectors_requested, not self.all_connectors)
         )
         return connectors_executed
 
     def set_analyzers_to_execute(
-        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+        self, analyzers_requested: List[AnalyzerConfig], tlp: str, **kwargs
     ) -> List[AnalyzerConfig]:
-        tlp = serialized_data["tlp"]
-        analyzers_executed = self.plugins_to_execute(
-            tlp, analyzers_requested, not self.all_analyzers
+        analyzers_executed = list(
+            self.plugins_to_execute(tlp, analyzers_requested, not self.all_analyzers)
         )
         if not analyzers_executed:
+            warnings = "\n".join(self.filter_warnings)
             raise ValidationError(
-                {"detail": "No Analyzers can be run after filtering."}
+                {"detail": f"No Analyzers can be run after filtering:\n{warnings}"}
             )
         return analyzers_executed
 
@@ -193,34 +210,37 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         tlp,
         plugins_requested: List[Union[AnalyzerConfig, ConnectorConfig]],
         add_warning: bool = False,
-    ) -> List[Union[AnalyzerConfig, ConnectorConfig]]:
-        plugins_to_execute = plugins_requested.copy()
-        for plugin_config in plugins_requested:
+    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig], None, None]:
+        if not plugins_requested:
+            return
+        qs = plugins_requested[0].__class__.objects.filter(
+            pk__in=[plugin.pk for plugin in plugins_requested]
+        )
+        for plugin_config in qs.annotate_runnable(self.context["request"].user):
             try:
-                if not plugin_config.is_runnable(self.context["request"].user):
+                if not plugin_config.runnable:
                     raise NotRunnableConnector(
                         f"{plugin_config.name} won't run: is disabled or not configured"
                     )
 
-                if TLP.get_priority(tlp) > TLP.get_priority(
-                    plugin_config.maximum_tlp
+                if (
+                    TLP[tlp] > TLP[plugin_config.maximum_tlp]
                 ):  # check if job's tlp allows running
                     # e.g. if connector_tlp is GREEN(1),
                     # run for job_tlp CLEAR(0) & GREEN(1) only
                     raise NotRunnableConnector(
-                        f"{plugin_config.name} won't run: "
-                        f"job.tlp ('{tlp}') >"
+                        f"{plugin_config.name} won't run because "
+                        f"job.tlp is '{tlp}') while plugin"
                         f" maximum_tlp ('{plugin_config.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
-                plugins_to_execute.remove(plugin_config)
                 if add_warning:
                     logger.info(e)
                     self.filter_warnings.append(str(e))
                 else:
                     logger.debug(e)
-
-        return plugins_to_execute
+            else:
+                yield plugin_config
 
     def filter_analyzers_requested(self, analyzers):
         self.all_analyzers = False
@@ -236,37 +256,40 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             self.all_connectors = True
         return connectors
 
-    def create(self, validated_data: dict) -> Job:
-        # create ``Tag`` objects from tags_labels
-        tags_labels = validated_data.pop("tags_labels", None)
+    def check_previous_jobs(self, validated_data: Dict) -> Job:
+        logger.info("Checking previous jobs")
+        if not validated_data["scan_check_time"]:
+            raise ValidationError("Scan check time can't be null")
+        status_to_exclude = [Job.Status.KILLED, Job.Status.FAILED]
+        if not validated_data.get("playbook_to_execute", None):
+            status_to_exclude.append(Job.Status.REPORTED_WITH_FAILS)
+        qs = (
+            self.Meta.model.objects.visible_for_user(self.context["request"].user)
+            .filter(
+                received_request_time__gte=now() - validated_data["scan_check_time"]
+            )
+            .filter(Q(md5=validated_data["md5"]))
+        )
+        for analyzer in validated_data.get("analyzers_to_execute", []):
+            qs = qs.filter(analyzers_requested__in=[analyzer])
+        return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
+
+    def create(self, validated_data: Dict) -> Job:
         validated_data.pop("warnings")
         send_task = validated_data.pop("send_task", False)
-        tags = [
-            Tag.objects.get_or_create(
-                label=label, defaults={"color": gen_random_colorhex()}
-            )[0]
-            for label in tags_labels
-        ]
-        for key in self.mtm_fields:
-            self.mtm_fields[key] = validated_data.pop(key)
+        if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
+            try:
+                job = self.check_previous_jobs(validated_data)
+            except self.Meta.model.DoesNotExist:
+                job = super().create(validated_data)
+        else:
+            job = super().create(validated_data)
 
-        job = Job(user=self.context["request"].user, **validated_data)
-        try:
-            job.full_clean()
-        except django.core.exceptions.ValidationError as e:
-            logger.info(e, stack_info=True)
-            raise ValidationError({"detail": "Validation model failed"})
-        job.save()
-        if tags:
-            job.tags.set(tags)
-
-        for key, value in self.mtm_fields.items():
-            mtm = getattr(job, key)
-            mtm.set(value)
+        logger.info(f"Job {job.pk} created")
         if send_task:
             from intel_owl.tasks import job_pipeline
 
-            logger.info("Sending task")
+            logger.info(f"Sending task for job {job.pk}")
             job_pipeline.apply_async(
                 args=[job.pk],
                 routing_key=DEFAULT_QUEUE,
@@ -296,7 +319,7 @@ class CommentSerializer(rfs.ModelSerializer):
         user = self.context["request"].user
         job = attrs.get("job")
         try:
-            Job.visible_for_user(user).get(pk=job.pk)
+            Job.objects.visible_for_user(user).get(pk=job.pk)
         except Job.DoesNotExist:
             raise ValidationError(
                 {"detail": f"You have no permission to comment on job {job.pk}"}
@@ -327,18 +350,26 @@ class JobSerializer(_AbstractJobViewSerializer):
         model = Job
         exclude = ("file",)
 
-    analyzer_reports = AnalyzerReportSerializer(
-        many=True, read_only=True, source="analyzerreports"
-    )
-    connector_reports = ConnectorReportSerializer(
-        many=True, read_only=True, source="connectorreports"
-    )
-    visualizer_reports = VisualizerReportSerializer(
-        many=True, read_only=True, source="visualizerreports"
-    )
     comments = CommentSerializer(many=True, read_only=True)
 
     permissions = rfs.SerializerMethodField()
+
+    def get_fields(self):
+        # this method override is required for a cyclic import
+        from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
+        from api_app.connectors_manager.serializers import ConnectorReportSerializer
+        from api_app.visualizers_manager.serializers import VisualizerReportSerializer
+
+        self._declared_fields["analyzer_reports"] = AnalyzerReportSerializer(
+            many=True, read_only=True, source="analyzerreports"
+        )
+        self._declared_fields["connector_reports"] = ConnectorReportSerializer(
+            many=True, read_only=True, source="connectorreports"
+        )
+        self._declared_fields["visualizer_reports"] = VisualizerReportSerializer(
+            many=True, read_only=True, source="visualizerreports"
+        )
+        return super().get_fields()
 
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
         request = self.context.get("request", None)
@@ -376,7 +407,7 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
 
-        if data.getlist("file_names", False) and len(data.getlist("file_names")) != len(
+        if data.getlist("file_names", []) and len(data.getlist("file_names")) != len(
             data.getlist("files")
         ):
             raise ValidationError(
@@ -397,9 +428,9 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
             item = base_data.copy()
 
             item["file"] = file
-            if data.getlist("file_names", False):
+            if data.getlist("file_names", []):
                 item["file_name"] = data.getlist("file_names")[index]
-            if data.get("file_mimetypes", False):
+            if data.get("file_mimetypes", []):
                 item["file_mimetype"] = data["file_mimetypes"][index]
             try:
                 validated = self.child.run_validation(item)
@@ -442,20 +473,10 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
 
     class Meta:
         model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
+        fields = _AbstractJobCreateSerializer.Meta.fields + (
             "file",
             "file_name",
             "file_mimetype",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbook_requested",
-            "tags_labels",
         )
 
     @classmethod
@@ -475,13 +496,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         if "file_name" not in attrs:
             attrs["file_name"] = attrs["file"].name
-        try:
-            attrs["file_mimetype"] = MimeTypes.calculate(
-                attrs["file"], attrs["file_name"]
-            )
-        except ValueError as e:
-            logger.info(e, stack_info=True)
-            raise ValidationError({"detail": "Mimetype is not correct"})
+        attrs["file_mimetype"] = MimeTypes.calculate(attrs["file"], attrs["file_name"])
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)
@@ -492,7 +507,12 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         return attrs
 
     def set_analyzers_to_execute(
-        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+        self,
+        analyzers_requested: List[AnalyzerConfig],
+        tlp: str,
+        file_mimetype: str,
+        file_name: str,
+        **kwargs,
     ) -> List[AnalyzerConfig]:
         analyzers_to_execute = analyzers_requested.copy()
 
@@ -500,14 +520,13 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
             pk__in=[config.pk for config in analyzers_to_execute]
         )
-        file_mimetype = serialized_data["file_mimetype"]
         if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP1.value]:
             EXCEL_OFFICE_FILES = r"\.[xl]\w{0,3}$"
             DOC_OFFICE_FILES = r"\.[doc]\w{0,3}$"
-            if re.search(DOC_OFFICE_FILES, serialized_data["file_name"]):
+            if re.search(DOC_OFFICE_FILES, file_name):
                 # its an excel file
                 file_mimetype = MimeTypes.DOC.value
-            elif re.search(EXCEL_OFFICE_FILES, serialized_data["file_name"]):
+            elif re.search(EXCEL_OFFICE_FILES, file_name):
                 # its an excel file
                 file_mimetype = MimeTypes.EXCEL1.value
             else:
@@ -534,7 +553,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             else:
                 logger.info(message)
                 self.filter_warnings.append(message)
-        return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
+        return super().set_analyzers_to_execute(analyzers_to_execute, tlp)
 
 
 class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
@@ -600,19 +619,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     class Meta:
         model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
+        fields = _AbstractJobCreateSerializer.Meta.fields + (
             "observable_name",
             "observable_classification",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbook_requested",
-            "tags_labels",
         )
 
     @classmethod
@@ -680,7 +689,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         return value
 
     def set_analyzers_to_execute(
-        self, analyzers_requested: List[AnalyzerConfig], serialized_data
+        self,
+        analyzers_requested: List[AnalyzerConfig],
+        tlp: str,
+        observable_classification: str,
+        **kwargs,
     ) -> List[AnalyzerConfig]:
         analyzers_to_execute = analyzers_requested.copy()
 
@@ -689,9 +702,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         )
         for analyzer in partially_filtered_analyzers_qs.exclude(
             type=TypeChoices.OBSERVABLE,
-            observable_supported__contains=[
-                serialized_data["observable_classification"]
-            ],
+            observable_supported__contains=[observable_classification],
         ):
             analyzers_to_execute.remove(analyzer)
             message = (
@@ -704,7 +715,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 logger.info(message)
                 self.filter_warnings.append(message)
 
-        return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
+        return super().set_analyzers_to_execute(analyzers_to_execute, tlp)
 
 
 class JobEnvelopeSerializer(rfs.ListSerializer):
@@ -823,7 +834,7 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
             query &= Q(received_request_time__gte=minutes_ago_time)
 
         last_job_for_md5 = (
-            Job.visible_for_user(self.context["request"].user)
+            Job.objects.visible_for_user(self.context["request"].user)
             .filter(query)
             .only("pk")
             .latest("received_request_time")
@@ -882,14 +893,17 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                 return json.dumps(result)
             return result
 
-    type = rfs.ChoiceField(choices=["1", "2", "3"])  # retrocompatibility
+    type = rfs.ChoiceField(choices=["1", "2", "3", "4"])  # retrocompatibility
     config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-
-    organization = rfs.PrimaryKeyRelatedField(
-        queryset=Organization.objects.all(), required=False, allow_null=True
+    organization = rfs.SlugRelatedField(
+        queryset=Organization.objects.all(),
+        required=False,
+        allow_null=True,
+        slug_field="name",
+        write_only=True,
     )
     value = CustomValueField()
 
@@ -906,13 +920,13 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         if self.partial:
             # we are in an update
             return attrs
-        if (
-            "organization" in attrs
-            and attrs["organization"]
-            and (attrs.pop("organization").owner != attrs["owner"])
-        ):
-            attrs["for_organization"] = True
-            raise ValidationError({"detail": "You are not owner of the organization"})
+        if "organization" in attrs and attrs["organization"]:
+            if attrs.pop("organization").owner != attrs["owner"]:
+                raise ValidationError(
+                    {"detail": "You are not owner of the organization"}
+                )
+            else:
+                attrs["for_organization"] = True
 
         _value = attrs["value"]
         # retro compatibility
@@ -938,3 +952,218 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     def update(self, instance, validated_data):
         self.validate_value_type(validated_data["value"], instance.parameter)
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance: PluginConfig):
+        result = super().to_representation(instance)
+        result["organization"] = instance.organization
+        return result
+
+
+class _ConfigSerializer(rfs.Serializer):
+    """
+    To validate `config` attr.
+    """
+
+    queue = rfs.CharField(required=True)
+    soft_time_limit = rfs.IntegerField(required=True)
+
+
+class ParamListSerializer(rfs.ListSerializer):
+    @property
+    def data(self):
+        # this is to return a dict instead of a list
+        return super(rfs.ListSerializer, self).data
+
+    def to_representation(self, data):
+        result = super().to_representation(data)
+        return {elem.pop("name"): elem for elem in result}
+
+
+class ParameterCompleteSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Parameter
+        fields = rfs.ALL_FIELDS
+
+
+class ParameterSerializer(rfs.ModelSerializer):
+
+    value = SerializerMethodField()
+
+    class Meta:
+        model = Parameter
+        fields = ["name", "type", "description", "required", "value"]
+        list_serializer_class = ParamListSerializer
+
+    def get_value(self, param: Parameter):
+        if hasattr(param, "value"):
+            if param.is_secret and param.is_from_org:
+                return "redacted"
+            return param.value
+
+
+class PythonListConfigSerializer(rfs.ListSerializer):
+
+    plugins = rfs.PrimaryKeyRelatedField(read_only=True)
+
+    def to_representation(self, data):
+
+        plugins = self.child.Meta.model.objects.filter(
+            pk__in=[plugin.pk for plugin in data]
+        ).prefetch_related("parameters")
+        user = self.context["request"].user
+        enabled_plugins = plugins.filter(disabled=False)
+
+        # get the values for that configurations
+        if user and user.has_membership():
+            if self.child.Meta.model.disabled_in_organizations:
+                enabled_plugins.prefetch_related("disabled_in_organizations")
+                logger.debug("Excluding plugins disabled in organization")
+                enabled_plugins = enabled_plugins.exclude(
+                    disabled_in_organizations=user.membership.organization.pk
+                )
+            else:
+                logger.debug("Plugin is system-wide.")
+        else:
+            logger.debug(
+                f"User {user.username} is not a member of an organization,"
+                "meaning that there are no disabled plugins"
+            )
+        # annotate if the params are configured or not with the subquery
+        params = (
+            Parameter.objects.filter(
+                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
+            )
+            .prefetch_related(self.child.Meta.model.snake_case_name)
+            .annotate_value_for_user(user)
+            .annotate_configured(user)
+        )
+        parsed = defaultdict(list)
+        # populate the result for every plugin (even the ones without parameters)
+        # parsed[plugin]= [parameter1]
+        for parameter in params:
+            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
+                parameter
+            )
+        logger.debug(
+            ", ".join(
+                [
+                    f"plugin {key} has {len(values)} parameters"
+                    for key, values in parsed.items()
+                ]
+            )
+        )
+        # we can finally construct our result
+        for plugin in plugins:
+            plugin_representation = self.child.to_representation(plugin)
+            plugin_representation["params"] = {}
+            plugin_representation["secrets"] = {}
+            total_parameter = len(parsed[plugin])
+            parameter_required_not_configured = []
+            for param in parsed[plugin]:
+                # the priority order is
+                # 1 owner
+                # 2 organization
+                # 3 default
+                if param.required and not param.configured:
+                    parameter_required_not_configured.append(param.name)
+                param_representation = ParameterSerializer(param).data
+                logger.debug(
+                    f"Parameter {param.name} for plugin {plugin.name} "
+                    f"has value {param.value} for user {user.username}"
+                )
+                param_representation.pop("name")
+                if param.is_secret:
+                    plugin_representation["secrets"][param.name] = param_representation
+                else:
+                    plugin_representation["params"][param.name] = param_representation
+            if not parameter_required_not_configured:
+                logger.debug(f"Plugin {plugin.name} is configured")
+                configured = True
+                details = "Ready to use!"
+            else:
+                logger.debug(f"Plugin {plugin.name} is not configured")
+                details = (
+                    f"{', '.join(parameter_required_not_configured)} "
+                    "secret"
+                    f"{'' if len(parameter_required_not_configured) == 1 else 's'}"
+                    " not set;"
+                    f" ({total_parameter - len(parameter_required_not_configured)} "
+                    f"of {total_parameter} satisfied)"
+                )
+                configured = False
+            plugin_representation["disabled"] = plugin not in enabled_plugins
+            plugin_representation["verification"] = {
+                "configured": configured,
+                "details": details,
+                "missing_secrets": parameter_required_not_configured,
+            }
+            yield plugin_representation
+
+
+class AbstractConfigSerializer(rfs.ModelSerializer):
+    ...
+
+
+class PythonConfigSerializer(AbstractConfigSerializer):
+
+    config = _ConfigSerializer(required=True)
+    parameters = ParameterSerializer(write_only=True, many=True)
+
+    class Meta:
+        exclude = ["disabled_in_organizations"]
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()
+
+
+class AbstractReportSerializer(rfs.ModelSerializer):
+
+    name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
+
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "process_time",
+            "report",
+            "status",
+            "errors",
+            "start_time",
+            "end_time",
+            "runtime_configuration",
+        )
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        data["type"] = instance.__class__.__name__.replace("Report", "").lower()
+        return data
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()
+
+
+class CrontabScheduleSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = CrontabSchedule
+        fields = [
+            "minute",
+            "hour",
+            "day_of_week",
+            "day_of_month",
+            "month_of_year",
+        ]
+
+
+class PeriodicTaskSerializer(rfs.ModelSerializer):
+    crontab = CrontabScheduleSerializer(read_only=True)
+
+    class Meta:
+        model = PeriodicTask
+        fields = [
+            "crontab",
+            "name",
+            "task",
+            "kwargs",
+            "queue",
+            "enabled",
+        ]

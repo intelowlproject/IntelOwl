@@ -31,27 +31,30 @@ git clone https://github.com/intelowlproject/IntelOwl
 cd IntelOwl/
 
 # construct environment files from templates
-cd docker/
-cp env_file_app_template env_file_app
-cp env_file_postgres_template env_file_postgres
-cp env_file_integrations_template env_file_integrations
-cd ..
+cp docker/env_file_app_template docker/env_file_app
+cp docker/env_file_postgres_template docker/env_file_postgres
+cp docker/env_file_integrations_template docker/env_file_integrations
 cp frontend/public/env_template.js frontend/public/env.js
 
 # verify installed dependencies
-./initialize.sh
+sudo ./initialize.sh
 
 # start the app
-python3 start.py prod up
+sudo python3 start.py prod up
 
 # now the application is running on http://localhost:80
 # create a super user 
-docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
+sudo docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
 # now you can login with the created user form http://localhost:80
 
 # Have fun!
 ```
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+The first time you start IntelOwl, a lot of database migrations are being applied. This requires some time. If you get 500 status code errors in the GUI, just wait few minutes and then refresh the page.
+</div>
 
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
@@ -83,21 +86,19 @@ All these components are managed via docker-compose.
 Open a terminal and execute below commands to construct new environment files from provided templates.
 
 ```bash
-cd docker/
-cp env_file_app_template env_file_app
-cp env_file_postgres_template env_file_postgres
-cp env_file_integrations_template env_file_integrations
-cd ..
+cp docker/env_file_app_template docker/env_file_app
+cp docker/env_file_postgres_template docker/env_file_postgres
+cp docker/env_file_integrations_template docker/env_file_integrations
 cp frontend/public/env_template.js frontend/public/env.js
 
-./initialize.sh
+sudo ./initialize.sh
 ```
 
 ### Environment configuration (required)
-In the `env_file_app`, configure different variables as explained below.
+In the `docker/env_file_app`, configure different variables as explained below.
 
 **REQUIRED** variables to run the image:
-* `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`: PostgreSQL configuration (The DB credentals should match the ones in the `env_file_postgres`). If you like, you can configure the connection to an external PostgreSQL instance in the same variables. Then, to avoid to run PostgreSQL locally, please run IntelOwl with the option `--use-external-database`.
+* `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`: PostgreSQL configuration (The DB credentals should match the ones in the `env_file_postgres`). If you like, you can configure the connection to an external PostgreSQL instance in the same variables. Then, to avoid to run PostgreSQL locally, please run IntelOwl with the option `--use-external-database`. Otherwise, `DB_HOST` must be `postgres` to have the app properly communicate with the PostgreSQL container.
 
 **Strongly recommended** variable to set:
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
@@ -114,8 +115,8 @@ Configuration required to enable integration with Slack:
 
 Configuration required to enable Re-Captcha in the Login and the Registration Page:
 In the `docker/env_file_app`:
-* `RECAPTCHA_SECRET_KEY_IO_LOCAL`: your recaptcha secret key internal deployment
-* `RECAPTCHA_SECRET_KEY_IO_PUBLIC`: your recaptcha secret key for public deployment
+* `USE_RECAPTCHA`: if you want to use recaptcha on your login
+* `RECAPTCHA_SECRET_KEY`: your recaptcha secret key
 In the `frontend/public/env.js`:
 * `RECAPTCHA_SITEKEY`: Recaptcha Key for your site
 
@@ -129,15 +130,13 @@ Configuration required to have InteOwl sending Emails (registration requests, ma
 * `EMAIL_USE_TLS`: whether to use an explicit TLS (secure) connection when talking to the SMTP server, generally used on port 587. 
 * `EMAIL_USE_SSL`: whether to use an implicit TLS (secure) connection when talking to the SMTP server, generally used on port 465.
 
-### Database configuration (required)
-In the `env_file_postgres`, configure different variables as explained below.
+### Database configuration (required if running PostgreSQL locally)
+If you use a local PostgreSQL instance (this is the default), in the `env_file_postgres` you have to configure different variables as explained below.
 
 **Required** variables:
 * `POSTGRES_PASSWORD` (same as `DB_PASSWORD`)
 * `POSTGRES_USER` (same as `DB_USER`)
 * `POSTGRES_DB` (default: `intel_owl_db`)
-
-If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker/default.yml` file and provide the configuration to connect to your controlled instances.
 
 ### Logrotate configuration (strongly recommended)
 If you want to have your logs rotated correctly, we suggest you to add the configuration for the system Logrotate.
@@ -160,7 +159,7 @@ cd ./docker/scripts
 ./install_crontab.sh
 ```
 
-### Web server configuration (optional)
+### Web server configuration (required for enabling HTTPS)
 Intel Owl provides basic configuration for:
 * Nginx (`configuration/nginx/http.conf`)
 * Uwsgi (`configuration/intel_owl.ini`)

@@ -4,14 +4,18 @@ from typing import Dict, List
 from django.db.models import Q
 
 from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.core.choices import Status
+from api_app.choices import ReportStatus
 from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.decorators import (
+    visualizable_error_handler_with_params,
+)
 from api_app.visualizers_manager.enums import VisualizableIcon
 
 logger = getLogger(__name__)
 
 
 class DomainReputationServices(Visualizer):
+    @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
             analyzer_report = self.analyzer_reports().get(
@@ -32,10 +36,11 @@ class DomainReputationServices(Visualizer):
                     icon=VisualizableIcon.VIRUSTotal,
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
-                disable=analyzer_report.status != Status.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
             return virustotal_report
 
+    @visualizable_error_handler_with_params("URLhaus")
     def _urlhaus(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
@@ -43,7 +48,7 @@ class DomainReputationServices(Visualizer):
             logger.warning("URLhaus report does not exist")
         else:
             disabled = (
-                analyzer_report.status != Status.SUCCESS
+                analyzer_report.status != ReportStatus.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
             )
             urlhaus_report = self.Title(
@@ -61,6 +66,7 @@ class DomainReputationServices(Visualizer):
             )
             return urlhaus_report
 
+    @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="ThreatFox")
@@ -68,7 +74,7 @@ class DomainReputationServices(Visualizer):
             logger.warning("Threatfox report does not exist")
         else:
             disabled = (
-                analyzer_report.status != Status.SUCCESS
+                analyzer_report.status != ReportStatus.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
             )
             data = analyzer_report.report.get("data", [])
@@ -84,6 +90,7 @@ class DomainReputationServices(Visualizer):
             )
             return threatfox_report
 
+    @visualizable_error_handler_with_params("Phishtank")
     def _phishtank(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Phishtank")
@@ -92,7 +99,7 @@ class DomainReputationServices(Visualizer):
         else:
             results = analyzer_report.report.get("results", {})
             in_database = results.get("in_database", False)
-            disabled = analyzer_report.status != Status.SUCCESS or not in_database
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not in_database
             phishtank_report = self.Title(
                 self.Base(
                     value="Phishtank",
@@ -104,6 +111,7 @@ class DomainReputationServices(Visualizer):
             )
             return phishtank_report
 
+    @visualizable_error_handler_with_params("PhishingArmy")
     def _phishing_army(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="PhishingArmy")
@@ -111,7 +119,7 @@ class DomainReputationServices(Visualizer):
             logger.warning("PhishingArmy report does not exist")
         else:
             found = analyzer_report.report.get("found", False)
-            disabled = analyzer_report.status != Status.SUCCESS or not found
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not found
             phishtank_report = self.Title(
                 self.Base(
                     value="PhishingArmy",
@@ -123,6 +131,7 @@ class DomainReputationServices(Visualizer):
             )
             return phishtank_report
 
+    @visualizable_error_handler_with_params("InQuest")
     def _inquest_repdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
@@ -132,7 +141,9 @@ class DomainReputationServices(Visualizer):
             success = analyzer_report.report.get("success", False)
             data = analyzer_report.report.get("data", [])
             disabled = (
-                analyzer_report.status != Status.SUCCESS or not success or not data
+                analyzer_report.status != ReportStatus.SUCCESS
+                or not success
+                or not data
             )
             inquest_report = self.Title(
                 self.Base(
@@ -145,6 +156,7 @@ class DomainReputationServices(Visualizer):
             )
             return inquest_report
 
+    @visualizable_error_handler_with_params("OTX Alienvault")
     def _otxquery(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
@@ -152,7 +164,7 @@ class DomainReputationServices(Visualizer):
             logger.warning("OTXQuery report does not exist")
         else:
             pulses = analyzer_report.report.get("pulses", [])
-            disabled = analyzer_report.status != Status.SUCCESS or not pulses
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not pulses
             otx_report = self.VList(
                 name=self.Base(
                     value="OTX Alienvault", icon=VisualizableIcon.OTX, disable=disabled

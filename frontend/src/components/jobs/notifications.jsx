@@ -3,7 +3,7 @@ import { PUBLIC_URL } from "../../constants/environment";
 // This function is used to generate a notification when a Job is terminated
 export function generateJobNotification(observableName, jobId) {
   console.debug(
-    `send notification for observable: ${observableName}(${jobId})`
+    `send notification for observable: ${observableName}(${jobId})`,
   );
   Notification.requestPermission().then((result) => {
     if (result === "granted") {
@@ -33,7 +33,7 @@ export function generateJobNotification(observableName, jobId) {
     } else {
       // eslint-disable-next-line no-console
       console.warn(
-        "Without the permission for the notifications IntelOwl cannot report when Jobs terminated"
+        "Without the permission for the notifications IntelOwl cannot report when Jobs terminated",
       );
     }
   });

@@ -12,7 +12,10 @@ import { saveJobAsPlaybook } from "../api";
 const initialValues = {
   name: "",
   description: "",
-  jobId: "",
+  analyzers: [],
+  connectors: [],
+  pivots: [],
+  runtimeConfiguration: {},
 };
 
 // methods
@@ -42,7 +45,7 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
         formik.setSubmitting(false);
       }
     },
-    [onFormSubmit]
+    [onFormSubmit],
   );
 
   return (
@@ -109,8 +112,15 @@ function SaveAsPlaybookIcon() {
   );
 }
 
-export function SaveAsPlaybookButton({ jobId }) {
-  initialValues.jobId = jobId;
+export function SaveAsPlaybookButton({ job }) {
+  initialValues.analyzers = job.analyzers;
+  initialValues.connectors = job.connectors;
+  initialValues.pivots = job.pivots;
+  initialValues.runtimeConfiguration = job.runtimeConfiguration;
+  initialValues.tags = job.tags;
+  initialValues.tlp = job.tlp;
+  initialValues.scan_mode = job.scan_mode;
+  initialValues.scan_check_time = job.scan_check_time;
   return (
     <PopupFormButton
       id="saveasplaybook"
@@ -127,7 +137,7 @@ SaveAsPlaybookForm.propTypes = {
 };
 
 SaveAsPlaybookButton.propTypes = {
-  jobId: PropTypes.number.isRequired,
+  job: PropTypes.object.isRequired,
 };
 
 export default SaveAsPlaybookButton;

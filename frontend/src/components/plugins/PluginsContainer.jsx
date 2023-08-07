@@ -3,6 +3,7 @@ import { AiOutlineApi } from "react-icons/ai";
 import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { TiFlowChildren, TiBook } from "react-icons/ti";
 import { IoIosEye } from "react-icons/io";
+import { MdInput } from "react-icons/md";
 
 import {
   RouterTabs,
@@ -16,6 +17,7 @@ import { useOrganizationStore } from "../../stores";
 const Analyzers = React.lazy(() => import("./utils/Analyzers"));
 const Connectors = React.lazy(() => import("./utils/Connectors"));
 const Visualizers = React.lazy(() => import("./utils/Visualizers"));
+const Ingestors = React.lazy(() => import("./utils/Ingestors"));
 const Playbooks = React.lazy(() => import("./utils/Playbooks"));
 
 const routes = [
@@ -65,6 +67,21 @@ const routes = [
     ),
   },
   {
+    key: "plugins-ingestors",
+    location: "ingestors",
+    Title: () => (
+      <span>
+        <MdInput />
+        &nbsp;Ingestors
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Ingestors />
+      </Suspense>
+    ),
+  },
+  {
     key: "plugins-playbooks",
     location: "playbooks",
     Title: () => (
@@ -94,8 +111,8 @@ export default function PluginsContainer() {
         fetchAll: state.fetchAll,
         organization: state.organization,
       }),
-      []
-    )
+      [],
+    ),
   );
 
   // on component mount

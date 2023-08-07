@@ -11,12 +11,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from api_app import models
 
-from .. import CustomAPITestCase
+from .. import CustomViewSetTestCase
 
 User = get_user_model()
 
 
-class ApiViewTests(CustomAPITestCase):
+class ApiViewTests(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
         self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
@@ -124,9 +124,9 @@ class ApiViewTests(CustomAPITestCase):
         self.assertEqual(file_name, job.file_name)
         self.assertEqual(file_mimetype, job.file_mimetype)
         self.assertEqual(md5, job.md5)
-        # there is only Suricata right now
+
         self.assertCountEqual(
-            ["Suricata"],
+            ["Suricata", "CapeSandbox"],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
 

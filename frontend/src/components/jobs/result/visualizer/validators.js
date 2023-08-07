@@ -79,7 +79,7 @@ function parseAlignment(alignment) {
 // parse list of Elements
 function parseElementList(rawElementList) {
   return rawElementList?.map((additionalElementrawData) =>
-    parseElementFields(additionalElementrawData)
+    parseElementFields(additionalElementrawData),
   );
 }
 
@@ -101,6 +101,8 @@ function parseElementFields(rawElement) {
       validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.link = rawElement.link;
       validatedFields.activeColor = parseColor(rawElement.color, "danger");
+      validatedFields.copyText = rawElement.copy_text || rawElement.value;
+      validatedFields.description = rawElement.description;
       break;
     }
     case VisualizerComponentType.HLIST: {
@@ -126,6 +128,8 @@ function parseElementFields(rawElement) {
       validatedFields.link = rawElement.link;
       validatedFields.bold = parseBool(rawElement.bold);
       validatedFields.italic = parseBool(rawElement.italic);
+      validatedFields.copyText = rawElement.copy_text || rawElement.value;
+      validatedFields.description = rawElement.description;
       break;
     }
   }

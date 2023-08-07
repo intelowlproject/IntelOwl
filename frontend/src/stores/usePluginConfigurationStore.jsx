@@ -9,6 +9,7 @@ import {
   CONNECTORS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
   PLAYBOOKS_CONFIG_URI,
+  INGESTORS_CONFIG_URI,
 } from "../constants/api";
 
 async function downloadAllPlugin(pluginUrl) {
@@ -31,7 +32,7 @@ async function downloadAllPlugin(pluginUrl) {
       additionalRequests.push(
         axios.get(pluginUrl, {
           params: { page: addtionalPageIndex, page_size: pageSize },
-        })
+        }),
       );
     }
     const multipleResponses = await Promise.all(additionalRequests);
@@ -47,14 +48,17 @@ const usePluginConfigurationStore = create((set, get) => ({
   analyzersLoading: true,
   connectorsLoading: true,
   visualizersLoading: true,
+  ingestorsLoading: true,
   playbooksLoading: true,
   analyzersError: null,
   connectorsError: null,
-  playbooksError: null,
   visualizersError: null,
+  ingestorsError: null,
+  playbooksError: null,
   analyzers: [],
   connectors: [],
   visualizers: [],
+  ingestors: [],
   playbooks: [],
   hydrate: () => {
     // this function is called to check if we need to download the data related to the plugins or not
@@ -67,6 +71,9 @@ const usePluginConfigurationStore = create((set, get) => ({
     if (get().visualizersLoading) {
       get().retrieveVisualizersConfiguration();
     }
+    if (get().ingestorsLoading) {
+      get().retrieveIngestorsConfiguration();
+    }
     if (get().playbooksLoading) {
       get().retrievePlaybooksConfiguration();
     }
@@ -75,7 +82,7 @@ const usePluginConfigurationStore = create((set, get) => ({
     try {
       set({ analyzersLoading: true });
       console.debug(
-        "usePluginConfigurationStore - retrieveAnalyzersConfiguration: "
+        "usePluginConfigurationStore - retrieveAnalyzersConfiguration: ",
       );
       const analyzers = await downloadAllPlugin(ANALYZERS_CONFIG_URI);
       console.debug(analyzers);
@@ -93,7 +100,7 @@ const usePluginConfigurationStore = create((set, get) => ({
       set({ connectorsLoading: true });
       const connectors = await downloadAllPlugin(CONNECTORS_CONFIG_URI);
       console.debug(
-        "usePluginConfigurationStore - retrieveConnectorsConfiguration: "
+        "usePluginConfigurationStore - retrieveConnectorsConfiguration: ",
       );
       console.debug(connectors);
       set({
@@ -110,7 +117,7 @@ const usePluginConfigurationStore = create((set, get) => ({
       set({ visualizersLoading: true });
       const visualizers = await downloadAllPlugin(VISUALIZERS_CONFIG_URI);
       console.debug(
-        "usePluginConfigurationStore - retrieveVisualizersConfiguration: "
+        "usePluginConfigurationStore - retrieveVisualizersConfiguration: ",
       );
       console.debug(visualizers);
       set({
@@ -120,6 +127,23 @@ const usePluginConfigurationStore = create((set, get) => ({
       });
     } catch (e) {
       set({ visualizersError: e, visualizersLoading: false });
+    }
+  },
+  retrieveIngestorsConfiguration: async () => {
+    try {
+      set({ ingestorsLoading: true });
+      const ingestors = await downloadAllPlugin(INGESTORS_CONFIG_URI);
+      console.debug(
+        "usePluginConfigurationStore - retrieveIngestorsConfiguration: ",
+      );
+      console.debug(ingestors);
+      set({
+        ingestorsError: null,
+        ingestors,
+        ingestorsLoading: false,
+      });
+    } catch (e) {
+      set({ ingestorsError: e, ingestorsLoading: false });
     }
   },
   retrievePlaybooksConfiguration: async () => {
@@ -136,7 +160,7 @@ const usePluginConfigurationStore = create((set, get) => ({
               "config",
               playbook.runtime_configuration.analyzers[analyzerName] || {},
             ],
-          ])
+          ]),
         );
         // eslint-disable-next-line no-param-reassign
         playbook.analyzers = {};
@@ -152,7 +176,7 @@ const usePluginConfigurationStore = create((set, get) => ({
               "config",
               playbook.runtime_configuration.connectors[connectorName] || {},
             ],
-          ])
+          ]),
         );
         // eslint-disable-next-line no-param-reassign
         playbook.connectors = {};
@@ -164,7 +188,7 @@ const usePluginConfigurationStore = create((set, get) => ({
         delete playbook.runtime_configuration;
       });
       console.debug(
-        "usePluginConfigurationStore - retrievePlaybooksConfiguration: "
+        "usePluginConfigurationStore - retrievePlaybooksConfiguration: ",
       );
       console.debug(playbooks);
       set({
@@ -179,7 +203,7 @@ const usePluginConfigurationStore = create((set, get) => ({
   checkPluginHealth: async (pluginType, PluginName) => {
     try {
       const resp = await axios.get(
-        `${API_BASE_URI}/${pluginType}/${PluginName}/healthcheck`
+        `${API_BASE_URI}/${pluginType}/${PluginName}/healthcheck`,
       );
       console.debug("usePluginConfigurationStore - checkPluginHealth: ");
       console.debug(resp);

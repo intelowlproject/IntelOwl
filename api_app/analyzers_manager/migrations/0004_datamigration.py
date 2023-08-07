@@ -6,7 +6,7 @@ analyzers = {
         "type": "file",
         "python_module": "apkid.APKiD",
         "description": "[APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, "
-                       "and other weird stuff from an APK or DEX file.",
+        "and other weird stuff from an APK or DEX file.",
         "disabled": False,
         "external_service": False,
         "leaks_info": False,
@@ -2180,41 +2180,34 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 90,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 90, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "OTX_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
-            "verbose": {
-                "value": False,
-                "type": "bool",
-                "description": ""
-            },
+            "verbose": {"value": False, "type": "bool", "description": ""},
             "sections": {
                 "value": ["general"],
                 "type": "list",
                 "description": "Sections to download. Options: [general, reputation, geo, malware, url_list, "
-                               "passive_dns, analysis"
+                "passive_dns, analysis",
             },
             "full_analysis": {
                 "value": False,
                 "type": "bool",
-                "description": "download all the available sections for the observable type"
+                "description": "download all the available sections for the observable type",
             },
             "timeout": {
                 "value": 30,
                 "type": "int",
-                "description": "Timeout of the request"
-            }
-        }
+                "description": "Timeout of the request",
+            },
+        },
     },
     "OTX_Check_Hash": {
         "type": "file",

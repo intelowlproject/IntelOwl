@@ -17,6 +17,7 @@ import {
   PluginHealthCheckButton,
   PluginInfoPopoverIcon,
   PluginVerificationIcon,
+  PlaybooksCollapse,
 } from "./utils";
 
 /* This function is available in the certego-ui, but it doesn't works:
@@ -99,7 +100,7 @@ const pluginTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 115,
+    maxWidth: 100,
   },
 ];
 
@@ -119,7 +120,7 @@ const analyzersTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 115,
+    maxWidth: 100,
   },
   {
     Header: "Enabled for organization",
@@ -133,7 +134,7 @@ const analyzersTableColumns = [
       />
     ),
     disableSortBy: true,
-    maxWidth: 115,
+    maxWidth: 100,
   },
   {
     Header: "Description",
@@ -216,7 +217,7 @@ const connectorTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 115,
+    maxWidth: 100,
   },
   {
     Header: "Enabled for organization",
@@ -230,7 +231,7 @@ const connectorTableColumns = [
       />
     ),
     disableSortBy: true,
-    maxWidth: 115,
+    maxWidth: 100,
   },
   {
     Header: "Description",
@@ -273,7 +274,7 @@ const playbookTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 300,
+    minWidth: 200,
   },
   {
     Header: "Type",
@@ -282,18 +283,14 @@ const playbookTableColumns = [
     Cell: ({ value }) => <code>{JSON.stringify(value, null, 2)}</code>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 250,
+    minWidth: 180,
   },
   {
     Header: "Analyzers executed",
     id: "analyzers_executed",
     accessor: (row) => Object.keys(row.analyzers),
     Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
+      <PlaybooksCollapse value={value} pluginType_="analyzers" />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -303,11 +300,7 @@ const playbookTableColumns = [
     id: "connectors_executed",
     accessor: (row) => Object.keys(row.connectors),
     Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
+      <PlaybooksCollapse value={value} pluginType_="connectors" />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -330,7 +323,7 @@ const visualizerTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 115,
+    maxWidth: 100,
   },
   {
     Header: "Enabled for organization",
@@ -344,7 +337,7 @@ const visualizerTableColumns = [
       />
     ),
     disableSortBy: true,
-    maxWidth: 115,
+    maxWidth: 100,
   },
   {
     Header: "Description",
@@ -356,37 +349,68 @@ const visualizerTableColumns = [
     minWidth: 300,
   },
   {
-    Header: "Analyzers required",
-    id: "analyzers_required",
-    accessor: "analyzers",
-    Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
-    ),
-    disableSortBy: true,
+    Header: "Playbook connected to",
+    id: "playbook",
+    accessor: "playbook",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     Filter: SelectColumnFilter,
-  },
-  {
-    Header: "Connectors required",
-    id: "connectors_required",
-    accessor: "connectors",
-    Cell: ({ value }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
-    ),
-    disableSortBy: true,
-    Filter: SelectColumnFilter,
+    maxWidth: 145,
   },
 ];
+// Visualizers columns: these columns are shown for the visualizers
+const ingestorTableColumns = [
+  ...pluginTableColumns,
+  {
+    Header: "Configured",
+    id: "configured",
+    accessor: "verification.configured",
+    Cell: ({ row: { original } }) => (
+      <PluginVerificationIcon
+        pluginName={original?.name}
+        verification={original?.verification}
+      />
+    ),
+    Filter: SelectOptionsFilter,
+    selectOptions: ["true", "false"],
+    disableSortBy: true,
+    maxWidth: 100,
+  },
+  {
+    Header: "Description",
+    id: "description",
+    accessor: "description",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 300,
+  },
+  {
+    Header: "Playbook executed",
+    id: "playbook",
+    accessor: "playbook_to_execute",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    Filter: SelectColumnFilter,
+    maxWidth: 145,
+  },
+  {
+    Header: "Schedule",
+    id: "schedule",
+    accessor: "schedule",
+    Cell: ({ value }) => (
+      <span>
+        {value.minute} {value.hour} {value.day_of_week} {value.day_of_month}{" "}
+        {value.month_of_year}
+      </span>
+    ),
+    disableSortBy: true,
+    maxWidth: 145,
+  },
+];
+
 export {
   analyzersTableColumns,
   connectorTableColumns,
-  playbookTableColumns,
   visualizerTableColumns,
+  ingestorTableColumns,
+  playbookTableColumns,
 };

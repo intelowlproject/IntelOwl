@@ -3,8 +3,7 @@
 
 import logging
 
-from api_app.core.views import AbstractConfigAPI, PluginActionViewSet
-
+from ..views import PluginActionViewSet, PythonConfigViewSet
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 
@@ -12,12 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = [
-    "ConnectorConfigAPI",
+    "ConnectorConfigViewSet",
     "ConnectorActionViewSet",
 ]
 
 
-class ConnectorConfigAPI(AbstractConfigAPI):
+class ConnectorConfigViewSet(PythonConfigViewSet):
     serializer_class = ConnectorConfigSerializer
 
 
@@ -26,9 +25,3 @@ class ConnectorActionViewSet(PluginActionViewSet):
     @property
     def report_model(cls):
         return ConnectorReport
-
-    def perform_retry(self, report: ConnectorReport):
-        signature = report.config.get_signature(
-            report.job,
-        )
-        signature.apply_async()

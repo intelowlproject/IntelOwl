@@ -21,13 +21,14 @@ export function VerticalListVisualizer({
   values,
   startOpen,
   disable,
+  id,
 }) {
   const [isListOpen, setIsListOpen] = useState(startOpen);
   const toggleList = () => setIsListOpen(!isListOpen);
 
   return (
-    <div className={`${size}`}>
-      <Card className={`${disable ? "opacity-50" : ""}`}>
+    <div className={size} id={id}>
+      <Card className={disable ? "opacity-50" : ""}>
         <CardTitle className="p-1 mb-0">
           <Button
             className="p-0 w-100 px-1"
@@ -46,12 +47,12 @@ export function VerticalListVisualizer({
             </div>
           </Button>
         </CardTitle>
-        <Collapse isOpen={isListOpen}>
-          <ListGroup flush>
+        <Collapse isOpen={isListOpen} className="small">
+          <ListGroup flush className="small">
             {values.map((listElement, index) => (
               <ListGroupItem
-                key={listElement.value}
-                className={`text-break ${
+                key={`${id}-${listElement.props.value}`}
+                className={`small text-break ${
                   index === values.length - 1 ? "rounded-bottom" : ""
                 } ${listElement.props.color}`}
               >
@@ -72,6 +73,7 @@ VerticalListVisualizer.propTypes = {
   alignment: PropTypes.string,
   startOpen: PropTypes.bool,
   disable: PropTypes.bool,
+  id: PropTypes.string.isRequired,
 };
 
 VerticalListVisualizer.defaultProps = {

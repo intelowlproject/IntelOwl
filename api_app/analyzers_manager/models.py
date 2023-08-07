@@ -7,6 +7,7 @@ from typing import Optional
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.analyzers_manager.constants import (
     HashChoices,
@@ -15,8 +16,8 @@ from api_app.analyzers_manager.constants import (
 )
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.choices import TLP
-from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.fields import ChoiceArrayField
+from api_app.models import AbstractReport, PythonConfig
 
 logger = getLogger(__name__)
 
@@ -115,8 +116,9 @@ class MimeTypes(models.TextChoices):
             try:
                 mimetype = cls(mimetype)
             except ValueError:
-                logger.error(
+                logger.info(
                     f"Unable to valid a {cls.__name__} for mimetype {mimetype}"
+                    f" for file {file_name}"
                 )
             else:
                 mimetype = mimetype.value
@@ -124,7 +126,7 @@ class MimeTypes(models.TextChoices):
         return mimetype
 
 
-class AnalyzerConfig(AbstractConfig):
+class AnalyzerConfig(PythonConfig):
     # generic
     type = models.CharField(choices=TypeChoices.choices, null=False, max_length=50)
     docker_based = models.BooleanField(null=False, default=False)
@@ -152,6 +154,20 @@ class AnalyzerConfig(AbstractConfig):
         models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
         default=list,
         blank=True,
+    )
+    update_schedule = models.ForeignKey(
+        CrontabSchedule,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="analyzers",
+    )
+    update_task = models.OneToOneField(
+        PeriodicTask,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="analyzer",
     )
 
     def clean_observable_supported(self):
@@ -182,11 +198,22 @@ class AnalyzerConfig(AbstractConfig):
         if self.run_hash and not self.run_hash_type:
             raise ValidationError("run_hash_type must be populated if run_hash is True")
 
+    def clean_update_schedule(self):
+        if (
+            not hasattr(self.python_class, "_update")
+            or not callable(self.python_class._update)
+        ) and (self.update_schedule or self.update_task):
+            raise ValidationError(
+                "You can't configure an update schedule if"
+                " the python class does not support that."
+            )
+
     def clean(self):
         super().clean()
         self.clean_run_hash_type()
         self.clean_observable_supported()
         self.clean_filetypes()
+        self.clean_update_schedule()
 
     @classmethod
     @property

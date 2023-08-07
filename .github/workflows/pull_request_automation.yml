@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4.6.1
+        uses: actions/setup-python@v4.7.0
         with:
           python-version: 3.9
 
@@ -90,6 +90,7 @@ jobs:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
+          REPO_DOWNLOADER_ENABLED: false
 
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
@@ -99,6 +100,7 @@ jobs:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
+          REPO_DOWNLOADER_ENABLED: false
 
       - name: Docker debug
         run: |

@@ -9,6 +9,7 @@ from authlib.integrations.base_client import OAuthError
 from authlib.oauth2 import OAuth2Error
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
@@ -18,18 +19,20 @@ from durin.models import Client
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 
 from certego_saas.ext.mixins import RecaptchaV2Mixin
 from certego_saas.ext.throttling import POSTUserRateThrottle
 from intel_owl.settings import AUTH_USER_MODEL
 
 from .oauth import oauth
-from .serializers import (  # LoginSerializer,
+from .serializers import (
     EmailVerificationSerializer,
+    LoginSerializer,
     RegistrationSerializer,
 )
 
@@ -79,7 +82,13 @@ class ResendVerificationView(
     throttle_classes: List = [POSTUserRateThrottle]
 
 
-class LoginView(durin_views.LoginView):
+class LoginView(durin_views.LoginView, RecaptchaV2Mixin):
+    @staticmethod
+    def validate_and_return_user(request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data["user"]
+
     @staticmethod
     def get_client_obj(request) -> Client:
         user_agent = get_user_agent(request)
@@ -88,6 +97,11 @@ class LoginView(durin_views.LoginView):
         return client
 
     def post(self, request, *args, **kwargs):
+        try:
+            self.get_serializer()  # for RecaptchaV2Mixin
+        except AssertionError:
+            # it will raise this bcz `serializer_class` is not defined
+            pass
         response = super().post(request, *args, **kwargs)
         uname = request.user.username
         logger.info(f"LoginView: received request from '{uname}'.")
@@ -99,6 +113,33 @@ class LoginView(durin_views.LoginView):
             except Exception:
                 logger.exception(f"administrator:'{uname}' login failed.")
         return response
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request: Request) -> Response:
+        # Get the old password and new password from the request data
+        old_password = request.data.get("old_password")
+        new_password = request.data.get("new_password")
+
+        # Check if the old password matches the user's current password
+        user = request.user
+        uname = user.username
+        if not check_password(old_password, user.password):
+            logger.info(f"'{uname}' has inputted invalid old password.")
+            # Return an error response if the old password doesn't match
+            return Response(
+                {"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Set the new password for the user
+        user.set_password(new_password)
+        user.save()
+
+        # Return a success response
+        return Response({"message": "Password changed successfully"})
 
 
 class LogoutView(durin_views.LogoutView):
@@ -195,39 +236,42 @@ class GoogleLoginCallbackView(LoginView):
 
 @api_view(["get"])
 @permission_classes([AllowAny])
-def check_registration_setup(request):
-    logger.info(f"Requested checking registration setup from {request.user}.")
+def checkConfiguration(request):
+    logger.info(f"Requested checking configuration from {request.user}.")
+    page = request.query_params.get("page")
+    register_uri = reverse("auth_register")
     errors = {}
 
-    # email setup
-    if not settings.DEFAULT_FROM_EMAIL:
-        errors["DEFAULT_FROM_EMAIL"] = "required"
-    if not settings.DEFAULT_EMAIL:
-        errors["DEFAULT_EMAIL"] = "required"
+    if page == register_uri.split("/")[-1]:
+        # email setup
+        if not settings.DEFAULT_FROM_EMAIL:
+            errors["DEFAULT_FROM_EMAIL"] = "required"
+        if not settings.DEFAULT_EMAIL:
+            errors["DEFAULT_EMAIL"] = "required"
 
-    # if you are in production environment
-    if settings.STAGE_PRODUCTION:
         # SES backend
         if settings.AWS_SES:
             if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
                 errors["AWS SES backend"] = "configuration required"
         else:
             # SMTP backend
-            required_variables = [
-                settings.EMAIL_HOST,
-                settings.EMAIL_HOST_USER,
-                settings.EMAIL_HOST_PASSWORD,
-                settings.EMAIL_PORT,
-            ]
-            for variable in required_variables:
-                if not variable:
-                    errors["SMTP backend"] = "configuration required"
+            if not all(
+                [
+                    settings.EMAIL_HOST,
+                    settings.EMAIL_HOST_USER,
+                    settings.EMAIL_HOST_PASSWORD,
+                    settings.EMAIL_PORT,
+                ]
+            ):
+                errors["SMTP backend"] = "configuration required"
 
+    # if you are in production environment
+    if settings.USE_RECAPTCHA:
         # recaptcha key
         if settings.DRF_RECAPTCHA_SECRET_KEY == "fake":
             errors["RECAPTCHA_SECRET_KEY"] = "required"
 
-    logger.info(f"Registration setup errors: {errors}")
-    if errors:
-        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
-    return Response(status=status.HTTP_200_OK)
+    logger.info(f"Configuration errors: {errors}")
+    return Response(
+        status=status.HTTP_200_OK, data={"errors": errors} if errors else {}
+    )

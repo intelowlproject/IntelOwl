@@ -11,11 +11,8 @@ import {
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
-import {
-  JOB_STATUSES,
-  TLP_CHOICES,
-  ALL_CLASSIFICATIONS,
-} from "../../../constants";
+import { TLP_CHOICES, ALL_CLASSIFICATIONS } from "../../../constants";
+import { jobStatuses } from "../../../constants/constants";
 
 const process_time_mmss = (value) =>
   new Date(value * 1000).toISOString().substring(14, 19);
@@ -178,7 +175,7 @@ const jobTableColumns = [
         Cell: ({ value }) => <StatusTag status={value} />,
         disableSortBy: true,
         Filter: SelectOptionsFilter,
-        selectOptions: JOB_STATUSES,
+        selectOptions: Object.values(jobStatuses),
       },
     ],
   },

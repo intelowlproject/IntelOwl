@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import PropTypes from "prop-types";
 import { AiFillSetting } from "react-icons/ai";
-import { GoGistSecret } from "react-icons/go";
+import { FaUserSecret } from "react-icons/fa";
 
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 
@@ -32,7 +32,7 @@ const routes = (filterFunction, additionalConfigData, editable) => [
     location: "secrets",
     Title: () => (
       <span>
-        <GoGistSecret />
+        <FaUserSecret />
         &nbsp;Secrets
       </span>
     ),

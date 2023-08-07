@@ -38,7 +38,7 @@ class Plugin(metaclass=ABCMeta):
         # some post init processing
         self.report: AbstractReport = self.init_report_object()
         # monkeypatch if in test suite
-        if settings.STAGE_CI:
+        if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
             self._monkeypatch()
 
     @classmethod

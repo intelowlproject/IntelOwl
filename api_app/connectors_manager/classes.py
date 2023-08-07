@@ -106,7 +106,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
 
                 if url.startswith("http"):
                     logger.info(f"Checking url {url} for connector {cc.name}")
-                    if settings.STAGE_CI:
+                    if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
                         return True
                     try:
                         # momentarily set this to False to

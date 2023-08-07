@@ -521,7 +521,7 @@ class Parameter(models.Model):
         return self.analyzer_config or self.connector_config or self.visualizer_config
 
     def get_valid_value_for_test(self):
-        if not settings.STAGE_CI:
+        if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
             raise PluginConfig.DoesNotExist
         if "url" in self.name:
             return "https://intelowl.com"
@@ -874,7 +874,7 @@ class PythonConfig(AbstractConfig):
                 if param.configured:
                     result[param] = param.value
                 else:
-                    if settings.STAGE_CI:
+                    if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
                         result[param] = param.get_valid_value_for_test()
                         continue
                     if param.required:

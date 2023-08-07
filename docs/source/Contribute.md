@@ -256,7 +256,7 @@ After having written the new python module, you have to remember to:
 
 ### Configuration
 1. Put the module in the `visualizers` directory
-2. Remember to use `_monkeypatch()` in its class to create automated tests for the new visualizer. This is a trick to have tests in the same class of its connector.
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new visualizer. This is a trick to have tests in the same class of its visualizer.
 3. Create the configuration inside django admin in `Visualizers_manager/VisualizerConfigs` (* = mandatory, ~ = mandatory on conditions)
    1. *Name: specific name of the configuration
    2. *Python module: <module_name>.<class_name>
@@ -310,6 +310,29 @@ You may want to look at a few existing examples to start to build a new one:
 
 - [dns.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/dns.py)
 - [yara.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/yara.py)
+
+## Hot to add a new Ingestor
+1. Put the module in the `ingestors` directory
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new ingestor. This is a trick to have tests in the same class of its ingestor.
+3. Create the configuration inside django admin in `Ingestors_manager/IngetorConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Parameters (at the bottom of the page)
+      1. *name
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. default:  default value provided for the parameter
+   6. *Playbook to Execute: Playbook that **will** be executed on every IOC retrieved
+   7. *Schedule: Crontab object that describes the schedule of the ingestor. You are able to create a new clicking the `plus` symbol.
+
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new ingestor (you will find it under `api_app/ingestors_manager/migrations`).
+   2. Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin IngestorConfig <new_visualizer_name>`
 
 
 ## How to add a new Playbook

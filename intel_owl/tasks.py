@@ -31,7 +31,7 @@ def update_plugin(state, plugin_path):
     plugin.update()
 
 
-@shared_task(soft_time_limit=120)
+@shared_task(soft_time_limit=300)
 def execute_ingestor(config_pk: str):
     from api_app.ingestors_manager.classes import Ingestor
     from api_app.ingestors_manager.models import IngestorConfig

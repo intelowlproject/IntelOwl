@@ -35,5 +35,5 @@ class AnalyzerConfigSerializerForMigration(AnalyzerConfigSerializer):
 
     class Meta:
         model = AnalyzerConfig
-        exclude = rfs.ALL_FIELDS
+        fields = rfs.ALL_FIELDS
         list_serializer_class = PythonListConfigSerializer

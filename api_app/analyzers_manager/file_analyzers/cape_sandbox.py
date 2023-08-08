@@ -51,10 +51,20 @@ class CAPEsandbox(FileAnalyzer):
     # CapeSandbox SSL certificate (multiline string).
     _certificate: str
 
+    @staticmethod
+    def _clean_certificate(cert):
+        return (
+            cert.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN_CERTIFICATE-----")
+            .replace("-----END CERTIFICATE-----", "-----END_CERTIFICATE-----")
+            .replace(" ", "\n")
+            .replace("-----BEGIN_CERTIFICATE-----", "-----BEGIN CERTIFICATE-----")
+            .replace("-----END_CERTIFICATE-----", "-----END CERTIFICATE-----")
+        )
+
     def config(self):
         super().config()
         self.__cert_file = NamedTemporaryFile(mode="w")
-        self.__cert_file.write(self._certificate)
+        self.__cert_file.write(self._clean_certificate(self._certificate))
         self.__cert_file.flush()
         self.__session = requests.Session()
         self.__session.verify = self.__cert_file.name

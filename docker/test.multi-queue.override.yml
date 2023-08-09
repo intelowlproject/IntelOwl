@@ -10,3 +10,8 @@ services:
     image: intelowlproject/intelowl:test
     volumes:
       - ../:/opt/deploy/intel_owl
+
+  celery_worker_ingestor:
+    image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl

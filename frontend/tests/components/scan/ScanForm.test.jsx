@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route, BrowserRouter } from "react-router-dom";
 import axios from "axios";
 import userEvent from "@testing-library/user-event";
 import ScanForm from "../../../src/components/scan/ScanForm";
@@ -1968,4 +1968,20 @@ describe("test ScanForm component", () => {
     },
     15 * 1000,
   );
+
+  test(
+    "test scan page with an observable in the GET parameters",
+    async () => {
+
+      render(
+        <MemoryRouter initialEntries={["/scan?observable=thisIsTheParamObservable.com"]}>
+           <Routes>
+            <Route path="/scan" element={<ScanForm/>} />
+          </Routes>
+        </MemoryRouter>
+       
+      );
+      expect(screen.getAllByRole("textbox")[0].value).toBe("thisIsTheParamObservable.com");
+  })
+
 });

@@ -760,7 +760,12 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     def disable_in_org(self, request, pk=None):
         logger.info(f"get disable_in_org from user {request.user}, name {pk}")
         obj: AbstractConfig = self.get_object()
-        if not request.user.has_membership() or not request.user.membership.is_owner:
+        if request.user.has_membership():
+            if not (
+                request.user.membership.is_owner or request.user.membership.is_admin
+            ):
+                raise PermissionDenied()
+        else:
             raise PermissionDenied()
         organization = request.user.membership.organization
         if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
@@ -772,7 +777,12 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     def enable_in_org(self, request, pk=None):
         logger.info(f"get enable_in_org from user {request.user}, name {pk}")
         obj: AbstractConfig = self.get_object()
-        if not request.user.has_membership() or not request.user.membership.is_owner:
+        if request.user.has_membership():
+            if not (
+                request.user.membership.is_owner or request.user.membership.is_admin
+            ):
+                raise PermissionDenied()
+        else:
             raise PermissionDenied()
         organization = request.user.membership.organization
         if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():

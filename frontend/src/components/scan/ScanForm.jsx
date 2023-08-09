@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
 import { MdEdit, MdInfoOutline } from "react-icons/md";
 import {
@@ -89,7 +89,7 @@ export default function ScanForm() {
     initialValues: {
       observableType: "observable",
       classification: "generic",
-      observable_names: [observableParam || ""],
+      observable_names: [""],
       files: [],
       analyzers: [],
       connectors: [],
@@ -203,27 +203,6 @@ export default function ScanForm() {
       }
     },
   });
-
-  /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
-  and leaves the UI with values not valid, for this reason the scan button is disabled, but if the user set focus on the UI the last
-  validation trigger and start scan is enabled. To avoid this we use this hook that force the validation when the form values change.
-  
-  This hook is the reason why we can disable the validation in the setFieldValue method (3rd params).
-  */
-  React.useEffect(() => {
-    formik.validateForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values]);
-
-  const [scanType, setScanType] = React.useState(
-    formik.values.analysisOptionValues,
-  );
-
-  const [isModalOpen, setModalOpen] = React.useState(false);
-  const toggleModal = React.useCallback(
-    () => setModalOpen((o) => !o),
-    [setModalOpen],
-  );
 
   const [isAdvancedSettingsOpen, toggleAdvancedSettings] =
     React.useState(false);
@@ -447,6 +426,88 @@ export default function ScanForm() {
     [navigate, refetchQuota, ValidatePlaybooks],
   );
 
+  const updateSelectedObservable = (observableValue, index) => {
+    if (index === 0) {
+      const oldClassification = formik.values.classification;
+      let newClassification = "generic";
+      Object.entries(observableType2RegExMap).forEach(
+        ([typeName, typeRegEx]) => {
+          if (new RegExp(typeRegEx).test(sanitizeObservable(observableValue))) {
+            newClassification = typeName;
+          }
+        },
+      );
+      formik.setFieldValue("classification", newClassification, false);
+      // in case a playbook is available and i changed classification or no playbook is selected i select a playbook
+      if (
+        playbookOptions(newClassification).length > 0 &&
+        (oldClassification !== newClassification ||
+          Object.keys(formik.values.playbook).length === 0) &&
+        formik.values.analysisOptionValues === scanTypes.playbooks
+      ) {
+        formik.setFieldValue(
+          "playbook",
+          playbookOptions(newClassification)[0],
+          false,
+        );
+        formik.setFieldValue(
+          "tags",
+          playbookOptions(newClassification)[0].tags,
+          false,
+        );
+        formik.setFieldValue(
+          "tlp",
+          playbookOptions(newClassification)[0].tlp,
+          false,
+        );
+        formik.setFieldValue(
+          "scan_mode",
+          playbookOptions(newClassification)[0].scan_mode,
+          false,
+        );
+      }
+    }
+    const observableNames = formik.values.observable_names;
+    observableNames[index] = observableValue;
+    formik.setFieldValue("observable_names", observableNames, false);
+  };
+
+  const updateSelectedPlaybook = (playbook) => {
+    formik.setFieldValue("playbook", playbook, false);
+    formik.setFieldValue("tags", playbook.tags, false);
+    formik.setFieldValue("tlp", playbook.tlp, false);
+    formik.setFieldValue("scan_mode", playbook.scan_mode, false);
+  };
+
+  useEffect(() => {
+    if (observableParam) {
+      updateSelectedObservable(observableParam, 0);
+      if (formik.playbook) updateSelectedPlaybook(formik.playbook);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [observableParam, playbooksLoading]);
+
+  /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
+  and leaves the UI with values not valid, for this reason the scan button is disabled, but if the user set focus on the UI the last
+  validation trigger and start scan is enabled. To avoid this we use this hook that force the validation when the form values change.
+  
+  This hook is the reason why we can disable the validation in the setFieldValue method (3rd params).
+  */
+  React.useEffect(() => {
+    formik.validateForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values]);
+
+  const [scanType, setScanType] = React.useState(
+    formik.values.analysisOptionValues,
+  );
+
+  const [isModalOpen, setModalOpen] = React.useState(false);
+  const toggleModal = React.useCallback(
+    () => setModalOpen((o) => !o),
+    [setModalOpen],
+  );
+
   console.debug(`classification: ${formik.values.classification}`);
   console.debug("formik");
   console.debug(formik);
@@ -551,74 +612,12 @@ export default function ScanForm() {
                                     formik.touched.observable_names &&
                                     formik.touched.observable_names[index]
                                   }
-                                  onChange={(event) => {
-                                    if (index === 0) {
-                                      const oldClassification =
-                                        formik.values.classification;
-                                      let newClassification = "generic";
-                                      Object.entries(
-                                        observableType2RegExMap,
-                                      ).forEach(([typeName, typeRegEx]) => {
-                                        if (
-                                          new RegExp(typeRegEx).test(
-                                            sanitizeObservable(
-                                              event.target.value,
-                                            ),
-                                          )
-                                        ) {
-                                          newClassification = typeName;
-                                        }
-                                      });
-                                      formik.setFieldValue(
-                                        "classification",
-                                        newClassification,
-                                        false,
-                                      );
-                                      // in case a palybook is available and i changed classification or no playbook is selected i select a playbook
-                                      if (
-                                        playbookOptions(newClassification)
-                                          .length > 0 &&
-                                        (oldClassification !==
-                                          newClassification ||
-                                          Object.keys(formik.values.playbook)
-                                            .length === 0) &&
-                                        formik.values.analysisOptionValues ===
-                                          scanTypes.playbooks
-                                      ) {
-                                        formik.setFieldValue(
-                                          "playbook",
-                                          playbookOptions(newClassification)[0],
-                                          false,
-                                        );
-                                        formik.setFieldValue(
-                                          "tags",
-                                          playbookOptions(newClassification)[0]
-                                            .tags,
-                                          false,
-                                        );
-                                        formik.setFieldValue(
-                                          "tlp",
-                                          playbookOptions(newClassification)[0]
-                                            .tlp,
-                                          false,
-                                        );
-                                        formik.setFieldValue(
-                                          "scan_mode",
-                                          playbookOptions(newClassification)[0]
-                                            .scan_mode,
-                                          false,
-                                        );
-                                      }
-                                    }
-                                    const observableNames =
-                                      formik.values.observable_names;
-                                    observableNames[index] = event.target.value;
-                                    formik.setFieldValue(
-                                      "observable_names",
-                                      observableNames,
-                                      false,
-                                    );
-                                  }}
+                                  onChange={(e) =>
+                                    updateSelectedObservable(
+                                      e.target.value,
+                                      index,
+                                    )
+                                  }
                                 />
                                 {DangerErrorMessage("observable_names")}
                               </Col>
@@ -826,12 +825,7 @@ export default function ScanForm() {
                       options={playbookOptions(formik.values.classification)}
                       styles={selectStyles}
                       value={formik.values.playbook}
-                      onChange={(v) => {
-                        formik.setFieldValue("playbook", v, false);
-                        formik.setFieldValue("tags", v.tags, false);
-                        formik.setFieldValue("tlp", v.tlp, false);
-                        formik.setFieldValue("scan_mode", v.scan_mode, false);
-                      }}
+                      onChange={(v) => updateSelectedPlaybook(v)}
                     />
                     {DangerErrorMessage("playbook")}
                   </Col>

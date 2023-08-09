@@ -81,8 +81,9 @@ export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get("observable");
 
-  console.debug("ScanForm rendered!");
-  console.debug(`observableParam: ${observableParam}`);
+  console.debug(
+    `ScanForm rendered! Observable in GET param: ${observableParam}`,
+  );
 
   const formik = useFormik({
     initialValues: {

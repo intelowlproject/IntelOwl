@@ -1969,19 +1969,18 @@ describe("test ScanForm component", () => {
     15 * 1000,
   );
 
-  test(
-    "test scan page with an observable in the GET parameters",
-    async () => {
-
-      render(
-        <MemoryRouter initialEntries={["/scan?observable=thisIsTheParamObservable.com"]}>
-           <Routes>
-            <Route path="/scan" element={<ScanForm/>} />
-          </Routes>
-        </MemoryRouter>
-       
-      );
-      expect(screen.getAllByRole("textbox")[0].value).toBe("thisIsTheParamObservable.com");
-  })
-
+  test("test scan page with an observable in the GET parameters", async () => {
+    render(
+      <MemoryRouter
+        initialEntries={["/scan?observable=thisIsTheParamObservable.com"]}
+      >
+        <Routes>
+          <Route path="/scan" element={<ScanForm />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(screen.getAllByRole("textbox")[0].value).toBe(
+      "thisIsTheParamObservable.com",
+    );
+  });
 });

@@ -14,3 +14,16 @@ class IsObjectRealOwnerPermission(BasePermission):
         if obj_owner := getattr(obj, "owner", None):
             return obj_owner == request.user
         return False
+
+
+class IsObjectAdminPermission(BasePermission):
+    @staticmethod
+    def has_object_permission(request, view, obj):
+        if request.user.has_membership():
+            return request.user.membership.is_admin
+        return False
+
+
+IsObjectRealOwnerOrAdminPermission = (
+    IsObjectRealOwnerPermission | IsObjectAdminPermission  # pylint: disable=E1131
+)

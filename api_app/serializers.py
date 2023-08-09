@@ -882,7 +882,15 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             if (
                 instance.is_secret()
                 and instance.for_organization
-                and self.context["request"].user.pk != instance.owner.pk
+                and not (
+                    self.context["request"].user.pk == instance.owner.pk
+                    or (
+                        self.context["request"].user.has_membership()
+                        and self.context["request"].user.membership.organization.pk
+                        == instance.owner.membership.organization.pk
+                        and self.context["request"].user.membership.is_admin
+                    )
+                )
             ):
                 return "redacted"
             return super().get_attribute(instance)
@@ -921,9 +929,18 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             # we are in an update
             return attrs
         if "organization" in attrs and attrs["organization"]:
-            if attrs.pop("organization").owner != attrs["owner"]:
+            org = attrs.pop("organization")
+            if not (
+                org.owner == attrs["owner"]
+                or (
+                    self.context["request"].user.has_membership()
+                    and self.context["request"].user.membership.organization.pk
+                    == org.pk
+                    and self.context["request"].user.membership.is_admin
+                )
+            ):
                 raise ValidationError(
-                    {"detail": "You are not owner of the organization"}
+                    {"detail": "You are not owner or admin of the organization"}
                 )
             else:
                 attrs["for_organization"] = True

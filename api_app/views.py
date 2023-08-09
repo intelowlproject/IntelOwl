@@ -43,7 +43,7 @@ from .models import (
     PythonConfig,
     Tag,
 )
-from .permissions import IsObjectRealOwnerPermission
+from .permissions import IsObjectRealOwnerOrAdminPermission
 from .pivots_manager.models import PivotConfig
 from .serializers import (
     CommentSerializer,
@@ -573,7 +573,7 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.request.method in ["PATCH", "DELETE"]:
-            permissions.append(IsObjectRealOwnerPermission())
+            permissions.append(IsObjectRealOwnerOrAdminPermission())
         elif self.request.method == "PUT":
             raise PermissionDenied()
         return permissions

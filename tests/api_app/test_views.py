@@ -28,11 +28,21 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
     def test_plugins_config_viewset(self):
         org = Organization.create("test_org", self.user)
+        self.admin = User.objects.create_user(
+            username="admin",
+            email="admin@intelowl.com",
+            password="test",
+        )
+        self.admin.save()
+        Membership.objects.create(
+            user=self.admin, organization=org, is_owner=False, is_admin=True
+        )
 
+        # logged out
+        self.client.logout()
         response = self.client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        self.assertFalse(content)
+        self.assertEqual(response.status_code, 401)
+
         param = Parameter.objects.create(
             is_secret=True,
             name="mynewparameter",
@@ -40,7 +50,6 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             required=True,
             type="str",
         )
-        # if the user is owner of an org, he should get the org secret
         pc = PluginConfig(
             value="supersecret",
             for_organization=True,
@@ -50,6 +59,17 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         pc.full_clean()
         pc.save()
         self.assertEqual(pc.owner, org.owner)
+
+        # if the user is owner of an org, he should get the org secret
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.URL, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        first_item = content[0]
+        self.assertEqual(first_item["value"], "supersecret")
+
+        # if the user is admin of an org, he should get the org secret
+        self.client.force_authenticate(user=self.admin)
         response = self.client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
@@ -64,11 +84,21 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             parameter=param,
         )
         secret_owner.save()
+
+        # user can see own personal secret
+        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
         second_item = content[1]
         self.assertEqual(second_item["value"], "supersecret_user_only")
+
+        # other users cannot see user's personal items
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(self.URL, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        self.assertEqual(1, len(content))
 
         # if a standard user who does not belong to any org tries to get a secret,
         # they should not find anything
@@ -87,7 +117,9 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
         # if a standard user tries to get the secret of his org,
         # he should have a "redacted" value
-        Membership(user=self.standard_user, organization=org, is_owner=False).save()
+        Membership(
+            user=self.standard_user, organization=org, is_owner=False, is_admin=False
+        ).save()
         response = self.standard_user_client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
@@ -109,13 +141,14 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         content = response.json()
         second_item = content[1]
         self.assertEqual(second_item["value"], "supersecret_low_privilege")
+
+        # if there are 2 secrets for different services, the user should get them both
         param2 = Parameter.objects.create(
             is_secret=True,
             name="mysecondsupernewsecret",
             analyzer_config=AnalyzerConfig.objects.get(name="Auth0"),
             required=True,
         )
-        # if there are 2 secrets for different services, the user should get them both
         secret_owner = PluginConfig(
             value="supersecret_low_privilege_third",
             for_organization=False,
@@ -482,7 +515,6 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
         self.assertEqual(response.status_code, 201)
         self.assertTrue(plugin.disabled_in_organizations.all().exists())
-
         response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
         self.assertEqual(response.status_code, 400, response.json())
         self.assertEqual(1, plugin.disabled_in_organizations.all().count())
@@ -492,6 +524,24 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(
             result["errors"]["detail"], f"Plugin {plugin.name} already disabled"
         )
+
+        m.is_owner = False
+        m.is_admin = True
+        m.save()
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(plugin.disabled_in_organizations.all().exists())
+        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 400, response.json())
+        self.assertEqual(1, plugin.disabled_in_organizations.all().count())
+        result = response.json()
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {plugin.name} already disabled"
+        )
+
         plugin.disabled_in_organizations.set([])
         m.delete()
         org.delete()
@@ -532,10 +582,29 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(
             result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
         )
-
         plugin.disabled_in_organizations.add(org)
         response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
         self.assertEqual(response.status_code, 202)
         self.assertFalse(plugin.disabled_in_organizations.all().exists())
+
+        m.is_owner = False
+        m.is_admin = True
+        m.save()
+        plugin.disabled_in_organizations.set([])
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        result = response.json()
+        self.assertEqual(response.status_code, 400, result)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
+        )
+        plugin.disabled_in_organizations.add(org)
+        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        self.assertEqual(response.status_code, 202)
+        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+
         m.delete()
         org.delete()

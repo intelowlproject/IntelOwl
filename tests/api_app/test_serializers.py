@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import datetime
 
+from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
@@ -25,6 +26,8 @@ from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
+
+User = get_user_model()
 
 
 class PluginConfigSerializerTestCase(CustomTestCase):
@@ -78,6 +81,79 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         m1.delete()
         org.delete()
         pc.delete()
+
+    def test_validate(self):
+        org = Organization.objects.create(name="test_org")
+        self.admin = User.objects.create_user(
+            username="admin",
+            email="admin@intelowl.com",
+            password="test",
+        )
+        self.admin.save()
+        self.guest = User.objects.create_user(
+            username="guest",
+            email="guest@intelowl.com",
+            password="test",
+        )
+        self.guest.save()
+        m1 = Membership.objects.create(
+            user=self.superuser, organization=org, is_owner=True
+        )
+        m2 = Membership.objects.create(
+            user=self.admin, organization=org, is_owner=False, is_admin=True
+        )
+        m3 = Membership.objects.create(
+            user=self.user, organization=org, is_owner=False, is_admin=False
+        )
+
+        payload = {
+            "create": True,
+            "edit": False,
+            "type": "1",
+            "plugin_name": "DNS0_EU",
+            "attribute": "query_type",
+            "value": "AA",
+            "organization": "test_org",
+            "config_type": "1",
+        }
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.superuser)},
+        )
+        serializer.is_valid(raise_exception=True)
+        pc: PluginConfig = serializer.save()
+        self.assertTrue(pc.for_organization)
+        pc.delete()
+
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.admin)},
+        )
+        serializer.is_valid(raise_exception=True)
+        pc: PluginConfig = serializer.save()
+        self.assertTrue(pc.for_organization)
+        pc.delete()
+
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.user)},
+        )
+        with self.assertRaises(ValidationError):
+            serializer.is_valid(raise_exception=True)
+        self.assertTrue(pc.for_organization)
+
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.guest)},
+        )
+        with self.assertRaises(ValidationError):
+            serializer.is_valid(raise_exception=True)
+        self.assertTrue(pc.for_organization)
+
+        m1.delete()
+        m2.delete()
+        m3.delete()
+        org.delete()
 
 
 class JobSerializerTestCase(CustomTestCase):

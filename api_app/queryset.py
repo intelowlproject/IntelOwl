@@ -210,11 +210,17 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
                 # we don't need to do anything.
                 return self.filter(Q(owner=user) | Q(owner__isnull=True))
             else:
-                return self.filter(
-                    (Q(for_organization=True) & Q(owner=membership.organization.owner))
-                    | Q(owner=user)
-                    | Q(owner__isnull=True)
-                )
+                if membership.is_admin:
+                    return self.filter(Q(for_organization=True) | Q(owner__isnull=True))
+                else:
+                    return self.filter(
+                        (
+                            Q(for_organization=True)
+                            & Q(owner=membership.organization.owner)
+                        )
+                        | Q(owner=user)
+                        | Q(owner__isnull=True)
+                    )
         else:
             return self.filter(owner__isnull=True)
 

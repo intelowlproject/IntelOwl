@@ -14,7 +14,7 @@ import {
   UncontrolledTooltip,
   Collapse,
 } from "reactstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Field,
   Form,
@@ -78,13 +78,18 @@ const sanitizeObservable = (observable) =>
 
 // Component
 export default function ScanForm() {
-  console.debug("ScanForm rendered!");
+  const [searchParams, _] = useSearchParams();
+  const observableParam = searchParams.get("observable");
+
+  console.debug(
+    `ScanForm rendered! Observable in GET param: ${observableParam}`,
+  );
 
   const formik = useFormik({
     initialValues: {
       observableType: "observable",
       classification: "generic",
-      observable_names: [""],
+      observable_names: [observableParam || ""],
       files: [],
       analyzers: [],
       connectors: [],

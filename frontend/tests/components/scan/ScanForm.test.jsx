@@ -1979,8 +1979,12 @@ describe("test ScanForm component", () => {
         </Routes>
       </MemoryRouter>,
     );
+
+    // check value has been loaded
     expect(screen.getAllByRole("textbox")[0].value).toBe(
       "thisIsTheParamObservable.com",
     );
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
   });
 });

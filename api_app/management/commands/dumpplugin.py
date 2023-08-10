@@ -78,7 +78,7 @@ from django.db.models.fields.related_descriptors import (
     def _migrate_template():
         return """
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]:
+    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -102,8 +102,7 @@ def migrate(apps, schema_editor):
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            if value:
-                value = _get_real_obj(Model, field ,value)
+            value = _get_real_obj(Model, field ,value)
             no_mtm[field] = value
     o = Model(**no_mtm)
     o.full_clean()

@@ -10,7 +10,7 @@ plugin = {
     "config": {"queue": "default", "soft_time_limit": 60},
     "update_schedule": None,
     "update_task": None,
-    "description": "[Netlas API](https://netlas.io/api) provides accurate technical information on IP addresses and domain names.",
+    "description": "[Netlas API](https://netlas.io/api) provides accurate technical information on IP addresses.",
     "disabled": False,
     "python_module": "netlas.Netlas",
     "type": "observable",
@@ -27,7 +27,7 @@ plugin = {
 
 params = [
     {
-        "id": 463,
+        "id": 464,
         "name": "api_key_name",
         "type": "str",
         "description": "API key for the netlas analyzer",
@@ -40,16 +40,7 @@ params = [
     }
 ]
 
-values = [
-    {
-        "id": 331,
-        "value": "JxML1ryUSLmaQU9CoTxzHTth5waGqRtO",
-        "for_organization": False,
-        "updated_at": "2023-08-08T07:53:19.926307Z",
-        "owner": None,
-        "parameter": 463,
-    }
-]
+values = []
 
 
 def _get_real_obj(Model, field, value):

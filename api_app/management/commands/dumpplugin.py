@@ -102,7 +102,8 @@ def migrate(apps, schema_editor):
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            value = _get_real_obj(Model, field ,value)
+            if value:
+                value = _get_real_obj(Model, field ,value)
             no_mtm[field] = value
     o = Model(**no_mtm)
     o.full_clean()

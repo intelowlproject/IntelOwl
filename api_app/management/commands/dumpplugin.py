@@ -53,7 +53,10 @@ class Command(BaseCommand):
             try:
                 # default value
                 value = PluginConfig.objects.get(
-                    owner=None, for_organization=False, parameter=parameter
+                    owner=None,
+                    for_organization=False,
+                    parameter=parameter,
+                    parameter__is_secret=False,
                 )
             except PluginConfig.DoesNotExist:
                 ...
@@ -122,10 +125,6 @@ def migrate(apps, schema_editor):
     for value in values:
         value.pop("id")
         parameter = param_maps[value["parameter"]]
-        if parameter.is_secret:
-            value["value"] = None
-            value["owner"] = None
-            value["for_organization"] = False
         value["parameter"] = parameter
         value = PluginConfig(**value)
         value.full_clean()

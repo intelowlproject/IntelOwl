@@ -44,10 +44,14 @@ values = []
 
 
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [
-        ForwardManyToOneDescriptor,
-        ForwardOneToOneDescriptor,
-    ]:
+    if (
+        type(getattr(Model, field))
+        in [
+            ForwardManyToOneDescriptor,
+            ForwardOneToOneDescriptor,
+        ]
+        and value
+    ):
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):

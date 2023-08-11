@@ -255,6 +255,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
 * `Mnemonic_PassiveDNS` : Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
+* `Netlas`: search an IP against [Netlas](https://netlas.io/api)
 * `ONYPHE`: search an observable in [ONYPHE](https://www.onyphe.io/)
 * `OpenCTI`: scan an observable on an [OpenCTI](https://github.com/OpenCTI-Platform/opencti) instance
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)

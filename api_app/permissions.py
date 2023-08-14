@@ -8,14 +8,6 @@ from rest_framework.permissions import BasePermission
 logger = getLogger(__name__)
 
 
-class IsObjectRealOwnerPermission(BasePermission):
-    @staticmethod
-    def has_object_permission(request, view, obj):
-        if obj_owner := getattr(obj, "owner", None):
-            return obj_owner == request.user
-        return False
-
-
 class IsObjectAdminPermission(BasePermission):
     @staticmethod
     def has_object_permission(request, view, obj):

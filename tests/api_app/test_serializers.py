@@ -84,18 +84,6 @@ class PluginConfigSerializerTestCase(CustomTestCase):
 
     def test_validate(self):
         org = Organization.objects.create(name="test_org")
-        self.admin = User.objects.create_user(
-            username="admin",
-            email="admin@intelowl.com",
-            password="test",
-        )
-        self.admin.save()
-        self.guest = User.objects.create_user(
-            username="guest",
-            email="guest@intelowl.com",
-            password="test",
-        )
-        self.guest.save()
         m1 = Membership.objects.create(
             user=self.superuser, organization=org, is_owner=True
         )

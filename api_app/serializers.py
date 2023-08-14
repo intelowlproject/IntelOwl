@@ -879,6 +879,12 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                     raise ValidationError({"detail": "Value is not JSON-compliant."})
 
         def get_attribute(self, instance: PluginConfig):
+            # We return `redacted` when
+            # 1) is a secret AND
+            # 2) is a value for the organization AND
+            # (NOR OPERATOR)
+            # 3) we are not its owner OR
+            # 4) we are not an admin of the same organization
             if (
                 instance.is_secret()
                 and instance.for_organization
@@ -930,6 +936,10 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             return attrs
         if "organization" in attrs and attrs["organization"]:
             org = attrs.pop("organization")
+            # we raise ValidationError() when
+            # (NOR OPERATOR)
+            # 1 - we are not owner  OR
+            # 2 - we are not admin of the same org
             if not (
                 org.owner == attrs["owner"]
                 or (

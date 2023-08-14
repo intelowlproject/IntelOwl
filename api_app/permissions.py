@@ -19,11 +19,15 @@ class IsObjectRealOwnerPermission(BasePermission):
 class IsObjectAdminPermission(BasePermission):
     @staticmethod
     def has_object_permission(request, view, obj):
-        if request.user.has_membership():
-            return request.user.membership.is_admin
-        return False
-
-
-IsObjectRealOwnerOrAdminPermission = (
-    IsObjectRealOwnerPermission | IsObjectAdminPermission  # pylint: disable=E1131
-)
+        obj_owner = getattr(obj, "owner", None)
+        # if the object was not made for an organization, we return false
+        if not obj_owner or not obj_owner.has_membership():
+            return False
+        else:
+            # if we are admin we can e have to check that is our org
+            return (
+                request.user.has_membership()
+                and request.user.membership.is_admin
+                and obj_owner.membership.organization
+                == request.user.membership.organization
+            )

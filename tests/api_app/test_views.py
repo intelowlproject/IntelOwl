@@ -28,12 +28,6 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
     def test_plugins_config_viewset(self):
         org = Organization.create("test_org", self.user)
-        self.admin = User.objects.create_user(
-            username="admin",
-            email="admin@intelowl.com",
-            password="test",
-        )
-        self.admin.save()
         Membership.objects.create(
             user=self.admin, organization=org, is_owner=False, is_admin=True
         )
@@ -488,19 +482,21 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
     def test_organization_disable(self):
         plugin_pk = self.model_class.objects.order_by("?").first().pk
         org, _ = Organization.objects.get_or_create(name="test")
+
+        # a guest user cannot disable plugin config at org level
         response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
-        # permission denied
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
         self.assertEqual(
             result["detail"], "You do not have permission to perform this action."
         )
+
+        # a member cannot disable plugin config at org level
         m, _ = Membership.objects.get_or_create(
             user=self.user, organization=org, is_owner=False
         )
         response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
-        # permission denied
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
@@ -508,16 +504,27 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
             result["detail"], "You do not have permission to perform this action."
         )
 
-        m.is_owner = True
+        # an admin can disable plugin config at org level
+        m.is_admin = True
         m.save()
         plugin = self.model_class.objects.get(pk=plugin_pk)
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
-        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # isn't it disabled?
+        response = self.client.post(
+            f"{self.URL}/{plugin_pk}/organization"
+        )  # disabling it
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(plugin.disabled_in_organizations.all().exists())
-        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        self.assertTrue(
+            plugin.disabled_in_organizations.all().exists()
+        )  # now it's disabled
+        response = self.client.post(
+            f"{self.URL}/{plugin_pk}/organization"
+        )  # try to disable it again
         self.assertEqual(response.status_code, 400, response.json())
-        self.assertEqual(1, plugin.disabled_in_organizations.all().count())
+        self.assertEqual(
+            1, plugin.disabled_in_organizations.all().count()
+        )  # still 1 disabled
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
@@ -525,22 +532,21 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
             result["errors"]["detail"], f"Plugin {plugin.name} already disabled"
         )
 
-        m.is_owner = False
-        m.is_admin = True
+        # an owner can disable plugin config at org level
+        m.is_admin = True  # and owner is also and admin
+        m.is_owner = True
         m.save()
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
-        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        plugin.disabled_in_organizations.set([])  # reset the disabled plugins
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # isn't it disabled?
+        response = self.client.post(
+            f"{self.URL}/{plugin_pk}/organization"
+        )  # disabling it
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(plugin.disabled_in_organizations.all().exists())
-        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
-        self.assertEqual(response.status_code, 400, response.json())
-        self.assertEqual(1, plugin.disabled_in_organizations.all().count())
-        result = response.json()
-        self.assertIn("errors", result)
-        self.assertIn("detail", result["errors"])
-        self.assertEqual(
-            result["errors"]["detail"], f"Plugin {plugin.name} already disabled"
-        )
+        self.assertTrue(
+            plugin.disabled_in_organizations.all().exists()
+        )  # now it's disabled
 
         plugin.disabled_in_organizations.set([])
         m.delete()
@@ -549,62 +555,88 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
     def test_organization_enable(self):
         plugin_pk = self.model_class.objects.order_by("?").first().pk
         org, _ = Organization.objects.get_or_create(name="test")
+
+        # a guest user cannot enable plugin config at org level
         response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
-        # permission denied
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
         self.assertEqual(
             result["detail"], "You do not have permission to perform this action."
         )
+
+        # a member cannot enable plugin config at org level
         m, _ = Membership.objects.get_or_create(
             user=self.user, organization=org, is_owner=False
         )
         response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
         result = response.json()
-        # permission denied
         self.assertEqual(response.status_code, 403, result)
         self.assertIn("detail", result)
         self.assertEqual(
             result["detail"], "You do not have permission to perform this action."
         )
 
-        m.is_owner = True
-        m.save()
-        plugin = self.model_class.objects.get(pk=plugin_pk)
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
-        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
-        result = response.json()
-        self.assertEqual(response.status_code, 400, result)
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
-        self.assertIn("errors", result)
-        self.assertIn("detail", result["errors"])
-        self.assertEqual(
-            result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
-        )
-        plugin.disabled_in_organizations.add(org)
-        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
-        self.assertEqual(response.status_code, 202)
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
-
-        m.is_owner = False
+        # an admin can enable plugin config at org level
         m.is_admin = True
         m.save()
-        plugin.disabled_in_organizations.set([])
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
-        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        plugin = self.model_class.objects.get(pk=plugin_pk)
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # isn't it disabled?
+        response = self.client.delete(
+            f"{self.URL}/{plugin_pk}/organization"
+        )  # enabling it
         result = response.json()
-        self.assertEqual(response.status_code, 400, result)
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        self.assertEqual(response.status_code, 400, result)  # validation error
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # isn't it disabled?
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
+        # I can enable it but is already enabled
         self.assertEqual(
             result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
         )
-        plugin.disabled_in_organizations.add(org)
-        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        plugin.disabled_in_organizations.add(org)  # disabling it
+        response = self.client.delete(
+            f"{self.URL}/{plugin_pk}/organization"
+        )  # enabling it
         self.assertEqual(response.status_code, 202)
-        self.assertFalse(plugin.disabled_in_organizations.all().exists())
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # is it enabled?
+
+        # an owner can disable plugin config at org level
+        m.is_owner = True
+        m.is_admin = True  # an owner is also an admin
+        m.save()
+        plugin.disabled_in_organizations.set([])
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # isn't it disabled?
+        response = self.client.delete(
+            f"{self.URL}/{plugin_pk}/organization"
+        )  # enabling it
+        result = response.json()
+        self.assertEqual(response.status_code, 400, result)  # validation error
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # isn't it disabled?
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        # I can enable it but is already enabled
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
+        )
+        plugin.disabled_in_organizations.add(org)  # disabling it
+        response = self.client.delete(
+            f"{self.URL}/{plugin_pk}/organization"
+        )  # enabling it
+        self.assertEqual(response.status_code, 202)
+        self.assertFalse(
+            plugin.disabled_in_organizations.all().exists()
+        )  # is it enabled?
 
         m.delete()
         org.delete()

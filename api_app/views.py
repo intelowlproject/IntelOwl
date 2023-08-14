@@ -43,7 +43,7 @@ from .models import (
     PythonConfig,
     Tag,
 )
-from .permissions import IsObjectRealOwnerOrAdminPermission
+from .permissions import IsObjectAdminPermission
 from .pivots_manager.models import PivotConfig
 from .serializers import (
     CommentSerializer,
@@ -573,7 +573,7 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.request.method in ["PATCH", "DELETE"]:
-            permissions.append(IsObjectRealOwnerOrAdminPermission())
+            permissions.append(IsObjectAdminPermission())
         elif self.request.method == "PUT":
             raise PermissionDenied()
         return permissions
@@ -761,9 +761,7 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         logger.info(f"get disable_in_org from user {request.user}, name {pk}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
-            if not (
-                request.user.membership.is_owner or request.user.membership.is_admin
-            ):
+            if not request.user.membership.is_admin:
                 raise PermissionDenied()
         else:
             raise PermissionDenied()
@@ -778,9 +776,7 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         logger.info(f"get enable_in_org from user {request.user}, name {pk}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
-            if not (
-                request.user.membership.is_owner or request.user.membership.is_admin
-            ):
+            if not request.user.membership.is_admin:
                 raise PermissionDenied()
         else:
             raise PermissionDenied()

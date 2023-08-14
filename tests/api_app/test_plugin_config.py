@@ -25,85 +25,125 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             required=True,
             type="str",
         )
-        self.org = Organization.objects.create(name="testorg")
-        self.admin = User.objects.create_user(
-            username="admin",
-            email="admin@intelowl.com",
+        self.org0 = Organization.objects.create(name="testorg0")
+        self.org1 = Organization.objects.create(name="testorg1")
+        self.another_owner = User.objects.create_user(
+            username="another_owner",
+            email="another_owner@intelowl.com",
             password="test",
         )
-        self.admin.save()
-        self.guest = User.objects.create_user(
-            username="guest",
-            email="guest@intelowl.com",
-            password="test",
+        self.another_owner.save()
+        self.m0 = Membership.objects.create(
+            organization=self.org0, user=self.superuser, is_owner=True
         )
-        self.guest.save()
-        Membership.objects.create(
-            organization=self.org, user=self.superuser, is_owner=True
+        self.m1 = Membership.objects.create(
+            organization=self.org0, user=self.admin, is_owner=False, is_admin=True
         )
-        Membership.objects.create(
-            organization=self.org, user=self.admin, is_owner=False, is_admin=True
+        self.m2 = Membership.objects.create(
+            organization=self.org1, user=self.user, is_owner=False, is_admin=False
         )
-        Membership.objects.create(
-            organization=self.org, user=self.user, is_owner=False, is_admin=False
+        self.m3 = Membership.objects.create(
+            organization=self.org1, user=self.another_owner, is_owner=True
         )
-        self.pc = PluginConfig.objects.create(
+        self.pc0 = PluginConfig.objects.create(
             parameter=self.param,
             value="value",
             owner=self.superuser,
             for_organization=True,
         )
+        self.pc1 = PluginConfig.objects.create(
+            parameter=self.param,
+            value="value",
+            owner=self.another_owner,
+            for_organization=True,
+        )
 
     def tearDown(self) -> None:
-        self.pc.delete()
+        self.m0.delete()
+        self.m1.delete()
+        self.m2.delete()
+        self.m3.delete()
+        self.pc0.delete()
+        self.pc1.delete()
         self.param.delete()
-        self.org.delete()
+        self.org0.delete()
+        self.org1.delete()
+        self.another_owner.delete()
 
     def test_get(self):
-        self.assertTrue(
-            PluginConfig.objects.visible_for_user(self.superuser)
-            .filter(pk=self.pc.pk)
-            .exists()
-        )
-
         # logged out
         self.client.logout()
-        response = self.client.get(f"{custom_config_uri}/{self.pc.pk}")
+        response = self.client.get(f"{custom_config_uri}/{self.pc0.pk}")
+        self.assertEqual(response.status_code, 401)
+        response = self.client.get(f"{custom_config_uri}/{self.pc1.pk}")
         self.assertEqual(response.status_code, 401)
 
-        # the owner can see the config
-        self.client.force_authenticate(user=self.superuser)
-        response = self.client.get(f"{custom_config_uri}/{self.pc.pk}")
-        self.assertEqual(response.status_code, 200)
-
-        # also an admin can see the config
-        self.client.force_authenticate(user=self.admin)
+        # the owner can see the config of own org but not of other orgs
         self.assertTrue(
-            PluginConfig.objects.visible_for_user(self.admin)
-            .filter(pk=self.pc.pk)
+            PluginConfig.objects.visible_for_user(self.superuser)
+            .filter(pk=self.pc0.pk)
             .exists()
         )
-        response = self.client.get(f"{custom_config_uri}/{self.pc.pk}")
+        self.assertFalse(
+            PluginConfig.objects.visible_for_user(self.superuser)
+            .filter(pk=self.pc1.pk)
+            .exists()
+        )
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.get(f"{custom_config_uri}/{self.pc0.pk}")
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{custom_config_uri}/{self.pc1.pk}")
+        self.assertEqual(response.status_code, 404)
 
-        # a user in the org can see the config
+        # also an admin can see the config of own org but not of other orgs
+        self.assertTrue(
+            PluginConfig.objects.visible_for_user(self.admin)
+            .filter(pk=self.pc0.pk)
+            .exists()
+        )
+        self.assertFalse(
+            PluginConfig.objects.visible_for_user(self.admin)
+            .filter(pk=self.pc1.pk)
+            .exists()
+        )
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(f"{custom_config_uri}/{self.pc0.pk}")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{custom_config_uri}/{self.pc1.pk}")
+        self.assertEqual(response.status_code, 404)
+
+        # a user in the org can see the config of own org but not of other orgs
+        self.assertFalse(
+            PluginConfig.objects.visible_for_user(self.user)
+            .filter(pk=self.pc0.pk)
+            .exists()
+        )
         self.assertTrue(
             PluginConfig.objects.visible_for_user(self.user)
-            .filter(pk=self.pc.pk)
+            .filter(pk=self.pc1.pk)
             .exists()
         )
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(f"{custom_config_uri}/{self.pc.pk}")
+        response = self.client.get(f"{custom_config_uri}/{self.pc0.pk}")
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(f"{custom_config_uri}/{self.pc1.pk}")
         self.assertEqual(response.status_code, 200)
 
         # a user outside the org can not see the config
         self.assertFalse(
             PluginConfig.objects.visible_for_user(self.guest)
-            .filter(pk=self.pc.pk)
+            .filter(pk=self.pc0.pk)
+            .exists()
+        )
+        self.assertFalse(
+            PluginConfig.objects.visible_for_user(self.guest)
+            .filter(pk=self.pc1.pk)
             .exists()
         )
         self.client.force_authenticate(user=self.guest)
-        response = self.client.get(f"{custom_config_uri}/{self.pc.pk}")
+        response = self.client.get(f"{custom_config_uri}/{self.pc0.pk}")
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(f"{custom_config_uri}/{self.pc1.pk}")
         self.assertEqual(response.status_code, 404)
 
     def test_list(self):
@@ -112,14 +152,16 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.get(f"{custom_config_uri}")
         self.assertEqual(response.status_code, 401)
 
-        # the owner can see the config
+        # the owner can see the config of own org
         self.client.force_authenticate(user=self.superuser)
         response = self.client.get(f"{custom_config_uri}")
         self.assertEqual(response.status_code, 200)
         result = response.json()
+        # the owner cannot see configs of other orgs (pc1)
+        self.assertEqual(1, len(result))
         needle = None
         for obj in result:
-            if obj["id"] == self.pc.pk:
+            if obj["id"] == self.pc0.pk:
                 needle = obj
         self.assertIsNotNone(needle)
         self.assertIn("type", needle)
@@ -129,20 +171,22 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertIn("plugin_name", needle)
         self.assertEqual(needle["plugin_name"], self.param.analyzer_config.name)
         self.assertIn("organization", needle)
-        self.assertEqual(needle["organization"], "testorg")
+        self.assertEqual(needle["organization"], "testorg0")
         self.assertIn("value", needle)
         self.assertEqual(needle["value"], "value")
         self.assertIn("attribute", needle)
         self.assertEqual(needle["attribute"], "test")
 
-        # an admin can see the config
+        # an admin can see the config of own org
         self.client.force_authenticate(user=self.admin)
         response = self.client.get(f"{custom_config_uri}")
         self.assertEqual(response.status_code, 200)
         result = response.json()
+        # an admin cannot see configs of other orgs (pc1)
+        self.assertEqual(1, len(result))
         needle = None
         for obj in result:
-            if obj["id"] == self.pc.pk:
+            if obj["id"] == self.pc0.pk:
                 needle = obj
         self.assertIsNotNone(needle)
         self.assertIn("type", needle)
@@ -152,7 +196,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertIn("plugin_name", needle)
         self.assertEqual(needle["plugin_name"], self.param.analyzer_config.name)
         self.assertIn("organization", needle)
-        self.assertEqual(needle["organization"], "testorg")
+        self.assertEqual(needle["organization"], "testorg0")
         self.assertIn("value", needle)
         self.assertEqual(needle["value"], "value")
         self.assertIn("attribute", needle)
@@ -163,9 +207,11 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         response = self.client.get(f"{custom_config_uri}")
         self.assertEqual(response.status_code, 200)
         result = response.json()
+        # a user cannot see configs of other orgs (pc0)
+        self.assertEqual(1, len(result))
         needle = None
         for obj in result:
-            if obj["id"] == self.pc.pk:
+            if obj["id"] == self.pc1.pk:
                 needle = obj
         self.assertIsNotNone(needle)
         self.assertIn("type", needle)
@@ -175,7 +221,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertIn("plugin_name", needle)
         self.assertEqual(needle["plugin_name"], self.param.analyzer_config.name)
         self.assertIn("organization", needle)
-        self.assertEqual(needle["organization"], "testorg")
+        self.assertEqual(needle["organization"], "testorg1")
         self.assertIn("value", needle)
         self.assertEqual(needle["value"], "redacted")
         self.assertIn("attribute", needle)

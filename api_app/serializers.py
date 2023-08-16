@@ -879,10 +879,24 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                     raise ValidationError({"detail": "Value is not JSON-compliant."})
 
         def get_attribute(self, instance: PluginConfig):
+            # We return `redacted` when
+            # 1) is a secret AND
+            # 2) is a value for the organization AND
+            # (NOR OPERATOR)
+            # 3) we are not its owner OR
+            # 4) we are not an admin of the same organization
             if (
                 instance.is_secret()
                 and instance.for_organization
-                and self.context["request"].user.pk != instance.owner.pk
+                and not (
+                    self.context["request"].user.pk == instance.owner.pk
+                    or (
+                        self.context["request"].user.has_membership()
+                        and self.context["request"].user.membership.organization.pk
+                        == instance.owner.membership.organization.pk
+                        and self.context["request"].user.membership.is_admin
+                    )
+                )
             ):
                 return "redacted"
             return super().get_attribute(instance)
@@ -921,9 +935,22 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             # we are in an update
             return attrs
         if "organization" in attrs and attrs["organization"]:
-            if attrs.pop("organization").owner != attrs["owner"]:
+            org = attrs.pop("organization")
+            # we raise ValidationError() when
+            # (NOR OPERATOR)
+            # 1 - we are not owner  OR
+            # 2 - we are not admin of the same org
+            if not (
+                org.owner == attrs["owner"]
+                or (
+                    self.context["request"].user.has_membership()
+                    and self.context["request"].user.membership.organization.pk
+                    == org.pk
+                    and self.context["request"].user.membership.is_admin
+                )
+            ):
                 raise ValidationError(
-                    {"detail": "You are not owner of the organization"}
+                    {"detail": "You are not owner or admin of the organization"}
                 )
             else:
                 attrs["for_organization"] = True

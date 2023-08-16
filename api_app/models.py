@@ -593,13 +593,6 @@ class PluginConfig(models.Model):
                 f"You can't create `for_organization` {self.__class__.__name__}"
                 " if you do not have an organization"
             )
-        if self.for_organization and (
-            self.owner.has_membership()
-            and self.owner.membership.organization.owner != self.owner
-        ):
-            raise ValidationError(
-                "Only organization owner can create configuration at the org level"
-            )
 
     def clean_value(self):
         from django.forms.fields import JSONString

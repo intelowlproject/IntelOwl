@@ -8,9 +8,18 @@ from rest_framework.permissions import BasePermission
 logger = getLogger(__name__)
 
 
-class IsObjectRealOwnerPermission(BasePermission):
+class IsObjectAdminPermission(BasePermission):
     @staticmethod
     def has_object_permission(request, view, obj):
-        if obj_owner := getattr(obj, "owner", None):
-            return obj_owner == request.user
-        return False
+        obj_owner = getattr(obj, "owner", None)
+        # if the object was not made for an organization, we return false
+        if not obj_owner or not obj_owner.has_membership():
+            return False
+        else:
+            # if we are admin we can e have to check that is our org
+            return (
+                request.user.has_membership()
+                and request.user.membership.is_admin
+                and obj_owner.membership.organization
+                == request.user.membership.organization
+            )

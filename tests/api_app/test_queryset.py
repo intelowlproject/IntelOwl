@@ -348,6 +348,91 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         org.delete()
         pc.delete()
 
+    def test_admin_visible_for_own_organization(self):
+        org0 = Organization.objects.create(name="test_org_0")
+        org1 = Organization.objects.create(name="test_org_1")
+
+        m0 = Membership.objects.create(
+            user=self.superuser, organization=org0, is_owner=True
+        )
+        m1 = Membership.objects.create(
+            user=self.admin, organization=org1, is_owner=False, is_admin=True
+        )
+        m2 = Membership.objects.create(
+            user=self.user, organization=org1, is_owner=False, is_admin=False
+        )
+
+        pc0 = PluginConfig.objects.create(
+            value="test_admin_visibility_0",
+            for_organization=True,
+            owner=self.superuser,
+            parameter=Parameter.objects.first(),
+        )
+        pc1 = PluginConfig.objects.create(
+            value="test_admin_visibility_1",
+            for_organization=True,
+            owner=self.user,
+            parameter=Parameter.objects.first(),
+        )
+
+        self.assertEqual(
+            1,
+            PluginConfig.objects.filter(value="test_admin_visibility_0")
+            .visible_for_user(self.superuser)
+            .count(),
+        )
+        self.assertEqual(
+            0,
+            PluginConfig.objects.filter(value="test_admin_visibility_0")
+            .visible_for_user(self.admin)
+            .count(),
+        )
+        self.assertEqual(
+            0,
+            PluginConfig.objects.filter(value="test_admin_visibility_0")
+            .visible_for_user(self.user)
+            .count(),
+        )
+        self.assertEqual(
+            0,
+            PluginConfig.objects.filter(value="test_admin_visibility_0")
+            .visible_for_user(self.guest)
+            .count(),
+        )
+
+        self.assertEqual(
+            0,
+            PluginConfig.objects.filter(value="test_admin_visibility_1")
+            .visible_for_user(self.superuser)
+            .count(),
+        )
+        self.assertEqual(
+            1,
+            PluginConfig.objects.filter(value="test_admin_visibility_1")
+            .visible_for_user(self.admin)
+            .count(),
+        )
+        self.assertEqual(
+            1,
+            PluginConfig.objects.filter(value="test_admin_visibility_1")
+            .visible_for_user(self.user)
+            .count(),
+        )
+        self.assertEqual(
+            0,
+            PluginConfig.objects.filter(value="test_admin_visibility_1")
+            .visible_for_user(self.guest)
+            .count(),
+        )
+
+        m0.delete()
+        m1.delete()
+        m2.delete()
+        org0.delete()
+        org1.delete()
+        pc0.delete()
+        pc1.delete()
+
 
 class JobQuerySetTestCase(CustomTestCase):
     def setUp(self) -> None:

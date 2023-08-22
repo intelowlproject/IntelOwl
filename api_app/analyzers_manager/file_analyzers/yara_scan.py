@@ -316,7 +316,7 @@ class YaraScan(FileAnalyzer):
         if url in self._private_repositories:
             parameter: Parameter = (
                 Parameter.objects.filter(
-                    analyzer_config=self._config,
+                    python_module=self.python_module,
                     is_secret=True,
                     name="private_repositories",
                 )

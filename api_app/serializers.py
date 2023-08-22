@@ -9,7 +9,7 @@ import logging
 import re
 import uuid
 from collections import defaultdict
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Union, Type
 
 import django.core.exceptions
 from django.db.models import Q
@@ -32,6 +32,7 @@ from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
+from .ingestors_manager.models import IngestorConfig
 from .models import AbstractReport, Comment, Job, Parameter, PluginConfig, Tag
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
@@ -967,6 +968,8 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             class_ = ConnectorConfig
         elif _type == "3":
             class_ = VisualizerConfig
+        elif _type == "4":
+            class_ = IngestorConfig
         else:
             raise RuntimeError("Not configured")
         parameter = class_.objects.get(name=_plugin_name).parameters.get(
@@ -1033,8 +1036,8 @@ class PythonListConfigSerializer(rfs.ListSerializer):
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation(self, data):
-
-        plugins = self.child.Meta.model.objects.filter(
+        python_config_class: Type["PythonConfig"] = self.child.Meta.model
+        plugins = python_config_class.objects.filter(
             pk__in=[plugin.pk for plugin in data]
         ).prefetch_related("parameters")
         user = self.context["request"].user
@@ -1042,7 +1045,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
 
         # get the values for that configurations
         if user and user.has_membership():
-            if self.child.Meta.model.disabled_in_organizations:
+            if python_config_class.disabled_in_organizations:
                 enabled_plugins.prefetch_related("disabled_in_organizations")
                 logger.debug("Excluding plugins disabled in organization")
                 enabled_plugins = enabled_plugins.exclude(
@@ -1057,10 +1060,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
             )
         # annotate if the params are configured or not with the subquery
         params = (
-            Parameter.objects.filter(
-                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
-            )
-            .prefetch_related(self.child.Meta.model.snake_case_name)
+            plugins.parameters
             .annotate_value_for_user(user)
             .annotate_configured(user)
         )
@@ -1068,7 +1068,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
         # populate the result for every plugin (even the ones without parameters)
         # parsed[plugin]= [parameter1]
         for parameter in params:
-            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
+            parsed[parameter.python_module].append(
                 parameter
             )
         logger.debug(
@@ -1086,7 +1086,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
             plugin_representation["secrets"] = {}
             total_parameter = len(parsed[plugin])
             parameter_required_not_configured = []
-            for param in parsed[plugin]:
+            for param in parsed[plugin.python_module]:
                 # the priority order is
                 # 1 owner
                 # 2 organization

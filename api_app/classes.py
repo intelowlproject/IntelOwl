@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.models import AbstractReport, Job, PythonConfig
+from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 
 logger = logging.getLogger(__name__)
 
@@ -237,8 +237,8 @@ class Plugin(metaclass=ABCMeta):
 
     @classmethod
     @property
-    def python_module(cls) -> str:
+    def python_module(cls) -> PythonModule:
         valid_module = cls.__module__.replace(str(cls.python_base_path), "")
         # remove the starting dot
         valid_module = valid_module[1:]
-        return f"{valid_module}.{cls.__name__}"
+        return PythonModule.objects.get(module=f"{valid_module}.{cls.__name__}", base_path=cls.python_base_path)

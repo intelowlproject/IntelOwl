@@ -14,7 +14,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from django.db.models import Manager, QuerySet
+from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -30,6 +30,7 @@ from api_app.choices import (
 )
 from api_app.defaults import config_default, default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
+from api_app.interfaces import AttachedToPythonConfigInterface
 from api_app.queryset import (
     AbstractConfigQuerySet,
     JobQuerySet,
@@ -49,6 +50,31 @@ from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
 
+class PythonModule(models.Model):
+    module = models.CharField(null=False, max_length=120, db_index=True)
+    base_path = models.CharField(null=False, max_length=120, db_index=True)
+
+
+    @cached_property
+    def python_complete_path(self) -> str:
+        return f"{self.base_path}.{self.module}"
+
+    @cached_property
+    def python_class(self) -> Type["Plugin"]:
+        return import_string(self.python_complete_path)
+
+    def clean_python_module(self):
+        try:
+            _ = self.python_class
+        except ImportError as exc:
+            raise ValidationError(
+                "`python_module` incorrect, "
+                f"{self.python_complete_path} couldn't be imported"
+            ) from exc
+
+    def clean(self) -> None:
+        super().clean()
+        self.clean_python_module()
 
 class Tag(models.Model):
     label = models.CharField(
@@ -449,7 +475,6 @@ class Job(models.Model):
 
 
 class Parameter(models.Model):
-
     objects = ParameterQuerySet.as_manager()
 
     name = models.CharField(null=False, blank=False, max_length=50)
@@ -457,83 +482,12 @@ class Parameter(models.Model):
         choices=ParamTypes.choices, max_length=10, null=False, blank=False
     )
     description = models.TextField(blank=True, default="")
-    is_secret = models.BooleanField(null=False)
+    is_secret = models.BooleanField(null=False, db_index=True)
     required = models.BooleanField(null=False)
-    analyzer_config = models.ForeignKey(
-        "analyzers_manager.AnalyzerConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    connector_config = models.ForeignKey(
-        "connectors_manager.ConnectorConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    visualizer_config = models.ForeignKey(
-        "visualizers_manager.VisualizerConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    ingestor_config = models.ForeignKey(
-        "ingestors_manager.IngestorConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
+    python_module = models.ForeignKey(PythonModule, related_name="parameters", on_delete=models.PROTECT)
 
     class Meta:
-        unique_together = [
-            ("name", "analyzer_config"),
-            ("name", "connector_config"),
-            ("name", "visualizer_config"),
-            ("name", "ingestor_config"),
-        ]
-        indexes = [
-            models.Index(fields=["analyzer_config", "is_secret"]),
-            models.Index(fields=["connector_config", "is_secret"]),
-            models.Index(fields=["visualizer_config", "is_secret"]),
-            models.Index(fields=["ingestor_config", "is_secret"]),
-        ]
-
-    def clean_config(self):
-        count_configs = (
-            bool(self.analyzer_config)
-            + bool(self.connector_config)
-            + bool(self.visualizer_config)
-            + bool(self.ingestor_config)
-        )
-
-        if count_configs > 1:
-            msg = (
-                "You can't have the same parameter on more than one"
-                " configuration at the time"
-            )
-            logger.error(msg)
-            raise ValidationError(msg)
-        elif count_configs == 0:
-            msg = "The parameter must be set to at least a configuration"
-            logger.error(msg)
-            raise ValidationError(msg)
-
-    def clean(self) -> None:
-        super().clean()
-        self.clean_config()
-
-    @cached_property
-    def config(self):
-        return (
-            self.analyzer_config
-            or self.connector_config
-            or self.visualizer_config
-            or self.ingestor_config
-        )
+        unique_together = [["name", "python_module"]]
 
     def get_valid_value_for_test(self):
         if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
@@ -547,8 +501,12 @@ class Parameter(models.Model):
         else:
             return "test"
 
+    @cached_property
+    def config_class(self) -> Type["PythonConfig"]:
+        return self.python_module.python_class.config_model
 
-class PluginConfig(models.Model):
+
+class PluginConfig(AttachedToPythonConfigInterface, models.Model):
 
     objects = PluginConfigQuerySet.as_manager()
 
@@ -565,6 +523,13 @@ class PluginConfig(models.Model):
         Parameter, on_delete=models.CASCADE, null=False, related_name="values"
     )
     updated_at = models.DateTimeField(auto_now=True)
+    ingestor_config = models.ForeignKey(
+        "ingestors_manager.IngestorConfig",
+        on_delete=models.PROTECT,
+        related_name="%(class)s",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         unique_together = ["owner", "for_organization", "parameter"]
@@ -581,7 +546,12 @@ class PluginConfig(models.Model):
                     "owner",
                 ]
             ),
-        ]
+          models.Index(fields=["ingestor_config"]),
+
+                  ] + AttachedToPythonConfigInterface.Meta.indexes
+
+    def _possible_configs(self)-> typing.List["PythonConfig"]:
+        return super()._possible_configs() + [self.ingestor_config]
 
     def clean_for_organization(self):
         if self.for_organization and not self.owner:
@@ -609,6 +579,7 @@ class PluginConfig(models.Model):
         super().clean()
         self.clean_value()
         self.clean_for_organization()
+        self.clean_config()
 
     @property
     def attribute(self):
@@ -620,10 +591,6 @@ class PluginConfig(models.Model):
     @property
     def plugin_name(self):
         return self.config.name
-
-    @property
-    def config(self):
-        return self.parameter.config
 
     @property
     def type(self):
@@ -735,15 +702,13 @@ class AbstractReport(models.Model):
 
 class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
-    parameters: Manager
-
-    python_module = models.CharField(null=False, max_length=120, db_index=True)
 
     config = models.JSONField(
         blank=False,
         default=config_default,
         validators=[validate_config],
     )
+    python_module = models.ForeignKey(PythonModule, on_delete=models.PROTECT, related_name="%(class)ss")
 
     class Meta:
         abstract = True
@@ -751,6 +716,10 @@ class PythonConfig(AbstractConfig):
             models.Index(fields=("python_module", "disabled")),
         ]
         ordering = ["name", "disabled"]
+
+    @property
+    def parameters(self) -> QuerySet:
+        return Parameter.objects.filter(python_module=self.python_module)
 
     @classmethod
     @property
@@ -791,15 +760,6 @@ class PythonConfig(AbstractConfig):
     def python_base_path(self) -> str:
         raise NotImplementedError()
 
-    def clean_python_module(self):
-        try:
-            _ = self.python_class
-        except ImportError as exc:
-            raise ValidationError(
-                "`python_module` incorrect, "
-                f"{self.python_complete_path} couldn't be imported"
-            ) from exc
-
     def clean_config_queue(self):
         queue = self.config["queue"]
         if queue not in settings.CELERY_QUEUES:
@@ -811,7 +771,6 @@ class PythonConfig(AbstractConfig):
 
     def clean(self):
         super().clean()
-        self.clean_python_module()
         self.clean_config_queue()
 
     @property
@@ -846,14 +805,6 @@ class PythonConfig(AbstractConfig):
     def soft_time_limit(self):
         return self.config["soft_time_limit"]
 
-    @cached_property
-    def python_complete_path(self) -> str:
-        return f"{self.python_base_path}.{self.python_module}"
-
-    @cached_property
-    def python_class(self) -> Type:
-        return import_string(self.python_complete_path)
-
     @classmethod
     @property
     def config_exception(cls):
@@ -885,3 +836,6 @@ class PythonConfig(AbstractConfig):
                             " does not have a valid value"
                         )
         return result
+
+
+

@@ -25,4 +25,4 @@ class IngestorConfigAdminView(PythonConfigAdminView):
         "schedule",
     )
     exclude = ["user", "periodic_task"]
-    form = IngestorConfigAdminForm
+    # form = IngestorConfigAdminForm

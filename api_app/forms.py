@@ -31,7 +31,7 @@ class ParameterInlineForm(forms.ModelForm):
 
     class Meta:
         model = Parameter
-        fields = ["name", "type", "description", "is_secret", "required"]
+        fields = ["name", "type", "description", "is_secret", "required", "python_module"]
 
     def __init__(self, *args, **kwargs):
         instance: Parameter = kwargs.get("instance")

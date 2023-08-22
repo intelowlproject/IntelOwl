@@ -6,7 +6,7 @@ from django.db.models import JSONField
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm
-from .models import AbstractConfig, Job, Parameter, PluginConfig, Tag
+from .models import AbstractConfig, Job, Parameter, PluginConfig, Tag, PythonConfig
 from .tabulars import PluginConfigInline
 
 
@@ -70,14 +70,11 @@ class PluginConfigAdminView(admin.ModelAdmin):
     list_filter = (
         "for_organization",
         "owner",
-        "parameter__analyzer_config__name",
-        "parameter__connector_config__name",
-        "parameter__visualizer_config__name",
     )
 
     @staticmethod
     def plugin(instance: PluginConfig):
-        return instance.parameter.config.name
+        return instance.config.name
 
     @staticmethod
     def parameter_name(instance: PluginConfig):
@@ -113,34 +110,24 @@ class JsonViewerAdminView(admin.ModelAdmin):
     }
 
 
-@admin.register(Parameter)
-class ParameterAdminView(admin.ModelAdmin):
-    inlines = [PluginConfigInline]
-    search_fields = ["name"]
-    list_filter = ["is_secret"]
-    list_display = ParameterInlineForm.Meta.fields + ["plugin"]
-    fields = list_display
-
-    @staticmethod
-    def plugin(obj: Parameter):
-        config = (
-            obj.analyzer_config
-            or obj.connector_config
-            or obj.visualizer_config
-            or obj.ingestor_config
-        )
-        return config.name
-
-
-class ParameterInline(admin.TabularInline):
-    model = Parameter
-    list_display = ParameterInlineForm.Meta.fields
-    fields = list_display + [
-        "default",
-    ]
-    extra = 0
-    show_change_link = True
-    form = ParameterInlineForm
+# @admin.register(Parameter)
+# class ParameterAdminView(admin.ModelAdmin):
+#     inlines = [PluginConfigInline]
+#     search_fields = ["name"]
+#     list_filter = ["is_secret"]
+#     list_display = ParameterInlineForm.Meta.fields
+#     fields = list_display
+#
+#
+# class ParameterInline(admin.TabularInline):
+#     model = Parameter
+#     list_display = ParameterInlineForm.Meta.fields
+#     fields = list_display + [
+#         "default",
+#     ]
+#     extra = 0
+#     show_change_link = True
+#     form = ParameterInlineForm
 
 
 class AbstractConfigAdminView(JsonViewerAdminView):
@@ -155,7 +142,7 @@ class AbstractConfigAdminView(JsonViewerAdminView):
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-    inlines = [ParameterInline]
+    # inlines = [ParameterInline]
     list_display = (
         "name",
         "python_module",
@@ -166,13 +153,13 @@ class PythonConfigAdminView(AbstractConfigAdminView):
     )
 
     @staticmethod
-    def params(instance: AbstractConfig):
+    def params(instance: PythonConfig):
         return list(
             instance.parameters.filter(is_secret=False).values_list("name", flat=True)
         )
 
     @staticmethod
-    def secrets(instance: AbstractConfig):
+    def secrets(instance: PythonConfig):
         return list(
             instance.parameters.filter(is_secret=True).values_list("name", flat=True)
         )

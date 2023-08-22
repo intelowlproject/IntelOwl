@@ -224,6 +224,12 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
+
+    def parameters(self) -> ParameterQuerySet:
+        from api_app.models import Parameter
+
+        return Parameter.objects.prefetch_related("python_module").filter(python_module__in=self.values_list("python_module",flat=True))
+
     def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
         from api_app.models import Parameter
 
@@ -233,7 +239,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             self.alias(
                 required_params=Subquery(
                     Parameter.objects.filter(
-                        **{self.model.snake_case_name: OuterRef("pk")}, required=True
+                        python_module=OuterRef("python_module"), required=True
                     )
                     # count them
                     .annotate(count=Func(F("pk"), function="Count")).values("count")
@@ -243,7 +249,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             .alias(
                 required_configured_params=Subquery(
                     Parameter.objects.filter(
-                        **{self.model.snake_case_name: OuterRef("pk")}, required=True
+                        python_module=OuterRef("python_module"), required=True
                     )
                     # set the configured param
                     .annotate_configured(user)

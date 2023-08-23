@@ -4,7 +4,7 @@
 import json
 import logging
 import time
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from pathlib import PosixPath
 from typing import Tuple
 
@@ -48,12 +48,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     @property
     def report_model(cls):
         return AnalyzerReport
-
-    @classmethod
-    @property
-    @abstractmethod
-    def python_base_path(cls) -> PosixPath:
-        ...
 
     @classmethod
     @property

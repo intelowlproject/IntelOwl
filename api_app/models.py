@@ -29,7 +29,10 @@ from api_app.choices import (
     ScanMode,
     Status,
 )
-from api_app.classes import Plugin
+
+if typing.TYPE_CHECKING:
+    from api_app.classes import Plugin
+
 from api_app.defaults import config_default, default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.interfaces import AttachedToPythonConfigInterface

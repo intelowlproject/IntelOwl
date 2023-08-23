@@ -1039,7 +1039,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
         python_config_class: Type["PythonConfig"] = self.child.Meta.model
         plugins = python_config_class.objects.filter(
             pk__in=[plugin.pk for plugin in data]
-        ).prefetch_related("parameters")
+        )
         user = self.context["request"].user
         enabled_plugins = plugins.filter(disabled=False)
 
@@ -1060,7 +1060,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
             )
         # annotate if the params are configured or not with the subquery
         params = (
-            plugins.parameters
+            plugins.get_parameters()
             .annotate_value_for_user(user)
             .annotate_configured(user)
         )

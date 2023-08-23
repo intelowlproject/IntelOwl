@@ -1,8 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Any, Iterator
 
 from django.contrib import admin
+from django.contrib.admin.options import InlineModelAdmin
 from django.db.models import JSONField
+from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm, PythonConfigAdminForm
@@ -123,9 +126,11 @@ class ParameterInline(admin.TabularInline):
     fields = list_display + [
         "default",
     ]
-    extra = 0
     show_change_link = True
     form = ParameterInlineForm
+
+    def get_extra(self, request, obj: Parameter=None, **kwargs):
+        return 0
 
 @admin.register(PythonModule)
 class PythonModuleAdminView(admin.ModelAdmin):
@@ -141,7 +146,6 @@ class PythonModuleAdminView(admin.ModelAdmin):
     @admin.display(description="Secrets")
     def get_secrets(self, obj: PythonModule):
         return list(obj.parameters.filter(is_secret=True).order_by("-name"))
-
 
 
 

@@ -225,10 +225,10 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
 
-    def parameters(self) -> ParameterQuerySet:
+    def get_parameters(self) -> ParameterQuerySet:
         from api_app.models import Parameter
 
-        return Parameter.objects.prefetch_related("python_module").filter(python_module__in=self.values_list("python_module",flat=True))
+        return Parameter.objects.prefetch_related("python_module").filter(python_module__pk__in=self.values_list("python_module__pk",flat=True))
 
     def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
         from api_app.models import Parameter

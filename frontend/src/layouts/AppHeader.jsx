@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React from "react";
 import axios from "axios";
 import {
@@ -12,7 +13,12 @@ import { NavLink as RRNavLink } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { SiHackaday } from "react-icons/si";
 import { MdHome } from "react-icons/md";
-import { RiFileListFill, RiPlugFill, RiBookReadFill } from "react-icons/ri";
+import {
+  RiFileListFill,
+  RiPlugFill,
+  RiBookReadFill,
+  RiGuideLine,
+} from "react-icons/ri";
 
 // lib
 import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
@@ -24,13 +30,14 @@ import { INTELOWL_DOCS_URL, PUBLIC_URL } from "../constants/environment";
 import UserMenu from "./widgets/UserMenu";
 import NotificationPopoverButton from "../components/misc/notification/NotificationPopoverButton";
 import { useAuthStore } from "../stores";
+import { useGuideContext } from "../contexts/GuideContext";
 
 const authLinks = (
   <>
     <NavItem>
       <NavLink className="d-flex-start-center" end to="/dashboard">
         <AiOutlineDashboard />
-        <span className="ms-1">Dashboard</span>
+        <span className="ms-1" id="dashboard-title">Dashboard</span>
       </NavLink>
     </NavItem>
     <NavItem>
@@ -74,22 +81,44 @@ const guestLinks = (
   </>
 );
 
-const rightLinks = (
-  <NavItem>
-    <a
-      className="d-flex-start-center btn text-gray"
-      href={INTELOWL_DOCS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <RiBookReadFill />
-      <span className="ms-1">Docs</span>
-    </a>
-  </NavItem>
-);
+function RightLinks({ handleClickStart }) {
+  return (
+    <>
+      <NavItem>
+        <button
+          type="button"
+          className="d-flex-start-center btn text-gray"
+          onClick={handleClickStart}
+        >
+          <RiGuideLine />
+          <span className="ms-1">Guide</span>
+        </button>
+      </NavItem>
+      <NavItem>
+        <a
+          className="d-flex-start-center btn text-gray"
+          href={INTELOWL_DOCS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <RiBookReadFill />
+          <span className="ms-1">Docs</span>
+        </a>
+      </NavItem>
+    </>
+  );
+}
 
 function AppHeader() {
   console.debug("AppHeader rendered!");
+
+  const {
+    setState,
+  } = useGuideContext();
+
+  const handleClickStart = () => {
+    setState({ run: true, tourActive: true });
+  };
 
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
@@ -126,7 +155,7 @@ function AppHeader() {
           </Nav>
           {/* Navbar Right Side */}
           <Nav navbar className="ms-auto d-flex align-items-center">
-            {rightLinks}
+            <RightLinks handleClickStart={handleClickStart} />
             {/* Notifications Popover */}
             {isAuthenticated && (
               <NavItem className="me-lg-3">

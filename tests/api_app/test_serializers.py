@@ -14,6 +14,7 @@ from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
     FileAnalysisSerializer,
+    JobRecentScanSerializer,
     JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
@@ -28,6 +29,25 @@ from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
 
 User = get_user_model()
+
+
+class JobRecentScanSerializerTestCase(CustomTestCase):
+    def test_to_representation(self):
+        j1 = Job.objects.create(
+            **{
+                "user": self.user,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(hours=2),
+            }
+        )
+        data = JobRecentScanSerializer(j1).data
+        self.assertIn(data, "pk")
+        self.assertIn(data, "playbook")
+        self.assertIn(data, "user")
+        self.assertIn(data, "importance")
+        self.assertIn(data, "tlp")
 
 
 class PluginConfigSerializerTestCase(CustomTestCase):

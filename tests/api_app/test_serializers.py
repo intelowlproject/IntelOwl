@@ -43,11 +43,11 @@ class JobRecentScanSerializerTestCase(CustomTestCase):
             }
         )
         data = JobRecentScanSerializer(j1).data
-        self.assertIn(data, "pk")
-        self.assertIn(data, "playbook")
-        self.assertIn(data, "user")
-        self.assertIn(data, "importance")
-        self.assertIn(data, "tlp")
+        self.assertIn("pk", data)
+        self.assertIn("playbook", data)
+        self.assertIn("user", data)
+        self.assertIn("importance", data)
+        self.assertIn("tlp", data)
 
 
 class PluginConfigSerializerTestCase(CustomTestCase):

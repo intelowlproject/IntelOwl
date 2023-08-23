@@ -55,7 +55,7 @@ from .serializers import (
     ObservableAnalysisSerializer,
     PluginConfigSerializer,
     PythonConfigSerializer,
-    TagSerializer,
+    TagSerializer, JobRecentScanSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -296,7 +296,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         if "md5" not in request.data:
             raise ValidationError({"detail": "md5 is required"})
 
-        pks = (
+        jobs = (
             Job.objects.filter(md5=request.data["md5"])
             .visible_for_user(self.request.user)
             .filter(finished_analysis_time__gte=now() - datetime.timedelta(days=14))
@@ -304,7 +304,17 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             .order_by("-importance", "-finished_analysis_time")
             .values_list("pk", flat=True)
         )
-        return Response({"jobs": pks}, status=status.HTTP_200_OK)
+        return Response(JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"])
+    def recent_scans_user(self, request):
+        jobs = (
+            Job.objects.filter(owner__pk=request.user.pk)
+            .annotate_importance(request.user)
+            .order_by("-importance", "-finished_analysis_time")
+            .limit(5)
+        )
+        return Response(JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["patch"])
     def retry(self, request, pk=None):

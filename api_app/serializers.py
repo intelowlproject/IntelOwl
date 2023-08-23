@@ -44,6 +44,13 @@ class TagSerializer(rfs.ModelSerializer):
         model = Tag
         fields = rfs.ALL_FIELDS
 
+class JobRecentScanSerializer(rfs.ModelSerializer):
+    playbook = rfs.CharField(source="playbook_to_execute.name")
+    user = rfs.CharField(source="user.username")
+
+    class Meta:
+        model = Job
+        fields = ["playbook", "pk", "tlp", "user", "importance"]
 
 class _AbstractJobViewSerializer(rfs.ModelSerializer):
     """

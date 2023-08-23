@@ -512,9 +512,12 @@ export default function ScanForm() {
   console.debug("formik");
   console.debug(formik);
   return (
-    <Container className="col-lg-12 col-xl-7">
+    <Container fluid className="d-flex justify-content-center">
       {/* Form */}
-      <ContentSection id="ScanForm" className="mt-3 bg-body shadow">
+      <ContentSection
+        id="ScanForm"
+        className="col-lg-9 col-xl-7 mt-3 bg-body shadow"
+      >
         <div className="mt-3 d-flex justify-content-between">
           <h3 className="fw-bold">
             Scan&nbsp;
@@ -984,8 +987,12 @@ export default function ScanForm() {
         </FormikProvider>
       </ContentSection>
       {/* Recent Scans */}
-      <h6 className="fw-bold">Recent Scans</h6>
-      <RecentScans />
+      <ContentSection
+        id="RecentScans"
+        className="col-lg-3 col-xl-3 mt-3 mx-3 bg-body shadow"
+      >
+        <RecentScans observableName={formik.values.observable_names[0]} />
+      </ContentSection>
     </Container>
   );
 }

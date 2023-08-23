@@ -1,11 +1,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "reactstrap";
-
+import { Card, CardHeader, CardBody } from "reactstrap";
 import useRecentScansStore from "../../../stores/useRecentScansStore";
 
-export default function RecentScans() {
+const md5 = require("md5");
+
+export default function RecentScans(observableName) {
   const { jobIdStatusMap } = useRecentScansStore();
+
+  console.debug(observableName);
+  if (observableName !== "") {
+    console.debug(md5(observableName));
+  }
 
   const navigate = useNavigate();
 
@@ -17,17 +23,15 @@ export default function RecentScans() {
   );
 
   return (
-    <div className="d-flex-start-start flex-wrap">
+    <div>
+      <h5 className="fw-bold my-4">Recent Scans</h5>
       {Object.entries(jobIdStatusMap).map(([jobId, status]) => (
-        <Button
-          key={`recentscans__${jobId}`}
-          color={status}
-          size="sm"
-          className="mb-2 me-2"
-          onClick={() => onClick(jobId)}
-        >
-          Job #{jobId}
-        </Button>
+        <Card className="border-dark mb-2" onClick={() => onClick(jobId)}>
+          <CardHeader className="bg-dark text-center p-0">
+            Job #{jobId}
+          </CardHeader>
+          <CardBody className="bg-darker p-2">{status}</CardBody>
+        </Card>
       ))}
     </div>
   );

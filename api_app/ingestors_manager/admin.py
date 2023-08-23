@@ -17,12 +17,10 @@ class IngestorReportAdminView(AbstractReportAdminView):
 class IngestorConfigAdminView(PythonConfigAdminView):
     list_display = (
         "name",
-        "python_module",
-        "params",
-        "secrets",
+        "get_python_module",
         "disabled",
         "playbook_to_execute",
         "schedule",
     )
     exclude = ["user", "periodic_task"]
-    # form = IngestorConfigAdminForm
+    form = IngestorConfigAdminForm

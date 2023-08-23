@@ -50,6 +50,11 @@ class PythonModule(models.Model):
     module = models.CharField(null=False, max_length=120, db_index=True)
     base_path = models.CharField(null=False, max_length=120, db_index=True, choices=PythonModuleBasePaths.choices)
 
+    class Meta:
+        unique_together = [["module", "base_path"]]
+
+    def __str__(self):
+        return self.module
 
     @cached_property
     def python_complete_path(self) -> str:
@@ -484,6 +489,9 @@ class Parameter(models.Model):
 
     class Meta:
         unique_together = [["name", "python_module"]]
+
+    def __str__(self):
+        return self.name
 
     def get_valid_value_for_test(self):
         if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:

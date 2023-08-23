@@ -19,4 +19,4 @@ class ConnectorConfigAdminView(PythonConfigAdminView):
         "maximum_tlp",
         "run_on_failure",
     )
-    # form = ConnectorConfigAdminForm
+    form = ConnectorConfigAdminForm

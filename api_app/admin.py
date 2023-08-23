@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.db.models import JSONField
 from prettyjson.widgets import PrettyJSONWidget
 
-from .forms import ParameterInlineForm
+from .forms import ParameterInlineForm, PythonConfigAdminForm
 from .models import Job, Parameter, PluginConfig, Tag, AbstractConfig, PythonConfig, PythonModule
 from .tabulars import PluginConfigInline
 
@@ -59,33 +59,31 @@ class TagAdminView(admin.ModelAdmin):
 @admin.register(PluginConfig)
 class PluginConfigAdminView(admin.ModelAdmin):
     list_display = (
-        "id",
-        "value",
-        "parameter_name",
+        "get_config",
+        "parameter",
         "for_organization",
-        "owner_name",
-        "plugin",
+        "get_owner",
+        "get_type",
+        "value",
     )
     search_fields = ["parameter__name", "value"]
     list_filter = (
         "for_organization",
-        "owner",
     )
 
-    @staticmethod
-    def plugin(instance: PluginConfig):
+    @admin.display(description="Config")
+    def get_config(self, instance: PluginConfig):
         return instance.config.name
 
-    @staticmethod
-    def parameter_name(instance: PluginConfig):
-        return instance.parameter.name
-
-    @staticmethod
-    def owner_name(instance: PluginConfig):
+    @admin.display(description="Owner")
+    def get_owner(self, instance: PluginConfig):
         if instance.owner:
             return instance.owner.username
-        return None
+        return "default"
 
+    @admin.display(description="Type")
+    def get_type(self, instance: PluginConfig):
+        return instance.parameter.type
 
 class AbstractReportAdminView(admin.ModelAdmin):
     list_display = (
@@ -109,30 +107,42 @@ class JsonViewerAdminView(admin.ModelAdmin):
         JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})}
     }
 
+
+@admin.register(Parameter)
+class ParameterAdminView(admin.ModelAdmin):
+    inlines = [PluginConfigInline]
+    search_fields = ["name"]
+    list_filter = ["is_secret"]
+    list_display = ParameterInlineForm.Meta.fields
+    fields = list_display
+
+
+class ParameterInline(admin.TabularInline):
+    model = Parameter
+    list_display = ParameterInlineForm.Meta.fields
+    fields = list_display + [
+        "default",
+    ]
+    extra = 0
+    show_change_link = True
+    form = ParameterInlineForm
+
 @admin.register(PythonModule)
 class PythonModuleAdminView(admin.ModelAdmin):
-    list_display = ["module", "base_path"]
+    list_display = ["module", "base_path", "get_parameters", "get_secrets"]
     search_fields = ["module", "base_path"]
     list_filter = ["base_path"]
+    inlines = [ParameterInline]
 
-# @admin.register(Parameter)
-# class ParameterAdminView(admin.ModelAdmin):
-#     inlines = [PluginConfigInline]
-#     search_fields = ["name"]
-#     list_filter = ["is_secret"]
-#     list_display = ParameterInlineForm.Meta.fields
-#     fields = list_display
-#
-#
-# class ParameterInline(admin.TabularInline):
-#     model = Parameter
-#     list_display = ParameterInlineForm.Meta.fields
-#     fields = list_display + [
-#         "default",
-#     ]
-#     extra = 0
-#     show_change_link = True
-#     form = ParameterInlineForm
+    @admin.display(description="Parameters")
+    def get_parameters(self, obj: PythonModule):
+        return list(obj.parameters.filter(is_secret=False).order_by("-name"))
+
+    @admin.display(description="Secrets")
+    def get_secrets(self, obj: PythonModule):
+        return list(obj.parameters.filter(is_secret=True).order_by("-name"))
+
+
 
 
 class AbstractConfigAdminView(JsonViewerAdminView):
@@ -141,30 +151,22 @@ class AbstractConfigAdminView(JsonViewerAdminView):
     # allow to clone the object
     save_as = True
 
-    @staticmethod
-    def disabled_in_orgs(instance: AbstractConfig):
+    @admin.display(description="Disabled in orgs")
+    def disabled_in_orgs(self, instance: AbstractConfig):
         return [org.name for org in instance.disabled_in_organizations.all()]
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-    # inlines = [ParameterInline]
+
+    form = PythonConfigAdminForm
+
     list_display = (
         "name",
-        "python_module",
-        "params",
-        "secrets",
+        "get_python_module",
         "disabled",
         "disabled_in_orgs",
     )
 
-    @staticmethod
-    def params(instance: PythonConfig):
-        return list(
-            instance.parameters.filter(is_secret=False).values_list("name", flat=True)
-        )
-
-    @staticmethod
-    def secrets(instance: PythonConfig):
-        return list(
-            instance.parameters.filter(is_secret=True).values_list("name", flat=True)
-        )
+    @admin.display(ordering="python_module__module", description="Python module")
+    def get_python_module(self, obj: PythonConfig):
+        return obj.python_module.module

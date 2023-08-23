@@ -4,7 +4,7 @@
 import json
 import logging
 import time
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from pathlib import PosixPath
 from typing import Tuple
 
@@ -16,7 +16,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 from ..choices import PythonModuleBasePaths
 
 from ..classes import Plugin
-from ..models import AbstractConfig, PythonConfig
+from ..models import PythonConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from .models import AnalyzerConfig, AnalyzerReport
@@ -48,6 +48,12 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     @property
     def report_model(cls):
         return AnalyzerReport
+
+    @classmethod
+    @property
+    @abstractmethod
+    def python_base_path(cls) -> PosixPath:
+        ...
 
     @classmethod
     @property
@@ -118,6 +124,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     observable_name: str
     observable_classification: str
+
     def __init__(
         self,
         config: PythonConfig,

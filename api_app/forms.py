@@ -1,6 +1,7 @@
 from django import forms
+from django.forms.models import ALL_FIELDS
 
-from api_app.models import Parameter, PluginConfig
+from api_app.models import Parameter, PluginConfig, PythonConfig
 
 
 class MultilineJSONField(forms.JSONField):
@@ -57,3 +58,8 @@ class ParameterInlineForm(forms.ModelForm):
 
         return instance
 
+class PythonConfigAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = PythonConfig
+        fields = ALL_FIELDS

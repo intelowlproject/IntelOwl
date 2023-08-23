@@ -20,5 +20,5 @@ class AnalyzerConfigAdminView(PythonConfigAdminView):
         "maximum_tlp",
         "update_schedule",
     )
-    # form = AnalyzerConfigAdminForm
+    form = AnalyzerConfigAdminForm
     exclude = ["update_task"]

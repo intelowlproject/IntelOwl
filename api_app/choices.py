@@ -9,11 +9,11 @@ from django.db import models
 
 
 class PythonModuleBasePaths(models.TextChoices):
-    ObservableAnalyzer = PosixPath("api_app.analyzers_manager.observable_analyzers")
-    FileAnalyzer = PosixPath("api_app.analyzers_manager.file_analyzers")
-    Connector = PosixPath("api_app.connectors_manager.connectors")
-    Ingestor = PosixPath("api_app.ingestors_manager.ingestors")
-    Visualizer = PosixPath("api_app.visualizers_manager.visualizers")
+    ObservableAnalyzer = PosixPath("api_app.analyzers_manager.observable_analyzers"), "Observable Analyzer"
+    FileAnalyzer = PosixPath("api_app.analyzers_manager.file_analyzers"), "File Analyzer"
+    Connector = PosixPath("api_app.connectors_manager.connectors"), "Connector"
+    Ingestor = PosixPath("api_app.ingestors_manager.ingestors"), "Ingestor"
+    Visualizer = PosixPath("api_app.visualizers_manager.visualizers"), "Visualizer"
 
 
 class TLP(models.TextChoices):

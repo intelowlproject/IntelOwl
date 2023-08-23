@@ -1,8 +1,17 @@
 from django import forms
-from django.forms import ModelForm
 
-from api_app.visualizers_manager.classes import Visualizer
+from api_app.choices import PythonModuleBasePaths
+from api_app.forms import PythonConfigAdminForm
+from api_app.models import PythonModule
 
 
-class VisualizerConfigAdminForm(ModelForm):
-    ...
+class VisualizerConfigAdminForm(PythonConfigAdminForm):
+    python_module = forms.ChoiceField(
+        required=True,
+        widget=forms.Select,
+        choices=[
+            (
+                python_module, python_module.module
+            ) for python_module in PythonModule.objects.filter(base_path=PythonModuleBasePaths.Visualizer.value)
+        ],
+    )

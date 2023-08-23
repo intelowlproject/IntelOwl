@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.classes import Plugin
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import AbstractConfig, Job, Parameter, PluginConfig
+from api_app.models import Job, Parameter, PluginConfig, AbstractConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
@@ -23,10 +23,6 @@ class AbstractConfigTestCase(CustomTestCase):
         with self.assertRaises(TypeError):
             AbstractConfig()
 
-    @patch.multiple(
-        "api_app.visualizers_manager.models.VisualizerConfig",
-        python_base_path=settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH,
-    )
     def test_python_class_wrong(self):
         muc = VisualizerConfig(
             name="test",
@@ -35,10 +31,6 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
-        )
-        self.assertEqual(
-            f"{settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH}.yara.Yara",
-            muc.python_complete_path,
         )
         with self.assertRaises(ImportError):
             muc.python_class

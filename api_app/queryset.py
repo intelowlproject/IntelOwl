@@ -289,7 +289,8 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def get_signatures(self, job) -> Generator[Signature, None, None]:
-        from api_app.models import Job, PythonConfig
+        from api_app.models import Job
+        from api_app.models import PythonConfig
         from intel_owl import tasks
 
         job: Job

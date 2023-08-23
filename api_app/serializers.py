@@ -33,7 +33,7 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
-from .models import AbstractReport, Comment, Job, Parameter, PluginConfig, Tag
+from .models import Comment, Job, Parameter, PluginConfig, Tag, AbstractReport
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 

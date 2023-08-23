@@ -2,12 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 import abc
 import logging
+from pathlib import PosixPath
 from typing import Optional, Type
 
 import requests
 from django.conf import settings
 
 from certego_saas.apps.user.models import User
+from ..choices import PythonModuleBasePaths
 
 from ..classes import Plugin
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
@@ -27,7 +29,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_CONNECTOR_PYTHON_PATH
+        return PythonModuleBasePaths[Connector.__name__].value
 
     @classmethod
     @property

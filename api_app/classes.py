@@ -9,7 +9,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import Job, PythonModule, AbstractReport, PythonConfig
 
 logger = logging.getLogger(__name__)
 

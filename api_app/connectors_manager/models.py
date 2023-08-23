@@ -29,9 +29,6 @@ class ConnectorConfig(PythonConfig):
     def plugin_type(cls) -> str:
         return "2"
 
-    @property
-    def python_base_path(self) -> str:
-        return settings.BASE_CONNECTOR_PYTHON_PATH
 
     @classmethod
     @property

@@ -6,7 +6,7 @@ from django.db.models import JSONField
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm
-from .models import AbstractConfig, Job, Parameter, PluginConfig, Tag, PythonConfig
+from .models import Job, Parameter, PluginConfig, Tag, AbstractConfig, PythonConfig, PythonModule
 from .tabulars import PluginConfigInline
 
 
@@ -109,6 +109,11 @@ class JsonViewerAdminView(admin.ModelAdmin):
         JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})}
     }
 
+@admin.register(PythonModule)
+class PythonModuleAdminView(admin.ModelAdmin):
+    list_display = ["module", "base_path"]
+    search_fields = ["module", "base_path"]
+    list_filter = ["base_path"]
 
 # @admin.register(Parameter)
 # class ParameterAdminView(admin.ModelAdmin):

@@ -80,10 +80,6 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     def plugin_type(cls) -> str:
         return "4"
 
-    @property
-    def python_base_path(self) -> str:
-        return settings.BASE_INGESTOR_PYTHON_PATH
-
     @classmethod
     @property
     def config_exception(cls):

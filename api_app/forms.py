@@ -56,3 +56,4 @@ class ParameterInlineForm(forms.ModelForm):
             )
 
         return instance
+

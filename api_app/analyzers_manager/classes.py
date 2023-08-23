@@ -5,6 +5,7 @@ import json
 import logging
 import time
 from abc import ABCMeta
+from pathlib import PosixPath
 from typing import Tuple
 
 import requests
@@ -12,9 +13,10 @@ from django.conf import settings
 
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+from ..choices import PythonModuleBasePaths
 
 from ..classes import Plugin
-from ..models import AbstractConfig
+from ..models import AbstractConfig, PythonConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from .models import AnalyzerConfig, AnalyzerReport
@@ -32,11 +34,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     HashChoices = HashChoices
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
-
-    @property
-    def python_base_path(self) -> str:
-        # this is just to avoid errors with the Abstract class
-        return ""
 
     @classmethod
     @property
@@ -121,10 +118,9 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     observable_name: str
     observable_classification: str
-
     def __init__(
         self,
-        config: AbstractConfig,
+        config: PythonConfig,
         job_id: int,
         runtime_configuration: dict,
         task_id: int,
@@ -148,10 +144,10 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
+        return PythonModuleBasePaths[ObservableAnalyzer.__name__].value
 
-    def before_run(self, *args, **kwargs):
-        super().before_run(**kwargs)
+    def before_run(self):
+        super().before_run()
         logger.info(
             f"STARTED analyzer: {self.__repr__()} -> "
             f"Observable: {self.observable_name}."
@@ -179,7 +175,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     def __init__(
         self,
-        config: AbstractConfig,
+        config: PythonConfig,
         job_id: int,
         runtime_configuration: dict,
         task_id: int,
@@ -196,8 +192,8 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     @classmethod
     @property
-    def python_base_path(cls):
-        return settings.BASE_ANALYZER_FILE_PYTHON_PATH
+    def python_base_path(cls) -> PosixPath:
+        return PythonModuleBasePaths[FileAnalyzer.__name__].value
 
     def read_file_bytes(self) -> bytes:
         self._job.file.seek(0)

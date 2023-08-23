@@ -5,7 +5,7 @@ import datetime
 import logging
 import typing
 import uuid
-from typing import Any, Dict, Optional, Type
+from typing import Optional, Type, Dict, Any
 
 from celery import group
 from celery.canvas import Signature
@@ -24,24 +24,19 @@ from api_app.choices import (
     TLP,
     ObservableClassification,
     ParamTypes,
-    ReportStatus,
     ScanMode,
-    Status,
+    Status, PythonModuleBasePaths, ReportStatus,
 )
-from api_app.defaults import config_default, default_runtime, file_directory_path
-from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
+from api_app.defaults import default_runtime, file_directory_path, config_default
+from api_app.helpers import calculate_sha1, calculate_sha256, get_now, deprecated
 from api_app.interfaces import AttachedToPythonConfigInterface
 from api_app.queryset import (
-    AbstractConfigQuerySet,
     JobQuerySet,
     ParameterQuerySet,
-    PluginConfigQuerySet,
-    PythonConfigQuerySet,
+    PluginConfigQuerySet, AbstractConfigQuerySet, PythonConfigQuerySet,
 )
 from api_app.validators import (
-    plugin_name_validator,
-    validate_config,
-    validate_runtime_configuration,
+    validate_runtime_configuration, plugin_name_validator, validate_config,
 )
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -50,9 +45,10 @@ from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
 
+
 class PythonModule(models.Model):
     module = models.CharField(null=False, max_length=120, db_index=True)
-    base_path = models.CharField(null=False, max_length=120, db_index=True)
+    base_path = models.CharField(null=False, max_length=120, db_index=True, choices=PythonModuleBasePaths.choices)
 
 
     @cached_property
@@ -387,7 +383,7 @@ class Job(models.Model):
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def _get_signatures(self, queryset: QuerySet) -> Signature:
+    def _get_signatures(self, queryset: JobQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
         signatures = list(
             queryset.annotate_runnable(self.user)
@@ -550,7 +546,7 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
 
                   ] + AttachedToPythonConfigInterface.Meta.indexes
 
-    def _possible_configs(self)-> typing.List["PythonConfig"]:
+    def _possible_configs(self) -> typing.List["PythonConfig"]:
         return super()._possible_configs() + [self.ingestor_config]
 
     def clean_for_organization(self):
@@ -718,7 +714,7 @@ class PythonConfig(AbstractConfig):
         ordering = ["name", "disabled"]
 
     @property
-    def parameters(self) -> QuerySet:
+    def parameters(self) -> ParameterQuerySet:
         return Parameter.objects.filter(python_module=self.python_module)
 
     @classmethod
@@ -755,10 +751,6 @@ class PythonConfig(AbstractConfig):
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
-
-    @property
-    def python_base_path(self) -> str:
-        raise NotImplementedError()
 
     def clean_config_queue(self):
         queue = self.config["queue"]
@@ -832,10 +824,7 @@ class PythonConfig(AbstractConfig):
                         continue
                     if param.required:
                         raise TypeError(
-                            f"Required param {param.name} of plugin {param.config.name}"
+                            f"Required param {param.name} of plugin {param.python_module.module}"
                             " does not have a valid value"
                         )
         return result
-
-
-

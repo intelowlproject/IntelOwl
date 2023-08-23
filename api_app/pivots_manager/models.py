@@ -7,7 +7,7 @@ from django.utils.functional import cached_property
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.interfaces import CreateJobsFromPlaybookInterface, AttachedToPythonConfigInterface
-from api_app.models import AbstractConfig, AbstractReport, Job
+from api_app.models import Job, AbstractConfig, AbstractReport
 from api_app.pivots_manager.validators import pivot_regex_validator
 from api_app.visualizers_manager.models import VisualizerConfig
 

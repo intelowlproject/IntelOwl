@@ -3,13 +3,17 @@
 import typing
 
 import _operator
+from pathlib import PosixPath
+
 from django.db import models
 
 
-class Position(models.TextChoices):
-    LEFT = "left"
-    CENTER = "center"
-    RIGHT = "right"
+class PythonModuleBasePaths(models.TextChoices):
+    ObservableAnalyzer = PosixPath("api_app.analyzers_manager.observable_analyzers")
+    FileAnalyzer = PosixPath("api_app.analyzers_manager.file_analyzers")
+    Connector = PosixPath("api_app.connectors_manager.connectors")
+    Ingestor = PosixPath("api_app.ingestors_manager.ingestors")
+    Visualizer = PosixPath("api_app.visualizers_manager.visualizers")
 
 
 class TLP(models.TextChoices):

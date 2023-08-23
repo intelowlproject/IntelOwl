@@ -35,10 +35,13 @@ from .choices import ObservableClassification
 from .decorators import deprecated_endpoint
 from .filters import JobFilter
 from .models import (
+    AbstractConfig,
+    AbstractReport,
     Comment,
     Job,
     PluginConfig,
-    Tag, AbstractConfig, AbstractReport, PythonConfig,
+    PythonConfig,
+    Tag,
 )
 from .permissions import IsObjectAdminPermission
 from .pivots_manager.models import PivotConfig

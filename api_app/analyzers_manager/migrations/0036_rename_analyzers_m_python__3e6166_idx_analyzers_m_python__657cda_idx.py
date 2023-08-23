@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0035_analyzer_config'),
+        ("analyzers_manager", "0035_analyzer_config"),
     ]
 
     operations = [
         migrations.RenameIndex(
-            model_name='analyzerconfig',
-            new_name='analyzers_m_python__657cda_idx',
-            old_name='analyzers_m_python__3e6166_idx',
+            model_name="analyzerconfig",
+            new_name="analyzers_m_python__657cda_idx",
+            old_name="analyzers_m_python__3e6166_idx",
         ),
     ]

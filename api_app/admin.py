@@ -1,15 +1,20 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from typing import Any, Iterator
 
 from django.contrib import admin
-from django.contrib.admin.options import InlineModelAdmin
 from django.db.models import JSONField
-from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm, PythonConfigAdminForm
-from .models import Job, Parameter, PluginConfig, Tag, AbstractConfig, PythonConfig, PythonModule
+from .models import (
+    AbstractConfig,
+    Job,
+    Parameter,
+    PluginConfig,
+    PythonConfig,
+    PythonModule,
+    Tag,
+)
 from .tabulars import PluginConfigInline
 
 
@@ -70,9 +75,7 @@ class PluginConfigAdminView(admin.ModelAdmin):
         "value",
     )
     search_fields = ["parameter__name", "value"]
-    list_filter = (
-        "for_organization",
-    )
+    list_filter = ("for_organization",)
 
     @admin.display(description="Config")
     def get_config(self, instance: PluginConfig):
@@ -87,6 +90,7 @@ class PluginConfigAdminView(admin.ModelAdmin):
     @admin.display(description="Type")
     def get_type(self, instance: PluginConfig):
         return instance.parameter.type
+
 
 class AbstractReportAdminView(admin.ModelAdmin):
     list_display = (
@@ -129,8 +133,9 @@ class ParameterInline(admin.TabularInline):
     show_change_link = True
     form = ParameterInlineForm
 
-    def get_extra(self, request, obj: Parameter=None, **kwargs):
+    def get_extra(self, request, obj: Parameter = None, **kwargs):
         return 0
+
 
 @admin.register(PythonModule)
 class PythonModuleAdminView(admin.ModelAdmin):
@@ -146,7 +151,6 @@ class PythonModuleAdminView(admin.ModelAdmin):
     @admin.display(description="Secrets")
     def get_secrets(self, obj: PythonModule):
         return list(obj.parameters.filter(is_secret=True).order_by("-name"))
-
 
 
 class AbstractConfigAdminView(JsonViewerAdminView):

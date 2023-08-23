@@ -1,16 +1,21 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import typing
-
-import _operator
 from pathlib import PosixPath
 
+import _operator
 from django.db import models
 
 
 class PythonModuleBasePaths(models.TextChoices):
-    ObservableAnalyzer = PosixPath("api_app.analyzers_manager.observable_analyzers"), "Observable Analyzer"
-    FileAnalyzer = PosixPath("api_app.analyzers_manager.file_analyzers"), "File Analyzer"
+    ObservableAnalyzer = (
+        PosixPath("api_app.analyzers_manager.observable_analyzers"),
+        "Observable Analyzer",
+    )
+    FileAnalyzer = (
+        PosixPath("api_app.analyzers_manager.file_analyzers"),
+        "File Analyzer",
+    )
     Connector = PosixPath("api_app.connectors_manager.connectors"), "Connector"
     Ingestor = PosixPath("api_app.ingestors_manager.ingestors"), "Ingestor"
     Visualizer = PosixPath("api_app.visualizers_manager.visualizers"), "Visualizer"

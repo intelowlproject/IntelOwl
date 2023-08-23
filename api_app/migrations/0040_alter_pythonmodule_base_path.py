@@ -6,13 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0039_remove_fields'),
+        ("api_app", "0039_remove_fields"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pythonmodule',
-            name='base_path',
-            field=models.CharField(choices=[('api_app.analyzers_manager.observable_analyzers', 'Observable Analyzer'), ('api_app.analyzers_manager.file_analyzers', 'File Analyzer'), ('api_app.connectors_manager.connectors', 'Connector'), ('api_app.ingestors_manager.ingestors', 'Ingestor'), ('api_app.visualizers_manager.visualizers', 'Visualizer')], db_index=True, max_length=120),
+            model_name="pythonmodule",
+            name="base_path",
+            field=models.CharField(
+                choices=[
+                    (
+                        "api_app.analyzers_manager.observable_analyzers",
+                        "Observable Analyzer",
+                    ),
+                    ("api_app.analyzers_manager.file_analyzers", "File Analyzer"),
+                    ("api_app.connectors_manager.connectors", "Connector"),
+                    ("api_app.ingestors_manager.ingestors", "Ingestor"),
+                    ("api_app.visualizers_manager.visualizers", "Visualizer"),
+                ],
+                db_index=True,
+                max_length=120,
+            ),
         ),
     ]

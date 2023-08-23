@@ -13,8 +13,8 @@ from django.conf import settings
 
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
-from ..choices import PythonModuleBasePaths
 
+from ..choices import PythonModuleBasePaths
 from ..classes import Plugin
 from ..models import PythonConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices

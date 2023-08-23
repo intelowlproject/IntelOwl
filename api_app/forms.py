@@ -32,7 +32,14 @@ class ParameterInlineForm(forms.ModelForm):
 
     class Meta:
         model = Parameter
-        fields = ["name", "type", "description", "is_secret", "required", "python_module"]
+        fields = [
+            "name",
+            "type",
+            "description",
+            "is_secret",
+            "required",
+            "python_module",
+        ]
 
     def __init__(self, *args, **kwargs):
         instance: Parameter = kwargs.get("instance")
@@ -58,8 +65,8 @@ class ParameterInlineForm(forms.ModelForm):
 
         return instance
 
-class PythonConfigAdminForm(forms.ModelForm):
 
+class PythonConfigAdminForm(forms.ModelForm):
     class Meta:
         model = PythonConfig
         fields = ALL_FIELDS

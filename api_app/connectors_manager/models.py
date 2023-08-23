@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.conf import settings
 from django.db import models
 
 from api_app.choices import TLP
@@ -28,7 +27,6 @@ class ConnectorConfig(PythonConfig):
     @property
     def plugin_type(cls) -> str:
         return "2"
-
 
     @classmethod
     @property

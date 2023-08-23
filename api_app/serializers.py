@@ -9,7 +9,7 @@ import logging
 import re
 import uuid
 from collections import defaultdict
-from typing import Any, Dict, Generator, List, Union, Type
+from typing import Any, Dict, Generator, List, Type, Union
 
 import django.core.exceptions
 from django.db.models import Q
@@ -33,7 +33,15 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
-from .models import Comment, Job, Parameter, PluginConfig, Tag, AbstractReport
+from .models import (
+    AbstractReport,
+    Comment,
+    Job,
+    Parameter,
+    PluginConfig,
+    PythonConfig,
+    Tag,
+)
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 
@@ -1036,7 +1044,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation(self, data):
-        python_config_class: Type["PythonConfig"] = self.child.Meta.model
+        python_config_class: Type[PythonConfig] = self.child.Meta.model
         plugins = python_config_class.objects.filter(
             pk__in=[plugin.pk for plugin in data]
         )
@@ -1068,9 +1076,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
         # populate the result for every plugin (even the ones without parameters)
         # parsed[plugin]= [parameter1]
         for parameter in params:
-            parsed[parameter.python_module].append(
-                parameter
-            )
+            parsed[parameter.python_module].append(parameter)
         logger.debug(
             ", ".join(
                 [

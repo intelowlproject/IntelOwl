@@ -15,7 +15,7 @@ from api_app.analyzers_manager.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-class TriageMixin(BaseAnalyzerMixin,metaclass=ABCMeta):
+class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"
     private_url: str = "https://private.tria.ge/api/v0/"

@@ -4,10 +4,8 @@ import abc
 import logging
 import typing
 from collections import deque
-from pathlib import PosixPath
 from typing import Any, Type
 
-from django.conf import settings
 from django.utils.functional import cached_property
 
 from ..choices import TLP, PythonModuleBasePaths

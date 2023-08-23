@@ -5,7 +5,7 @@ import datetime
 import logging
 import typing
 import uuid
-from typing import Optional, Type, Dict, Any
+from typing import Any, Dict, Optional, Type
 
 from celery import group
 from celery.canvas import Signature
@@ -24,19 +24,26 @@ from api_app.choices import (
     TLP,
     ObservableClassification,
     ParamTypes,
+    PythonModuleBasePaths,
+    ReportStatus,
     ScanMode,
-    Status, PythonModuleBasePaths, ReportStatus,
+    Status,
 )
-from api_app.defaults import default_runtime, file_directory_path, config_default
-from api_app.helpers import calculate_sha1, calculate_sha256, get_now, deprecated
+from api_app.classes import Plugin
+from api_app.defaults import config_default, default_runtime, file_directory_path
+from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.interfaces import AttachedToPythonConfigInterface
 from api_app.queryset import (
+    AbstractConfigQuerySet,
     JobQuerySet,
     ParameterQuerySet,
-    PluginConfigQuerySet, AbstractConfigQuerySet, PythonConfigQuerySet,
+    PluginConfigQuerySet,
+    PythonConfigQuerySet,
 )
 from api_app.validators import (
-    validate_runtime_configuration, plugin_name_validator, validate_config,
+    plugin_name_validator,
+    validate_config,
+    validate_runtime_configuration,
 )
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -48,7 +55,9 @@ logger = logging.getLogger(__name__)
 
 class PythonModule(models.Model):
     module = models.CharField(null=False, max_length=120, db_index=True)
-    base_path = models.CharField(null=False, max_length=120, db_index=True, choices=PythonModuleBasePaths.choices)
+    base_path = models.CharField(
+        null=False, max_length=120, db_index=True, choices=PythonModuleBasePaths.choices
+    )
 
     class Meta:
         unique_together = [["module", "base_path"]]
@@ -76,6 +85,7 @@ class PythonModule(models.Model):
     def clean(self) -> None:
         super().clean()
         self.clean_python_module()
+
 
 class Tag(models.Model):
     label = models.CharField(
@@ -485,7 +495,9 @@ class Parameter(models.Model):
     description = models.TextField(blank=True, default="")
     is_secret = models.BooleanField(null=False, db_index=True)
     required = models.BooleanField(null=False)
-    python_module = models.ForeignKey(PythonModule, related_name="parameters", on_delete=models.PROTECT)
+    python_module = models.ForeignKey(
+        PythonModule, related_name="parameters", on_delete=models.PROTECT
+    )
 
     class Meta:
         unique_together = [["name", "python_module"]]
@@ -550,9 +562,8 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                     "owner",
                 ]
             ),
-          models.Index(fields=["ingestor_config"]),
-
-                  ] + AttachedToPythonConfigInterface.Meta.indexes
+            models.Index(fields=["ingestor_config"]),
+        ] + AttachedToPythonConfigInterface.Meta.indexes
 
     def _possible_configs(self) -> typing.List["PythonConfig"]:
         return super()._possible_configs() + [self.ingestor_config]
@@ -712,7 +723,9 @@ class PythonConfig(AbstractConfig):
         default=config_default,
         validators=[validate_config],
     )
-    python_module = models.ForeignKey(PythonModule, on_delete=models.PROTECT, related_name="%(class)ss")
+    python_module = models.ForeignKey(
+        PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
+    )
 
     class Meta:
         abstract = True
@@ -832,7 +845,8 @@ class PythonConfig(AbstractConfig):
                         continue
                     if param.required:
                         raise TypeError(
-                            f"Required param {param.name} of plugin {param.python_module.module}"
+                            f"Required param {param.name} "
+                            f"of plugin {param.python_module.module}"
                             " does not have a valid value"
                         )
         return result

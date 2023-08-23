@@ -1,7 +1,11 @@
 import abc
 import io
 import logging
-from typing import Any, Generator, List
+from typing import TYPE_CHECKING, Any, Generator, List
+
+if TYPE_CHECKING:
+    from api_app.playbooks_manager.models import PlaybookConfig
+    from api_app.models import AbstractReport, PythonConfig, Job
 
 from django.core.files import File
 from django.db import models
@@ -117,22 +121,17 @@ class AttachedToPythonConfigInterface(models.Model):
             models.Index(fields=["visualizer_config"]),
         ]
 
-    def _possible_configs(self)-> List["PythonConfig"]:
+    def _possible_configs(self) -> List["PythonConfig"]:
         return [self.analyzer_config, self.connector_config, self.visualizer_config]
 
     def clean_config(self) -> None:
         from django.core.exceptions import ValidationError
 
-        if (
-            len(list(filter(None, self._possible_configs())))
-
-            != 1
-        ):
+        if len(list(filter(None, self._possible_configs()))) != 1:
             raise ValidationError(
                 "You must have exactly one between"
                 f"{', '.join([config.name for config in self._possible_configs()])}"
             )
-
 
     @cached_property
     def config(self) -> "PythonConfig":

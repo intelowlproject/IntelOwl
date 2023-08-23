@@ -10,8 +10,12 @@ class AnalyzerConfigAdminForm(PythonConfigAdminForm):
         required=True,
         widget=forms.Select,
         choices=[
-            (
-                python_module, python_module.module
-            ) for python_module in PythonModule.objects.filter(base_path__in=[PythonModuleBasePaths.ObservableAnalyzer.value, PythonModuleBasePaths.FileAnalyzer.value])
+            (python_module, python_module.module)
+            for python_module in PythonModule.objects.filter(
+                base_path__in=[
+                    PythonModuleBasePaths.ObservableAnalyzer.value,
+                    PythonModuleBasePaths.FileAnalyzer.value,
+                ]
+            )
         ],
     )

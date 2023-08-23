@@ -3,10 +3,8 @@
 import abc
 import logging
 from enum import Enum
-from pathlib import PosixPath
 from typing import Any, Dict, List, Tuple, Type, Union
 
-from django.conf import settings
 from django.db.models import QuerySet
 
 from api_app.choices import PythonModuleBasePaths

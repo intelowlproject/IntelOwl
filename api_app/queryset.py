@@ -224,11 +224,12 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
-
     def get_parameters(self) -> ParameterQuerySet:
         from api_app.models import Parameter
 
-        return Parameter.objects.prefetch_related("python_module").filter(python_module__pk__in=self.values_list("python_module__pk",flat=True))
+        return Parameter.objects.prefetch_related("python_module").filter(
+            python_module__pk__in=self.values_list("python_module__pk", flat=True)
+        )
 
     def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
         from api_app.models import Parameter
@@ -289,8 +290,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def get_signatures(self, job) -> Generator[Signature, None, None]:
-        from api_app.models import Job
-        from api_app.models import PythonConfig
+        from api_app.models import Job, PythonConfig
         from intel_owl import tasks
 
         job: Job

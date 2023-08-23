@@ -10,8 +10,9 @@ class VisualizerConfigAdminForm(PythonConfigAdminForm):
         required=True,
         widget=forms.Select,
         choices=[
-            (
-                python_module, python_module.module
-            ) for python_module in PythonModule.objects.filter(base_path=PythonModuleBasePaths.Visualizer.value)
+            (python_module, python_module.module)
+            for python_module in PythonModule.objects.filter(
+                base_path=PythonModuleBasePaths.Visualizer.value
+            )
         ],
     )

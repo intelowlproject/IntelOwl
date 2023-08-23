@@ -4,7 +4,6 @@
 from logging import getLogger
 from typing import Optional
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
@@ -224,4 +223,3 @@ class AnalyzerConfig(PythonConfig):
     @property
     def config_exception(cls):
         return AnalyzerConfigurationException
-

@@ -130,7 +130,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             for_organization=False,
             owner=self.standard_user,
             parameter=param,
-            analyzer_config=ac
+            analyzer_config=ac,
         )
         secret_owner.save()
         response = self.standard_user_client.get(self.URL, {}, format="json")

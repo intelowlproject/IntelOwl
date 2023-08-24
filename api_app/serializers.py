@@ -40,6 +40,7 @@ from .models import (
     Parameter,
     PluginConfig,
     PythonConfig,
+    PythonModule,
     Tag,
 )
 from .playbooks_manager.models import PlaybookConfig
@@ -1133,6 +1134,12 @@ class PythonListConfigSerializer(rfs.ListSerializer):
             yield plugin_representation
 
 
+class PythonModuleSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = PythonModule
+        fields = rfs.ALL_FIELDS
+
+
 class AbstractConfigSerializer(rfs.ModelSerializer):
     ...
 
@@ -1141,6 +1148,7 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
     config = _ConfigSerializer(required=True)
     parameters = ParameterSerializer(write_only=True, many=True)
+    python_module = PythonModuleSerializer(read_only=True)
 
     class Meta:
         exclude = ["disabled_in_organizations"]

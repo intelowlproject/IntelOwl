@@ -7,9 +7,10 @@ from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-from api_app.models import Job, Parameter, PluginConfig
+from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
@@ -35,10 +36,16 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         org = Organization.objects.create(name="test_org")
 
         m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
+        param = Parameter.objects.filter(
+            base_path=PythonModuleBasePaths.FileAnalyzer.value
+        )
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
             for_organization=True,
         )
         data = PluginConfigSerializer(pc).data
@@ -47,7 +54,10 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
             for_organization=False,
         )
         data = PluginConfigSerializer(pc).data
@@ -554,7 +564,9 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
     def test_to_representation(self):
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
@@ -576,14 +588,16 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
 
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
         )
         param: Parameter = Parameter.objects.create(
-            connector_config=cc,
+            python_module=cc.python_module,
             name="test",
             type="str",
             required=True,

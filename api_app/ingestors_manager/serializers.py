@@ -19,7 +19,7 @@ class IngestorConfigSerializer(PythonConfigSerializer):
 
     class Meta:
         model = IngestorConfig
-        exclude = ["user", "periodic_task"]
+        exclude = ["user", "periodic_task", "python_module"]
         list_serializer_class = PythonListConfigSerializer
 
     def to_internal_value(self, data):

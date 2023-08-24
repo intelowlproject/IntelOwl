@@ -25,7 +25,7 @@ class AnalyzerReportSerializer(AbstractReportSerializer):
 class AnalyzerConfigSerializer(PythonConfigSerializer):
     class Meta:
         model = AnalyzerConfig
-        exclude = ["disabled_in_organizations"]
+        exclude = ["disabled_in_organizations", "python_module"]
         list_serializer_class = PythonListConfigSerializer
 
 

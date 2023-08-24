@@ -5,8 +5,9 @@ from django.utils.timezone import now
 from django_celery_beat.models import CrontabSchedule
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import PythonModuleBasePaths
 from api_app.ingestors_manager.models import IngestorConfig
-from api_app.models import Job, Parameter, PluginConfig
+from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -17,7 +18,10 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
     def test_annotate_configured_multiple_parameter(self):
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
@@ -31,7 +35,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter",
             is_secret=False,
             required=True,
-            analyzer_config=ac,
+            python_config=ac.python_config,
         )
         param2 = Parameter.objects.create(
             name="testparameter2",
@@ -39,7 +43,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter2",
             is_secret=False,
             required=True,
-            analyzer_config=ac,
+            python_config=ac.python_config,
         )
 
         pc = PluginConfig.objects.create(
@@ -47,6 +51,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             for_organization=False,
             owner=self.user,
             parameter=param1,
+            analyzer_config=ac,
         )
         ac_retrieved = (
             AnalyzerConfig.objects.annotate_runnable(self.user)
@@ -69,7 +74,10 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
     def test_runnable_valid(self):
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
@@ -83,7 +91,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter",
             is_secret=False,
             required=True,
-            analyzer_config=ac,
+            python_module=ac.python_module,
         )
         pc = PluginConfig.objects.create(
             value="myperfecttest",
@@ -110,7 +118,10 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
     def test_runnable_not_configured(self):
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
@@ -124,7 +135,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter",
             is_secret=False,
             required=True,
-            analyzer_config=ac,
+            python_module=ac.python_module,
         )
 
         ac_retrieved = (
@@ -144,7 +155,10 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
     def test_runnable_disabled(self):
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=True,
@@ -167,19 +181,21 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
 
 class ParameterQuerySetTestCase(CustomTestCase):
     def test_configured_for_user(self):
+        ac = AnalyzerConfig.objects.first()
         param = Parameter.objects.create(
             name="testparameter",
             type="str",
             description="test parameter",
             is_secret=False,
             required=False,
-            analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=ac.python_module,
         )
         pc = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=False,
             owner=self.superuser,
             parameter=param,
+            analyzer_config=ac,
         )
 
         self.assertFalse(
@@ -201,19 +217,21 @@ class ParameterQuerySetTestCase(CustomTestCase):
         param.delete()
 
     def test_annotate_value_for_user(self):
+        ac = AnalyzerConfig.objects.first()
         param = Parameter.objects.create(
             name="testparameter",
             type="str",
             description="test parameter",
             is_secret=False,
             required=False,
-            analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=ac.python_module,
         )
         pc2 = PluginConfig.objects.create(
             value="myperfecttest2",
             for_organization=False,
             owner=None,
             parameter=param,
+            analyzer_config=ac,
         )
         org = Organization.objects.create(name="test_org")
 
@@ -238,6 +256,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
             for_organization=True,
             owner=self.superuser,
             parameter=param,
+            analyzer_config=ac,
         )
         param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
         # org value
@@ -248,6 +267,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
             for_organization=False,
             owner=self.user,
             parameter=param,
+            analyzer_config=ac,
         )
         param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
 
@@ -265,11 +285,17 @@ class ParameterQuerySetTestCase(CustomTestCase):
 
 class PluginConfigQuerySetTestCase(CustomTestCase):
     def test_visible_for_user_owner(self):
+        param = Parameter.objects.filter(
+            base_path=PythonModuleBasePaths.FileAnalyzer.value
+        )
         pc = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=False,
             owner=self.superuser,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
         )
         self.assertEqual(
             0,
@@ -286,11 +312,17 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         pc.delete()
 
     def test_visible_for_user_default(self):
+        param = Parameter.objects.filter(
+            base_path=PythonModuleBasePaths.FileAnalyzer.value
+        )
         pc = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=False,
             owner=None,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
         )
         self.assertEqual(
             1,
@@ -301,11 +333,18 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         pc.delete()
 
     def test_visible_for_user_organization(self):
+        param = Parameter.objects.filter(
+            base_path=PythonModuleBasePaths.FileAnalyzer.value
+        )
+
         pc = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=False,
             owner=self.superuser,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
         )
         self.assertEqual(
             0,
@@ -361,18 +400,27 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         m2 = Membership.objects.create(
             user=self.user, organization=org1, is_owner=False, is_admin=False
         )
+        param = Parameter.objects.filter(
+            base_path=PythonModuleBasePaths.FileAnalyzer.value
+        )
 
         pc0 = PluginConfig.objects.create(
             value="test_admin_visibility_0",
             for_organization=True,
             owner=self.superuser,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
         )
         pc1 = PluginConfig.objects.create(
             value="test_admin_visibility_1",
             for_organization=True,
             owner=self.user,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
         )
 
         self.assertEqual(
@@ -633,7 +681,10 @@ class JobQuerySetTestCase(CustomTestCase):
         schedule = CrontabSchedule.objects.create()
         ingestor = IngestorConfig.objects.create(
             name="test",
-            python_module="threatfox.ThreatFox",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Ingestor.value,
+                module="threatfox.ThreatFox",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,

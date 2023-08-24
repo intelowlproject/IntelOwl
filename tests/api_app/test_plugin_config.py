@@ -18,8 +18,9 @@ User = get_user_model()
 class PluginConfigViewSetTestCase(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
+        ac = AnalyzerConfig.objects.first()
         self.param = Parameter.objects.create(
-            analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=ac.python_module,
             name="test",
             is_secret=True,
             required=True,
@@ -47,12 +48,14 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         )
         self.pc0 = PluginConfig.objects.create(
             parameter=self.param,
+            analyzer_config=ac,
             value="value",
             owner=self.superuser,
             for_organization=True,
         )
         self.pc1 = PluginConfig.objects.create(
             parameter=self.param,
+            analyzer_config=ac,
             value="value",
             owner=self.another_owner,
             for_organization=True,

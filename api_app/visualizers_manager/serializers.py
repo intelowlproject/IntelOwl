@@ -14,7 +14,7 @@ from .models import VisualizerConfig, VisualizerReport
 class VisualizerConfigSerializer(PythonConfigSerializer):
     class Meta:
         model = VisualizerConfig
-        fields = rfs.ALL_FIELDS
+        exclude = ["python_module"]
         list_serializer_class = PythonListConfigSerializer
 
 

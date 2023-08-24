@@ -14,7 +14,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import QuerySet, UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -551,7 +551,18 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
     )
 
     class Meta:
-        unique_together = ["owner", "for_organization", "parameter"]
+        constraints = [
+            UniqueConstraint(
+                fields=["owner", "for_organization", "parameter", config],
+                name=f"unique_with_{config}",
+            )
+            for config in [
+                "analyzer_config",
+                "connector_config",
+                "visualizer_config",
+                "ingestor_config",
+            ]
+        ]
         indexes = [
             models.Index(fields=["owner", "for_organization", "parameter"]),
             models.Index(
@@ -593,11 +604,19 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                 f" should be {self.parameter.type}"
             )
 
+    def clean_parameter(self):
+        if self.config.python_module != self.parameter.python_module:
+            raise ValidationError(
+                f"Missmatch between config python module {self.config.python_module}"
+                f" and parameter python module {self.parameter.python_module}"
+            )
+
     def clean(self):
         super().clean()
         self.clean_value()
         self.clean_for_organization()
         self.clean_config()
+        self.clean_parameter()
 
     @property
     def attribute(self):

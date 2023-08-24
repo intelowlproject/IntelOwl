@@ -40,7 +40,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         param = Parameter.objects.create(
             is_secret=True,
             name="mynewparameter",
-            analyzer_config=AnalyzerConfig.objects.get(name="AbuseIPDB"),
+            python_module=AnalyzerConfig.objects.get(name="AbuseIPDB").python_module,
             required=True,
             type="str",
         )
@@ -135,12 +135,12 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         content = response.json()
         second_item = content[1]
         self.assertEqual(second_item["value"], "supersecret_low_privilege")
-
+        ac = AnalyzerConfig.objects.get(name="Auth0")
         # if there are 2 secrets for different services, the user should get them both
         param2 = Parameter.objects.create(
             is_secret=True,
             name="mysecondsupernewsecret",
-            analyzer_config=AnalyzerConfig.objects.get(name="Auth0"),
+            python_module=ac.python_module,
             required=True,
         )
         secret_owner = PluginConfig(
@@ -148,6 +148,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             for_organization=False,
             owner=self.standard_user,
             parameter=param2,
+            analyzer_config=ac,
         )
         secret_owner.save()
         response = self.standard_user_client.get(self.URL, {}, format="json")

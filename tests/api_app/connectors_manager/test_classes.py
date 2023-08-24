@@ -37,7 +37,7 @@ class ConnectorTestCase(CustomTestCase):
             MockUpConnector.health_check("test", self.user)
         cc.disabled = False
         param = Parameter.objects.create(
-            connector_config=cc,
+            python_module=cc.python_module,
             name="url_key_name",
             type="str",
             is_secret=True,
@@ -50,6 +50,7 @@ class ConnectorTestCase(CustomTestCase):
             value="https://intelowl.com",
             owner=self.user,
             parameter=param,
+            connector_config=cc,
         )
         with patch("requests.head"):
             result = MockUpConnector.health_check("test", self.user)

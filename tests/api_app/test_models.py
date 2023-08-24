@@ -6,9 +6,9 @@ from celery.canvas import Signature
 from django.core.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.classes import Plugin
+from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import AbstractConfig, Job, Parameter, PluginConfig
+from api_app.models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
@@ -16,56 +16,39 @@ from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 
 
+class PythonModuleTestCase(CustomTestCase):
+    def test_clean_python_module(self):
+        pc = PythonModule(module="test.Test", base_path="teeest")
+        with self.assertRaises(ValidationError):
+            pc.clean_python_module()
+
+    def test_python_complete_path(self):
+        pc = PythonModule(module="test.Test", base_path="teeest")
+        self.assertEqual(pc.python_complete_path, "teeest.test.Test")
+
+    def test_str(self):
+        pc = PythonModule(module="test.Test", base_path="teeest")
+        self.assertEqual(str(pc), "test.Test")
+
+    def test_unique_together(self):
+        pc = PythonModule.objects.create(module="test.Test", base_path="teeest")
+        with self.assertRaises(ValidationError):
+            PythonModule.objects.create(module="test.Test", base_path="teeest")
+        pc.delete()
+
+
 class AbstractConfigTestCase(CustomTestCase):
     def test_abstract(self):
         with self.assertRaises(TypeError):
             AbstractConfig()
 
-    def test_python_class_wrong(self):
-        muc = VisualizerConfig(
-            name="test",
-            description="test",
-            python_module="yara.Yara",
-            disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ImportError):
-            muc.python_class
-
-    def test_python_class(self):
-        muc = VisualizerConfig(
-            name="test",
-            description="test",
-            python_module="yara.Yara",
-            disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
-        )
-        try:
-            pc = muc.python_class
-        except ImportError as e:
-            self.fail(e)
-        else:
-            self.assertTrue(issubclass(pc, Plugin))
-
-    def test_clean_python_module(self):
-        muc: VisualizerConfig = VisualizerConfig(
-            name="test",
-            description="test",
-            python_module="wrong_path.WrongPath",
-            disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ValidationError):
-            muc.full_clean()
-
     def test_clean_config_queue(self):
         muc: VisualizerConfig = VisualizerConfig(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "wrongQueue"},
             playbook=PlaybookConfig.objects.first(),
@@ -77,7 +60,9 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
@@ -90,13 +75,15 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
-            visualizer_config=muc,
+            python_module=muc.python_module,
             name="test",
             type="str",
             is_secret=True,
@@ -111,13 +98,15 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
-            visualizer_config=muc,
+            python_module=muc.python_module,
             name="test",
             type="str",
             is_secret=True,
@@ -133,13 +122,15 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
-            visualizer_config=muc,
+            python_module=muc.python_module,
             name="test",
             type="str",
             is_secret=True,
@@ -147,7 +138,11 @@ class AbstractConfigTestCase(CustomTestCase):
         )
 
         pc, _ = PluginConfig.objects.get_or_create(
-            owner=self.user, for_organization=False, parameter=param, value="test"
+            owner=self.user,
+            for_organization=False,
+            parameter=param,
+            value="test",
+            visualizer_config=muc,
         )
         result = muc._is_configured(self.user)
         self.assertTrue(result)
@@ -159,20 +154,26 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
-            visualizer_config=muc,
+            python_module=muc.python_module,
             name="test",
             type="str",
             is_secret=True,
             required=True,
         )
         pc, _ = PluginConfig.objects.get_or_create(
-            owner=self.superuser, for_organization=False, value="test", parameter=param
+            owner=self.superuser,
+            for_organization=False,
+            value="test",
+            parameter=param,
+            visualizer_config=muc,
         )
         result = muc._is_configured(self.user)
         self.assertFalse(result)
@@ -184,7 +185,9 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
@@ -196,7 +199,9 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
@@ -208,7 +213,9 @@ class AbstractConfigTestCase(CustomTestCase):
         muc = VisualizerConfig.objects.create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
@@ -234,7 +241,9 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
@@ -254,7 +263,9 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
@@ -278,7 +289,9 @@ class AbstractConfigTestCase(CustomTestCase):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
@@ -298,81 +311,126 @@ class AbstractConfigTestCase(CustomTestCase):
         job.delete()
 
 
-class ParameterTestCase(CustomTestCase):
-    def test_clean(self):
-        ac, _ = AnalyzerConfig.objects.get_or_create(
+class PluginConfigTestCase(CustomTestCase):
+    def test_clean_parameter(self):
+        ac, created = AnalyzerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                module="yara_scan.YaraScan",
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            ),
             disabled=False,
             type="file",
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        cc, _ = ConnectorConfig.objects.get_or_create(
+        ac2, created2 = AnalyzerConfig.objects.get_or_create(
+            name="test2",
+            description="test",
+            python_module=PythonModule.objects.get(
+                module="yara_scan.YaraScan",
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            ),
+            disabled=False,
+            type="file",
+            config={"soft_time_limit": 100, "queue": "default"},
+        )
+        param = Parameter.objects.create(
+            name="test",
+            python_module=ac.python_module,
+            is_secret=False,
+            required=False,
+            type="str",
+        )
+        pc = PluginConfig(
+            owner=self.user,
+            for_organization=False,
+            parameter=param,
+            value="test",
+            analyzer_config=ac2,
+        )
+        with self.assertRaises(ValidationError):
+            pc.clean_parameter()
+
+        pc = PluginConfig(
+            owner=self.user,
+            for_organization=False,
+            parameter=param,
+            value="test",
+            analyzer_config=ac,
+        )
+        pc.clean_parameter()
+
+        if created:
+            ac.delete()
+        if created2:
+            ac2.delete()
+
+    def test_clean_config(self):
+        ac, created = AnalyzerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                module="yara_scan.YaraScan",
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            ),
+            disabled=False,
+            type="file",
+            config={"soft_time_limit": 100, "queue": "default"},
+        )
+        cc, created2 = ConnectorConfig.objects.get_or_create(
+            name="test",
+            description="test",
+            python_module=PythonModule.objects.get(
+                module="misp.MISP", base_path=PythonModuleBasePaths.Connector.value
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        vc, _ = VisualizerConfig.objects.get_or_create(
+        vc, created3 = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
-            python_module="yara.Yara",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
             playbook=PlaybookConfig.objects.first(),
         )
-        par = Parameter(
+        param = Parameter.objects.create(
             name="test",
+            python_module=ac.python_module,
+            is_secret=False,
+            required=False,
+            type="str",
+        )
+        pc = PluginConfig(
+            owner=self.user,
+            for_organization=False,
+            parameter=param,
+            value="test",
             analyzer_config=ac,
             connector_config=cc,
             visualizer_config=vc,
-            is_secret=False,
-            required=False,
-            type="str",
         )
         with self.assertRaises(ValidationError):
-            par.full_clean()
-
-        par = Parameter(
-            name="test",
-            analyzer_config=ac,
-            connector_config=cc,
-            is_secret=False,
-            required=False,
-            type="str",
-        )
-        with self.assertRaises(ValidationError):
-            par.full_clean()
-
-        par = Parameter(
-            name="test",
+            pc.clean_config()
+        pc = PluginConfig(
+            owner=self.user,
+            for_organization=False,
+            parameter=param,
+            value="test",
             analyzer_config=ac,
             visualizer_config=vc,
-            is_secret=False,
-            required=False,
-            type="str",
         )
-        with self.assertRaises(ValidationError):
-            par.full_clean()
 
-        par = Parameter(
-            name="test",
-            visualizer_config=vc,
-            connector_config=cc,
-            is_secret=False,
-            required=False,
-            type="str",
-        )
         with self.assertRaises(ValidationError):
-            par.full_clean()
+            pc.clean_config()
 
-        par = Parameter(
-            name="test",
-            connector_config=cc,
-            is_secret=False,
-            required=False,
-            type="str",
-        )
-        par.full_clean()
+        param.delete()
+        if created:
+            ac.delete()
+        if created2:
+            cc.delete()
+        if created3:
+            vc.delete()

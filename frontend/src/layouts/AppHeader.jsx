@@ -83,12 +83,12 @@ const guestLinks = (
 );
 
 // eslint-disable-next-line react/prop-types
-function RightLinks({ handleClickStart }) {
+function RightLinks({ handleClickStart, isAuthenticated }) {
   const location = useLocation();
   const isRootPath = location.pathname === "/";
   return (
     <>
-      {isRootPath && (
+      {isRootPath && isAuthenticated && (
         <NavItem>
           <button
             type="button"
@@ -159,7 +159,10 @@ function AppHeader() {
           </Nav>
           {/* Navbar Right Side */}
           <Nav navbar className="ms-auto d-flex align-items-center">
-            <RightLinks handleClickStart={handleClickStart} />
+            <RightLinks
+              handleClickStart={handleClickStart}
+              isAuthenticated={isAuthenticated}
+            />
             {/* Notifications Popover */}
             {isAuthenticated && (
               <NavItem className="me-lg-3">

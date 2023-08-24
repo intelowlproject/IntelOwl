@@ -8,7 +8,7 @@ import {
   NavbarBrand,
   NavbarToggler,
 } from "reactstrap";
-import { NavLink as RRNavLink } from "react-router-dom";
+import { NavLink as RRNavLink, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { SiHackaday } from "react-icons/si";
 import { MdHome } from "react-icons/md";
@@ -84,18 +84,22 @@ const guestLinks = (
 
 // eslint-disable-next-line react/prop-types
 function RightLinks({ handleClickStart }) {
+  const location = useLocation();
+  const isRootPath = location.pathname === "/";
   return (
     <>
-      <NavItem>
-        <button
-          type="button"
-          className="d-flex-start-center btn text-gray"
-          onClick={handleClickStart}
-        >
-          <RiGuideLine />
-          <span className="ms-1">Guide</span>
-        </button>
-      </NavItem>
+      {isRootPath && (
+        <NavItem>
+          <button
+            type="button"
+            className="d-flex-start-center btn text-gray"
+            onClick={handleClickStart}
+          >
+            <RiGuideLine />
+            <span className="ms-1">Guide</span>
+          </button>
+        </NavItem>
+      )}
       <NavItem>
         <a
           className="d-flex-start-center btn text-gray"

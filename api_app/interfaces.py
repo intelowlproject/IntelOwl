@@ -131,6 +131,8 @@ class AttachedToPythonConfigInterface(models.Model):
             configs = ", ".join(
                 [config.name for config in self._possible_configs() if config]
             )
+            if not configs:
+                raise ValidationError("You must select a plugin configuration")
             raise ValidationError(f"You must have exactly one between {configs}")
 
     @cached_property

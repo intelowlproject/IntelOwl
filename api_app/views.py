@@ -815,7 +815,7 @@ class PythonConfigViewSet(AbstractConfigViewSet):
     def health_check(self, request, pk=None):
         logger.info(f"get healthcheck from user {request.user}, name {pk}")
         obj: PythonConfig = self.get_object()
-        class_ = obj.python_class
+        class_ = obj.python_module.python_class
         try:
             if not hasattr(class_, "health_check") or not callable(class_.health_check):
                 raise NotImplementedError()

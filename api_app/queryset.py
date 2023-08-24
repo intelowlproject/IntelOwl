@@ -311,7 +311,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             task_id = str(uuid.uuid4())
             args = [
                 job.pk,
-                config.python_complete_path,
+                config.python_module.pk,
                 config.pk,
                 job.get_config_runtime_configuration(config),
                 task_id,

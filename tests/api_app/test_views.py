@@ -31,7 +31,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         Membership.objects.create(
             user=self.admin, organization=org, is_owner=False, is_admin=True
         )
-
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
         # logged out
         self.client.logout()
         response = self.client.get(self.URL, {}, format="json")
@@ -40,7 +40,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         param = Parameter.objects.create(
             is_secret=True,
             name="mynewparameter",
-            python_module=AnalyzerConfig.objects.get(name="AbuseIPDB").python_module,
+            python_module=ac.python_module,
             required=True,
             type="str",
         )
@@ -49,6 +49,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             for_organization=True,
             owner=self.user,
             parameter=param,
+            analyzer_config=ac,
         )
         pc.full_clean()
         pc.save()
@@ -76,6 +77,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             for_organization=False,
             owner=self.user,
             parameter=param,
+            analyzer_config=ac,
         )
         secret_owner.save()
 
@@ -158,6 +160,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(third_item["value"], "supersecret_low_privilege_third")
         param2.delete()
         param.delete()
+        PluginConfig.objects.filter(value__startswith="supersecret").delete()
 
 
 class CommentViewSetTestCase(CustomViewSetTestCase):

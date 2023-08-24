@@ -4,6 +4,7 @@
 
 from celery.canvas import Signature
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths
@@ -32,7 +33,7 @@ class PythonModuleTestCase(CustomTestCase):
 
     def test_unique_together(self):
         pc = PythonModule.objects.create(module="test.Test", base_path="teeest")
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(IntegrityError):
             PythonModule.objects.create(module="test.Test", base_path="teeest")
         pc.delete()
 

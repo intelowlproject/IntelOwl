@@ -12,7 +12,6 @@ from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
 from django.conf import settings
 from django.db.models import Q
-from django.utils.module_loading import import_string
 from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
 
@@ -24,11 +23,11 @@ logger = logging.getLogger(__name__)
 
 
 @control_command(
-    args=[("plugin_path", str)],
+    args=[("python_module_pk", int)],
 )
-def update_plugin(state, plugin_path):
-    plugin = import_string(plugin_path)
-    plugin.update()
+def update_plugin(state, python_module_pk:int):
+    from api_app.models import PythonModule
+    PythonModule.objects.get(pk=python_module_pk).update()
 
 
 @shared_task(soft_time_limit=300)
@@ -107,23 +106,29 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
 
 @shared_task(soft_time_limit=150)
-def update(config_pk: str):
-    from api_app.analyzers_manager.models import AnalyzerConfig
+def update(python_module_pk: int):
     from intel_owl.celery import broadcast
 
-    analyzer_config = AnalyzerConfig.objects.get(pk=config_pk)
-    class_ = analyzer_config.python_class
+    from api_app.models import PythonModule
+    python_module: PythonModule = PythonModule.objects.get(pk=python_module_pk)
+    class_ = python_module.python_class
     if hasattr(class_, "_update") and callable(class_._update):  # noqa
         if settings.NFS:
-            update_plugin(None, analyzer_config.python_complete_path)
+            update_plugin(None, python_module_pk)
         else:
-            broadcast(
-                update_plugin,
-                queue=analyzer_config.queue,
-                arguments={"plugin_path": analyzer_config.python_complete_path},
-            )
+            from api_app.analyzers_manager.models import AnalyzerConfig
+            from api_app.ingestors_manager.models import IngestorConfig
+            from api_app.visualizers_manager.models import VisualizerConfig
+            from api_app.connectors_manager.models import ConnectorConfig
+            queues = set(config.queue for config in [AnalyzerConfig.objects.filter(python_module=python_module), ConnectorConfig.objects.filter(python_module=python_module), VisualizerConfig.objects.filter(python_module=python_module), IngestorConfig.objects.filter(python_module=python_module) ])
+            for queue in queues:
+                broadcast(
+                    update_plugin,
+                    queue=queue,
+                    arguments={"python_module_pk": python_module_pk},
+                )
         return True
-    logger.error(f"Unable to update {analyzer_config.python_complete_path}")
+    logger.error(f"Unable to update {str(class_)}")
     return False
 
 
@@ -174,14 +179,14 @@ def job_pipeline(
 @app.task(name="run_plugin", soft_time_limit=500)
 def run_plugin(
     job_id: int,
-    plugin_path: str,
+    python_module_pk: int,
     plugin_config_pk: str,
     runtime_configuration: dict,
     task_id: int,
 ):
     from api_app.classes import Plugin
-
-    plugin_class: typing.Type[Plugin] = import_string(plugin_path)
+    from api_app.models import PythonModule
+    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(pk=python_module_pk).python_class
     config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
     plugin = plugin_class(
         config=config,

@@ -51,7 +51,7 @@ class AnalyzerConfigViewSet(PythonConfigViewSet):
     def pull(self, request, pk=None):
         logger.info(f"update request from user {request.user}, name {pk}")
         obj: AnalyzerConfig = self.get_object()
-        success = obj.python_class.update()
+        success = obj.python_module.python_class.update()
         if not success:
             raise ValidationError({"detail": "No update implemented"})
 

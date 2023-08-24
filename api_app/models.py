@@ -72,9 +72,13 @@ class PythonModule(models.Model):
     def python_complete_path(self) -> str:
         return f"{self.base_path}.{self.module}"
 
+    def __contains__(self, item: str):
+        if not isinstance(item, str):
+            raise TypeError(f"{self.__class__.__name__} needs a string")
+        return item in self.python_complete_path
+
     @cached_property
     def python_class(self) -> Type["Plugin"]:
-        print(self.python_complete_path)
         return import_string(self.python_complete_path)
 
     def clean_python_module(self):

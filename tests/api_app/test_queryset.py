@@ -98,6 +98,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             for_organization=False,
             owner=self.user,
             parameter=param,
+            analyzer_config=ac,
         )
         ac_retrieved = (
             AnalyzerConfig.objects.annotate_runnable(self.user)

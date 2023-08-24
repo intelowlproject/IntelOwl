@@ -70,3 +70,10 @@ class PythonConfigAdminForm(forms.ModelForm):
     class Meta:
         model = PythonConfig
         fields = ALL_FIELDS
+        base_paths_allowed = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["python_module"].queryset = self.fields[
+            "python_module"
+        ].queryset.filter(base_path__in=self.Meta.base_paths_allowed)

@@ -1141,7 +1141,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
 class PythonModuleSerializer(rfs.ModelSerializer):
     class Meta:
         model = PythonModule
-        fields = rfs.ALL_FIELDS
+        fields = ["module", "base_path"]
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):

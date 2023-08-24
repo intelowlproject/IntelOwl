@@ -199,8 +199,8 @@ class AnalyzerConfig(PythonConfig):
 
     def clean_update_schedule(self):
         if (
-            not hasattr(self.python_class, "_update")
-            or not callable(self.python_class._update)
+            not hasattr(self.python_module.python_class, "_update")
+            or not callable(self.python_module.python_class._update)
         ) and (self.update_schedule or self.update_task):
             raise ValidationError(
                 "You can't configure an update schedule if"

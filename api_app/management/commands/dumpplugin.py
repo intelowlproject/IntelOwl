@@ -200,7 +200,7 @@ values = {3}
         )
         return (
             f"{str(int(last_migration_number) + 1).rjust(4, '0')}"
-            f"_{obj.snake_case_name}.py"
+            f"_{obj.snake_case_name}_{obj.name.lower()}.py"
         )
 
     @staticmethod

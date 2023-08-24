@@ -74,6 +74,7 @@ class PythonModule(models.Model):
 
     @cached_property
     def python_class(self) -> Type["Plugin"]:
+        print(self.python_complete_path)
         return import_string(self.python_complete_path)
 
     def clean_python_module(self):

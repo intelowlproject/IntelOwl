@@ -981,11 +981,15 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             class_ = IngestorConfig
         else:
             raise RuntimeError("Not configured")
-        parameter = class_.objects.get(name=_plugin_name).parameters.get(
+        # we set the pointers allowing retro-compatibility from the frontend
+        config = class_.objects.get(name=_plugin_name)
+        parameter = config.parameters.get(
             name=_attribute, is_secret=_config_type == "2"
         )
         self.validate_value_type(_value, parameter)
+
         attrs["parameter"] = parameter
+        attrs[class_.snake_case_name] = config
         return attrs
 
     def update(self, instance, validated_data):
@@ -1148,13 +1152,20 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
     config = _ConfigSerializer(required=True)
     parameters = ParameterSerializer(write_only=True, many=True)
+
+    class Meta:
+        exclude = ["disabled_in_organizations", "python_module"]
+        list_serializer_class = PythonListConfigSerializer
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()
+
+
+class PythonConfigSerializerForMigration(PythonConfigSerializer):
     python_module = PythonModuleSerializer(read_only=True)
 
     class Meta:
         exclude = ["disabled_in_organizations"]
-
-    def to_internal_value(self, data):
-        raise NotImplementedError()
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):

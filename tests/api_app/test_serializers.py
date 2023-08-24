@@ -37,8 +37,9 @@ class PluginConfigSerializerTestCase(CustomTestCase):
 
         m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
         param = Parameter.objects.filter(
-            base_path=PythonModuleBasePaths.FileAnalyzer.value
-        )
+            python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            type="str",
+        ).first()
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
@@ -48,7 +49,9 @@ class PluginConfigSerializerTestCase(CustomTestCase):
             ).first(),
             for_organization=True,
         )
-        data = PluginConfigSerializer(pc).data
+        data = PluginConfigSerializer(
+            pc, context={"request": MockUpRequest(user=self.user)}
+        ).data
         self.assertEqual(org.name, data["organization"])
         pc.delete()
         pc = PluginConfig.objects.create(
@@ -60,7 +63,9 @@ class PluginConfigSerializerTestCase(CustomTestCase):
             ).first(),
             for_organization=False,
         )
-        data = PluginConfigSerializer(pc).data
+        data = PluginConfigSerializer(
+            pc, context={"request": MockUpRequest(user=self.user)}
+        ).data
         self.assertIsNone(data["organization"])
         m1.delete()
         org.delete()
@@ -299,7 +304,9 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_connectors_is_runnable(self):
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=True,
@@ -322,7 +329,9 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_connectors_tlp(self):
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
@@ -418,7 +427,10 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_analyzer_mimetype(self):
         a = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
@@ -580,10 +592,13 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
         self.assertEqual(1, len(result))
         result = result[0]
         self.assertIn("verification", result)
+        self.assertIn("missing_secrets", result["verification"])
+        self.assertFalse(
+            result["verification"]["missing_secrets"],
+            result["verification"]["missing_secrets"],
+        )
         self.assertIn("configured", result["verification"])
         self.assertTrue(result["verification"]["configured"])
-        self.assertIn("missing_secrets", result["verification"])
-        self.assertFalse(result["verification"]["missing_secrets"])
         cc.delete()
 
         cc = ConnectorConfig.objects.create(

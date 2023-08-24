@@ -8,7 +8,7 @@ from django.core.management import BaseCommand
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializerForMigration
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+from api_app.connectors_manager.serializers import ConnectorConfigSerializerForMigration
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.ingestors_manager.serializers import IngestorConfigSerializerForMigration
 from api_app.models import PluginConfig
@@ -17,7 +17,9 @@ from api_app.serializers import (
     PluginConfigCompleteSerializer,
 )
 from api_app.visualizers_manager.models import VisualizerConfig
-from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
+from api_app.visualizers_manager.serializers import (
+    VisualizerConfigSerializerForMigration,
+)
 
 
 class Command(BaseCommand):
@@ -220,9 +222,9 @@ values = {3}
         class_, serializer_class = (
             (AnalyzerConfig, AnalyzerConfigSerializerForMigration)
             if config_class == AnalyzerConfig.__name__
-            else (ConnectorConfig, ConnectorConfigSerializer)
+            else (ConnectorConfig, ConnectorConfigSerializerForMigration)
             if config_class == ConnectorConfig.__name__
-            else (VisualizerConfig, VisualizerConfigSerializer)
+            else (VisualizerConfig, VisualizerConfigSerializerForMigration)
             if config_class == VisualizerConfig.__name__
             else (IngestorConfig, IngestorConfigSerializerForMigration)
         )

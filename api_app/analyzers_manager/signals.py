@@ -11,8 +11,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 @receiver(pre_save, sender=AnalyzerConfig)
 def pre_save_analyzer_config(sender, instance: AnalyzerConfig, *args, **kwargs):
     if (
-        hasattr(instance.python_class, "_update")
-        and callable(instance.python_class._update)
+        hasattr(instance.python_module.python_class, "_update")
+        and callable(instance.python_module.python_class._update)
         and hasattr(instance, "update_schedule")
         and instance.update_schedule
     ):

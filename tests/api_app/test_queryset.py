@@ -286,8 +286,9 @@ class ParameterQuerySetTestCase(CustomTestCase):
 class PluginConfigQuerySetTestCase(CustomTestCase):
     def test_visible_for_user_owner(self):
         param = Parameter.objects.filter(
-            base_path=PythonModuleBasePaths.FileAnalyzer.value
-        )
+            python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            type="str",
+        ).first()
         pc = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=False,
@@ -313,8 +314,9 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
 
     def test_visible_for_user_default(self):
         param = Parameter.objects.filter(
-            base_path=PythonModuleBasePaths.FileAnalyzer.value
-        )
+            python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            type="str",
+        ).first()
         pc = PluginConfig.objects.create(
             value="myperfecttest",
             for_organization=False,
@@ -334,8 +336,9 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
 
     def test_visible_for_user_organization(self):
         param = Parameter.objects.filter(
-            base_path=PythonModuleBasePaths.FileAnalyzer.value
-        )
+            python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            type="str",
+        ).first()
 
         pc = PluginConfig.objects.create(
             value="myperfecttest",
@@ -401,8 +404,9 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             user=self.user, organization=org1, is_owner=False, is_admin=False
         )
         param = Parameter.objects.filter(
-            base_path=PythonModuleBasePaths.FileAnalyzer.value
-        )
+            python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            type="str",
+        ).first()
 
         pc0 = PluginConfig.objects.create(
             value="test_admin_visibility_0",

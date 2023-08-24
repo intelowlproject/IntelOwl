@@ -45,7 +45,7 @@ class Plugin(metaclass=ABCMeta):
     @property
     @abstractmethod
     def python_base_path(cls) -> PosixPath:
-        raise NotImplementedError()
+        ...
 
     @classmethod
     def all_subclasses(cls):
@@ -99,7 +99,6 @@ class Plugin(metaclass=ABCMeta):
         Should be overwritten in child class
         :returns report
         """
-        raise NotImplementedError()
 
     def after_run(self):
         """

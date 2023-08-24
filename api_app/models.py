@@ -14,7 +14,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from django.db.models import QuerySet, UniqueConstraint
+from django.db.models import Q, QuerySet, UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -557,6 +557,14 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
 
     class Meta:
         constraints = [
+            models.CheckConstraint(
+                check=Q(analyzer_config__isnull=True)
+                | Q(connector_config__isnull=True)
+                | Q(visualizer_config__isnull=True)
+                | Q(ingestor_config__isnull=True),
+                name="plugin_config_no_config_all_null",
+            )
+        ] + [
             UniqueConstraint(
                 fields=["owner", "for_organization", "parameter", config],
                 name=f"unique_with_{config}",

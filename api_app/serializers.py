@@ -1082,7 +1082,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
         # parsed[plugin]= [parameter1]
         for parameter in params:
             parsed[parameter.python_module].append(parameter)
-        logger.debug(
+        print(
             ", ".join(
                 [
                     f"plugin {key} has {len(values)} parameters"
@@ -1098,10 +1098,6 @@ class PythonListConfigSerializer(rfs.ListSerializer):
             total_parameter = len(parsed[plugin])
             parameter_required_not_configured = []
             for param in parsed[plugin.python_module]:
-                # the priority order is
-                # 1 owner
-                # 2 organization
-                # 3 default
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data

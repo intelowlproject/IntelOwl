@@ -2,6 +2,7 @@ import logging
 from typing import Any, Generator, List
 
 from django.db import models
+from django.db.models import Q
 from django.utils.functional import cached_property
 
 from api_app.interfaces import (
@@ -77,6 +78,14 @@ class PivotConfig(
     )
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=Q(analyzer_config__isnull=True)
+                | Q(connector_config__isnull=True)
+                | Q(visualizer_config__isnull=True),
+                name="pivot_config_no_config_all_null",
+            )
+        ]
         unique_together = [
             (
                 "analyzer_config",

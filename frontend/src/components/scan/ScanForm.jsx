@@ -89,7 +89,7 @@ export default function ScanForm() {
         setGuideState({ run: true, stepIndex: 5 });
       }, 100);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   console.debug(
@@ -593,7 +593,12 @@ export default function ScanForm() {
                 name="observable_names"
                 render={(arrayHelpers) => (
                   <FormGroup row>
-                    <Label id="selectobservable" className="required" sm={3} for="observable_name">
+                    <Label
+                      id="selectobservable"
+                      className="required"
+                      sm={3}
+                      for="observable_name"
+                    >
                       Observable Value(s)
                     </Label>
                     <Col sm={9}>

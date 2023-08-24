@@ -12,9 +12,9 @@ function App() {
   return (
     <GuideProvider>
       <BrowserRouter>
-        <GuideWrapper/>
-          <AppMain />
-          <AppFooter />
+        <GuideWrapper />
+        <AppMain />
+        <AppFooter />
       </BrowserRouter>
     </GuideProvider>
   );

@@ -14,7 +14,11 @@ export default function GuideWrapper() {
       content: (
         <div id="guidebox">
           <h3>Guide</h3>
-          <p>Welcome to IntelOwls Guide for First Time Visitors!, for further questions you could check out our <a href="/">docs</a> or reach us out on <a href="/">intelowls slack channel</a></p>
+          <p>
+            Welcome to IntelOwls Guide for First Time Visitors!, for further
+            questions you could check out our <a href="/">docs</a> or reach us
+            out on <a href="/">intelowls slack channel</a>
+          </p>
         </div>
       ),
       disableBeacon: true,

@@ -56,7 +56,7 @@ const routes = [
     key: "plugins-visualizers",
     location: "visualizers",
     Title: () => (
-      <span >
+      <span>
         <IoIosEye />
         &nbsp;Visualizers
       </span>
@@ -124,7 +124,7 @@ export default function PluginsContainer() {
         setGuideState({ run: true, stepIndex: 3 });
       }, 200);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // on component mount
@@ -158,7 +158,12 @@ export default function PluginsContainer() {
           to="/me/config"
           style={{ color: "inherit", textDecoration: "inherit" }}
         >
-          <Button id="pluginconfigbutton" size="sm" color="darker" onClick={() => null}>
+          <Button
+            id="pluginconfigbutton"
+            size="sm"
+            color="darker"
+            onClick={() => null}
+          >
             <BsSliders className="me-2" id="plugin_config" />
             Your plugin config
           </Button>

@@ -1,7 +1,5 @@
-import React from 'react';
-import { useSetState } from 'react-use';
-// eslint-disable-next-line no-unused-vars
-import { Step } from 'react-joyride';
+import React from "react";
+import { useSetState } from "react-use";
 
 const GuideState = {
   run: false,
@@ -14,7 +12,7 @@ export const GuideContext = React.createContext({
   state: GuideState,
   setState: () => undefined,
 });
-GuideContext.displayName = 'GuideContext';
+GuideContext.displayName = "GuideContext";
 
 export function GuideProvider(props) {
   const [state, setState] = useSetState(GuideState);
@@ -30,11 +28,11 @@ export function GuideProvider(props) {
   return <GuideContext.Provider value={value} {...props} />;
 }
 
-export function useGuideContext(){
+export function useGuideContext() {
   const context = React.useContext(GuideContext);
 
   if (!context) {
-    throw new Error('useGuideContext must be used within a GuideProvider');
+    throw new Error("useGuideContext must be used within a GuideProvider");
   }
 
   return context;

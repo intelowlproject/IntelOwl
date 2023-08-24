@@ -497,7 +497,7 @@ class Parameter(models.Model):
         choices=ParamTypes.choices, max_length=10, null=False, blank=False
     )
     description = models.TextField(blank=True, default="")
-    is_secret = models.BooleanField(null=False, db_index=True)
+    is_secret = models.BooleanField(db_index=True)
     required = models.BooleanField(null=False)
     python_module = models.ForeignKey(
         PythonModule, related_name="parameters", on_delete=models.PROTECT

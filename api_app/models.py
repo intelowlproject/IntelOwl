@@ -59,7 +59,7 @@ logger = logging.getLogger(__name__)
 class PythonModule(models.Model):
     module = models.CharField(null=False, max_length=120, db_index=True)
     base_path = models.CharField(
-        null=False, max_length=120, db_index=True, choices=PythonModuleBasePaths.choices
+        max_length=120, db_index=True, choices=PythonModuleBasePaths.choices
     )
 
     class Meta:

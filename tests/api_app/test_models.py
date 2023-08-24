@@ -329,7 +329,7 @@ class PluginConfigTestCase(CustomTestCase):
             name="test2",
             description="test",
             python_module=PythonModule.objects.get(
-                module="yara_scan.YaraScan",
+                module="tranco.Tranco",
                 base_path=PythonModuleBasePaths.FileAnalyzer.value,
             ),
             disabled=False,

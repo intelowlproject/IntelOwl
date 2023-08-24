@@ -25,8 +25,9 @@ logger = logging.getLogger(__name__)
 @control_command(
     args=[("python_module_pk", int)],
 )
-def update_plugin(state, python_module_pk:int):
+def update_plugin(state, python_module_pk: int):
     from api_app.models import PythonModule
+
     PythonModule.objects.get(pk=python_module_pk).update()
 
 
@@ -107,9 +108,9 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
 @shared_task(soft_time_limit=150)
 def update(python_module_pk: int):
+    from api_app.models import PythonModule
     from intel_owl.celery import broadcast
 
-    from api_app.models import PythonModule
     python_module: PythonModule = PythonModule.objects.get(pk=python_module_pk)
     class_ = python_module.python_class
     if hasattr(class_, "_update") and callable(class_._update):  # noqa
@@ -117,10 +118,19 @@ def update(python_module_pk: int):
             update_plugin(None, python_module_pk)
         else:
             from api_app.analyzers_manager.models import AnalyzerConfig
+            from api_app.connectors_manager.models import ConnectorConfig
             from api_app.ingestors_manager.models import IngestorConfig
             from api_app.visualizers_manager.models import VisualizerConfig
-            from api_app.connectors_manager.models import ConnectorConfig
-            queues = set(config.queue for config in [AnalyzerConfig.objects.filter(python_module=python_module), ConnectorConfig.objects.filter(python_module=python_module), VisualizerConfig.objects.filter(python_module=python_module), IngestorConfig.objects.filter(python_module=python_module) ])
+
+            queues = set(
+                config.queue
+                for config in [
+                    AnalyzerConfig.objects.filter(python_module=python_module),
+                    ConnectorConfig.objects.filter(python_module=python_module),
+                    VisualizerConfig.objects.filter(python_module=python_module),
+                    IngestorConfig.objects.filter(python_module=python_module),
+                ]
+            )
             for queue in queues:
                 broadcast(
                     update_plugin,
@@ -186,7 +196,10 @@ def run_plugin(
 ):
     from api_app.classes import Plugin
     from api_app.models import PythonModule
-    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(pk=python_module_pk).python_class
+
+    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
+        pk=python_module_pk
+    ).python_class
     config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
     plugin = plugin_class(
         config=config,

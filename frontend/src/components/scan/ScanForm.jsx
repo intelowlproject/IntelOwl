@@ -87,7 +87,7 @@ export default function ScanForm() {
     if (guideState.tourActive) {
       setTimeout(() => {
         setGuideState({ run: true, stepIndex: 5 });
-      }, 200);
+      }, 100);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

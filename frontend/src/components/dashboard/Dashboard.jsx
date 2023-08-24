@@ -45,9 +45,9 @@ export default function Dashboard() {
     if (state.tourActive) {
       setTimeout(() => {
         setGuideState({ run: true, stepIndex: 1 });
-      }, 200);
+      }, 100);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   console.debug("Dashboard rendered!");

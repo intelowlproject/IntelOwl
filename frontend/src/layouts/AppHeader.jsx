@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React from "react";
 import axios from "axios";
 import {
@@ -37,7 +36,9 @@ const authLinks = (
     <NavItem>
       <NavLink className="d-flex-start-center" end to="/dashboard">
         <AiOutlineDashboard />
-        <span className="ms-1" id="dashboard-title">Dashboard</span>
+        <span className="ms-1" id="dashboard-title">
+          Dashboard
+        </span>
       </NavLink>
     </NavItem>
     <NavItem>
@@ -81,6 +82,7 @@ const guestLinks = (
   </>
 );
 
+// eslint-disable-next-line react/prop-types
 function RightLinks({ handleClickStart }) {
   return (
     <>
@@ -112,9 +114,7 @@ function RightLinks({ handleClickStart }) {
 function AppHeader() {
   console.debug("AppHeader rendered!");
 
-  const {
-    setState,
-  } = useGuideContext();
+  const { setState } = useGuideContext();
 
   const handleClickStart = () => {
     setState({ run: true, tourActive: true });

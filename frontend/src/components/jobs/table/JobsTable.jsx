@@ -55,9 +55,9 @@ export default function JobsTable() {
     if (state.tourActive) {
       setTimeout(() => {
         setGuideState({ run: true, stepIndex: 9 });
-      }, 200);
+      }, 100);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

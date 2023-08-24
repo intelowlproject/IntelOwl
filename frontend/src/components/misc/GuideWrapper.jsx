@@ -1,15 +1,11 @@
 import React from "react";
-// eslint-disable-next-line no-unused-vars
-import Joyride, { CallBackProps } from "react-joyride";
+import Joyride from "react-joyride";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useMount } from "react-use";
 import { useGuideContext } from "../../contexts/GuideContext";
 
 export default function GuideWrapper() {
-  const {
-    setState,
-    state,
-  } = useGuideContext();
+  const { setState, state } = useGuideContext();
   const navigate = useNavigate();
 
   const steps = [
@@ -18,7 +14,7 @@ export default function GuideWrapper() {
       content: (
         <div id="guidebox">
           <h3>Guide</h3>
-          <p>Welcome to IntelOwl Guide!</p>
+          <p>Welcome to IntelOwls Guide for First Time Visitors!, for further questions you could check out our <a href="/">docs</a> or reach us out on <a href="/">intelowls slack channel</a></p>
         </div>
       ),
       disableBeacon: true,
@@ -28,7 +24,7 @@ export default function GuideWrapper() {
       content: (
         <div id="guidebox">
           <h3>Dashboard</h3>
-          <p>See previous job details here</p>
+          <p>See previous job details here with charts and more</p>
         </div>
       ),
       disableBeacon: true,
@@ -38,17 +34,21 @@ export default function GuideWrapper() {
       content: (
         <div id="guidebox">
           <h3>Filter</h3>
-          <p>Filter by time here</p>
+          <p>Filter by time to get details about previous jobs</p>
         </div>
       ),
       disableBeacon: true,
     },
     {
-      target: "#Analyzers", 
+      target: "#Analyzers",
       content: (
         <div id="guidebox">
-          <h3>PLugins</h3>
-          <p>different plugins here</p>
+          <h3>Plugins</h3>
+          <p>
+            Analyzers are the most important plugins in IntelOwl. They allow to
+            perform data extraction on the observables and/or files that you
+            would like to analyze.
+          </p>
         </div>
       ),
       disableBeacon: true,
@@ -57,8 +57,12 @@ export default function GuideWrapper() {
       target: "#pluginconfigbutton",
       content: (
         <div id="guidebox">
-          <h3>plugin config</h3>
-          <p>config up your own plugins</p>
+          <h3>Plugin Configurations</h3>
+          <p>Write up your own plugin configs</p>
+          <p>
+            Note: Your plugin configuration overrides your organizations
+            configuration (if any).
+          </p>
         </div>
       ),
       disableBeacon: true,
@@ -67,8 +71,11 @@ export default function GuideWrapper() {
       target: "#scanpage",
       content: (
         <div id="guidebox">
-          <h3>this is scan page</h3>
-          <p>do this</p>
+          <h3>Scan Page</h3>
+          <p>
+            You could get started with analyzing various observabls with just
+            three steps{" "}
+          </p>
         </div>
       ),
       disableBeacon: true,
@@ -77,8 +84,7 @@ export default function GuideWrapper() {
       target: "#selectobservable",
       content: (
         <div id="guidebox">
-          
-          <p>select observable</p>
+          <p>Select/Add Observables </p>
         </div>
       ),
       disableBeacon: true,
@@ -87,7 +93,7 @@ export default function GuideWrapper() {
       target: "#selectplugins",
       content: (
         <div id="guidebox">
-          <p>select plugins</p>
+          <p>Select from different plugins(Analyzers/Playbooks/Ingestors)</p>
         </div>
       ),
       disableBeacon: true,
@@ -96,7 +102,7 @@ export default function GuideWrapper() {
       target: "#startScan",
       content: (
         <div id="guidebox">
-          <h3>start scan</h3>
+          <h3>Click to Start the Scan</h3>
         </div>
       ),
       disableBeacon: true,
@@ -105,8 +111,11 @@ export default function GuideWrapper() {
       target: "#jobsHistory",
       content: (
         <div id="guidebox">
-          <h3>history</h3>
-          <p>kjabdjk</p>
+          <h3>Job History</h3>
+          <p>
+            Here you could see the list of all previous jobs and expand over the
+            details through clicking that particular job from the table
+          </p>
         </div>
       ),
       disableBeacon: true,
@@ -120,42 +129,114 @@ export default function GuideWrapper() {
   });
 
   const handleCallback = (data) => {
-    const { _action, index, _lifecycle, type } = data;
+    const { action, index, _lifecycle, type } = data;
 
-    if (type === "step:after" && index === 0) {
-      setState({ run: false, stepIndex: 1 });
-      navigate("/dashboard");
-    }
-    if (type === "step:after" && index === 1) {
-      setState({ run: true, stepIndex: 2 });
-    }
-    if (type === "step:after" && index === 2) {
-      setState({ run: true, stepIndex: 3  });
-      navigate("/plugins");
-    }
-    if (type === "step:after" && index === 3) {
-      setState({ run: true, stepIndex: 4  });
-    }
-    if (type === "step:after" && index === 4) {
-      setState({ run: false, stepIndex: 5  });
-      navigate("/scan");
-    }
-    if (type === "step:after" && index === 5) {
-      setState({ run: true, stepIndex: 6  });
-    }
-    if (type === "step:after" && index === 6) {
-      setState({ run: true, stepIndex: 7  });
-    }
-    if (type === "step:after" && index === 7) {
-      setState({ run: true, stepIndex: 8  });
-    }
-    if (type === "step:after" && index === 8) {
-      setState({ run: true, stepIndex: 9  });
-      navigate("/jobs");
-    }
-    if (type === "step:after" && index === 9) {
-      setState({ run: true, stepIndex: 10  });
-      navigate("/");
+    switch (index) {
+      case 0:
+        if (type === "step:after") {
+          setState({ run: false, stepIndex: 1 });
+          navigate("/dashboard");
+        }
+        break;
+      case 1:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 2 });
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 2:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 3 });
+            navigate("/plugins");
+            setState({ run: true, stepIndex: 2 });
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 3:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 4 });
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 4:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: false, stepIndex: 5 });
+            navigate("/scan");
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 5:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 6 });
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 6:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 7 });
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 7:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 8 });
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 8:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 9 });
+            navigate("/jobs");
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 9:
+        if (type === "step:after") {
+          if (action === "close") {
+            setState({ run: true, stepIndex: 10 });
+            navigate("/");
+          } else {
+            setState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      default:
+        setState({ run: false, stepIndex: 0 });
+        navigate("/");
+        break;
     }
   };
 
@@ -165,13 +246,19 @@ export default function GuideWrapper() {
       <Joyride
         callback={handleCallback}
         run={state.run}
+        hideCloseButton
+        locale={{
+          // NOTE: this fixes the button behaviours for react-joyride
+          close: "Next",
+          back: "Close",
+        }}
         stepIndex={state.stepIndex}
         steps={state.steps}
         styles={{
           options: {
             arrowColor: "#000",
-            backgroundColor: "#000",
-            primaryColor: "#000",
+            backgroundColor: "#001D24",
+            primaryColor: "#5592AA",
             textColor: "#fff",
           },
         }}

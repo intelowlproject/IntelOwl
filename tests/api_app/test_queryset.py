@@ -35,7 +35,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter",
             is_secret=False,
             required=True,
-            python_config=ac.python_config,
+            python_module=ac.python_module,
         )
         param2 = Parameter.objects.create(
             name="testparameter2",
@@ -43,7 +43,7 @@ class PythonConfiguQuerySetTestCase(CustomTestCase):
             description="test parameter2",
             is_secret=False,
             required=True,
-            python_config=ac.python_config,
+            python_module=ac.python_module,
         )
 
         pc = PluginConfig.objects.create(

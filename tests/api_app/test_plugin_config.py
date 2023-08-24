@@ -18,9 +18,9 @@ User = get_user_model()
 class PluginConfigViewSetTestCase(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
-        ac = AnalyzerConfig.objects.first()
+        self.ac = AnalyzerConfig.objects.first()
         self.param = Parameter.objects.create(
-            python_module=ac.python_module,
+            python_module=self.ac.python_module,
             name="test",
             is_secret=True,
             required=True,
@@ -48,14 +48,14 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         )
         self.pc0 = PluginConfig.objects.create(
             parameter=self.param,
-            analyzer_config=ac,
+            analyzer_config=self.ac,
             value="value",
             owner=self.superuser,
             for_organization=True,
         )
         self.pc1 = PluginConfig.objects.create(
             parameter=self.param,
-            analyzer_config=ac,
+            analyzer_config=self.ac,
             value="value",
             owner=self.another_owner,
             for_organization=True,
@@ -172,7 +172,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertIn("config_type", needle)
         self.assertEqual(needle["config_type"], "2")
         self.assertIn("plugin_name", needle)
-        self.assertEqual(needle["plugin_name"], self.param.analyzer_config.name)
+        self.assertEqual(needle["plugin_name"], self.ac.name)
         self.assertIn("organization", needle)
         self.assertEqual(needle["organization"], "testorg0")
         self.assertIn("value", needle)

@@ -128,10 +128,10 @@ class AttachedToPythonConfigInterface(models.Model):
         from django.core.exceptions import ValidationError
 
         if len(list(filter(None, self._possible_configs()))) != 1:
-            raise ValidationError(
-                "You must have exactly one between"
-                f"{', '.join([config.name for config in self._possible_configs()])}"
+            configs = ", ".join(
+                [config.name for config in self._possible_configs() if config]
             )
+            raise ValidationError(f"You must have exactly one between {configs}")
 
     @cached_property
     def config(self) -> "PythonConfig":

@@ -371,35 +371,31 @@ class YaraScan(FileAnalyzer):
 
     @classmethod
     def _create_storage(cls):
-        from api_app.analyzers_manager.models import AnalyzerConfig
-
         storage = YaraStorage()
-        for config in AnalyzerConfig.objects.filter(
-            python_module=cls.python_module, disabled=False
-        ):
-            for plugin in PluginConfig.objects.filter(
-                parameter__name="private_repositories",
-                parameter__analyzer_config__pk=config.pk,
-            ):
-                if not plugin.value:
-                    continue
-                owner = (
-                    f"{plugin.organization.name}.{plugin.organization.owner}"
-                    if plugin.for_organization
-                    else plugin.owner.username
-                )
-                for url, ssh_key in plugin.value.items():
-                    logger.info(f"Adding personal private url {url}")
-                    storage.add_repo(url, owner, ssh_key)
 
-            # we are downloading even custom signatures for each analyzer
-            for plugin in PluginConfig.objects.filter(
-                parameter__name="repositories", parameter__analyzer_config__pk=config.pk
-            ):
-                new_urls = plugin.value
-                logger.info(f"Adding personal urls {new_urls}")
-                for url in new_urls:
-                    storage.add_repo(url)
+        for plugin in PluginConfig.objects.filter(
+            parameter__name="private_repositories",
+            parameter__python_module=cls.python_module,
+        ):
+            if not plugin.value:
+                continue
+            owner = (
+                f"{plugin.organization.name}.{plugin.organization.owner}"
+                if plugin.for_organization
+                else plugin.owner.username
+            )
+            for url, ssh_key in plugin.value.items():
+                logger.info(f"Adding personal private url {url}")
+                storage.add_repo(url, owner, ssh_key)
+
+        # we are downloading even custom signatures for each analyzer
+        for plugin in PluginConfig.objects.filter(
+            parameter__name="repositories", parameter__python_module=cls.python_module
+        ):
+            new_urls = plugin.value
+            logger.info(f"Adding personal urls {new_urls}")
+            for url in new_urls:
+                storage.add_repo(url)
         return storage
 
     @classmethod

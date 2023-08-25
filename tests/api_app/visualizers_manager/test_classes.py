@@ -5,7 +5,8 @@
 from kombu import uuid
 
 from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.models import Job
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import Job, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
@@ -278,7 +279,12 @@ class VisualizerTestCase(CustomTestCase):
             status="reported_without_fails",
         )
         vc = VisualizerConfig.objects.create(
-            name="test", python_module="yara.Yara", description="test", playbook=pc
+            name="test",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
+            description="test",
+            playbook=pc,
         )
         ar = AnalyzerReport.objects.create(
             config=pc.analyzers.first(), job=job, task_id=uuid()

@@ -71,6 +71,27 @@ class PivotConfig(
         help_text="Dotted path to the field",
         validators=[pivot_regex_validator],
     )
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="pivots",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="pivots",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="pivots",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
     playbook_to_execute = models.ForeignKey(
         "playbooks_manager.PlaybookConfig",
         on_delete=models.PROTECT,

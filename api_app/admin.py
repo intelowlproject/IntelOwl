@@ -6,16 +6,12 @@ from django.db.models import JSONField
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm, PythonConfigAdminForm
-from .models import (
-    AbstractConfig,
-    Job,
-    Parameter,
-    PluginConfig,
-    PythonConfig,
-    PythonModule,
-    Tag,
+from .models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule, Tag
+from .tabulars import (
+    ParameterInline,
+    PluginConfigInlineForParameter,
+    PluginConfigInlineForPythonConfig,
 )
-from .tabulars import PluginConfigInline
 
 
 @admin.register(Job)
@@ -117,24 +113,11 @@ class JsonViewerAdminView(admin.ModelAdmin):
 
 @admin.register(Parameter)
 class ParameterAdminView(admin.ModelAdmin):
-    inlines = [PluginConfigInline]
+    inlines = [PluginConfigInlineForParameter]
     search_fields = ["name"]
     list_filter = ["is_secret"]
     list_display = ParameterInlineForm.Meta.fields
     fields = list_display
-
-
-class ParameterInline(admin.TabularInline):
-    model = Parameter
-    list_display = ParameterInlineForm.Meta.fields
-    fields = list_display + [
-        "default",
-    ]
-    show_change_link = True
-    form = ParameterInlineForm
-
-    def get_extra(self, request, obj: Parameter = None, **kwargs):
-        return 0
 
 
 @admin.register(PythonModule)
@@ -170,11 +153,8 @@ class PythonConfigAdminView(AbstractConfigAdminView):
 
     list_display = (
         "name",
-        "get_python_module",
+        "python_module",
         "disabled",
         "disabled_in_orgs",
     )
-
-    @admin.display(ordering="python_module__module", description="Python module")
-    def get_python_module(self, obj: PythonConfig):
-        return obj.python_module.module
+    inlines = [PluginConfigInlineForPythonConfig]

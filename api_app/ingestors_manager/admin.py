@@ -17,7 +17,7 @@ class IngestorReportAdminView(AbstractReportAdminView):
 class IngestorConfigAdminView(PythonConfigAdminView):
     list_display = (
         "name",
-        "get_python_module",
+        "python_module",
         "disabled",
         "playbook_to_execute",
         "schedule",

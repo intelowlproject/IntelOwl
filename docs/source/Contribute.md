@@ -176,7 +176,6 @@ Here, you should add every `Parameter` that the python code requires:
       2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
       3. *description
       4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
-      5. default:  default value provided for the parameter (if is a secret, it should be `Null`)
 
 At this point, you can follow the specific guide for each plugin 
 

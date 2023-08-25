@@ -94,21 +94,18 @@ class AttachedToPythonConfigInterface(models.Model):
     analyzer_config = models.ForeignKey(
         "analyzers_manager.AnalyzerConfig",
         on_delete=models.PROTECT,
-        related_name="%(class)s",
         null=True,
         blank=True,
     )
     connector_config = models.ForeignKey(
         "connectors_manager.ConnectorConfig",
         on_delete=models.PROTECT,
-        related_name="%(class)s",
         null=True,
         blank=True,
     )
     visualizer_config = models.ForeignKey(
         "visualizers_manager.VisualizerConfig",
         on_delete=models.PROTECT,
-        related_name="%(class)s",
         null=True,
         blank=True,
     )

@@ -547,10 +547,31 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
         Parameter, on_delete=models.CASCADE, null=False, related_name="values"
     )
     updated_at = models.DateTimeField(auto_now=True)
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="values",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="values",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="values",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
     ingestor_config = models.ForeignKey(
         "ingestors_manager.IngestorConfig",
         on_delete=models.PROTECT,
-        related_name="%(class)s",
+        related_name="values",
         null=True,
         blank=True,
     )
@@ -565,15 +586,22 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                 name="plugin_config_no_config_all_null",
             )
         ] + [
-            UniqueConstraint(
-                fields=["owner", "for_organization", "parameter", config],
-                name=f"unique_with_{config}",
-            )
+            item
             for config in [
                 "analyzer_config",
                 "connector_config",
                 "visualizer_config",
                 "ingestor_config",
+            ]
+            for item in [
+                UniqueConstraint(
+                    fields=["owner", "for_organization", "parameter", config],
+                    name=f"plugin_config_unique_with_{config}_owner",
+                ),
+                UniqueConstraint(
+                    fields=["for_organization", "parameter", config],
+                    name=f"plugin_config_unique_with_{config}",
+                ),
             ]
         ]
         indexes = [

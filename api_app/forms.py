@@ -1,7 +1,7 @@
 from django import forms
 from django.forms.models import ALL_FIELDS
 
-from api_app.models import Parameter, PluginConfig, PythonConfig
+from api_app.models import Parameter, PythonConfig
 
 
 class MultilineJSONField(forms.JSONField):
@@ -41,30 +41,6 @@ class ParameterInlineForm(forms.ModelForm):
             "python_module",
         ]
 
-    def __init__(self, *args, **kwargs):
-        instance: Parameter = kwargs.get("instance")
-        if instance:
-            try:
-                pc = PluginConfig.objects.get(parameter=instance, owner__isnull=True)
-            except PluginConfig.DoesNotExist:
-                default = None
-            else:
-                default = pc.value
-            kwargs["initial"] = {"default": default}
-        super().__init__(*args, **kwargs)
-
-    def save(self, commit: bool = ...):
-        instance = super().save(commit=commit)
-        if (default_value := self.cleaned_data["default"]) is not None:
-            PluginConfig.objects.update_or_create(
-                owner=None,
-                for_organization=False,
-                parameter=instance,
-                defaults={"value": default_value},
-            )
-
-        return instance
-
 
 class PythonConfigAdminForm(forms.ModelForm):
     class Meta:
@@ -74,6 +50,7 @@ class PythonConfigAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # only modules of this configurations
         self.fields["python_module"].queryset = self.fields[
             "python_module"
         ].queryset.filter(base_path__in=self.Meta.base_paths_allowed)

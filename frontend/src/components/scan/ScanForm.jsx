@@ -81,7 +81,7 @@ const sanitizeObservable = (observable) =>
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get("observable");
-  const { setState: setGuideState, state: guideState } = useGuideContext();
+  const { guideState, setGuideState } = useGuideContext();
 
   React.useEffect(() => {
     if (guideState.tourActive) {

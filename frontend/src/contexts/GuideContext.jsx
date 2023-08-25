@@ -9,20 +9,20 @@ const GuideState = {
 };
 
 export const GuideContext = React.createContext({
-  state: GuideState,
-  setState: () => undefined,
+  guideState: GuideState,
+  setGuideState: () => undefined,
 });
 GuideContext.displayName = "GuideContext";
 
 export function GuideProvider(props) {
-  const [state, setState] = useSetState(GuideState);
+  const [guideState, setGuideState] = useSetState(GuideState);
 
   const value = React.useMemo(
     () => ({
-      state,
-      setState,
+      guideState,
+      setGuideState,
     }),
-    [setState, state],
+    [setGuideState, guideState],
   );
 
   return <GuideContext.Provider value={value} {...props} />;

@@ -49,10 +49,10 @@ export default function JobsTable() {
     toPassTableProps,
   );
 
-  const { setState: setGuideState, state } = useGuideContext();
+  const { guideState, setGuideState } = useGuideContext();
 
   React.useEffect(() => {
-    if (state.tourActive) {
+    if (guideState.tourActive) {
       setTimeout(() => {
         setGuideState({ run: true, stepIndex: 9 });
       }, 100);

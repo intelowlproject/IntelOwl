@@ -5,7 +5,7 @@ import { useMount } from "react-use";
 import { useGuideContext } from "../../contexts/GuideContext";
 
 export default function GuideWrapper() {
-  const { setState, state } = useGuideContext();
+  const { guideState, setGuideState } = useGuideContext();
   const navigate = useNavigate();
 
   const steps = [
@@ -127,7 +127,7 @@ export default function GuideWrapper() {
   ];
 
   useMount(() => {
-    setState({
+    setGuideState({
       steps,
     });
   });
@@ -138,16 +138,16 @@ export default function GuideWrapper() {
     switch (index) {
       case 0:
         if (type === "step:after") {
-          setState({ run: false, stepIndex: 1 });
+          setGuideState({ run: false, stepIndex: 1 });
           navigate("/dashboard");
         }
         break;
       case 1:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 2 });
+            setGuideState({ run: true, stepIndex: 2 });
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -155,11 +155,11 @@ export default function GuideWrapper() {
       case 2:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 3 });
+            setGuideState({ run: true, stepIndex: 3 });
             navigate("/plugins");
-            setState({ run: true, stepIndex: 2 });
+            setGuideState({ run: true, stepIndex: 2 });
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -167,9 +167,9 @@ export default function GuideWrapper() {
       case 3:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 4 });
+            setGuideState({ run: true, stepIndex: 4 });
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -177,10 +177,10 @@ export default function GuideWrapper() {
       case 4:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: false, stepIndex: 5 });
+            setGuideState({ run: false, stepIndex: 5 });
             navigate("/scan");
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -188,9 +188,9 @@ export default function GuideWrapper() {
       case 5:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 6 });
+            setGuideState({ run: true, stepIndex: 6 });
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -198,9 +198,9 @@ export default function GuideWrapper() {
       case 6:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 7 });
+            setGuideState({ run: true, stepIndex: 7 });
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -208,9 +208,9 @@ export default function GuideWrapper() {
       case 7:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 8 });
+            setGuideState({ run: true, stepIndex: 8 });
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -218,10 +218,10 @@ export default function GuideWrapper() {
       case 8:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 9 });
+            setGuideState({ run: true, stepIndex: 9 });
             navigate("/jobs");
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
@@ -229,16 +229,16 @@ export default function GuideWrapper() {
       case 9:
         if (type === "step:after") {
           if (action === "close") {
-            setState({ run: true, stepIndex: 10 });
+            setGuideState({ run: true, stepIndex: 10 });
             navigate("/");
           } else {
-            setState({ run: false, stepIndex: 0 });
+            setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
           }
         }
         break;
       default:
-        setState({ run: false, stepIndex: 0 });
+        setGuideState({ run: false, stepIndex: 0 });
         navigate("/");
         break;
     }
@@ -249,15 +249,15 @@ export default function GuideWrapper() {
       <Outlet />
       <Joyride
         callback={handleCallback}
-        run={state.run}
+        run={guideState.run}
         hideCloseButton
         locale={{
           // NOTE: this fixes the button behaviours for react-joyride
           close: "Next",
           back: "Close",
         }}
-        stepIndex={state.stepIndex}
-        steps={state.steps}
+        stepIndex={guideState.stepIndex}
+        steps={guideState.steps}
         styles={{
           options: {
             arrowColor: "#000",

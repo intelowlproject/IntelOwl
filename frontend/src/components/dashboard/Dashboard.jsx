@@ -39,10 +39,10 @@ const charts2 = [
 ];
 
 export default function Dashboard() {
-  const { setState: setGuideState, state } = useGuideContext();
+  const { guideState, setGuideState } = useGuideContext();
 
   useEffect(() => {
-    if (state.tourActive) {
+    if (guideState.tourActive) {
       setTimeout(() => {
         setGuideState({ run: true, stepIndex: 1 });
       }, 100);

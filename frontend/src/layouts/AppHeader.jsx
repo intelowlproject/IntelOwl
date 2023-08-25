@@ -118,10 +118,10 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
 function AppHeader() {
   console.debug("AppHeader rendered!");
 
-  const { setState } = useGuideContext();
+  const { setGuideState } = useGuideContext();
 
   const handleClickStart = () => {
-    setState({ run: true, tourActive: true });
+    setGuideState({ run: true, tourActive: true });
   };
 
   // local state

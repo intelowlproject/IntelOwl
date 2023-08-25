@@ -116,10 +116,10 @@ export default function PluginsContainer() {
     ),
   );
 
-  const { setState: setGuideState, state } = useGuideContext();
+  const { guideState, setGuideState } = useGuideContext();
 
   React.useEffect(() => {
-    if (state.tourActive) {
+    if (guideState.tourActive) {
       setTimeout(() => {
         setGuideState({ run: true, stepIndex: 3 });
       }, 200);

@@ -124,12 +124,13 @@ def update(python_module_pk: int):
 
             queues = set(
                 config.queue
-                for config in [
+                for qs in [
                     AnalyzerConfig.objects.filter(python_module=python_module),
                     ConnectorConfig.objects.filter(python_module=python_module),
                     VisualizerConfig.objects.filter(python_module=python_module),
                     IngestorConfig.objects.filter(python_module=python_module),
                 ]
+                for config in qs
             )
             for queue in queues:
                 broadcast(

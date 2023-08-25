@@ -4,7 +4,7 @@
 
 from celery.canvas import Signature
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths
@@ -33,9 +33,13 @@ class PythonModuleTestCase(CustomTestCase):
 
     def test_unique_together(self):
         pc = PythonModule.objects.create(module="test.Test", base_path="teeest")
-        with self.assertRaises(IntegrityError):
-            PythonModule.objects.create(module="test.Test", base_path="teeest")
-        pc.delete()
+        try:
+            with transaction.atomic():
+                PythonModule.objects.create(module="test.Test", base_path="teeest")
+        except IntegrityError:
+            pc.delete()
+        else:
+            self.fail("Duplicate module allowed")
 
 
 class AbstractConfigTestCase(CustomTestCase):

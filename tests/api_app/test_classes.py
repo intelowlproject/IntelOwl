@@ -5,10 +5,11 @@ from unittest.mock import patch
 
 from kombu import uuid
 
+from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job
+from api_app.models import Job, PythonModule
 from tests import CustomTestCase
 
 
@@ -20,7 +21,9 @@ class PluginTestCase(CustomTestCase):
         )
         self.cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},

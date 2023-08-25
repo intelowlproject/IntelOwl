@@ -15,10 +15,13 @@ export default function GuideWrapper() {
         <div id="guidebox">
           <h3>Guide</h3>
           <p>
-            Welcome to IntelOwls Guide for First Time Visitors!
-            For further
-            questions you could either check out our <a href="https://intelowl.readthedocs.io/en/latest/">docs</a> or reach us
-            out on <a href="https://www.honeynet.org/gsoc/">the official IntelOwl slack channel</a>
+            Welcome to IntelOwls Guide for First Time Visitors! For further
+            questions you could either check out our{" "}
+            <a href="https://intelowl.readthedocs.io/en/latest/">docs</a> or
+            reach us out on{" "}
+            <a href="https://www.honeynet.org/gsoc/">
+              the official IntelOwl slack channel
+            </a>
           </p>
         </div>
       ),
@@ -49,10 +52,12 @@ export default function GuideWrapper() {
       content: (
         <div id="guidebox">
           <h3>Plugins</h3>
+          <br />
           <p>
-<br>Plugins</br> are the core modular components of IntelOwl that can be easily added, changed and customized. 
-</p><p>
-The most important ones are the Analyzers that allow to perform data extraction on the observables and/or files that you would like to analyze.
+            Plugins are the core modular components of IntelOwl that can be
+            easily added, changed and customized. The most important ones are
+            the Analyzers that allow to perform data extraction on the
+            observables and/or files that you would like to analyze.
           </p>
         </div>
       ),
@@ -65,7 +70,8 @@ The most important ones are the Analyzers that allow to perform data extraction 
           <h3>Plugin Configurations</h3>
           <p>Write up your own plugin configuration!</p>
           <p>
-            Note: Some plugins work out-of-the-box, while others requires to be configured (with API keys for instance).
+            Note: Some plugins work out-of-the-box, while others requires to be
+            configured (with API keys for instance).
           </p>
         </div>
       ),
@@ -97,7 +103,11 @@ The most important ones are the Analyzers that allow to perform data extraction 
       target: "#selectplugins",
       content: (
         <div id="guidebox">
-          <p>Select a <br>Playbook</br>. Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.</p>
+          <p>
+            Select a Playbook.
+            <br /> Playbooks are designed to be easy to share sequence of
+            running Analyzers/Connectors on a particular kind of observable.
+          </p>
         </div>
       ),
       disableBeacon: true,

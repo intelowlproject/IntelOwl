@@ -320,8 +320,8 @@ class YaraScan(FileAnalyzer):
                     is_secret=True,
                     name="private_repositories",
                 )
-                .annotate_configured(self._job.user)
-                .annotate_value_for_user(self._job.user)
+                .annotate_configured(self._config, self._job.user)
+                .annotate_value_for_user(self._config, self._job.user)
                 .first()
             )
             if (

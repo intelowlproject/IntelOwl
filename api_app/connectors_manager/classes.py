@@ -85,8 +85,8 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             logger.info(f"Found connector runnable {cc.name} for user {user.username}")
             for param in (
                 cc.parameters.filter(name__startswith="url")
-                .annotate_configured(user)
-                .annotate_value_for_user(user)
+                .annotate_configured(cc, user)
+                .annotate_value_for_user(cc, user)
             ):
                 if not param.configured or not param.value:
                     continue

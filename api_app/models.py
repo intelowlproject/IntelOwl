@@ -550,27 +550,27 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
     analyzer_config = models.ForeignKey(
         "analyzers_manager.AnalyzerConfig",
         related_name="values",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
     connector_config = models.ForeignKey(
         "connectors_manager.ConnectorConfig",
         related_name="values",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
     visualizer_config = models.ForeignKey(
         "visualizers_manager.VisualizerConfig",
         related_name="values",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
     ingestor_config = models.ForeignKey(
         "ingestors_manager.IngestorConfig",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="values",
         null=True,
         blank=True,
@@ -782,7 +782,9 @@ class AbstractReport(models.Model):
 
 class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
+    parameters = models.ManyToManyField(
 
+    )
     config = models.JSONField(
         blank=False,
         default=config_default,
@@ -865,7 +867,11 @@ class PythonConfig(AbstractConfig):
 
     @deprecated("Please use the queryset method `annotate_configured`.")
     def _is_configured(self, user: User = None) -> bool:
-        pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
+        pc = (
+            self.__class__.objects.filter(pk=self.pk)
+            .annotate_configured(self, user)
+            .first()
+        )
         return pc.configured
 
     @cached_property
@@ -895,9 +901,9 @@ class PythonConfig(AbstractConfig):
         # 1 - Runtime config
         # 2 - Value inside the db
         result = {}
-        for param in self.parameters.annotate_configured(user).annotate_value_for_user(
-            user
-        ):
+        for param in self.parameters.annotate_configured(
+            self, user
+        ).annotate_value_for_user(self, user):
             param: Parameter
             if param.name in config_runtime:
                 result[param] = config_runtime[param.name]

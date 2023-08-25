@@ -1052,7 +1052,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
         python_config_class: Type[PythonConfig] = self.child.Meta.model
         plugins = python_config_class.objects.filter(
             pk__in=[plugin.pk for plugin in data]
-        )
+        ).prefetch_related("parameters")
         user = self.context["request"].user
         enabled_plugins = plugins.filter(disabled=False)
 
@@ -1071,9 +1071,11 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                 f"User {user.username} is not a member of an organization,"
                 "meaning that there are no disabled plugins"
             )
-        # annotate if the params are configured or not with the subquery
         params = (
-            plugins.get_parameters()
+            Parameter.objects.filter(
+                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
+            )
+            .prefetch_related(self.child.Meta.model.snake_case_name)
             .annotate_value_for_user(user)
             .annotate_configured(user)
         )
@@ -1081,23 +1083,16 @@ class PythonListConfigSerializer(rfs.ListSerializer):
         # populate the result for every plugin (even the ones without parameters)
         # parsed[plugin]= [parameter1]
         for parameter in params:
-            parsed[parameter.python_module].append(parameter)
-        print(
-            ", ".join(
-                [
-                    f"plugin {key} has {len(values)} parameters"
-                    for key, values in parsed.items()
-                ]
-            )
-        )
-        # we can finally construct our result
+            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
+                parameter
+            )        # we can finally construct our result
         for plugin in plugins:
             plugin_representation = self.child.to_representation(plugin)
             plugin_representation["params"] = {}
             plugin_representation["secrets"] = {}
             total_parameter = len(parsed[plugin])
             parameter_required_not_configured = []
-            for param in parsed[plugin.python_module]:
+            for param in plugin.parameters.annotate_configured(plugin, user).annotate_value_for_user(plugin, user):
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data
@@ -1106,10 +1101,10 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                     f"has value {param.value} for user {user.username}"
                 )
                 param_representation.pop("name")
-                if param.is_secret:
-                    plugin_representation["secrets"][param.name] = param_representation
-                else:
-                    plugin_representation["params"][param.name] = param_representation
+                key = "secrets" if param.is_secret else "params"
+
+                plugin_representation[key][param.name] = param_representation
+
             if not parameter_required_not_configured:
                 logger.debug(f"Plugin {plugin.name} is configured")
                 configured = True

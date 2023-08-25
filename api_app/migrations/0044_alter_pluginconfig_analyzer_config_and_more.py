@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.PROTECT,
+                on_delete=django.db.models.deletion.CASCADE,
                 related_name="values",
                 to="analyzers_manager.analyzerconfig",
             ),
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.PROTECT,
+                on_delete=django.db.models.deletion.CASCADE,
                 related_name="values",
                 to="connectors_manager.connectorconfig",
             ),
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.PROTECT,
+                on_delete=django.db.models.deletion.CASCADE,
                 related_name="values",
                 to="ingestors_manager.ingestorconfig",
             ),
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.PROTECT,
+                on_delete=django.db.models.deletion.CASCADE,
                 related_name="values",
                 to="visualizers_manager.visualizerconfig",
             ),

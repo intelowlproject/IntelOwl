@@ -75,6 +75,6 @@ class PluginTestCase(CustomTestCase):
 
         class_ = ClassicDNSResolver
         self.assertEqual(
-            class_.python_module,
+            class_.python_module.module,
             "dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
         )

@@ -342,9 +342,9 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs, [cc], "CLEAR"
         )
         self.assertCountEqual(connectors, [cc])
-        cc.delete()
         pc.delete()
         pc2.delete()
+        cc.delete()
 
     def test_filter_connectors_tlp(self):
         cc = ConnectorConfig.objects.create(

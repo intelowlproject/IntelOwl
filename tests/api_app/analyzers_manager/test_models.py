@@ -18,7 +18,7 @@ class AnalyzerConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig(
             name="test",
             python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
                 module="tranco.Tranco",
             ),
             description="test",

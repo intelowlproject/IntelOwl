@@ -330,7 +330,7 @@ class PluginConfigTestCase(CustomTestCase):
             description="test",
             python_module=PythonModule.objects.get(
                 module="tranco.Tranco",
-                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
             ),
             disabled=False,
             type="file",

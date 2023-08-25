@@ -313,7 +313,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             maximum_tlp="CLEAR",
         )
         pc = PluginConfig.objects.create(
-            param=Parameter.objects.get(
+            parameter=Parameter.objects.get(
                 name="api_key_name", python_module=cc.python_module
             ),
             connector_config=cc,
@@ -322,7 +322,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             for_organization=False,
         )
         pc2 = PluginConfig.objects.create(
-            param=Parameter.objects.get(
+            parameter=Parameter.objects.get(
                 name="url_key_name", python_module=cc.python_module
             ),
             connector_config=cc,
@@ -358,7 +358,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             maximum_tlp="CLEAR",
         )
         pc = PluginConfig.objects.create(
-            param=Parameter.objects.get(
+            parameter=Parameter.objects.get(
                 name="api_key_name", python_module=cc.python_module
             ),
             connector_config=cc,
@@ -367,7 +367,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             for_organization=False,
         )
         pc2 = PluginConfig.objects.create(
-            param=Parameter.objects.get(
+            parameter=Parameter.objects.get(
                 name="url_key_name", python_module=cc.python_module
             ),
             connector_config=cc,

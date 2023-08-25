@@ -301,7 +301,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return PythonModuleBasePaths[Visualizer.__name__].value
+        return PythonModuleBasePaths.Visualizer.value
 
     @classmethod
     @property

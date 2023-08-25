@@ -32,7 +32,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return PythonModuleBasePaths[Ingestor.__name__].value
+        return PythonModuleBasePaths.Ingestor.value
 
     @abc.abstractmethod
     def run(self) -> typing.Iterator[Any]:

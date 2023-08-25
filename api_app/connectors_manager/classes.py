@@ -28,7 +28,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return PythonModuleBasePaths[Connector.__name__].value
+        return PythonModuleBasePaths.Connector.value
 
     @classmethod
     @property

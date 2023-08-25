@@ -15,7 +15,7 @@ class CustomOAuthTestCase(APITestCase):
             username=username,
             email=email,
             is_superuser=True,
-            defaults={"passowrd": password},
+            defaults={"password": password},
         )[0]
         cls.creds = {
             "username": username,

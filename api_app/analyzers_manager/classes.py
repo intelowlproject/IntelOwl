@@ -145,7 +145,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return PythonModuleBasePaths[ObservableAnalyzer.__name__].value
+        return PythonModuleBasePaths.ObservableAnalyzer.value
 
     def before_run(self):
         super().before_run()

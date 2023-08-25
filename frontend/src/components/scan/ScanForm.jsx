@@ -86,7 +86,7 @@ export default function ScanForm() {
   React.useEffect(() => {
     if (guideState.tourActive) {
       setTimeout(() => {
-        setGuideState({ run: true, stepIndex: 5 });
+        setGuideState({ run: true, stepIndex: 3 });
       }, 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

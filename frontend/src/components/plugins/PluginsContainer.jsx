@@ -121,7 +121,7 @@ export default function PluginsContainer() {
   React.useEffect(() => {
     if (guideState.tourActive) {
       setTimeout(() => {
-        setGuideState({ run: true, stepIndex: 3 });
+        setGuideState({ run: true, stepIndex: 1 });
       }, 200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

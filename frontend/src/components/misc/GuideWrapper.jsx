@@ -28,26 +28,6 @@ export default function GuideWrapper() {
       disableBeacon: true,
     },
     {
-      target: "#Dashboard_title",
-      content: (
-        <div id="guidebox">
-          <h3>Dashboard</h3>
-          <p>See previous job details here with charts and more</p>
-        </div>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: "#Dashboard_timepicker",
-      content: (
-        <div id="guidebox">
-          <h3>Filter</h3>
-          <p>Filter by time to get details about previous jobs</p>
-        </div>
-      ),
-      disableBeacon: true,
-    },
-    {
       target: "#Analyzers",
       content: (
         <div id="guidebox">
@@ -134,6 +114,26 @@ export default function GuideWrapper() {
       ),
       disableBeacon: true,
     },
+    {
+      target: "#Dashboard_title",
+      content: (
+        <div id="guidebox">
+          <h3>Dashboard</h3>
+          <p>See previous job details here with charts and more</p>
+        </div>
+      ),
+      disableBeacon: true,
+    },
+    {
+      target: "#Dashboard_timepicker",
+      content: (
+        <div id="guidebox">
+          <h3>Filter</h3>
+          <p>Filter by time to get details about previous jobs</p>
+        </div>
+      ),
+      disableBeacon: true,
+    },
   ];
 
   useMount(() => {
@@ -149,7 +149,7 @@ export default function GuideWrapper() {
       case 0:
         if (type === "step:after") {
           setGuideState({ run: false, stepIndex: 1 });
-          navigate("/dashboard");
+          navigate("/plugins");
         }
         break;
       case 1:
@@ -165,9 +165,8 @@ export default function GuideWrapper() {
       case 2:
         if (type === "step:after") {
           if (action === "close") {
-            setGuideState({ run: true, stepIndex: 3 });
-            navigate("/plugins");
-            setGuideState({ run: true, stepIndex: 2 });
+            setGuideState({ run: false, stepIndex: 3 });
+            navigate("/scan");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -187,8 +186,7 @@ export default function GuideWrapper() {
       case 4:
         if (type === "step:after") {
           if (action === "close") {
-            setGuideState({ run: false, stepIndex: 5 });
-            navigate("/scan");
+            setGuideState({ run: true, stepIndex: 5 });
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -209,6 +207,7 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 7 });
+            navigate("/jobs");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -219,6 +218,7 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 8 });
+            navigate("/dashboard");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -229,7 +229,6 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 9 });
-            navigate("/jobs");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");

@@ -54,7 +54,7 @@ export default function JobsTable() {
   React.useEffect(() => {
     if (guideState.tourActive) {
       setTimeout(() => {
-        setGuideState({ run: true, stepIndex: 9 });
+        setGuideState({ run: true, stepIndex: 7 });
       }, 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

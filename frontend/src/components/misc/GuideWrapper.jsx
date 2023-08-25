@@ -50,9 +50,9 @@ export default function GuideWrapper() {
         <div id="guidebox">
           <h3>Plugins</h3>
           <p>
-            Analyzers are the most important plugins in IntelOwl. They allow to
-            perform data extraction on the observables and/or files that you
-            would like to analyze.
+<br>Plugins</br> are the core modular components of IntelOwl that can be easily added, changed and customized. 
+</p><p>
+The most important ones are the Analyzers that allow to perform data extraction on the observables and/or files that you would like to analyze.
           </p>
         </div>
       ),
@@ -63,10 +63,9 @@ export default function GuideWrapper() {
       content: (
         <div id="guidebox">
           <h3>Plugin Configurations</h3>
-          <p>Write up your own plugin configs</p>
+          <p>Write up your own plugin configuration!</p>
           <p>
-            Note: Your plugin configuration overrides your organizations
-            configuration (if any).
+            Note: Some plugins work out-of-the-box, while others requires to be configured (with API keys for instance).
           </p>
         </div>
       ),
@@ -78,7 +77,7 @@ export default function GuideWrapper() {
         <div id="guidebox">
           <h3>Scan Page</h3>
           <p>
-            You could get started with analyzing various observabls with just
+            You could get started with analyzing various observables with just
             three steps{" "}
           </p>
         </div>
@@ -98,7 +97,7 @@ export default function GuideWrapper() {
       target: "#selectplugins",
       content: (
         <div id="guidebox">
-          <p>Select from different plugins(Analyzers/Playbooks/Ingestors)</p>
+          <p>Select a <br>Playbook</br>. Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.</p>
         </div>
       ),
       disableBeacon: true,

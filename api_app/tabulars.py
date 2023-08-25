@@ -15,10 +15,17 @@ class PluginConfigInlineForParameter(admin.TabularInline):
 class PluginConfigInlineForPythonConfig(admin.TabularInline):
     model = PluginConfig
     extra = 0
-    fields = ["parameter", "is_secret", "value"]
-    readonly_fields = ["is_secret"]
+    fields = ["parameter", "is_secret", "get_type", "value"]
+    readonly_fields = ["is_secret", "get_type"]
     verbose_name = "Default Plugin Config"
     verbose_name_plural = "Default Plugin Configs"
+
+    @admin.display(description="Type")
+    def get_type(self, instance: PluginConfig):
+        return instance.parameter.type
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
     def get_parent_pk(self, request) -> Optional[str]:
         parent_pk = request.resolver_match.kwargs.get("object_id")

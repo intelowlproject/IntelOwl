@@ -15,9 +15,10 @@ export default function GuideWrapper() {
         <div id="guidebox">
           <h3>Guide</h3>
           <p>
-            Welcome to IntelOwls Guide for First Time Visitors!, for further
-            questions you could check out our <a href="/">docs</a> or reach us
-            out on <a href="/">intelowls slack channel</a>
+            Welcome to IntelOwls Guide for First Time Visitors!
+            For further
+            questions you could either check out our <a href="https://intelowl.readthedocs.io/en/latest/">docs</a> or reach us
+            out on <a href="https://www.honeynet.org/gsoc/">the official IntelOwl slack channel</a>
           </p>
         </div>
       ),

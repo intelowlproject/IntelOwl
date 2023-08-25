@@ -151,9 +151,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
             playbook: PlaybookConfig
-            if not attrs.get("scan_mode"):
+            if "scan_mode" not in attrs:
                 attrs["scan_mode"] = playbook.scan_mode
-            if not attrs.get("scan_check_time"):
+            if "scan_check_time" not in attrs:
                 attrs["scan_check_time"] = playbook.scan_check_time
             if attrs.get("analyzers_requested", []) or attrs.get(
                 "connectors_requested", []

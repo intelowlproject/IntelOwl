@@ -31,6 +31,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("owner", "for_organization", "parameter", "analyzer_config"),
                 name="plugin_config_unique_with_analyzer_config_owner",
+                condition=models.Q(owner__isnull=False),
             ),
         ),
         migrations.AddConstraint(
@@ -38,6 +39,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("for_organization", "parameter", "analyzer_config"),
                 name="plugin_config_unique_with_analyzer_config",
+                condition=models.Q(owner__isnull=True),
             ),
         ),
         migrations.AddConstraint(
@@ -45,6 +47,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("owner", "for_organization", "parameter", "connector_config"),
                 name="plugin_config_unique_with_connector_config_owner",
+                condition=models.Q(owner__isnull=False),
             ),
         ),
         migrations.AddConstraint(
@@ -52,6 +55,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("for_organization", "parameter", "connector_config"),
                 name="plugin_config_unique_with_connector_config",
+                condition=models.Q(owner__isnull=True),
             ),
         ),
         migrations.AddConstraint(
@@ -59,6 +63,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("owner", "for_organization", "parameter", "visualizer_config"),
                 name="plugin_config_unique_with_visualizer_config_owner",
+                condition=models.Q(owner__isnull=False),
             ),
         ),
         migrations.AddConstraint(
@@ -66,6 +71,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("for_organization", "parameter", "visualizer_config"),
                 name="plugin_config_unique_with_visualizer_config",
+                condition=models.Q(owner__isnull=True),
             ),
         ),
         migrations.AddConstraint(
@@ -73,6 +79,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("owner", "for_organization", "parameter", "ingestor_config"),
                 name="plugin_config_unique_with_ingestor_config_owner",
+                condition=models.Q(owner__isnull=False),
             ),
         ),
         migrations.AddConstraint(
@@ -80,6 +87,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 fields=("for_organization", "parameter", "ingestor_config"),
                 name="plugin_config_unique_with_ingestor_config",
+                condition=models.Q(owner__isnull=True),
             ),
         ),
     ]

@@ -597,10 +597,12 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                 UniqueConstraint(
                     fields=["owner", "for_organization", "parameter", config],
                     name=f"plugin_config_unique_with_{config}_owner",
+                    condition=Q(owner__isnull=False),
                 ),
                 UniqueConstraint(
                     fields=["for_organization", "parameter", config],
                     name=f"plugin_config_unique_with_{config}",
+                    condition=Q(owner__isnull=True),
                 ),
             ]
         ]

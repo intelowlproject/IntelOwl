@@ -210,6 +210,28 @@ def run_plugin(
     )
     plugin.start()
 
+@app.task(name="create_caches", soft_time_limit=200)
+def create_caches(user_pk:int):
+    # we create the cache hit
+    from certego_saas.apps.user.models import User
+    user = User.objects.get(pk=user_pk)
+    from api_app.serializers import PythonListConfigSerializer
+    from api_app.analyzers_manager.models import AnalyzerConfig
+    from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+    from api_app.connectors_manager.models import ConnectorConfig
+    from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+    from api_app.visualizers_manager.models import VisualizerConfig
+    from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
+    from api_app.ingestors_manager.serializers import IngestorConfigSerializer
+    from api_app.ingestors_manager.models import IngestorConfig
+    for plugin in AnalyzerConfig.objects.all():
+        PythonListConfigSerializer(child=AnalyzerConfigSerializer()).to_representation_single_plugin(plugin, user)
+    for plugin in ConnectorConfig.objects.all():
+        PythonListConfigSerializer(child=ConnectorConfigSerializer()).to_representation_single_plugin(plugin, user)
+    for plugin in VisualizerConfig.objects.all():
+        PythonListConfigSerializer(child=VisualizerConfigSerializer()).to_representation_single_plugin(plugin, user)
+    for plugin in IngestorConfig.objects.all():
+        PythonListConfigSerializer(child=IngestorConfigSerializer()).to_representation_single_plugin(plugin, user)
 
 # startup
 @signals.worker_ready.connect

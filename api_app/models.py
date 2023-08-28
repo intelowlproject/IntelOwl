@@ -5,12 +5,16 @@ import datetime
 import logging
 import typing
 import uuid
-from typing import Any, Dict, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type
+
+if TYPE_CHECKING:
+    from api_app.serializers import PythonConfigSerializer, PythonListConfigSerializer
 
 from celery import group
 from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
@@ -80,6 +84,10 @@ class PythonModule(models.Model):
     @cached_property
     def python_class(self) -> Type["Plugin"]:
         return import_string(self.python_complete_path)
+
+    @cached_property
+    def config_class(self) -> Type["PythonConfig"]:
+        return self.python_class.config_model
 
     def clean_python_module(self):
         try:
@@ -513,6 +521,14 @@ class Parameter(models.Model):
     def __str__(self):
         return self.name
 
+    def refresh_cache_keys(self):
+        self.config_class.delete_class_cache_keys()
+        for config in self.config_class.objects.filter(
+            python_module=self.python_module
+        ):
+            config: PythonConfig
+            config.refresh_cache_keys()
+
     def get_valid_value_for_test(self):
         if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
             raise PluginConfig.DoesNotExist
@@ -622,6 +638,20 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
             models.Index(fields=["ingestor_config"]),
         ] + AttachedToPythonConfigInterface.Meta.indexes
 
+    def refresh_cache_keys(self):
+        if self.owner:
+            if self.owner.has_membership() and self.owner.membership.is_admin:
+                for user in self.owner.membership.organization.members:
+                    self.config.delete_class_cache_keys(user)
+                    self.config.refresh_cache_keys(user)
+            else:
+                self.config.delete_class_cache_keys(self.owner)
+                self.config.refresh_cache_keys(self.owner)
+
+        else:
+            self.config.delete_class_cache_keys()
+            self.config.refresh_cache_keys()
+
     def _possible_configs(self) -> typing.List["PythonConfig"]:
         return super()._possible_configs() + [self.ingestor_config]
 
@@ -730,6 +760,14 @@ class AbstractConfig(models.Model):
             .runnable
         )
 
+    def enabled_for_user(self, user: User) -> bool:
+        if user.has_membership():
+            return (
+                not self.disabled
+                and user.membership.organization not in self.disabled_in_organizations
+            )
+        return not self.disabled
+
 
 class AbstractReport(models.Model):
     # constants
@@ -782,9 +820,6 @@ class AbstractReport(models.Model):
 
 class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
-    parameters = models.ManyToManyField(
-
-    )
     config = models.JSONField(
         blank=False,
         default=config_default,
@@ -810,6 +845,34 @@ class PythonConfig(AbstractConfig):
     def plugin_type(cls) -> str:
         # retro compatibility
 
+        raise NotImplementedError()
+
+    @classmethod
+    def delete_class_cache_keys(cls, user: User = None):
+        base_key = f"{cls.__name__}_{user.username if user else ''}"
+        for key in cache.get_where(f"list_{base_key}%").keys():
+            logger.info(f"Deleting cache key {key}")
+            cache.delete(key)
+
+    def refresh_cache_keys(self, user: User = None):
+        base_key = (
+            f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
+        )
+        for key in cache.get_where(f"serializer_{base_key}%").keys():
+            cache.delete(key)
+        if user:
+            PythonListConfigSerializer(
+                child=self.config.serializer_class()
+            ).to_representation_single_plugin(self.config, user)
+        else:
+            for user in User.objects.exclude(email=""):
+                PythonListConfigSerializer(
+                    child=self.config.serializer_class()
+                ).to_representation_single_plugin(self.config, user)
+
+    @classmethod
+    @property
+    def serializer_class(cls) -> Type["PythonConfigSerializer"]:
         raise NotImplementedError()
 
     @classmethod
@@ -869,7 +932,7 @@ class PythonConfig(AbstractConfig):
     def _is_configured(self, user: User = None) -> bool:
         pc = (
             self.__class__.objects.filter(pk=self.pk)
-            .annotate_configured(self, user)
+            ._annotate_configured(self, user)
             .first()
         )
         return pc.configured

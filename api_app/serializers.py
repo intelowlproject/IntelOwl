@@ -8,10 +8,10 @@ import json
 import logging
 import re
 import uuid
-from collections import defaultdict
-from typing import Any, Dict, Generator, List, Type, Union
+from typing import Any, Dict, Generator, List, Union
 
 import django.core.exceptions
+from django.core.cache import cache
 from django.db.models import Q
 from django.http import QueryDict
 from django.utils.timezone import now
@@ -23,6 +23,7 @@ from rest_framework.fields import SerializerMethodField
 
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
@@ -1034,7 +1035,7 @@ class ParameterSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Parameter
-        fields = ["name", "type", "description", "required", "value"]
+        fields = ["name", "type", "description", "required", "value", "is_secret"]
         list_serializer_class = ParamListSerializer
 
     def get_value(self, param: Parameter):
@@ -1048,51 +1049,21 @@ class PythonListConfigSerializer(rfs.ListSerializer):
 
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
-    def to_representation(self, data):
-        python_config_class: Type[PythonConfig] = self.child.Meta.model
-        plugins = python_config_class.objects.filter(
-            pk__in=[plugin.pk for plugin in data]
-        ).prefetch_related("parameters")
-        user = self.context["request"].user
-        enabled_plugins = plugins.filter(disabled=False)
-
-        # get the values for that configurations
-        if user and user.has_membership():
-            if python_config_class.disabled_in_organizations:
-                enabled_plugins.prefetch_related("disabled_in_organizations")
-                logger.debug("Excluding plugins disabled in organization")
-                enabled_plugins = enabled_plugins.exclude(
-                    disabled_in_organizations=user.membership.organization.pk
-                )
-            else:
-                logger.debug("Plugin is system-wide.")
-        else:
-            logger.debug(
-                f"User {user.username} is not a member of an organization,"
-                "meaning that there are no disabled plugins"
-            )
-        params = (
-            Parameter.objects.filter(
-                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
-            )
-            .prefetch_related(self.child.Meta.model.snake_case_name)
-            .annotate_value_for_user(user)
-            .annotate_configured(user)
+    def to_representation_single_plugin(self, plugin: PythonConfig, user: User):
+        cache_name = (
+            f"serializer_{plugin.__class__.__name__}_{plugin.name}_{user.username}"
         )
-        parsed = defaultdict(list)
-        # populate the result for every plugin (even the ones without parameters)
-        # parsed[plugin]= [parameter1]
-        for parameter in params:
-            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
-                parameter
-            )        # we can finally construct our result
-        for plugin in plugins:
+        cache_hit = cache.get(cache_name)
+        if not cache_hit:
             plugin_representation = self.child.to_representation(plugin)
-            plugin_representation["params"] = {}
             plugin_representation["secrets"] = {}
-            total_parameter = len(parsed[plugin])
+            plugin_representation["params"] = {}
+            total_parameters = 0
             parameter_required_not_configured = []
-            for param in plugin.parameters.annotate_configured(plugin, user).annotate_value_for_user(plugin, user):
+            for param in plugin.python_module.parameters.annotate_configured(
+                plugin, user
+            ).annotate_value_for_user(plugin, user):
+                total_parameters += 1
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data
@@ -1116,17 +1087,24 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                     "secret"
                     f"{'' if len(parameter_required_not_configured) == 1 else 's'}"
                     " not set;"
-                    f" ({total_parameter - len(parameter_required_not_configured)} "
-                    f"of {total_parameter} satisfied)"
+                    f" ({total_parameters - len(parameter_required_not_configured)} "
+                    f"of {total_parameters} satisfied)"
                 )
                 configured = False
-            plugin_representation["disabled"] = plugin not in enabled_plugins
+            plugin_representation["disabled"] = plugin.enabled_for_user(user)
             plugin_representation["verification"] = {
                 "configured": configured,
                 "details": details,
                 "missing_secrets": parameter_required_not_configured,
             }
-            yield plugin_representation
+            logger.info(f"Setting cache {cache_name}")
+            cache.set(cache_name, plugin_representation)
+        return cache.get(cache_name)
+
+    def to_representation(self, data):
+        user = self.context["request"].user
+        for plugin in data:
+            yield self.to_representation_single_plugin(plugin, user)
 
 
 class PythonModuleSerializer(rfs.ModelSerializer):

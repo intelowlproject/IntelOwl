@@ -36,3 +36,10 @@ class VisualizerConfig(PythonConfig):
     @property
     def config_exception(cls):
         return VisualizerConfigurationException
+
+    @classmethod
+    @property
+    def serializer_class(cls):
+        from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
+
+        return VisualizerConfigSerializer

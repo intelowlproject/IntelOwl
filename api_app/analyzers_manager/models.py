@@ -169,6 +169,13 @@ class AnalyzerConfig(PythonConfig):
         related_name="analyzer",
     )
 
+    @classmethod
+    @property
+    def serializer_class(cls):
+        from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+
+        return AnalyzerConfigSerializer
+
     def clean_observable_supported(self):
         if self.type == TypeChoices.OBSERVABLE and not self.observable_supported:
             raise ValidationError(

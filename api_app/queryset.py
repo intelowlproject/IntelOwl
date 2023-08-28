@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from typing import Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
@@ -243,22 +243,10 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
-    def get_parameters(self) -> ParameterQuerySet:
-        from api_app.models import Parameter
-
-        return Parameter.objects.prefetch_related("python_module").filter(
-            python_module__pk__in=self.values_list("python_module__pk", flat=True)
-        )
-    def annotate_param_configured(self, user:User=None):
-        self.annotate(
-
-        )
-
     def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
-        from api_app.models import Parameter
-
         # a Python plugin is configured only if every required parameter is configured
-        from api_app.models import PluginConfig
+        from api_app.models import Parameter, PluginConfig
+
         return (
             # we retrieve the number or required parameters
             self.alias(

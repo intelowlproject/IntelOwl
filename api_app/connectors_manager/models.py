@@ -32,3 +32,10 @@ class ConnectorConfig(PythonConfig):
     @property
     def config_exception(cls):
         return ConnectorConfigurationException
+
+    @classmethod
+    @property
+    def serializer_class(cls):
+        from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+
+        return ConnectorConfigSerializer

@@ -29,9 +29,6 @@ class AnalyzerConfigViewSet(PythonConfigViewSet):
     serializer_class = AnalyzerConfigSerializer
     filterset_class = AnalyzerConfigFilter
 
-    def get_queryset(self):
-        return super().get_queryset()
-
     @add_docs(
         description="Update plugin with latest configuration",
         request=None,

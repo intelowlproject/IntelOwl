@@ -84,3 +84,10 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     @property
     def config_exception(cls):
         return IngestorConfigurationException
+
+    @classmethod
+    @property
+    def serializer_class(cls):
+        from api_app.ingestors_manager.serializers import IngestorConfigSerializer
+
+        return IngestorConfigSerializer

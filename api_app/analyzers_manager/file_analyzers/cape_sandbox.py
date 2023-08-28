@@ -166,7 +166,7 @@ class CAPEsandbox(FileAnalyzer):
                         self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + status_id
-                        + "/json"
+                        + "/litereport"
                     )
                     to_respond["result_url"] = gui_report_url
 
@@ -241,7 +241,7 @@ class CAPEsandbox(FileAnalyzer):
                         self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + str(task_id)
-                        + "/json"
+                        + "/litereport"
                     )
                     try:
                         final_request = self.__session.get(

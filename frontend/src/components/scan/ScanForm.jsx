@@ -100,7 +100,7 @@ export default function ScanForm() {
       tags: [],
       scan_mode: scanMode.CHECK_PREVIOUS_ANALYSIS,
       analysisOptionValues: scanTypes.playbooks,
-      hoursAgo: 24,
+      scan_check_time: 24,
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -360,6 +360,7 @@ export default function ScanForm() {
         })),
         tlp: v.tlp,
         scan_mode: `${v.scan_mode}`,
+        scan_check_time: v.scan_check_time,
       }))
       .sort((a, b) =>
         // eslint-disable-next-line no-nested-ternary
@@ -400,7 +401,7 @@ export default function ScanForm() {
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         playbook: values.playbook.value,
         scan_mode: values.scan_mode,
-        hoursAgo: values.hoursAgo,
+        scan_check_time: values.scan_check_time,
       };
 
       const errors = ValidatePlaybooks(values);
@@ -426,6 +427,21 @@ export default function ScanForm() {
     [navigate, refetchQuota, ValidatePlaybooks],
   );
 
+  const updateAdvancedConfig = (tags, tlp, _scanMode, scanCheckTime) => {
+    formik.setFieldValue("tags", tags, false);
+    formik.setFieldValue("tlp", tlp, false);
+    formik.setFieldValue("scan_mode", _scanMode, false);
+    // null for playbooks with force new
+    console.debug("scanCheckTime");
+    console.debug(scanCheckTime);
+    if (scanCheckTime) {
+      // scan_check_time is in format day hours:minutes:seconds, we need to convert them to hours
+      const daysAgo = parseInt(scanCheckTime.split(" ")[0], 10);
+      const hoursAgo = parseInt(scanCheckTime.split(" ")[1].split(":")[0], 10);
+      formik.setFieldValue("scan_check_time", daysAgo * 24 + hoursAgo, false);
+    }
+  };
+
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
@@ -450,20 +466,11 @@ export default function ScanForm() {
           playbookOptions(newClassification)[0],
           false,
         );
-        formik.setFieldValue(
-          "tags",
+        updateAdvancedConfig(
           playbookOptions(newClassification)[0].tags,
-          false,
-        );
-        formik.setFieldValue(
-          "tlp",
           playbookOptions(newClassification)[0].tlp,
-          false,
-        );
-        formik.setFieldValue(
-          "scan_mode",
           playbookOptions(newClassification)[0].scan_mode,
-          false,
+          playbookOptions(newClassification)[0].scan_check_time,
         );
       }
     }
@@ -474,9 +481,12 @@ export default function ScanForm() {
 
   const updateSelectedPlaybook = (playbook) => {
     formik.setFieldValue("playbook", playbook, false);
-    formik.setFieldValue("tags", playbook.tags, false);
-    formik.setFieldValue("tlp", playbook.tlp, false);
-    formik.setFieldValue("scan_mode", playbook.scan_mode, false);
+    updateAdvancedConfig(
+      playbook.tags,
+      playbook.tlp,
+      playbook.scan_mode,
+      playbook.scan_check_time,
+    );
   };
 
   useEffect(() => {
@@ -673,20 +683,11 @@ export default function ScanForm() {
                           playbookOptions("file")[0],
                           false,
                         );
-                        formik.setFieldValue(
-                          "tags",
+                        updateAdvancedConfig(
                           playbookOptions("file")[0].tags,
-                          false,
-                        );
-                        formik.setFieldValue(
-                          "tlp",
                           playbookOptions("file")[0].tlp,
-                          false,
-                        );
-                        formik.setFieldValue(
-                          "scan_mode",
                           playbookOptions("file")[0].scan_mode,
-                          false,
+                          playbookOptions("file")[0].scan_check_time,
                         );
                       }
                     }}
@@ -720,20 +721,11 @@ export default function ScanForm() {
                             false,
                           ); // reset playbook
                           // reset advanced configuration
-                          formik.setFieldValue(
-                            "tags",
+                          updateAdvancedConfig(
                             formik.initialValues.tags,
-                            false,
-                          );
-                          formik.setFieldValue(
-                            "tlp",
                             formik.initialValues.tlp,
-                            false,
-                          );
-                          formik.setFieldValue(
-                            "scan_mode",
                             formik.initialValues.scan_mode,
-                            false,
+                            "1 00:00:00",
                           );
                         }}
                       />
@@ -922,7 +914,7 @@ export default function ScanForm() {
                             as={Input}
                             id="checkchoice__check_all__minutes_ago"
                             type="number"
-                            name="hoursAgo"
+                            name="scan_check_time"
                             onChange={formik.handleChange}
                           />
                         </div>

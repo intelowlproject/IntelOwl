@@ -55,6 +55,7 @@ import {
   TagSelectInput,
 } from "./utils";
 import { createJob, createPlaybookJob } from "./api";
+import { useGuideContext } from "../../contexts/GuideContext";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -80,6 +81,16 @@ const sanitizeObservable = (observable) =>
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get("observable");
+  const { guideState, setGuideState } = useGuideContext();
+
+  React.useEffect(() => {
+    if (guideState.tourActive) {
+      setTimeout(() => {
+        setGuideState({ run: true, stepIndex: 3 });
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   console.debug(
     `ScanForm rendered! Observable in GET param: ${observableParam}`,
@@ -526,7 +537,7 @@ export default function ScanForm() {
       {/* Form */}
       <ContentSection id="ScanForm" className="mt-3 bg-body shadow">
         <div className="mt-3 d-flex justify-content-between">
-          <h3 className="fw-bold">
+          <h3 id="scanpage" className="fw-bold">
             Scan&nbsp;
             {formik.values.classification === "file" ? "Files" : "Observables"}
           </h3>
@@ -592,7 +603,12 @@ export default function ScanForm() {
                 name="observable_names"
                 render={(arrayHelpers) => (
                   <FormGroup row>
-                    <Label className="required" sm={3} for="observable_name">
+                    <Label
+                      id="selectobservable"
+                      className="required"
+                      sm={3}
+                      for="observable_name"
+                    >
                       Observable Value(s)
                     </Label>
                     <Col sm={9}>
@@ -807,7 +823,7 @@ export default function ScanForm() {
             )}
             {scanType === scanTypes.playbooks && (
               <FormGroup row>
-                <Label sm={3} htmlFor="playbook">
+                <Label id="selectplugins" sm={3} htmlFor="playbook">
                   Select Playbook
                 </Label>
                 {!(playbooksLoading || playbooksError) && (
@@ -957,6 +973,7 @@ export default function ScanForm() {
 
             <FormGroup row className="mt-2">
               <Button
+                id="startScan"
                 type="submit"
                 /* dirty return True if values are different then default
                  we cannot run the validation on mount or we get an infinite loop.

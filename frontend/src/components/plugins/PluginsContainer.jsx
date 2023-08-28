@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import { Button, Col } from "reactstrap";
 import { useOrganizationStore } from "../../stores";
+import { useGuideContext } from "../../contexts/GuideContext";
 
 const Analyzers = React.lazy(() => import("./utils/Analyzers"));
 const Connectors = React.lazy(() => import("./utils/Connectors"));
@@ -25,7 +26,7 @@ const routes = [
     key: "plugins-analyzers",
     location: "analyzers",
     Title: () => (
-      <span>
+      <span id="Analyzers">
         <AiOutlineApi />
         &nbsp;Analyzers
       </span>
@@ -40,7 +41,7 @@ const routes = [
     key: "plugins-connectors",
     location: "connectors",
     Title: () => (
-      <span>
+      <span id="Connectors">
         <TiFlowChildren />
         &nbsp;Connectors
       </span>
@@ -115,6 +116,17 @@ export default function PluginsContainer() {
     ),
   );
 
+  const { guideState, setGuideState } = useGuideContext();
+
+  React.useEffect(() => {
+    if (guideState.tourActive) {
+      setTimeout(() => {
+        setGuideState({ run: true, stepIndex: 1 });
+      }, 200);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // on component mount
   React.useEffect(() => {
     if (!isUserOwner) {
@@ -146,8 +158,13 @@ export default function PluginsContainer() {
           to="/me/config"
           style={{ color: "inherit", textDecoration: "inherit" }}
         >
-          <Button size="sm" color="darker" onClick={() => null}>
-            <BsSliders className="me-2" />
+          <Button
+            id="pluginconfigbutton"
+            size="sm"
+            color="darker"
+            onClick={() => null}
+          >
+            <BsSliders className="me-2" id="plugin_config" />
             Your plugin config
           </Button>
         </Link>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Row, Col } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 
@@ -16,6 +16,8 @@ import {
   JobObsNamePieChart,
   JobFileHashPieChart,
 } from "./utils/charts";
+
+import { useGuideContext } from "../../contexts/GuideContext";
 
 const charts1 = [
   ["JobStatusBarChart", "Job: Status", JobStatusBarChart],
@@ -37,6 +39,17 @@ const charts2 = [
 ];
 
 export default function Dashboard() {
+  const { guideState, setGuideState } = useGuideContext();
+
+  useEffect(() => {
+    if (guideState.tourActive) {
+      setTimeout(() => {
+        setGuideState({ run: true, stepIndex: 8 });
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   console.debug("Dashboard rendered!");
 
   const { range, onTimeIntervalChange } = useTimePickerStore();
@@ -47,12 +60,15 @@ export default function Dashboard() {
   return (
     <Container fluid id="Dashboard">
       <div className="g-0 d-flex align-items-baseline flex-column flex-lg-row mb-2">
-        <h3 className="fw-bold">Dashboard</h3>
+        <h3 className="fw-bold" id="Dashboard_title">
+          Dashboard
+        </h3>
         <ElasticTimePicker
           className="ms-auto"
           size="sm"
           defaultSelected={range}
           onChange={onTimeIntervalChange}
+          id="Dashboard_timepicker"
         />
       </div>
       <Row className="d-flex flex-wrap flex-lg-nowrap">

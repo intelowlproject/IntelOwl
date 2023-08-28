@@ -4,11 +4,13 @@ import base64
 import pickle
 
 from django.core.cache.backends.db import DatabaseCache
-from django.db import router, connections
+from django.db import connections, router
 from django.utils.encoding import force_bytes
 
+
 def plain_key(key, key_prefix, version):
-    return key # just return the key without doing anything
+    return key  # just return the key without doing anything
+
 
 class DatabaseCacheExtended(DatabaseCache):
     def get_where(self, query, default=None, version=None):
@@ -19,21 +21,25 @@ class DatabaseCacheExtended(DatabaseCache):
         table = connections[db].ops.quote_name(self._table)
 
         with connections[db].cursor() as cursor:
-            cursor.execute("SELECT cache_key, value, expires FROM %s "
-                           "WHERE cache_key LIKE %%s" % table, [query])
+            cursor.execute(
+                "SELECT cache_key, value, expires FROM %s "
+                "WHERE cache_key LIKE %%s" % table,
+                [query],
+            )
             rows = cursor.fetchall()
         if len(rows) < 1:
             return {}
-        return_d ={}
+        return_d = {}
         for row in rows:
             value = connections[db].ops.process_clob(row[1])
             return_d[row[0]] = pickle.loads(base64.b64decode(force_bytes(value)))
         return return_d
 
+
 CACHES = {
     "default": {
         "BACKEND": "intel_owl.settings.cache.DatabaseCacheExtended",
         "LOCATION": "intelowl_cache",
-        "KEY_FUNCTION": "intel_owl.settings.cache.plain_key"
+        "KEY_FUNCTION": "intel_owl.settings.cache.plain_key",
     }
 }

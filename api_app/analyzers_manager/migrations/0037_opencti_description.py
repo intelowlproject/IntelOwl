@@ -11,7 +11,7 @@ def migrate(apps, schema_editor):
     ac.full_clean()
     ac.save()
 
-    ConnectorConfig = apps.get_model("playbooks_manager", "ConnectorConfig")
+    ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     ac = ConnectorConfig.objects.get(name="OpenCTI")
     ac.description = "Automatically creates an observable and a linked report on your OpenCTI instance, linking the successful analysis on IntelOwl. CARE! This may require additional advanced configuration. Check the docs [here](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#opencti)"
     ac.full_clean()

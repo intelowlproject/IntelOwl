@@ -122,7 +122,7 @@ def update(python_module_pk: int):
             from api_app.ingestors_manager.models import IngestorConfig
             from api_app.visualizers_manager.models import VisualizerConfig
 
-            queues = set(
+            queues = {
                 config.queue
                 for qs in [
                     AnalyzerConfig.objects.filter(python_module=python_module),
@@ -131,7 +131,7 @@ def update(python_module_pk: int):
                     IngestorConfig.objects.filter(python_module=python_module),
                 ]
                 for config in qs
-            )
+            }
             for queue in queues:
                 broadcast(
                     update_plugin,

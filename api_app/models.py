@@ -868,10 +868,10 @@ class PythonConfig(AbstractConfig):
                 child=self.serializer_class()
             ).to_representation_single_plugin(self, user)
         else:
-            for user in User.objects.exclude(email=""):
+            for generic_user in User.objects.exclude(email=""):
                 PythonListConfigSerializer(
                     child=self.serializer_class()
-                ).to_representation_single_plugin(self, user)
+                ).to_representation_single_plugin(self, generic_user)
 
     @classmethod
     @property

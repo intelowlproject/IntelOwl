@@ -303,7 +303,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Confidence`: Give max, average and minimum confidence of maliciousness for an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Confidence API.
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
 * `CRXcavator`: scans a chrome extension against crxcavator.io
-* `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 * `EmailRep`: search an email address on [emailrep.io](https://emailrep.io)
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach

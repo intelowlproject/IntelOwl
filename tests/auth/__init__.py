@@ -11,12 +11,19 @@ class CustomOAuthTestCase(APITestCase):
         username = "john.doe"
         email = "john.doe@example.com"
         password = "hunter2"
-        cls.user = User.objects.get_or_create(
-            username=username,
-            email=email,
-            is_superuser=True,
-            defaults={"password": password},
-        )[0]
+        try:
+            cls.user = User.objects.get(
+                username=username,
+                email=email,
+                is_superuser=True,
+            )
+        except User.DoesNotExist:
+            cls.user = User.objects.create(
+                username=username, email=email, is_superuser=True
+            )
+            cls.user.set_password(password)
+            cls.user.save()
+
         cls.creds = {
             "username": username,
             "password": password,

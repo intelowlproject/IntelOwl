@@ -797,19 +797,20 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         )
 
     def list(self, request, *args, **kwargs):
+        cache_name = (
+            f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
+        )
+
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
+
         if page is not None:
             page = self.serializer_class.Meta.model.objects.filter(
                 pk__in=[plugin.pk for plugin in page]
             )
-            cache_name = (
-                "list_"
-                f"{self.serializer_class.Meta.model.__name__}_"
-                f"{request.user.username}_"
-                f"{request.query_params['page']}_"
-                f"{request.query_params['page_size']}"
-            )
+            cache_name += f"_{request.user.username}"
+            if "page" in request.query_params and "page_size" in request.query_params:
+                cache_name += f"_{request.query_params['page']}_{request.query_params['page_size']}"
             cache_hit = cache.get(cache_name)
             if cache_hit is None:
                 serializer = self.get_serializer(page, many=True)
@@ -818,9 +819,6 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             else:
                 data = cache_hit
             return self.get_paginated_response(data)
-        cache_name = (
-            f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
-        )
         cache_hit = cache.get(cache_name)
 
         if cache_hit is None:

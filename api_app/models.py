@@ -641,7 +641,7 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
     def refresh_cache_keys(self):
         if self.owner:
             if self.owner.has_membership() and self.owner.membership.is_admin:
-                for user in self.owner.membership.organization.members:
+                for user in self.owner.membership.organization.members.all():
                     self.config.delete_class_cache_keys(user)
                     self.config.refresh_cache_keys(user)
             else:
@@ -935,7 +935,7 @@ class PythonConfig(AbstractConfig):
     def _is_configured(self, user: User = None) -> bool:
         pc = (
             self.__class__.objects.filter(pk=self.pk)
-            ._annotate_configured(self, user)
+            .annotate_configured(self, user)
             .first()
         )
         return pc.configured

@@ -8,7 +8,7 @@ import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 if TYPE_CHECKING:
-    from api_app.serializers import PythonConfigSerializer, PythonListConfigSerializer
+    from api_app.serializers import PythonConfigSerializer
 
 from celery import group
 from celery.canvas import Signature
@@ -855,6 +855,8 @@ class PythonConfig(AbstractConfig):
             cache.delete(key)
 
     def refresh_cache_keys(self, user: User = None):
+        from api_app.serializers import PythonListConfigSerializer
+
         base_key = (
             f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
         )
@@ -862,13 +864,13 @@ class PythonConfig(AbstractConfig):
             cache.delete(key)
         if user:
             PythonListConfigSerializer(
-                child=self.config.serializer_class()
-            ).to_representation_single_plugin(self.config, user)
+                child=self.serializer_class()
+            ).to_representation_single_plugin(self, user)
         else:
             for user in User.objects.exclude(email=""):
                 PythonListConfigSerializer(
-                    child=self.config.serializer_class()
-                ).to_representation_single_plugin(self.config, user)
+                    child=self.serializer_class()
+                ).to_representation_single_plugin(self, user)
 
     @classmethod
     @property

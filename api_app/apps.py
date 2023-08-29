@@ -30,7 +30,7 @@ class ApiAppConfig(AppConfig):
                 logger.info("No table to clean")
             finally:
 
-                from certego_saas.apps.user.models import User
+                from certego_saas.models import User
                 from intel_owl.celery import DEFAULT_QUEUE
                 from intel_owl.tasks import create_caches
 

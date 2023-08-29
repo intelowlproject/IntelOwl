@@ -814,7 +814,7 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             if cache_hit is None:
                 serializer = self.get_serializer(page, many=True)
                 data = serializer.data
-                cache.set(cache_name, value=data)
+                cache.set(cache_name, value=data, timeout=24 * 7)
             else:
                 data = cache_hit
             return self.get_paginated_response(data)

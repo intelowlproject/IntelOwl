@@ -200,7 +200,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
         )
 
         self.assertFalse(
-            Parameter.objects.annotate_configured(self.user)
+            Parameter.objects.annotate_configured(ac, self.user)
             .get(name="testparameter")
             .configured
         )
@@ -209,7 +209,7 @@ class ParameterQuerySetTestCase(CustomTestCase):
         pc.save()
 
         self.assertTrue(
-            Parameter.objects.annotate_configured(self.user)
+            Parameter.objects.annotate_configured(ac, self.user)
             .get(name="testparameter")
             .configured
         )
@@ -244,7 +244,9 @@ class ParameterQuerySetTestCase(CustomTestCase):
             organization=org,
         )
 
-        param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
+        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(
+            pk=param.pk
+        )
         self.assertFalse(hasattr(param, "owner_value"))
         self.assertFalse(hasattr(param, "org_value"))
         self.assertFalse(hasattr(param, "default_value"))
@@ -259,7 +261,9 @@ class ParameterQuerySetTestCase(CustomTestCase):
             parameter=param,
             analyzer_config=ac,
         )
-        param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
+        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(
+            pk=param.pk
+        )
         # org value
         self.assertEqual(param.value, "myperfecttest3")
 
@@ -270,7 +274,9 @@ class ParameterQuerySetTestCase(CustomTestCase):
             parameter=param,
             analyzer_config=ac,
         )
-        param = Parameter.objects.annotate_value_for_user(self.user).get(pk=param.pk)
+        param = Parameter.objects.annotate_value_for_user(ac, self.user).get(
+            pk=param.pk
+        )
 
         # user value
         self.assertEqual(param.value, "myperfecttest1")

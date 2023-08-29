@@ -212,7 +212,7 @@ async function _analyzeObservable(formValues) {
     scan_mode: parseInt(formValues.scan_mode, 10),
   };
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
+    body.scan_check_time = `${formValues.scan_check_time}:00:00`;
   } else {
     body.scan_check_time = null;
   }
@@ -257,7 +257,7 @@ async function _analyzeFile(formValues) {
   body.append("scan_mode", formValues.scan_mode);
   // scan check time
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+    body.append("scan_check_time", `${formValues.scan_check_time}:00:00`);
   }
   console.debug("_analyzeFile", body);
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
@@ -281,7 +281,7 @@ async function _startPlaybookFile(formValues) {
   body.append("scan_mode", formValues.scan_mode);
   // scan check time
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+    body.append("scan_check_time", `${formValues.scan_check_time}:00:00`);
   }
   console.debug("_analyzeFile", body);
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);
@@ -301,7 +301,7 @@ async function _startPlaybookObservable(formValues) {
     scan_mode: parseInt(formValues.scan_mode, 10),
   };
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
+    body.scan_check_time = `${formValues.scan_check_time}:00:00`;
   } else {
     body.scan_check_time = null;
   }

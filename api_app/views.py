@@ -51,6 +51,7 @@ from .serializers import (
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
+    JobRecentScanSerializer,
     JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
@@ -296,16 +297,32 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     def recent_scans(self, request):
         if "md5" not in request.data:
             raise ValidationError({"detail": "md5 is required"})
-
-        pks = (
+        max_temporal_distance = request.data.get("max_temporal_distance", 14)
+        jobs = (
             Job.objects.filter(md5=request.data["md5"])
             .visible_for_user(self.request.user)
-            .filter(finished_analysis_time__gte=now() - datetime.timedelta(days=14))
+            .filter(
+                finished_analysis_time__gte=now()
+                - datetime.timedelta(days=max_temporal_distance)
+            )
             .annotate_importance(request.user)
             .order_by("-importance", "-finished_analysis_time")
-            .values_list("pk", flat=True)
         )
-        return Response({"jobs": pks}, status=status.HTTP_200_OK)
+        return Response(
+            JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["post"])
+    def recent_scans_user(self, request):
+        limit = request.data.get("limit", 5)
+        jobs = (
+            Job.objects.filter(user__pk=request.user.pk)
+            .annotate_importance(request.user)
+            .order_by("-importance", "-finished_analysis_time")[:limit]
+        )
+        return Response(
+            JobRecentScanSerializer(jobs, many=True).data, status=status.HTTP_200_OK
+        )
 
     @action(detail=True, methods=["patch"])
     def retry(self, request, pk=None):

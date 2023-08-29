@@ -166,7 +166,7 @@ class CAPEsandbox(FileAnalyzer):
                         self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + status_id
-                        + "/json"
+                        + "/litereport"
                     )
                     to_respond["result_url"] = gui_report_url
 
@@ -241,7 +241,7 @@ class CAPEsandbox(FileAnalyzer):
                         self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + str(task_id)
-                        + "/json"
+                        + "/litereport"
                     )
                     try:
                         final_request = self.__session.get(
@@ -251,6 +251,16 @@ class CAPEsandbox(FileAnalyzer):
                     except requests.RequestException as e:
                         raise AnalyzerRunException(e)
 
+                    results = final_request.json()
+
+                    # the task was being processed
+                    if (
+                        "error" in results
+                        and results["error"]
+                        and results["error_value"] == "Task is still being analyzed"
+                    ):
+                        raise self.ContinuePolling("Task still processing")
+
                     logger.info(
                         f" Job: {self.job_id} ->"
                         f"Poll number #{attempt}/{self.max_tries} fetched"
@@ -258,7 +268,6 @@ class CAPEsandbox(FileAnalyzer):
                         " stopping polling.."
                     )
 
-                    results = final_request.json()
                     break
 
                 else:

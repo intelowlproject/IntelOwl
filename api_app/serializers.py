@@ -56,6 +56,18 @@ class TagSerializer(rfs.ModelSerializer):
         fields = rfs.ALL_FIELDS
 
 
+class JobRecentScanSerializer(rfs.ModelSerializer):
+    playbook = rfs.CharField(
+        source="playbook_to_execute.name", allow_null=True, read_only=True
+    )
+    user = rfs.CharField(source="user.username", allow_null=False, read_only=True)
+    importance = rfs.IntegerField(allow_null=True, read_only=True)
+
+    class Meta:
+        model = Job
+        fields = ["playbook", "pk", "tlp", "user", "importance"]
+
+
 class _AbstractJobViewSerializer(rfs.ModelSerializer):
     """
     Base Serializer for ``Job`` model's ``retrieve()`` and ``list()``.
@@ -150,9 +162,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
             playbook: PlaybookConfig
-            if not attrs.get("scan_mode"):
+            if "scan_mode" not in attrs:
                 attrs["scan_mode"] = playbook.scan_mode
-            if not attrs.get("scan_check_time"):
+            if "scan_check_time" not in attrs:
                 attrs["scan_check_time"] = playbook.scan_check_time
             if attrs.get("analyzers_requested", []) or attrs.get(
                 "connectors_requested", []

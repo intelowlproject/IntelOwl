@@ -222,6 +222,7 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
 class JobViewSetTests(CustomViewSetTestCase):
     jobs_list_uri = reverse("jobs-list")
     jobs_recent_scans_uri = reverse("jobs-recent-scans")
+    jobs_recent_scans_user_uri = reverse("jobs-recent-scans-user")
     agg_status_uri = reverse("jobs-aggregate-status")
     agg_type_uri = reverse("jobs-aggregate-type")
     agg_observable_classification_uri = reverse(
@@ -274,10 +275,41 @@ class JobViewSetTests(CustomViewSetTestCase):
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)
-        self.assertIn("jobs", content, msg=msg)
-        jobs = content["jobs"]
-        self.assertEqual(j2.pk, jobs[0])
-        self.assertEqual(j1.pk, jobs[1])
+        self.assertIsInstance(content, list)
+        pks = [elem["pk"] for elem in content]
+        self.assertIn(j2.pk, pks)
+        self.assertIn(j1.pk, pks)
+
+        j1.delete()
+        j2.delete()
+
+    def test_recent_scan_user(self):
+        j1 = Job.objects.create(
+            **{
+                "user": self.user,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(days=2),
+            }
+        )
+        j2 = Job.objects.create(
+            **{
+                "user": self.superuser,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(hours=2),
+            }
+        )
+        response = self.client.post(self.jobs_recent_scans_user_uri)
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(200, response.status_code, msg=msg)
+        self.assertIsInstance(content, list)
+        pks = [elem["pk"] for elem in content]
+        self.assertIn(j1.pk, pks)
+        self.assertNotIn(j2.pk, pks)
 
         j1.delete()
         j2.delete()

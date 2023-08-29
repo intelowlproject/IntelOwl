@@ -263,13 +263,18 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 # we just need one config for required parameter
                 required_configured_params=Subquery(
                     PluginConfig.objects.filter(
-                        **{self.model.snake_case_name: OuterRef("config_pk")},
+                        **{self.model.snake_case_name: OuterRef("pk")},
                         parameter__required=True
                     )
                     .visible_for_user(user)
-                    .values("parameter")
-                    .distinct()
-                    .count()
+                    .annotate(
+                        count=Func(
+                            F("parameter__pk"),
+                            function="Count",
+                            extra={"distinct": True},
+                        )
+                    )
+                    .values("count")
                 )
             )
             # and we save the difference

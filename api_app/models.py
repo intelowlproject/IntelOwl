@@ -764,7 +764,8 @@ class AbstractConfig(models.Model):
         if user.has_membership():
             return (
                 not self.disabled
-                and user.membership.organization not in self.disabled_in_organizations
+                and user.membership.organization
+                not in self.disabled_in_organizations.all()
             )
         return not self.disabled
 

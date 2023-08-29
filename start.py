@@ -236,7 +236,7 @@ def start():
             " This is because they can change the version of those library only during"
             " the build of a new Docker Image."
         )
-        exit(11)
+        sys.exit(11)
 
     print(os.environ)
 

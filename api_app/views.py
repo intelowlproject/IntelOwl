@@ -810,7 +810,10 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             )
             cache_name += f"_{request.user.username}"
             if "page" in request.query_params and "page_size" in request.query_params:
-                cache_name += f"_{request.query_params['page']}_{request.query_params['page_size']}"
+                cache_name += (
+                    f"_{request.query_params['page']}_"
+                    f"{request.query_params['page_size']}"
+                )
             cache_hit = cache.get(cache_name)
             if cache_hit is None:
                 serializer = self.get_serializer(page, many=True)

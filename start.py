@@ -196,8 +196,8 @@ def start():
         required=False,
         type=generic_version_regex,
         default=PYCTI_DEFAULT_VERSION,
-        help=f"The pycti version to choose. This must match the OpenCTI server version"
-        f" you are connecting to."
+        help="The pycti version to choose. This must match the OpenCTI server version"
+        " you are connecting to."
         f" Default is {PYCTI_DEFAULT_VERSION}",
     )
     parser.add_argument(

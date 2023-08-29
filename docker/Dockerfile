@@ -19,11 +19,13 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
-ENV ELASTICSEARCH_DSL_VERSION 7.2.2
-ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
-
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
+ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
+
+# Change these values manually to install the version that you need for your environment
+ENV ELASTICSEARCH_DSL_VERSION 7.2.2
+ENV PYCTI_VERSION 5.10.0
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -52,6 +54,7 @@ WORKDIR $PYTHONPATH
 RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
     # install elasticsearch-dsl's appropriate version as specified by user
     && pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION} \
+    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
 COPY . $PYTHONPATH

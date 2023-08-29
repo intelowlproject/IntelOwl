@@ -9,6 +9,7 @@ This page includes details about some advanced features that Intel Owl provides 
     - [OAuth support](#google-oauth2)
     - [LDAP](#ldap)
     - [RADIUS](#radius-authentication)
+  - [OpenCTI support](#opencti)
   - [Cloud Support](#cloud-support)
     - [AWS support](#aws-support)
       - [Secrets](#secrets)
@@ -106,6 +107,22 @@ For more details on how to configure this file, check the <a href="https://githu
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
 
+
+## OpenCTI
+Like many other integrations that we have, we have an [Analyzer](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers) and a [Connector](https://intelowl.readthedocs.io/en/latest/Usage.html#connectors) for the [OpenCTI]([OpenCTI](https://github.com/OpenCTI-Platform/opencti)) platform.
+
+This allows the users to leverage these 2 popular open source projects and frameworks together.
+
+So why we have a section here? This is because there are various compatibility problems with the [official PyCTI library](https://github.com/OpenCTI-Platform/client-python/).
+
+We found out (see issues in [IntelOwl](https://github.com/intelowlproject/IntelOwl/issues/1730) and [PyCTI](https://github.com/OpenCTI-Platform/client-python/issues/287)) that, most of the times, it is required that the OpenCTI version of the server you are using and the pycti version installed in IntelOwl **must** match perfectly.
+
+Because of that, we decided to provide to the users the chance to customize the version of PyCTI installed in IntelOwl based on the OpenCTI version that they are using.
+
+To do that, you would need to perform a change in the Official IntelOwl [Dockerfile](https://github.com/intelowlproject/IntelOwl/blob/master/docker/Dockerfile):
+* modify the value of the environment variable `PYCTI_VERSION` to match the OpenCTI server version that you use
+* re-build the IntelOwl Image locally and restart the project (follow the guide [here](https://intelowl.readthedocs.io/en/latest/Installation.html#update-and-rebuild))
+* enjoy
 
 ## Cloud Support
 

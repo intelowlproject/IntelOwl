@@ -641,10 +641,13 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
     def refresh_cache_keys(self):
         if self.owner:
             if self.owner.has_membership() and self.owner.membership.is_admin:
-                for user in self.owner.membership.organization.members.all():
+                for user in User.objects.filter(
+                    membership__organization=self.owner.membership.organization
+                ):
                     self.config.delete_class_cache_keys(user)
                     self.config.refresh_cache_keys(user)
             else:
+                self.owner: User
                 self.config.delete_class_cache_keys(self.owner)
                 self.config.refresh_cache_keys(self.owner)
 
@@ -933,11 +936,7 @@ class PythonConfig(AbstractConfig):
 
     @deprecated("Please use the queryset method `annotate_configured`.")
     def _is_configured(self, user: User = None) -> bool:
-        pc = (
-            self.__class__.objects.filter(pk=self.pk)
-            .annotate_configured(self, user)
-            .first()
-        )
+        pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
         return pc.configured
 
     @cached_property

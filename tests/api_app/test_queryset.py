@@ -405,7 +405,7 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             user=self.superuser, organization=org0, is_owner=True
         )
         m1 = Membership.objects.create(
-            user=self.admin, organization=org1, is_owner=False, is_admin=True
+            user=self.admin, organization=org1, is_owner=True, is_admin=True
         )
         m2 = Membership.objects.create(
             user=self.user, organization=org1, is_owner=False, is_admin=False

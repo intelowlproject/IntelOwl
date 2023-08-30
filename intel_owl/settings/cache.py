@@ -14,7 +14,12 @@ def plain_key(key, key_prefix, version):
 
 
 class DatabaseCacheExtended(DatabaseCache):
-    def get_where(self, starts_with:str, version=None) -> Dict[str, Any]:
+    """
+    Reference SO:
+    https://stackoverflow.com/questions/37621392/enumerating-keys-in-django-database-cache
+    """
+
+    def get_where(self, starts_with: str, version=None) -> Dict[str, Any]:
         """
         Usage: cache.get_where('string%')
         """

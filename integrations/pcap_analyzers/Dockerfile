@@ -12,6 +12,11 @@ WORKDIR ${PROJECT_PATH}/pcap_analyzers-flask
 COPY app.py requirements.txt entrypoint.sh ./
 COPY check_pcap.py update_signatures.sh /
 COPY crontab /etc/cron.d/suricata
+# adding Suricata config files and sigs
+# these copies are required in case a Docker Volume is used instead of a Bind volume (Swarm deployments)
+COPY suricata/etc/* /etc/suricata
+COPY suricata/rules/* /var/lib/suricata/rules
+
 RUN pip3 install -r requirements.txt --no-cache-dir \
     && chown -R ${USER}:${USER} . /etc/suricata /var/lib/suricata \
     && touch /var/log/cron.log \

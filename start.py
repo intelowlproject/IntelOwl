@@ -222,10 +222,9 @@ def start():
         is_test = True
         test_appendix = ".test"
 
-    if args.mode == "test" and args.docker_command == "build":
-        os.environ["PYELASTIC_VERSION"] = args.pyelastic_version
-        os.environ["PYCTI_VERSION"] = args.pycti_version
-    elif (
+    os.environ["PYELASTIC_VERSION"] = args.pyelastic_version
+    os.environ["PYCTI_VERSION"] = args.pycti_version
+    if (not args.mode == "test" or args.docker_command not in ["up", "build"]) and (
         args.pyelastic_version != PYELASTIC_DEFAULT_VERSION
         or args.pycti_version != PYCTI_DEFAULT_VERSION
     ):
@@ -237,8 +236,6 @@ def start():
             " the build of a new Docker Image."
         )
         sys.exit(11)
-
-    print(os.environ)
 
     # load relevant .env file
     load_dotenv("docker/.env.start" + test_appendix)

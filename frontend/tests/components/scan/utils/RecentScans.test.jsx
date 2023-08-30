@@ -1,12 +1,24 @@
 import React from "react";
 import "@testing-library/jest-dom";
+import md5 from "md5";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
+import {useAxiosComponentLoader, Loader} from "@certego/certego-ui";
 import RecentScans from "../../../../src/components/scan/utils/RecentScans";
+import {JOB_RECENT_SCANS, JOB_RECENT_SCANS_USER} from "../../../../src/constants/api";
 
+// mock useAxiosComponentLoader 
 jest.mock("@certego/certego-ui", () => {
   const originalModule = jest.requireActual("@certego/certego-ui");
+  return {
+    __esModule: true,
+    ...originalModule,
+    useAxiosComponentLoader: jest.fn()
+  };
+});
+
+describe("Recent Scans test", () => {
   const recentScansUser = [
     {
       file_name: "",
@@ -19,71 +31,69 @@ jest.mock("@certego/certego-ui", () => {
       user: "test",
     },
   ];
-  const recentScans = [
+  const recentScansObservable = [
     {
-      file_name: "test.json",
+      file_name: "",
       finished_analysis_time: "2023-08-25T15:43:13.896626Z",
       importance: 5,
-      observable_name: "",
+      observable_name: "1.2.3.4",
       pk: 2,
-      playbook: null,
+      playbook: "ip",
       tlp: "CLEAR",
       user: "t.test",
     },
   ];
   const loaderRecentScansUser = (props) => (
-    <originalModule.Loader loading={false} {...props} />
+    <Loader loading={false} {...props} />
   );
   const loaderRecentScans = (props) => (
-    <originalModule.Loader loading={false} {...props} />
+    <Loader loading={false} {...props} />
   );
 
-  // mock useAxiosComponentLoader
-  return {
-    __esModule: true,
-    ...originalModule,
-    useAxiosComponentLoader: jest.fn()
-      // mock for 'Recent scans - no recent scans' test
-      .mockReturnValueOnce([[], loaderRecentScansUser])
-      .mockReturnValueOnce([[], loaderRecentScans])
-      // mock for 'Recent scans - only user recent scans' test
-      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
-      .mockReturnValueOnce([[], loaderRecentScans])
-      // mock for 'Recent scans - user and observable' test
-      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
-      .mockReturnValueOnce([recentScans, loaderRecentScans])
-      // mock for 'Recent scans - redirect to job page' test
-      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
-      .mockReturnValueOnce([[], loaderRecentScans])
-  };
-});
+  test("Recent scans - default", async () => {
+    // mock return value of useAxiosComponentLoader
+    useAxiosComponentLoader
+    .mockReturnValueOnce([[], loaderRecentScansUser])
+    .mockReturnValueOnce([[], loaderRecentScans])
 
-
-describe("Recent Scans test", () => {
-  test("Recent scans - no recent scans", async () => {
     render(
       <BrowserRouter>
-        <RecentScans classification={jest.fn()} param={jest.fn()} />
+        <RecentScans classification="generic" param="" />
       </BrowserRouter>,
     );
     const recentScansTitle = screen.getByText("Recent Scans");
     expect(recentScansTitle).toBeInTheDocument();
-    const recentScans = screen.getByText("0 total");
-    expect(recentScans).toBeInTheDocument();
+    const recentScansTotal = screen.getByText("0 total");
+    expect(recentScansTotal).toBeInTheDocument();
     const elementText = screen.getByText("No recent scans available");
     expect(elementText).toBeInTheDocument();
+
+    expect(useAxiosComponentLoader).toHaveBeenCalledWith({
+      url: JOB_RECENT_SCANS_USER,
+      method: "POST",
+    });
+    expect(useAxiosComponentLoader).toHaveBeenCalledWith({
+      url: JOB_RECENT_SCANS,
+      method: "POST",
+      data: {md5: md5("")},
+    });
   });
 
   test("Recent scans - only user recent scans", async () => {
+    // mock return value of useAxiosComponentLoader
+    useAxiosComponentLoader
+    .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+    .mockReturnValueOnce([[], loaderRecentScans])
+
     const { container } = render(
       <BrowserRouter>
-        <RecentScans classification={jest.fn()} param={jest.fn()} />
+        <RecentScans classification="generic" param="" />
       </BrowserRouter>,
     );
     const recentScansTitle = screen.getByText("Recent Scans");
     expect(recentScansTitle).toBeInTheDocument();
-    const recentScans = screen.getByText("1 total");
-    expect(recentScans).toBeInTheDocument();
+    const recentScansTotal = screen.getByText("1 total");
+    expect(recentScansTotal).toBeInTheDocument();
     
     // card (observable and no playbook)
     const firstCard = container.querySelector("#RecentScanCard-1");
@@ -100,27 +110,42 @@ describe("Recent Scans test", () => {
     expect(firstCardUser.textContent).toBe("User: test");
     const firstCardFinished = screen.getByText("Finished:");
     expect(firstCardFinished).toBeInTheDocument();
+
+    expect(useAxiosComponentLoader).toHaveBeenCalledWith({
+      url: JOB_RECENT_SCANS_USER,
+      method: "POST",
+    });
+    expect(useAxiosComponentLoader).toHaveBeenCalledWith({
+      url: JOB_RECENT_SCANS,
+      method: "POST",
+      data: {md5: md5("")},
+    });
   });
 
   test("Recent scans - user and observable", async () => {
+    // mock return value of useAxiosComponentLoader
+    useAxiosComponentLoader
+    .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+    .mockReturnValueOnce([recentScansObservable, loaderRecentScans])
+
     const { container } = render(
       <BrowserRouter>
-        <RecentScans classification={jest.fn()} param={jest.fn()} />
+        <RecentScans classification="ip" param="1.2.3.4" />
       </BrowserRouter>,
     );
     const recentScansTitle = screen.getByText("Recent Scans");
     expect(recentScansTitle).toBeInTheDocument();
-    const recentScans = screen.getByText("2 total");
-    expect(recentScans).toBeInTheDocument();
+    const recentScansTotal = screen.getByText("2 total");
+    expect(recentScansTotal).toBeInTheDocument();
     
     // first card (file and no playbook)
     const firstCard = container.querySelector("#RecentScanCard-2");
     expect(firstCard).toBeInTheDocument();
-    const firstCardTitle = screen.getByText("test.json");
+    const firstCardTitle = screen.getByText("1.2.3.4");
     expect(firstCardTitle).toBeInTheDocument();
     expect(firstCardTitle.closest("div").className).toContain("card-header");
     const firstCardPlaybook = screen.getAllByText("Playbook:")[0];
-    expect(firstCardPlaybook.textContent).toBe("Playbook: Custom analysis");
+    expect(firstCardPlaybook.textContent).toBe("Playbook: ip");
     const firstCardTLP = screen.getAllByText("TLP:")[0];
     expect(firstCardTLP.textContent).toBe("TLP: CLEAR");
     const firstCardUser = screen.getAllByText("User:")[0];
@@ -142,21 +167,35 @@ describe("Recent Scans test", () => {
     expect(secondCardUser.textContent).toBe("User: test");
     const secondCardFinished = screen.getAllByText("Finished:")[1];
     expect(secondCardFinished).toBeInTheDocument();
+
+    expect(useAxiosComponentLoader).toHaveBeenCalledWith({
+      url: JOB_RECENT_SCANS_USER,
+      method: "POST",
+    });
+    expect(useAxiosComponentLoader).toHaveBeenCalledWith({
+      url: JOB_RECENT_SCANS,
+      method: "POST",
+      data: {md5: md5("1.2.3.4")},
+    });
   });
 
   test("Recent scans - redirect to job page", async () => {
+    // mock return value of useAxiosComponentLoader
+    useAxiosComponentLoader
+    .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+    .mockReturnValueOnce([[], loaderRecentScans])
     // mock user interaction: reccomanded to put this at the start of the test
     const user = userEvent.setup();
 
     const { container } = render(
       <BrowserRouter>
-        <RecentScans classification={jest.fn()} param={jest.fn()} />
+        <RecentScans classification="generic" param="" />
       </BrowserRouter>,
     );
     const recentScansTitle = screen.getByText("Recent Scans");
     expect(recentScansTitle).toBeInTheDocument();
-    const recentScans = screen.getByText("1 total");
-    expect(recentScans).toBeInTheDocument();
+    const recentScansTotal = screen.getByText("1 total");
+    expect(recentScansTotal).toBeInTheDocument();
     
     // card
     const firstCard = container.querySelector("#RecentScanCard-1");

@@ -11,6 +11,7 @@ import {
   PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../../src/constants/api";
+import { RecentScans } from "../../../src/components/scan/utils";
 
 jest.mock("axios");
 // IMPORTANT: this mocks work with several storages because all of them are imported from index!
@@ -219,6 +220,11 @@ jest.mock("../../../src/stores", () => ({
     }),
   ),
 }));
+// mock RecentScans component
+jest.mock("../../../src/components/scan/utils/RecentScans", () =>
+  jest.fn((props) => <div {...props} />),
+);
+
 describe("test ScanForm component", () => {
   /* those tests could require lots of time, jest.setTimeout doesn't work on async function.
         use the second param of async instead.
@@ -239,6 +245,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "generic", param: "" },
+      {},
+    );
   });
 
   test("form validation - no observable selection and playbook", async () => {
@@ -270,6 +280,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "generic", param: "" },
+      {},
+    );
   });
 
   test("form validation - observable selected and no playbook", async () => {
@@ -299,6 +313,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "domain", param: "google.com" },
+      {},
+    );
   });
 
   test("form validation - observable and playbook selected", async () => {
@@ -320,6 +338,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "domain", param: "google.com" },
+      {},
+    );
   });
 
   test("form validation - observable and no analyzer selected", async () => {
@@ -347,6 +369,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "domain", param: "google.com" },
+      {},
+    );
   });
 
   test("form validation - no observable and analyzer selected", async () => {
@@ -386,6 +412,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "generic", param: "" },
+      {},
+    );
   });
 
   // observable and analyzers
@@ -427,6 +457,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "domain", param: "google.com" },
+      {},
+    );
   });
 
   test("form validation - no file selection and playbook", async () => {
@@ -459,6 +493,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: "" },
+      {},
+    );
   });
 
   // file and no playbook
@@ -499,6 +537,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
   });
 
   // file and playbook
@@ -531,6 +573,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
   });
 
   test("form validation - no file and analyzer", async () => {
@@ -571,6 +617,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: "" },
+      {},
+    );
   });
 
   test("form validation - file and no analyzer", async () => {
@@ -609,6 +659,10 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
   });
 
   test("form validation - file and analyzer", async () => {
@@ -659,6 +713,11 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
+    // recent scans
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
   });
 
   test(
@@ -680,7 +739,11 @@ describe("test ScanForm component", () => {
       expect(timeRangeSelector).toBeInTheDocument();
       await user.clear(timeRangeSelector);
       await user.type(timeRangeSelector, "10");
-
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "generic", param: "" },
+        {},
+      );
       // select an observable and start scan
       const firstObservableInputElement = screen.getByRole("textbox", {
         name: "",
@@ -691,6 +754,11 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
       await user.click(startScanButton);
 
       await waitFor(() => {
@@ -728,7 +796,11 @@ describe("test ScanForm component", () => {
       const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
       expect(analyzerSelectionRadioButton).toBeInTheDocument();
       await user.click(analyzerSelectionRadioButton);
-
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "generic", param: "" },
+        {},
+      );
       // select an observable
       const firstObservableInputElement = screen.getByRole("textbox", {
         name: "",
@@ -737,7 +809,11 @@ describe("test ScanForm component", () => {
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
       });
-
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
       // advanced settings
       const advancedSettingsButton = screen.getByRole("button", {
         name: "Advanced settings",
@@ -830,7 +906,11 @@ describe("test ScanForm component", () => {
       });
       expect(forceAnalysisRadio).toBeInTheDocument();
       await user.click(forceAnalysisRadio);
-
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
       // start scan
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
@@ -910,6 +990,11 @@ describe("test ScanForm component", () => {
       });
       expect(forceAnalysisRadio).toBeInTheDocument();
       await user.click(forceAnalysisRadio);
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "file", param: testImageFiles[0] },
+        {},
+      );
 
       // select an observable and start scan
       const startScanButton = screen.getByRole("button", {
@@ -996,6 +1081,12 @@ describe("test ScanForm component", () => {
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
 
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
@@ -1097,6 +1188,12 @@ describe("test ScanForm component", () => {
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
 
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "file", param: testImageFiles[0] },
+        {},
+      );
+
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
       });
@@ -1155,6 +1252,12 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1233,6 +1336,12 @@ describe("test ScanForm component", () => {
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
 
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+
       await user.click(startScanButton);
       await waitFor(() => {
         expect(axios.post.mock.calls).toEqual([
@@ -1294,6 +1403,12 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "ip", param: "8.8.8.8" },
+        {},
+      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1372,6 +1487,12 @@ describe("test ScanForm component", () => {
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
 
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "ip", param: "8.8.8.8" },
+        {},
+      );
+
       await user.click(startScanButton);
       await waitFor(() => {
         expect(axios.post.mock.calls).toEqual([
@@ -1436,6 +1557,12 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "url", param: "https://google.com" },
+        {},
+      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1517,6 +1644,12 @@ describe("test ScanForm component", () => {
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
 
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "url", param: "https://google.com" },
+        {},
+      );
+
       await user.click(startScanButton);
       await waitFor(() => {
         expect(axios.post.mock.calls).toEqual([
@@ -1584,6 +1717,12 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
+        {},
+      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1668,6 +1807,12 @@ describe("test ScanForm component", () => {
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
 
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
+        {},
+      );
+
       await user.click(startScanButton);
       await waitFor(() => {
         expect(axios.post.mock.calls).toEqual([
@@ -1729,6 +1874,12 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "generic", param: "genericText" },
+        {},
+      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1799,6 +1950,12 @@ describe("test ScanForm component", () => {
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "generic", param: "genericText" },
+        {},
+      );
 
       // check scan is enabled
       const startScanButton = screen.getByRole("button", {
@@ -1873,6 +2030,12 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
+
+    // recent scans
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
 
     await user.click(startScanButton);
     await waitFor(() => {
@@ -1951,6 +2114,12 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
+
+      // recent scans
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "file", param: testImageFiles[0] },
+        {},
+      );
 
       await user.click(startScanButton);
       await waitFor(() => {

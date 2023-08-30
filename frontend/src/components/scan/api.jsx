@@ -11,10 +11,7 @@ import {
   PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../constants/api";
-import useRecentScansStore from "../../stores/useRecentScansStore";
 import { scanMode } from "../../constants/constants";
-
-const { append: appendToRecentScans } = useRecentScansStore.getState();
 
 function prettifyErrors(errorResponse) {
   // only validation errors returns an array of errors
@@ -69,9 +66,6 @@ export async function createPlaybookJob(formValues) {
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
-      jobIds.forEach((jobId) => {
-        appendToRecentScans(jobId, "success");
-      });
       addToast(
         `Created new Job with ID(s) #${jobIds.join(", ")}!`,
         <div>
@@ -157,9 +151,6 @@ export async function createJob(formValues) {
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
-      jobIds.forEach((jobId) => {
-        appendToRecentScans(jobId, "success");
-      });
       addToast(
         `Created new Job with ID(s) #${jobIds.join(", ")}!`,
         <div>

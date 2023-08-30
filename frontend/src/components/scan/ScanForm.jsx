@@ -516,9 +516,9 @@ export default function ScanForm() {
       {/* Form */}
       <ContentSection
         id="ScanForm"
-        className="col-lg-9 col-xl-7 mt-3 bg-body shadow"
+        className="col-lg-8 col-xl-7 mt-3 bg-body shadow"
       >
-        <div className="mt-3 d-flex justify-content-between">
+        <div className="mt-4 d-flex justify-content-between">
           <h3 className="fw-bold">
             Scan&nbsp;
             {formik.values.classification === "file" ? "Files" : "Observables"}
@@ -535,7 +535,7 @@ export default function ScanForm() {
           <Form onSubmit={formik.handleSubmit}>
             <Row>
               <div className="col-sm-3 col-form-label" />
-              <FormGroup className="mb-0 d-flex col-sm-9">
+              <FormGroup className="mb-0 mt-2 d-flex col-sm-9">
                 {["observable", "file"].map((ch) => (
                   <FormGroup check inline key={`observableType__${ch}`}>
                     <Col>
@@ -634,7 +634,7 @@ export default function ScanForm() {
                             </div>
                           ))
                         : null}
-                      <Row className="mb-2 mt-0 pt-0">
+                      <Row className="my-2 pt-0">
                         <Button
                           color="primary"
                           size="sm"
@@ -817,7 +817,7 @@ export default function ScanForm() {
               </>
             )}
             {scanType === scanTypes.playbooks && (
-              <FormGroup row>
+              <FormGroup row className="mb-4">
                 <Label sm={3} htmlFor="playbook">
                   Select Playbook
                 </Label>
@@ -841,6 +841,7 @@ export default function ScanForm() {
               size="sm"
               onClick={() => toggleAdvancedSettings(!isAdvancedSettingsOpen)}
               color="primary"
+              className="mt-2"
             >
               <span className="me-1">Advanced settings</span>
               {isAdvancedSettingsOpen ? (
@@ -966,7 +967,7 @@ export default function ScanForm() {
               </FormGroup>
             </Collapse>
 
-            <FormGroup row className="mt-2">
+            <FormGroup row className="mt-3">
               <Button
                 type="submit"
                 /* dirty return True if values are different then default
@@ -978,7 +979,7 @@ export default function ScanForm() {
                 color="primary"
                 size="lg"
                 outline
-                className="mx-auto rounded-0 col-sm-2 order-sm-5"
+                className="mx-auto rounded-0 col-sm-3 order-sm-5"
               >
                 {formik.isSubmitting && <Spinner size="sm" />}Start Scan
               </Button>
@@ -989,9 +990,16 @@ export default function ScanForm() {
       {/* Recent Scans */}
       <ContentSection
         id="RecentScans"
-        className="col-lg-3 col-xl-3 mt-3 mx-3 bg-body shadow"
+        className="col-lg-4 col-xl-4 mt-3 mx-3 bg-body shadow"
       >
-        <RecentScans observableName={formik.values.observable_names[0]} />
+        <RecentScans
+          classification={formik.values.classification}
+          param={
+            formik.values.files.length
+              ? formik.values.files[0]
+              : formik.values.observable_names[0]
+          }
+        />
       </ContentSection>
     </Container>
   );

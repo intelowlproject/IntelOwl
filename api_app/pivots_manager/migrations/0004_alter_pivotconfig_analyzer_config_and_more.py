@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
             "connectors_manager",
             "0019_rename_connectors__python__0fb146_idx_connectors__python__f23fd8_idx_and_more",
         ),
-        ("analyzers_manager", "0037_alter_analyzerconfig_python_module"),
+        ("analyzers_manager", "0039_alter_analyzerconfig_python_module"),
         (
             "visualizers_manager",
             "0024_rename_visualizers_python__2c4ded_idx_visualizers_python__8b1832_idx_and_more",

@@ -24,7 +24,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0040_delete_cryptoscam"),
+        ("analyzers_manager", "0036_delete_cryptoscam"),
     ]
 
     operations = [

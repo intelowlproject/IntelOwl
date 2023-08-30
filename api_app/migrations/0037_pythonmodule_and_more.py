@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
         ("ingestors_manager", "0004_alter_ingestorreport_name"),
         (
             "analyzers_manager",
-            "0036_rename_analyzers_m_python__3e6166_idx_analyzers_m_python__657cda_idx",
+            "0038_rename_analyzers_m_python__3e6166_idx_analyzers_m_python__657cda_idx",
         ),
         ("api_app", "0036_alter_parameter_unique_together_and_more"),
     ]

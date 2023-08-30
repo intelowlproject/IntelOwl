@@ -21,7 +21,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0039_alter_analyzerconfig_python_module"),
+        ("analyzers_manager", "0035_analyzer_config"),
     ]
 
     operations = [

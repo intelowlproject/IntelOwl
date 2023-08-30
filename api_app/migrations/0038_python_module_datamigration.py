@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
             "ingestors_manager",
             "0005_rename_ingestors_m_python__5c8ce0_idx_ingestors_m_python__b7a859_idx_and_more",
         ),
-        ("analyzers_manager", "0037_alter_analyzerconfig_python_module"),
+        ("analyzers_manager", "0039_alter_analyzerconfig_python_module"),
         ("api_app", "0037_pythonmodule_and_more"),
     ]
 

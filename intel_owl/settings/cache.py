@@ -1,12 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import base64
-import pickle
 from typing import Any, Dict
 
 from django.core.cache.backends.db import DatabaseCache
 from django.db import connections, router
-from django.utils.encoding import force_bytes
 
 
 def plain_key(key, key_prefix, version):
@@ -35,11 +32,7 @@ class DatabaseCacheExtended(DatabaseCache):
             rows = cursor.fetchall()
         if len(rows) < 1:
             return {}
-        return_d = {}
-        for row in rows:
-            value = connections[db].ops.process_clob(row[1])
-            return_d[row[0]] = pickle.loads(base64.b64decode(force_bytes(value)))
-        return return_d
+        return self.get_many([row[0] for row in rows], version=version)
 
 
 CACHES = {

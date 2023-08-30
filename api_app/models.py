@@ -15,7 +15,7 @@ from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.db.models import Q, QuerySet, UniqueConstraint
@@ -639,6 +639,11 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
         ] + AttachedToPythonConfigInterface.Meta.indexes
 
     def refresh_cache_keys(self):
+        try:
+            self.config
+        except ObjectDoesNotExist:
+            # this happens if the configuration was deleted before this instance
+            return
         if self.owner:
             if self.owner.has_membership() and self.owner.membership.is_admin:
                 for user in User.objects.filter(

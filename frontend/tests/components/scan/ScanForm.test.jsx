@@ -761,7 +761,7 @@ describe("test ScanForm component", () => {
         { classification: "generic", param: "" },
         {},
       );
-      
+
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
       });

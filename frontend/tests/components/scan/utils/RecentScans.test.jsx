@@ -4,17 +4,20 @@ import md5 from "md5";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import {useAxiosComponentLoader, Loader} from "@certego/certego-ui";
+import { useAxiosComponentLoader, Loader } from "@certego/certego-ui";
 import RecentScans from "../../../../src/components/scan/utils/RecentScans";
-import {JOB_RECENT_SCANS, JOB_RECENT_SCANS_USER} from "../../../../src/constants/api";
+import {
+  JOB_RECENT_SCANS,
+  JOB_RECENT_SCANS_USER,
+} from "../../../../src/constants/api";
 
-// mock useAxiosComponentLoader 
+// mock useAxiosComponentLoader
 jest.mock("@certego/certego-ui", () => {
   const originalModule = jest.requireActual("@certego/certego-ui");
   return {
     __esModule: true,
     ...originalModule,
-    useAxiosComponentLoader: jest.fn()
+    useAxiosComponentLoader: jest.fn(),
   };
 });
 
@@ -46,15 +49,13 @@ describe("Recent Scans test", () => {
   const loaderRecentScansUser = (props) => (
     <Loader loading={false} {...props} />
   );
-  const loaderRecentScans = (props) => (
-    <Loader loading={false} {...props} />
-  );
+  const loaderRecentScans = (props) => <Loader loading={false} {...props} />;
 
   test("Recent scans - default", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-    .mockReturnValueOnce([[], loaderRecentScansUser])
-    .mockReturnValueOnce([[], loaderRecentScans])
+      .mockReturnValueOnce([[], loaderRecentScansUser])
+      .mockReturnValueOnce([[], loaderRecentScans]);
 
     render(
       <BrowserRouter>
@@ -75,15 +76,15 @@ describe("Recent Scans test", () => {
     expect(useAxiosComponentLoader).toHaveBeenCalledWith({
       url: JOB_RECENT_SCANS,
       method: "POST",
-      data: {md5: md5("")},
+      data: { md5: md5("") },
     });
   });
 
   test("Recent scans - only user recent scans", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-    .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
-    .mockReturnValueOnce([[], loaderRecentScans])
+      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+      .mockReturnValueOnce([[], loaderRecentScans]);
 
     const { container } = render(
       <BrowserRouter>
@@ -94,7 +95,7 @@ describe("Recent Scans test", () => {
     expect(recentScansTitle).toBeInTheDocument();
     const recentScansTotal = screen.getByText("1 total");
     expect(recentScansTotal).toBeInTheDocument();
-    
+
     // card (observable and no playbook)
     const firstCard = container.querySelector("#RecentScanCard-1");
     expect(firstCard).toBeInTheDocument();
@@ -118,15 +119,15 @@ describe("Recent Scans test", () => {
     expect(useAxiosComponentLoader).toHaveBeenCalledWith({
       url: JOB_RECENT_SCANS,
       method: "POST",
-      data: {md5: md5("")},
+      data: { md5: md5("") },
     });
   });
 
   test("Recent scans - user and observable", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-    .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
-    .mockReturnValueOnce([recentScansObservable, loaderRecentScans])
+      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+      .mockReturnValueOnce([recentScansObservable, loaderRecentScans]);
 
     const { container } = render(
       <BrowserRouter>
@@ -137,7 +138,7 @@ describe("Recent Scans test", () => {
     expect(recentScansTitle).toBeInTheDocument();
     const recentScansTotal = screen.getByText("2 total");
     expect(recentScansTotal).toBeInTheDocument();
-    
+
     // first card (file and no playbook)
     const firstCard = container.querySelector("#RecentScanCard-2");
     expect(firstCard).toBeInTheDocument();
@@ -152,7 +153,7 @@ describe("Recent Scans test", () => {
     expect(firstCardUser.textContent).toBe("User: t.test");
     const firstCardFinished = screen.getAllByText("Finished:")[0];
     expect(firstCardFinished).toBeInTheDocument();
-    
+
     // second card (observable and playbook)
     const secondCard = container.querySelector("#RecentScanCard-1");
     expect(secondCard).toBeInTheDocument();
@@ -175,15 +176,15 @@ describe("Recent Scans test", () => {
     expect(useAxiosComponentLoader).toHaveBeenCalledWith({
       url: JOB_RECENT_SCANS,
       method: "POST",
-      data: {md5: md5("1.2.3.4")},
+      data: { md5: md5("1.2.3.4") },
     });
   });
 
   test("Recent scans - redirect to job page", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-    .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
-    .mockReturnValueOnce([[], loaderRecentScans])
+      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+      .mockReturnValueOnce([[], loaderRecentScans]);
     // mock user interaction: reccomanded to put this at the start of the test
     const user = userEvent.setup();
 
@@ -196,7 +197,7 @@ describe("Recent Scans test", () => {
     expect(recentScansTitle).toBeInTheDocument();
     const recentScansTotal = screen.getByText("1 total");
     expect(recentScansTotal).toBeInTheDocument();
-    
+
     // card
     const firstCard = container.querySelector("#RecentScanCard-1");
     expect(firstCard).toBeInTheDocument();

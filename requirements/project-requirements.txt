@@ -1,7 +1,7 @@
 # django libs
 Django==4.1.10
 psycopg2-binary==2.9.6
-django-auth-ldap==4.4.0
+django-auth-ldap==4.5.0
 django-radius==1.5.0
 django-filter==23.2
 django-storages==1.13.1
@@ -19,7 +19,7 @@ djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.26.1
 django-rest-email-auth==4.0.0
 
-uWSGI==2.0.20
+uWSGI==2.0.22
 uwsgitop==0.11
 whitenoise==6.5.0
 
@@ -32,7 +32,7 @@ dataclasses==0.6
 flower==2.0.0
 
 # plugins
-GitPython==3.1.30
+GitPython==3.1.32
 checkdmarc==4.7.0
 dnspython==2.4.0
 dnstwist[full]==20230509
@@ -48,14 +48,13 @@ peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2023.2.7
 Pillow==9.5.0
-pycti==5.9.0
 pydeep==0.4
 pyelftools==0.29
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
 pymisp==2.4.172
-git+https://github.com/DissectMalware/pyOneNote@74d7b05966b9948b408a8de484e6c4e40a220de0
+pyOneNote==0.0.2
 pypdns==2.1.0
 pypssl==2.2
 pysafebrowsing==0.1.1

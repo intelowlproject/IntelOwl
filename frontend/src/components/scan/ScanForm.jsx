@@ -55,6 +55,7 @@ import {
   TagSelectInput,
 } from "./utils";
 import { createJob, createPlaybookJob } from "./api";
+import { useGuideContext } from "../../contexts/GuideContext";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -80,6 +81,16 @@ const sanitizeObservable = (observable) =>
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get("observable");
+  const { guideState, setGuideState } = useGuideContext();
+
+  React.useEffect(() => {
+    if (guideState.tourActive) {
+      setTimeout(() => {
+        setGuideState({ run: true, stepIndex: 3 });
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   console.debug(
     `ScanForm rendered! Observable in GET param: ${observableParam}`,
@@ -100,7 +111,7 @@ export default function ScanForm() {
       tags: [],
       scan_mode: scanMode.CHECK_PREVIOUS_ANALYSIS,
       analysisOptionValues: scanTypes.playbooks,
-      hoursAgo: 24,
+      scan_check_time: 24,
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -360,6 +371,7 @@ export default function ScanForm() {
         })),
         tlp: v.tlp,
         scan_mode: `${v.scan_mode}`,
+        scan_check_time: v.scan_check_time,
       }))
       .sort((a, b) =>
         // eslint-disable-next-line no-nested-ternary
@@ -400,7 +412,7 @@ export default function ScanForm() {
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         playbook: values.playbook.value,
         scan_mode: values.scan_mode,
-        hoursAgo: values.hoursAgo,
+        scan_check_time: values.scan_check_time,
       };
 
       const errors = ValidatePlaybooks(values);
@@ -426,6 +438,21 @@ export default function ScanForm() {
     [navigate, refetchQuota, ValidatePlaybooks],
   );
 
+  const updateAdvancedConfig = (tags, tlp, _scanMode, scanCheckTime) => {
+    formik.setFieldValue("tags", tags, false);
+    formik.setFieldValue("tlp", tlp, false);
+    formik.setFieldValue("scan_mode", _scanMode, false);
+    // null for playbooks with force new
+    console.debug("scanCheckTime");
+    console.debug(scanCheckTime);
+    if (scanCheckTime) {
+      // scan_check_time is in format day hours:minutes:seconds, we need to convert them to hours
+      const daysAgo = parseInt(scanCheckTime.split(" ")[0], 10);
+      const hoursAgo = parseInt(scanCheckTime.split(" ")[1].split(":")[0], 10);
+      formik.setFieldValue("scan_check_time", daysAgo * 24 + hoursAgo, false);
+    }
+  };
+
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
@@ -450,20 +477,11 @@ export default function ScanForm() {
           playbookOptions(newClassification)[0],
           false,
         );
-        formik.setFieldValue(
-          "tags",
+        updateAdvancedConfig(
           playbookOptions(newClassification)[0].tags,
-          false,
-        );
-        formik.setFieldValue(
-          "tlp",
           playbookOptions(newClassification)[0].tlp,
-          false,
-        );
-        formik.setFieldValue(
-          "scan_mode",
           playbookOptions(newClassification)[0].scan_mode,
-          false,
+          playbookOptions(newClassification)[0].scan_check_time,
         );
       }
     }
@@ -474,9 +492,12 @@ export default function ScanForm() {
 
   const updateSelectedPlaybook = (playbook) => {
     formik.setFieldValue("playbook", playbook, false);
-    formik.setFieldValue("tags", playbook.tags, false);
-    formik.setFieldValue("tlp", playbook.tlp, false);
-    formik.setFieldValue("scan_mode", playbook.scan_mode, false);
+    updateAdvancedConfig(
+      playbook.tags,
+      playbook.tlp,
+      playbook.scan_mode,
+      playbook.scan_check_time,
+    );
   };
 
   useEffect(() => {
@@ -519,7 +540,7 @@ export default function ScanForm() {
         className="col-lg-8 col-xl-7 mt-3 bg-body shadow"
       >
         <div className="mt-4 d-flex justify-content-between">
-          <h3 className="fw-bold">
+          <h3 id="scanpage" className="fw-bold">
             Scan&nbsp;
             {formik.values.classification === "file" ? "Files" : "Observables"}
           </h3>
@@ -585,7 +606,12 @@ export default function ScanForm() {
                 name="observable_names"
                 render={(arrayHelpers) => (
                   <FormGroup row>
-                    <Label className="required" sm={3} for="observable_name">
+                    <Label
+                      id="selectobservable"
+                      className="required"
+                      sm={3}
+                      for="observable_name"
+                    >
                       Observable Value(s)
                     </Label>
                     <Col sm={9}>
@@ -676,20 +702,11 @@ export default function ScanForm() {
                           playbookOptions("file")[0],
                           false,
                         );
-                        formik.setFieldValue(
-                          "tags",
+                        updateAdvancedConfig(
                           playbookOptions("file")[0].tags,
-                          false,
-                        );
-                        formik.setFieldValue(
-                          "tlp",
                           playbookOptions("file")[0].tlp,
-                          false,
-                        );
-                        formik.setFieldValue(
-                          "scan_mode",
                           playbookOptions("file")[0].scan_mode,
-                          false,
+                          playbookOptions("file")[0].scan_check_time,
                         );
                       }
                     }}
@@ -723,20 +740,11 @@ export default function ScanForm() {
                             false,
                           ); // reset playbook
                           // reset advanced configuration
-                          formik.setFieldValue(
-                            "tags",
+                          updateAdvancedConfig(
                             formik.initialValues.tags,
-                            false,
-                          );
-                          formik.setFieldValue(
-                            "tlp",
                             formik.initialValues.tlp,
-                            false,
-                          );
-                          formik.setFieldValue(
-                            "scan_mode",
                             formik.initialValues.scan_mode,
-                            false,
+                            "1 00:00:00",
                           );
                         }}
                       />
@@ -818,7 +826,7 @@ export default function ScanForm() {
             )}
             {scanType === scanTypes.playbooks && (
               <FormGroup row className="mb-4">
-                <Label sm={3} htmlFor="playbook">
+                <Label id="selectplugins" sm={3} htmlFor="playbook">
                   Select Playbook
                 </Label>
                 {!(playbooksLoading || playbooksError) && (
@@ -926,7 +934,7 @@ export default function ScanForm() {
                             as={Input}
                             id="checkchoice__check_all__minutes_ago"
                             type="number"
-                            name="hoursAgo"
+                            name="scan_check_time"
                             onChange={formik.handleChange}
                           />
                         </div>
@@ -969,6 +977,7 @@ export default function ScanForm() {
 
             <FormGroup row className="mt-3">
               <Button
+                id="startScan"
                 type="submit"
                 /* dirty return True if values are different then default
                  we cannot run the validation on mount or we get an infinite loop.

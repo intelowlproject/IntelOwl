@@ -120,6 +120,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 2,
+          scan_check_time: "2 00:00:00",
           tags: [
             {
               id: 1,
@@ -142,6 +143,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 2,
+          scan_check_time: "2 00:00:00",
           tags: [],
           tlp: "CLEAR",
         },
@@ -158,6 +160,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 1,
+          scan_check_time: null,
           tags: [],
           tlp: "AMBER",
         },
@@ -174,6 +177,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 1,
+          scan_check_time: null,
           tags: [],
           tlp: "AMBER",
         },
@@ -190,6 +194,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 1,
+          scan_check_time: null,
           tags: [],
           tlp: "AMBER",
         },
@@ -206,6 +211,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 1,
+          scan_check_time: null,
           tags: [],
           tlp: "AMBER",
         },
@@ -730,7 +736,17 @@ describe("test ScanForm component", () => {
           <ScanForm />
         </BrowserRouter>,
       );
-      // advanced settings
+
+      // select an observable and start scan
+      const firstObservableInputElement = screen.getByRole("textbox", {
+        name: "",
+      });
+      await user.type(firstObservableInputElement, "google.com");
+
+      /* advanced settings:
+        if you modify advanced settings before typing the observable when the playbook auto load override the advanced settings
+        Don't move this block before the observable typing!!!
+      */
       const advancedSettingsButton = screen.getByRole("button", {
         name: "Advanced settings",
       });
@@ -739,16 +755,13 @@ describe("test ScanForm component", () => {
       expect(timeRangeSelector).toBeInTheDocument();
       await user.clear(timeRangeSelector);
       await user.type(timeRangeSelector, "10");
+
       // recent scans
       expect(RecentScans).toHaveBeenCalledWith(
         { classification: "generic", param: "" },
         {},
       );
-      // select an observable and start scan
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "google.com");
+      
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
       });
@@ -1274,7 +1287,7 @@ describe("test ScanForm component", () => {
               tags_labels: [],
               tlp: "CLEAR",
               scan_mode: 2,
-              scan_check_time: "24:00:00",
+              scan_check_time: "48:00:00",
             },
           ],
         ]);
@@ -1425,7 +1438,7 @@ describe("test ScanForm component", () => {
               tags_labels: ["test tag"],
               tlp: "CLEAR",
               scan_mode: 2,
-              scan_check_time: "24:00:00",
+              scan_check_time: "48:00:00",
             },
           ],
         ]);

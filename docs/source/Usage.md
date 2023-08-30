@@ -13,6 +13,7 @@ This page includes the most important things to know and understand when using I
   - [Playbooks](#playbooks)
   - [Visualizers](#visualizers)
   - [Ingestors](#ingestors)
+  - [Enabling or Disabling Plugins](#enabling-or-disabling-plugins)
 - [TLP Support](#tlp-support)
 
 ## Client
@@ -303,7 +304,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Confidence`: Give max, average and minimum confidence of maliciousness for an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Confidence API.
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
 * `CRXcavator`: scans a chrome extension against crxcavator.io
-* `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 * `EmailRep`: search an email address on [emailrep.io](https://emailrep.io)
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
@@ -523,6 +523,16 @@ The following are all the keys that you can change without touching the source c
 - `playbook_to_execute`: Playbook that will be used for every IOC retrieved from the ingestor
 - `schedule`: Crontab schedule of its execution
 
+### Enabling or Disabling Plugins
+By default, each available plugin is configured as either disabled or not. The majority of them are enabled by default, while others may be disabled to avoid potential problems in the application usability for first time users.
+
+Considering the impact that this change could have in the application, the GUI does not allow a normal user to enable/disable any plugin. On the contrary, users with specific privileges may change this configuration:
+* Org Administrators may leverage the feature documented [here](#disable-analyzers-at-org-level) to enable/disable plugins for their org. This can be helpful to control users' behavior.
+* IntelOwl Superusers (full admin) can go to the Django Admin Interface and enable/disable them from there. This operation does overwrite the Org administrators configuration. To find the plugin to change, they'll need to first choose the section of its type ("ANALYZERS_MANAGER", "CONNECTORS_MANAGER", etc), then select the chosen plugin, change the flag on that option and save the plugin by pressing the right button.
+
+![img.png](../static/disabled.png)
+
+![img.png](../static/save.png)
 
 ## TLP Support
 The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 

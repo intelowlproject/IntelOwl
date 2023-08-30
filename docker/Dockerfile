@@ -19,11 +19,11 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
-ENV ELASTICSEARCH_DSL_VERSION 7.2.2
-ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
-
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
+ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
+ARG PYELASTIC_VERSION=7.2.2
+ARG PYCTI_VERSION=5.10.0
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -40,19 +40,20 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
 
-# perl not interactive
-ENV PERL_MM_USE_DEFAULT 1
-# msgconvert
-RUN cpan -T Email::Outlook::Message
-
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
 RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
     # install elasticsearch-dsl's appropriate version as specified by user
-    && pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION} \
+    && pip3 install --no-cache-dir django-elasticsearch-dsl==${PYELASTIC_VERSION} \
+    && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
+
+# perl not interactive
+ENV PERL_MM_USE_DEFAULT 1
+# msgconvert
+RUN cpan -T Email::Outlook::Message
 
 COPY . $PYTHONPATH
 

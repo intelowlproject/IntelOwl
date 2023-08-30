@@ -9,6 +9,7 @@ This page includes details about some advanced features that Intel Owl provides 
     - [OAuth support](#google-oauth2)
     - [LDAP](#ldap)
     - [RADIUS](#radius-authentication)
+  - [OpenCTI support](#opencti)
   - [Cloud Support](#cloud-support)
     - [AWS support](#aws-support)
       - [Secrets](#secrets)
@@ -36,8 +37,8 @@ Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboa
 1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elasticsearch` on port `9200` which is exposed to the shared docker network.
    (Alternatively, you can spin up a local Elastic Search instance, by appending `--elastic` to the `python3 start.py ...` command. Note that the local Elastic Search instance consumes large amount of memory, and hence having >=16GB is recommended.))
 2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elasticsearch:9200`.
-3. In the `Dockerfile`, set the correct version in `ELASTICSEARCH_DSL_VERSION` [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our elasticsearch server.
-4. Rebuild the docker images with `docker-compose build` (required only if `ELASTICSEARCH_DSL_VERSION` was changed)
+3. Configure the version of the ElasticSearch Library used [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our Elasticsearch server. This is required for compatibility. To do that, you can leverage the option `--pyelastic-version` of the `start.py` script. The default value of that parameter indicates the version that would be installed by default.
+4. Rebuild the docker images with `python3 start.py test --pyelastic-version x.x.x build` (required only if you changed the default value of `--pyelastic-version`)
 5. Now start the docker containers and execute,
 
 ```bash
@@ -106,6 +107,23 @@ For more details on how to configure this file, check the <a href="https://githu
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
 
+
+## OpenCTI
+Like many other integrations that we have, we have an [Analyzer](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers) and a [Connector](https://intelowl.readthedocs.io/en/latest/Usage.html#connectors) for the [OpenCTI]([OpenCTI](https://github.com/OpenCTI-Platform/opencti)) platform.
+
+This allows the users to leverage these 2 popular open source projects and frameworks together.
+
+So why we have a section here? This is because there are various compatibility problems with the [official PyCTI library](https://github.com/OpenCTI-Platform/client-python/).
+
+We found out (see issues in [IntelOwl](https://github.com/intelowlproject/IntelOwl/issues/1730) and [PyCTI](https://github.com/OpenCTI-Platform/client-python/issues/287)) that, most of the times, it is required that the OpenCTI version of the server you are using and the pycti version installed in IntelOwl **must** match perfectly.
+
+Because of that, we decided to provide to the users the chance to customize the version of PyCTI installed in IntelOwl based on the OpenCTI version that they are using.
+
+To do that, you would need to leverage the option `--pycti-version` provided by the `script.py` helper:
+* check the default version that would be installed by checking the description of the option `--pycti-version` with `python3 start.py -h`
+* if the default version is different from your OpenCTI server version, you need to rebuild the IntelOwl Image with `python3 start.py test --pycti-version <your_version> build`
+* then restart the project `python3 start.py test up --build`
+* enjoy
 
 ## Cloud Support
 

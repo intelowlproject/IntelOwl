@@ -166,16 +166,15 @@ There are two possible cases:
 
 If you are doing the step number `2`, you can skip this paragraph.
 
-First of you need to class the python code that will be run when your Plugin is executed. You can use a similar plugin for what you need as a template.
-
-After have done the python code, every plugin requires the configuration of the respective `Python Module`,
-that is nothing more than a proxy model to have in the database the python path of the class that you wrote.
-
-Here, you should add every `Parameter` that the python code requires:
+First, you need to create the python code that will be actually executed. You can easily take other plugins as example to write this.
+Then, you have to create a `Python Module` model. You can do this in the `django admin`: 
+You have to specify which type of Plugin you wrote, and its python module. Again, you can use as an example an already configured `Python Module`.
+Finally, you should add every `Parameter` that the python code requires (the class attributes that you needed):
       1. *name: Name of the parameter that will be dynamically added to the python class (if is a secret, in the python code a `_` wil be prepended to the name)
       2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
       3. *description
       4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. *is_secret: `true` or `false`
 
 At this point, you can follow the specific guide for each plugin 
 

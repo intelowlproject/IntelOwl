@@ -78,8 +78,8 @@ def post_save_plugin_config(sender, instance: PluginConfig, *args, **kwargs):
     instance.refresh_cache_keys()
 
 
-@receiver(models.signals.pre_delete, sender=PluginConfig)
-def pre_delete_plugin_config(sender, instance: PluginConfig, *args, **kwargs):
+@receiver(models.signals.post_delete, sender=PluginConfig)
+def post_delete_plugin_config(sender, instance: PluginConfig, *args, **kwargs):
     instance.refresh_cache_keys()
 
 
@@ -89,7 +89,7 @@ def post_save_parameter(sender, instance: Parameter, *args, **kwargs):
     instance.refresh_cache_keys()
 
 
-@receiver(models.signals.pre_delete, sender=Parameter)
-def pre_delete_parameter(sender, instance: Parameter, *args, **kwargs):
+@receiver(models.signals.post_delete, sender=Parameter)
+def post_delete_parameter(sender, instance: Parameter, *args, **kwargs):
     # delete list view cache
     instance.refresh_cache_keys()

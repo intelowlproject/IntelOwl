@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import base64
 import pickle
+from typing import Any, Dict
 
 from django.core.cache.backends.db import DatabaseCache
 from django.db import connections, router
@@ -13,17 +14,17 @@ def plain_key(key, key_prefix, version):
 
 
 class DatabaseCacheExtended(DatabaseCache):
-    def get_where(self, query, default=None, version=None):
+    def get_where(self, starts_with:str, version=None) -> Dict[str, Any]:
         """
         Usage: cache.get_where('string%')
         """
         db = router.db_for_read(self.cache_model_class)
         table = connections[db].ops.quote_name(self._table)
-
+        query = self.make_and_validate_key(starts_with + "%", version=version)
         with connections[db].cursor() as cursor:
             cursor.execute(
-                "SELECT cache_key, value, expires FROM %s "
-                "WHERE cache_key LIKE %%s" % table,
+                f"SELECT cache_key, value, expires FROM {table} "
+                "WHERE cache_key LIKE %s",
                 [query],
             )
             rows = cursor.fetchall()

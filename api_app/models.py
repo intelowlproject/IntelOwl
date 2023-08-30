@@ -854,7 +854,7 @@ class PythonConfig(AbstractConfig):
     @classmethod
     def delete_class_cache_keys(cls, user: User = None):
         base_key = f"{cls.__name__}_{user.username if user else ''}"
-        for key in cache.get_where(f"list_{base_key}%").keys():
+        for key in cache.get_where(f"list_{base_key}").keys():
             logger.info(f"Deleting cache key {key}")
             cache.delete(key)
 
@@ -864,7 +864,8 @@ class PythonConfig(AbstractConfig):
         base_key = (
             f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
         )
-        for key in cache.get_where(f"serializer_{base_key}%").keys():
+        for key in cache.get_where(f"serializer_{base_key}").keys():
+            logger.info(f"Deleting cache key {key}")
             cache.delete(key)
         if user:
             PythonListConfigSerializer(

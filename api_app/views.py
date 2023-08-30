@@ -825,7 +825,6 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             page = self.serializer_class.Meta.model.objects.filter(
                 pk__in=[plugin.pk for plugin in page]
             )
-            cache_name += f"_{request.user.username}"
             if "page" in request.query_params and "page_size" in request.query_params:
                 cache_name += (
                     f"_{request.query_params['page']}_"
@@ -833,10 +832,12 @@ class PythonConfigViewSet(AbstractConfigViewSet):
                 )
             cache_hit = cache.get(cache_name)
             if cache_hit is None:
+                logger.debug(f"View {cache_name} cache not hit")
                 serializer = self.get_serializer(page, many=True)
                 data = serializer.data
                 cache.set(cache_name, value=data, timeout=24 * 7)
             else:
+                logger.debug(f"View {cache_name} cache hit")
                 data = cache_hit
             return self.get_paginated_response(data)
         cache_hit = cache.get(cache_name)

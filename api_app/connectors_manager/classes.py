@@ -9,6 +9,7 @@ from django.conf import settings
 
 from certego_saas.apps.user.models import User
 
+from ..choices import PythonModuleBasePaths
 from ..classes import Plugin
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorConfig, ConnectorReport
@@ -27,7 +28,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_CONNECTOR_PYTHON_PATH
+        return PythonModuleBasePaths.Connector.value
 
     @classmethod
     @property
@@ -84,8 +85,8 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             logger.info(f"Found connector runnable {cc.name} for user {user.username}")
             for param in (
                 cc.parameters.filter(name__startswith="url")
-                .annotate_configured(user)
-                .annotate_value_for_user(user)
+                .annotate_configured(cc, user)
+                .annotate_value_for_user(cc, user)
             ):
                 if not param.configured or not param.value:
                     continue

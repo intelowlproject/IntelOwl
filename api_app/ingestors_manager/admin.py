@@ -18,8 +18,6 @@ class IngestorConfigAdminView(PythonConfigAdminView):
     list_display = (
         "name",
         "python_module",
-        "params",
-        "secrets",
         "disabled",
         "playbook_to_execute",
         "schedule",

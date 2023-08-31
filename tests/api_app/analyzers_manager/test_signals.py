@@ -3,6 +3,8 @@ import json
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import PythonModule
 from tests import CustomTestCase
 
 
@@ -11,7 +13,10 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         crontab, created = CrontabSchedule.objects.get_or_create(minute=22)
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
@@ -36,7 +41,10 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         crontab, created = CrontabSchedule.objects.get_or_create(minute=22)
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,

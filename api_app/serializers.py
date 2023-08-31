@@ -8,10 +8,10 @@ import json
 import logging
 import re
 import uuid
-from collections import defaultdict
 from typing import Any, Dict, Generator, List, Union
 
 import django.core.exceptions
+from django.core.cache import cache
 from django.db.models import Q
 from django.http import QueryDict
 from django.utils.timezone import now
@@ -23,6 +23,7 @@ from rest_framework.fields import SerializerMethodField
 
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
@@ -32,7 +33,17 @@ from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
-from .models import AbstractReport, Comment, Job, Parameter, PluginConfig, Tag
+from .ingestors_manager.models import IngestorConfig
+from .models import (
+    AbstractReport,
+    Comment,
+    Job,
+    Parameter,
+    PluginConfig,
+    PythonConfig,
+    PythonModule,
+    Tag,
+)
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 
@@ -979,13 +990,19 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             class_ = ConnectorConfig
         elif _type == "3":
             class_ = VisualizerConfig
+        elif _type == "4":
+            class_ = IngestorConfig
         else:
             raise RuntimeError("Not configured")
-        parameter = class_.objects.get(name=_plugin_name).parameters.get(
+        # we set the pointers allowing retro-compatibility from the frontend
+        config = class_.objects.get(name=_plugin_name)
+        parameter = config.parameters.get(
             name=_attribute, is_secret=_config_type == "2"
         )
         self.validate_value_type(_value, parameter)
+
         attrs["parameter"] = parameter
+        attrs[class_.snake_case_name] = config
         return attrs
 
     def update(self, instance, validated_data):
@@ -1030,7 +1047,7 @@ class ParameterSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Parameter
-        fields = ["name", "type", "description", "required", "value"]
+        fields = ["name", "type", "description", "required", "value", "is_secret"]
         list_serializer_class = ParamListSerializer
 
     def get_value(self, param: Parameter):
@@ -1044,65 +1061,21 @@ class PythonListConfigSerializer(rfs.ListSerializer):
 
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
-    def to_representation(self, data):
-
-        plugins = self.child.Meta.model.objects.filter(
-            pk__in=[plugin.pk for plugin in data]
-        ).prefetch_related("parameters")
-        user = self.context["request"].user
-        enabled_plugins = plugins.filter(disabled=False)
-
-        # get the values for that configurations
-        if user and user.has_membership():
-            if self.child.Meta.model.disabled_in_organizations:
-                enabled_plugins.prefetch_related("disabled_in_organizations")
-                logger.debug("Excluding plugins disabled in organization")
-                enabled_plugins = enabled_plugins.exclude(
-                    disabled_in_organizations=user.membership.organization.pk
-                )
-            else:
-                logger.debug("Plugin is system-wide.")
-        else:
-            logger.debug(
-                f"User {user.username} is not a member of an organization,"
-                "meaning that there are no disabled plugins"
-            )
-        # annotate if the params are configured or not with the subquery
-        params = (
-            Parameter.objects.filter(
-                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
-            )
-            .prefetch_related(self.child.Meta.model.snake_case_name)
-            .annotate_value_for_user(user)
-            .annotate_configured(user)
+    def to_representation_single_plugin(self, plugin: PythonConfig, user: User):
+        cache_name = (
+            f"serializer_{plugin.__class__.__name__}_{plugin.name}_{user.username}"
         )
-        parsed = defaultdict(list)
-        # populate the result for every plugin (even the ones without parameters)
-        # parsed[plugin]= [parameter1]
-        for parameter in params:
-            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
-                parameter
-            )
-        logger.debug(
-            ", ".join(
-                [
-                    f"plugin {key} has {len(values)} parameters"
-                    for key, values in parsed.items()
-                ]
-            )
-        )
-        # we can finally construct our result
-        for plugin in plugins:
+        cache_hit = cache.get(cache_name)
+        if not cache_hit:
             plugin_representation = self.child.to_representation(plugin)
-            plugin_representation["params"] = {}
             plugin_representation["secrets"] = {}
-            total_parameter = len(parsed[plugin])
+            plugin_representation["params"] = {}
+            total_parameters = 0
             parameter_required_not_configured = []
-            for param in parsed[plugin]:
-                # the priority order is
-                # 1 owner
-                # 2 organization
-                # 3 default
+            for param in plugin.python_module.parameters.annotate_configured(
+                plugin, user
+            ).annotate_value_for_user(plugin, user):
+                total_parameters += 1
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data
@@ -1111,10 +1084,10 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                     f"has value {param.value} for user {user.username}"
                 )
                 param_representation.pop("name")
-                if param.is_secret:
-                    plugin_representation["secrets"][param.name] = param_representation
-                else:
-                    plugin_representation["params"][param.name] = param_representation
+                key = "secrets" if param.is_secret else "params"
+
+                plugin_representation[key][param.name] = param_representation
+
             if not parameter_required_not_configured:
                 logger.debug(f"Plugin {plugin.name} is configured")
                 configured = True
@@ -1126,17 +1099,30 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                     "secret"
                     f"{'' if len(parameter_required_not_configured) == 1 else 's'}"
                     " not set;"
-                    f" ({total_parameter - len(parameter_required_not_configured)} "
-                    f"of {total_parameter} satisfied)"
+                    f" ({total_parameters - len(parameter_required_not_configured)} "
+                    f"of {total_parameters} satisfied)"
                 )
                 configured = False
-            plugin_representation["disabled"] = plugin not in enabled_plugins
+            plugin_representation["disabled"] = plugin.enabled_for_user(user)
             plugin_representation["verification"] = {
                 "configured": configured,
                 "details": details,
                 "missing_secrets": parameter_required_not_configured,
             }
-            yield plugin_representation
+            logger.info(f"Setting cache {cache_name}")
+            cache.set(cache_name, plugin_representation, timeout=24 * 7)
+        return cache.get(cache_name)
+
+    def to_representation(self, data):
+        user = self.context["request"].user
+        for plugin in data:
+            yield self.to_representation_single_plugin(plugin, user)
+
+
+class PythonModuleSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = PythonModule
+        fields = ["module", "base_path"]
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):
@@ -1149,10 +1135,18 @@ class PythonConfigSerializer(AbstractConfigSerializer):
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = ["disabled_in_organizations"]
+        exclude = ["disabled_in_organizations", "python_module"]
+        list_serializer_class = PythonListConfigSerializer
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
+class PythonConfigSerializerForMigration(PythonConfigSerializer):
+    python_module = PythonModuleSerializer(read_only=True)
+
+    class Meta:
+        exclude = ["disabled_in_organizations"]
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):

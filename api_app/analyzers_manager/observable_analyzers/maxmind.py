@@ -65,8 +65,9 @@ class Maxmind(classes.ObservableAnalyzer):
         ):
             for plugin in PluginConfig.objects.filter(
                 param=Parameter.objects.get(
-                    analyzer_config=config, name="api_key_name", is_secret=True
+                    python_module=cls.python_module, name="api_key_name", is_secret=True
                 ),
+                analyzer_config=config,
             ):
                 if plugin.value:
                     return plugin.value

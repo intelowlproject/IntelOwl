@@ -115,7 +115,6 @@ class JobQuerySet(CleanOnCreateQuerySet):
         return self.annotate(user_weight=user_case)
 
     def annotate_importance(self, user: User) -> QuerySet:
-
         return (
             self._annotate_importance_date()
             ._annotate_importance_user(user)
@@ -312,7 +311,6 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
 
         job: Job
         for config in self:
-
             config: PythonConfig
             if not hasattr(config, "runnable"):
                 raise RuntimeError(

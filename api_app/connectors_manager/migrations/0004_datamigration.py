@@ -145,7 +145,6 @@ def delete_configurations(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("connectors_manager", "0003_connectorconfig"),
     ]

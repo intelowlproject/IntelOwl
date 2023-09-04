@@ -67,7 +67,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("connectors_manager", "00011_remove_runtime_configuration"),
     ]

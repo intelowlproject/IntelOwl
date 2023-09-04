@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ingestors_manager", "0007_alter_ingestorconfig_python_module"),
         ("analyzers_manager", "0039_alter_analyzerconfig_python_module"),

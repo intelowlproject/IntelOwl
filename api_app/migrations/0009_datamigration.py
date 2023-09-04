@@ -16,7 +16,6 @@ def create_apiaccess_client_for_durin(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0008_job_user_field"),
         ("durin", "0002_client_throttlerate"),  # important

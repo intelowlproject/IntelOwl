@@ -11,7 +11,6 @@ import api_app.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "0002_analyzerreport_parent_playbook"),
     ]

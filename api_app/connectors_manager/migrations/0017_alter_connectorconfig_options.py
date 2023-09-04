@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("connectors_manager", "0016_alter_connectorconfig_name"),
     ]

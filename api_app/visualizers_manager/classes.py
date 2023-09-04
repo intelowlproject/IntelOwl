@@ -324,7 +324,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
     def after_run_success(self, content):
-
         if not isinstance(content, list):
             raise VisualizerRunException(
                 f"Report has not correct type: {type(self.report.report)}"

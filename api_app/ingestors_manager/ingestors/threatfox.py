@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class ThreatFox(Ingestor):
-
     days: int
 
     BASE_URL = "https://threatfox-api.abuse.ch/api/v1/"

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("django_celery_beat", "0018_improve_crontab_helptext"),
         ("analyzers_manager", "0032_analyzer_config"),

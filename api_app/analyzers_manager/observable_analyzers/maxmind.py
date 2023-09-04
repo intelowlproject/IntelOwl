@@ -27,7 +27,6 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
-
     _api_key_name: str
 
     def run(self):
@@ -58,19 +57,13 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _get_api_key(cls) -> Optional[str]:
-        from api_app.analyzers_manager.models import AnalyzerConfig
-
-        for config in AnalyzerConfig.objects.filter(
-            python_module=cls.python_module, disabled=False
+        for plugin in PluginConfig.objects.filter(
+            param=Parameter.objects.get(
+                python_module=cls.python_module, name="api_key_name", is_secret=True
+            ),
         ):
-            for plugin in PluginConfig.objects.filter(
-                param=Parameter.objects.get(
-                    python_module=cls.python_module, name="api_key_name", is_secret=True
-                ),
-                analyzer_config=config,
-            ):
-                if plugin.value:
-                    return plugin.value
+            if plugin.value:
+                return plugin.value
         return None
 
     @classmethod
@@ -82,7 +75,6 @@ class Maxmind(classes.ObservableAnalyzer):
 
         db_location = _get_db_location(db)
         try:
-
             db_name_wo_ext = db[:-5]
             logger.info(f"starting download of db {db_name_wo_ext} from maxmind")
             url = (

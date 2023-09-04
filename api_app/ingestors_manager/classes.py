@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 class Ingestor(Plugin, metaclass=abc.ABCMeta):
-
     maximum_jobs: int = None
 
     def __init__(self, config: IngestorConfig, runtime_configuration: dict, **kwargs):

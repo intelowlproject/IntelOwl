@@ -29,7 +29,6 @@ def post_migrate_finished(*args, **kwargs):
     except ProgrammingError:
         logger.info("No table to clean")
     finally:
-
         from certego_saas.models import User
         from intel_owl.celery import DEFAULT_QUEUE
         from intel_owl.tasks import create_caches

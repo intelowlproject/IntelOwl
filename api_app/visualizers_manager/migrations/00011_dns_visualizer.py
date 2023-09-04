@@ -50,7 +50,6 @@ def reverse_dns_visualizer(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("visualizers_manager", "00010_remove_runtime_configuration"),
     ]

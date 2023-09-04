@@ -125,7 +125,6 @@ class VisualizableBoolTestCase(CustomTestCase):
 
 class VisualizableTitleTestCase(CustomTestCase):
     def test_to_dict(self):
-
         title = VisualizableBase(
             value="test_title", color=VisualizableColor.DARK, link="http://test_title"
         )
@@ -185,7 +184,6 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         self.assertCountEqual(vvl.to_dict(), expected_result)
 
     def test_to_dict_values_empty(self):
-
         name = VisualizableBase(value="test")
         vvl = VisualizableVerticalList(name=name, value=[])
         expected_result = {

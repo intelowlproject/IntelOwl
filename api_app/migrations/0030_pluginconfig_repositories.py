@@ -35,7 +35,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0029_parameter_api_app_par_analyze_1f1bee_idx_and_more"),
     ]

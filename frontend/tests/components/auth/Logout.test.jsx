@@ -23,5 +23,7 @@ describe("Logout component", () => {
       certegoUIenableProgressBar: false,
     });
     expect(screen.getByText("Logging you out...")).toBeInTheDocument();
+    // check redirect to home page
+    expect(global.location.pathname).toEqual("/");
   });
 });

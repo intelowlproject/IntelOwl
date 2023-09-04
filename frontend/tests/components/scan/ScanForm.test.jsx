@@ -789,6 +789,8 @@ describe("test ScanForm component", () => {
             },
           ],
         );
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -874,6 +876,8 @@ describe("test ScanForm component", () => {
             },
           ],
         );
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -948,6 +952,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1030,6 +1036,8 @@ describe("test ScanForm component", () => {
           tlp: "GREEN",
           scan_mode: "1",
         });
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1126,6 +1134,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1225,6 +1235,8 @@ describe("test ScanForm component", () => {
           tags_labels: "test tag",
           scan_mode: "1",
         });
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1291,6 +1303,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1376,6 +1390,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1442,6 +1458,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1527,6 +1545,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1596,6 +1616,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1684,6 +1706,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1756,6 +1780,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1847,6 +1873,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1913,6 +1941,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -1998,6 +2028,8 @@ describe("test ScanForm component", () => {
             },
           ],
         ]);
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,
@@ -2063,6 +2095,8 @@ describe("test ScanForm component", () => {
         tlp: "AMBER",
         scan_mode: "1",
       });
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
     });
   });
 
@@ -2146,6 +2180,8 @@ describe("test ScanForm component", () => {
           scan_mode: "2",
           scan_check_time: "24:00:00",
         });
+        // check redirect to job page
+        expect(global.location.pathname).toContain("/jobs/");
       });
     },
     15 * 1000,

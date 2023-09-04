@@ -63,6 +63,8 @@ describe("Login component", () => {
         { password: "dummyPwd1", username: "test_user", recaptcha: "noKey" },
         { certegoUIenableProgressBar: false },
       );
+      // check redirect to home page
+      expect(global.location.pathname).toEqual("/");
     });
   });
 });

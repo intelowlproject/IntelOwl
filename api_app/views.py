@@ -189,7 +189,6 @@ def analyze_multiple_files(request):
 )
 @api_view(["POST"])
 def analyze_observable(request):
-
     oas = ObservableAnalysisSerializer(data=request.data, context={"request": request})
     oas.is_valid(raise_exception=True)
     job = oas.save(send_task=True)
@@ -576,7 +575,6 @@ class TagViewSet(viewsets.ModelViewSet):
     """
 )
 class PluginConfigViewSet(viewsets.ModelViewSet):
-
     serializer_class = PluginConfigSerializer
     pagination_class = None
 
@@ -635,7 +633,6 @@ def plugin_state_viewer(request):
 
 
 class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
-
     permission_classes = [
         IsObjectOwnerOrSameOrgPermission,
     ]

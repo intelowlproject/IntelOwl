@@ -34,7 +34,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "00013_remove_runtime_configuration"),
     ]

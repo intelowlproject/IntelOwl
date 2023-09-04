@@ -131,7 +131,6 @@ class CAPEsandbox(FileAnalyzer):
                     and values[0]
                     == "Not unique, as unique option set on submit or in conf/web.conf"
                 ):
-
                     #    The above response is only returned when
                     #    a sample that has been already
                     #    uploaded once is uploaded again.

@@ -192,7 +192,6 @@ def delete_configurations(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("playbooks_manager", "0003_playbook"),
         ("analyzers_manager", "0004_datamigration"),

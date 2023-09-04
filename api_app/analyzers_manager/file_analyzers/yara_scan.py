@@ -306,7 +306,6 @@ class YaraStorage:
 
 
 class YaraScan(FileAnalyzer):
-
     ignore: list
     repositories: list
     _private_repositories: dict

@@ -111,7 +111,6 @@ def reverse_migrate_generic_tasks(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("django_celery_beat", "0018_improve_crontab_helptext"),
         ("analyzers_manager", "0033_analyzerconfig_update_schedule_and_more"),

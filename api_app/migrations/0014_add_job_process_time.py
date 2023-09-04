@@ -16,7 +16,6 @@ def calculate_process_time(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0013_alter_job_observable_classification"),
     ]

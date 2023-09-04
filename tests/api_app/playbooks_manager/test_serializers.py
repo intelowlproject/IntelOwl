@@ -68,7 +68,6 @@ class PlaybookConfigSerializerTestCase(CustomTestCase):
             pccs.is_valid(raise_exception=True)
 
     def test_create(self):
-
         pccs = PlaybookConfigSerializer(
             data={
                 "analyzers": [AnalyzerConfig.objects.first().pk],

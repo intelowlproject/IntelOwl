@@ -89,7 +89,6 @@ class DNS(Visualizer):
         )
 
     def run(self) -> List[Dict]:
-
         first_level_elements = []
         second_level_elements = []
 

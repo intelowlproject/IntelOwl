@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0042_alter_pluginconfig_unique_together_and_more"),
     ]

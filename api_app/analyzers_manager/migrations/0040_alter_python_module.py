@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0039_remove_fields"),
         ("analyzers_manager", "0039_alter_analyzerconfig_python_module"),

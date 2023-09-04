@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0037_pythonmodule_and_more"),
         ("visualizers_manager", "0023_alter_visualizerconfig_name"),

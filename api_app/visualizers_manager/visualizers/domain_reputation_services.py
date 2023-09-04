@@ -192,7 +192,6 @@ class DomainReputationServices(Visualizer):
             Q(config__name__endswith="Malicious_Detector")
             | Q(config__name="GoogleSafebrowsing")
         ):
-
             printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
             third_level_elements.append(
                 self.Bool(

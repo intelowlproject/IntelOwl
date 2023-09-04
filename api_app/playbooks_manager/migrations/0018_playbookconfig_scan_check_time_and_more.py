@@ -30,7 +30,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0034_job_scan_check_time_job_scan_mode"),
         ("playbooks_manager", "0017_playbookconfig_pivots"),

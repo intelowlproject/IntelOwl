@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("playbooks_manager", "0008_fix_free_to_use_playbook"),
     ]

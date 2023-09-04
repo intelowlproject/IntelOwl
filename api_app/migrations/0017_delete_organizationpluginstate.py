@@ -7,7 +7,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0016_add_index"),
         ("visualizers_manager", "0005_visualizerconfig_disabled_in_org"),

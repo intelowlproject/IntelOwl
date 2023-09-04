@@ -439,7 +439,6 @@ class CheckConfigurationTestCase(CustomOAuthTestCase):
             USE_RECAPTCHA="true",
             DRF_RECAPTCHA_SECRET_KEY="fake",
         ):
-
             response = self.client.get(f"{configuration}?page=register")
             self.assertEqual(response.status_code, 200)
             data = response.json()

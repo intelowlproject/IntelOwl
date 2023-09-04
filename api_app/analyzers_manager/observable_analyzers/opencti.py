@@ -29,7 +29,6 @@ RESULT_TRIM_MAP = {
 
 
 class OpenCTI(classes.ObservableAnalyzer):
-
     ssl_verify: bool
     proxies: dict
     exact_search: bool

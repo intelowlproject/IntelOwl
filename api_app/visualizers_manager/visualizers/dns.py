@@ -94,9 +94,7 @@ class DNS(Visualizer):
         second_level_elements = []
 
         for analyzer_report in self.analyzer_reports():
-            logger.debug(f"{analyzer_report.config.python_complete_path=}")
-            logger.debug(f"{analyzer_report.report=}")
-            if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
+            if "dns.dns_resolvers" in analyzer_report.config.python_module:
                 first_level_elements.append(
                     self._dns_resolution(analyzer_report=analyzer_report)
                 )

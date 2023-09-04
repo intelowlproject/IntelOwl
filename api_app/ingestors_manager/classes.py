@@ -6,10 +6,9 @@ import typing
 from collections import deque
 from typing import Any, Type
 
-from django.conf import settings
 from django.utils.functional import cached_property
 
-from ..choices import TLP
+from ..choices import TLP, PythonModuleBasePaths
 from ..classes import Plugin
 from .exceptions import IngestorConfigurationException, IngestorRunException
 from .models import IngestorConfig, IngestorReport
@@ -33,7 +32,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_INGESTOR_PYTHON_PATH
+        return PythonModuleBasePaths.Ingestor.value
 
     @abc.abstractmethod
     def run(self) -> typing.Iterator[Any]:

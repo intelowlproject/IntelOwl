@@ -142,7 +142,11 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
                 value = "test"
             pcs.append(
                 PluginConfig.objects.create(
-                    value=value, parameter=param, for_organization=False, owner=None
+                    value=value,
+                    parameter=param,
+                    for_organization=False,
+                    owner=None,
+                    **{_report.config.snake_case_name: _report.config},
                 )
             )
         response = self.client.patch(

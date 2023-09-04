@@ -1,8 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.choices import Position
 from api_app.validators import validate_schema
+from api_app.visualizers_manager.choices import Position
 
 
 def validate_report(value):

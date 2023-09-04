@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.conf import settings
 from django.db import models
 
 from api_app.choices import TLP
@@ -29,11 +28,14 @@ class ConnectorConfig(PythonConfig):
     def plugin_type(cls) -> str:
         return "2"
 
-    @property
-    def python_base_path(self) -> str:
-        return settings.BASE_CONNECTOR_PYTHON_PATH
-
     @classmethod
     @property
     def config_exception(cls):
         return ConnectorConfigurationException
+
+    @classmethod
+    @property
+    def serializer_class(cls):
+        from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+
+        return ConnectorConfigSerializer

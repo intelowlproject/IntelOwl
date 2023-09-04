@@ -5,10 +5,11 @@ from unittest.mock import patch
 
 from kombu import uuid
 
+from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.exceptions import ConnectorRunException
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job, Parameter, PluginConfig
+from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from tests import CustomTestCase
 
 
@@ -24,10 +25,12 @@ class ConnectorTestCase(CustomTestCase):
 
         with self.assertRaises(ConnectorRunException):
             MockUpConnector.health_check("test", self.user)
-
+        pm = PythonModule.objects.get(
+            base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+        )
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=pm,
             description="test",
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
@@ -36,26 +39,19 @@ class ConnectorTestCase(CustomTestCase):
         with self.assertRaises(ConnectorRunException):
             MockUpConnector.health_check("test", self.user)
         cc.disabled = False
-        param = Parameter.objects.create(
-            connector_config=cc,
-            name="url_key_name",
-            type="str",
-            is_secret=True,
-            required=True,
-        )
         cc.save()
         with self.assertRaises(ConnectorRunException):
             MockUpConnector.health_check("test", self.user)
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
-            parameter=param,
+            parameter=Parameter.objects.get(name="url_key_name", python_module=pm),
+            connector_config=cc,
         )
         with patch("requests.head"):
             result = MockUpConnector.health_check("test", self.user)
         self.assertTrue(result)
         cc.delete()
-        param.delete()
         pc.delete()
 
     def test_before_run(self):
@@ -70,7 +66,9 @@ class ConnectorTestCase(CustomTestCase):
         )
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},

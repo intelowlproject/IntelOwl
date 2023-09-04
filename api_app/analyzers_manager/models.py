@@ -4,7 +4,6 @@
 from logging import getLogger
 from typing import Optional
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
@@ -170,6 +169,13 @@ class AnalyzerConfig(PythonConfig):
         related_name="analyzer",
     )
 
+    @classmethod
+    @property
+    def serializer_class(cls):
+        from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+
+        return AnalyzerConfigSerializer
+
     def clean_observable_supported(self):
         if self.type == TypeChoices.OBSERVABLE and not self.observable_supported:
             raise ValidationError(
@@ -200,8 +206,8 @@ class AnalyzerConfig(PythonConfig):
 
     def clean_update_schedule(self):
         if (
-            not hasattr(self.python_class, "_update")
-            or not callable(self.python_class._update)
+            not hasattr(self.python_module.python_class, "_update")
+            or not callable(self.python_module.python_class._update)
         ) and (self.update_schedule or self.update_task):
             raise ValidationError(
                 "You can't configure an update schedule if"
@@ -224,12 +230,3 @@ class AnalyzerConfig(PythonConfig):
     @property
     def config_exception(cls):
         return AnalyzerConfigurationException
-
-    @property
-    def python_base_path(self) -> str:
-        if self.type == TypeChoices.FILE:
-            if self.run_hash:
-                return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
-            return settings.BASE_ANALYZER_FILE_PYTHON_PATH
-        else:
-            return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH

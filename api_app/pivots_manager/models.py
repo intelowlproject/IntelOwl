@@ -2,14 +2,15 @@ import logging
 from typing import Any, Generator, List
 
 from django.db import models
+from django.db.models import Q
 from django.utils.functional import cached_property
 
-from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.connectors_manager.models import ConnectorConfig
-from api_app.interfaces import CreateJobsFromPlaybookInterface
+from api_app.interfaces import (
+    AttachedToPythonConfigInterface,
+    CreateJobsFromPlaybookInterface,
+)
 from api_app.models import AbstractConfig, AbstractReport, Job
 from api_app.pivots_manager.validators import pivot_regex_validator
-from api_app.visualizers_manager.models import VisualizerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -57,37 +58,39 @@ class Pivot(models.Model):
         return self.starting_job.user.username
 
 
-class PivotConfig(AbstractConfig, CreateJobsFromPlaybookInterface):
+class PivotConfig(
+    AbstractConfig, CreateJobsFromPlaybookInterface, AttachedToPythonConfigInterface
+):
     name = models.CharField(
         max_length=100,
         validators=[pivot_regex_validator],
-    )
-    analyzer_config = models.ForeignKey(
-        AnalyzerConfig,
-        on_delete=models.PROTECT,
-        related_name="pivots",
-        null=True,
-        blank=True,
-    )
-    connector_config = models.ForeignKey(
-        ConnectorConfig,
-        on_delete=models.PROTECT,
-        related_name="pivots",
-        null=True,
-        blank=True,
-    )
-    visualizer_config = models.ForeignKey(
-        VisualizerConfig,
-        on_delete=models.PROTECT,
-        related_name="pivots",
-        null=True,
-        blank=True,
     )
 
     field = models.CharField(
         max_length=256,
         help_text="Dotted path to the field",
         validators=[pivot_regex_validator],
+    )
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="pivots",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="pivots",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="pivots",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
     )
     playbook_to_execute = models.ForeignKey(
         "playbooks_manager.PlaybookConfig",
@@ -96,6 +99,14 @@ class PivotConfig(AbstractConfig, CreateJobsFromPlaybookInterface):
     )
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=Q(analyzer_config__isnull=True)
+                | Q(connector_config__isnull=True)
+                | Q(visualizer_config__isnull=True),
+                name="pivot_config_no_config_all_null",
+            )
+        ]
         unique_together = [
             (
                 "analyzer_config",
@@ -114,37 +125,12 @@ class PivotConfig(AbstractConfig, CreateJobsFromPlaybookInterface):
             ),
         ]
         indexes = [
-            models.Index(fields=["analyzer_config"]),
-            models.Index(fields=["connector_config"]),
-            models.Index(fields=["visualizer_config"]),
             models.Index(fields=["playbook_to_execute"]),
-        ]
-
-    def clean_config(self) -> None:
-        from django.core.exceptions import ValidationError
-
-        if (
-            sum(
-                (
-                    bool(self.analyzer_config),
-                    bool(self.connector_config),
-                    bool(self.visualizer_config),
-                )
-            )
-            != 1
-        ):
-            raise ValidationError(
-                "You must have exactly one between"
-                " `analyzer`, `connector` and `visualizer"
-            )
+        ] + AttachedToPythonConfigInterface.Meta.indexes
 
     def clean(self) -> None:
         super().clean()
         self.clean_config()
-
-    @cached_property
-    def config(self) -> AbstractConfig:
-        return self.analyzer_config or self.connector_config or self.visualizer_config
 
     def get_values(self, report: AbstractReport) -> Generator[Any, None, None]:
         value = report.report

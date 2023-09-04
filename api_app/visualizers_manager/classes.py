@@ -5,9 +5,9 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Type, Union
 
-from django.conf import settings
 from django.db.models import QuerySet
 
+from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
@@ -301,7 +301,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_VISUALIZER_PYTHON_PATH
+        return PythonModuleBasePaths.Visualizer.value
 
     @classmethod
     @property

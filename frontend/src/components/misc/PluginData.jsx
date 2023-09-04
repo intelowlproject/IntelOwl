@@ -222,6 +222,9 @@ export function PluginData({
                                     <option value={pluginType.VISUALIZER}>
                                       Visualizer
                                     </option>
+                                    <option value={pluginType.INGESTOR}>
+                                      Ingestor
+                                    </option>
                                   </Field>
                                 </Col>
                                 {/* col for the plugin selection */}

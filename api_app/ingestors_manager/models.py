@@ -51,7 +51,6 @@ class IngestorReport(AbstractReport):
 
 
 class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
-
     objects = IngestorQuerySet.as_manager()
 
     playbook_to_execute = models.ForeignKey(

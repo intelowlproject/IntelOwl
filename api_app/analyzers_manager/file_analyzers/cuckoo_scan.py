@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 class CuckooAnalysis(FileAnalyzer):
-
     _api_key_name: str
     _url_key_name: str
     max_post_tries: int

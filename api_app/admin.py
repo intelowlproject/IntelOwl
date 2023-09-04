@@ -148,7 +148,6 @@ class AbstractConfigAdminView(JsonViewerAdminView):
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-
     form = PythonConfigAdminForm
 
     list_display = (

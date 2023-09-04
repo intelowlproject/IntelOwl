@@ -31,7 +31,6 @@ def backwards_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("playbooks_manager", "0004_datamigration"),
         ("connectors_manager", "0008_auto_20230308_1623"),

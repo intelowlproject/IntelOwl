@@ -177,7 +177,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0030_pluginconfig_repositories"),
         ("analyzers_manager", "0025_alert_tlp_and_analyzer_cleanup"),

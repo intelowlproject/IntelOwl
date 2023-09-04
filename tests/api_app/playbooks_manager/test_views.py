@@ -11,7 +11,6 @@ from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
 class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
-
     URL = "/api/playbook"
 
     @classmethod

@@ -35,7 +35,6 @@ class PivotSerializerTestCase(CustomTestCase):
         self.pc.delete()
 
     def test_read(self):
-
         pivot = Pivot.objects.create(
             starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc
         )

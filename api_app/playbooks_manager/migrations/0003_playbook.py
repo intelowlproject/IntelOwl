@@ -12,7 +12,6 @@ import api_app.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "0003_analyzerconfig"),
         ("connectors_manager", "0003_connectorconfig"),

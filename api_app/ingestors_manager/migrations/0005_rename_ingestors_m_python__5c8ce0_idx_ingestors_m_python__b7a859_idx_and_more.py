@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0037_pythonmodule_and_more"),
         ("ingestors_manager", "0004_alter_ingestorreport_name"),

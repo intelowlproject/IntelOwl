@@ -6,7 +6,6 @@ import api_app.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "analyzers_manager",

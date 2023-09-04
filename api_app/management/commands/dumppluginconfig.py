@@ -92,7 +92,6 @@ from django.db import migrations
             f.write(content)
 
     def handle(self, *args, **options):
-
         plugin_config_pk = options["plugin_config"]
         obj = PluginConfig.objects.get(pk=plugin_config_pk)
         app = obj._meta.app_label

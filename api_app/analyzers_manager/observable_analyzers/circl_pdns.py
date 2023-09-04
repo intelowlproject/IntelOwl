@@ -28,7 +28,6 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
             )
 
     def run(self):
-
         user, pwd = self.split_credentials
         pdns = pypdns.PyPDNS(basic_auth=(user, pwd))
 

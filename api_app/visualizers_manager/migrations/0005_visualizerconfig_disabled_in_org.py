@@ -25,7 +25,6 @@ def backwards_migrate_disabled_config(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("certego_saas_organization", "0001_initial"),
         ("visualizers_manager", "0004_alter_visualizerreport_report"),

@@ -215,7 +215,6 @@ values = {3}
             f.write(content)
 
     def handle(self, *args, **options):
-
         config_name = options["plugin_name"]
         config_class = options["plugin_class"]
 

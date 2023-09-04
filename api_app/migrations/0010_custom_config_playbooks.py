@@ -10,7 +10,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0009_datamigration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

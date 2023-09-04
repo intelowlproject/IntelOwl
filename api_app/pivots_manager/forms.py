@@ -4,7 +4,6 @@ from api_app.pivots_manager.models import PivotConfig
 
 
 class PivotConfigModelForm(forms.ModelForm):
-
     name = forms.CharField(
         disabled=True, required=False, initial="<generated automatically>"
     )

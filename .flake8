@@ -1,9 +1,9 @@
 [flake8]
 max-line-length = 88
 ignore =
-    W503, # line break before binary operator
-    E231, # missing whitespace after ',' (caused by black style)
-    W605, # invalid escape sequence (caused by regex)
+    W503,
+    E231,
+    W605,
 exclude =
     Dockerfile,
     docker-compose*,

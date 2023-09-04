@@ -25,7 +25,6 @@ INTELOWL_OPENCTI_TYPE_MAP = {
 
 
 class OpenCTI(classes.Connector):
-
     ssl_verify: bool
     tlp: dict
     proxies: str

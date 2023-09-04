@@ -36,7 +36,6 @@ class PluginTestCase(CustomTestCase):
         self.cc.delete()
 
     def test_abstract(self):
-
         with self.assertRaises(TypeError):
             Plugin(self.cc, self.job.pk, {})  # noqa
 

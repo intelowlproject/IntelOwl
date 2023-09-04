@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0044_alter_pluginconfig_analyzer_config_and_more"),
     ]

@@ -15,7 +15,6 @@ class PivotConfigAdminView(admin.ModelAdmin):
 
 @admin.register(Pivot)
 class PivotAdminView(admin.ModelAdmin):
-
     list_display = ["starting_job", "configuration", "value", "ending_job", "owner"]
 
     @staticmethod

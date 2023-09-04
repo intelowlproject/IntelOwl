@@ -50,11 +50,12 @@ describe("Recent Scans test", () => {
     <Loader loading={false} {...props} />
   );
   const loaderRecentScans = (props) => <Loader loading={false} {...props} />;
+  const refetch = jest.fn();
 
   test("Recent scans - default", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-      .mockReturnValueOnce([[], loaderRecentScansUser])
+      .mockReturnValueOnce([[], loaderRecentScansUser, refetch])
       .mockReturnValueOnce([[], loaderRecentScans]);
 
     render(
@@ -83,7 +84,7 @@ describe("Recent Scans test", () => {
   test("Recent scans - only user recent scans", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser, refetch])
       .mockReturnValueOnce([[], loaderRecentScans]);
 
     const { container } = render(
@@ -126,7 +127,7 @@ describe("Recent Scans test", () => {
   test("Recent scans - user and observable", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser, refetch])
       .mockReturnValueOnce([recentScansObservable, loaderRecentScans]);
 
     const { container } = render(
@@ -183,7 +184,7 @@ describe("Recent Scans test", () => {
   test("Recent scans - redirect to job page", async () => {
     // mock return value of useAxiosComponentLoader
     useAxiosComponentLoader
-      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser])
+      .mockReturnValueOnce([recentScansUser, loaderRecentScansUser, refetch])
       .mockReturnValueOnce([[], loaderRecentScans]);
     // mock user interaction: reccomanded to put this at the start of the test
     const user = userEvent.setup();

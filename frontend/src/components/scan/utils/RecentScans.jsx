@@ -95,11 +95,18 @@ RecentScansCard.defaultProps = {
 
 export default function RecentScans({ classification, param }) {
   // user recent scans
-  const [recentScansUser, LoaderRecentScansUser] = useAxiosComponentLoader({
-    url: JOB_RECENT_SCANS_USER,
-    method: "POST",
-  });
+  const [recentScansUser, LoaderRecentScansUser, refetch] =
+    useAxiosComponentLoader({
+      url: JOB_RECENT_SCANS_USER,
+      method: "POST",
+    });
   console.debug("recentScansUser", recentScansUser);
+
+  React.useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // file md5
   const [fileMd5, setFileMd5] = React.useState("");
   if (classification === "file" && param) {

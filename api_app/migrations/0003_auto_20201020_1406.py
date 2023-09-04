@@ -21,7 +21,6 @@ def create_default_clients(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0002_added_job_field"),
         # added dependency to enable using models from app2 in move_m1

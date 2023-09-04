@@ -12,7 +12,6 @@ from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 class ConnectorConfigViewSetTestCase(
     AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
 ):
-
     URL = "/api/connector"
 
     @classmethod

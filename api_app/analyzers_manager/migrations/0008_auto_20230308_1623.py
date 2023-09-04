@@ -23,7 +23,6 @@ def backwards_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0019_mitm_configs"),
         ("analyzers_manager", "0007_alter_analyzerreport_job"),

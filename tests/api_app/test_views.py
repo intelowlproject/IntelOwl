@@ -456,7 +456,6 @@ class JobViewSetTests(CustomViewSetTestCase):
 
 
 class TagViewsetTests(CustomViewSetTestCase):
-
     tags_list_uri = reverse("tags-list")
 
     def setUp(self):

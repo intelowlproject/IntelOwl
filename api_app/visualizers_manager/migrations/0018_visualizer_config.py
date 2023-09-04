@@ -70,7 +70,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0030_pluginconfig_repositories"),
         ("analyzers_manager", "0028_alter_analyzerconfig_name"),

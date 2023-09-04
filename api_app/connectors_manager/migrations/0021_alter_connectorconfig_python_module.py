@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0039_remove_fields"),
         ("connectors_manager", "0020_alter_python_module"),

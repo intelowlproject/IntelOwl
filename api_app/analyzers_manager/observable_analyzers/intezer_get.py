@@ -14,7 +14,6 @@ from tests.mock_utils import if_mock_connections, patch
 
 
 class IntezerGet(ObservableAnalyzer):
-
     soft_time_limit: int
     _api_key_name: str
 

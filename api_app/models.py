@@ -146,7 +146,6 @@ class Comment(models.Model):
 
 
 class Job(models.Model):
-
     objects = JobQuerySet.as_manager()
 
     class Meta:
@@ -279,7 +278,6 @@ class Job(models.Model):
         return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
     def retry(self):
-
         self.update_status(Job.Status.RUNNING)
         failed_analyzers_reports = self.analyzerreports.filter(
             status=AbstractReport.Status.FAILED.value
@@ -396,7 +394,6 @@ class Job(models.Model):
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
-
             reports = self._get_config_reports(config).filter(
                 status__in=[
                     AbstractReport.Status.PENDING,
@@ -547,7 +544,6 @@ class Parameter(models.Model):
 
 
 class PluginConfig(AttachedToPythonConfigInterface, models.Model):
-
     objects = PluginConfigQuerySet.as_manager()
 
     value = models.JSONField(blank=True, null=True)

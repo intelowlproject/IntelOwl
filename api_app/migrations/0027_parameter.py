@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0026_pluginconfig_api_app_plu_organiz_0867bd_idx"),
         (

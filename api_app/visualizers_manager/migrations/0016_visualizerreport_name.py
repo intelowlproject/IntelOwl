@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("visualizers_manager", "0015_alter_visualizerreport_unique_together"),
     ]

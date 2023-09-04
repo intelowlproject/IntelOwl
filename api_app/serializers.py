@@ -603,7 +603,6 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
         for classification, name in data.pop("observables", []):
-
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
@@ -837,7 +836,6 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-
         statuses_to_check = [Job.Status.RUNNING]
 
         if not validated_data["running_only"]:
@@ -1051,7 +1049,6 @@ class ParameterCompleteSerializer(rfs.ModelSerializer):
 
 
 class ParameterSerializer(rfs.ModelSerializer):
-
     value = SerializerMethodField()
 
     class Meta:
@@ -1067,7 +1064,6 @@ class ParameterSerializer(rfs.ModelSerializer):
 
 
 class PythonListConfigSerializer(rfs.ListSerializer):
-
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation_single_plugin(self, plugin: PythonConfig, user: User):
@@ -1139,7 +1135,6 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):
-
     config = _ConfigSerializer(required=True)
     parameters = ParameterSerializer(write_only=True, many=True)
 
@@ -1159,7 +1154,6 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):
-
     name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
 
     class Meta:

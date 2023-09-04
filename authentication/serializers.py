@@ -106,7 +106,6 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
     is_active = rfs.BooleanField(default=False, read_only=True)
 
     def validate_profile(self, profile):
-
         logger.info(f"{profile}")
 
         self._profile_serializer = UserProfileSerializer(data=profile)

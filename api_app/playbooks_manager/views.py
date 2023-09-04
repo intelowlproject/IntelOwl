@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 class PlaybookConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):
-
     serializer_class = PlaybookConfigSerializer
 
     permission_classes = [IsAuthenticated]

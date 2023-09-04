@@ -248,7 +248,6 @@ def create_caches(user_pk: int):
 # startup
 @signals.worker_ready.connect
 def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
-
     logger.info(f"worker {sender.hostname} ready")
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")

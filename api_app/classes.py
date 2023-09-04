@@ -28,7 +28,6 @@ class Plugin(metaclass=ABCMeta):
         task_id: int,
         **kwargs,
     ):
-
         self._config = config
         self.job_id = job_id
         self.runtime_configuration = runtime_configuration

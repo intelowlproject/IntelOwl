@@ -71,7 +71,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0030_pluginconfig_repositories"),
         ("visualizers_manager", "0019_dns_visualizer_change"),

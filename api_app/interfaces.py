@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class CreateJobsFromPlaybookInterface:
-
     playbook_to_execute: "PlaybookConfig"
     name: str
 
@@ -27,7 +26,6 @@ class CreateJobsFromPlaybookInterface:
         raise NotImplementedError()
 
     def _get_serializer(self, report: "AbstractReport", tlp: str, user: User):
-
         values = self.get_values(report)
         if self.playbook_to_execute.is_sample():
             return self._get_file_serializer(values, tlp, user)
@@ -78,7 +76,6 @@ class CreateJobsFromPlaybookInterface:
     def _create_jobs(
         self, report: "AbstractReport", tlp: str, user: User, send_task: bool = True
     ) -> Generator["Job", None, None]:
-
         try:
             serializer = self._get_serializer(report, tlp, user)
         except ValueError as e:
@@ -90,7 +87,6 @@ class CreateJobsFromPlaybookInterface:
 
 
 class AttachedToPythonConfigInterface(models.Model):
-
     analyzer_config = models.ForeignKey(
         "analyzers_manager.AnalyzerConfig",
         on_delete=models.PROTECT,

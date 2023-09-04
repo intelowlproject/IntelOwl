@@ -127,7 +127,6 @@ class PivotConfigViewSetTestCase(
         return PivotConfig
 
     def test_create(self):
-
         data = {
             "playbook_to_execute": self.pc.playbook_to_execute_id,
             "field": self.pc.field,

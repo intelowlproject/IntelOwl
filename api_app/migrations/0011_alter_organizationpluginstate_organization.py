@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("certego_saas_organization", "0001_initial"),
         ("api_app", "0010_custom_config_playbooks"),

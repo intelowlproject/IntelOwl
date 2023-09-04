@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class DragonflyEmulation(FileAnalyzer):
-
     max_tries: int = 30
     poll_distance: int = 10
     operating_system: str

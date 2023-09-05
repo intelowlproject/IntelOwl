@@ -72,7 +72,7 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         data = PluginConfigSerializer(
             pc, context={"request": MockUpRequest(user=self.user)}
         ).data
-        self.assertEqual(org.name, data["organization"])
+        self.assertEqual(org, data["organization"])
         pc.delete()
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",

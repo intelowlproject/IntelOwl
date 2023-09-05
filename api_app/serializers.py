@@ -1009,7 +1009,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result["organization"] = instance.organization
+        result["organization"] = instance.organization.name
         return result
 
 

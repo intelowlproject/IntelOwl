@@ -82,8 +82,12 @@ def migrate(apps, schema_editor):
                 plugin_config.parameter = saved_params[
                     (param.name, param.python_module)
                 ]
-                plugin_config.full_clean()
-                plugin_config.save()
+                try:
+                    plugin_config.full_clean()
+                except ValidationError:
+                    plugin_config.delete()
+                else:
+                    plugin_config.save()
             param.delete()
         else:
             for plugin_config in param.values.all():
@@ -92,7 +96,12 @@ def migrate(apps, schema_editor):
                 plugin_config.visualizer_config = param.visualizer_config
                 plugin_config.visualizer_config = param.visualizer_config
                 plugin_config.ingestor_config = param.ingestor_config
-                plugin_config.full_clean()
+                try:
+                    plugin_config.full_clean()
+                except ValidationError:
+                    plugin_config.delete()
+                else:
+                    plugin_config.save()
                 plugin_config.save()
             param.save()
             saved_params[(param.name, param.python_module)] = param

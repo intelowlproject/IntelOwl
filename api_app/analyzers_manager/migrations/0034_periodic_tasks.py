@@ -99,7 +99,6 @@ def migrate_generic_tasks(apps, schema_editor):
         crontab=c3,
         enabled=True,
         queue=get_queue_name("default"),
-        kwargs=json.dumps({"check_pending": True}),
     )
 
 

@@ -166,7 +166,12 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
                 .visible_for_user(user)
-                .filter(for_organization=True, owner=user.membership.organization.owner)
+                .filter(
+                    for_organization=True,
+                    owner__in=user.membership.organization.members.filter(
+                        is_admin=True
+                    ).values_list("user", flat=True),
+                )
                 .values("value")[:1]
             )
             if user and user.has_membership()

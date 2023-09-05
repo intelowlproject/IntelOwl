@@ -261,18 +261,20 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             .alias(
                 # we just need one config for required parameter
                 required_configured_params=Subquery(
-                    PluginConfig.objects.filter(
-                        **{self.model.snake_case_name: OuterRef("pk")},
-                        parameter__required=True
-                    )
-                    .visible_for_user(user)
-                    .annotate(
-                        count=Func(
-                            F("parameter__pk"),
-                            function="Count",
-                            extra={"distinct": True},
+                    # we count how many parameters have a valid value
+                    # considering the values that the user has access to
+                    Parameter.objects.filter(
+                        pk__in=Subquery(
+                            # we get all values that the user can see
+                            PluginConfig.objects.filter(
+                                **{self.model.snake_case_name: OuterRef("pk")},
+                                parameter__required=True
+                            )
+                            .visible_for_user(user)
+                            .values("parameter__pk")
                         )
                     )
+                    .annotate(count=Func(F("pk"), function="Count"))
                     .values("count")
                 )
             )

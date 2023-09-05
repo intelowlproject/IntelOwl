@@ -1099,7 +1099,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                     f"of {total_parameters} satisfied)"
                 )
                 configured = False
-            plugin_representation["disabled"] = plugin.enabled_for_user(user)
+            plugin_representation["disabled"] = not plugin.enabled_for_user(user)
             plugin_representation["verification"] = {
                 "configured": configured,
                 "details": details,

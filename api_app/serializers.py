@@ -1009,7 +1009,9 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result["organization"] = instance.organization.name
+        result["organization"] = (
+            instance.organization.name if instance.organization is not None else None
+        )
         return result
 
 

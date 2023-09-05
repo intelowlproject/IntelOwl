@@ -22,6 +22,8 @@ export const JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_BASE_URI}/aggregate/observa
 export const JOB_AGG_FILE_MIMETYPE_URI = `${JOB_BASE_URI}/aggregate/file_mimetype`;
 export const JOB_AGG_OBS_NAME_URI = `${JOB_BASE_URI}/aggregate/observable_name`;
 export const JOB_AGG_FILE_MD5_URI = `${JOB_BASE_URI}/aggregate/md5`;
+export const JOB_RECENT_SCANS = `${JOB_BASE_URI}/recent_scans`;
+export const JOB_RECENT_SCANS_USER = `${JOB_BASE_URI}/recent_scans_user`;
 
 // user
 export const USERACCESS_URI = `${API_BASE_URI}/me/access`;

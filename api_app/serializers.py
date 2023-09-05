@@ -65,7 +65,16 @@ class JobRecentScanSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ["playbook", "pk", "tlp", "user", "importance"]
+        fields = [
+            "playbook",
+            "pk",
+            "tlp",
+            "user",
+            "importance",
+            "observable_name",
+            "file_name",
+            "finished_analysis_time",
+        ]
 
 
 class _AbstractJobViewSerializer(rfs.ModelSerializer):

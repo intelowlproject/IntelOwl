@@ -1018,7 +1018,9 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result["organization"] = instance.organization
+        result["organization"] = (
+            instance.organization.name if instance.organization is not None else None
+        )
         return result
 
 
@@ -1108,7 +1110,7 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                     f"of {total_parameters} satisfied)"
                 )
                 configured = False
-            plugin_representation["disabled"] = plugin.enabled_for_user(user)
+            plugin_representation["disabled"] = not plugin.enabled_for_user(user)
             plugin_representation["verification"] = {
                 "configured": configured,
                 "details": details,

@@ -712,9 +712,9 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
         return self.config.plugin_type
 
     @cached_property
-    def organization(self):
+    def organization(self) -> Optional[Organization]:
         if self.for_organization:
-            return self.owner.membership.organization.name
+            return self.owner.membership.organization
         return None
 
     @property

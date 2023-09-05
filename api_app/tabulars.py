@@ -55,21 +55,24 @@ class PluginConfigInlineForPythonConfig(admin.TabularInline):
         return field
 
     def get_extra(self, request, obj: PluginConfig = None, **kwargs):
-        return (
-            Parameter.objects.filter(
-                python_module=self.get_parent(request).python_module, is_secret=False
-            ).count()
-            - PluginConfig.objects.filter(
-                **{
-                    self.get_parent(
-                        request
-                    ).snake_case_name.lower(): self.get_parent_pk(request)
-                },
-                owner=None,
-                for_organization=False,
-                parameter__is_secret=False
-            ).count()
-        )
+        if self.get_parent(request):
+            return (
+                Parameter.objects.filter(
+                    python_module=self.get_parent(request).python_module,
+                    is_secret=False,
+                ).count()
+                - PluginConfig.objects.filter(
+                    **{
+                        self.get_parent(
+                            request
+                        ).snake_case_name.lower(): self.get_parent_pk(request)
+                    },
+                    owner=None,
+                    for_organization=False,
+                    parameter__is_secret=False
+                ).count()
+            )
+        return 0
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(owner=None, for_organization=False)

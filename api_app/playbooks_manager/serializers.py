@@ -37,6 +37,7 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
     scan_check_time = rfs.DurationField(required=True, allow_null=True)
     tags = TagSerializer(required=False, allow_empty=True, many=True)
     tlp = rfs.CharField(read_only=True)
+    weight = rfs.IntegerField(read_only=True, required=False, allow_null=True)
 
     def create(self, validated_data):
         types_supported = list(

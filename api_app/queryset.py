@@ -349,6 +349,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 )
 
             task_id = str(uuid.uuid4())
+            config.generate_empty_report(job, task_id)
             args = [
                 job.pk,
                 config.python_module.pk,

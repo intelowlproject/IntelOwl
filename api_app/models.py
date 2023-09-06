@@ -441,6 +441,14 @@ class Job(models.Model):
                 MessageGroupId=str(uuid.uuid4()),
             )
         )
+        # generate an empty report
+        for plugin in (
+            list(self.analyzers_to_execute.all())
+            + list(self.connectors_to_execute.all())
+            + list(self.visualizers_to_execute.all())
+        ):
+            plugin: PythonConfig
+            plugin.generate_empty_report(self)
         runner()
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
@@ -851,6 +859,13 @@ class PythonConfig(AbstractConfig):
         # retro compatibility
 
         raise NotImplementedError()
+
+    def generate_empty_report(self, job: Job):
+        return self.python_module.python_class.report_model.objects.update_or_create(
+            job=job,
+            config=self,
+            defaults={"status": AbstractReport.Status.PENDING.value},
+        )
 
     @classmethod
     def delete_class_cache_keys(cls, user: User = None):

@@ -168,7 +168,7 @@ class Plugin(metaclass=ABCMeta):
             job_id=self.job_id,
             config=self._config,
             defaults={
-                "status": AbstractReport.Status.PENDING.value,
+                "status": AbstractReport.Status.RUNNING.value,
                 "task_id": self.task_id,
             },
         )

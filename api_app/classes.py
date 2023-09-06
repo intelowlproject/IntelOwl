@@ -88,8 +88,6 @@ class Plugin(metaclass=ABCMeta):
         """
         function called directly before run function.
         """
-        self.report.status = self.report.Status.RUNNING.value
-        self.report.save(update_fields=["status"])
 
     @abstractmethod
     def run(self) -> dict:

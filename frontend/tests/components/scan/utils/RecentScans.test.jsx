@@ -43,11 +43,11 @@ describe("Recent Scans test", () => {
     axios.post.mockImplementation((url) => {
       switch (url) {
         case JOB_RECENT_SCANS_USER:
-          return Promise.resolve({data: []})
+          return Promise.resolve({ data: [] });
         case JOB_RECENT_SCANS:
-          return Promise.resolve({data: []})
+          return Promise.resolve({ data: [] });
         default:
-          return Promise.reject(new Error('Error'))
+          return Promise.reject(new Error("Error"));
       }
     });
 
@@ -68,18 +68,21 @@ describe("Recent Scans test", () => {
 
     // axios call
     expect(axios.post.mock.calls[0]).toEqual([JOB_RECENT_SCANS_USER]);
-    expect(axios.post.mock.calls[1]).toEqual([JOB_RECENT_SCANS, { md5: md5("") }]);
+    expect(axios.post.mock.calls[1]).toEqual([
+      JOB_RECENT_SCANS,
+      { md5: md5("") },
+    ]);
   });
 
   test("Recent scans - only user recent scans", async () => {
     axios.post.mockImplementation((url) => {
       switch (url) {
         case JOB_RECENT_SCANS_USER:
-          return Promise.resolve({data: recentScansUser})
+          return Promise.resolve({ data: recentScansUser });
         case JOB_RECENT_SCANS:
-          return Promise.resolve({data: []})
+          return Promise.resolve({ data: [] });
         default:
-          return Promise.reject(new Error('Error'))
+          return Promise.reject(new Error("Error"));
       }
     });
 
@@ -113,18 +116,21 @@ describe("Recent Scans test", () => {
 
     // axios call
     expect(axios.post.mock.calls[0]).toEqual([JOB_RECENT_SCANS_USER]);
-    expect(axios.post.mock.calls[1]).toEqual([JOB_RECENT_SCANS, { md5: md5("") }]);
+    expect(axios.post.mock.calls[1]).toEqual([
+      JOB_RECENT_SCANS,
+      { md5: md5("") },
+    ]);
   });
 
   test("Recent scans - user and observable", async () => {
     axios.post.mockImplementation((url) => {
       switch (url) {
         case JOB_RECENT_SCANS_USER:
-          return Promise.resolve({data: recentScansUser})
+          return Promise.resolve({ data: recentScansUser });
         case JOB_RECENT_SCANS:
-          return Promise.resolve({data: recentScansObservable})
+          return Promise.resolve({ data: recentScansObservable });
         default:
-          return Promise.reject(new Error('Error'))
+          return Promise.reject(new Error("Error"));
       }
     });
 
@@ -168,23 +174,26 @@ describe("Recent Scans test", () => {
       const secondCardUser = screen.getAllByText("User:")[1];
       expect(secondCardUser.textContent).toBe("User: test");
       const secondCardFinished = screen.getAllByText("Finished:")[1];
-      expect(secondCardFinished).toBeInTheDocument(); 
+      expect(secondCardFinished).toBeInTheDocument();
     });
 
     // axios call
     expect(axios.post.mock.calls[0]).toEqual([JOB_RECENT_SCANS_USER]);
-    expect(axios.post.mock.calls[1]).toEqual([JOB_RECENT_SCANS, { md5: md5("1.2.3.4") }]);
+    expect(axios.post.mock.calls[1]).toEqual([
+      JOB_RECENT_SCANS,
+      { md5: md5("1.2.3.4") },
+    ]);
   });
 
   test("Recent scans - redirect to job page", async () => {
     axios.post.mockImplementation((url) => {
       switch (url) {
         case JOB_RECENT_SCANS_USER:
-          return Promise.resolve({data: recentScansUser})
+          return Promise.resolve({ data: recentScansUser });
         case JOB_RECENT_SCANS:
-          return Promise.resolve({data: []})
+          return Promise.resolve({ data: [] });
         default:
-          return Promise.reject(new Error('Error'))
+          return Promise.reject(new Error("Error"));
       }
     });
 
@@ -217,7 +226,7 @@ describe("Recent Scans test", () => {
       expect(firstCardUser.textContent).toBe("User: test");
       const firstCardFinished = screen.getByText("Finished:");
       expect(firstCardFinished).toBeInTheDocument();
-      
+
       // check redirect to job page
       user.click(firstCard);
       expect(global.location.pathname).toEqual("/jobs/1");

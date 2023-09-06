@@ -32,7 +32,9 @@ export function BooleanVisualizer({
       <Badge
         pill
         color={disable ? "gray" : activeColor}
-        className={`w-100 text-wrap ${disable ? "opacity-25" : ""}`}
+        className={`w-100 text-wrap text-capitalize ${
+          disable ? "opacity-25" : ""
+        }`}
       >
         {coreComponent}
       </Badge>

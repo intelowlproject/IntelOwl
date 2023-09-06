@@ -36,7 +36,7 @@ export function VerticalListVisualizer({
             color={name.props.color.replace("bg-", "")}
           >
             <div
-              className={`d-flex align-items-center justify-content-${alignment}`}
+              className={`d-flex align-items-center text-capitalize justify-content-${alignment}`}
             >
               {isListOpen ? (
                 <IoIosArrowDropupCircle className="me-1" />
@@ -47,12 +47,12 @@ export function VerticalListVisualizer({
             </div>
           </Button>
         </CardTitle>
-        <Collapse isOpen={isListOpen} className="small">
-          <ListGroup flush className="small">
+        <Collapse isOpen={isListOpen}>
+          <ListGroup flush>
             {values.map((listElement, index) => (
               <ListGroupItem
                 key={`${id}-${listElement.props.value}`}
-                className={`small text-break ${
+                className={`text-break ${
                   index === values.length - 1 ? "rounded-bottom" : ""
                 } ${listElement.props.color}`}
               >

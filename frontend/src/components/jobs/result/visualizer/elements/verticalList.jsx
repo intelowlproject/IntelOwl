@@ -38,12 +38,12 @@ export function VerticalListVisualizer({
             <div
               className={`d-flex align-items-center text-capitalize justify-content-${alignment}`}
             >
-              {isListOpen ? (
-                <IoIosArrowDropupCircle className="me-1" />
-              ) : (
-                <IoIosArrowDropdownCircle className="me-1" />
-              )}
               {name}
+              {isListOpen ? (
+                <IoIosArrowDropupCircle className="ms-1" />
+              ) : (
+                <IoIosArrowDropdownCircle className="ms-1" />
+              )}
             </div>
           </Button>
         </CardTitle>

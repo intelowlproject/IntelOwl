@@ -17,9 +17,12 @@ export function BooleanVisualizer({
   description,
 }) {
   let coreComponent = (
-    <span className={italic ? "fst-italic" : ""} id={`${id}-tooltip`}>
-      {value} {icon}
-    </span>
+    <React.Fragment>
+      {icon}
+      <span className={italic ? "fst-italic" : ""} id={`${id}-tooltip`}>
+        {value}
+      </span>
+    </React.Fragment>
   );
   // link added only in case is available and the component is not disabled, or it will be clickable
   if (link && !disable) {

@@ -14,7 +14,6 @@ def migrate(apps, schema_editor):
             "ELF_Info",
             "Strings_Info",
             "HashLookupServer_Get_File",
-            # static analyzers
             "Yara",
             "HybridAnalysis_Get_File",
             "Doc_Info",
@@ -30,7 +29,6 @@ def migrate(apps, schema_editor):
             "YARAify_File_Search",
             "APKiD",
             "OneNote_Info",
-            # other
             "Signature_Info",
             "Floss",
             "Quark_Engine",

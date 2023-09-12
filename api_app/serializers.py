@@ -194,6 +194,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["analyzers_requested"] = self.filter_analyzers_requested(
             attrs["analyzers_requested"]
         )
+        attrs["connectors_requested"] = attrs.get("connectors_requested", [])
         attrs["connectors_requested"] = self.filter_connectors_requested(
             attrs["connectors_requested"]
         )

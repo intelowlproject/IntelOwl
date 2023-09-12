@@ -94,7 +94,7 @@ export default function RecentScans({ classification, param }) {
   // api
   const [
     loadingScansUser,
-    loadingScans,
+    loadingScansInsertedAnalyzable,
     recentScansUserError,
     recentScansError,
     recentScansUser,
@@ -103,7 +103,7 @@ export default function RecentScans({ classification, param }) {
     fetchRecentscans,
   ] = useRecentScansStore((state) => [
     state.loadingScansUser,
-    state.loadingScans,
+    state.loadingScansInsertedAnalyzable,
     state.recentScansUserError,
     state.recentScansError,
     state.recentScansUser,
@@ -116,7 +116,7 @@ export default function RecentScans({ classification, param }) {
     "loadingScansUser",
     loadingScansUser,
     "loadingScans",
-    loadingScans,
+    loadingScansInsertedAnalyzable,
   );
 
   // file md5
@@ -127,10 +127,12 @@ export default function RecentScans({ classification, param }) {
 
   React.useEffect(() => {
     fetchRecentScansUser();
-    fetchRecentscans(fileMd5.length ? fileMd5 : md5(param));
-  }, [fetchRecentScansUser, fetchRecentscans, fileMd5, param]);
-
+  }, [fetchRecentScansUser]);
   console.debug("recentScansUser", recentScansUser);
+
+  React.useEffect(() => {
+    fetchRecentscans(fileMd5.length ? fileMd5 : md5(param));
+  }, [fetchRecentscans, fileMd5, param]);
   console.debug("recentScans", recentScans);
 
   // remove duplicate job
@@ -154,7 +156,7 @@ export default function RecentScans({ classification, param }) {
             </small>
           </div>
           <Loader
-            loading={loadingScans}
+            loading={loadingScansInsertedAnalyzable}
             error={recentScansError}
             render={() => (
               <div style={{ maxHeight: "500px", overflowY: "auto" }}>

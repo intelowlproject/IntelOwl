@@ -453,6 +453,21 @@ export default function ScanForm() {
     }
   };
 
+  const [inputValue, setInputValue] = React.useState("");
+  console.debug("INPUT:", inputValue);
+
+  const recentScansInput = React.useRef();
+  console.debug(recentScansInput);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      recentScansInput.current = inputValue;
+      console.debug(recentScansInput);
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
@@ -488,6 +503,7 @@ export default function ScanForm() {
     const observableNames = formik.values.observable_names;
     observableNames[index] = observableValue;
     formik.setFieldValue("observable_names", observableNames, false);
+    setInputValue(observableValue);
   };
 
   const updateSelectedPlaybook = (playbook) => {
@@ -1006,7 +1022,7 @@ export default function ScanForm() {
           param={
             formik.values.files.length
               ? formik.values.files[0]
-              : formik.values.observable_names[0]
+              : recentScansInput.current
           }
         />
       </ContentSection>

@@ -5,7 +5,7 @@ import { JOB_RECENT_SCANS, JOB_RECENT_SCANS_USER } from "../constants/api";
 
 const useRecentScansStore = create((set, _get) => ({
   loadingScansUser: true,
-  loadingScans: true,
+  loadingScansInsertedAnalyzable: true,
   recentScansUserError: null,
   recentScansError: null,
   recentScansUser: [],
@@ -24,14 +24,14 @@ const useRecentScansStore = create((set, _get) => ({
   },
   fetchRecentscans: async (md5) => {
     try {
-      set({ loadingScans: true });
+      set({ loadingScansInsertedAnalyzable: true });
       const resp = await axios.post(JOB_RECENT_SCANS, { md5 });
       set({
         recentScans: resp.data,
-        loadingScans: false,
+        loadingScansInsertedAnalyzable: false,
       });
     } catch (e) {
-      set({ recentScansError: e, loadingScans: false });
+      set({ recentScansError: e, loadingScansInsertedAnalyzable: false });
     }
   },
 }));

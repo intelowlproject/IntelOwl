@@ -9,7 +9,7 @@ from django.conf import settings
 
 from certego_saas.apps.user.models import User
 
-from ..choices import PythonModuleBasePaths
+from ..choices import PythonModuleBasePaths, ReportStatus
 from ..classes import Plugin
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorConfig, ConnectorReport
@@ -50,24 +50,21 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         super().before_run()
         logger.info(f"STARTED connector: {self.__repr__()}")
         self._config: ConnectorConfig
-        if self._job.status not in [
-            self._job.Status.REPORTED_WITH_FAILS,
-            self._job.Status.REPORTED_WITHOUT_FAILS,
-        ]:
-            if (
-                self._config.run_on_failure
-                and self._job.status == self._job.Status.FAILED
-            ):
-                logger.info(
-                    f"Running connector {self.__class__.__name__} "
-                    f"even if job status is {self._job.status} because"
-                    "run on failure is set"
-                )
-            else:
-                raise ConnectorRunException(
-                    f"Job status is {self._job.status}, "
-                    f"unable to run connector {self.__class__.__name__}"
-                )
+        if (
+            self._config.run_on_failure
+            or self._job.analyzerreports.exclude(
+                status=ReportStatus.FAILED.value
+            ).exists()
+        ):
+            logger.info(
+                f"Running connector {self.__class__.__name__} "
+                f"even if job status is {self._job.status} because"
+                "run on failure is set"
+            )
+        else:
+            raise ConnectorRunException(
+                f"The, " f"unable to run connector {self.__class__.__name__}"
+            )
 
     def after_run(self):
         super().after_run()

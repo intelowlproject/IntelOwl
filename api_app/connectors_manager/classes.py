@@ -68,7 +68,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             )
         else:
             raise ConnectorRunException(
-                f"An analyzer has failed,"
+                "An analyzer has failed,"
                 f" unable to run connector {self.__class__.__name__}"
             )
 

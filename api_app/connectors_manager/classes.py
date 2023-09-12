@@ -68,7 +68,8 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             )
         else:
             raise ConnectorRunException(
-                f"An analyzer has failed, unable to run connector {self.__class__.__name__}"
+                f"An analyzer has failed,"
+                f" unable to run connector {self.__class__.__name__}"
             )
 
     def after_run(self):

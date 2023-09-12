@@ -184,10 +184,11 @@ class Plugin(metaclass=ABCMeta):
         Returns error message for
         *_handle_analyzer_exception* and *_handle_base_exception* fn
         """
-        return (
-            f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else f'{self.config_model.__name__} error'}: '{err}'"
-        )
+        if is_base_err:
+            msg = "'Unexpected error'"
+        else:
+            msg = f"'{self.config_model.__name__} error'"
+        return f"{self.__repr__()}." f"{msg}: '{err}'"
 
     def start(self, *args, **kwargs):
         """

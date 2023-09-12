@@ -49,7 +49,7 @@ pdfid==1.1.0
 pefile==2023.2.7
 Pillow==9.5.0
 pydeep==0.4
-pyelftools==0.29
+pyelftools==0.30
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5

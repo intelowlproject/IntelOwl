@@ -856,8 +856,10 @@ class PythonConfig(AbstractConfig):
         return self.python_module.python_class.report_model.objects.update_or_create(
             job=job,
             config=self,
-            task_id=task_id,
-            defaults={"status": AbstractReport.Status.PENDING.value},
+            defaults={
+                "status": AbstractReport.Status.PENDING.value,
+                "task_id": task_id,
+            },
         )
 
     @classmethod

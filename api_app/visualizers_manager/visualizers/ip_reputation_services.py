@@ -231,7 +231,9 @@ class IPReputationServices(Visualizer):
             )
             return gb_report
 
-    @visualizable_error_handler_with_params("Crowdsec Behaviors")
+    @visualizable_error_handler_with_params(
+        "Crowdsec Classifications", "Crowdsec Behaviors"
+    )
     def _crowdsec(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Crowdsec")

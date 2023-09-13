@@ -216,12 +216,16 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
         return self.filter(owner__isnull=True)
 
     def visible_for_user_by_org(self, user: User):
-        membership = Membership.objects.get(user=user)
-        # If you are member of an organization you should see the configs.
-        return self.filter(
-            for_organization=True,
-            owner__membership__organization=membership.organization,
-        )
+        try:
+            membership = Membership.objects.get(user=user)
+        except Membership.DoesNotExist:
+            return self.none()
+        else:
+            # If you are member of an organization you should see the configs.
+            return self.filter(
+                for_organization=True,
+                owner__membership__organization=membership.organization,
+            )
 
     def visible_for_user_owned(self, user: User):
         return self.filter(owner=user)

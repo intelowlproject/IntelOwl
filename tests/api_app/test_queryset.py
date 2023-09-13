@@ -336,7 +336,7 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
         self.assertEqual(
             1,
             PluginConfig.objects.visible_for_user(self.user)
-            .filter(pc.value, analyzer_config=pc.analyzer_config)
+            .filter(value=pc.value, analyzer_config=pc.analyzer_config)
             .count(),
         )
         pc.delete()

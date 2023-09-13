@@ -36,6 +36,8 @@ def visualizable_error_handler_with_params(
                             size=error_size,
                         )
                     )
+                if len(result) == 1:
+                    return result[0]
                 return result
 
         return wrapper

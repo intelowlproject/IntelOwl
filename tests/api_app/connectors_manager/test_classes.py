@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from kombu import uuid
 
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.exceptions import ConnectorRunException
@@ -62,7 +63,14 @@ class ConnectorTestCase(CustomTestCase):
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
-            status="failed",
+            status=Job.Status.CONNECTORS_RUNNING.value,
+        )
+        AnalyzerReport.objects.create(
+            report={},
+            job=job,
+            config=AnalyzerConfig.objects.first(),
+            status=AnalyzerReport.Status.FAILED.value,
+            task_id=str(uuid()),
         )
         cc = ConnectorConfig.objects.create(
             name="test",

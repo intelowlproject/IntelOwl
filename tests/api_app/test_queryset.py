@@ -324,19 +324,19 @@ class PluginConfigQuerySetTestCase(CustomTestCase):
             python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
             type="str",
         ).first()
-        pc = PluginConfig.objects.create(
-            value="myperfecttest",
+        pc = PluginConfig.objects.get_or_create(
             for_organization=False,
             owner=None,
             parameter=param,
             analyzer_config=AnalyzerConfig.objects.filter(
                 python_module=param.python_module
             ).first(),
-        )
+            defaults={"value": "myperfecttest"},
+        )[0]
         self.assertEqual(
             1,
-            PluginConfig.objects.filter(value="myperfecttest")
-            .visible_for_user(self.user)
+            PluginConfig.objects.visible_for_user(self.user)
+            .filter(pc.value, analyzer_config=pc.analyzer_config)
             .count(),
         )
         pc.delete()

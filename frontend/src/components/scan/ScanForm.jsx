@@ -82,7 +82,7 @@ export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get("observable");
   const { guideState, setGuideState } = useGuideContext();
-  
+
   /* Recent Scans states - inputValue is used to save the user typing (this state changes for each character that is typed), 
   recentScansInput is used for rendering RecentScans component only once per second
   */
@@ -659,8 +659,8 @@ export default function ScanForm() {
                                   }
                                   onChange={(e) =>
                                     updateSelectedObservable(
-                                        e.target.value,
-                                        index,
+                                      e.target.value,
+                                      index,
                                     )
                                   }
                                 />

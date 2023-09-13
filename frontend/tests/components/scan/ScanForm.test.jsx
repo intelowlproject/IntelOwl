@@ -308,7 +308,7 @@ describe("test ScanForm component", () => {
     expect(firstObservableInputElement).toBeInTheDocument();
     await user.type(firstObservableInputElement, "google.com");
     expect(firstObservableInputElement.value).toBe("google.com");
-    await waitFor (() => {
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
         { classification: "domain", param: "google.com" },
         {},
@@ -346,7 +346,7 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
-    await waitFor (() => {
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
         { classification: "domain", param: "google.com" },
         {},
@@ -379,7 +379,7 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
-    await waitFor (() => {
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
         { classification: "domain", param: "google.com" },
         {},
@@ -469,7 +469,7 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
-    await waitFor (() => {
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
         { classification: "domain", param: "google.com" },
         {},
@@ -770,7 +770,7 @@ describe("test ScanForm component", () => {
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "domain", param: "google.com" },
           {},
@@ -829,7 +829,7 @@ describe("test ScanForm component", () => {
         name: "Start Scan",
       });
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "domain", param: "google.com" },
           {},
@@ -929,7 +929,7 @@ describe("test ScanForm component", () => {
       });
       expect(forceAnalysisRadio).toBeInTheDocument();
       await user.click(forceAnalysisRadio);
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "domain", param: "google.com" },
           {},
@@ -1067,7 +1067,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "google.com");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "domain", param: "google.com" },
           {},
@@ -1265,7 +1265,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "google.com");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "domain", param: "google.com" },
           {},
@@ -1334,7 +1334,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "google.com");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "domain", param: "google.com" },
           {},
@@ -1422,7 +1422,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "8.8.8.8");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "ip", param: "8.8.8.8" },
           {},
@@ -1491,7 +1491,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "8.8.8.8");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "ip", param: "8.8.8.8" },
           {},
@@ -1579,7 +1579,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "https://google.com");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "url", param: "https://google.com" },
           {},
@@ -1651,7 +1651,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "https://google.com");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "url", param: "https://google.com" },
           {},
@@ -1745,7 +1745,7 @@ describe("test ScanForm component", () => {
         "1d5920f4b44b27a802bd77c4f0536f5a",
       );
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
           {},
@@ -1766,7 +1766,7 @@ describe("test ScanForm component", () => {
         "ff5c054c7cd6924c570f944007ccf076",
       );
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
           {},
@@ -1827,7 +1827,7 @@ describe("test ScanForm component", () => {
         "1d5920f4b44b27a802bd77c4f0536f5a",
       );
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
           {},
@@ -1848,7 +1848,7 @@ describe("test ScanForm component", () => {
         "ff5c054c7cd6924c570f944007ccf076",
       );
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
           {},
@@ -1925,7 +1925,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "genericText");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "generic", param: "genericText" },
           {},
@@ -1943,7 +1943,7 @@ describe("test ScanForm component", () => {
       // doubled braked are required by user-event library
       await user.type(secondObservableInputElement, "genericText2");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "generic", param: "genericText2" },
           {},
@@ -2001,7 +2001,7 @@ describe("test ScanForm component", () => {
       });
       await user.type(firstObservableInputElement, "genericText");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "generic", param: "genericText" },
           {},
@@ -2019,7 +2019,7 @@ describe("test ScanForm component", () => {
       // doubled braked are required by user-event library
       await user.type(secondObservableInputElement, "genericText2");
       // recent scans
-      await waitFor (() => {
+      await waitFor(() => {
         expect(RecentScans).toHaveBeenCalledWith(
           { classification: "generic", param: "genericText2" },
           {},

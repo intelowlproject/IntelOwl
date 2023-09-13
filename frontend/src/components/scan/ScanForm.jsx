@@ -82,6 +82,12 @@ export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get("observable");
   const { guideState, setGuideState } = useGuideContext();
+  
+  /* Recent Scans states - inputValue is used to save the user typing (this state changes for each character that is typed), 
+  recentScansInput is used for rendering RecentScans component only once per second
+  */
+  const [inputValue, setInputValue] = React.useState("");
+  const [recentScansInput, setRecentScansInput] = React.useState("");
 
   React.useEffect(() => {
     if (guideState.tourActive) {
@@ -453,18 +459,12 @@ export default function ScanForm() {
     }
   };
 
-  const [inputValue, setInputValue] = React.useState("");
-  console.debug("INPUT:", inputValue);
-
-  const recentScansInput = React.useRef();
-  console.debug(recentScansInput);
-
+  // wait the user terminated to typing and then perform the request to recent scans
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      recentScansInput.current = inputValue;
-      console.debug(recentScansInput);
-    }, 1200);
-
+      setRecentScansInput(inputValue);
+      console.debug(inputValue);
+    }, 1000);
     return () => clearTimeout(timer);
   }, [inputValue]);
 
@@ -659,8 +659,8 @@ export default function ScanForm() {
                                   }
                                   onChange={(e) =>
                                     updateSelectedObservable(
-                                      e.target.value,
-                                      index,
+                                        e.target.value,
+                                        index,
                                     )
                                   }
                                 />
@@ -1022,7 +1022,7 @@ export default function ScanForm() {
           param={
             formik.values.files.length
               ? formik.values.files[0]
-              : recentScansInput.current
+              : recentScansInput
           }
         />
       </ContentSection>

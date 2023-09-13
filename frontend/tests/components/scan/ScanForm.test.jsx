@@ -308,6 +308,12 @@ describe("test ScanForm component", () => {
     expect(firstObservableInputElement).toBeInTheDocument();
     await user.type(firstObservableInputElement, "google.com");
     expect(firstObservableInputElement.value).toBe("google.com");
+    await waitFor (() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
     expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
     const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
     expect(analyzerSelectionRadioButton).toBeInTheDocument();
@@ -319,10 +325,6 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
-    expect(RecentScans).toHaveBeenCalledWith(
-      { classification: "domain", param: "google.com" },
-      {},
-    );
   });
 
   test("form validation - observable and playbook selected", async () => {
@@ -344,10 +346,12 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
-    expect(RecentScans).toHaveBeenCalledWith(
-      { classification: "domain", param: "google.com" },
-      {},
-    );
+    await waitFor (() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
   });
 
   test("form validation - observable and no analyzer selected", async () => {
@@ -375,10 +379,12 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).toContain("disabled");
-    expect(RecentScans).toHaveBeenCalledWith(
-      { classification: "domain", param: "google.com" },
-      {},
-    );
+    await waitFor (() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
   });
 
   test("form validation - no observable and analyzer selected", async () => {
@@ -463,10 +469,12 @@ describe("test ScanForm component", () => {
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
-    expect(RecentScans).toHaveBeenCalledWith(
-      { classification: "domain", param: "google.com" },
-      {},
-    );
+    await waitFor (() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
   });
 
   test("form validation - no file selection and playbook", async () => {
@@ -756,22 +764,18 @@ describe("test ScanForm component", () => {
       await user.clear(timeRangeSelector);
       await user.type(timeRangeSelector, "10");
 
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "generic", param: "" },
-        {},
-      );
-
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
       // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "domain", param: "google.com" },
-        {},
-      );
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "domain", param: "google.com" },
+          {},
+        );
+      });
       await user.click(startScanButton);
 
       await waitFor(() => {
@@ -825,10 +829,12 @@ describe("test ScanForm component", () => {
         name: "Start Scan",
       });
       // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "domain", param: "google.com" },
-        {},
-      );
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "domain", param: "google.com" },
+          {},
+        );
+      });
       // advanced settings
       const advancedSettingsButton = screen.getByRole("button", {
         name: "Advanced settings",
@@ -923,11 +929,12 @@ describe("test ScanForm component", () => {
       });
       expect(forceAnalysisRadio).toBeInTheDocument();
       await user.click(forceAnalysisRadio);
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "domain", param: "google.com" },
-        {},
-      );
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "domain", param: "google.com" },
+          {},
+        );
+      });
       // start scan
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
@@ -1059,7 +1066,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "google.com");
-
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "domain", param: "google.com" },
+          {},
+        );
+      });
       // select analyzer
       const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
       expect(analyzerSelectionRadioButton).toBeInTheDocument();
@@ -1102,12 +1115,6 @@ describe("test ScanForm component", () => {
       );
       expect(testAnalyzerButton).toBeInTheDocument();
       await user.click(testAnalyzerButton);
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "domain", param: "google.com" },
-        {},
-      );
 
       const startScanButton = screen.getByRole("button", {
         name: "Start Scan",
@@ -1257,6 +1264,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "google.com");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "domain", param: "google.com" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1277,12 +1291,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "domain", param: "google.com" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1325,6 +1333,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "google.com");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "domain", param: "google.com" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1362,12 +1377,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "domain", param: "google.com" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1412,6 +1421,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "8.8.8.8");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "ip", param: "8.8.8.8" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1432,12 +1448,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "ip", param: "8.8.8.8" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1480,6 +1490,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "8.8.8.8");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "ip", param: "8.8.8.8" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1517,12 +1534,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "ip", param: "8.8.8.8" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1567,6 +1578,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "https://google.com");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "url", param: "https://google.com" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1590,12 +1608,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "url", param: "https://google.com" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1638,6 +1650,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "https://google.com");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "url", param: "https://google.com" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1678,12 +1697,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "url", param: "https://google.com" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1731,6 +1744,13 @@ describe("test ScanForm component", () => {
         firstObservableInputElement,
         "1d5920f4b44b27a802bd77c4f0536f5a",
       );
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1745,6 +1765,13 @@ describe("test ScanForm component", () => {
         secondObservableInputElement,
         "ff5c054c7cd6924c570f944007ccf076",
       );
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
+          {},
+        );
+      });
 
       // check playbooks has been loaded
       expect(screen.getByText("TEST_PLAYBOOK_HASH")).toBeInTheDocument();
@@ -1754,12 +1781,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1805,6 +1826,13 @@ describe("test ScanForm component", () => {
         firstObservableInputElement,
         "1d5920f4b44b27a802bd77c4f0536f5a",
       );
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1819,6 +1847,13 @@ describe("test ScanForm component", () => {
         secondObservableInputElement,
         "ff5c054c7cd6924c570f944007ccf076",
       );
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
+          {},
+        );
+      });
 
       // select analyzer
       const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
@@ -1845,12 +1880,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1895,6 +1924,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "genericText");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "generic", param: "genericText" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1906,6 +1942,13 @@ describe("test ScanForm component", () => {
       })[1];
       // doubled braked are required by user-event library
       await user.type(secondObservableInputElement, "genericText2");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "generic", param: "genericText2" },
+          {},
+        );
+      });
 
       // check playbooks has been loaded
       expect(screen.getByText("TEST_PLAYBOOK_GENERIC")).toBeInTheDocument();
@@ -1915,12 +1958,6 @@ describe("test ScanForm component", () => {
       });
       expect(startScanButton).toBeInTheDocument();
       expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "generic", param: "genericText" },
-        {},
-      );
 
       await user.click(startScanButton);
       await waitFor(() => {
@@ -1963,6 +2000,13 @@ describe("test ScanForm component", () => {
         name: "",
       });
       await user.type(firstObservableInputElement, "genericText");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "generic", param: "genericText" },
+          {},
+        );
+      });
       // add second observable to analyze
       const addNewValueButton = screen.getByRole("button", {
         name: "Add new value",
@@ -1974,6 +2018,13 @@ describe("test ScanForm component", () => {
       })[1];
       // doubled braked are required by user-event library
       await user.type(secondObservableInputElement, "genericText2");
+      // recent scans
+      await waitFor (() => {
+        expect(RecentScans).toHaveBeenCalledWith(
+          { classification: "generic", param: "genericText2" },
+          {},
+        );
+      });
 
       // select analyzer
       const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];

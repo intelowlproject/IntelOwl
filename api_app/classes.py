@@ -186,7 +186,8 @@ class Plugin(metaclass=ABCMeta):
         """
         return (
             f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else f'{self.config_model.__name__} error'}: '{err}'"
+            f" {'Unexpected error' if is_base_err else f'{self.config_model.__name__} error'}:"  # noqa
+            f" '{err}'"
         )
 
     def start(self, *args, **kwargs):

@@ -21,7 +21,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, Coalesce
 from django.db.models.lookups import Exact
 from django.utils.timezone import now
 
@@ -149,8 +149,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 PluginConfig.objects.filter(
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
-                .visible_for_user(user)
-                .filter(owner=user)
+                .visible_for_user_owned(user)
                 .values("value")[:1]
             )
         )
@@ -165,17 +164,14 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 PluginConfig.objects.filter(
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
-                .visible_for_user(user)
-                .filter(for_organization=True, owner=user.membership.organization.owner)
+                .visible_for_user_by_org(user)
                 .values("value")[:1]
             )
             if user and user.has_membership()
             else Value(None, output_field=JSONField()),
         )
 
-    def _alias_default_value_for_user(
-        self, config: "PythonConfig", user: User = None
-    ) -> "ParameterQuerySet":
+    def _alias_default_value(self, config: "PythonConfig") -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
         return self.alias(
@@ -183,8 +179,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 PluginConfig.objects.filter(
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
-                .visible_for_user(user)
-                .filter(owner__isnull=True)
+                .default_values()
                 .values("value")[:1]
             )
         )
@@ -196,7 +191,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             self.prefetch_related("values")
             ._alias_owner_value_for_user(config, user)
             ._alias_org_value_for_user(config, user)
-            ._alias_default_value_for_user(config, user)
+            ._alias_default_value(config)
             # importance order
             .annotate(
                 value=Case(
@@ -217,6 +212,24 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
 
 
 class PluginConfigQuerySet(CleanOnCreateQuerySet):
+    def default_values(self):
+        return self.filter(owner__isnull=True)
+
+    def visible_for_user_by_org(self, user: User):
+        try:
+            membership = Membership.objects.get(user=user)
+        except Membership.DoesNotExist:
+            return self.none()
+        else:
+            # If you are member of an organization you should see the configs.
+            return self.filter(
+                for_organization=True,
+                owner__membership__organization=membership.organization,
+            )
+
+    def visible_for_user_owned(self, user: User):
+        return self.filter(owner=user)
+
     def visible_for_user(self, user: User = None) -> "PluginConfigQuerySet":
         if user:
             # User-level custom configs should override organization-level configs,
@@ -238,7 +251,7 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
                     | Q(owner__isnull=True)
                 )
         else:
-            return self.filter(owner__isnull=True)
+            return self.default_values()
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
@@ -249,31 +262,47 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         return (
             # we retrieve the number or required parameters
             self.alias(
-                required_params=Subquery(
-                    Parameter.objects.filter(
-                        python_module=OuterRef("python_module"), required=True
-                    )
-                    # count them
-                    .annotate(count=Func(F("pk"), function="Count")).values("count")
+                required_params=Coalesce(
+                    Subquery(
+                        Parameter.objects.filter(
+                            python_module=OuterRef("python_module"), required=True
+                        )
+                        # count them
+                        .annotate(count=Func(F("pk"), function="Count")).values(
+                            "count"
+                        ),
+                        output_field=IntegerField(),
+                    ),
+                    0,
                 )
             )
             # how many of them are configured
             .alias(
-                # we just need one config for required parameter
-                required_configured_params=Subquery(
-                    PluginConfig.objects.filter(
-                        **{self.model.snake_case_name: OuterRef("pk")},
-                        parameter__required=True
-                    )
-                    .visible_for_user(user)
-                    .annotate(
-                        count=Func(
-                            F("parameter__pk"),
-                            function="Count",
-                            extra={"distinct": True},
+                # just to be sure that if the query fails, we return an integered
+                required_configured_params=Coalesce(
+                    Subquery(
+                        # we count how many parameters have a valid value
+                        # considering the values that the user has access to
+                        Parameter.objects.filter(
+                            pk__in=Subquery(
+                                # we get all values that the user can see
+                                PluginConfig.objects.filter(
+                                    **{
+                                        self.model.snake_case_name: OuterRef(
+                                            OuterRef("pk")
+                                        )
+                                    },
+                                    parameter__required=True
+                                )
+                                .visible_for_user(user)
+                                .values("parameter__pk")
+                            )
                         )
-                    )
-                    .values("count")
+                        .annotate(count=Func(F("pk"), function="Count"))
+                        .values("count"),
+                        output_field=IntegerField(),
+                    ),
+                    0,
                 )
             )
             # and we save the difference
@@ -324,6 +353,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 )
 
             task_id = str(uuid.uuid4())
+            config.generate_empty_report(job, task_id)
             args = [
                 job.pk,
                 config.python_module.pk,

@@ -354,7 +354,9 @@ class ErrorHandlerTestCase(CustomTestCase):
             )
 
         @property
-        @visualizable_error_handler_with_params("error component", VisualizableSize.S_2)
+        @visualizable_error_handler_with_params(
+            "error component", error_size=VisualizableSize.S_2
+        )
         def error(self):
             raise Exception("this is an exception to test the error")
 

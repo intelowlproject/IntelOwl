@@ -88,8 +88,6 @@ class Plugin(metaclass=ABCMeta):
         """
         function called directly before run function.
         """
-        self.report.status = self.report.Status.RUNNING.value
-        self.report.save(update_fields=["status"])
 
     @abstractmethod
     def run(self) -> dict:
@@ -168,7 +166,7 @@ class Plugin(metaclass=ABCMeta):
             job_id=self.job_id,
             config=self._config,
             defaults={
-                "status": AbstractReport.Status.PENDING.value,
+                "status": AbstractReport.Status.RUNNING.value,
                 "task_id": self.task_id,
             },
         )
@@ -188,7 +186,8 @@ class Plugin(metaclass=ABCMeta):
         """
         return (
             f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
+            f" {'Unexpected error' if is_base_err else f'{self.config_model.__name__} error'}:"  # noqa
+            f" '{err}'"
         )
 
     def start(self, *args, **kwargs):

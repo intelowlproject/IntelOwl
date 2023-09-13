@@ -154,27 +154,33 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     @staticmethod
     def set_default_value_from_playbook(attrs: Dict) -> None:
         # we are changing attrs in place
-        for attribute, default_value in [
-            ("scan_mode", ScanMode.CHECK_PREVIOUS_ANALYSIS.value),
-            ("scan_check_time", datetime.timedelta(hours=24)),
-            ("tlp", TLP.CLEAR.value),
-            ("tags", []),
+        for attribute in [
+            "scan_mode",
+            "scan_check_time",
+            "tlp",
+            "tags",
         ]:
             if attribute not in attrs:
                 if playbook := attrs.get("playbook_requested"):
                     attrs[attribute] = getattr(playbook, attribute)
-                else:
-                    attrs[attribute] = default_value
 
     def validate(self, attrs: dict) -> dict:
         self.set_default_value_from_playbook(attrs)
+        if "tlp" not in attrs:
+            attrs["tlp"] = TLP.CLEAR.value
+        if "scan_mode" not in attrs:
+            attrs["scan_mode"] = ScanMode.CHECK_PREVIOUS_ANALYSIS.value
+        if attrs.get(
+            "scan_mode"
+        ) == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and not attrs.get(
+            "scan_check_time"
+        ):
+            attrs["scan_check_time"] = datetime.timedelta(hours=24)
+        elif attrs.get("scan_mode") == ScanMode.FORCE_NEW_ANALYSIS:
+            attrs["scan_check_time"] = None
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
             playbook: PlaybookConfig
-            if "scan_mode" not in attrs:
-                attrs["scan_mode"] = playbook.scan_mode
-            if "scan_check_time" not in attrs:
-                attrs["scan_check_time"] = playbook.scan_check_time
             if attrs.get("analyzers_requested", []) or attrs.get(
                 "connectors_requested", []
             ):

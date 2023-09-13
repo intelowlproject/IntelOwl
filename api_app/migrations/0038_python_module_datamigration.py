@@ -11,7 +11,7 @@ def migrate(apps, schema_editor):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     IngestorConfig = apps.get_model("ingestors_manager", "IngestorConfig")
     for config in AnalyzerConfig.objects.all():
-        if config.type == "file":
+        if config.type == "file" and not config.run_hash:
             module = PythonModule.objects.get_or_create(
                 module=config.python_module,
                 base_path="api_app.analyzers_manager.file_analyzers",

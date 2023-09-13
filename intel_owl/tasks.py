@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @control_command(
     args=[("python_module_pk", int)],
 )
-def update_plugin(state, python_module_pk: int):
+def update_plugin(state, python_module_pk: str):
     from api_app.models import PythonModule
 
     PythonModule.objects.get(pk=python_module_pk).update()
@@ -107,15 +107,15 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
 
 @shared_task(soft_time_limit=150)
-def update(config_pk: int):
+def update(python_module_pk: str):
     from api_app.models import PythonModule
     from intel_owl.celery import broadcast
 
-    python_module: PythonModule = PythonModule.objects.get(pk=config_pk)
+    python_module: PythonModule = PythonModule.objects.get(pk=python_module_pk)
     class_ = python_module.python_class
     if hasattr(class_, "_update") and callable(class_._update):  # noqa
         if settings.NFS:
-            update_plugin(None, config_pk)
+            update_plugin(None, python_module_pk)
         else:
             from api_app.analyzers_manager.models import AnalyzerConfig
             from api_app.connectors_manager.models import ConnectorConfig
@@ -136,7 +136,7 @@ def update(config_pk: int):
                 broadcast(
                     update_plugin,
                     queue=queue,
-                    arguments={"python_module_pk": config_pk},
+                    arguments={"python_module_pk": python_module_pk},
                 )
         return True
     logger.error(f"Unable to update {str(class_)}")
@@ -255,9 +255,9 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
         for task in PeriodicTask.objects.filter(
             enabled=True, queue=queue, task="intel_owl.tasks.update"
         ):
-            config_pk = task.kwargs["config_pk"]
-            logger.info(f"Updating {config_pk}")
-            update(config_pk)
+            python_module_pk = task.kwargs["python_module_pk"]
+            logger.info(f"Updating {python_module_pk}")
+            update(python_module_pk)
 
 
 # set logger

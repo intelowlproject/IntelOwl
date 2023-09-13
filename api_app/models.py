@@ -852,6 +852,16 @@ class PythonConfig(AbstractConfig):
 
         raise NotImplementedError()
 
+    def generate_empty_report(self, job: Job, task_id: str):
+        return self.python_module.python_class.report_model.objects.update_or_create(
+            job=job,
+            config=self,
+            defaults={
+                "status": AbstractReport.Status.PENDING.value,
+                "task_id": task_id,
+            },
+        )
+
     @classmethod
     def delete_class_cache_keys(cls, user: User = None):
         base_key = f"{cls.__name__}_{user.username if user else ''}"

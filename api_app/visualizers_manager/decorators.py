@@ -15,7 +15,8 @@ from api_app.visualizers_manager.enums import VisualizableColor, VisualizableSiz
 # in case the generation of the field will raise an error
 # this will handle it allowing to render the other components
 def visualizable_error_handler_with_params(
-    error_name: str = "", error_size: VisualizableSize = VisualizableSize.S_AUTO
+    *errors_names: str,
+    error_size: VisualizableSize = VisualizableSize.S_AUTO,
 ):
     def visualizable_error_handler(func):
         def wrapper(*args, **kwargs):
@@ -23,15 +24,19 @@ def visualizable_error_handler_with_params(
                 return func(*args, **kwargs)
             except Exception as error:
                 logger.exception(error)
-                return VisualizableTitle(
-                    title=VisualizableBase(
-                        value=error_name if error_name else func.__name__
-                    ),
-                    value=VisualizableBase(
-                        value="error", color=VisualizableColor.DANGER
-                    ),
-                    size=error_size,
-                )
+                names = [func.__name__] if not errors_names else errors_names
+                result = []
+                for error_name in names:
+                    result.append(
+                        VisualizableTitle(
+                            title=VisualizableBase(value=error_name),
+                            value=VisualizableBase(
+                                value="error", color=VisualizableColor.DANGER
+                            ),
+                            size=error_size,
+                        )
+                    )
+                return result
 
         return wrapper
 

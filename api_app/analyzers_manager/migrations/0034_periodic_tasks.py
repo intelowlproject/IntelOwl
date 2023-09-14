@@ -12,7 +12,7 @@ def _create_periodic_task(PeriodicTask, analyzer, crontab):
         crontab=crontab,
         queue=get_queue_name(analyzer.config["queue"]),
         enabled=not analyzer.disabled,
-        kwargs=json.dumps({"config_pk": analyzer.pk}),
+        kwargs=json.dumps({"python_module_pk": analyzer.pk}),
     )
     analyzer.update_schedule = crontab
     analyzer.update_task = pt

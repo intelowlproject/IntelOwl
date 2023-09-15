@@ -23,7 +23,8 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
     @property
     def related_report(self):
         return self._config.execute_on_python_module.config_class.objects.get(
-            executed_in_jobs=self._job
+            executed_in_jobs=self._job,
+            python_module=self._config.execute_on_python_module,
         ).reports.get(job=self._job)
 
     @classmethod
@@ -56,7 +57,7 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
         super().before_run()
         self._config: PivotConfig
         try:
-            self.get_value(self._config.field_to_compare)
+            return self.get_value(self._config.field_to_compare)
         except PivotFieldNotFoundException as e:
             raise PivotRunException(str(e))
 
@@ -72,10 +73,10 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
     def after_run_success(self, content: Any):
         logger.info(f"Creating jobs from {content}")
         to_run = bool(content)
-        report = {"create_job": to_run}
+        report = {"create_job": to_run, "jobs_id": []}
         if to_run:
             for job in self._config._create_jobs(content, self._job.tlp, self._user):
-                report.setdefault("jobs_id", []).append(job.pk)
+                report["jobs_id"].append(job.pk)
                 PivotMap.objects.create(
                     starting_job=self._job, ending_job=job, pivot_config=self._config
                 )

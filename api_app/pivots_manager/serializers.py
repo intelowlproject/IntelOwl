@@ -2,9 +2,15 @@ from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 
 from api_app.models import Job
-from api_app.pivots_manager.models import PivotConfig, PivotMap
+from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import PythonConfigSerializer
+from api_app.serializers import AbstractReportSerializer, PythonConfigSerializer
+
+
+class PivotReportSerializer(AbstractReportSerializer):
+    class Meta:
+        model = PivotReport
+        fields = AbstractReportSerializer.Meta.fields
 
 
 class PivotMapSerializer(rfs.ModelSerializer):

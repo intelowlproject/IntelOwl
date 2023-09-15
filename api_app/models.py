@@ -275,7 +275,11 @@ class Job(models.Model):
         ).decode("utf-8")
 
     def get_absolute_url(self):
-        return reverse("jobs-detail", args=[self.pk])
+        return self.get_absolute_url_by_pk(self.pk)
+
+    @classmethod
+    def get_absolute_url_by_pk(cls, pk: int):
+        return reverse("jobs-detail", args=[pk])
 
     @property
     def url(self):
@@ -571,6 +575,54 @@ class Parameter(models.Model):
     @cached_property
     def config_class(self) -> Type["PythonConfig"]:
         return self.python_module.python_class.config_model
+
+class AbstractConfigProxy(models.Model):
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="+",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="+",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="+",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    ingestor_config = models.ForeignKey(
+        "ingestors_manager.IngestorConfig",
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
+    pivot_config = models.ForeignKey(
+        "pivots_manager.PivotConfig",
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=Q(analyzer_config__isnull=True)
+                | Q(connector_config__isnull=True)
+                | Q(visualizer_config__isnull=True)
+                | Q(ingestor_config__isnull=True)
+                | Q(pivot_config__isnull=True),
+                name="plugin_config_no_config_all_null",
+            )
+        ]
 
 
 class PluginConfig(models.Model):

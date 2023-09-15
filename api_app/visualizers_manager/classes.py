@@ -323,11 +323,34 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         super().before_run()
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
+    def create_pivot_page(self) -> VisualizablePage:
+        from api_app.models import Job
+
+        vp = self.Page(name="Job Pivots")
+        vp.add_level(
+            level=1,
+            horizontal_list=self.HList(
+                value=[
+                    self.Base(
+                        value=f"Pivot to {job_pk}",
+                        link=f"{Job.get_absolute_url_by_pk(job_pk)}",
+                        disable=False,
+                    )
+                    for report in self.pivots_reports()
+                    for job_pk in report.report.get("jobs_id", [])
+                ]
+            ),
+        )
+        return vp
+
     def after_run_success(self, content):
+        pivot_page = self.create_pivot_page()
+
         if not isinstance(content, list):
             raise VisualizerRunException(
                 f"Report has not correct type: {type(self.report.report)}"
             )
+        content.append(pivot_page.to_dict())
         for elem in content:
             if not isinstance(elem, tuple) or not isinstance(elem[1], list):
                 raise VisualizerRunException(
@@ -363,3 +386,8 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         from api_app.connectors_manager.models import ConnectorReport
 
         return ConnectorReport.objects.filter(job=self._job)
+
+    def pivots_reports(self) -> QuerySet:
+        from api_app.pivots_manager.models import PivotReport
+
+        return PivotReport.objects.filter(job=self._job)

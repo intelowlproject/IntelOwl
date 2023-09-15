@@ -396,17 +396,18 @@ class JobSerializer(_AbstractJobViewSerializer):
         # this method override is required for a cyclic import
         from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
         from api_app.connectors_manager.serializers import ConnectorReportSerializer
+        from api_app.pivots_manager.serializers import PivotReportSerializer
         from api_app.visualizers_manager.serializers import VisualizerReportSerializer
 
-        self._declared_fields["analyzer_reports"] = AnalyzerReportSerializer(
-            many=True, read_only=True, source="analyzerreports"
-        )
-        self._declared_fields["connector_reports"] = ConnectorReportSerializer(
-            many=True, read_only=True, source="connectorreports"
-        )
-        self._declared_fields["visualizer_reports"] = VisualizerReportSerializer(
-            many=True, read_only=True, source="visualizerreports"
-        )
+        for field, serializer in [
+            ("analyzer", AnalyzerReportSerializer),
+            ("connector", ConnectorReportSerializer),
+            ("pivot", PivotReportSerializer),
+            ("visualizer", VisualizerReportSerializer),
+        ]:
+            self._declared_fields[f"{field}_reports"] = serializer(
+                many=True, read_only=True, source=f"{field}reports"
+            )
         return super().get_fields()
 
     def get_permissions(self, obj: Job) -> Dict[str, bool]:

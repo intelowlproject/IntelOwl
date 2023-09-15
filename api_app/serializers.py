@@ -1092,10 +1092,6 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data
-                logger.debug(
-                    f"Parameter {param.name} for plugin {plugin.name} "
-                    f"has value {param.value} for user {user.username}"
-                )
                 param_representation.pop("name")
                 key = "secrets" if param.is_secret else "params"
 

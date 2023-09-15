@@ -5,15 +5,13 @@ from api_app.pivots_manager.models import PivotConfig
 
 
 @receiver(pre_save, sender=PivotConfig)
-def pre_save_pivot_config(sender, instance, raw, using, update_fields, *args, **kwargs):
-    config = instance.config
+def pre_save_pivot_config(
+    sender, instance: PivotConfig, raw, using, update_fields, *args, **kwargs
+):
     instance.description = (
-        f"Pivot object for plugin {config.name}"
-        f" using field {instance.field}"
-        " that creates job using"
+        f"Pivot object for python module {str(instance.execute_on_python_module)}"
+        f"using field {instance.field_to_compare}"
+        " that executes "
         f" playbook {instance.playbook_to_execute.name}"
-    )
-    instance.name = (
-        f"{config.name}.{instance.field}.{instance.playbook_to_execute.name}"
     )
     return instance

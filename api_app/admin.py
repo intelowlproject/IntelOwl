@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.db.models import JSONField
 from prettyjson.widgets import PrettyJSONWidget
 
-from .forms import ParameterInlineForm, PythonConfigAdminForm
+from .forms import ParameterInlineForm
 from .models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule, Tag
 from .tabulars import (
     ParameterInline,
@@ -148,8 +148,6 @@ class AbstractConfigAdminView(JsonViewerAdminView):
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-    form = PythonConfigAdminForm
-
     list_display = (
         "name",
         "python_module",

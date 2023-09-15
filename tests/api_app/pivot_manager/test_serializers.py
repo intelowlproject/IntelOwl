@@ -1,13 +1,13 @@
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.models import Job
-from api_app.pivots_manager.models import Pivot, PivotConfig
-from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotSerializer
+from api_app.pivots_manager.models import PivotConfig, PivotMap
+from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotMapSerializer
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
 
 
-class PivotSerializerTestCase(CustomTestCase):
+class PivotMapSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.j1 = Job.objects.create(
@@ -35,10 +35,10 @@ class PivotSerializerTestCase(CustomTestCase):
         self.pc.delete()
 
     def test_read(self):
-        pivot = Pivot.objects.create(
+        pivot = PivotMap.objects.create(
             starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc
         )
-        ps = PivotSerializer(pivot)
+        ps = PivotMapSerializer(pivot)
         self.assertEqual(ps.data["starting_job"], self.j1.pk)
         self.assertEqual(ps.data["ending_job"], self.j2.pk)
         self.assertEqual(ps.data["pivot_config"], self.pc.pk)
@@ -46,7 +46,7 @@ class PivotSerializerTestCase(CustomTestCase):
         pivot.delete()
 
     def test_write(self):
-        ps = PivotSerializer(
+        ps = PivotMapSerializer(
             data={
                 "starting_job": self.j1.pk,
                 "pivot_config": self.pc.pk,

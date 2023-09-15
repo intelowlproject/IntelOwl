@@ -14,9 +14,9 @@ from api_app.analyzers_manager.constants import (
     TypeChoices,
 )
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
-from api_app.choices import TLP
+from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.fields import ChoiceArrayField
-from api_app.models import AbstractReport, PythonConfig
+from api_app.models import AbstractReport, PythonConfig, PythonModule
 
 logger = getLogger(__name__)
 
@@ -130,6 +130,17 @@ class AnalyzerConfig(PythonConfig):
     docker_based = models.BooleanField(null=False, default=False)
     maximum_tlp = models.CharField(
         null=False, default=TLP.RED, choices=TLP.choices, max_length=50
+    )
+    python_module = models.ForeignKey(
+        PythonModule,
+        on_delete=models.PROTECT,
+        related_name="%(class)ss",
+        limit_choices_to={
+            "base_path__in": [
+                PythonModuleBasePaths.FileAnalyzer.value,
+                PythonModuleBasePaths.ObservableAnalyzer.value,
+            ]
+        },
     )
     # obs
     observable_supported = ChoiceArrayField(

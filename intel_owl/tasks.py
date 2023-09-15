@@ -184,7 +184,13 @@ def job_pipeline(
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
-    job.execute()
+    try:
+        job.execute()
+    except Exception as e:
+        logger.exception(e)
+        for report in list(job.analyzerreports.all()) + list(job.connectorsreports.all())+ list(job.pivotsreports.all()) + list(job.visualizerreports.all()):
+            report.status = report.Status.FAILED.value
+            report.save()
 
 
 @app.task(name="run_plugin", soft_time_limit=500)
@@ -208,7 +214,11 @@ def run_plugin(
         runtime_configuration=runtime_configuration,
         task_id=task_id,
     )
-    plugin.start()
+    try:
+        plugin.start()
+    except Exception as e:
+        logger.exception(e)
+        config.reports.get(job__pk=job_id).update(status=plugin.report_model.Status.FAILED.value)
 
 
 @app.task(name="create_caches", soft_time_limit=200)

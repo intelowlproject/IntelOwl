@@ -1,16 +1,13 @@
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 
-from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
-from api_app.pivots_manager.models import Pivot, PivotConfig
+from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import AbstractConfigSerializer
-from api_app.visualizers_manager.models import VisualizerConfig
+from api_app.serializers import PythonConfigSerializer
 
 
-class PivotSerializer(rfs.ModelSerializer):
+class PivotMapSerializer(rfs.ModelSerializer):
     starting_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
     pivot_config = rfs.PrimaryKeyRelatedField(
         queryset=PivotConfig.objects.all(), required=True
@@ -18,7 +15,7 @@ class PivotSerializer(rfs.ModelSerializer):
     ending_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
 
     class Meta:
-        model = Pivot
+        model = PivotMap
         fields = rfs.ALL_FIELDS
 
     def validate(self, attrs):
@@ -32,28 +29,9 @@ class PivotSerializer(rfs.ModelSerializer):
         return result
 
 
-class PivotConfigSerializer(AbstractConfigSerializer):
-    config = rfs.PrimaryKeyRelatedField(read_only=True)
+class PivotConfigSerializer(PythonConfigSerializer):
     playbook_to_execute = rfs.PrimaryKeyRelatedField(
         queryset=PlaybookConfig.objects.all()
-    )
-    analyzer_config = rfs.PrimaryKeyRelatedField(
-        write_only=True,
-        queryset=AnalyzerConfig.objects.all(),
-        required=False,
-        default=None,
-    )
-    connector_config = rfs.PrimaryKeyRelatedField(
-        write_only=True,
-        queryset=ConnectorConfig.objects.all(),
-        required=False,
-        default=None,
-    )
-    visualizer_config = rfs.PrimaryKeyRelatedField(
-        write_only=True,
-        queryset=VisualizerConfig.objects.all(),
-        required=False,
-        default=None,
     )
 
     name = rfs.CharField(read_only=True)

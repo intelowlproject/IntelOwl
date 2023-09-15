@@ -104,22 +104,12 @@ class Plugin(metaclass=ABCMeta):
         self.report.end_time = timezone.now()
         self.report.save()
 
-    def after_run_success(self, content: typing.Union[typing.Dict, typing.Iterable]):
+    def after_run_success(self, content: typing.Any):
         if isinstance(content, typing.Generator):
             content = list(content)
         self.report.report = content
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
-
-    def execute_pivots(self) -> None:
-        from api_app.pivots_manager.models import PivotConfig
-
-        if self._job.playbook_to_execute:
-            for pivot in self._config.pivots.annotate_runnable(self._job.user).filter(
-                used_by_playbooks=self._job.playbook_to_execute, runnable=True
-            ):
-                pivot: PivotConfig
-                pivot.pivot_job(self._job)
 
     def log_error(self, e):
         if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):
@@ -204,7 +194,6 @@ class Plugin(metaclass=ABCMeta):
             self.after_run_failed(e)
         else:
             self.after_run_success(_result)
-            self.execute_pivots()
         finally:
             # add end time of process
             self.after_run()

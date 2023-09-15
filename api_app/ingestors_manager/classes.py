@@ -65,7 +65,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
         deque(
             self._config._create_jobs(
                 # every job created from an ingestor
-                self.report,
+                content,
                 TLP.CLEAR.value,
                 self._user,
             ),

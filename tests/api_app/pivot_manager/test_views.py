@@ -3,19 +3,19 @@ from typing import Type
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
-from api_app.pivots_manager.models import Pivot, PivotConfig
+from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomViewSetTestCase, ViewSetTestCaseMixin
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
-class PivotViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
-    URL = "/api/pivot"
+class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
+    URL = "/api/pivot_map"
 
     @classmethod
     @property
-    def model_class(cls) -> Type[Pivot]:
-        return Pivot
+    def model_class(cls) -> Type[PivotMap]:
+        return PivotMap
 
     def test_get(self):
         plugin = self.model_class.objects.order_by("?").first().pk
@@ -87,7 +87,7 @@ class PivotViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
             analyzer_config=AnalyzerConfig.objects.first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
-        self.pivot = Pivot.objects.create(
+        self.pivot = PivotMap.objects.create(
             starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc
         )
 
@@ -96,7 +96,7 @@ class PivotViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         self.j1.delete()
         self.j2.delete()
         self.pc.delete()
-        Pivot.objects.all().delete()
+        PivotMap.objects.all().delete()
 
 
 class PivotConfigViewSetTestCase(

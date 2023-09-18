@@ -699,8 +699,9 @@ class PluginConfig(models.Model):
     def refresh_cache_keys(self):
         try:
             self.config
+            self.owner
         except ObjectDoesNotExist:
-            # this happens if the configuration was deleted before this instance
+            # this happens if the configuration/user was deleted before this instance
             return
         if self.owner:
             if self.owner.has_membership() and self.owner.membership.is_admin:

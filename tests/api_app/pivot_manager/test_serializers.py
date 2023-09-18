@@ -72,8 +72,8 @@ class PivotConfigSerializerTestCase(CustomTestCase):
     def test_read(self):
         ac = AnalyzerConfig.objects.first()
         pc = PivotConfig.objects.create(
-            field="test.0",
-            analyzer_config=ac,
+            field_to_compare="test.0",
+            related_analyzer_config=ac,
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         pcs = PivotConfigSerializer(pc)
@@ -84,9 +84,9 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         playbook = PlaybookConfig.objects.first()
         data = {
-            "analyzer_config": ac.pk,
+            "related_analyzer_config": ac.pk,
             "playbook_to_execute": playbook.pk,
-            "field": "test.0",
+            "field_to_compare": "test.0",
         }
         pcs = PivotConfigSerializer(data=data)
         pcs.is_valid(raise_exception=True)

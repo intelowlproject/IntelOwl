@@ -70,7 +70,7 @@ class PivotConfigViewSetTestCase(
         "api_app/fixtures/0001_user.json",
     ]
 
-    URL = "/api/pivotconfig"
+    URL = "/api/pivot"
 
     def setUp(self):
         super().setUp()

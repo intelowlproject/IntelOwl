@@ -6,7 +6,6 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.user.models import User
 from tests import CustomTestCase
 
@@ -18,7 +17,6 @@ class PivotConfigTestCase(CustomTestCase):
             description="test",
             related_analyzer_config=AnalyzerConfig.objects.first(),
             related_connector_config=ConnectorConfig.objects.first(),
-            related_visualizer_config=VisualizerConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),

@@ -149,7 +149,7 @@ export function getIcon(iconCode) {
    we would need to known the code of all flags and it's too expensive
   */
   if (!selectedIcon) {
-    return <span className={` mx-1 fi fi-${iconCode}`} />;
+    return <span className={` mx-1 fi fi-${iconCode.toLowerCase()}`} />;
   }
   return selectedIcon;
 }

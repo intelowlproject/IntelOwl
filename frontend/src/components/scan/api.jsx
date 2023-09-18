@@ -42,22 +42,22 @@ function prettifyErrors(errorResponse) {
 }
 
 export async function createPlaybookJob(formValues) {
-  // new scan
-  const resp =
-    formValues.classification === "file"
-      ? await _startPlaybookFile(formValues)
-      : await _startPlaybookObservable(formValues);
-
-  const playbooksRunning = new Set();
-  const warnings = [];
-  const respData = resp.data.results;
-
-  respData.forEach((x) => {
-    if (x.playbook_running) playbooksRunning.add(x.playbook_running);
-    if (x.warnings) warnings.push(...x.warnings);
-  });
-
   try {
+    // new scan
+    const resp =
+      formValues.classification === "file"
+        ? await _startPlaybookFile(formValues)
+        : await _startPlaybookObservable(formValues);
+
+    const playbooksRunning = new Set();
+    const warnings = [];
+    const respData = resp.data.results;
+
+    respData.forEach((x) => {
+      if (x.playbook_running) playbooksRunning.add(x.playbook_running);
+      if (x.warnings) warnings.push(...x.warnings);
+    });
+
     // handle response/error
     if (
       respData.every(

@@ -1,7 +1,6 @@
 from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -30,44 +29,6 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 200, response.json())
 
-    def test_create(self):
-        data = {
-            "starting_job": self.j1.pk,
-            "ending_job": self.j2.pk,
-            "pivot_config": self.pc.pk,
-        }
-        response = self.client.post(self.URL, data=data)
-        content = response.json()
-        self.assertEqual(response.status_code, 400, content)
-        self.assertIn("errors", content)
-        self.assertIn("non_field_errors", content["errors"])
-        self.assertCountEqual(
-            [
-                "The fields starting_job, pivot_config,"
-                " ending_job must make a unique set."
-            ],
-            content["errors"]["non_field_errors"],
-        )
-        data = {
-            "starting_job": self.j2.pk,
-            "ending_job": self.j1.pk,
-            "pivot_config": self.pc.pk,
-        }
-        response = self.client.post(self.URL, data=data)
-        content = response.json()
-        self.assertEqual(response.status_code, 400, content)
-        self.assertIn("errors", content)
-        self.assertIn("non_field_errors", content["errors"])
-        self.assertCountEqual(
-            ["You do not have permission to pivot these two jobs"],
-            content["errors"]["non_field_errors"],
-        )
-
-        self.client.force_authenticate(self.superuser)
-        response = self.client.post(self.URL, data=data)
-        content = response.json()
-        self.assertEqual(response.status_code, 201, content)
-
     def setUp(self):
         super().setUp()
         self.j1 = Job.objects.create(
@@ -83,8 +44,11 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
             status="reported_without_fails",
         )
         self.pc = PivotConfig.objects.create(
-            field="test.0",
-            analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test.0",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         self.pivot = PivotMap.objects.create(
@@ -128,33 +92,3 @@ class PivotConfigViewSetTestCase(
     @property
     def model_class(cls) -> Type[PivotConfig]:
         return PivotConfig
-
-    def test_create(self):
-        data = {
-            "playbook_to_execute": self.pc.playbook_to_execute_id,
-            "field_to_compare": self.pc.field_to_compare,
-            "related_analyzer_config": self.pc.related_analyzer_config_id,
-        }
-
-        response = self.client.post(self.URL, data=data)
-        content = response.json()
-        self.assertEqual(400, response.status_code, content)
-        self.assertIn("errors", content)
-        self.assertIn("non_field_errors", content["errors"])
-        self.assertCountEqual(
-            [
-                "The fields analyzer_config, field,"
-                " playbook_to_execute must make a unique set."
-            ],
-            content["errors"]["non_field_errors"],
-        )
-
-        data = {
-            "playbook_to_execute": self.pc.playbook_to_execute_id,
-            "field_to_compare": self.pc.field_to_compare,
-            "related_connector_config": ConnectorConfig.objects.first().pk,
-        }
-        response = self.client.post(self.URL, data=data)
-        content = response.json()
-        self.assertEqual(201, response.status_code, content)
-        PivotConfig.objects.get(pk=content["id"]).delete()

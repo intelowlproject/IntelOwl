@@ -57,7 +57,7 @@ class PivotMap(models.Model):
         ]
 
     def __str__(self):
-        return f"Job {self.starting_job.pk} -> Job {self.ending_job.pk}"
+        return f"Job {self.starting_job_id} -> Job {self.ending_job_id}"
 
     @cached_property
     def report(self) -> AbstractReport:

@@ -195,17 +195,31 @@ async function _analyzeObservable(formValues) {
   });
   const body = {
     observables,
-    analyzers_requested: formValues.analyzers,
-    connectors_requested: formValues.connectors,
     tlp: formValues.tlp,
-    runtime_configuration: formValues.runtime_configuration,
-    tags_labels: formValues.tags_labels,
     scan_mode: parseInt(formValues.scan_mode, 10),
   };
+  // analyzers
+  if (formValues.analyzers.length) {
+    body.analyzers_requested = formValues.analyzers;
+  }
+  // connectors
+  if (formValues.connectors.length) {
+    body.connectors_requested = formValues.connectors;
+  }
+  // tags
+  if (formValues.tags_labels.length) {
+    body.tags_labels = formValues.tags_labels;
+  }
+  // runtime configuration
+  if (
+    formValues.runtime_configuration != null &&
+    Object.keys(formValues.runtime_configuration).length
+  ) {
+    body.runtime_configuration = formValues.runtime_configuration;
+  }
+  // scan mode
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
     body.scan_check_time = `${formValues.scan_check_time}:00:00`;
-  } else {
-    body.scan_check_time = null;
   }
   return axios.post(ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }
@@ -287,14 +301,14 @@ async function _startPlaybookObservable(formValues) {
   const body = {
     observables,
     playbook_requested: formValues.playbook,
-    tags_labels: formValues.tags_labels,
     tlp: formValues.tlp,
     scan_mode: parseInt(formValues.scan_mode, 10),
   };
+  if (formValues.tags_labels.length) {
+    body.tags_labels = formValues.tags_labels;
+  }
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
     body.scan_check_time = `${formValues.scan_check_time}:00:00`;
-  } else {
-    body.scan_check_time = null;
   }
   console.debug("_analyzeObservable", body);
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI, body);

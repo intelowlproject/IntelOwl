@@ -81,4 +81,4 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         )
         pcs = PivotConfigSerializer(pc)
         result = pcs.data
-        self.assertEqual(result["config"], ac.pk)
+        self.assertEqual(result["related_config"], ac.pk)

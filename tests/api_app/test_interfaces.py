@@ -23,7 +23,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         jobs = serializer.save(send_task=False)
         self.assertEqual(len(jobs), 1)
         job = jobs[0]
-        self.assertEqual(job.analyzed_object_name, "test.1")
+        self.assertEqual(job.analyzed_object_name, "test.0")
         self.assertEqual(job.playbook_to_execute, self.c.playbook_to_execute)
         self.assertEqual(job.tlp, "CLEAR")
         self.assertEqual(job.file.read(), b"test")

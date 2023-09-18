@@ -112,7 +112,12 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
                 check=Q(related_analyzer_config__isnull=True)
                 | Q(related_connector_config__isnull=True),
                 name="pivot_config_all_null_configs",
-            )
+            ),
+            models.CheckConstraint(
+                check=Q(related_analyzer_config__isnull=False)
+                | Q(related_connector_config__isnull=False),
+                name="pivot_config_no_null_configs",
+            ),
         ]
 
     @property

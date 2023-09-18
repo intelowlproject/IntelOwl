@@ -376,7 +376,18 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file", "errors")
+        exclude = (
+            "file",
+            "errors",
+            "runtime_configuration",
+            "received_request_time",
+            "finished_analysis_time",
+        )
+
+    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
+
+    def get_pivots_to_execute(self, obj: Job):
+        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
 
 class JobSerializer(_AbstractJobViewSerializer):

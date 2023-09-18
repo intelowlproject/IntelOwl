@@ -166,6 +166,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def validate(self, attrs: dict) -> dict:
         self.set_default_value_from_playbook(attrs)
+        if "tlp" not in attrs:
+            attrs["tlp"] = TLP.CLEAR.value
+        if "scan_mode" not in attrs:
+            attrs["scan_mode"] = ScanMode.CHECK_PREVIOUS_ANALYSIS.value
         if attrs.get(
             "scan_mode"
         ) == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and not attrs.get(

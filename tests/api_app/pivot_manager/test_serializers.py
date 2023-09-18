@@ -1,5 +1,5 @@
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.models import Job
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotMapSerializer
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -23,8 +23,11 @@ class PivotMapSerializerTestCase(CustomTestCase):
             status="reported_without_fails",
         )
         self.pc = PivotConfig.objects.create(
-            field="test.0",
-            analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test.0",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
 

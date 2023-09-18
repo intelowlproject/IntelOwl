@@ -1,8 +1,6 @@
-import uuid
-
 from django.core.exceptions import ValidationError
 
-from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig
@@ -17,9 +15,12 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            connector_config=ConnectorConfig.objects.first(),
-            visualizer_config=VisualizerConfig.objects.first(),
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            related_connector_config=ConnectorConfig.objects.first(),
+            related_visualizer_config=VisualizerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -31,6 +32,9 @@ class PivotConfigTestCase(CustomTestCase):
             name="test",
             description="test",
             field_to_compare="test",
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -40,8 +44,11 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
+            related_analyzer_config=AnalyzerConfig.objects.first(),
             field_to_compare="test",
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         try:
@@ -124,11 +131,10 @@ class PivotConfigTestCase(CustomTestCase):
             playbook_to_execute=playbook,
         )
 
-        report = AnalyzerReport(
-            report={"test": ["something", "something2"]}, config=ac, job=job
-        )
         jobs = list(
-            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
+            pc._create_jobs(
+                ["something", "something2"], job.tlp, job.user, send_task=False
+            )
         )
         self.assertEqual(2, len(jobs))
         self.assertEqual("something", jobs[0].observable_name)
@@ -152,10 +158,7 @@ class PivotConfigTestCase(CustomTestCase):
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
-        report = AnalyzerReport(report={"test": [content]}, config=ac, job=job)
-        jobs = list(
-            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
-        )
+        jobs = list(pc._create_jobs(content, job.tlp, job.user, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("PivotOnTest.0", jobs[0].file_name)
         self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
@@ -171,45 +174,7 @@ class PivotConfigTestCase(CustomTestCase):
             field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
-        report = AnalyzerReport(report={"test": "google.com"}, config=ac, job=job)
-        jobs = list(
-            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
-        )
+        jobs = list(pc._create_jobs("google.com", job.tlp, job.user, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("google.com", jobs[0].observable_name)
         self.assertEqual("domain", jobs[0].observable_classification)
-
-    def test_pivot_job_invalid_report(self):
-        ac = AnalyzerConfig.objects.first()
-        job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
-        pc = PivotConfig(
-            related_analyzer_config=ac,
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            field_to_compare="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        self.assertCountEqual([], pc.pivot_job(job))
-
-    def test_pivot_job_invalid_value(self):
-        ac = AnalyzerConfig.objects.first()
-        job = Job.objects.create(
-            observable_name="test.com",
-            tlp="AMBER",
-            user=User.objects.first(),
-        )
-        pc = PivotConfig(
-            related_analyzer_config=ac,
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            field_to_compare="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport.objects.create(
-            report={"test": 123}, config=ac, job=job, task_id=uuid.uuid4()
-        )
-        self.assertCountEqual([], pc.pivot_job(job))
-        report.delete()
-        job.delete()

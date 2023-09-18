@@ -18,7 +18,9 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         serializer = self.c._get_file_serializer([b"test"], tlp="CLEAN", user=self.user)
         self.assertIsInstance(serializer, MultipleFileAnalysisSerializer)
         serializer.is_valid()
-        job = serializer.save(send_task=False)
+        jobs = serializer.save(send_task=False)
+        self.assertEqual(len(jobs), 1)
+        job = jobs[0]
         self.assertEqual(job.analyzed_object_name, "test.1")
         self.assertEqual(job.playbook_to_execute, self.c.playbook_to_execute)
         self.assertEqual(job.tlp, "CLEAN")
@@ -30,7 +32,9 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         )
         self.assertIsInstance(serializer, MultipleObservableAnalysisSerializer)
         serializer.is_valid()
-        job = serializer.save(send_task=False)
+        jobs = serializer.save(send_task=False)
+        self.assertEqual(len(jobs), 1)
+        job = jobs[0]
         self.assertEqual(job.analyzed_object_name, "google.com")
         self.assertEqual(job.playbook_to_execute, self.c.playbook_to_execute)
         self.assertEqual(job.tlp, "CLEAN")

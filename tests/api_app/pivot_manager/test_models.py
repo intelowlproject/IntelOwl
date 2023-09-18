@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
@@ -27,7 +28,7 @@ class PivotConfigTestCase(CustomTestCase):
         with self.assertRaises(ValidationError):
             pc.full_clean()
 
-    def test_clean_no_config(self):
+    def test_constraint_no_config(self):
         pc = PivotConfig(
             name="test",
             description="test",
@@ -37,8 +38,8 @@ class PivotConfigTestCase(CustomTestCase):
             ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
+        with self.assertRaises(IntegrityError):
+            pc.save()
 
     def test_clean_valid(self):
         pc = PivotConfig(

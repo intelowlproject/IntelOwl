@@ -8,8 +8,8 @@ from rest_framework import routers
 from api_app.pivots_manager.views import PivotConfigViewSet, PivotMapViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register(r"pivotconfig", PivotConfigViewSet, basename="pivotconfig")
-router.register(r"pivot", PivotMapViewSet, basename="pivot_map")
+router.register(r"pivot", PivotConfigViewSet, basename="pivot")
+router.register(r"pivot_map", PivotMapViewSet, basename="pivot_map")
 
 urlpatterns = [
     path(r"", include(router.urls)),

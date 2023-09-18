@@ -2,7 +2,7 @@ from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomViewSetTestCase, ViewSetTestCaseMixin
@@ -111,8 +111,11 @@ class PivotConfigViewSetTestCase(
     def setUp(self):
         super().setUp()
         self.pc = PivotConfig(
-            field="test.0",
-            analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test.0",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         self.pc.save()
@@ -129,8 +132,8 @@ class PivotConfigViewSetTestCase(
     def test_create(self):
         data = {
             "playbook_to_execute": self.pc.playbook_to_execute_id,
-            "field": self.pc.field,
-            "analyzer_config": self.pc.analyzer_config_id,
+            "field_to_compare": self.pc.field_to_compare,
+            "related_analyzer_config": self.pc.related_analyzer_config_id,
         }
 
         response = self.client.post(self.URL, data=data)
@@ -148,8 +151,8 @@ class PivotConfigViewSetTestCase(
 
         data = {
             "playbook_to_execute": self.pc.playbook_to_execute_id,
-            "field": self.pc.field,
-            "connector_config": ConnectorConfig.objects.first().pk,
+            "field_to_compare": self.pc.field_to_compare,
+            "related_connector_config": ConnectorConfig.objects.first().pk,
         }
         response = self.client.post(self.URL, data=data)
         content = response.json()

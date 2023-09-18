@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
@@ -54,6 +54,9 @@ class PivotConfigTestCase(CustomTestCase):
             name="test",
             description="test",
             related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -67,6 +70,9 @@ class PivotConfigTestCase(CustomTestCase):
             name="test",
             description="test",
             related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare=".test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -78,6 +84,9 @@ class PivotConfigTestCase(CustomTestCase):
             name="test",
             description="test",
             related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test.",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -89,19 +98,14 @@ class PivotConfigTestCase(CustomTestCase):
             name="test",
             description="test",
             related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test!",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
             pc.full_clean()
-
-    def test_config(self):
-        pc = PivotConfig(
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            field_to_compare="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        self.assertIsInstance(pc.config, AnalyzerConfig)
 
     def test_create_job_multiple_generic(self):
         playbook = PlaybookConfig.objects.create(
@@ -113,6 +117,9 @@ class PivotConfigTestCase(CustomTestCase):
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test",
             playbook_to_execute=playbook,
         )
@@ -137,6 +144,9 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="PivotOnTest",
             related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["file"]).first(),
         )
@@ -155,6 +165,9 @@ class PivotConfigTestCase(CustomTestCase):
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
@@ -171,6 +184,9 @@ class PivotConfigTestCase(CustomTestCase):
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
@@ -185,6 +201,9 @@ class PivotConfigTestCase(CustomTestCase):
         )
         pc = PivotConfig(
             related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )

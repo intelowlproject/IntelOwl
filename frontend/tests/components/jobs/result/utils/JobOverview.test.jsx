@@ -291,6 +291,7 @@ describe("test JobOverview (job report)", () => {
             connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
             analyzers_to_execute: ["Classic_DNS"],
             connectors_to_execute: [],
+            pivots_to_execute: [],
             visualizers_to_execute: ["test visualizer"],
           }}
         />
@@ -529,6 +530,7 @@ describe("test JobOverview (job report)", () => {
             connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
             analyzers_to_execute: ["Classic_DNS"],
             connectors_to_execute: [],
+            pivots_to_execute: [],
             visualizers_to_execute: ["test visualizer"],
           }}
         />
@@ -724,6 +726,7 @@ describe("test JobOverview (job report)", () => {
             connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
             analyzers_to_execute: ["Classic_DNS"],
             connectors_to_execute: [],
+            pivots_to_execute: [],
             visualizers_to_execute: ["test visualizer", "test2 visualizer"],
           }}
         />
@@ -894,6 +897,7 @@ describe("test JobOverview (job report)", () => {
             connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
             analyzers_to_execute: ["Classic_DNS"],
             connectors_to_execute: [],
+            pivots_to_execute: [],
             visualizers_to_execute: ["test visualizer"],
           }}
         />
@@ -1196,6 +1200,7 @@ describe("test JobOverview (job report)", () => {
             connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
             analyzers_to_execute: ["Classic_DNS"],
             connectors_to_execute: [],
+            pivots_to_execute: [],
             visualizers_to_execute: ["test visualizer"],
           }}
         />

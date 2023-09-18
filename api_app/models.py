@@ -70,7 +70,7 @@ class PythonModule(models.Model):
         ordering = ["base_path", "module"]
 
     def __str__(self):
-        return f"{PythonModuleBasePaths(self.base_path).name}: {self.module}"
+        return self.module
 
     @cached_property
     def python_complete_path(self) -> str:

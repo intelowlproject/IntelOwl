@@ -389,8 +389,11 @@ class JobSerializer(_AbstractJobViewSerializer):
         exclude = ("file",)
 
     comments = CommentSerializer(many=True, read_only=True)
-
+    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
     permissions = rfs.SerializerMethodField()
+
+    def get_pivots_to_execute(self, obj: Job):
+        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
     def get_fields(self):
         # this method override is required for a cyclic import
@@ -1159,7 +1162,7 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):
-    name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
+    name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
     class Meta:
         fields = (

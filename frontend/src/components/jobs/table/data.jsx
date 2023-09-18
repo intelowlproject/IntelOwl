@@ -155,6 +155,9 @@ const jobTableColumns = [
               {job.connectors_to_execute.length}/
               {job.connectors_requested.length} connectors
             </span>
+            <span>
+              {job.pivots_to_execute.length}/ all pivots
+            </span>
             <span>{job.visualizers_to_execute.length}/all visualizers</span>
           </div>
         ),

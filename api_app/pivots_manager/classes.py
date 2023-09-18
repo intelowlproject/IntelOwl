@@ -22,9 +22,9 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
 
     @property
     def related_report(self):
-        return self._config.execute_on_python_module.config_class.objects.get(
+        return self._config.related_config.__class__.objects.get(
             executed_in_jobs=self._job,
-            python_module=self._config.execute_on_python_module,
+            python_module=self._config.related_config.python_module,
         ).reports.get(job=self._job)
 
     @classmethod

@@ -3,6 +3,7 @@ import typing
 from typing import Type
 
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from api_app.validators import plugin_name_validator
 
@@ -69,34 +70,33 @@ class PivotMap(models.Model):
 
 class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     name = models.CharField(
-        max_length=100,
-        null=False,
-        validators=[plugin_name_validator],
+        max_length=100, null=False, validators=[plugin_name_validator], unique=True
     )
     field_to_compare = models.CharField(
         max_length=256,
         help_text="Dotted path to the field",
         validators=[pivot_regex_validator],
     )
-    execute_on_python_module = models.ForeignKey(
-        PythonModule,
-        on_delete=models.PROTECT,
-        related_name="pivots",
-        null=False,
-        blank=False,
-        limit_choices_to={
-            "base_path__in": [
-                PythonModuleBasePaths.FileAnalyzer.value,
-                PythonModuleBasePaths.ObservableAnalyzer.value,
-                PythonModuleBasePaths.Connector.value,
-            ]
-        },
-    )
     python_module = models.ForeignKey(
         PythonModule,
         on_delete=models.PROTECT,
         related_name="%(class)ss",
         limit_choices_to={"base_path": PythonModuleBasePaths.Pivot.value},
+    )
+
+    related_analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="pivots",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    related_connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="pivots",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     playbook_to_execute = models.ForeignKey(
         "playbooks_manager.PlaybookConfig",
@@ -105,6 +105,10 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         null=False,
         blank=False,
     )
+
+    @property
+    def related_config(self):
+        return self.related_analyzer_config or self.related_connector_config
 
     @classmethod
     def plugin_type(cls) -> str:
@@ -120,6 +124,10 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     def config_exception(cls):
         return PivotConfigurationException
 
+    def clean_config(self):
+        if self.related_analyzer_config and self.related_connector_config:
+            raise ValidationError("You can't set both analyzer and connector")
+
     def clean_playbook_to_execute(self):
         if self.id:
             if self.playbook_to_execute in self.used_by_playbooks.all():
@@ -130,11 +138,10 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         self.clean_playbook_to_execute()
 
     class Meta:
-        unique_together = [
-            (
-                "python_module",
-                "execute_on_python_module",
-                "playbook_to_execute",
-            ),
-            ("name",),
+        constraints = [
+            models.CheckConstraint(
+                check=Q(related_analyzer_config__isnull=True)
+                | Q(related_connector_config__isnull=True),
+                name="pivot_config_all_null_configs",
+            )
         ]

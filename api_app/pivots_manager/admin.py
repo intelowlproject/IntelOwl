@@ -17,10 +17,14 @@ class PivotReportAdminView(AbstractReportAdminView):
 class PivotConfigAdminView(PythonConfigAdminView):
     list_display = PythonConfigAdminView.list_display + (
         "field_to_compare",
-        "execute_on_python_module",
+        "get_related_config",
         "playbook_to_execute",
     )
     form = PivotConfigAdminForm
+
+    @admin.display(description="Related Config")
+    def get_related_config(self, instance: PivotConfig):
+        return instance.related_config
 
 
 @admin.register(PivotMap)

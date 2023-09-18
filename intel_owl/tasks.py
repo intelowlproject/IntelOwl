@@ -236,15 +236,24 @@ def create_caches(user_pk: int):
     from api_app.serializers import PythonListConfigSerializer
     from api_app.visualizers_manager.models import VisualizerConfig
     from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
+    from api_app.pivots_manager.models import PivotConfig
+    from api_app.pivots_manager.serializers import PivotConfigSerializer
 
     for plugin in AnalyzerConfig.objects.all():
         PythonListConfigSerializer(
             child=AnalyzerConfigSerializer()
         ).to_representation_single_plugin(plugin, user)
+
     for plugin in ConnectorConfig.objects.all():
         PythonListConfigSerializer(
             child=ConnectorConfigSerializer()
         ).to_representation_single_plugin(plugin, user)
+
+    for plugin in PivotConfig.objects.all():
+        PythonListConfigSerializer(
+            child=PivotConfigSerializer()
+        ).to_representation_single_plugin(plugin, user)
+
     for plugin in VisualizerConfig.objects.all():
         PythonListConfigSerializer(
             child=VisualizerConfigSerializer()

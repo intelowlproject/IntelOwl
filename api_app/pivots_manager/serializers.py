@@ -42,7 +42,9 @@ class PivotConfigSerializer(PythonConfigSerializer):
 
     name = rfs.CharField(read_only=True)
     description = rfs.CharField(read_only=True)
+    related_config = rfs.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = PivotConfig
         fields = rfs.ALL_FIELDS
+        list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class

@@ -30,7 +30,7 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            field="test",
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -41,7 +41,7 @@ class PivotConfigTestCase(CustomTestCase):
             name="test",
             description="test",
             analyzer_config=AnalyzerConfig.objects.first(),
-            field="test",
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         try:
@@ -53,8 +53,8 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         try:
@@ -66,8 +66,8 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field=".test",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare=".test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -77,8 +77,8 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test.",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test.",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -88,8 +88,8 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test!",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test!",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -97,78 +97,11 @@ class PivotConfigTestCase(CustomTestCase):
 
     def test_config(self):
         pc = PivotConfig(
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         self.assertIsInstance(pc.config, AnalyzerConfig)
-
-    def test_get_value_str(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": "abc"}, config=ac)
-        try:
-            value = next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        self.assertEqual("abc", value)
-
-    def test_get_value_list(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": ["abc", "edf"]}, config=ac)
-        self.assertCountEqual(["abc", "edf"], list(pc.get_values(report)))
-        pc.field = "test.0"
-        try:
-            value = next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        self.assertEqual("abc", value)
-
-    def test_get_value_dict(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": {"test2": "abc"}}, config=ac)
-
-        with self.assertRaises(ValueError):
-            try:
-                next(pc.get_values(report))
-            except StopIteration:
-                self.fail("No value to retrieve")
-        pc.field = "test.test2"
-        try:
-            value = next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        self.assertEqual("abc", value)
-
-    def test_get_value_bytes(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": b"abc"}, config=ac)
-
-        try:
-            next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        except ValueError:
-            self.fail("Raised exception")
 
     def test_create_job_multiple_generic(self):
         playbook = PlaybookConfig.objects.create(
@@ -179,8 +112,8 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            field_to_compare="test",
             playbook_to_execute=playbook,
         )
 
@@ -203,8 +136,8 @@ class PivotConfigTestCase(CustomTestCase):
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             name="PivotOnTest",
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["file"]).first(),
         )
         with open("test_files/file.exe", "rb") as f:
@@ -221,8 +154,8 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
         report = AnalyzerReport(report={"test": "google.com"}, config=ac, job=job)
@@ -237,8 +170,8 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         self.assertCountEqual([], pc.pivot_job(job))
@@ -251,8 +184,8 @@ class PivotConfigTestCase(CustomTestCase):
             user=User.objects.first(),
         )
         pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         report = AnalyzerReport.objects.create(

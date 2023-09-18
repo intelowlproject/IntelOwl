@@ -20,6 +20,7 @@ import { GoBackButton, Loader } from "@certego/certego-ui";
 import {
   AnalyzersReportTable,
   ConnectorsReportTable,
+  PivotsReportTable,
   VisualizersReportTable,
 } from "./tables";
 import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
@@ -40,7 +41,8 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   // raw elements
   let AnalyzerDenominator = job.analyzers_to_execute?.length || "all";
   let ConnectorDenominator = job.connectors_to_execute?.length || "all";
-  let VisualizerDenominator = job.visualizers_to_execute?.lenght || "all";
+  let PivotDenominator = job.pivots_to_execute?.length || "all";
+  let VisualizerDenominator = job.visualizers_to_execute?.length || "all";
 
   if (job.playbook_to_execute) {
     AnalyzerDenominator = job.analyzers_to_execute.length;
@@ -48,6 +50,11 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       ConnectorDenominator = "0";
     } else {
       ConnectorDenominator = job.connectors_to_execute.length;
+    }
+    if (job.pivots_to_execute?.length === 0) {
+      PivotDenominator = "0";
+    } else {
+      PivotDenominator = job.pivots_to_execute.length;
     }
     if (job.visualizers_to_execute?.length === 0) {
       VisualizerDenominator = "0";
@@ -85,6 +92,19 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       },
       {
         id: 3,
+        nav: (
+          <div className="d-flex-center">
+            <strong>Pivots Report</strong>
+            <Badge className="ms-2">
+              {job.pivots_to_execute?.length} /&nbsp;
+              {PivotDenominator}
+            </Badge>
+          </div>
+        ),
+        report: <PivotsReportTable job={job} refetch={refetch} />,
+      },
+      {
+        id: 4,
         nav: (
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>

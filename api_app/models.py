@@ -305,10 +305,17 @@ class Job(models.Model):
                 self.analyzers_to_execute.filter(pk__in=analyzers_with_failed_reports)
             )
             | self._get_signatures(
+                self.pivots_to_execute.filter(
+                    pk__in=pivots_with_failed_reports, analyzer_config__isnull=False
+                )
+            )
+            | self._get_signatures(
                 self.connectors_to_execute.filter(pk__in=connectors_with_failed_reports)
             )
             | self._get_signatures(
-                self.pivots_to_execute.filter(pk__in=pivots_with_failed_reports)
+                self.pivots_to_execute.filter(
+                    pk__in=pivots_with_failed_reports, connector_config__isnull=False
+                )
             )
             | self._get_signatures(
                 self.visualizers_to_execute.filter(
@@ -446,25 +453,34 @@ class Job(models.Model):
     def pivots_to_execute(self) -> PythonConfigQuerySet:
         from api_app.pivots_manager.models import PivotConfig
 
-        valid_python_modules = list(
-            self.analyzers_to_execute.all().values_list("python_module__pk", flat=True)
-        ) + list(
-            self.connectors_to_execute.all().values_list("python_module__pk", flat=True)
+        valid_python_modules_analyzers = self.analyzers_to_execute.all().values_list(
+            "pk", flat=True
         )
+        valid_python_modules_connectors = self.connectors_to_execute.all().values_list(
+            "pk", flat=True
+        )
+
         if self.playbook_to_execute:
             return self.playbook_to_execute.pivots.filter(
-                execute_on_python_module__pk__in=valid_python_modules
+                Q(related_analyzer_config__in=valid_python_modules_analyzers)
+                | Q(related_connector_config__in=valid_python_modules_connectors)
             )
         return PivotConfig.objects.filter(
-            execute_on_python_module__pk__in=valid_python_modules
+            Q(related_analyzer_config__in=valid_python_modules_analyzers)
+            | Q(related_connector_config__in=valid_python_modules_connectors)
         )
 
     def execute(self):
         self.update_status(Job.Status.RUNNING)
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
+            | self._get_signatures(
+                self.pivots_to_execute.all(analyzer_config__isnull=False)
+            )
             | self._get_signatures(self.connectors_to_execute.all())
-            | self._get_signatures(self.pivots_to_execute.all())
+            | self._get_signatures(
+                self.pivots_to_execute.all(connector_config__isnull=False)
+            )
             | self._get_signatures(self.visualizers_to_execute.all())
             | tasks.job_set_final_status.signature(
                 args=[self.pk],
@@ -575,54 +591,6 @@ class Parameter(models.Model):
     @cached_property
     def config_class(self) -> Type["PythonConfig"]:
         return self.python_module.python_class.config_model
-
-class AbstractConfigProxy(models.Model):
-    analyzer_config = models.ForeignKey(
-        "analyzers_manager.AnalyzerConfig",
-        related_name="+",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    connector_config = models.ForeignKey(
-        "connectors_manager.ConnectorConfig",
-        related_name="+",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    visualizer_config = models.ForeignKey(
-        "visualizers_manager.VisualizerConfig",
-        related_name="+",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    ingestor_config = models.ForeignKey(
-        "ingestors_manager.IngestorConfig",
-        on_delete=models.CASCADE,
-        related_name="+",
-        null=True,
-        blank=True,
-    )
-    pivot_config = models.ForeignKey(
-        "pivots_manager.PivotConfig",
-        on_delete=models.CASCADE,
-        related_name="+",
-        null=True,
-        blank=True,
-    )
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=Q(analyzer_config__isnull=True)
-                | Q(connector_config__isnull=True)
-                | Q(visualizer_config__isnull=True)
-                | Q(ingestor_config__isnull=True)
-                | Q(pivot_config__isnull=True),
-                name="plugin_config_no_config_all_null",
-            )
-        ]
 
 
 class PluginConfig(models.Model):

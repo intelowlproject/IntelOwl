@@ -49,6 +49,7 @@ describe("test JobOverview (job report)", () => {
               },
             ],
             connector_reports: [],
+            pivot_reports: [],
             visualizer_reports: [],
             comments: [
               {
@@ -89,6 +90,7 @@ describe("test JobOverview (job report)", () => {
             analyzers_to_execute: ["Classic_DNS"],
             connectors_to_execute: [],
             visualizers_to_execute: [],
+            pivots_to_execute: [],
           }}
         />
       </BrowserRouter>,
@@ -708,6 +710,7 @@ describe("test JobOverview (job report)", () => {
             runtime_configuration: {
               analyzers: {},
               connectors: {},
+              pivots: {},
               visualizers: {},
             },
             received_request_time: "2023-05-31T08:19:03.256003",

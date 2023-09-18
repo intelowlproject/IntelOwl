@@ -79,7 +79,7 @@ class Yara(Visualizer):
 
         if not AnalyzerReport.objects.filter(
             config=AnalyzerConfig.objects.get(name="Yara")
-        ):
+        ).exists():
             report = AnalyzerReport(
                 config=AnalyzerConfig.objects.get(name="Yara"),
                 job=Job.objects.first(),

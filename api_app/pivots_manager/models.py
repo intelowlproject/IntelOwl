@@ -106,6 +106,15 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         blank=False,
     )
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=Q(related_analyzer_config__isnull=True)
+                | Q(related_connector_config__isnull=True),
+                name="pivot_config_all_null_configs",
+            )
+        ]
+
     @property
     def related_config(self):
         return self.related_analyzer_config or self.related_connector_config
@@ -136,12 +145,3 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     def clean(self):
         super().clean()
         self.clean_playbook_to_execute()
-
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=Q(related_analyzer_config__isnull=True)
-                | Q(related_connector_config__isnull=True),
-                name="pivot_config_all_null_configs",
-            )
-        ]

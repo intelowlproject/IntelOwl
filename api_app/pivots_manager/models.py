@@ -143,9 +143,8 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
             raise ValidationError("You can't set both analyzer and connector")
 
     def clean_playbook_to_execute(self):
-        if self.id:
-            if self.playbook_to_execute in self.used_by_playbooks.all():
-                raise ValidationError("Recursive playbook usage in pivot")
+        if self.id and self.playbook_to_execute in self.used_by_playbooks.all():
+            raise ValidationError("Recursive playbook usage in pivot")
 
     def clean(self):
         super().clean()

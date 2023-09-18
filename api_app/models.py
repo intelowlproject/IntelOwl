@@ -740,8 +740,6 @@ class PluginConfig(models.Model):
             )
 
     def clean_config(self) -> None:
-        from django.core.exceptions import ValidationError
-
         if len(list(filter(None, self._possible_configs()))) != 1:
             configs = ", ".join(
                 [config.name for config in self._possible_configs() if config]

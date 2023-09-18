@@ -4,7 +4,7 @@ import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { TiFlowChildren, TiBook } from "react-icons/ti";
 import { IoIosEye } from "react-icons/io";
 import { MdInput } from "react-icons/md";
-import { GiShurikenAperture} from "react-icons/gi"
+import { GiShurikenAperture } from "react-icons/gi";
 
 import {
   RouterTabs,

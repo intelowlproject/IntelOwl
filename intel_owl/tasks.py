@@ -188,7 +188,12 @@ def job_pipeline(
         job.execute()
     except Exception as e:
         logger.exception(e)
-        for report in list(job.analyzerreports.all()) + list(job.connectorsreports.all())+ list(job.pivotsreports.all()) + list(job.visualizerreports.all()):
+        for report in (
+            list(job.analyzerreports.all())
+            + list(job.connectorsreports.all())
+            + list(job.pivotsreports.all())
+            + list(job.visualizerreports.all())
+        ):
             report.status = report.Status.FAILED.value
             report.save()
 
@@ -218,7 +223,9 @@ def run_plugin(
         plugin.start()
     except Exception as e:
         logger.exception(e)
-        config.reports.get(job__pk=job_id).update(status=plugin.report_model.Status.FAILED.value)
+        config.reports.get(job__pk=job_id).update(
+            status=plugin.report_model.Status.FAILED.value
+        )
 
 
 @app.task(name="create_caches", soft_time_limit=200)
@@ -233,11 +240,11 @@ def create_caches(user_pk: int):
     from api_app.connectors_manager.serializers import ConnectorConfigSerializer
     from api_app.ingestors_manager.models import IngestorConfig
     from api_app.ingestors_manager.serializers import IngestorConfigSerializer
+    from api_app.pivots_manager.models import PivotConfig
+    from api_app.pivots_manager.serializers import PivotConfigSerializer
     from api_app.serializers import PythonListConfigSerializer
     from api_app.visualizers_manager.models import VisualizerConfig
     from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
-    from api_app.pivots_manager.models import PivotConfig
-    from api_app.pivots_manager.serializers import PivotConfigSerializer
 
     for plugin in AnalyzerConfig.objects.all():
         PythonListConfigSerializer(

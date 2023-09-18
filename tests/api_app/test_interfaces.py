@@ -11,7 +11,9 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.c = CreateJobsFromPlaybookInterface()
-        self.c.playbook_to_execute = PlaybookConfig.objects.first()
+        self.c.playbook_to_execute = PlaybookConfig.objects.get(
+            name="FREE_TO_USE_ANALYZERS"
+        )
         self.c.name = "test"
 
     def test__get_file_serializer(self):

@@ -8,10 +8,15 @@ from api_app.pivots_manager.models import PivotConfig
 def pre_save_pivot_config(
     sender, instance: PivotConfig, raw, using, update_fields, *args, **kwargs
 ):
-    instance.description = (
-        f"Pivot object for plugin {str(instance.related_config.name)}"
-        f"using field {instance.field_to_compare}"
-        " that executes "
-        f" playbook {instance.playbook_to_execute.name}"
-    )
+    try:
+        instance.description = (
+            f"Pivot object for plugin {str(instance.related_config.name)}"
+            f"using field {instance.field_to_compare}"
+            " that executes "
+            f" playbook {instance.playbook_to_execute.name}"
+        )
+    except AttributeError:
+        # this happens when
+        # an integrity error will be raised because some fields are missing
+        pass
     return instance

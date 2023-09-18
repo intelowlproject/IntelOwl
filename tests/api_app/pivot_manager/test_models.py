@@ -20,7 +20,7 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            field="test",
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):

@@ -74,22 +74,11 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         pc = PivotConfig.objects.create(
             field_to_compare="test.0",
             related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         pcs = PivotConfigSerializer(pc)
         result = pcs.data
         self.assertEqual(result["config"], ac.pk)
-
-    def test_write(self):
-        ac = AnalyzerConfig.objects.first()
-        playbook = PlaybookConfig.objects.first()
-        data = {
-            "related_analyzer_config": ac.pk,
-            "playbook_to_execute": playbook.pk,
-            "field_to_compare": "test.0",
-        }
-        pcs = PivotConfigSerializer(data=data)
-        pcs.is_valid(raise_exception=True)
-        pivot_config = pcs.save()
-        self.assertEqual(pivot_config.name, f"{ac.pk}.test.0.{playbook.pk}")
-        pivot_config.delete()

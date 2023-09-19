@@ -1334,9 +1334,7 @@ describe("test JobOverview (job report)", () => {
     expect(connectorsReportMenuElement.closest("a").className).not.toContain(
       "active",
     );
-    expect(pivotsReportMenuElement.closest("a").className).toContain(
-      "active",
-    );
+    expect(pivotsReportMenuElement.closest("a").className).toContain("active");
     expect(visualizersReportMenuElement.closest("a").className).not.toContain(
       "active",
     );

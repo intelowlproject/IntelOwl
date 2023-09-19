@@ -239,6 +239,7 @@ describe("test JobOverview (job report)", () => {
               },
             ],
             connector_reports: [],
+            pivot_reports: [],
             visualizer_reports: [
               {
                 id: 104,
@@ -423,6 +424,7 @@ describe("test JobOverview (job report)", () => {
               },
             ],
             connector_reports: [],
+            pivot_reports: [],
             visualizer_reports: [
               {
                 id: 105,
@@ -661,6 +663,7 @@ describe("test JobOverview (job report)", () => {
               },
             ],
             connector_reports: [],
+            pivot_reports: [],
             visualizer_reports: [
               {
                 id: 105,
@@ -867,6 +870,7 @@ describe("test JobOverview (job report)", () => {
               },
             ],
             connector_reports: [],
+            pivot_reports: [],
             visualizer_reports: [],
             comments: [],
             permissions: {
@@ -1059,6 +1063,7 @@ describe("test JobOverview (job report)", () => {
               },
             ],
             connector_reports: [],
+            pivot_reports: [],
             visualizer_reports: [
               {
                 id: 105,
@@ -1267,6 +1272,8 @@ describe("test JobOverview (job report)", () => {
     expect(analyzerReportMenuElement).toBeInTheDocument();
     const connectorsReportMenuElement = screen.getByText("Connectors Report");
     expect(connectorsReportMenuElement).toBeInTheDocument();
+    const pivotsReportMenuElement = screen.getByText("Pivots Report");
+    expect(pivotsReportMenuElement).toBeInTheDocument();
     const visualizersReportMenuElement = screen.getByText("Visualizers Report");
     expect(visualizersReportMenuElement).toBeInTheDocument();
     expect(analyzerReportMenuElement.closest("a").className).toContain(
@@ -1275,15 +1282,20 @@ describe("test JobOverview (job report)", () => {
     expect(connectorsReportMenuElement.closest("a").className).not.toContain(
       "active",
     );
+    expect(pivotsReportMenuElement.closest("a").className).not.toContain(
+      "active",
+    );
     expect(visualizersReportMenuElement.closest("a").className).not.toContain(
       "active",
     );
     // check tabs
     const analyzerReportBody = container.querySelector("#jobReportTab1");
     const connectorReportBody = container.querySelector("#jobReportTab2");
-    const visualizerReportBody = container.querySelector("#jobReportTab3");
+    const pivotReportBody = container.querySelector("#jobReportTab3");
+    const visualizerReportBody = container.querySelector("#jobReportTab4");
     expect(analyzerReportBody.className).toContain("active");
     expect(connectorReportBody.className).not.toContain("active");
+    expect(pivotReportBody.className).not.toContain("active");
     expect(visualizerReportBody.className).not.toContain("active");
 
     /** move to connector reports */
@@ -1298,12 +1310,40 @@ describe("test JobOverview (job report)", () => {
     expect(connectorsReportMenuElement.closest("a").className).toContain(
       "active",
     );
+    expect(pivotsReportMenuElement.closest("a").className).not.toContain(
+      "active",
+    );
     expect(visualizersReportMenuElement.closest("a").className).not.toContain(
       "active",
     );
     // check tabs
     expect(analyzerReportBody.className).not.toContain("active");
     expect(connectorReportBody.className).toContain("active");
+    expect(pivotReportBody.className).not.toContain("active");
+    expect(visualizerReportBody.className).not.toContain("active");
+
+    /** move to pivot reports */
+    await user.click(pivotsReportMenuElement);
+    // check sections
+    expect(visualizerButton.className).toContain("btn-outline-tertiary"); // selected
+    expect(rawButton.className).toContain("btn-primary"); // not selected
+    // check nav
+    expect(analyzerReportMenuElement.closest("a").className).not.toContain(
+      "active",
+    );
+    expect(connectorsReportMenuElement.closest("a").className).not.toContain(
+      "active",
+    );
+    expect(pivotsReportMenuElement.closest("a").className).toContain(
+      "active",
+    );
+    expect(visualizersReportMenuElement.closest("a").className).not.toContain(
+      "active",
+    );
+    // check tabs
+    expect(analyzerReportBody.className).not.toContain("active");
+    expect(connectorReportBody.className).not.toContain("active");
+    expect(pivotReportBody.className).toContain("active");
     expect(visualizerReportBody.className).not.toContain("active");
 
     /** move to visualizer reports */
@@ -1318,12 +1358,16 @@ describe("test JobOverview (job report)", () => {
     expect(connectorsReportMenuElement.closest("a").className).not.toContain(
       "active",
     );
+    expect(pivotsReportMenuElement.closest("a").className).not.toContain(
+      "active",
+    );
     expect(visualizersReportMenuElement.closest("a").className).toContain(
       "active",
     );
     // check tabs
     expect(analyzerReportBody.className).not.toContain("active");
     expect(connectorReportBody.className).not.toContain("active");
+    expect(pivotReportBody.className).not.toContain("active");
     expect(visualizerReportBody.className).toContain("active");
 
     /** go back to visualizer UI (check "test visualizer" is selected again) */

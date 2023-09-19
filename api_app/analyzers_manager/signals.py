@@ -23,7 +23,7 @@ def pre_save_analyzer_config(sender, instance: AnalyzerConfig, *args, **kwargs):
                 "crontab": instance.update_schedule,
                 "queue": instance.queue,
                 "enabled": not instance.disabled and settings.REPO_DOWNLOADER_ENABLED,
-                "kwargs": json.dumps({"config_pk": instance.pk}),
+                "kwargs": json.dumps({"python_module_pk": instance.python_module_id}),
             },
         )[0]
         instance.update_task = periodic_task

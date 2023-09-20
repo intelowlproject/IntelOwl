@@ -18,7 +18,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from api_app.models import Parameter, PluginConfig
+from api_app.models import PluginConfig
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -58,9 +58,9 @@ class Maxmind(classes.ObservableAnalyzer):
     @classmethod
     def _get_api_key(cls) -> Optional[str]:
         for plugin in PluginConfig.objects.filter(
-            param=Parameter.objects.get(
-                python_module=cls.python_module, name="api_key_name", is_secret=True
-            ),
+            parameter__python_module=cls.python_module,
+            parameter__is_secret=True,
+            parameter__name="api_key_name",
         ):
             if plugin.value:
                 return plugin.value

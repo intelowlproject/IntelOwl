@@ -83,6 +83,12 @@ export default function ScanForm() {
   const observableParam = searchParams.get("observable");
   const { guideState, setGuideState } = useGuideContext();
 
+  /* Recent Scans states - inputValue is used to save the user typing (this state changes for each character that is typed), 
+  recentScansInput is used for rendering RecentScans component only once per second
+  */
+  const [inputValue, setInputValue] = React.useState("");
+  const [recentScansInput, setRecentScansInput] = React.useState("");
+
   React.useEffect(() => {
     if (guideState.tourActive) {
       setTimeout(() => {
@@ -453,6 +459,15 @@ export default function ScanForm() {
     }
   };
 
+  // wait the user terminated to typing and then perform the request to recent scans
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setRecentScansInput(inputValue);
+      console.debug(inputValue);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
@@ -488,6 +503,7 @@ export default function ScanForm() {
     const observableNames = formik.values.observable_names;
     observableNames[index] = observableValue;
     formik.setFieldValue("observable_names", observableNames, false);
+    setInputValue(observableValue);
   };
 
   const updateSelectedPlaybook = (playbook) => {
@@ -1006,7 +1022,7 @@ export default function ScanForm() {
           param={
             formik.values.files.length
               ? formik.values.files[0]
-              : formik.values.observable_names[0]
+              : recentScansInput
           }
         />
       </ContentSection>

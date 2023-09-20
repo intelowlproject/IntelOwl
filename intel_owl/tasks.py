@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 def update_plugin(state, python_module_pk: str):
     from api_app.models import PythonModule
 
-    PythonModule.objects.get(pk=python_module_pk).update()
+    pm: PythonModule = PythonModule.objects.get(pk=python_module_pk)
+    pm.python_class.update()
 
 
 @shared_task(soft_time_limit=300)

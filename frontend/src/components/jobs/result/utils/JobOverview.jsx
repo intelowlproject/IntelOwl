@@ -22,7 +22,12 @@ import {
   ConnectorsReportTable,
   VisualizersReportTable,
 } from "./tables";
-import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
+import {
+  reportedPluginNumber,
+  JobInfoCard,
+  JobIsRunningAlert,
+  JobActionsBar,
+} from "./sections";
 import { StatusIcon } from "../../../common";
 import VisualizerReport from "../visualizer/visualizer";
 import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
@@ -37,24 +42,6 @@ const NO_VISUALIZER_UI_ELEMENT_CODE = -1;
 export default function JobOverview({ isRunningJob, job, refetch }) {
   console.debug("JobOverview rendered");
 
-  // raw elements
-  let AnalyzerDenominator = job.analyzers_to_execute?.length || "all";
-  let ConnectorDenominator = job.connectors_to_execute?.length || "all";
-  let VisualizerDenominator = job.visualizers_to_execute?.lenght || "all";
-
-  if (job.playbook_to_execute) {
-    AnalyzerDenominator = job.analyzers_to_execute.length;
-    if (job.connectors_to_execute?.length === 0) {
-      ConnectorDenominator = "0";
-    } else {
-      ConnectorDenominator = job.connectors_to_execute.length;
-    }
-    if (job.visualizers_to_execute?.length === 0) {
-      VisualizerDenominator = "0";
-    } else {
-      VisualizerDenominator = job.visualizers_to_execute.length;
-    }
-  }
   const rawElements = React.useMemo(
     () => [
       {
@@ -63,8 +50,8 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <div className="d-flex-center">
             <strong>Analyzers Report</strong>
             <Badge className="ms-2">
-              {job.analyzers_to_execute?.length} /&nbsp;
-              {AnalyzerDenominator}
+              {reportedPluginNumber(job.analyzer_reports)} /&nbsp;
+              {job.analyzers_to_execute.length}
             </Badge>
           </div>
         ),
@@ -76,8 +63,8 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <div className="d-flex-center">
             <strong>Connectors Report</strong>
             <Badge className="ms-2">
-              {job.connectors_to_execute?.length} /&nbsp;
-              {ConnectorDenominator}
+              {reportedPluginNumber(job.connector_reports)} /&nbsp;
+              {job.connectors_to_execute.length}
             </Badge>
           </div>
         ),
@@ -89,21 +76,15 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>
             <Badge className="ms-2">
-              {job.visualizers_to_execute?.length} /&nbsp;
-              {VisualizerDenominator}
+              {reportedPluginNumber(job.visualizer_reports)} /&nbsp;
+              {job.visualizers_to_execute.length}
             </Badge>
           </div>
         ),
         report: <VisualizersReportTable job={job} refetch={refetch} />,
       },
     ],
-    [
-      job,
-      refetch,
-      AnalyzerDenominator,
-      ConnectorDenominator,
-      VisualizerDenominator,
-    ],
+    [job, refetch],
   );
 
   // state

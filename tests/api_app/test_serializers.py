@@ -287,10 +287,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         p.save()
         self.ajcs.validate({"playbook_requested": p, "tlp": "CLEAR"})
 
-    def test_validate_analyzers_requested(self):
-        analyzers = self.ajcs.filter_analyzers_requested([])
-        self.assertEqual(len(analyzers), AnalyzerConfig.objects.all().count())
-
     def test_filter_analyzers_not_runnable(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.disabled = True

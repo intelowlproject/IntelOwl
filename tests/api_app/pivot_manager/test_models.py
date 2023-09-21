@@ -177,7 +177,8 @@ class PivotConfigTestCase(CustomTestCase):
             description="test123",
         )
         ac2 = AnalyzerConfig.objects.filter(
-            observable_supported__contains=["generic"]
+            observable_supported__contains=["generic"],
+            python_module__parameters__isnull=True,
         ).first()
         ac = AnalyzerConfig.objects.filter().first()
         playbook.analyzers.set([ac2])

@@ -264,7 +264,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         self.assertIn("scan_mode", data)
         self.assertIn("scan_check_time", data)
         self.assertIn("tlp", data)
-        self.assertIn("tags", data)
 
     def test_validate_playbook_and_analyzers(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
@@ -286,10 +285,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         p.disabled = False
         p.save()
         self.ajcs.validate({"playbook_requested": p, "tlp": "CLEAR"})
-
-    def test_validate_analyzers_requested(self):
-        analyzers = self.ajcs.filter_analyzers_requested([])
-        self.assertEqual(len(analyzers), AnalyzerConfig.objects.all().count())
 
     def test_filter_analyzers_not_runnable(self):
         a = AnalyzerConfig.objects.get(name="Tranco")

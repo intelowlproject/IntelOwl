@@ -743,6 +743,9 @@ class AbstractConfig(models.Model):
         indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
         abstract = True
 
+    def __str__(self):
+        return self.name
+
     @classmethod
     @property
     def runtime_configuration_key(cls) -> str:

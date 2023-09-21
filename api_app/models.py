@@ -535,6 +535,8 @@ class Parameter(models.Model):
             return "user|pwd"
         elif "test" in self.name:
             raise PluginConfig.DoesNotExist
+        elif self.type == ParamTypes.INT.value:
+            return 10
         else:
             return "test"
 

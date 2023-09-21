@@ -264,7 +264,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         self.assertIn("scan_mode", data)
         self.assertIn("scan_check_time", data)
         self.assertIn("tlp", data)
-        self.assertIn("tags", data)
+        self.assertIn("tags_labels", data)
 
     def test_validate_playbook_and_analyzers(self):
         a = AnalyzerConfig.objects.get(name="Tranco")

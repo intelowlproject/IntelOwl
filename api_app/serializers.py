@@ -123,6 +123,17 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     )
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
 
+    connectors_requested = rfs.PrimaryKeyRelatedField(
+        queryset=ConnectorConfig.objects.all(),
+        many=True,
+        default=ConnectorConfig.objects.none(),
+    )
+    analyzers_requested = rfs.PrimaryKeyRelatedField(
+        queryset=AnalyzerConfig.objects.all(),
+        many=True,
+        default=AnalyzerConfig.objects.none(),
+    )
+
     def validate_runtime_configuration(self, runtime_config: Dict):
         from api_app.validators import validate_runtime_configuration
 
@@ -195,17 +206,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             attrs["analyzers_requested"] = list(playbook.analyzers.all())
             attrs["connectors_requested"] = list(playbook.connectors.all())
 
-        attrs["analyzers_requested"] = self.filter_analyzers_requested(
-            attrs["analyzers_requested"]
-        )
-        attrs["connectors_requested"] = attrs.get("connectors_requested", [])
-        attrs["connectors_requested"] = self.filter_connectors_requested(
-            attrs["connectors_requested"]
-        )
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
-        attrs["connectors_to_execute"] = self.set_connectors_to_execute(
-            attrs["connectors_requested"], attrs["tlp"]
-        )
+        attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
         attrs["visualizers_to_execute"] = list(
             self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
         )
@@ -223,7 +225,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             ).annotate_runnable(self.context["request"].user).filter(runnable=True)
 
     def set_connectors_to_execute(
-        self, connectors_requested: List[ConnectorConfig], tlp: str
+        self, connectors_requested: List[ConnectorConfig], tlp: str, **kwargs
     ) -> List[ConnectorConfig]:
         connectors_executed = list(self.plugins_to_execute(tlp, connectors_requested))
         return connectors_executed
@@ -271,16 +273,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 logger.info(e)
             else:
                 yield plugin_config
-
-    def filter_analyzers_requested(self, analyzers):
-        if not analyzers:
-            analyzers = list(AnalyzerConfig.objects.all())
-        return analyzers
-
-    def filter_connectors_requested(self, connectors):
-        if not connectors:
-            connectors = list(ConnectorConfig.objects.all())
-        return connectors
 
     def check_previous_jobs(self, validated_data: Dict) -> Job:
         logger.info("Checking previous jobs")

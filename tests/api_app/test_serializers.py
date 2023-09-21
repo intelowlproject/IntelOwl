@@ -199,8 +199,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             data={}, context={"request": MockUpRequest(self.user)}
         )
         self.ajcs.Meta.model = Job
-        self.ajcs.all_analyzers = False
-        self.ajcs.all_connectors = False
 
     def test_check_previous_job(self):
         Job.objects.all().delete()
@@ -292,7 +290,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_validate_analyzers_requested(self):
         analyzers = self.ajcs.filter_analyzers_requested([])
         self.assertEqual(len(analyzers), AnalyzerConfig.objects.all().count())
-        self.assertTrue(self.ajcs.all_analyzers)
 
     def test_filter_analyzers_not_runnable(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
@@ -310,7 +307,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         previous_tlp = a.maximum_tlp
         a.maximum_tlp = "CLEAR"
         a.save()
-        self.ajcs.all_analyzers = False
         with self.assertRaises(ValidationError):
             self.ajcs.set_analyzers_to_execute([a], "GREEN")
 
@@ -460,8 +456,6 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         self.fas = FileAnalysisSerializer(
             data={}, context={"request": MockUpRequest(self.user)}
         )
-        self.fas.all_analyzers = False
-        self.fas.all_connectors = False
 
     def test_filter_analyzers_type(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
@@ -530,8 +524,6 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         self.oass = ObservableAnalysisSerializer(
             data={}, context={"request": MockUpRequest(self.user)}
         )
-        self.oass.all_analyzers = False
-        self.oass.all_connectors = False
 
     def test_filter_analyzers_type(self):
         a = AnalyzerConfig.objects.get(name="Yara")

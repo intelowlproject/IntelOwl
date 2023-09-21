@@ -210,7 +210,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
         )
         attrs["warnings"] = self.filter_warnings
-        self.filter_warnings.clear()
         attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 
@@ -226,17 +225,13 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def set_connectors_to_execute(
         self, connectors_requested: List[ConnectorConfig], tlp: str
     ) -> List[ConnectorConfig]:
-        connectors_executed = list(
-            self.plugins_to_execute(tlp, connectors_requested, not self.all_connectors)
-        )
+        connectors_executed = list(self.plugins_to_execute(tlp, connectors_requested))
         return connectors_executed
 
     def set_analyzers_to_execute(
         self, analyzers_requested: List[AnalyzerConfig], tlp: str, **kwargs
     ) -> List[AnalyzerConfig]:
-        analyzers_executed = list(
-            self.plugins_to_execute(tlp, analyzers_requested, not self.all_analyzers)
-        )
+        analyzers_executed = list(self.plugins_to_execute(tlp, analyzers_requested))
         if not analyzers_executed:
             warnings = "\n".join(self.filter_warnings)
             raise ValidationError(
@@ -248,7 +243,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self,
         tlp,
         plugins_requested: List[Union[AnalyzerConfig, ConnectorConfig]],
-        add_warning: bool = False,
     ) -> Generator[Union[AnalyzerConfig, ConnectorConfig], None, None]:
         if not plugins_requested:
             return
@@ -273,26 +267,19 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f" maximum_tlp ('{plugin_config.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
-                if add_warning:
-                    logger.info(e)
-                    self.filter_warnings.append(str(e))
-                else:
-                    logger.debug(e)
+                self.filter_warnings.append(str(e))
+                logger.info(e)
             else:
                 yield plugin_config
 
     def filter_analyzers_requested(self, analyzers):
-        self.all_analyzers = False
         if not analyzers:
             analyzers = list(AnalyzerConfig.objects.all())
-            self.all_analyzers = True
         return analyzers
 
     def filter_connectors_requested(self, connectors):
-        self.all_connectors = False
         if not connectors:
             connectors = list(ConnectorConfig.objects.all())
-            self.all_connectors = True
         return connectors
 
     def check_previous_jobs(self, validated_data: Dict) -> Job:
@@ -314,7 +301,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
 
     def create(self, validated_data: Dict) -> Job:
-        validated_data.pop("warnings")
+        warnings = validated_data.pop("warnings")
         send_task = validated_data.pop("send_task", False)
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
             try:
@@ -323,7 +310,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 job = super().create(validated_data)
         else:
             job = super().create(validated_data)
-
+        job.errors = warnings
+        job.save()
         logger.info(f"Job {job.pk} created")
         if send_task:
             from intel_owl.tasks import job_pipeline
@@ -587,11 +575,8 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
                 f"{analyzer.name} won't be run "
                 "because does not support the file mimetype."
             )
-            if self.all_analyzers:
-                logger.debug(message)
-            else:
-                logger.info(message)
-                self.filter_warnings.append(message)
+            logger.info(message)
+            self.filter_warnings.append(message)
         return super().set_analyzers_to_execute(analyzers_to_execute, tlp)
 
 
@@ -747,11 +732,8 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 f"{analyzer.name} won't be run because"
                 " it does not support the requested observable."
             )
-            if self.all_analyzers:
-                logger.debug(message)
-            else:
-                logger.info(message)
-                self.filter_warnings.append(message)
+            logger.info(message)
+            self.filter_warnings.append(message)
 
         return super().set_analyzers_to_execute(analyzers_to_execute, tlp)
 

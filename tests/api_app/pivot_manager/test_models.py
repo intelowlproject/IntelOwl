@@ -176,7 +176,9 @@ class PivotConfigTestCase(CustomTestCase):
             name="test123",
             description="test123",
         )
-        ac = AnalyzerConfig.objects.filter(observable_supported__contains=["generic"]).first()
+        ac = AnalyzerConfig.objects.filter(
+            observable_supported__contains=["generic"]
+        ).first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             analyzer_config=ac,

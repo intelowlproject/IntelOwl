@@ -7,6 +7,7 @@ import datetime
 import json
 import logging
 import typing
+import uuid
 
 from celery import shared_task, signals
 from celery.worker.consumer import Consumer
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 @control_command(
     args=[("python_module_pk", int)],
 )
-def update_plugin(state, python_module_pk: str):
+def update_plugin(state, python_module_pk: int):
     from api_app.models import PythonModule
 
     pm: PythonModule = PythonModule.objects.get(pk=python_module_pk)
@@ -109,7 +110,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
 
 @shared_task(soft_time_limit=150)
-def update(python_module_pk: str):
+def update(python_module_pk: int):
     from api_app.models import PythonModule
     from intel_owl.celery import broadcast
 
@@ -155,7 +156,7 @@ def job_set_final_status(job_id: int):
     job.set_final_status()
 
 
-@app.task(name="job_set_pipeline_status", soft_time_limit=30)
+@shared_task(name="job_set_pipeline_status", soft_time_limit=30)
 def job_set_pipeline_status(job_id: int, status: str):
     from api_app.models import Job
 
@@ -167,7 +168,7 @@ def job_set_pipeline_status(job_id: int, status: str):
         job.save(update_fields=["status"])
 
 
-@app.task(name="job_pipeline", soft_time_limit=100)
+@shared_task(name="job_pipeline", soft_time_limit=100)
 def job_pipeline(
     job_id: int,
 ):
@@ -177,7 +178,7 @@ def job_pipeline(
     job.execute()
 
 
-@app.task(name="run_plugin", soft_time_limit=500)
+@shared_task(name="run_plugin", soft_time_limit=500)
 def run_plugin(
     job_id: int,
     python_module_pk: int,
@@ -201,7 +202,7 @@ def run_plugin(
     plugin.start()
 
 
-@app.task(name="create_caches", soft_time_limit=200)
+@shared_task(name="create_caches", soft_time_limit=200)
 def create_caches(user_pk: int):
     # we create the cache hit
     from certego_saas.apps.user.models import User
@@ -235,15 +236,32 @@ def create_caches(user_pk: int):
         ).to_representation_single_plugin(plugin, user)
 
 
-# startup
 @signals.beat_init.connect
 def beat_init_connect(*args, sender: Consumer = None, **kwargs):
+    from certego_saas.models import User
+    from intel_owl.celery import DEFAULT_QUEUE
+
+    logger.info("Starting beat_init signal")
+
     for task in PeriodicTask.objects.filter(
         enabled=True, task="intel_owl.tasks.update"
     ):
         python_module_pk = json.loads(task.kwargs)["python_module_pk"]
         logger.info(f"Updating {python_module_pk}")
-        update(python_module_pk)
+        update.apply_async(
+            routing_key=DEFAULT_QUEUE,
+            MessageGroupId=str(uuid.uuid4()),
+            args=[python_module_pk],
+        )
+
+    # we are not considering system users
+    for user in User.objects.exclude(email=""):
+        logger.info(f"Creating cache for user {user.username}")
+        create_caches.apply_async(
+            routing_key=DEFAULT_QUEUE,
+            MessageGroupId=str(uuid.uuid4()),
+            args=[user.pk],
+        )
 
 
 # set logger

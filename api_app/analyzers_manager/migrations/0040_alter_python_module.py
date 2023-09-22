@@ -11,7 +11,7 @@ def migrate(apps, schema_editor):
     for task in PeriodicTask.objects.filter(task="intel_owl.tasks.update"):
         kwargs = json.loads(task.kwargs)
         try:
-            config = AnalyzerConfig.objects.get(pk=kwargs.pop("config_pk"))
+            config = AnalyzerConfig.objects.get(pk=kwargs["config_pk"])
         except KeyError:
             kwargs["python_module_pk"] = PythonModule.objects.get(
                 module=kwargs["python_module_pk"],

@@ -4,6 +4,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import json
 import logging
 import typing
 
@@ -17,7 +18,7 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.choices import Status
 from intel_owl import secrets
-from intel_owl.celery import DEFAULT_QUEUE, app, get_queue_name
+from intel_owl.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -118,21 +119,9 @@ def update(python_module_pk: str):
         if settings.NFS:
             update_plugin(None, python_module_pk)
         else:
-            from api_app.analyzers_manager.models import AnalyzerConfig
-            from api_app.connectors_manager.models import ConnectorConfig
-            from api_app.ingestors_manager.models import IngestorConfig
-            from api_app.visualizers_manager.models import VisualizerConfig
+            pass
 
-            queues = {
-                config.queue
-                for qs in [
-                    AnalyzerConfig.objects.filter(python_module=python_module),
-                    ConnectorConfig.objects.filter(python_module=python_module),
-                    VisualizerConfig.objects.filter(python_module=python_module),
-                    IngestorConfig.objects.filter(python_module=python_module),
-                ]
-                for config in qs
-            }
+            queues = {config.queue for config in python_module.configs}
             for queue in queues:
                 broadcast(
                     update_plugin,
@@ -247,18 +236,14 @@ def create_caches(user_pk: int):
 
 
 # startup
-@signals.worker_ready.connect
-def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
-    logger.info(f"worker {sender.hostname} ready")
-    queue = sender.hostname.split("_", maxsplit=1)[1]
-    logger.info(f"Updating repositories inside {queue}")
-    if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
-        for task in PeriodicTask.objects.filter(
-            enabled=True, queue=queue, task="intel_owl.tasks.update"
-        ):
-            python_module_pk = task.kwargs["python_module_pk"]
-            logger.info(f"Updating {python_module_pk}")
-            update(python_module_pk)
+@signals.beat_init.connect
+def beat_init_connect(*args, sender: Consumer = None, **kwargs):
+    for task in PeriodicTask.objects.filter(
+        enabled=True, task="intel_owl.tasks.update"
+    ):
+        python_module_pk = json.loads(task.kwargs)["python_module_pk"]
+        logger.info(f"Updating {python_module_pk}")
+        update(python_module_pk)
 
 
 # set logger

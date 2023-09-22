@@ -220,10 +220,13 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # We delete the file only if we have single copy for analyzer
         # and the file has been saved locally.
         # Otherwise we would remove the single file that we have on the server
-        if not settings.LOCAL_STORAGE and self.__filepath is not None:
+        if not settings.LOCAL_STORAGE and self.filepath is not None:
             import os
 
-            os.remove(self.filepath)
+            try:
+                os.remove(self.filepath)
+            except OSError:
+                logger.warning(f"Filepath {self.filepath} does not exists")
 
         logger.info(
             f"FINISHED analyzer: {self.__repr__()} -> "

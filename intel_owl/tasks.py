@@ -157,7 +157,7 @@ def update_notifications_with_releases():
     )
 
 
-@app.task(name="job_set_final_status", soft_time_limit=20)
+@app.task(name="job_set_final_status", soft_time_limit=30)
 def job_set_final_status(job_id: int):
     from api_app.models import Job
 
@@ -166,7 +166,7 @@ def job_set_final_status(job_id: int):
     job.set_final_status()
 
 
-@app.task(name="job_set_pipeline_status", soft_time_limit=20)
+@app.task(name="job_set_pipeline_status", soft_time_limit=30)
 def job_set_pipeline_status(job_id: int, status: str):
     from api_app.models import Job
 

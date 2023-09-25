@@ -475,11 +475,11 @@ class Job(models.Model):
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.all(analyzer_config__isnull=False)
+                self.pivots_to_execute.filter(related_analyzer_config__isnull=False)
             )
             | self._get_signatures(self.connectors_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.all(connector_config__isnull=False)
+                self.pivots_to_execute.filter(related_connector_config__isnull=False)
             )
             | self._get_signatures(self.visualizers_to_execute.all())
             | tasks.job_set_final_status.signature(

@@ -3,11 +3,8 @@ import PropTypes from "prop-types";
 import md5 from "md5";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody } from "reactstrap";
-import { useAxiosComponentLoader, DateHoverable } from "@certego/certego-ui";
-import {
-  JOB_RECENT_SCANS,
-  JOB_RECENT_SCANS_USER,
-} from "../../../constants/api";
+import { DateHoverable, Loader } from "@certego/certego-ui";
+import useRecentScansStore from "../../../stores/useRecentScansStore";
 
 function RecentScansCard({
   pk,
@@ -94,39 +91,62 @@ RecentScansCard.defaultProps = {
 };
 
 export default function RecentScans({ classification, param }) {
-  // user recent scans
-  const [recentScansUser, LoaderRecentScansUser, refetch] =
-    useAxiosComponentLoader({
-      url: JOB_RECENT_SCANS_USER,
-      method: "POST",
-    });
-  console.debug("recentScansUser", recentScansUser);
+  // api
+  const [
+    loadingScansUser,
+    loadingScansInsertedAnalyzable,
+    recentScansUserError,
+    recentScansError,
+    recentScansUser,
+    recentScans,
+    fetchRecentScansUser,
+    fetchRecentscans,
+  ] = useRecentScansStore((state) => [
+    state.loadingScansUser,
+    state.loadingScansInsertedAnalyzable,
+    state.recentScansUserError,
+    state.recentScansError,
+    state.recentScansUser,
+    state.recentScans,
+    state.fetchRecentScansUser,
+    state.fetchRecentscans,
+  ]);
 
-  React.useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  console.debug(
+    "loadingScansUser",
+    loadingScansUser,
+    "loadingScans",
+    loadingScansInsertedAnalyzable,
+  );
 
   // file md5
   const [fileMd5, setFileMd5] = React.useState("");
   if (classification === "file" && param) {
     param.text().then((x) => setFileMd5(md5(x)));
   }
-  // observable/file recent scans
-  const [recentScans, LoaderRecentScans] = useAxiosComponentLoader({
-    url: JOB_RECENT_SCANS,
-    method: "POST",
-    data: { md5: fileMd5.length ? fileMd5 : md5(param) },
-  });
+
+  React.useEffect(() => {
+    fetchRecentScansUser();
+  }, [fetchRecentScansUser]);
+  console.debug("recentScansUser", recentScansUser);
+
+  React.useEffect(() => {
+    fetchRecentscans(fileMd5.length ? fileMd5 : md5(param));
+  }, [fetchRecentscans, fileMd5, param]);
   console.debug("recentScans", recentScans);
 
-  const allRecentScans = recentScans.length
-    ? recentScans.concat(recentScansUser)
-    : recentScansUser;
+  // remove duplicate job
+  const allRecentScans = Array.from(
+    [...recentScans, ...recentScansUser]
+      .reduce((m, scan) => m.set(scan.pk, scan), new Map())
+      .values(),
+  );
   console.debug("allRecentScans", allRecentScans);
 
   return (
-    <LoaderRecentScansUser
+    <Loader
+      loading={loadingScansUser}
+      error={recentScansUserError}
       render={() => (
         <div>
           <div className="d-flex justify-content-between my-3 align-items-end">
@@ -135,7 +155,9 @@ export default function RecentScans({ classification, param }) {
               {allRecentScans?.length} total
             </small>
           </div>
-          <LoaderRecentScans
+          <Loader
+            loading={loadingScansInsertedAnalyzable}
+            error={recentScansError}
             render={() => (
               <div style={{ maxHeight: "500px", overflowY: "auto" }}>
                 {allRecentScans.length ? (
@@ -164,5 +186,9 @@ export default function RecentScans({ classification, param }) {
 
 RecentScans.propTypes = {
   classification: PropTypes.string.isRequired,
-  param: PropTypes.any.isRequired,
+  param: PropTypes.any,
+};
+
+RecentScans.defaultProps = {
+  param: "",
 };

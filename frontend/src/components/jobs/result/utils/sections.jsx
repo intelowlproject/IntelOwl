@@ -319,12 +319,11 @@ export function JobInfoCard({ job }) {
               ],
               [
                 "Error(s)",
-                <textarea
-                  disabled
-                  value={job.errors}
-                  className="text-danger"
-                  hidden={!job.errors.length}
-                />,
+                <ul className="text-danger">
+                  {job.errors.map((error) => (
+                    <li>{error}</li>
+                  ))}
+                </ul>,
               ],
               [
                 "Playbook",

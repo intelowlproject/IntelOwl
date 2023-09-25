@@ -89,7 +89,6 @@ app.conf.update(
     task_time_limit=1800,
     broker_url=settings.BROKER_URL,
     result_backend=settings.RESULT_BACKEND,
-    result_expires=datetime.timedelta(hours=4),
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",

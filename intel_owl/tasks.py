@@ -4,8 +4,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import json
 import logging
 import typing
+import uuid
 
 from celery import shared_task, signals
 from celery.worker.consumer import Consumer
@@ -17,7 +19,7 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.choices import Status
 from intel_owl import secrets
-from intel_owl.celery import DEFAULT_QUEUE, app, get_queue_name
+from intel_owl.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +27,11 @@ logger = logging.getLogger(__name__)
 @control_command(
     args=[("python_module_pk", int)],
 )
-def update_plugin(state, python_module_pk: str):
+def update_plugin(state, python_module_pk: int):
     from api_app.models import PythonModule
 
-    PythonModule.objects.get(pk=python_module_pk).update()
+    pm: PythonModule = PythonModule.objects.get(pk=python_module_pk)
+    pm.python_class.update()
 
 
 @shared_task(soft_time_limit=300)
@@ -107,7 +110,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
 
 @shared_task(soft_time_limit=150)
-def update(python_module_pk: str):
+def update(python_module_pk: int):
     from api_app.models import PythonModule
     from intel_owl.celery import broadcast
 
@@ -117,21 +120,9 @@ def update(python_module_pk: str):
         if settings.NFS:
             update_plugin(None, python_module_pk)
         else:
-            from api_app.analyzers_manager.models import AnalyzerConfig
-            from api_app.connectors_manager.models import ConnectorConfig
-            from api_app.ingestors_manager.models import IngestorConfig
-            from api_app.visualizers_manager.models import VisualizerConfig
+            pass
 
-            queues = {
-                config.queue
-                for qs in [
-                    AnalyzerConfig.objects.filter(python_module=python_module),
-                    ConnectorConfig.objects.filter(python_module=python_module),
-                    VisualizerConfig.objects.filter(python_module=python_module),
-                    IngestorConfig.objects.filter(python_module=python_module),
-                ]
-                for config in qs
-            }
+            queues = {config.queue for config in python_module.configs}
             for queue in queues:
                 broadcast(
                     update_plugin,
@@ -156,7 +147,7 @@ def update_notifications_with_releases():
     )
 
 
-@app.task(name="job_set_final_status", soft_time_limit=20)
+@app.task(name="job_set_final_status", soft_time_limit=30)
 def job_set_final_status(job_id: int):
     from api_app.models import Job
 
@@ -165,7 +156,7 @@ def job_set_final_status(job_id: int):
     job.set_final_status()
 
 
-@app.task(name="job_set_pipeline_status", soft_time_limit=20)
+@shared_task(name="job_set_pipeline_status", soft_time_limit=30)
 def job_set_pipeline_status(job_id: int, status: str):
     from api_app.models import Job
 
@@ -177,7 +168,7 @@ def job_set_pipeline_status(job_id: int, status: str):
         job.save(update_fields=["status"])
 
 
-@app.task(name="job_pipeline", soft_time_limit=100)
+@shared_task(name="job_pipeline", soft_time_limit=100)
 def job_pipeline(
     job_id: int,
 ):
@@ -198,7 +189,7 @@ def job_pipeline(
             report.save()
 
 
-@app.task(name="run_plugin", soft_time_limit=500)
+@shared_task(name="run_plugin", soft_time_limit=500)
 def run_plugin(
     job_id: int,
     python_module_pk: int,
@@ -228,7 +219,7 @@ def run_plugin(
         )
 
 
-@app.task(name="create_caches", soft_time_limit=200)
+@shared_task(name="create_caches", soft_time_limit=200)
 def create_caches(user_pk: int):
     # we create the cache hit
     from certego_saas.apps.user.models import User
@@ -271,19 +262,32 @@ def create_caches(user_pk: int):
         ).to_representation_single_plugin(plugin, user)
 
 
-# startup
-@signals.worker_ready.connect
-def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
-    logger.info(f"worker {sender.hostname} ready")
-    queue = sender.hostname.split("_", maxsplit=1)[1]
-    logger.info(f"Updating repositories inside {queue}")
-    if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
-        for task in PeriodicTask.objects.filter(
-            enabled=True, queue=queue, task="intel_owl.tasks.update"
-        ):
-            python_module_pk = task.kwargs["python_module_pk"]
-            logger.info(f"Updating {python_module_pk}")
-            update(python_module_pk)
+@signals.beat_init.connect
+def beat_init_connect(*args, sender: Consumer = None, **kwargs):
+    from certego_saas.models import User
+    from intel_owl.celery import DEFAULT_QUEUE
+
+    logger.info("Starting beat_init signal")
+
+    for task in PeriodicTask.objects.filter(
+        enabled=True, task="intel_owl.tasks.update"
+    ):
+        python_module_pk = json.loads(task.kwargs)["python_module_pk"]
+        logger.info(f"Updating {python_module_pk}")
+        update.apply_async(
+            routing_key=DEFAULT_QUEUE,
+            MessageGroupId=str(uuid.uuid4()),
+            args=[python_module_pk],
+        )
+
+    # we are not considering system users
+    for user in User.objects.exclude(email=""):
+        logger.info(f"Creating cache for user {user.username}")
+        create_caches.apply_async(
+            routing_key=DEFAULT_QUEUE,
+            MessageGroupId=str(uuid.uuid4()),
+            args=[user.pk],
+        )
 
 
 # set logger

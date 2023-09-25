@@ -319,12 +319,11 @@ export function JobInfoCard({ job }) {
               ],
               [
                 "Error(s)",
-                <textarea
-                  disabled
-                  value={job.errors}
-                  className="text-danger"
-                  hidden={!job.errors.length}
-                />,
+                <ul className="text-danger">
+                  {job.errors.map((error) => (
+                    <li>{error}</li>
+                  ))}
+                </ul>,
               ],
               [
                 "Playbook",
@@ -347,23 +346,21 @@ export function JobInfoCard({ job }) {
   );
 }
 
+export function reportedPluginNumber(pluginList) {
+  /**
+   * Return the number of plugin in the final statuses
+   */
+  return pluginList
+    .map((report) => report.status)
+    .filter((status) => Object.values(pluginFinalStatuses).includes(status))
+    .length;
+}
+
 export function JobIsRunningAlert({ job }) {
   // number of analyzers/connectors/visualizers reported (status: killed/succes/failed)
-  const analizersReported = job.analyzer_reports
-    .map((report) => report.status)
-    .filter((status) =>
-      Object.values(pluginFinalStatuses).includes(status),
-    ).length;
-  const connectorsReported = job.connector_reports
-    .map((report) => report.status)
-    .filter((status) =>
-      Object.values(pluginFinalStatuses).includes(status),
-    ).length;
-  const visualizersReported = job.visualizer_reports
-    .map((report) => report.status)
-    .filter((status) =>
-      Object.values(pluginFinalStatuses).includes(status),
-    ).length;
+  const analizersReported = reportedPluginNumber(job.analyzer_reports);
+  const connectorsReported = reportedPluginNumber(job.connector_reports);
+  const visualizersReported = reportedPluginNumber(job.visualizer_reports);
 
   /* Check if analyzers/connectors/visualizers are completed
     The analyzers are completed from the "analyzers_completed" status (index=3) to the last status 

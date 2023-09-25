@@ -6,13 +6,24 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    PythonModule = apps.get_model("api_app", "PythonModule")
     PeriodicTask = apps.get_model("django_celery_beat", "PeriodicTask")
     for task in PeriodicTask.objects.filter(task="intel_owl.tasks.update"):
         kwargs = json.loads(task.kwargs)
-        config = AnalyzerConfig.objects.get(python_module=kwargs["python_module_pk"])
-        kwargs["python_module_pk"] = config.python_module2.pk
-        task.kwargs = json.dumps(kwargs)
-        task.save()
+        try:
+            config = AnalyzerConfig.objects.get(pk=kwargs["config_pk"])
+        except KeyError:
+            kwargs["python_module_pk"] = PythonModule.objects.get(
+                module=kwargs["python_module_pk"],
+                base_path__in=[
+                    "api_app.analyzers_manager.observable_analyzers",
+                    "api_app.analyzers_manager.file_analyzers",
+                ],
+            ).pk
+        else:
+            kwargs["python_module_pk"] = config.python_module2.pk
+            task.kwargs = json.dumps(kwargs)
+            task.save()
 
 
 def reverse_migrate(apps, schema_editor):

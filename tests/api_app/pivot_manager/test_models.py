@@ -119,7 +119,12 @@ class PivotConfigTestCase(CustomTestCase):
             name="test123",
             description="test123",
         )
-        ac = AnalyzerConfig.objects.first()
+        ac2 = AnalyzerConfig.objects.filter(
+            observable_supported__contains=["generic"],
+            python_module__parameters__isnull=True,
+        ).first()
+        ac = AnalyzerConfig.objects.filter().first()
+        playbook.analyzers.set([ac2])
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             related_analyzer_config=ac,

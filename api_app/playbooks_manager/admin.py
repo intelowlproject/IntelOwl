@@ -21,6 +21,7 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
         "runtime_configuration",
         "scan_mode",
     )
+    filter_horizontal = ["analyzers", "connectors", "pivots"]
 
     @staticmethod
     def _get_plugins(qs):

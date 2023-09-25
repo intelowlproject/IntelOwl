@@ -85,6 +85,10 @@ class PythonModule(models.Model):
     def python_class(self) -> Type["Plugin"]:
         return import_string(self.python_complete_path)
 
+    @property
+    def configs(self) -> PythonConfigQuerySet:
+        return self.config_class.objects.filter(python_module__pk=self.pk)
+
     @cached_property
     def config_class(self) -> Type["PythonConfig"]:
         return self.python_class.config_model
@@ -585,6 +589,8 @@ class Parameter(models.Model):
             return "user|pwd"
         elif "test" in self.name:
             raise PluginConfig.DoesNotExist
+        elif self.type == ParamTypes.INT.value:
+            return 10
         else:
             return "test"
 

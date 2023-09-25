@@ -52,7 +52,8 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      - uwsgi
+      uwsgi:
+        condition: service_healthy
     <<: *no-healthcheck
 
 

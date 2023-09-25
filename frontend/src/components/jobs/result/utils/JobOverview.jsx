@@ -77,7 +77,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <div className="d-flex-center">
             <strong>Pivots Report</strong>
             <Badge className="ms-2">
-              {reportedPluginNumber(job.pivots_reports)} /&nbsp;
+              {reportedPluginNumber(job.pivot_reports)} /&nbsp;
               {job.pivots_to_execute.length}
             </Badge>
           </div>

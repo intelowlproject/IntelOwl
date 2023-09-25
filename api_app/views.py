@@ -694,7 +694,6 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             args=[report.job.id],
             kwargs={},
             queue=report.config.queue,
-            soft_time_limit=10,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )

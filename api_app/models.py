@@ -440,12 +440,13 @@ class Job(models.Model):
                 args=[self.pk],
                 kwargs={},
                 queue=get_queue_name(DEFAULT_QUEUE),
-                soft_time_limit=10,
                 immutable=True,
                 MessageGroupId=str(uuid.uuid4()),
             )
         )
-        runner()
+        runner.apply_async(
+            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+        )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -925,7 +926,6 @@ class PythonConfig(AbstractConfig):
             args=[job.pk, status],
             kwargs={},
             queue=get_queue_name(DEFAULT_QUEUE),
-            soft_time_limit=10,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )

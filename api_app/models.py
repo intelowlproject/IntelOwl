@@ -283,11 +283,11 @@ class Job(models.Model):
 
     @classmethod
     def get_absolute_url_by_pk(cls, pk: int):
-        return reverse("jobs-detail", args=[pk])
+        return reverse("jobs-detail", args=[pk]).removeprefix("/api")
 
     @property
     def url(self):
-        return settings.WEB_CLIENT_URL + self.get_absolute_url().removeprefix("/api")
+        return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)

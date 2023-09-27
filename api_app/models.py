@@ -7,8 +7,6 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
-import celery
-
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
 
@@ -445,7 +443,7 @@ class Job(models.Model):
         )
 
     @property
-    def _final_status_signature(self) -> celery.canvas.Signature:
+    def _final_status_signature(self) -> Signature:
         return tasks.job_set_final_status.signature(
             args=[self.pk],
             kwargs={},

@@ -287,7 +287,7 @@ class Job(models.Model):
 
     @property
     def url(self):
-        return settings.WEB_CLIENT_URL + self.get_absolute_url()
+        return settings.WEB_CLIENT_URL + self.get_absolute_url().removeprefix("/api")
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)

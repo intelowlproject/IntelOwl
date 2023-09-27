@@ -317,28 +317,25 @@ class Job(models.Model):
             ]
         ).values_list("pk", flat=True)
 
-
         runner = (
             self._get_signatures(
-                self.analyzers_to_execute.filter(pk__in=analyzers_with_failed_reports)
+                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=pivots_with_failed_reports, related_analyzer_config__isnull=False
+                    pk__in=failed_pivot_reports, related_analyzer_config__isnull=False
                 )
             )
             | self._get_signatures(
-                self.connectors_to_execute.filter(pk__in=connectors_with_failed_reports)
+                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=pivots_with_failed_reports, related_connector_config__isnull=False
+                    pk__in=failed_pivot_reports, related_connector_config__isnull=False
                 )
             )
             | self._get_signatures(
-                self.visualizers_to_execute.filter(
-                    pk__in=visualizers_with_failed_reports
-                )
+                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
             )
             | self._final_status_signature
         )
@@ -489,6 +486,7 @@ class Job(models.Model):
         return PivotConfig.objects.filter(
             Q(related_analyzer_config__in=valid_python_modules_analyzers)
             | Q(related_connector_config__in=valid_python_modules_connectors)
+        )
 
     @property
     def _final_status_signature(self) -> Signature:

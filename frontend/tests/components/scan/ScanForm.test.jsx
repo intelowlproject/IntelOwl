@@ -796,7 +796,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -882,7 +881,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -958,7 +956,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1042,7 +1039,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1137,7 +1133,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1238,7 +1233,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1306,7 +1300,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1391,7 +1384,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1460,7 +1452,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1545,7 +1536,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1615,7 +1605,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1703,7 +1692,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1783,7 +1771,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1881,7 +1868,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -1955,7 +1941,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test(
@@ -2053,7 +2038,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test("file playbook analysis", async () => {
@@ -2205,7 +2189,6 @@ describe("test ScanForm component", () => {
         expect(global.location.pathname).toContain("/jobs/");
       });
     },
-    15 * 1000,
   );
 
   test("test scan page with an observable in the GET parameters", async () => {

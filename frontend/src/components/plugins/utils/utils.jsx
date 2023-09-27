@@ -17,10 +17,7 @@ import {
   ModalBody,
 } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
-import {
-  MdInfo,
-  MdDelete,
-} from "react-icons/md";
+import { MdInfo, MdDelete } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
 
 import { IconButton, BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
@@ -229,9 +226,7 @@ function PluginHealthSpinner() {
 }
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
-  const { 
-    checkPluginHealth,
-  } = usePluginConfigurationStore(
+  const { checkPluginHealth } = usePluginConfigurationStore(
     React.useCallback(
       (state) => ({
         checkPluginHealth: state.checkPluginHealth,
@@ -292,8 +287,10 @@ export function OrganizationPluginStateToggle({
       [],
     ),
   );
-  let title = disabled ? `Enable ${pluginName} for organization` : `Disable ${pluginName} for organization`;
-  if (!isUserOwner){
+  let title = disabled
+    ? `Enable ${pluginName} for organization`
+    : `Disable ${pluginName} for organization`;
+  if (!isUserOwner) {
     title = `You're not an owner of your organization - ${organization.name}`;
   }
   let baseUrl = "";
@@ -314,8 +311,9 @@ export function OrganizationPluginStateToggle({
     }
   };
   return (
-      <div className={`d-flex align-items-center ${noOrg ? "" : "px-2"}`}>
-        {!noOrg && <IconButton
+    <div className={`d-flex align-items-center ${noOrg ? "" : "px-2"}`}>
+      {!noOrg && (
+        <IconButton
           id={`table-pluginstatebtn__${pluginName}`}
           color={disabled ? "dark" : "success"}
           size="sm"
@@ -323,7 +321,8 @@ export function OrganizationPluginStateToggle({
           title={title}
           onClick={onClick}
           titlePlacement="top"
-        />}
+        />
+      )}
     </div>
   );
 }
@@ -357,23 +356,21 @@ export function PlaybooksCollapse({ value, pluginType_ }) {
 export function PlaybooksDeletionButton({ playbookName }) {
   const [showModal, setShowModal] = React.useState(false);
 
-  const { 
-    deletePlaybook,
-    retrievePlaybooksConfiguration,
-  } = usePluginConfigurationStore(
-    React.useCallback(
-      (state) => ({
-        deletePlaybook: state.deletePlaybook,
-        retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
-      }),
-      [],
-    ),
-  );
+  const { deletePlaybook, retrievePlaybooksConfiguration } =
+    usePluginConfigurationStore(
+      React.useCallback(
+        (state) => ({
+          deletePlaybook: state.deletePlaybook,
+          retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
+        }),
+        [],
+      ),
+    );
 
   const onClick = async () => {
     const success = await deletePlaybook(playbookName);
     setShowModal(false);
-    if (success){
+    if (success) {
       await retrievePlaybooksConfiguration();
     }
   };
@@ -386,10 +383,10 @@ export function PlaybooksDeletionButton({ playbookName }) {
         size="sm"
         Icon={MdDelete}
         title="Delete playbook"
-        onClick={()=>setShowModal(true)}
+        onClick={() => setShowModal(true)}
         titlePlacement="top"
       />
-      <Modal 
+      <Modal
         autoFocus
         centered
         zIndex="1050"
@@ -399,16 +396,27 @@ export function PlaybooksDeletionButton({ playbookName }) {
         labelledBy="Playbook deletion modal"
         isOpen={showModal}
       >
-        <ModalHeader className="mx-2" toggle={()=>setShowModal(false)}><small className="text-info">Delete playbook</small></ModalHeader>
-          <ModalBody className="d-flex justify-content-between my-2 mx-2">
-            <div>
-              Do you want to delete the playbook: <span className="text-info">{playbookName}</span>?
-            </div>
-            <div className="d-flex justify-content-between">
-              <Button className="mx-2" color="danger" size="sm" onClick={onClick}>Delete</Button>
-              <Button className="mx-2" size="sm" onClick={()=>setShowModal(false)} >Cancel</Button>
+        <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
+          <small className="text-info">Delete playbook</small>
+        </ModalHeader>
+        <ModalBody className="d-flex justify-content-between my-2 mx-2">
+          <div>
+            Do you want to delete the playbook:{" "}
+            <span className="text-info">{playbookName}</span>?
           </div>
-          </ModalBody>
+          <div className="d-flex justify-content-between">
+            <Button className="mx-2" color="danger" size="sm" onClick={onClick}>
+              Delete
+            </Button>
+            <Button
+              className="mx-2"
+              size="sm"
+              onClick={() => setShowModal(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </ModalBody>
       </Modal>
     </div>
   );

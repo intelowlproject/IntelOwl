@@ -216,7 +216,9 @@ const usePluginConfigurationStore = create((set, get) => ({
   deletePlaybook: async (playbook) => {
     let success = false;
     try {
-      const response = await axios.delete(`${PLAYBOOKS_CONFIG_URI}/${playbook}`);
+      const response = await axios.delete(
+        `${PLAYBOOKS_CONFIG_URI}/${playbook}`,
+      );
       success = response.status === 204;
       if (success) {
         addToast(`${playbook} deleted`, null, "info");

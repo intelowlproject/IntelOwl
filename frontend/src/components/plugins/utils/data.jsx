@@ -180,20 +180,20 @@ const analyzersTableColumns = [
     accessor: (r) => r,
     disableSortBy: true,
     Cell: ({ value }) => (
-        <div className="d-flex justify-content-center mx-2">
-          <OrganizationPluginStateToggle
-            pluginName={value?.name}
-            disabled={value?.orgPluginDisabled}
-            refetch={value?.refetch}
-            type={value?.plugin_type}
+      <div className="d-flex justify-content-center mx-2">
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={value?.orgPluginDisabled}
+          refetch={value?.refetch}
+          type={value?.plugin_type}
+        />
+        {value?.docker_based && (
+          <PluginHealthCheckButton
+            pluginName={value.name}
+            pluginType="analyzer"
           />
-          {value?.docker_based && 
-            <PluginHealthCheckButton
-              pluginName={value.name}
-              pluginType="analyzer"
-            />
-          }
-        </div>
+        )}
+      </div>
     ),
     maxWidth: 125,
   },
@@ -304,12 +304,10 @@ const playbookTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
-      {value.is_deletable && 
-        <PlaybooksDeletionButton
-          playbookName={value?.name}
-        />
-      }
-    </div>
+        {value.is_deletable && (
+          <PlaybooksDeletionButton playbookName={value?.name} />
+        )}
+      </div>
     ),
     maxWidth: 125,
   },
@@ -357,13 +355,13 @@ const visualizerTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
-      <OrganizationPluginStateToggle
-        pluginName={value?.name}
-        disabled={value?.orgPluginDisabled}
-        refetch={value?.refetch}
-        type={value?.plugin_type}
-      />
-    </div>
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={value?.orgPluginDisabled}
+          refetch={value?.refetch}
+          type={value?.plugin_type}
+        />
+      </div>
     ),
     maxWidth: 125,
   },

@@ -7,6 +7,8 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
+import celery
+
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
 
@@ -291,18 +293,32 @@ class Job(models.Model):
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)
-        analyzers_with_failed_reports = self.analyzerreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("config__pk", flat=True)
-        connectors_with_failed_reports = self.connectorreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("config__pk", flat=True)
-        pivots_with_failed_reports = self.pivotreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("config__pk", flat=True)
-        visualizers_with_failed_reports = self.visualizerreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("config__pk", flat=True)
+        failed_analyzers_reports = self.analyzerreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("pk", flat=True)
+        failed_connector_reports = self.connectorreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("pk", flat=True)
+        failed_pivot_reports = self.pivotreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("pk", flat=True)
+
+        failed_visualizer_reports = self.visualizerreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("pk", flat=True)
+
 
         runner = (
             self._get_signatures(
@@ -310,7 +326,7 @@ class Job(models.Model):
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=pivots_with_failed_reports, analyzer_config__isnull=False
+                    pk__in=pivots_with_failed_reports, related_analyzer_config__isnull=False
                 )
             )
             | self._get_signatures(
@@ -318,7 +334,7 @@ class Job(models.Model):
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=pivots_with_failed_reports, connector_config__isnull=False
+                    pk__in=pivots_with_failed_reports, related_connector_config__isnull=False
                 )
             )
             | self._get_signatures(
@@ -326,8 +342,11 @@ class Job(models.Model):
                     pk__in=visualizers_with_failed_reports
                 )
             )
+            | self._final_status_signature
         )
-        return runner()
+        runner.apply_async(
+            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+        )
 
     def set_final_status(self) -> None:
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
@@ -472,6 +491,15 @@ class Job(models.Model):
         return PivotConfig.objects.filter(
             Q(related_analyzer_config__in=valid_python_modules_analyzers)
             | Q(related_connector_config__in=valid_python_modules_connectors)
+
+    @property
+    def _final_status_signature(self) -> celery.canvas.Signature:
+        return tasks.job_set_final_status.signature(
+            args=[self.pk],
+            kwargs={},
+            queue=get_queue_name(DEFAULT_QUEUE),
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
         )
 
     def execute(self):
@@ -486,16 +514,11 @@ class Job(models.Model):
                 self.pivots_to_execute.filter(related_connector_config__isnull=False)
             )
             | self._get_signatures(self.visualizers_to_execute.all())
-            | tasks.job_set_final_status.signature(
-                args=[self.pk],
-                kwargs={},
-                queue=get_queue_name(DEFAULT_QUEUE),
-                soft_time_limit=10,
-                immutable=True,
-                MessageGroupId=str(uuid.uuid4()),
-            )
+            | self._final_status_signature
         )
-        runner()
+        runner.apply_async(
+            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+        )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -1003,7 +1026,6 @@ class PythonConfig(AbstractConfig):
             args=[job.pk, status],
             kwargs={},
             queue=get_queue_name(DEFAULT_QUEUE),
-            soft_time_limit=10,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )

@@ -20,7 +20,11 @@ from api_app.views import AbstractConfigViewSet
 logger = logging.getLogger(__name__)
 
 
-class PlaybookConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin,):
+class PlaybookConfigViewSet(
+    AbstractConfigViewSet,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+):
     serializer_class = PlaybookConfigSerializer
     ordering = ["-weight", "name"]
     permission_classes = [IsAuthenticated]

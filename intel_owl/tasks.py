@@ -80,6 +80,18 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     """
     from api_app.models import Job
 
+    def fail_job(job):
+        logger.error(
+            f"found stuck analysis, job_id:{job.id}."
+            f"Setting the job to status to {Job.Status.FAILED.value}'"
+        )
+        job.status = Job.Status.FAILED.value
+        job.finished_analysis_time = now()
+        job.process_time = job.calculate_process_time()
+        job.save(
+            update_fields=["status", "finished_analysis_time", "process_time"]
+        )
+
     logger.info("started check_stuck_analysis")
     query = Q(status=Job.Status.RUNNING.value)
     if check_pending:
@@ -92,17 +104,18 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
 
     jobs_id_stuck = []
     for running_job in running_jobs:
-        logger.error(
-            f"found stuck analysis, job_id:{running_job.id}."
-            f"Setting the job to status to {Job.Status.FAILED.value}'"
-        )
         jobs_id_stuck.append(running_job.id)
-        running_job.status = Job.Status.FAILED.value
-        running_job.finished_analysis_time = now()
-        running_job.process_time = running_job.calculate_process_time()
-        running_job.save(
-            update_fields=["status", "finished_analysis_time", "process_time"]
-        )
+        if running_job.status == Job.Status.RUNNING.value:
+            fail_job(running_job)
+        elif running_job.status == Job.Status.PENDING.value:
+            # the job can be pending for 2 cycles of this function
+            if running_job.received_request_time < (now() - datetime.timedelta(minutes=(minutes_ago*2)+1)):
+                # if it's still pending, we are killing
+                fail_job(running_job)
+            else:
+                # we are trying to execute again all pending
+                # (and technically, but it is not the case here) all failed reports
+                running_job.retry()
 
     logger.info("finished check_stuck_analysis")
 

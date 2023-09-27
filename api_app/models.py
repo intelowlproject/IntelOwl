@@ -7,6 +7,8 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
+import celery
+
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
 
@@ -284,13 +286,22 @@ class Job(models.Model):
     def retry(self):
         self.update_status(Job.Status.RUNNING)
         failed_analyzers_reports = self.analyzerreports.filter(
-            status=AbstractReport.Status.FAILED.value
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
         ).values_list("pk", flat=True)
         failed_connector_reports = self.connectorreports.filter(
-            status=AbstractReport.Status.FAILED.value
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
         ).values_list("pk", flat=True)
         failed_visualizer_reports = self.visualizerreports.filter(
-            status=AbstractReport.Status.FAILED.value
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
         ).values_list("pk", flat=True)
 
         runner = (
@@ -303,8 +314,11 @@ class Job(models.Model):
             | self._get_signatures(
                 self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
             )
+            | self._final_status_signature
         )
-        return runner()
+        runner.apply_async(
+            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+        )
 
     def set_final_status(self) -> None:
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
@@ -430,19 +444,23 @@ class Job(models.Model):
             | config_class.signature_pipeline_completed(self)
         )
 
+    @property
+    def _final_status_signature(self) -> celery.canvas.Signature:
+        return tasks.job_set_final_status.signature(
+            args=[self.pk],
+            kwargs={},
+            queue=get_queue_name(DEFAULT_QUEUE),
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
+
     def execute(self):
         self.update_status(Job.Status.RUNNING)
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
             | self._get_signatures(self.connectors_to_execute.all())
             | self._get_signatures(self.visualizers_to_execute.all())
-            | tasks.job_set_final_status.signature(
-                args=[self.pk],
-                kwargs={},
-                queue=get_queue_name(DEFAULT_QUEUE),
-                immutable=True,
-                MessageGroupId=str(uuid.uuid4()),
-            )
+            | self._final_status_signature
         )
         runner.apply_async(
             queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())

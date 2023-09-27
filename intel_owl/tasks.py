@@ -88,9 +88,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
         job.status = Job.Status.FAILED.value
         job.finished_analysis_time = now()
         job.process_time = job.calculate_process_time()
-        job.save(
-            update_fields=["status", "finished_analysis_time", "process_time"]
-        )
+        job.save(update_fields=["status", "finished_analysis_time", "process_time"])
 
     logger.info("started check_stuck_analysis")
     query = Q(status=Job.Status.RUNNING.value)
@@ -109,7 +107,9 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
             fail_job(running_job)
         elif running_job.status == Job.Status.PENDING.value:
             # the job can be pending for 2 cycles of this function
-            if running_job.received_request_time < (now() - datetime.timedelta(minutes=(minutes_ago*2)+1)):
+            if running_job.received_request_time < (
+                now() - datetime.timedelta(minutes=(minutes_ago * 2) + 1)
+            ):
                 # if it's still pending, we are killing
                 fail_job(running_job)
             else:

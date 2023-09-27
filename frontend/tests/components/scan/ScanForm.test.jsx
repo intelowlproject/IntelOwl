@@ -734,1311 +734,1257 @@ describe("test ScanForm component", () => {
     );
   });
 
-  test(
-    "test playbooks advanced change time",
-    async () => {
-      const user = userEvent.setup();
+  test("test playbooks advanced change time", async () => {
+    const user = userEvent.setup();
 
-      render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
 
-      // select an observable and start scan
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "google.com");
+    // select an observable and start scan
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
 
-      /* advanced settings:
+    /* advanced settings:
         if you modify advanced settings before typing the observable when the playbook auto load override the advanced settings
         Don't move this block before the observable typing!!!
       */
-      const advancedSettingsButton = screen.getByRole("button", {
-        name: "Advanced settings",
-      });
-      await user.click(advancedSettingsButton);
-      const timeRangeSelector = screen.getByRole("spinbutton");
-      expect(timeRangeSelector).toBeInTheDocument();
-      await user.clear(timeRangeSelector);
-      await user.type(timeRangeSelector, "10");
+    const advancedSettingsButton = screen.getByRole("button", {
+      name: "Advanced settings",
+    });
+    await user.click(advancedSettingsButton);
+    const timeRangeSelector = screen.getByRole("spinbutton");
+    expect(timeRangeSelector).toBeInTheDocument();
+    await user.clear(timeRangeSelector);
+    await user.type(timeRangeSelector, "10");
 
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "domain", param: "google.com" },
-          {},
-        );
-      });
-      await user.click(startScanButton);
-
-      await waitFor(() => {
-        expect(axios.post.mock.calls[0]).toEqual(
-          // axios call
-          [
-            PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [["domain", "google.com"]],
-              playbook_requested: "TEST_PLAYBOOK_DOMAIN",
-              tlp: "CLEAR",
-              scan_mode: 2,
-              scan_check_time: "10:00:00",
-            },
-          ],
-        );
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "test analyzers advanced change time",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      // recent scans
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    // recent scans
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "generic", param: "" },
+        { classification: "domain", param: "google.com" },
         {},
       );
-      // select an observable
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "google.com");
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "domain", param: "google.com" },
-          {},
-        );
-      });
-      // advanced settings
-      const advancedSettingsButton = screen.getByRole("button", {
-        name: "Advanced settings",
-      });
-      await user.click(advancedSettingsButton);
-      const timeRangeSelector = screen.getByRole("spinbutton");
-      expect(timeRangeSelector).toBeInTheDocument();
-      await user.clear(timeRangeSelector);
-      await user.type(timeRangeSelector, "10");
+    });
+    await user.click(startScanButton);
 
-      // select analyzer
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-      /* the id change in case you run a single test or all of them.
-        we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    await waitFor(() => {
+      expect(axios.post.mock.calls[0]).toEqual(
+        // axios call
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "google.com"]],
+            playbook_requested: "TEST_PLAYBOOK_DOMAIN",
+            tlp: "CLEAR",
+            scan_mode: 2,
+            scan_check_time: "10:00:00",
+          },
+        ],
       );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
-      expect(screen.getByText("TEST_ANALYZER")).toBeInTheDocument();
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
 
-      // start scan
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-      await user.click(startScanButton);
+  test("test analyzers advanced change time", async () => {
+    const user = userEvent.setup();
 
-      await waitFor(() => {
-        expect(axios.post.mock.calls[0]).toEqual(
-          // axios call
-          [
-            ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [["domain", "google.com"]],
-              analyzers_requested: ["TEST_ANALYZER"],
-              tlp: "AMBER",
-              scan_mode: 2,
-              scan_check_time: "10:00:00",
-            },
-          ],
-        );
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
 
-  test(
-    "test observable playbooks advanced settings (force analysis, tlp and tags)",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      // select an observable
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "google.com");
-
-      // advanced settings
-      /* the id change in case you run a single test or all of them.
-        we need this strange way to access instead of the id */
-      const tagsDropdown = screen.getAllByRole("combobox")[1];
-      expect(tagsDropdown).toBeInTheDocument();
-      await user.click(tagsDropdown);
-      const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
-      );
-      expect(testTagButton).toBeInTheDocument();
-      await user.click(testTagButton);
-      const advancedSettingsButton = screen.getByRole("button", {
-        name: "Advanced settings",
-      });
-      await user.click(advancedSettingsButton);
-      const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
-      expect(tlpRadio).toBeInTheDocument();
-      await user.click(tlpRadio);
-      const forceAnalysisRadio = screen.getByRole("radio", {
-        name: "Force new analysis",
-      });
-      expect(forceAnalysisRadio).toBeInTheDocument();
-      await user.click(forceAnalysisRadio);
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "domain", param: "google.com" },
-          {},
-        );
-      });
-      // start scan
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-      await user.click(startScanButton);
-
-      await waitFor(() => {
-        // no call to the API to check old analysis (one of the advanced settings)
-        expect(axios.post.mock.calls.length).toBe(1);
-        expect(axios.post.mock.calls).toEqual([
-          [
-            PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [["domain", "google.com"]],
-              playbook_requested: "TEST_PLAYBOOK_DOMAIN",
-              tags_labels: ["test tag"],
-              tlp: "GREEN",
-              scan_mode: 1,
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "test file playbooks advanced settings (force analysis, tlp and tags)",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      // select file type
-      const fileSelectorRadioButton = screen.getAllByRole("radio")[1];
-      expect(fileSelectorRadioButton).toBeInTheDocument();
-      await user.click(fileSelectorRadioButton);
-      expect(screen.getByText("File(s)")).toBeInTheDocument();
-
-      // select file
-      const fileInputComponent = screen.getByLabelText("File(s)");
-      const testImageFiles = [
-        new File(["this is a text line"], "test1.txt", { type: "plain/text" }),
-      ];
-      await user.upload(fileInputComponent, testImageFiles);
-      expect(fileInputComponent.files).toHaveLength(1);
-      expect(fileInputComponent.files[0]).toStrictEqual(testImageFiles[0]);
-      expect(fileInputComponent.files.item(0)).toStrictEqual(testImageFiles[0]);
-
-      // advanced settings
-      /* the id change in case you run a single test or all of them.
-        we need this strange way to access instead of the id */
-      const tagsDropdown = screen.getAllByRole("combobox")[1];
-      expect(tagsDropdown).toBeInTheDocument();
-      await user.click(tagsDropdown);
-      const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
-      );
-      expect(testTagButton).toBeInTheDocument();
-      await user.click(testTagButton);
-      const advancedSettingsButton = screen.getByRole("button", {
-        name: "Advanced settings",
-      });
-      await user.click(advancedSettingsButton);
-      const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
-      expect(tlpRadio).toBeInTheDocument();
-      await user.click(tlpRadio);
-      const forceAnalysisRadio = screen.getByRole("radio", {
-        name: "Force new analysis",
-      });
-      expect(forceAnalysisRadio).toBeInTheDocument();
-      await user.click(forceAnalysisRadio);
-      // recent scans
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    // recent scans
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "generic", param: "" },
+      {},
+    );
+    // select an observable
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    // recent scans
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "file", param: testImageFiles[0] },
+        { classification: "domain", param: "google.com" },
         {},
       );
+    });
+    // advanced settings
+    const advancedSettingsButton = screen.getByRole("button", {
+      name: "Advanced settings",
+    });
+    await user.click(advancedSettingsButton);
+    const timeRangeSelector = screen.getByRole("spinbutton");
+    expect(timeRangeSelector).toBeInTheDocument();
+    await user.clear(timeRangeSelector);
+    await user.type(timeRangeSelector, "10");
 
-      // select an observable and start scan
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-      await user.click(startScanButton);
-
-      await waitFor(() => {
-        // no call to the API to check old analysis (one of the advanced settings)
-        expect(axios.post.mock.calls.length).toBe(1);
-        expect(axios.post.mock.calls[0][0]).toEqual(
-          PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
-        );
-        expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
-          files: new File([], ""),
-          playbook_requested: "TEST_PLAYBOOK_FILE",
-          tags_labels: "test tag",
-          tlp: "GREEN",
-          scan_mode: "1",
-        });
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "test observable analyzers advanced settings (force analysis, tlp and tags)",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      // select an observable
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "google.com");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "domain", param: "google.com" },
-          {},
-        );
-      });
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-
-      // advanced settings
-      /* the id change in case you run a single test or all of them.
+    // select analyzer
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const tagsDropdown = screen.getAllByRole("combobox")[2];
-      expect(tagsDropdown).toBeInTheDocument();
-      await user.click(tagsDropdown);
-      const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
-      );
-      expect(testTagButton).toBeInTheDocument();
-      await user.click(testTagButton);
-      const advancedSettingsButton = screen.getByRole("button", {
-        name: "Advanced settings",
-      });
-      await user.click(advancedSettingsButton);
-      const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
-      expect(tlpRadio).toBeInTheDocument();
-      await user.click(tlpRadio);
-      const forceAnalysisRadio = screen.getByRole("radio", {
-        name: "Force new analysis",
-      });
-      expect(forceAnalysisRadio).toBeInTheDocument();
-      await user.click(forceAnalysisRadio);
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
+    expect(screen.getByText("TEST_ANALYZER")).toBeInTheDocument();
 
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
+    // start scan
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    await user.click(startScanButton);
+
+    await waitFor(() => {
+      expect(axios.post.mock.calls[0]).toEqual(
+        // axios call
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "google.com"]],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tlp: "AMBER",
+            scan_mode: 2,
+            scan_check_time: "10:00:00",
+          },
+        ],
+      );
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("test observable playbooks advanced settings (force analysis, tlp and tags)", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    // select an observable
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
+
+    // advanced settings
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
-      );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
-
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-      await user.click(startScanButton);
-
-      await waitFor(() => {
-        // no call to the API to check old analysis (one of the advanced settings)
-        expect(axios.post.mock.calls.length).toBe(1);
-        expect(axios.post.mock.calls).toEqual([
-          [
-            ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [["domain", "google.com"]],
-              analyzers_requested: ["TEST_ANALYZER"],
-              tags_labels: ["test tag"],
-              tlp: "GREEN",
-              scan_mode: 1,
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "test file analyzers advanced settings (force analysis, tlp and tags)",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      // select file type
-      const fileSelectorRadioButton = screen.getAllByRole("radio")[1];
-      expect(fileSelectorRadioButton).toBeInTheDocument();
-      await user.click(fileSelectorRadioButton);
-      expect(screen.getByText("File(s)")).toBeInTheDocument();
-
-      // select file
-      const fileInputComponent = screen.getByLabelText("File(s)");
-      const testImageFiles = [
-        new File(["this is a text line"], "test1.txt", { type: "plain/text" }),
-      ];
-      await user.upload(fileInputComponent, testImageFiles);
-      expect(fileInputComponent.files).toHaveLength(1);
-      expect(fileInputComponent.files[0]).toStrictEqual(testImageFiles[0]);
-      expect(fileInputComponent.files.item(0)).toStrictEqual(testImageFiles[0]);
-
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-
-      // advanced settings
-      const advancedSettingsButton = screen.getByRole("button", {
-        name: "Advanced settings",
-      });
-      await user.click(advancedSettingsButton);
-      /* the id change in case you run a single test or all of them.
-        we need this strange way to access instead of the id */
-      const tagsDropdown = screen.getAllByRole("combobox")[2];
-      expect(tagsDropdown).toBeInTheDocument();
-      await user.click(tagsDropdown);
-      const testTagButton = container.querySelector(
-        `#${tagsDropdown.id.replace("-input", "")}-option-0`,
-      );
-      expect(testTagButton).toBeInTheDocument();
-      await user.click(testTagButton);
-      const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
-      expect(tlpRadio).toBeInTheDocument();
-      await user.click(tlpRadio);
-      const forceAnalysisRadio = screen.getByRole("radio", {
-        name: "Force new analysis",
-      });
-      expect(forceAnalysisRadio).toBeInTheDocument();
-      await user.click(forceAnalysisRadio);
-
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
-        we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
-      );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
-
-      // recent scans
+    const tagsDropdown = screen.getAllByRole("combobox")[1];
+    expect(tagsDropdown).toBeInTheDocument();
+    await user.click(tagsDropdown);
+    const testTagButton = container.querySelector(
+      `#${tagsDropdown.id.replace("-input", "")}-option-0`,
+    );
+    expect(testTagButton).toBeInTheDocument();
+    await user.click(testTagButton);
+    const advancedSettingsButton = screen.getByRole("button", {
+      name: "Advanced settings",
+    });
+    await user.click(advancedSettingsButton);
+    const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
+    expect(tlpRadio).toBeInTheDocument();
+    await user.click(tlpRadio);
+    const forceAnalysisRadio = screen.getByRole("radio", {
+      name: "Force new analysis",
+    });
+    expect(forceAnalysisRadio).toBeInTheDocument();
+    await user.click(forceAnalysisRadio);
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "file", param: testImageFiles[0] },
+        { classification: "domain", param: "google.com" },
         {},
       );
+    });
+    // start scan
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    await user.click(startScanButton);
 
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-      await user.click(startScanButton);
+    await waitFor(() => {
+      // no call to the API to check old analysis (one of the advanced settings)
+      expect(axios.post.mock.calls.length).toBe(1);
+      expect(axios.post.mock.calls).toEqual([
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "google.com"]],
+            playbook_requested: "TEST_PLAYBOOK_DOMAIN",
+            tags_labels: ["test tag"],
+            tlp: "GREEN",
+            scan_mode: 1,
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
 
-      await waitFor(() => {
-        // force analysis avoid call for old analysis
-        expect(axios.post.mock.calls.length).toBe(1);
-        expect(axios.post.mock.calls[0][0]).toEqual(ANALYZE_MULTIPLE_FILES_URI);
-        expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
-          analyzers_requested: "TEST_ANALYZER",
-          files: new File([""], ""),
-          tlp: "GREEN",
-          tags_labels: "test tag",
-          scan_mode: "1",
-        });
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
+  test("test file playbooks advanced settings (force analysis, tlp and tags)", async () => {
+    const user = userEvent.setup();
 
-  test(
-    "domains playbook analysis",
-    async () => {
-      const user = userEvent.setup();
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
 
-      render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
+    // select file type
+    const fileSelectorRadioButton = screen.getAllByRole("radio")[1];
+    expect(fileSelectorRadioButton).toBeInTheDocument();
+    await user.click(fileSelectorRadioButton);
+    expect(screen.getByText("File(s)")).toBeInTheDocument();
 
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "google.com");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "domain", param: "google.com" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(secondObservableInputElement, "microsoft[[.]]com");
+    // select file
+    const fileInputComponent = screen.getByLabelText("File(s)");
+    const testImageFiles = [
+      new File(["this is a text line"], "test1.txt", { type: "plain/text" }),
+    ];
+    await user.upload(fileInputComponent, testImageFiles);
+    expect(fileInputComponent.files).toHaveLength(1);
+    expect(fileInputComponent.files[0]).toStrictEqual(testImageFiles[0]);
+    expect(fileInputComponent.files.item(0)).toStrictEqual(testImageFiles[0]);
 
-      // check playbooks has been loaded
-      expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["domain", "google.com"],
-                ["domain", "microsoft.com"],
-              ],
-              playbook_requested: "TEST_PLAYBOOK_DOMAIN",
-              tlp: "CLEAR",
-              scan_mode: 2,
-              scan_check_time: "48:00:00",
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "domains analyzer analysis",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "google.com");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "domain", param: "google.com" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(secondObservableInputElement, "microsoft[[.]]com");
-
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
+    // advanced settings
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    const tagsDropdown = screen.getAllByRole("combobox")[1];
+    expect(tagsDropdown).toBeInTheDocument();
+    await user.click(tagsDropdown);
+    const testTagButton = container.querySelector(
+      `#${tagsDropdown.id.replace("-input", "")}-option-0`,
+    );
+    expect(testTagButton).toBeInTheDocument();
+    await user.click(testTagButton);
+    const advancedSettingsButton = screen.getByRole("button", {
+      name: "Advanced settings",
+    });
+    await user.click(advancedSettingsButton);
+    const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
+    expect(tlpRadio).toBeInTheDocument();
+    await user.click(tlpRadio);
+    const forceAnalysisRadio = screen.getByRole("radio", {
+      name: "Force new analysis",
+    });
+    expect(forceAnalysisRadio).toBeInTheDocument();
+    await user.click(forceAnalysisRadio);
+    // recent scans
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
+
+    // select an observable and start scan
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    await user.click(startScanButton);
+
+    await waitFor(() => {
+      // no call to the API to check old analysis (one of the advanced settings)
+      expect(axios.post.mock.calls.length).toBe(1);
+      expect(axios.post.mock.calls[0][0]).toEqual(
+        PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
       );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
-
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
+      expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
+        files: new File([], ""),
+        playbook_requested: "TEST_PLAYBOOK_FILE",
+        tags_labels: "test tag",
+        tlp: "GREEN",
+        scan_mode: "1",
       });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
 
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["domain", "google.com"],
-                ["domain", "microsoft.com"],
-              ],
-              analyzers_requested: ["TEST_ANALYZER"],
-              tlp: "AMBER",
-              scan_mode: 2,
-              scan_check_time: "24:00:00",
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
+  test("test observable analyzers advanced settings (force analysis, tlp and tags)", async () => {
+    const user = userEvent.setup();
 
-  test(
-    "IP address playbook analysis",
-    async () => {
-      const user = userEvent.setup();
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
 
-      render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
+    // select an observable
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
       );
+    });
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
 
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "8.8.8.8");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "ip", param: "8.8.8.8" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(secondObservableInputElement, "1[[.]]1[[.]]1[[.]]1");
-
-      // check playbooks has been loaded
-      expect(screen.getByText("TEST_PLAYBOOK_IP")).toBeInTheDocument();
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["ip", "8.8.8.8"],
-                ["ip", "1.1.1.1"],
-              ],
-              playbook_requested: "TEST_PLAYBOOK_IP",
-              tags_labels: ["test tag"],
-              tlp: "CLEAR",
-              scan_mode: 2,
-              scan_check_time: "48:00:00",
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "IP address analyzer analysis",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "8.8.8.8");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "ip", param: "8.8.8.8" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(secondObservableInputElement, "1[[.]]1[[.]]1[[.]]1");
-
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
+    // advanced settings
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
-      );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
+    const tagsDropdown = screen.getAllByRole("combobox")[2];
+    expect(tagsDropdown).toBeInTheDocument();
+    await user.click(tagsDropdown);
+    const testTagButton = container.querySelector(
+      `#${tagsDropdown.id.replace("-input", "")}-option-0`,
+    );
+    expect(testTagButton).toBeInTheDocument();
+    await user.click(testTagButton);
+    const advancedSettingsButton = screen.getByRole("button", {
+      name: "Advanced settings",
+    });
+    await user.click(advancedSettingsButton);
+    const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
+    expect(tlpRadio).toBeInTheDocument();
+    await user.click(tlpRadio);
+    const forceAnalysisRadio = screen.getByRole("radio", {
+      name: "Force new analysis",
+    });
+    expect(forceAnalysisRadio).toBeInTheDocument();
+    await user.click(forceAnalysisRadio);
 
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["ip", "8.8.8.8"],
-                ["ip", "1.1.1.1"],
-              ],
-              analyzers_requested: ["TEST_ANALYZER"],
-              tlp: "AMBER",
-              scan_mode: 2,
-              scan_check_time: "24:00:00",
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "URL playbook analysis",
-    async () => {
-      const user = userEvent.setup();
-
-      render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "https://google.com");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "url", param: "https://google.com" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(
-        secondObservableInputElement,
-        "https://microsoft[[.]]com",
-      );
-
-      // check playbooks has been loaded
-      expect(screen.getByText("TEST_PLAYBOOK_URL")).toBeInTheDocument();
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["url", "https://google.com"],
-                ["url", "https://microsoft.com"],
-              ],
-              playbook_requested: "TEST_PLAYBOOK_URL",
-              tlp: "AMBER",
-              scan_mode: 1,
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "URL analyzer analysis",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "https://google.com");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "url", param: "https://google.com" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(
-        secondObservableInputElement,
-        "https://microsoft[[.]]com",
-      );
-
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
-      );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
 
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    await user.click(startScanButton);
 
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["url", "https://google.com"],
-                ["url", "https://microsoft.com"],
-              ],
-              analyzers_requested: ["TEST_ANALYZER"],
-              tlp: "AMBER",
-              scan_mode: 2,
-              scan_check_time: "24:00:00",
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
+    await waitFor(() => {
+      // no call to the API to check old analysis (one of the advanced settings)
+      expect(axios.post.mock.calls.length).toBe(1);
+      expect(axios.post.mock.calls).toEqual([
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "google.com"]],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tags_labels: ["test tag"],
+            tlp: "GREEN",
+            scan_mode: 1,
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
 
-  test(
-    "HASH playbook analysis",
-    async () => {
-      const user = userEvent.setup();
+  test("test file analyzers advanced settings (force analysis, tlp and tags)", async () => {
+    const user = userEvent.setup();
 
-      render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
 
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(
-        firstObservableInputElement,
-        "1d5920f4b44b27a802bd77c4f0536f5a",
-      );
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(
-        secondObservableInputElement,
-        "ff5c054c7cd6924c570f944007ccf076",
-      );
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
-          {},
-        );
-      });
+    // select file type
+    const fileSelectorRadioButton = screen.getAllByRole("radio")[1];
+    expect(fileSelectorRadioButton).toBeInTheDocument();
+    await user.click(fileSelectorRadioButton);
+    expect(screen.getByText("File(s)")).toBeInTheDocument();
 
-      // check playbooks has been loaded
-      expect(screen.getByText("TEST_PLAYBOOK_HASH")).toBeInTheDocument();
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
+    // select file
+    const fileInputComponent = screen.getByLabelText("File(s)");
+    const testImageFiles = [
+      new File(["this is a text line"], "test1.txt", { type: "plain/text" }),
+    ];
+    await user.upload(fileInputComponent, testImageFiles);
+    expect(fileInputComponent.files).toHaveLength(1);
+    expect(fileInputComponent.files[0]).toStrictEqual(testImageFiles[0]);
+    expect(fileInputComponent.files.item(0)).toStrictEqual(testImageFiles[0]);
 
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["hash", "1d5920f4b44b27a802bd77c4f0536f5a"],
-                ["hash", "ff5c054c7cd6924c570f944007ccf076"],
-              ],
-              playbook_requested: "TEST_PLAYBOOK_HASH",
-              tlp: "AMBER",
-              scan_mode: 1,
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
 
-  test(
-    "HASH analyzer analysis",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(
-        firstObservableInputElement,
-        "1d5920f4b44b27a802bd77c4f0536f5a",
-      );
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(
-        secondObservableInputElement,
-        "ff5c054c7cd6924c570f944007ccf076",
-      );
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
-          {},
-        );
-      });
-
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
+    // advanced settings
+    const advancedSettingsButton = screen.getByRole("button", {
+      name: "Advanced settings",
+    });
+    await user.click(advancedSettingsButton);
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
-      );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
+    const tagsDropdown = screen.getAllByRole("combobox")[2];
+    expect(tagsDropdown).toBeInTheDocument();
+    await user.click(tagsDropdown);
+    const testTagButton = container.querySelector(
+      `#${tagsDropdown.id.replace("-input", "")}-option-0`,
+    );
+    expect(testTagButton).toBeInTheDocument();
+    await user.click(testTagButton);
+    const tlpRadio = screen.getByRole("radio", { name: "GREEN" });
+    expect(tlpRadio).toBeInTheDocument();
+    await user.click(tlpRadio);
+    const forceAnalysisRadio = screen.getByRole("radio", {
+      name: "Force new analysis",
+    });
+    expect(forceAnalysisRadio).toBeInTheDocument();
+    await user.click(forceAnalysisRadio);
 
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["hash", "1d5920f4b44b27a802bd77c4f0536f5a"],
-                ["hash", "ff5c054c7cd6924c570f944007ccf076"],
-              ],
-              analyzers_requested: ["TEST_ANALYZER"],
-              tlp: "AMBER",
-              scan_mode: 2,
-              scan_check_time: "24:00:00",
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "generic playbook analysis",
-    async () => {
-      const user = userEvent.setup();
-
-      render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "genericText");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "generic", param: "genericText" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(secondObservableInputElement, "genericText2");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "generic", param: "genericText2" },
-          {},
-        );
-      });
-
-      // check playbooks has been loaded
-      expect(screen.getByText("TEST_PLAYBOOK_GENERIC")).toBeInTheDocument();
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["generic", "genericText"],
-                ["generic", "genericText2"],
-              ],
-              playbook_requested: "TEST_PLAYBOOK_GENERIC",
-              tlp: "AMBER",
-              scan_mode: 1,
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
-
-  test(
-    "generic analyzer analysis",
-    async () => {
-      const user = userEvent.setup();
-
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
-
-      const firstObservableInputElement = screen.getByRole("textbox", {
-        name: "",
-      });
-      await user.type(firstObservableInputElement, "genericText");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "generic", param: "genericText" },
-          {},
-        );
-      });
-      // add second observable to analyze
-      const addNewValueButton = screen.getByRole("button", {
-        name: "Add new value",
-      });
-      expect(addNewValueButton).toBeInTheDocument();
-      await user.click(addNewValueButton);
-      const secondObservableInputElement = screen.getAllByRole("textbox", {
-        name: "",
-      })[1];
-      // doubled braked are required by user-event library
-      await user.type(secondObservableInputElement, "genericText2");
-      // recent scans
-      await waitFor(() => {
-        expect(RecentScans).toHaveBeenCalledWith(
-          { classification: "generic", param: "genericText2" },
-          {},
-        );
-      });
-
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
-
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
-      );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
 
-      // recent scans
+    // recent scans
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
+
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    await user.click(startScanButton);
+
+    await waitFor(() => {
+      // force analysis avoid call for old analysis
+      expect(axios.post.mock.calls.length).toBe(1);
+      expect(axios.post.mock.calls[0][0]).toEqual(ANALYZE_MULTIPLE_FILES_URI);
+      expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
+        analyzers_requested: "TEST_ANALYZER",
+        files: new File([""], ""),
+        tlp: "GREEN",
+        tags_labels: "test tag",
+        scan_mode: "1",
+      });
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("domains playbook analysis", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "microsoft[[.]]com");
+
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["domain", "google.com"],
+              ["domain", "microsoft.com"],
+            ],
+            playbook_requested: "TEST_PLAYBOOK_DOMAIN",
+            tlp: "CLEAR",
+            scan_mode: 2,
+            scan_check_time: "48:00:00",
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("domains analyzer analysis", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "microsoft[[.]]com");
+
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
+        we need this strange way to access instead of the id */
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
+
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["domain", "google.com"],
+              ["domain", "microsoft.com"],
+            ],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tlp: "AMBER",
+            scan_mode: 2,
+            scan_check_time: "24:00:00",
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("IP address playbook analysis", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "8.8.8.8");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "ip", param: "8.8.8.8" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "1[[.]]1[[.]]1[[.]]1");
+
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_IP")).toBeInTheDocument();
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["ip", "8.8.8.8"],
+              ["ip", "1.1.1.1"],
+            ],
+            playbook_requested: "TEST_PLAYBOOK_IP",
+            tags_labels: ["test tag"],
+            tlp: "CLEAR",
+            scan_mode: 2,
+            scan_check_time: "48:00:00",
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("IP address analyzer analysis", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "8.8.8.8");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "ip", param: "8.8.8.8" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "1[[.]]1[[.]]1[[.]]1");
+
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
+        we need this strange way to access instead of the id */
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
+
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["ip", "8.8.8.8"],
+              ["ip", "1.1.1.1"],
+            ],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tlp: "AMBER",
+            scan_mode: 2,
+            scan_check_time: "24:00:00",
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("URL playbook analysis", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "https://google.com");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "url", param: "https://google.com" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "https://microsoft[[.]]com");
+
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_URL")).toBeInTheDocument();
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["url", "https://google.com"],
+              ["url", "https://microsoft.com"],
+            ],
+            playbook_requested: "TEST_PLAYBOOK_URL",
+            tlp: "AMBER",
+            scan_mode: 1,
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("URL analyzer analysis", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "https://google.com");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "url", param: "https://google.com" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "https://microsoft[[.]]com");
+
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
+        we need this strange way to access instead of the id */
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
+
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["url", "https://google.com"],
+              ["url", "https://microsoft.com"],
+            ],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tlp: "AMBER",
+            scan_mode: 2,
+            scan_check_time: "24:00:00",
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("HASH playbook analysis", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(
+      firstObservableInputElement,
+      "1d5920f4b44b27a802bd77c4f0536f5a",
+    );
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(
+      secondObservableInputElement,
+      "ff5c054c7cd6924c570f944007ccf076",
+    );
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
+        {},
+      );
+    });
+
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_HASH")).toBeInTheDocument();
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["hash", "1d5920f4b44b27a802bd77c4f0536f5a"],
+              ["hash", "ff5c054c7cd6924c570f944007ccf076"],
+            ],
+            playbook_requested: "TEST_PLAYBOOK_HASH",
+            tlp: "AMBER",
+            scan_mode: 1,
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("HASH analyzer analysis", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(
+      firstObservableInputElement,
+      "1d5920f4b44b27a802bd77c4f0536f5a",
+    );
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "hash", param: "1d5920f4b44b27a802bd77c4f0536f5a" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(
+      secondObservableInputElement,
+      "ff5c054c7cd6924c570f944007ccf076",
+    );
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "hash", param: "ff5c054c7cd6924c570f944007ccf076" },
+        {},
+      );
+    });
+
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
+        we need this strange way to access instead of the id */
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
+
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["hash", "1d5920f4b44b27a802bd77c4f0536f5a"],
+              ["hash", "ff5c054c7cd6924c570f944007ccf076"],
+            ],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tlp: "AMBER",
+            scan_mode: 2,
+            scan_check_time: "24:00:00",
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("generic playbook analysis", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "genericText");
+    // recent scans
+    await waitFor(() => {
       expect(RecentScans).toHaveBeenCalledWith(
         { classification: "generic", param: "genericText" },
         {},
       );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "genericText2");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "generic", param: "genericText2" },
+        {},
+      );
+    });
 
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
-      });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_GENERIC")).toBeInTheDocument();
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
 
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls).toEqual([
-          // axios call: start new analysis
-          [
-            ANALYZE_MULTIPLE_OBSERVABLE_URI,
-            {
-              observables: [
-                ["generic", "genericText"],
-                ["generic", "genericText2"],
-              ],
-              analyzers_requested: ["TEST_ANALYZER"],
-              tlp: "AMBER",
-              scan_mode: 2,
-              scan_check_time: "24:00:00",
-            },
-          ],
-        ]);
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["generic", "genericText"],
+              ["generic", "genericText2"],
+            ],
+            playbook_requested: "TEST_PLAYBOOK_GENERIC",
+            tlp: "AMBER",
+            scan_mode: 1,
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
+
+  test("generic analyzer analysis", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "genericText");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "generic", param: "genericText" },
+        {},
+      );
+    });
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "genericText2");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "generic", param: "genericText2" },
+        {},
+      );
+    });
+
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
+        we need this strange way to access instead of the id */
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
+
+    // recent scans
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "generic", param: "genericText" },
+      {},
+    );
+
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        // axios call: start new analysis
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [
+              ["generic", "genericText"],
+              ["generic", "genericText2"],
+            ],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tlp: "AMBER",
+            scan_mode: 2,
+            scan_check_time: "24:00:00",
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
 
   test("file playbook analysis", async () => {
     const user = userEvent.setup();
@@ -2105,91 +2051,88 @@ describe("test ScanForm component", () => {
     });
   });
 
-  test(
-    "file analyzer analysis",
-    async () => {
-      const user = userEvent.setup();
+  test("file analyzer analysis", async () => {
+    const user = userEvent.setup();
 
-      const { container } = render(
-        <BrowserRouter>
-          <ScanForm />
-        </BrowserRouter>,
-      );
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
 
-      // select file type
-      const fileSelectorRadioButton = screen.getAllByRole("radio")[1];
-      expect(fileSelectorRadioButton).toBeInTheDocument();
-      await user.click(fileSelectorRadioButton);
-      expect(screen.getByText("File(s)")).toBeInTheDocument();
+    // select file type
+    const fileSelectorRadioButton = screen.getAllByRole("radio")[1];
+    expect(fileSelectorRadioButton).toBeInTheDocument();
+    await user.click(fileSelectorRadioButton);
+    expect(screen.getByText("File(s)")).toBeInTheDocument();
 
-      // select analyzer
-      const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
-      expect(analyzerSelectionRadioButton).toBeInTheDocument();
-      await user.click(analyzerSelectionRadioButton);
-      expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
-      expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
 
-      // select file
-      // This mock is required because even if the files are uploaded they are empty (not found a solution)
-      // and when the md5 is computed it raise an error, with this mock this problem is solved
-      File.prototype.text = jest
-        .fn()
-        .mockResolvedValueOnce("this is a text line")
-        .mockResolvedValueOnce("this is another line");
-      const fileInputComponent = screen.getByLabelText("File(s)");
-      const testImageFiles = [
-        new File(["this is a text line"], "test1.txt", { type: "plain/text" }),
-        new File(["this is another line"], "test2.txt", { type: "plain/text" }),
-      ];
-      await user.upload(fileInputComponent, testImageFiles);
-      expect(fileInputComponent.files).toHaveLength(2);
-      expect(fileInputComponent.files[0]).toStrictEqual(testImageFiles[0]);
-      expect(fileInputComponent.files.item(0)).toStrictEqual(testImageFiles[0]);
-      expect(fileInputComponent.files[1]).toStrictEqual(testImageFiles[1]);
-      expect(fileInputComponent.files.item(1)).toStrictEqual(testImageFiles[1]);
+    // select file
+    // This mock is required because even if the files are uploaded they are empty (not found a solution)
+    // and when the md5 is computed it raise an error, with this mock this problem is solved
+    File.prototype.text = jest
+      .fn()
+      .mockResolvedValueOnce("this is a text line")
+      .mockResolvedValueOnce("this is another line");
+    const fileInputComponent = screen.getByLabelText("File(s)");
+    const testImageFiles = [
+      new File(["this is a text line"], "test1.txt", { type: "plain/text" }),
+      new File(["this is another line"], "test2.txt", { type: "plain/text" }),
+    ];
+    await user.upload(fileInputComponent, testImageFiles);
+    expect(fileInputComponent.files).toHaveLength(2);
+    expect(fileInputComponent.files[0]).toStrictEqual(testImageFiles[0]);
+    expect(fileInputComponent.files.item(0)).toStrictEqual(testImageFiles[0]);
+    expect(fileInputComponent.files[1]).toStrictEqual(testImageFiles[1]);
+    expect(fileInputComponent.files.item(1)).toStrictEqual(testImageFiles[1]);
 
-      // select the test analyzer
-      /* the id change in case you run a single test or all of them.
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
         we need this strange way to access instead of the id */
-      const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
-      expect(analyzerDropdownButton).toBeInTheDocument();
-      await user.click(analyzerDropdownButton);
-      const testAnalyzerButton = container.querySelector(
-        `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
-      );
-      expect(testAnalyzerButton).toBeInTheDocument();
-      await user.click(testAnalyzerButton);
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
 
-      // check scan is enabled
-      const startScanButton = screen.getByRole("button", {
-        name: "Start Scan",
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    // recent scans
+    expect(RecentScans).toHaveBeenCalledWith(
+      { classification: "file", param: testImageFiles[0] },
+      {},
+    );
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls.length).toBe(1);
+      // axios call: start new analysis
+      expect(axios.post.mock.calls[0][0]).toEqual(ANALYZE_MULTIPLE_FILES_URI);
+      expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
+        analyzers_requested: "TEST_ANALYZER",
+        files: new File([""], ""),
+        tlp: "AMBER",
+        scan_mode: "2",
+        scan_check_time: "24:00:00",
       });
-      expect(startScanButton).toBeInTheDocument();
-      expect(startScanButton.className).not.toContain("disabled");
-
-      // recent scans
-      expect(RecentScans).toHaveBeenCalledWith(
-        { classification: "file", param: testImageFiles[0] },
-        {},
-      );
-
-      await user.click(startScanButton);
-      await waitFor(() => {
-        expect(axios.post.mock.calls.length).toBe(1);
-        // axios call: start new analysis
-        expect(axios.post.mock.calls[0][0]).toEqual(ANALYZE_MULTIPLE_FILES_URI);
-        expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
-          analyzers_requested: "TEST_ANALYZER",
-          files: new File([""], ""),
-          tlp: "AMBER",
-          scan_mode: "2",
-          scan_check_time: "24:00:00",
-        });
-        // check redirect to job page
-        expect(global.location.pathname).toContain("/jobs/");
-      });
-    },
-  );
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/");
+    });
+  });
 
   test("test scan page with an observable in the GET parameters", async () => {
     render(

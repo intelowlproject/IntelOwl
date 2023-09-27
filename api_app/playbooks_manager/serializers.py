@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
+from rest_framework.permissions import IsAdminUser
 
 from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -38,6 +39,14 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
     tags = TagSerializer(required=False, allow_empty=True, many=True)
     tlp = rfs.CharField(read_only=True)
     weight = rfs.IntegerField(read_only=True, required=False, allow_null=True)
+    is_deletable = rfs.SerializerMethodField()
+
+    def get_is_deletable(self, obj):
+        request = self.context.get("request", None)
+        view = self.context.get("view", None)
+        if request and view:
+            return IsAdminUser().has_permission(request, view)
+        return False
 
     def create(self, validated_data):
         types_supported = list(

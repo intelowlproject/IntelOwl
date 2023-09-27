@@ -240,10 +240,14 @@ class ViewSetTestCaseMixin:
     def test_delete(self):
         plugin = self.model_class.objects.order_by("?").first().pk
         response = self.client.delete(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 405, response.json())
+        if "playbook" in self.URL:
+            self.assertEqual(response.status_code, 204, response)
+        else:
+            self.assertEqual(response.status_code, 405, response.json())
         self.client.force_authenticate(self.superuser)
         response = self.client.delete(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 405, response.json())
+        if "playbook" not in self.URL:
+            self.assertEqual(response.status_code, 405, response.json())
 
     def test_create(self):
         response = self.client.post(self.URL)

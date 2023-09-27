@@ -43,6 +43,7 @@ import { createJob, createPlaybookJob } from "../../../scan/api";
 import {
   pluginFinalStatuses,
   jobStatuses,
+  scanMode,
 } from "../../../../constants/constants";
 
 function DeleteIcon() {
@@ -117,20 +118,21 @@ export function JobActionsBar({ job, refetch }) {
     job.is_sample ? job.file_name : job.observable_name
   }) on IntelOwl`;
 
-  const formValues = {
-    ...job,
-    check: "force_new",
-    classification: job.observable_classification,
-    tlp: job.tlp,
-    observable_names: [job.observable_name],
-    analyzers: job.analyzers_requested,
-    connectors: job.connectors_requested,
-    runtime_configuration: job.runtime_configuration,
-    tags_labels: job.tags.map((optTag) => optTag.label),
-    playbooks: [job.playbook_requested],
-  };
-
   const handleRetry = async () => {
+    const formValues = {
+      ...job,
+      check: "force_new",
+      classification: job.observable_classification,
+      tlp: job.tlp,
+      observable_names: [job.observable_name],
+      analyzers: job.analyzers_requested,
+      connectors: job.connectors_requested,
+      runtime_configuration: job.runtime_configuration,
+      tags_labels: job.tags.map((optTag) => optTag.label),
+      playbook: job.playbook_requested,
+      scan_mode: scanMode.FORCE_NEW_ANALYSIS,
+    };
+
     addToast("Retrying the same job...", null, "spinner", false, 2000);
     if (job.playbook_to_execute) {
       console.debug("retrying Playbook");

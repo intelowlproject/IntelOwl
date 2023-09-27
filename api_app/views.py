@@ -680,6 +680,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 
     @staticmethod
     def perform_retry(report: AbstractReport):
+        report.errors.clear()
+        report.save(update_fields=["errors"])
         try:
             signature = next(
                 report.config.__class__.objects.filter(pk=report.config.pk)

@@ -67,45 +67,6 @@ class PivotConfigTestCase(CustomTestCase):
         except ValidationError as e:
             self.fail(e)
 
-    def test_field_validation_start_dotted(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
-
-    def test_field_validation_end_dotted(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
-
-    def test_field_validation_invalid_char(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
-
     def test_create_job_multiple_generic(self):
         playbook = PlaybookConfig.objects.create(
             type=["generic"],

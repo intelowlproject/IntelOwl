@@ -230,6 +230,9 @@ export function PluginData({
                                     <option value={pluginType.CONNECTOR}>
                                       Connector
                                     </option>
+                                    <option value={pluginType.PIVOT}>
+                                      Pivot
+                                    </option>
                                     <option value={pluginType.VISUALIZER}>
                                       Visualizer
                                     </option>

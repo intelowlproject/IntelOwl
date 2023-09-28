@@ -16,7 +16,6 @@ class PivotReportAdminView(AbstractReportAdminView):
 @admin.register(PivotConfig)
 class PivotConfigAdminView(PythonConfigAdminView):
     list_display = PythonConfigAdminView.list_display + (
-        "field_to_compare",
         "get_related_config",
         "playbook_to_execute",
     )

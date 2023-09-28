@@ -194,8 +194,8 @@ def job_pipeline(
         logger.exception(e)
         for report in (
             list(job.analyzerreports.all())
-            + list(job.connectorsreports.all())
-            + list(job.pivotsreports.all())
+            + list(job.connectorreports.all())
+            + list(job.pivotreports.all())
             + list(job.visualizerreports.all())
         ):
             report.status = report.Status.FAILED.value

@@ -20,7 +20,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -30,7 +29,6 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            field_to_compare="test",
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -44,7 +42,6 @@ class PivotConfigTestCase(CustomTestCase):
             name="test",
             description="test",
             related_analyzer_config=AnalyzerConfig.objects.first(),
-            field_to_compare="test",
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -63,55 +60,12 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         try:
             pc.full_clean()
         except ValidationError as e:
             self.fail(e)
-
-    def test_field_validation_start_dotted(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            field_to_compare=".test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
-
-    def test_field_validation_end_dotted(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            field_to_compare="test.",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
-
-    def test_field_validation_invalid_char(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            field_to_compare="test!",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
 
     def test_create_job_multiple_generic(self):
         playbook = PlaybookConfig.objects.create(
@@ -131,7 +85,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            field_to_compare="test",
             playbook_to_execute=playbook,
         )
 
@@ -157,7 +110,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["file"]).first(),
         )
         with open("test_files/file.exe", "rb") as f:
@@ -175,7 +127,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
         jobs = list(pc._create_jobs("google.com", job.tlp, job.user, send_task=False))

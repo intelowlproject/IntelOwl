@@ -44,7 +44,6 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
             status="reported_without_fails",
         )
         self.pc = PivotConfig.objects.create(
-            field_to_compare="test.0",
             related_analyzer_config=AnalyzerConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
@@ -75,7 +74,6 @@ class PivotConfigViewSetTestCase(
     def setUp(self):
         super().setUp()
         self.pc = PivotConfig(
-            field_to_compare="test.0",
             related_analyzer_config=AnalyzerConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"

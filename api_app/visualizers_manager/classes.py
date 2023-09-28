@@ -381,13 +381,16 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         return pivot_page
 
     def after_run_success(self, content):
-        pivot_page = self.create_pivot_page()
+        if self._job.pivotsreports.filter(
+            staus=VisualizerReport.Status.SUCCESS.value
+        ).exists():
+            pivot_page = self.create_pivot_page()
+            content.append(pivot_page.to_dict())
 
         if not isinstance(content, list):
             raise VisualizerRunException(
                 f"Report has not correct type: {type(self.report.report)}"
             )
-        content.append(pivot_page.to_dict())
         for elem in content:
             if not isinstance(elem, tuple) or not isinstance(elem[1], list):
                 raise VisualizerRunException(

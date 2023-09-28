@@ -60,15 +60,3 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
             PivotConfigurationException,
             PivotRunException,
         ]
-
-    def after_run_success(self, content: Any):
-        logger.info(f"Creating jobs from {content}")
-        to_run = bool(content)
-        report = {"create_job": to_run, "jobs_id": []}
-        if to_run:
-            for job in self._config._create_jobs(content, self._job.tlp, self._user):
-                report["jobs_id"].append(job.pk)
-                PivotMap.objects.create(
-                    starting_job=self._job, ending_job=job, pivot_config=self._config
-                )
-        return super().after_run_success(report)

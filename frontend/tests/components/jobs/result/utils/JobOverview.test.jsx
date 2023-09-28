@@ -826,8 +826,15 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(connectorsRunning).getByText("reported 0/0").className,
     ).toContain("success"); // connectors completed
+    const pivotsRunning = within(JobIsRunningAlert).getByText(
+      "STEP 3: PIVOTS RUNNING -",
+    );
+    expect(pivotsRunning).toBeInTheDocument();
+    expect(within(pivotsRunning).getByText("reported 0/0").className).toContain(
+      "success",
+    ); // connectors completed
     const visualizersRunning = within(JobIsRunningAlert).getByText(
-      "STEP 3: VISUALIZERS RUNNING -",
+      "STEP 4: VISUALIZERS RUNNING -",
     );
     expect(visualizersRunning).toBeInTheDocument();
     expect(
@@ -996,8 +1003,15 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(connectorsRunning).getByText("reported 0/0").className,
     ).toContain("info"); // connectors waiting
+    const pivotsRunning = within(JobIsRunningAlert).getByText(
+      "STEP 3: PIVOTS RUNNING -",
+    );
+    expect(pivotsRunning).toBeInTheDocument();
+    expect(within(pivotsRunning).getByText("reported 0/0").className).toContain(
+      "info",
+    ); // connectors completed
     const visualizersRunning = within(JobIsRunningAlert).getByText(
-      "STEP 3: VISUALIZERS RUNNING -",
+      "STEP 4: VISUALIZERS RUNNING -",
     );
     expect(visualizersRunning).toBeInTheDocument();
     expect(

@@ -85,6 +85,10 @@ class PythonModule(models.Model):
     def python_class(self) -> Type["Plugin"]:
         return import_string(self.python_complete_path)
 
+    @property
+    def configs(self) -> PythonConfigQuerySet:
+        return self.config_class.objects.filter(python_module__pk=self.pk)
+
     @cached_property
     def config_class(self) -> Type["PythonConfig"]:
         return self.python_class.config_model
@@ -280,13 +284,22 @@ class Job(models.Model):
     def retry(self):
         self.update_status(Job.Status.RUNNING)
         failed_analyzers_reports = self.analyzerreports.filter(
-            status=AbstractReport.Status.FAILED.value
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
         ).values_list("pk", flat=True)
         failed_connector_reports = self.connectorreports.filter(
-            status=AbstractReport.Status.FAILED.value
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
         ).values_list("pk", flat=True)
         failed_visualizer_reports = self.visualizerreports.filter(
-            status=AbstractReport.Status.FAILED.value
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
         ).values_list("pk", flat=True)
 
         runner = (
@@ -299,8 +312,11 @@ class Job(models.Model):
             | self._get_signatures(
                 self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
             )
+            | self._final_status_signature
         )
-        return runner()
+        runner.apply_async(
+            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+        )
 
     def set_final_status(self) -> None:
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
@@ -426,22 +442,27 @@ class Job(models.Model):
             | config_class.signature_pipeline_completed(self)
         )
 
+    @property
+    def _final_status_signature(self) -> Signature:
+        return tasks.job_set_final_status.signature(
+            args=[self.pk],
+            kwargs={},
+            queue=get_queue_name(DEFAULT_QUEUE),
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
+
     def execute(self):
         self.update_status(Job.Status.RUNNING)
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
             | self._get_signatures(self.connectors_to_execute.all())
             | self._get_signatures(self.visualizers_to_execute.all())
-            | tasks.job_set_final_status.signature(
-                args=[self.pk],
-                kwargs={},
-                queue=get_queue_name(DEFAULT_QUEUE),
-                soft_time_limit=10,
-                immutable=True,
-                MessageGroupId=str(uuid.uuid4()),
-            )
+            | self._final_status_signature
         )
-        runner()
+        runner.apply_async(
+            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+        )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -535,6 +556,8 @@ class Parameter(models.Model):
             return "user|pwd"
         elif "test" in self.name:
             raise PluginConfig.DoesNotExist
+        elif self.type == ParamTypes.INT.value:
+            return 10
         else:
             return "test"
 
@@ -743,6 +766,9 @@ class AbstractConfig(models.Model):
         indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
         abstract = True
 
+    def __str__(self):
+        return self.name
+
     @classmethod
     @property
     def runtime_configuration_key(cls) -> str:
@@ -916,7 +942,6 @@ class PythonConfig(AbstractConfig):
             args=[job.pk, status],
             kwargs={},
             queue=get_queue_name(DEFAULT_QUEUE),
-            soft_time_limit=10,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )

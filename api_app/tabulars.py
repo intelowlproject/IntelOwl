@@ -75,7 +75,11 @@ class PluginConfigInlineForPythonConfig(admin.TabularInline):
         return 0
 
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(owner=None, for_organization=False)
+        return (
+            super()
+            .get_queryset(request)
+            .filter(owner=None, for_organization=False, parameter__is_secret=False)
+        )
 
     @admin.display(description="Is a secret", boolean=True)
     def is_secret(self, instance: PluginConfig):

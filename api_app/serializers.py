@@ -360,9 +360,6 @@ class JobListSerializer(_AbstractJobViewSerializer):
         exclude = (
             "file",
             "errors",
-            "runtime_configuration",
-            "received_request_time",
-            "finished_analysis_time",
         )
 
     pivots_to_execute = rfs.SerializerMethodField(read_only=True)

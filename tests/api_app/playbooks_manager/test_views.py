@@ -66,7 +66,7 @@ class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTest
             pc.delete()
         finally:
             ac.delete()
-    
+
     def test_delete(self):
         plugin = self.model_class.objects.order_by("?").first().pk
         response = self.client.delete(f"{self.URL}/{plugin}")

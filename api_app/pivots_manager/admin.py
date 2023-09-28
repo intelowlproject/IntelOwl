@@ -16,14 +16,14 @@ class PivotReportAdminView(AbstractReportAdminView):
 @admin.register(PivotConfig)
 class PivotConfigAdminView(PythonConfigAdminView):
     list_display = PythonConfigAdminView.list_display + (
-        "get_related_config",
+        "get_related_configs",
         "playbook_to_execute",
     )
     form = PivotConfigAdminForm
 
-    @admin.display(description="Related Config")
-    def get_related_config(self, instance: PivotConfig):
-        return instance.related_config
+    @admin.display(description="Related Configs")
+    def get_related_configs(self, instance: PivotConfig):
+        return instance.related_configs
 
 
 @admin.register(PivotMap)

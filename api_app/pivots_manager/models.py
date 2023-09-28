@@ -5,6 +5,7 @@ from typing import Type
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
+from api_app.queryset import PythonConfigQuerySet
 from api_app.validators import plugin_name_validator
 
 if typing.TYPE_CHECKING:
@@ -78,17 +79,15 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         limit_choices_to={"base_path": PythonModuleBasePaths.Pivot.value},
     )
 
-    related_analyzer_config = models.ForeignKey(
+    related_analyzer_configs = models.ManyToManyField(
         "analyzers_manager.AnalyzerConfig",
         related_name="pivots",
-        on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
-    related_connector_config = models.ForeignKey(
+    related_connector_configs = models.ManyToManyField(
         "connectors_manager.ConnectorConfig",
         related_name="pivots",
-        on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
@@ -100,23 +99,9 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         blank=False,
     )
 
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=Q(related_analyzer_config__isnull=True)
-                | Q(related_connector_config__isnull=True),
-                name="pivot_config_all_null_configs",
-            ),
-            models.CheckConstraint(
-                check=Q(related_analyzer_config__isnull=False)
-                | Q(related_connector_config__isnull=False),
-                name="pivot_config_no_null_configs",
-            ),
-        ]
-
     @property
-    def related_config(self):
-        return self.related_analyzer_config or self.related_connector_config
+    def related_configs(self) -> PythonConfigQuerySet:
+        return self.related_analyzer_configs.all() or self.related_connector_configs.all()
 
     @classmethod
     def plugin_type(cls) -> str:
@@ -131,10 +116,6 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     @classmethod
     def config_exception(cls):
         return PivotConfigurationException
-
-    def clean_config(self):
-        if self.related_analyzer_config and self.related_connector_config:
-            raise ValidationError("You can't set both analyzer and connector")
 
     def clean_playbook_to_execute(self):
         if self.id and self.playbook_to_execute in self.used_by_playbooks.all():

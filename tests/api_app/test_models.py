@@ -10,6 +10,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule
+from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
@@ -439,3 +440,39 @@ class PluginConfigTestCase(CustomTestCase):
             cc.delete()
         if created3:
             vc.delete()
+
+
+class JobTestCase(CustomTestCase):
+
+    def test_pivots_to_execute(self):
+
+        ac = AnalyzerConfig.objects.first()
+        ac2 = AnalyzerConfig.objects.last()
+        ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac, ac2])
+        j1 = Job.objects.create(
+            observable_name="test.com",
+            observable_classification="domain",
+            user=self.user,
+            md5="72cf478e87b031233091d8c00a38ce00",
+            status=Job.Status.REPORTED_WITHOUT_FAILS,
+        )
+        pc = PivotConfig.objects.create(
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            playbook_to_execute=PlaybookConfig.objects.first(),
+        )
+
+        j1.analyzers_to_execute.set([ac, ac2])
+        pc.related_analyzer_configs.set([ac, ac2])
+        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk])
+
+        del j1.pivots_to_execute
+        j1.analyzers_to_execute.set([ac])
+        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [])
+
+
+        del j1.pivots_to_execute
+        j1.analyzers_to_execute.set([ac, ac2, ac3])
+        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk])
+

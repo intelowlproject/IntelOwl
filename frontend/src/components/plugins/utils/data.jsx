@@ -313,11 +313,13 @@ const pivotTableColumns = [
   },
   {
     Header: "Related config",
-    id: "related_config",
-    accessor: "related_config",
-    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    id: "related_configs",
+    accessor: (row) => Object.keys(row.related_configs),
+    Cell: ({ value }) => (
+      <PlaybooksCollapse value={value} pluginType_="analyzers" />
+    ),
+    disableSortBy: true,
     Filter: SelectColumnFilter,
-    maxWidth: 145,
   },
 ];
 // Playbooks columns: these columns are shown for the playbooks

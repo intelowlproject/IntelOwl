@@ -158,9 +158,10 @@ class YaraRepo:
     @cached_property
     def first_level_directories(self) -> List[PosixPath]:
         paths = []
-        for directory in self.directory.iterdir():
-            if directory.is_dir() and directory.stem not in [".git", ".github"]:
-                paths.append(directory)
+        if self.directory.exists():
+            for directory in self.directory.iterdir():
+                if directory.is_dir() and directory.stem not in [".git", ".github"]:
+                    paths.append(directory)
         return paths
 
     @cached_property

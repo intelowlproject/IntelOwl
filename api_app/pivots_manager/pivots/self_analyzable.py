@@ -6,7 +6,10 @@ from api_app.pivots_manager.classes import Pivot
 
 
 class SelfAnalyzable(Pivot):
-    def run(self) -> Any:
+    def should_run(self) -> bool:
+        return True
+
+    def get_value_to_pivot_to(self) -> Any:
         obj = self._job.analyzed_object
         # the 7 is because the file name follow this syntax
         # `f"job_{now}_{filename}"` where

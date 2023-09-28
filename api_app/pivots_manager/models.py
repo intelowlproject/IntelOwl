@@ -17,7 +17,6 @@ from api_app.choices import PythonModuleBasePaths
 from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from api_app.pivots_manager.exceptions import PivotConfigurationException
-from api_app.pivots_manager.validators import pivot_regex_validator
 
 logger = logging.getLogger(__name__)
 
@@ -71,11 +70,6 @@ class PivotMap(models.Model):
 class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     name = models.CharField(
         max_length=100, null=False, validators=[plugin_name_validator], unique=True
-    )
-    field_to_compare = models.CharField(
-        max_length=256,
-        help_text="Dotted path to the field",
-        validators=[pivot_regex_validator],
     )
     python_module = models.ForeignKey(
         PythonModule,

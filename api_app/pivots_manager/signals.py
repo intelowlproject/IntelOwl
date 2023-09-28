@@ -11,7 +11,6 @@ def pre_save_pivot_config(
     try:
         instance.description = (
             f"Pivot object for plugin {str(instance.related_config.name)}"
-            f"using field {instance.field_to_compare}"
             " that executes "
             f" playbook {instance.playbook_to_execute.name}"
         )

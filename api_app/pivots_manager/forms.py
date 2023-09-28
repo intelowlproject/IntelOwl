@@ -20,7 +20,6 @@ class PivotConfigAdminForm(forms.ModelForm):
             "disabled",
             "disabled_in_organizations",
             "python_module",
-            "field_to_compare",
             "related_analyzer_config",
             "related_connector_config",
             "playbook_to_execute",

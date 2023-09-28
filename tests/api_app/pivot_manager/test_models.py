@@ -1,13 +1,11 @@
-import uuid
-
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
-from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.user.models import User
 from tests import CustomTestCase
 
@@ -17,31 +15,39 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            connector_config=ConnectorConfig.objects.first(),
-            visualizer_config=VisualizerConfig.objects.first(),
-            field="test",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            related_connector_config=ConnectorConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
             pc.full_clean()
 
-    def test_clean_no_config(self):
+    def test_constraint_no_config(self):
         pc = PivotConfig(
             name="test",
             description="test",
-            field="test",
+            field_to_compare="test",
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
-        with self.assertRaises(ValidationError):
-            pc.full_clean()
+        with self.assertRaises(IntegrityError):
+            pc.save()
 
     def test_clean_valid(self):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            field_to_compare="test",
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         try:
@@ -53,8 +59,11 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         try:
@@ -66,8 +75,11 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field=".test",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare=".test",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -77,8 +89,11 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test.",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare="test.",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
@@ -88,87 +103,15 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test!",
+            related_analyzer_config=AnalyzerConfig.objects.first(),
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare="test!",
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
             pc.full_clean()
-
-    def test_config(self):
-        pc = PivotConfig(
-            analyzer_config=AnalyzerConfig.objects.first(),
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        self.assertIsInstance(pc.config, AnalyzerConfig)
-
-    def test_get_value_str(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": "abc"}, config=ac)
-        try:
-            value = next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        self.assertEqual("abc", value)
-
-    def test_get_value_list(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": ["abc", "edf"]}, config=ac)
-        self.assertCountEqual(["abc", "edf"], list(pc.get_values(report)))
-        pc.field = "test.0"
-        try:
-            value = next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        self.assertEqual("abc", value)
-
-    def test_get_value_dict(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": {"test2": "abc"}}, config=ac)
-
-        with self.assertRaises(ValueError):
-            try:
-                next(pc.get_values(report))
-            except StopIteration:
-                self.fail("No value to retrieve")
-        pc.field = "test.test2"
-        try:
-            value = next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        self.assertEqual("abc", value)
-
-    def test_get_value_bytes(self):
-        ac = AnalyzerConfig.objects.first()
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport(report={"test": b"abc"}, config=ac)
-
-        try:
-            next(pc.get_values(report))
-        except StopIteration:
-            self.fail("No value to retrieve")
-        except ValueError:
-            self.fail("Raised exception")
 
     def test_create_job_multiple_generic(self):
         playbook = PlaybookConfig.objects.create(
@@ -184,16 +127,18 @@ class PivotConfigTestCase(CustomTestCase):
         playbook.analyzers.set([ac2])
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare="test",
             playbook_to_execute=playbook,
         )
 
-        report = AnalyzerReport(
-            report={"test": ["something", "something2"]}, config=ac, job=job
-        )
         jobs = list(
-            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
+            pc._create_jobs(
+                ["something", "something2"], job.tlp, job.user, send_task=False
+            )
         )
         self.assertEqual(2, len(jobs))
         self.assertEqual("something", jobs[0].observable_name)
@@ -208,16 +153,16 @@ class PivotConfigTestCase(CustomTestCase):
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             name="PivotOnTest",
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["file"]).first(),
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
-        report = AnalyzerReport(report={"test": [content]}, config=ac, job=job)
-        jobs = list(
-            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
-        )
+        jobs = list(pc._create_jobs(content, job.tlp, job.user, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("PivotOnTest.0", jobs[0].file_name)
         self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
@@ -226,43 +171,14 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
+            related_analyzer_config=ac,
+            python_module=PythonModule.objects.filter(
+                base_path="api_app.pivots_manager.pivots"
+            ).first(),
+            field_to_compare="test",
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
-        report = AnalyzerReport(report={"test": "google.com"}, config=ac, job=job)
-        jobs = list(
-            pc._create_jobs(report, report.job.tlp, report.job.user, send_task=False)
-        )
+        jobs = list(pc._create_jobs("google.com", job.tlp, job.user, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("google.com", jobs[0].observable_name)
         self.assertEqual("domain", jobs[0].observable_classification)
-
-    def test_pivot_job_invalid_report(self):
-        ac = AnalyzerConfig.objects.first()
-        job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        self.assertCountEqual([], pc.pivot_job(job))
-
-    def test_pivot_job_invalid_value(self):
-        ac = AnalyzerConfig.objects.first()
-        job = Job.objects.create(
-            observable_name="test.com",
-            tlp="AMBER",
-            user=User.objects.first(),
-        )
-        pc = PivotConfig(
-            analyzer_config=ac,
-            field="test",
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        report = AnalyzerReport.objects.create(
-            report={"test": 123}, config=ac, job=job, task_id=uuid.uuid4()
-        )
-        self.assertCountEqual([], pc.pivot_job(job))
-        report.delete()
-        job.delete()

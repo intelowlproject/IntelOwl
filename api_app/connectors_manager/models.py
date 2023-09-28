@@ -3,9 +3,9 @@
 
 from django.db import models
 
-from api_app.choices import TLP
+from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.connectors_manager.exceptions import ConnectorConfigurationException
-from api_app.models import AbstractReport, PythonConfig
+from api_app.models import AbstractReport, PythonConfig, PythonModule
 
 
 class ConnectorReport(AbstractReport):
@@ -22,6 +22,12 @@ class ConnectorConfig(PythonConfig):
         null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50
     )
     run_on_failure = models.BooleanField(null=False, default=True)
+    python_module = models.ForeignKey(
+        PythonModule,
+        on_delete=models.PROTECT,
+        related_name="%(class)ss",
+        limit_choices_to={"base_path": PythonModuleBasePaths.Connector.value},
+    )
 
     @classmethod
     @property

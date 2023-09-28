@@ -357,7 +357,18 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file", "errors")
+        exclude = (
+            "file",
+            "errors",
+            "runtime_configuration",
+            "received_request_time",
+            "finished_analysis_time",
+        )
+
+    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
+
+    def get_pivots_to_execute(self, obj: Job):
+        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
 
 class JobSerializer(_AbstractJobViewSerializer):
@@ -370,24 +381,28 @@ class JobSerializer(_AbstractJobViewSerializer):
         exclude = ("file",)
 
     comments = CommentSerializer(many=True, read_only=True)
-
+    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
     permissions = rfs.SerializerMethodField()
+
+    def get_pivots_to_execute(self, obj: Job):
+        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
     def get_fields(self):
         # this method override is required for a cyclic import
         from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
         from api_app.connectors_manager.serializers import ConnectorReportSerializer
+        from api_app.pivots_manager.serializers import PivotReportSerializer
         from api_app.visualizers_manager.serializers import VisualizerReportSerializer
 
-        self._declared_fields["analyzer_reports"] = AnalyzerReportSerializer(
-            many=True, read_only=True, source="analyzerreports"
-        )
-        self._declared_fields["connector_reports"] = ConnectorReportSerializer(
-            many=True, read_only=True, source="connectorreports"
-        )
-        self._declared_fields["visualizer_reports"] = VisualizerReportSerializer(
-            many=True, read_only=True, source="visualizerreports"
-        )
+        for field, serializer in [
+            ("analyzer", AnalyzerReportSerializer),
+            ("connector", ConnectorReportSerializer),
+            ("pivot", PivotReportSerializer),
+            ("visualizer", VisualizerReportSerializer),
+        ]:
+            self._declared_fields[f"{field}_reports"] = serializer(
+                many=True, read_only=True, source=f"{field}reports"
+            )
         return super().get_fields()
 
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
@@ -1067,10 +1082,6 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data
-                logger.debug(
-                    f"Parameter {param.name} for plugin {plugin.name} "
-                    f"has value {param.value} for user {user.username}"
-                )
                 param_representation.pop("name")
                 key = "secrets" if param.is_secret else "params"
 
@@ -1137,7 +1148,7 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):
-    name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
+    name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
     class Meta:
         fields = (

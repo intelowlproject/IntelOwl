@@ -139,7 +139,16 @@ export function ConnectorsReportTable({ job, refetch }) {
     />
   );
 }
-
+export function PivotsReportTable({ job, refetch }) {
+  console.debug("ConnectorsReportTable rendered");
+  return (
+    <DataTable
+      data={job?.pivot_reports}
+      customProps={{ job, refetch }}
+      {...tableProps}
+    />
+  );
+}
 export function VisualizersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
   return (
@@ -157,6 +166,11 @@ AnalyzersReportTable.propTypes = {
 ConnectorsReportTable.propTypes = {
   job: PropTypes.object.isRequired,
 };
+
+PivotsReportTable.propTypes = {
+  job: PropTypes.object.isRequired,
+};
+
 VisualizersReportTable.propTypes = {
   job: PropTypes.object.isRequired,
 };

@@ -101,6 +101,12 @@ def validate_runtime_configuration(value):
                     "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},
                 },
             },
+            "pivots": {
+                "type": "object",
+                "patternProperties": {
+                    "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},
+                },
+            },
             "visualizers": {
                 "type": "object",
                 "patternProperties": {

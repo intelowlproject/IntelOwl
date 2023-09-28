@@ -39,7 +39,6 @@ if typing.TYPE_CHECKING:
 
 from api_app.defaults import config_default, default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
-from api_app.interfaces import AttachedToPythonConfigInterface
 from api_app.queryset import (
     AbstractConfigQuerySet,
     JobQuerySet,
@@ -68,6 +67,7 @@ class PythonModule(models.Model):
 
     class Meta:
         unique_together = [["module", "base_path"]]
+        ordering = ["base_path", "module"]
 
     def __str__(self):
         return self.module
@@ -256,6 +256,10 @@ class Job(models.Model):
     def analyzed_object_name(self):
         return self.file_name if self.is_sample else self.observable_name
 
+    @property
+    def analyzed_object(self):
+        return self.file if self.is_sample else self.observable_name
+
     @cached_property
     def sha256(self) -> str:
         return calculate_sha256(
@@ -275,7 +279,11 @@ class Job(models.Model):
         ).decode("utf-8")
 
     def get_absolute_url(self):
-        return reverse("jobs-detail", args=[self.pk])
+        return self.get_absolute_url_by_pk(self.pk)
+
+    @classmethod
+    def get_absolute_url_by_pk(cls, pk: int):
+        return reverse("jobs-detail", args=[pk]).removeprefix("/api")
 
     @property
     def url(self):
@@ -295,6 +303,13 @@ class Job(models.Model):
                 AbstractReport.Status.PENDING.value,
             ]
         ).values_list("pk", flat=True)
+        failed_pivot_reports = self.pivotreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("pk", flat=True)
+
         failed_visualizer_reports = self.visualizerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
@@ -307,7 +322,17 @@ class Job(models.Model):
                 self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
             )
             | self._get_signatures(
+                self.pivots_to_execute.filter(
+                    pk__in=failed_pivot_reports, related_analyzer_config__isnull=False
+                )
+            )
+            | self._get_signatures(
                 self.connectors_to_execute.filter(pk__in=failed_connector_reports)
+            )
+            | self._get_signatures(
+                self.pivots_to_execute.filter(
+                    pk__in=failed_pivot_reports, related_connector_config__isnull=False
+                )
             )
             | self._get_signatures(
                 self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
@@ -442,6 +467,27 @@ class Job(models.Model):
             | config_class.signature_pipeline_completed(self)
         )
 
+    @cached_property
+    def pivots_to_execute(self) -> PythonConfigQuerySet:
+        from api_app.pivots_manager.models import PivotConfig
+
+        valid_python_modules_analyzers = self.analyzers_to_execute.all().values_list(
+            "pk", flat=True
+        )
+        valid_python_modules_connectors = self.connectors_to_execute.all().values_list(
+            "pk", flat=True
+        )
+
+        if self.playbook_to_execute:
+            return self.playbook_to_execute.pivots.filter(
+                Q(related_analyzer_config__in=valid_python_modules_analyzers)
+                | Q(related_connector_config__in=valid_python_modules_connectors)
+            )
+        return PivotConfig.objects.filter(
+            Q(related_analyzer_config__in=valid_python_modules_analyzers)
+            | Q(related_connector_config__in=valid_python_modules_connectors)
+        )
+
     @property
     def _final_status_signature(self) -> Signature:
         return tasks.job_set_final_status.signature(
@@ -456,7 +502,13 @@ class Job(models.Model):
         self.update_status(Job.Status.RUNNING)
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
+            | self._get_signatures(
+                self.pivots_to_execute.filter(related_analyzer_config__isnull=False)
+            )
             | self._get_signatures(self.connectors_to_execute.all())
+            | self._get_signatures(
+                self.pivots_to_execute.filter(related_connector_config__isnull=False)
+            )
             | self._get_signatures(self.visualizers_to_execute.all())
             | self._final_status_signature
         )
@@ -472,7 +524,7 @@ class Job(models.Model):
                 f"{config.__class__.__name__} {config.name} "
                 f"is not configured inside job {self.pk}"
             )
-        return self.runtime_configuration[config.runtime_configuration_key].get(
+        return self.runtime_configuration.get(config.runtime_configuration_key, {}).get(
             config.name, {}
         )
 
@@ -566,7 +618,7 @@ class Parameter(models.Model):
         return self.python_module.python_class.config_model
 
 
-class PluginConfig(AttachedToPythonConfigInterface, models.Model):
+class PluginConfig(models.Model):
     objects = PluginConfigQuerySet.as_manager()
 
     value = models.JSONField(blank=True, null=True)
@@ -610,6 +662,13 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
         null=True,
         blank=True,
     )
+    pivot_config = models.ForeignKey(
+        "pivots_manager.PivotConfig",
+        on_delete=models.CASCADE,
+        related_name="values",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         constraints = [
@@ -617,7 +676,8 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                 check=Q(analyzer_config__isnull=True)
                 | Q(connector_config__isnull=True)
                 | Q(visualizer_config__isnull=True)
-                | Q(ingestor_config__isnull=True),
+                | Q(ingestor_config__isnull=True)
+                | Q(pivot_config__isnull=True),
                 name="plugin_config_no_config_all_null",
             )
         ] + [
@@ -627,6 +687,7 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                 "connector_config",
                 "visualizer_config",
                 "ingestor_config",
+                "pivot_config",
             ]
             for item in [
                 UniqueConstraint(
@@ -654,14 +715,18 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                     "owner",
                 ]
             ),
-            models.Index(fields=["ingestor_config"]),
-        ] + AttachedToPythonConfigInterface.Meta.indexes
+        ]
+
+    @cached_property
+    def config(self) -> "PythonConfig":
+        return list(filter(None, self._possible_configs()))[0]
 
     def refresh_cache_keys(self):
         try:
             self.config
+            self.owner
         except ObjectDoesNotExist:
-            # this happens if the configuration was deleted before this instance
+            # this happens if the configuration/user was deleted before this instance
             return
         if self.owner:
             if self.owner.has_membership() and self.owner.membership.is_admin:
@@ -680,7 +745,13 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
             self.config.refresh_cache_keys()
 
     def _possible_configs(self) -> typing.List["PythonConfig"]:
-        return super()._possible_configs() + [self.ingestor_config]
+        return [
+            self.analyzer_config,
+            self.connector_config,
+            self.visualizer_config,
+            self.ingestor_config,
+            self.pivot_config,
+        ]
 
     def clean_for_organization(self):
         if self.for_organization and not self.owner:
@@ -692,6 +763,15 @@ class PluginConfig(AttachedToPythonConfigInterface, models.Model):
                 f"You can't create `for_organization` {self.__class__.__name__}"
                 " if you do not have an organization"
             )
+
+    def clean_config(self) -> None:
+        if len(list(filter(None, self._possible_configs()))) != 1:
+            configs = ", ".join(
+                [config.name for config in self._possible_configs() if config]
+            )
+            if not configs:
+                raise ValidationError("You must select a plugin configuration")
+            raise ValidationError(f"You must have exactly one between {configs}")
 
     def clean_value(self):
         from django.forms.fields import JSONString

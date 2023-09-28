@@ -4,6 +4,7 @@ import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { TiFlowChildren, TiBook } from "react-icons/ti";
 import { IoIosEye } from "react-icons/io";
 import { MdInput } from "react-icons/md";
+import { PiGraphFill } from "react-icons/pi";
 
 import {
   RouterTabs,
@@ -17,6 +18,7 @@ import { useGuideContext } from "../../contexts/GuideContext";
 
 const Analyzers = React.lazy(() => import("./utils/Analyzers"));
 const Connectors = React.lazy(() => import("./utils/Connectors"));
+const Pivots = React.lazy(() => import("./utils/Pivots"));
 const Visualizers = React.lazy(() => import("./utils/Visualizers"));
 const Ingestors = React.lazy(() => import("./utils/Ingestors"));
 const Playbooks = React.lazy(() => import("./utils/Playbooks"));
@@ -49,6 +51,21 @@ const routes = [
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
         <Connectors />
+      </Suspense>
+    ),
+  },
+  {
+    key: "plugins-pivots",
+    location: "pivots",
+    Title: () => (
+      <span id="Pivots">
+        <PiGraphFill />
+        &nbsp;Pivots
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Pivots />
       </Suspense>
     ),
   },

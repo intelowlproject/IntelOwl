@@ -382,7 +382,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
     def after_run_success(self, content):
         if self._job.pivotreports.filter(
-            staus=VisualizerReport.Status.SUCCESS.value
+            status=VisualizerReport.Status.SUCCESS.value
         ).exists():
             pivot_page = self.create_pivot_page()
             content.append(pivot_page.to_dict())

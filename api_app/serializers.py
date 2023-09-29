@@ -290,6 +290,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         )
         for analyzer in validated_data.get("analyzers_to_execute", []):
             qs = qs.filter(analyzers_requested__in=[analyzer])
+        for connector in validated_data.get("connectors_to_execute", []):
+            qs = qs.filter(connectors_requested__in=[connector])
+        for visualizer in validated_data.get("visualizers_to_execute", []):
+            qs = qs.filter(visualizers_requested__in=[visualizer])
+
         return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
 
     def create(self, validated_data: Dict) -> Job:

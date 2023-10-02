@@ -62,7 +62,7 @@ export async function createPlaybookJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running",
+          element.status === "accepted" || element.status === "exists",
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
@@ -147,7 +147,7 @@ export async function createJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running",
+          element.status === "accepted" || element.status === "exists",
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));

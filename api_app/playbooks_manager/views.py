@@ -15,18 +15,18 @@ from api_app.serializers import (
     JobResponseSerializer,
     ObservableAnalysisSerializer,
 )
-from api_app.views import AbstractConfigViewSet
+from api_app.views import AbstractConfigViewSet, ModelWithOwnershipViewSet
 
 logger = logging.getLogger(__name__)
 
 
-class PlaybookConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):
+class PlaybookConfigViewSet(ModelWithOwnershipViewSet, AbstractConfigViewSet, mixins.CreateModelMixin):
     serializer_class = PlaybookConfigSerializer
     ordering = ["-weight", "name"]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return self.serializer_class.Meta.model.objects.ordered_for_user(
+        return self.serializer_class.Meta.model.objects.visible_for_user(self.request.user).ordered_for_user(
             self.request.user
         ).prefetch_related("analyzers", "connectors", "visualizers", "tags", "pivots")
 

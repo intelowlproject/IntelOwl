@@ -37,7 +37,7 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             playbook_to_execute=pc,
             finished_analysis_time=now(),
         )
-        subq = PlaybookConfigQuerySet._subquery_user(self.user)
+        subq = PlaybookConfigQuerySet._subquery_weight_user(self.user)
         pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
         self.assertEqual(1, pc.weight)
         j1.delete()
@@ -73,7 +73,7 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             playbook_to_execute=pc,
             finished_analysis_time=now(),
         )
-        subq = PlaybookConfigQuerySet._subquery_org(self.user)
+        subq = PlaybookConfigQuerySet._subquery_weight_org(self.user)
         pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
         self.assertEqual(0, pc.weight)
 
@@ -117,7 +117,7 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             organization=org,
         )
         m2 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
-        subq = PlaybookConfigQuerySet._subquery_org(self.user)
+        subq = PlaybookConfigQuerySet._subquery_weight_org(self.user)
         pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
         self.assertEqual(2, pc.weight)
 
@@ -156,7 +156,7 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             playbook_to_execute=pc,
             finished_analysis_time=now(),
         )
-        subq = PlaybookConfigQuerySet._subquery_other(self.user)
+        subq = PlaybookConfigQuerySet._subquery_weight_other(self.user)
         pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
         self.assertEqual(2, pc.weight)
         j1.delete()

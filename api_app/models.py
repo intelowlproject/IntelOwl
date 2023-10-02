@@ -7,6 +7,8 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
+from api_app.interfaces import ModelWithOwnership
+
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
 
@@ -18,7 +20,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from django.db.models import Q, QuerySet, UniqueConstraint
+from django.db.models import BaseConstraint, Q, QuerySet, UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -618,18 +620,10 @@ class Parameter(models.Model):
         return self.python_module.python_class.config_model
 
 
-class PluginConfig(models.Model):
+class PluginConfig(ModelWithOwnership):
     objects = PluginConfigQuerySet.as_manager()
-
     value = models.JSONField(blank=True, null=True)
-    for_organization = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="custom_configs",
-        null=True,
-        blank=True,
-    )
+
     parameter = models.ForeignKey(
         Parameter, on_delete=models.CASCADE, null=False, related_name="values"
     )
@@ -671,7 +665,7 @@ class PluginConfig(models.Model):
     )
 
     class Meta:
-        constraints = [
+        constraints: typing.List[BaseConstraint] = [
             models.CheckConstraint(
                 check=Q(analyzer_config__isnull=True)
                 | Q(connector_config__isnull=True)
@@ -704,18 +698,7 @@ class PluginConfig(models.Model):
         ]
         indexes = [
             models.Index(fields=["owner", "for_organization", "parameter"]),
-            models.Index(
-                fields=[
-                    "owner",
-                    "for_organization",
-                ]
-            ),
-            models.Index(
-                fields=[
-                    "owner",
-                ]
-            ),
-        ]
+        ] + ModelWithOwnership.Meta.indexes
 
     @cached_property
     def config(self) -> "PythonConfig":
@@ -723,8 +706,7 @@ class PluginConfig(models.Model):
 
     def refresh_cache_keys(self):
         try:
-            self.config
-            self.owner
+            _ = self.config and self.owner
         except ObjectDoesNotExist:
             # this happens if the configuration/user was deleted before this instance
             return
@@ -752,17 +734,6 @@ class PluginConfig(models.Model):
             self.ingestor_config,
             self.pivot_config,
         ]
-
-    def clean_for_organization(self):
-        if self.for_organization and not self.owner:
-            raise ValidationError(
-                "You can't set `for_organization` and not have an owner"
-            )
-        if self.for_organization and not self.owner.has_membership():
-            raise ValidationError(
-                f"You can't create `for_organization` {self.__class__.__name__}"
-                " if you do not have an organization"
-            )
 
     def clean_config(self) -> None:
         if len(list(filter(None, self._possible_configs()))) != 1:
@@ -813,12 +784,6 @@ class PluginConfig(models.Model):
     def type(self):
         # TODO retrocompatibility
         return self.config.plugin_type
-
-    @cached_property
-    def organization(self) -> Optional[Organization]:
-        if self.for_organization:
-            return self.owner.membership.organization
-        return None
 
     @property
     def config_type(self):

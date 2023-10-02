@@ -34,6 +34,7 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
+from .interfaces import ModelWithOwnership
 from .models import (
     AbstractReport,
     Comment,
@@ -876,7 +877,46 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
         fields = rfs.ALL_FIELDS
 
 
-class PluginConfigSerializer(rfs.ModelSerializer):
+class ModelWithOwnershipSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = ModelWithOwnership
+        fields = ("for_organization", "owner")
+        abstract = True
+
+    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
+    organization = rfs.SlugRelatedField(
+        queryset=Organization.objects.all(),
+        required=False,
+        allow_null=True,
+        slug_field="name",
+        write_only=True,
+        default=None
+    )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if "organization" in attrs and attrs["organization"]:
+            org = attrs.pop("organization")
+            # 1 - we are owner  OR
+            # 2 - we are admin of the same org
+            if (
+                org.owner == attrs["owner"]
+                or (
+                    self.context["request"].user.has_membership()
+                    and self.context["request"].user.membership.organization.pk
+                    == org.pk
+                    and self.context["request"].user.membership.is_admin
+                )
+            ):
+                attrs["for_organization"] = True
+            else:
+                raise ValidationError(
+                    {"detail": "You are not owner or admin of the organization"}
+                )
+        return attrs
+
+
+class PluginConfigSerializer(ModelWithOwnershipSerializer):
     class Meta:
         model = PluginConfig
         fields = (
@@ -939,14 +979,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
-    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-    organization = rfs.SlugRelatedField(
-        queryset=Organization.objects.all(),
-        required=False,
-        allow_null=True,
-        slug_field="name",
-        write_only=True,
-    )
     value = CustomValueField()
 
     def validate_value_type(self, value: Any, parameter: Parameter):
@@ -962,27 +994,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         if self.partial:
             # we are in an update
             return attrs
-        if "organization" in attrs and attrs["organization"]:
-            org = attrs.pop("organization")
-            # we raise ValidationError() when
-            # (NOR OPERATOR)
-            # 1 - we are not owner  OR
-            # 2 - we are not admin of the same org
-            if not (
-                org.owner == attrs["owner"]
-                or (
-                    self.context["request"].user.has_membership()
-                    and self.context["request"].user.membership.organization.pk
-                    == org.pk
-                    and self.context["request"].user.membership.is_admin
-                )
-            ):
-                raise ValidationError(
-                    {"detail": "You are not owner or admin of the organization"}
-                )
-            else:
-                attrs["for_organization"] = True
-
+        attrs = super().validate(attrs)
         _value = attrs["value"]
         # retro compatibility
         _type = attrs.pop("type")
@@ -1057,7 +1069,7 @@ class ParameterSerializer(rfs.ModelSerializer):
         list_serializer_class = ParamListSerializer
 
     def get_value(self, param: Parameter):
-        if hasattr(param, "value"):
+        if hasattr(param, "value") and hasattr(param, "is_from_org"):
             if param.is_secret and param.is_from_org:
                 return "redacted"
             return param.value

@@ -9,12 +9,13 @@ from api_app.analyzers_manager.constants import AllTypes
 from api_app.choices import TLP, ScanMode
 from api_app.defaults import default_runtime
 from api_app.fields import ChoiceArrayField
+from api_app.interfaces import ModelWithOwnership
 from api_app.models import AbstractConfig, Tag
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 
 
-class PlaybookConfig(AbstractConfig):
+class PlaybookConfig(AbstractConfig, ModelWithOwnership):
     objects = PlaybookConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
@@ -58,6 +59,7 @@ class PlaybookConfig(AbstractConfig):
 
     class Meta:
         ordering = ["name", "disabled"]
+        indexes = ModelWithOwnership.Meta.indexes
 
     def clean_pivots(self):
         for pivot in self.pivots.all():
@@ -94,6 +96,7 @@ class PlaybookConfig(AbstractConfig):
         super().clean()
         self.clean_scan()
         self.clean_pivots()
+        self.clean_for_organization()
 
     def is_sample(self) -> bool:
         return AllTypes.FILE.value in self.type

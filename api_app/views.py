@@ -568,13 +568,23 @@ class TagViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
+class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.request.method in ["PATCH", "DELETE"]:
+            permissions.append((IsObjectAdminPermission | IsObjectOwnerPermission)())
+        elif self.request.method == "PUT":
+            raise PermissionDenied()
+        return permissions
+
+
 @add_docs(
     description="""
     REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
     Requires authentication. Allows access to only authorized CustomConfigs.
     """
 )
-class PluginConfigViewSet(viewsets.ModelViewSet):
+class PluginConfigViewSet(ModelWithOwnershipViewSet):
     serializer_class = PluginConfigSerializer
     pagination_class = None
 
@@ -585,14 +595,6 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
             .exclude(owner__isnull=True)
             .order_by("id")
         )
-
-    def get_permissions(self):
-        permissions = super().get_permissions()
-        if self.request.method in ["PATCH", "DELETE"]:
-            permissions.append((IsObjectAdminPermission | IsObjectOwnerPermission)())
-        elif self.request.method == "PUT":
-            raise PermissionDenied()
-        return permissions
 
 
 @add_docs(

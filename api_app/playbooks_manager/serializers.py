@@ -8,10 +8,10 @@ from api_app.choices import ScanMode
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import TagSerializer
+from api_app.serializers import TagSerializer, ModelWithOwnershipSerializer
 
 
-class PlaybookConfigSerializer(rfs.ModelSerializer):
+class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     class Meta:
         model = PlaybookConfig
         exclude = ["disabled_in_organizations"]

@@ -1,6 +1,13 @@
 import io
 import logging
-from typing import TYPE_CHECKING, Any, Generator, Iterable, Union
+from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils.functional import cached_property
+
+from certego_saas.apps.organization.organization import Organization
 
 if TYPE_CHECKING:
     from api_app.playbooks_manager.models import PlaybookConfig
@@ -77,3 +84,42 @@ class CreateJobsFromPlaybookInterface:
         else:
             serializer.is_valid(raise_exception=True)
             yield from serializer.save(send_task=send_task)
+
+
+class ModelWithOwnership(models.Model):
+    for_organization = models.BooleanField(default=False)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=[
+                    "owner",
+                    "for_organization",
+                ]
+            )
+        ]
+        abstract = True
+
+    def clean_for_organization(self):
+        if self.for_organization and not self.owner:
+            raise ValidationError(
+                "You can't set `for_organization` and not have an owner"
+            )
+        if self.for_organization and not self.owner.has_membership():
+            raise ValidationError(
+                f"You can't create `for_organization` {self.__class__.__name__}"
+                " if you do not have an organization"
+            )
+
+    @cached_property
+    def organization(self) -> Optional[Organization]:
+        if self.for_organization:
+            return self.owner.membership.organization
+        return None

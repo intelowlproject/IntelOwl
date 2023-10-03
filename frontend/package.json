@@ -27,7 +27,7 @@
     "react-use": "^17.4.0",
     "reactstrap": "^9.2.0",
     "recharts": "^2.8.0",
-    "zustand": "^4.3.8"
+    "zustand": "^4.4.2"
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",

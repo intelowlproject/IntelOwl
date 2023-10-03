@@ -4,7 +4,7 @@
 from django.apps import AppConfig
 
 
-class IngestorManagerConfig(AppConfig):
+class IngestorsManagerConfig(AppConfig):
     name = "api_app.ingestors_manager"
 
     @staticmethod

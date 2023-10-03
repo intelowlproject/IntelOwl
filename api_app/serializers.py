@@ -890,7 +890,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
         allow_null=True,
         slug_field="name",
         write_only=True,
-        default=None
+        default=None,
     )
 
     def validate(self, attrs):
@@ -899,14 +899,10 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
             org = attrs.pop("organization")
             # 1 - we are owner  OR
             # 2 - we are admin of the same org
-            if (
-                org.owner == attrs["owner"]
-                or (
-                    self.context["request"].user.has_membership()
-                    and self.context["request"].user.membership.organization.pk
-                    == org.pk
-                    and self.context["request"].user.membership.is_admin
-                )
+            if org.owner == attrs["owner"] or (
+                self.context["request"].user.has_membership()
+                and self.context["request"].user.membership.organization.pk == org.pk
+                and self.context["request"].user.membership.is_admin
             ):
                 attrs["for_organization"] = True
             else:

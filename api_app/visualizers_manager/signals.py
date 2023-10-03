@@ -1,6 +1,7 @@
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_migrate, post_save
 from django.dispatch import receiver
 
+from api_app.visualizers_manager.apps import VisualizersManagerConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 
 
@@ -16,3 +17,11 @@ def post_delete_visualizer_config(
 ):
     # delete list view cache
     instance.delete_class_cache_keys()
+
+
+@receiver(post_migrate, sender=VisualizersManagerConfig)
+def post_migrate_visualizer(
+    sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
+):
+    if plan:
+        VisualizerConfig.delete_class_cache_keys()

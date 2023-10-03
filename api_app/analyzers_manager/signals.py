@@ -1,10 +1,11 @@
 import json
 
 from django.conf import settings
-from django.db.models.signals import post_delete, post_save, pre_save
+from django.db.models.signals import post_delete, post_migrate, post_save, pre_save
 from django.dispatch import receiver
 from django_celery_beat.models import PeriodicTask
 
+from api_app.analyzers_manager.apps import AnalyzersManagerConfig
 from api_app.analyzers_manager.models import AnalyzerConfig
 
 
@@ -45,3 +46,11 @@ def post_delete_analyzer_config(
 
     if hasattr(instance, "periodic_task") and instance.periodic_task:
         instance.periodic_task.delete()
+
+
+@receiver(post_migrate, sender=AnalyzersManagerConfig)
+def post_migrate_analyzer(
+    sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
+):
+    if plan:
+        AnalyzerConfig.delete_class_cache_keys()

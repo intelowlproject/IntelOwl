@@ -98,7 +98,7 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         # every time we execute the ingestor we have to create a new report
         # instead of using the update/create
         # because we do not have the same unique constraints
-        _report = self.python_module.python_class.report_model.objects.create(
+        return self.python_module.python_class.report_model.objects.create(
             job=job,
             config=self,
             status=status,

@@ -8,6 +8,7 @@ import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 from django.utils.timezone import now
+
 from api_app.interfaces import ModelWithOwnership
 
 if TYPE_CHECKING:

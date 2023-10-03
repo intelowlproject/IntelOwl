@@ -970,7 +970,7 @@ class PythonConfig(AbstractConfig):
                 "start_time": now(),
                 "end_time": now(),
             },
-        )
+        )[0]
 
     @classmethod
     def delete_class_cache_keys(cls, user: User = None):

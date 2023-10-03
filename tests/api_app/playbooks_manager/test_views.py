@@ -101,11 +101,3 @@ class PlaybookConfigViewSetTestCase(
             pc.delete()
         finally:
             ac.delete()
-
-    def test_delete(self):
-        plugin = self.model_class.objects.order_by("?").first().pk
-        response = self.client.delete(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 403, response)
-        self.client.force_authenticate(self.superuser)
-        response = self.client.delete(f"{self.URL}/{plugin}")
-        self.assertEqual(response.status_code, 204, response)

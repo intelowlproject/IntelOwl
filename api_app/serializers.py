@@ -894,7 +894,6 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     )
 
     def validate(self, attrs):
-        attrs = super().validate(attrs)
         if "organization" in attrs and attrs["organization"]:
             org = attrs.pop("organization")
             # 1 - we are owner  OR
@@ -909,7 +908,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                 raise ValidationError(
                     {"detail": "You are not owner or admin of the organization"}
                 )
-        return attrs
+        return super().validate(attrs)
 
 
 class PluginConfigSerializer(ModelWithOwnershipSerializer):
@@ -990,7 +989,6 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
         if self.partial:
             # we are in an update
             return attrs
-        attrs = super().validate(attrs)
         _value = attrs["value"]
         # retro compatibility
         _type = attrs.pop("type")
@@ -1016,7 +1014,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
 
         attrs["parameter"] = parameter
         attrs[class_.snake_case_name] = config
-        return attrs
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         self.validate_value_type(validated_data["value"], instance.parameter)

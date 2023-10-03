@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.16
+FROM python:3.9.16 as backend-build
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
@@ -57,8 +57,6 @@ RUN cpan -T Email::Outlook::Message
 
 COPY . $PYTHONPATH
 
-COPY --from=frontend-build /build /var/www/reactapp
-
 RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/celery.log ${LOG_PATH}/django/celery_errors.log \
     && touch ${LOG_PATH}/django/django_auth_ldap.log ${LOG_PATH}/django/django_errors.log \
@@ -70,6 +68,10 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff
     && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
+
+FROM backend-build
+
+COPY --from=frontend-build /build /var/www/reactapp
 
 
 # quarkengine calls

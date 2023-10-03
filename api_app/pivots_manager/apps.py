@@ -4,7 +4,7 @@
 from django.apps import AppConfig
 
 
-class PivotManagerConfig(AppConfig):
+class PivotsManagerConfig(AppConfig):
     name = "api_app.pivots_manager"
 
     @staticmethod

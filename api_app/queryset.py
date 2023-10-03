@@ -211,7 +211,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
 
-class PluginConfigQuerySet(CleanOnCreateQuerySet):
+class ModelWithOwnershipQuerySet:
     def default_values(self):
         return self.filter(owner__isnull=True)
 
@@ -252,6 +252,10 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
                 )
         else:
             return self.default_values()
+
+
+class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet):
+    ...
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
@@ -335,7 +339,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def get_signatures(self, job) -> Generator[Signature, None, None]:
-        from api_app.models import Job, PythonConfig
+        from api_app.models import AbstractReport, Job, PythonConfig
         from intel_owl import tasks
 
         job: Job
@@ -353,7 +357,9 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 )
 
             task_id = str(uuid.uuid4())
-            config.generate_empty_report(job, task_id)
+            config.generate_empty_report(
+                job, task_id, AbstractReport.Status.PENDING.value
+            )
             args = [
                 job.pk,
                 config.python_module.pk,

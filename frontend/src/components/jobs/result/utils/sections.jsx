@@ -362,6 +362,7 @@ export function JobIsRunningAlert({ job }) {
   // number of analyzers/connectors/visualizers reported (status: killed/succes/failed)
   const analizersReported = reportedPluginNumber(job.analyzer_reports);
   const connectorsReported = reportedPluginNumber(job.connector_reports);
+  const pivotsReported = reportedPluginNumber(job.pivot_reports);
   const visualizersReported = reportedPluginNumber(job.visualizer_reports);
 
   /* Check if analyzers/connectors/visualizers are completed
@@ -375,8 +376,11 @@ export function JobIsRunningAlert({ job }) {
   const connectorsCompleted = Object.values(jobStatuses)
     .slice(5)
     .includes(job.status);
-  const visualizersCompleted = Object.values(jobStatuses)
+  const pivotsCompleted = Object.values(jobStatuses)
     .slice(7)
+    .includes(job.status);
+  const visualizersCompleted = Object.values(jobStatuses)
+    .slice(9)
     .includes(job.status);
 
   const alertElements = [
@@ -398,6 +402,13 @@ export function JobIsRunningAlert({ job }) {
     },
     {
       step: 3,
+      type: "PIVOTS",
+      completed:
+        pivotsReported === job.pivots_to_execute.length && pivotsCompleted,
+      report: `${pivotsReported}/${job.pivots_to_execute.length}`,
+    },
+    {
+      step: 4,
       type: "VISUALIZERS",
       completed:
         visualizersReported === job.visualizers_to_execute.length &&

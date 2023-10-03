@@ -1,7 +1,6 @@
 from django import forms
-from django.forms.models import ALL_FIELDS
 
-from api_app.models import Parameter, PythonConfig
+from api_app.models import Parameter
 
 
 class MultilineJSONField(forms.JSONField):
@@ -40,17 +39,3 @@ class ParameterInlineForm(forms.ModelForm):
             "required",
             "python_module",
         ]
-
-
-class PythonConfigAdminForm(forms.ModelForm):
-    class Meta:
-        model = PythonConfig
-        fields = ALL_FIELDS
-        base_paths_allowed = []
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # only modules of this configurations
-        self.fields["python_module"].queryset = self.fields[
-            "python_module"
-        ].queryset.filter(base_path__in=self.Meta.base_paths_allowed)

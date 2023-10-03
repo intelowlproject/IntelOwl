@@ -12,10 +12,6 @@ from .models import AnalyzerConfig, AnalyzerReport
 
 
 class AnalyzerReportSerializer(AbstractReportSerializer):
-    """
-    AnalyzerReport model's serializer.
-    """
-
     class Meta:
         model = AnalyzerReport
         fields = AbstractReportSerializer.Meta.fields

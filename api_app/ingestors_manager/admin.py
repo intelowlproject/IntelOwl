@@ -4,7 +4,6 @@
 from django.contrib import admin
 
 from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
-from api_app.ingestors_manager.forms import IngestorConfigAdminForm
 from api_app.ingestors_manager.models import IngestorConfig, IngestorReport
 
 
@@ -23,4 +22,3 @@ class IngestorConfigAdminView(PythonConfigAdminView):
         "schedule",
     )
     exclude = ["user", "periodic_task"]
-    form = IngestorConfigAdminForm

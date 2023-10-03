@@ -20,6 +20,7 @@ import { GoBackButton, Loader } from "@certego/certego-ui";
 import {
   AnalyzersReportTable,
   ConnectorsReportTable,
+  PivotsReportTable,
   VisualizersReportTable,
 } from "./tables";
 import {
@@ -72,6 +73,19 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       },
       {
         id: 3,
+        nav: (
+          <div className="d-flex-center">
+            <strong>Pivots Report</strong>
+            <Badge className="ms-2">
+              {reportedPluginNumber(job.pivot_reports)} /&nbsp;
+              {job.pivots_to_execute.length}
+            </Badge>
+          </div>
+        ),
+        report: <PivotsReportTable job={job} refetch={refetch} />,
+      },
+      {
+        id: 4,
         nav: (
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>

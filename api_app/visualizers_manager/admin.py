@@ -4,7 +4,6 @@
 from django.contrib import admin
 
 from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
-from api_app.visualizers_manager.forms import VisualizerConfigAdminForm
 from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 
 
@@ -16,5 +15,3 @@ class VisualizerReportAdminView(AbstractReportAdminView):
 @admin.register(VisualizerConfig)
 class VisualizerConfigAdminView(PythonConfigAdminView):
     list_display = PythonConfigAdminView.list_display + ("playbook",)
-
-    form = VisualizerConfigAdminForm

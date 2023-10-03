@@ -3,12 +3,12 @@ from django import forms
 from api_app.pivots_manager.models import PivotConfig
 
 
-class PivotConfigModelForm(forms.ModelForm):
-    name = forms.CharField(
-        disabled=True, required=False, initial="<generated automatically>"
-    )
+class PivotConfigAdminForm(forms.ModelForm):
     description = forms.CharField(
-        disabled=True, required=False, initial="<generated automatically>"
+        disabled=True,
+        required=False,
+        initial="<generated automatically>",
+        widget=forms.Textarea(),
     )
 
     class Meta:
@@ -16,9 +16,11 @@ class PivotConfigModelForm(forms.ModelForm):
         fields = [
             "name",
             "description",
-            "analyzer_config",
-            "connector_config",
-            "visualizer_config",
-            "field",
+            "config",
+            "disabled",
+            "disabled_in_organizations",
+            "python_module",
+            "related_analyzer_config",
+            "related_connector_config",
             "playbook_to_execute",
         ]

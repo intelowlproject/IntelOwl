@@ -188,7 +188,18 @@ def job_pipeline(
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
-    job.execute()
+    try:
+        job.execute()
+    except Exception as e:
+        logger.exception(e)
+        for report in (
+            list(job.analyzerreports.all())
+            + list(job.connectorreports.all())
+            + list(job.pivotreports.all())
+            + list(job.visualizerreports.all())
+        ):
+            report.status = report.Status.FAILED.value
+            report.save()
 
 
 @shared_task(name="run_plugin", soft_time_limit=500)
@@ -212,7 +223,13 @@ def run_plugin(
         runtime_configuration=runtime_configuration,
         task_id=task_id,
     )
-    plugin.start()
+    try:
+        plugin.start()
+    except Exception as e:
+        logger.exception(e)
+        config.reports.get(job__pk=job_id).update(
+            status=plugin.report_model.Status.FAILED.value
+        )
 
 
 @shared_task(name="create_caches", soft_time_limit=200)
@@ -227,6 +244,8 @@ def create_caches(user_pk: int):
     from api_app.connectors_manager.serializers import ConnectorConfigSerializer
     from api_app.ingestors_manager.models import IngestorConfig
     from api_app.ingestors_manager.serializers import IngestorConfigSerializer
+    from api_app.pivots_manager.models import PivotConfig
+    from api_app.pivots_manager.serializers import PivotConfigSerializer
     from api_app.serializers import PythonListConfigSerializer
     from api_app.visualizers_manager.models import VisualizerConfig
     from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
@@ -235,10 +254,17 @@ def create_caches(user_pk: int):
         PythonListConfigSerializer(
             child=AnalyzerConfigSerializer()
         ).to_representation_single_plugin(plugin, user)
+
     for plugin in ConnectorConfig.objects.all():
         PythonListConfigSerializer(
             child=ConnectorConfigSerializer()
         ).to_representation_single_plugin(plugin, user)
+
+    for plugin in PivotConfig.objects.all():
+        PythonListConfigSerializer(
+            child=PivotConfigSerializer()
+        ).to_representation_single_plugin(plugin, user)
+
     for plugin in VisualizerConfig.objects.all():
         PythonListConfigSerializer(
             child=VisualizerConfigSerializer()

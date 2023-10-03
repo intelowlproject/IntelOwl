@@ -34,6 +34,7 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
+from .interfaces import ModelWithOwnership
 from .models import (
     AbstractReport,
     Comment,
@@ -290,6 +291,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         )
         for analyzer in validated_data.get("analyzers_to_execute", []):
             qs = qs.filter(analyzers_requested__in=[analyzer])
+        for connector in validated_data.get("connectors_to_execute", []):
+            qs = qs.filter(connectors_requested__in=[connector])
+        for visualizer in validated_data.get("visualizers_to_execute", []):
+            qs = qs.filter(visualizers_to_execute__in=[visualizer])
+
         return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
 
     def create(self, validated_data: Dict) -> Job:
@@ -297,7 +303,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         send_task = validated_data.pop("send_task", False)
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
             try:
-                job = self.check_previous_jobs(validated_data)
+                return self.check_previous_jobs(validated_data)
             except self.Meta.model.DoesNotExist:
                 job = super().create(validated_data)
         else:
@@ -357,7 +363,15 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file", "errors")
+        exclude = (
+            "file",
+            "errors",
+        )
+
+    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
+
+    def get_pivots_to_execute(self, obj: Job):
+        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
 
 class JobSerializer(_AbstractJobViewSerializer):
@@ -370,24 +384,28 @@ class JobSerializer(_AbstractJobViewSerializer):
         exclude = ("file",)
 
     comments = CommentSerializer(many=True, read_only=True)
-
+    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
     permissions = rfs.SerializerMethodField()
+
+    def get_pivots_to_execute(self, obj: Job):
+        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
     def get_fields(self):
         # this method override is required for a cyclic import
         from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
         from api_app.connectors_manager.serializers import ConnectorReportSerializer
+        from api_app.pivots_manager.serializers import PivotReportSerializer
         from api_app.visualizers_manager.serializers import VisualizerReportSerializer
 
-        self._declared_fields["analyzer_reports"] = AnalyzerReportSerializer(
-            many=True, read_only=True, source="analyzerreports"
-        )
-        self._declared_fields["connector_reports"] = ConnectorReportSerializer(
-            many=True, read_only=True, source="connectorreports"
-        )
-        self._declared_fields["visualizer_reports"] = VisualizerReportSerializer(
-            many=True, read_only=True, source="visualizerreports"
-        )
+        for field, serializer in [
+            ("analyzer", AnalyzerReportSerializer),
+            ("connector", ConnectorReportSerializer),
+            ("pivot", PivotReportSerializer),
+            ("visualizer", VisualizerReportSerializer),
+        ]:
+            self._declared_fields[f"{field}_reports"] = serializer(
+                many=True, read_only=True, source=f"{field}reports"
+            )
         return super().get_fields()
 
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
@@ -746,6 +764,7 @@ class JobEnvelopeSerializer(rfs.ListSerializer):
 
 class JobResponseSerializer(rfs.ModelSerializer):
     STATUS_ACCEPTED = "accepted"
+    STATUS_EXISTS = "exists"
     STATUS_NOT_AVAILABLE = "not_available"
 
     job_id = rfs.IntegerField(source="pk")
@@ -774,9 +793,13 @@ class JobResponseSerializer(rfs.ModelSerializer):
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Job):
         result = super().to_representation(instance)
-        result["status"] = self.STATUS_ACCEPTED
+        if instance.status in instance.Status.final_statuses():
+            status = self.STATUS_EXISTS
+        else:
+            status = self.STATUS_ACCEPTED
+        result["status"] = status
         return result
 
     def get_initial(self):
@@ -859,7 +882,41 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
         fields = rfs.ALL_FIELDS
 
 
-class PluginConfigSerializer(rfs.ModelSerializer):
+class ModelWithOwnershipSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = ModelWithOwnership
+        fields = ("for_organization", "owner")
+        abstract = True
+
+    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
+    organization = rfs.SlugRelatedField(
+        queryset=Organization.objects.all(),
+        required=False,
+        allow_null=True,
+        slug_field="name",
+        write_only=True,
+        default=None,
+    )
+
+    def validate(self, attrs):
+        org = attrs.pop("organization", None)
+        if org:
+            # 1 - we are owner  OR
+            # 2 - we are admin of the same org
+            if org.owner == attrs["owner"] or (
+                self.context["request"].user.has_membership()
+                and self.context["request"].user.membership.organization.pk == org.pk
+                and self.context["request"].user.membership.is_admin
+            ):
+                attrs["for_organization"] = True
+            else:
+                raise ValidationError(
+                    {"detail": "You are not owner or admin of the organization"}
+                )
+        return super().validate(attrs)
+
+
+class PluginConfigSerializer(ModelWithOwnershipSerializer):
     class Meta:
         model = PluginConfig
         fields = (
@@ -922,14 +979,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
-    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-    organization = rfs.SlugRelatedField(
-        queryset=Organization.objects.all(),
-        required=False,
-        allow_null=True,
-        slug_field="name",
-        write_only=True,
-    )
     value = CustomValueField()
 
     def validate_value_type(self, value: Any, parameter: Parameter):
@@ -945,27 +994,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         if self.partial:
             # we are in an update
             return attrs
-        if "organization" in attrs and attrs["organization"]:
-            org = attrs.pop("organization")
-            # we raise ValidationError() when
-            # (NOR OPERATOR)
-            # 1 - we are not owner  OR
-            # 2 - we are not admin of the same org
-            if not (
-                org.owner == attrs["owner"]
-                or (
-                    self.context["request"].user.has_membership()
-                    and self.context["request"].user.membership.organization.pk
-                    == org.pk
-                    and self.context["request"].user.membership.is_admin
-                )
-            ):
-                raise ValidationError(
-                    {"detail": "You are not owner or admin of the organization"}
-                )
-            else:
-                attrs["for_organization"] = True
-
         _value = attrs["value"]
         # retro compatibility
         _type = attrs.pop("type")
@@ -991,7 +1019,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
         attrs["parameter"] = parameter
         attrs[class_.snake_case_name] = config
-        return attrs
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         self.validate_value_type(validated_data["value"], instance.parameter)
@@ -1040,7 +1068,7 @@ class ParameterSerializer(rfs.ModelSerializer):
         list_serializer_class = ParamListSerializer
 
     def get_value(self, param: Parameter):
-        if hasattr(param, "value"):
+        if hasattr(param, "value") and hasattr(param, "is_from_org"):
             if param.is_secret and param.is_from_org:
                 return "redacted"
             return param.value
@@ -1067,10 +1095,6 @@ class PythonListConfigSerializer(rfs.ListSerializer):
                 if param.required and not param.configured:
                     parameter_required_not_configured.append(param.name)
                 param_representation = ParameterSerializer(param).data
-                logger.debug(
-                    f"Parameter {param.name} for plugin {plugin.name} "
-                    f"has value {param.value} for user {user.username}"
-                )
                 param_representation.pop("name")
                 key = "secrets" if param.is_secret else "params"
 
@@ -1137,7 +1161,7 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):
-    name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
+    name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
     class Meta:
         fields = (

@@ -7,6 +7,7 @@ import {
   API_BASE_URI,
   ANALYZERS_CONFIG_URI,
   CONNECTORS_CONFIG_URI,
+  PIVOTS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
   PLAYBOOKS_CONFIG_URI,
   INGESTORS_CONFIG_URI,
@@ -47,16 +48,19 @@ const usePluginConfigurationStore = create((set, get) => ({
   // loading: true,
   analyzersLoading: true,
   connectorsLoading: true,
+  pivotsLoading: true,
   visualizersLoading: true,
   ingestorsLoading: true,
   playbooksLoading: true,
   analyzersError: null,
   connectorsError: null,
+  pivotsError: null,
   visualizersError: null,
   ingestorsError: null,
   playbooksError: null,
   analyzers: [],
   connectors: [],
+  pivots: [],
   visualizers: [],
   ingestors: [],
   playbooks: [],
@@ -67,6 +71,9 @@ const usePluginConfigurationStore = create((set, get) => ({
     }
     if (get().connectorsLoading) {
       get().retrieveConnectorsConfiguration();
+    }
+    if (get().pivotsLoading) {
+      get().retrievePivotsConfiguration();
     }
     if (get().visualizersLoading) {
       get().retrieveVisualizersConfiguration();
@@ -144,6 +151,23 @@ const usePluginConfigurationStore = create((set, get) => ({
       });
     } catch (e) {
       set({ ingestorsError: e, ingestorsLoading: false });
+    }
+  },
+  retrievePivotsConfiguration: async () => {
+    try {
+      set({ pivotsLoading: true });
+      const pivots = await downloadAllPlugin(PIVOTS_CONFIG_URI);
+      console.debug(
+        "usePluginConfigurationStore - retrievePivotsConfiguration: ",
+      );
+      console.debug(pivots);
+      set({
+        pivotsError: null,
+        pivots,
+        pivotsLoading: false,
+      });
+    } catch (e) {
+      set({ pivotsError: e, pivotsLoading: false });
     }
   },
   retrievePlaybooksConfiguration: async () => {

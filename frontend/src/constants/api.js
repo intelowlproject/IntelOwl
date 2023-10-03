@@ -10,6 +10,7 @@ export const ANALYZE_MULTIPLE_FILES_URI = `${API_BASE_URI}/analyze_multiple_file
 export const ANALYZE_MULTIPLE_OBSERVABLE_URI = `${API_BASE_URI}/analyze_multiple_observables`;
 export const ANALYZERS_CONFIG_URI = `${API_BASE_URI}/analyzer`;
 export const CONNECTORS_CONFIG_URI = `${API_BASE_URI}/connector`;
+export const PIVOTS_CONFIG_URI = `${API_BASE_URI}/pivot`;
 export const VISUALIZERS_CONFIG_URI = `${API_BASE_URI}/visualizer`;
 export const INGESTORS_CONFIG_URI = `${API_BASE_URI}/ingestor`;
 export const PLAYBOOKS_CONFIG_URI = `${API_BASE_URI}/playbook`;

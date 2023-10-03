@@ -87,16 +87,20 @@ export function PluginData({
   const [
     analyzers,
     connectors,
+    pivots,
     visualizers,
     retrieveAnalyzersConfiguration,
     retrieveConnectorsConfiguration,
+    retrievePivotsConfiguration,
     retrieveVisualizersConfiguration,
   ] = usePluginConfigurationStore((state) => [
     filterEmptyData(state.analyzers, dataName),
     filterEmptyData(state.connectors, dataName),
+    filterEmptyData(state.pivots, dataName),
     filterEmptyData(state.visualizers, dataName),
     state.retrieveAnalyzersConfiguration,
     state.retrieveConnectorsConfiguration,
+    state.retrievePivotsConfiguration,
     state.retrieveVisualizersConfiguration,
   ]);
 
@@ -117,6 +121,8 @@ export function PluginData({
             plugins = connectors;
           } else if (res.type === pluginType.VISUALIZER) {
             plugins = visualizers;
+          } else if (res.type === pluginType.PIVOT) {
+            plugins = pivots;
           } else {
             console.error(`Invalid type: ${res.type}`);
           }
@@ -135,6 +141,7 @@ export function PluginData({
     refetchPluginData();
     retrieveAnalyzersConfiguration();
     retrieveConnectorsConfiguration();
+    retrievePivotsConfiguration();
     retrieveVisualizersConfiguration();
   };
 
@@ -164,6 +171,10 @@ export function PluginData({
                               configuration.type === pluginType.VISUALIZER
                             ) {
                               plugins = visualizers;
+                            } else if (
+                              configuration.type === pluginType.PIVOT
+                            ) {
+                              plugins = pivots;
                             }
 
                             if (
@@ -218,6 +229,9 @@ export function PluginData({
                                     </option>
                                     <option value={pluginType.CONNECTOR}>
                                       Connector
+                                    </option>
+                                    <option value={pluginType.PIVOT}>
+                                      Pivot
                                     </option>
                                     <option value={pluginType.VISUALIZER}>
                                       Visualizer

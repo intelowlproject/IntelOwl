@@ -1,15 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
-from typing import Any, Generator
 
 from django.conf import settings
 from django.db import models
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
+from api_app.choices import PythonModuleBasePaths
 from api_app.ingestors_manager.exceptions import IngestorConfigurationException
 from api_app.interfaces import CreateJobsFromPlaybookInterface
-from api_app.models import AbstractReport, PythonConfig
+from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.queryset import IngestorQuerySet
 
@@ -52,7 +52,12 @@ class IngestorReport(AbstractReport):
 
 class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     objects = IngestorQuerySet.as_manager()
-
+    python_module = models.ForeignKey(
+        PythonModule,
+        on_delete=models.PROTECT,
+        related_name="%(class)ss",
+        limit_choices_to={"base_path": PythonModuleBasePaths.Ingestor.value},
+    )
     playbook_to_execute = models.ForeignKey(
         PlaybookConfig,
         related_name="ingestors",
@@ -70,9 +75,7 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         PeriodicTask, related_name="ingestor", on_delete=models.PROTECT
     )
     disabled_in_organizations = None
-
-    def get_values(self, report: AbstractReport) -> Generator[Any, None, None]:
-        yield from report.report
+    maximum_jobs = models.IntegerField(default=10)
 
     @classmethod
     @property
@@ -90,3 +93,15 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         from api_app.ingestors_manager.serializers import IngestorConfigSerializer
 
         return IngestorConfigSerializer
+
+    def generate_empty_report(self, job: Job, task_id: str, status: str):
+        # every time we execute the ingestor we have to create a new report
+        # instead of using the update/create
+        # because we do not have the same unique constraints
+        return self.python_module.python_class.report_model.objects.create(
+            job=job,
+            config=self,
+            status=status,
+            task_id=task_id,
+            max_size_report=self.maximum_jobs,
+        )

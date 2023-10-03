@@ -35,6 +35,13 @@ class PlaybookConfigViewSetTestCase(
 
         p.delete()
 
+    def test_update(self):
+        plugin = self.model_class.objects.order_by("?").first().pk
+        response = self.client.patch(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 200, response.json())
+        response = self.client.put(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 405, response.json())
+
     def test_delete(self):
         p = PlaybookConfig.objects.create(name="test", type=["ip"], tlp="CLEAR")
 
@@ -45,13 +52,13 @@ class PlaybookConfigViewSetTestCase(
         p.save()
 
         response = self.client.delete(f"{self.URL}/{p.pk}")
-        self.assertEqual(response.status_code, 202, response.json())
+        self.assertEqual(response.status_code, 204)
 
         p = PlaybookConfig.objects.create(name="test", type=["ip"], tlp="CLEAR")
 
         self.client.force_authenticate(self.superuser)
         response = self.client.delete(f"{self.URL}/{p.pk}")
-        self.assertEqual(response.status_code, 202, response.json())
+        self.assertEqual(response.status_code, 204)
 
     def test_create(self):
         ac, _ = AnalyzerConfig.objects.get_or_create(

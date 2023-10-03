@@ -899,8 +899,8 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     )
 
     def validate(self, attrs):
-        if "organization" in attrs and attrs["organization"]:
-            org = attrs.pop("organization")
+        org = attrs.pop("organization", None)
+        if org:
             # 1 - we are owner  OR
             # 2 - we are admin of the same org
             if org.owner == attrs["owner"] or (

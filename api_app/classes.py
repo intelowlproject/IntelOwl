@@ -25,7 +25,7 @@ class Plugin(metaclass=ABCMeta):
         config: PythonConfig,
         job_id: int,
         runtime_configuration: dict,
-        task_id: int,
+        task_id: str,
         **kwargs,
     ):
         self._config = config
@@ -35,7 +35,9 @@ class Plugin(metaclass=ABCMeta):
 
         self.kwargs = kwargs
         # some post init processing
-        self.report: AbstractReport = self.init_report_object()
+        self.report: AbstractReport = self._config.generate_empty_report(
+            self._job, task_id, AbstractReport.Status.RUNNING.value
+        )
         # monkeypatch if in test suite
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
             self._monkeypatch()
@@ -145,22 +147,6 @@ class Plugin(metaclass=ABCMeta):
         Returns Model to be used for *init_report_object*
         """
         raise NotImplementedError()
-
-    def init_report_object(self) -> AbstractReport:
-        """
-        Returns report object set in *__init__* fn
-        """
-        # unique constraint ensures only one report is possible
-        # update case: recurring plugin run
-        _report, _ = self.report_model.objects.update_or_create(
-            job_id=self.job_id,
-            config=self._config,
-            defaults={
-                "status": AbstractReport.Status.RUNNING.value,
-                "task_id": self.task_id,
-            },
-        )
-        return _report
 
     @abstractmethod
     def get_exceptions_to_catch(self) -> list:

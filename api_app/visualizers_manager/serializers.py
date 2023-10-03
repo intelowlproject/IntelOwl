@@ -27,10 +27,12 @@ class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration)
 class VisualizerReportSerializer(AbstractReportSerializer):
     name = rfs.SerializerMethodField()
 
+    config = rfs.PrimaryKeyRelatedField(queryset=VisualizerConfig.objects.all())
+
     @classmethod
     def get_name(cls, instance: VisualizerReport):
         return instance.name or instance.config.pk
 
     class Meta:
         model = VisualizerReport
-        fields = AbstractReportSerializer.Meta.fields
+        fields = AbstractReportSerializer.Meta.fields + ("config",)

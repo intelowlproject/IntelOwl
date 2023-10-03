@@ -3,7 +3,7 @@ Django==4.1.10
 psycopg2-binary==2.9.6
 django-auth-ldap==4.5.0
 django-radius==1.5.0
-django-filter==23.2
+django-filter==23.3
 django-storages==1.14
 django-celery-beat==2.5.0
 django-celery-results==2.5.0
@@ -35,7 +35,7 @@ flower==2.0.0
 GitPython==3.1.32
 checkdmarc==4.8.4
 dnspython==2.4.0
-dnstwist[full]==20230509
+dnstwist[full]==20230918
 google>=3.0.0
 google-cloud-webrisk==1.12.0
 intezer-sdk==1.18.4

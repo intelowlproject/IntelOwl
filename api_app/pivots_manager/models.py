@@ -42,6 +42,8 @@ class PivotMap(models.Model):
         on_delete=models.PROTECT,
         related_name="pivots",
         editable=False,
+        default=None,
+        null=True,
     )
     ending_job = models.ForeignKey(
         Job,
@@ -59,8 +61,10 @@ class PivotMap(models.Model):
         return f"Job {self.starting_job_id} -> Job {self.ending_job_id}"
 
     @cached_property
-    def report(self) -> AbstractReport:
-        return self.pivot_config.config.reports.get(job=self.starting_job)
+    def report(self) -> typing.Optional[AbstractReport]:
+        if self.pivot_config:
+            return self.pivot_config.reports.get(job=self.starting_job)
+        return None
 
     @cached_property
     def owner(self) -> str:

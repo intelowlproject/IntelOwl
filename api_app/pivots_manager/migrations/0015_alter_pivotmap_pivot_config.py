@@ -5,15 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pivots_manager', '0014_pivotconfig_no_field_to_compare'),
+        ("pivots_manager", "0014_pivotconfig_no_field_to_compare"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pivotmap',
-            name='pivot_config',
-            field=models.ForeignKey(default=None, editable=False, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pivots', to='pivots_manager.pivotconfig'),
+            model_name="pivotmap",
+            name="pivot_config",
+            field=models.ForeignKey(
+                default=None,
+                editable=False,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="pivots",
+                to="pivots_manager.pivotconfig",
+            ),
         ),
     ]

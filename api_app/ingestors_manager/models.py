@@ -9,7 +9,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from api_app.choices import PythonModuleBasePaths
 from api_app.ingestors_manager.exceptions import IngestorConfigurationException
 from api_app.interfaces import CreateJobsFromPlaybookInterface
-from api_app.models import AbstractReport, PythonConfig, PythonModule
+from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.queryset import IngestorQuerySet
 
@@ -75,6 +75,7 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         PeriodicTask, related_name="ingestor", on_delete=models.PROTECT
     )
     disabled_in_organizations = None
+    maximum_jobs = models.IntegerField(default=10)
 
     @classmethod
     @property
@@ -92,3 +93,15 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         from api_app.ingestors_manager.serializers import IngestorConfigSerializer
 
         return IngestorConfigSerializer
+
+    def generate_empty_report(self, job: Job, task_id: str, status: str):
+        # every time we execute the ingestor we have to create a new report
+        # instead of using the update/create
+        # because we do not have the same unique constraints
+        _report = self.python_module.python_class.report_model.objects.create(
+            job=job,
+            config=self,
+            status=status,
+            task_id=task_id,
+            max_size_report=self.maximum_jobs,
+        )

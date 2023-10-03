@@ -7,6 +7,8 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
+from django.utils.timezone import now
+
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
 
@@ -958,13 +960,15 @@ class PythonConfig(AbstractConfig):
 
         raise NotImplementedError()
 
-    def generate_empty_report(self, job: Job, task_id: str):
+    def generate_empty_report(self, job: Job, task_id: str, status: str):
         return self.python_module.python_class.report_model.objects.update_or_create(
             job=job,
             config=self,
             defaults={
-                "status": AbstractReport.Status.PENDING.value,
+                "status": status,
                 "task_id": task_id,
+                "start_time": now(),
+                "end_time": now(),
             },
         )
 

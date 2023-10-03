@@ -18,6 +18,38 @@ class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTest
     def model_class(cls) -> Type[PlaybookConfig]:
         return PlaybookConfig
 
+    def test_list(self):
+        super().test_list()
+
+        p = PlaybookConfig.objects.create(
+            name="test", type=["ip"], tlp="CLEAR", owner=self.superuser
+        )
+        response = self.client.get(self.URL)
+        result = response.json()
+        self.assertEqual(response.status_code, 200, result)
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], self.model_class.objects.all().count() - 1)
+
+        p.delete()
+
+    def test_delete(self):
+        p = PlaybookConfig.objects.create(name="test", type=["ip"], tlp="CLEAR")
+
+        response = self.client.delete(f"{self.URL}/{p.pk}")
+        self.assertEqual(response.status_code, 405, response.json())
+
+        p.owner = self.user
+        p.save()
+
+        response = self.client.delete(f"{self.URL}/{p.pk}")
+        self.assertEqual(response.status_code, 202, response.json())
+
+        p = PlaybookConfig.objects.create(name="test", type=["ip"], tlp="CLEAR")
+
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.URL}/{p.pk}")
+        self.assertEqual(response.status_code, 202, response.json())
+
     def test_create(self):
         ac, _ = AnalyzerConfig.objects.get_or_create(
             name="test",

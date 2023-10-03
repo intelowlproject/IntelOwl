@@ -20,7 +20,6 @@ class PlaybookConfig(AbstractConfig, ModelWithOwnership):
     name = models.CharField(
         max_length=100,
         null=False,
-        unique=True,
         primary_key=True,
         validators=[plugin_name_validator],
     )
@@ -60,6 +59,7 @@ class PlaybookConfig(AbstractConfig, ModelWithOwnership):
     class Meta:
         ordering = ["name", "disabled"]
         indexes = ModelWithOwnership.Meta.indexes
+        unique_together = [["name", "owner"]]
 
     def clean_pivots(self):
         for pivot in self.pivots.all():

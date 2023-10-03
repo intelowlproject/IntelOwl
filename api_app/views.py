@@ -571,10 +571,11 @@ class TagViewSet(viewsets.ModelViewSet):
 class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         permissions = super().get_permissions()
-        if self.request.method in ["PATCH", "DELETE"]:
+        if self.action in ["destroy", "update"]:
+            if self.request.method == "PUT":
+                raise PermissionDenied()
             permissions.append((IsObjectAdminPermission | IsObjectOwnerPermission)())
-        elif self.request.method == "PUT":
-            raise PermissionDenied()
+
         return permissions
 
 

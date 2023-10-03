@@ -21,6 +21,7 @@ class PlaybookConfigViewSetTestCase(AbstractConfigViewSetTestCaseMixin, CustomVi
     def test_list(self):
         super().test_list()
 
+        self.client.force_authenticate(self.user)
         p = PlaybookConfig.objects.create(
             name="test", type=["ip"], tlp="CLEAR", owner=self.superuser
         )

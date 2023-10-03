@@ -39,7 +39,7 @@ class PlaybookConfigViewSetTestCase(
         p = PlaybookConfig.objects.create(name="test", type=["ip"], tlp="CLEAR")
 
         response = self.client.delete(f"{self.URL}/{p.pk}")
-        self.assertEqual(response.status_code, 405, response.json())
+        self.assertEqual(response.status_code, 403, response.json())
 
         p.owner = self.user
         p.save()

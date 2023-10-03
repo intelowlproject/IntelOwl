@@ -35,7 +35,7 @@ flower==2.0.0
 GitPython==3.1.32
 checkdmarc==4.8.4
 dnspython==2.4.0
-dnstwist[full]==20230509
+dnstwist[full]==20230918
 google>=3.0.0
 google-cloud-webrisk==1.12.0
 intezer-sdk==1.18.4

@@ -443,12 +443,10 @@ class PluginConfigTestCase(CustomTestCase):
 
 
 class JobTestCase(CustomTestCase):
-
     def test_pivots_to_execute(self):
-
         ac = AnalyzerConfig.objects.first()
-        ac2 = AnalyzerConfig.objects.last()
-        ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac, ac2])
+        ac2 = AnalyzerConfig.objects.exclude(pk__in=[ac]).first()
+        ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac, ac2]).first()
         j1 = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -465,14 +463,20 @@ class JobTestCase(CustomTestCase):
 
         j1.analyzers_to_execute.set([ac, ac2])
         pc.related_analyzer_configs.set([ac, ac2])
-        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk])
+        self.assertCountEqual(
+            j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk]
+        )
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac])
         self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [])
 
-
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac2, ac3])
-        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk])
+        self.assertCountEqual(
+            j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk]
+        )
 
+        del j1.pivots_to_execute
+        j1.analyzers_to_execute.set([ac, ac3])
+        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [])

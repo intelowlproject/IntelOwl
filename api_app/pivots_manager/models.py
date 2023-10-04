@@ -2,9 +2,6 @@ import logging
 import typing
 from typing import Type
 
-from django.core.exceptions import ValidationError
-from django.db.models import Q
-
 from api_app.queryset import PythonConfigQuerySet
 from api_app.validators import plugin_name_validator
 
@@ -84,16 +81,10 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     )
 
     related_analyzer_configs = models.ManyToManyField(
-        "analyzers_manager.AnalyzerConfig",
-        related_name="pivots",
-        null=True,
-        blank=True,
+        "analyzers_manager.AnalyzerConfig", related_name="pivots", blank=True
     )
     related_connector_configs = models.ManyToManyField(
-        "connectors_manager.ConnectorConfig",
-        related_name="pivots",
-        null=True,
-        blank=True,
+        "connectors_manager.ConnectorConfig", related_name="pivots", blank=True
     )
     playbook_to_execute = models.ForeignKey(
         "playbooks_manager.PlaybookConfig",
@@ -105,7 +96,9 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
 
     @property
     def related_configs(self) -> PythonConfigQuerySet:
-        return self.related_analyzer_configs.all() or self.related_connector_configs.all()
+        return (
+            self.related_analyzer_configs.all() or self.related_connector_configs.all()
+        )
 
     @classmethod
     def plugin_type(cls) -> str:
@@ -121,10 +114,5 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     def config_exception(cls):
         return PivotConfigurationException
 
-    def clean_playbook_to_execute(self):
-        if self.id and self.playbook_to_execute in self.used_by_playbooks.all():
-            raise ValidationError("Recursive playbook usage in pivot")
-
     def clean(self):
         super().clean()
-        self.clean_playbook_to_execute()

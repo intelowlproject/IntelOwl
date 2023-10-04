@@ -6,7 +6,6 @@ from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import ScanMode
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import TagSerializer
 
@@ -28,9 +27,6 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
     )
     visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
 
-    pivots = rfs.PrimaryKeyRelatedField(
-        many=True, queryset=PivotConfig.objects.all(), required=True
-    )
     runtime_configuration = rfs.DictField(required=True)
 
     scan_mode = rfs.ChoiceField(choices=ScanMode.choices, required=True)

@@ -89,7 +89,7 @@ class PivotConfigTestCase(CustomTestCase):
         )
 
         jobs = list(
-            pc._create_jobs(
+            pc.create_jobs(
                 ["something", "something2"], job.tlp, job.user, send_task=False
             )
         )
@@ -114,7 +114,7 @@ class PivotConfigTestCase(CustomTestCase):
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
-        jobs = list(pc._create_jobs(content, job.tlp, job.user, send_task=False))
+        jobs = list(pc.create_jobs(content, job.tlp, job.user, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("PivotOnTest.0", jobs[0].file_name)
         self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
@@ -129,7 +129,7 @@ class PivotConfigTestCase(CustomTestCase):
             ).first(),
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
-        jobs = list(pc._create_jobs("google.com", job.tlp, job.user, send_task=False))
+        jobs = list(pc.create_jobs("google.com", job.tlp, job.user, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("google.com", jobs[0].observable_name)
         self.assertEqual("domain", jobs[0].observable_classification)

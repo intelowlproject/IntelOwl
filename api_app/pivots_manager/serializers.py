@@ -46,5 +46,5 @@ class PivotConfigSerializer(PythonConfigSerializer):
 
     class Meta:
         model = PivotConfig
-        fields = rfs.ALL_FIELDS
+        exclude = ["related_analyzer_configs", "related_connector_configs"]
         list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class

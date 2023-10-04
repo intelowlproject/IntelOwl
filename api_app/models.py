@@ -473,22 +473,24 @@ class Job(models.Model):
     def pivots_to_execute(self) -> PythonConfigQuerySet:
         from api_app.pivots_manager.models import PivotConfig
 
-        valid_python_modules_analyzers = self.analyzers_to_execute.all().values_list(
-            "pk", flat=True
-        )
-        valid_python_modules_connectors = self.connectors_to_execute.all().values_list(
-            "pk", flat=True
-        )
+        qs = PivotConfig.objects.all()
 
-        if self.playbook_to_execute:
-            return self.playbook_to_execute.pivots.filter(
-                Q(related_analyzer_configs__in=valid_python_modules_analyzers)
-                | Q(related_connector_configs__in=valid_python_modules_connectors)
-            )
-        return PivotConfig.objects.filter(
-            Q(related_analyzer_configs__in=valid_python_modules_analyzers)
-            | Q(related_connector_configs__in=valid_python_modules_connectors)
+        valid_analyzers = list(
+            self.analyzers_to_execute.all().values_list("pk", flat=True)
         )
+        if valid_analyzers:
+            qs = qs.many_to_many_to_array("related_analyzer_configs")
+            qs = qs.filter(related_analyzer_configs_array__contained_by=valid_analyzers)
+        valid_connectors = list(
+            self.connectors_to_execute.all().values_list("pk", flat=True)
+        )
+        if valid_connectors:
+            qs = qs.many_to_many_to_array("related_connector_configs")
+            qs = qs.filter(
+                related_connector_configs_array__contained_by=valid_connectors
+            )
+        logger.info(f"Pivots are {qs.values_list('name', flat=True)}")
+        return qs
 
     @property
     def _final_status_signature(self) -> Signature:

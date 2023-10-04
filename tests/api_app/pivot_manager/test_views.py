@@ -1,6 +1,5 @@
 from typing import Type
 
-from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -44,7 +43,6 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
             status="reported_without_fails",
         )
         self.pc = PivotConfig.objects.create(
-            related_analyzer_config=AnalyzerConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -74,7 +72,6 @@ class PivotConfigViewSetTestCase(
     def setUp(self):
         super().setUp()
         self.pc = PivotConfig(
-            related_analyzer_config=AnalyzerConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),

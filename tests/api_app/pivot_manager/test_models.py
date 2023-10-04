@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
@@ -12,36 +11,23 @@ from tests import CustomTestCase
 
 class PivotConfigTestCase(CustomTestCase):
     def test_clean_multiple_config(self):
-        pc = PivotConfig(
+        pc = PivotConfig.objects.create(
             name="test",
             description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
-            related_connector_config=ConnectorConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
+        pc.related_analyzer_configs.set([AnalyzerConfig.objects.first()])
         with self.assertRaises(ValidationError):
-            pc.full_clean()
-
-    def test_constraint_no_config(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            playbook_to_execute=PlaybookConfig.objects.first(),
-        )
-        with self.assertRaises(IntegrityError):
-            pc.save()
+            pc.related_connector_configs.set([ConnectorConfig.objects.first()])
+        pc.delete()
 
     def test_clean_valid(self):
         pc = PivotConfig(
             name="test",
             description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -56,7 +42,6 @@ class PivotConfigTestCase(CustomTestCase):
         pc = PivotConfig(
             name="test",
             description="test",
-            related_analyzer_config=AnalyzerConfig.objects.first(),
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -77,11 +62,9 @@ class PivotConfigTestCase(CustomTestCase):
             observable_supported__contains=["generic"],
             python_module__parameters__isnull=True,
         ).first()
-        ac = AnalyzerConfig.objects.filter().first()
         playbook.analyzers.set([ac2])
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            related_analyzer_config=ac,
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -102,11 +85,9 @@ class PivotConfigTestCase(CustomTestCase):
         playbook.delete()
 
     def test_create_job_multiple_file(self):
-        ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
             name="PivotOnTest",
-            related_analyzer_config=ac,
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -120,10 +101,8 @@ class PivotConfigTestCase(CustomTestCase):
         self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
 
     def test_create_job(self):
-        ac = AnalyzerConfig.objects.first()
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())
         pc = PivotConfig(
-            related_analyzer_config=ac,
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),

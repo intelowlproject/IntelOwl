@@ -746,6 +746,15 @@ class PluginConfig(ModelWithOwnership):
                 raise ValidationError("You must select a plugin configuration")
             raise ValidationError(f"You must have exactly one between {configs}")
 
+    def clean_config(self) -> None:
+        if len(list(filter(None, self._possible_configs()))) != 1:
+            configs = ", ".join(
+                [config.name for config in self._possible_configs() if config]
+            )
+            if not configs:
+                raise ValidationError("You must select a plugin configuration")
+            raise ValidationError(f"You must have exactly one between {configs}")
+
     def clean_value(self):
         from django.forms.fields import JSONString
 
@@ -935,7 +944,7 @@ class PythonConfig(AbstractConfig):
                 "start_time": now(),
                 "end_time": now(),
             },
-        )
+        )[0]
 
     @classmethod
     def delete_class_cache_keys(cls, user: User = None):

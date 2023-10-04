@@ -290,6 +290,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         )
         for analyzer in validated_data.get("analyzers_to_execute", []):
             qs = qs.filter(analyzers_requested__in=[analyzer])
+        for connector in validated_data.get("connectors_to_execute", []):
+            qs = qs.filter(connectors_requested__in=[connector])
+        for visualizer in validated_data.get("visualizers_to_execute", []):
+            qs = qs.filter(visualizers_to_execute__in=[visualizer])
+
         return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
 
     def create(self, validated_data: Dict) -> Job:
@@ -297,7 +302,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         send_task = validated_data.pop("send_task", False)
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
             try:
-                job = self.check_previous_jobs(validated_data)
+                return self.check_previous_jobs(validated_data)
             except self.Meta.model.DoesNotExist:
                 job = super().create(validated_data)
         else:
@@ -360,9 +365,6 @@ class JobListSerializer(_AbstractJobViewSerializer):
         exclude = (
             "file",
             "errors",
-            "runtime_configuration",
-            "received_request_time",
-            "finished_analysis_time",
         )
 
     pivots_to_execute = rfs.SerializerMethodField(read_only=True)
@@ -761,6 +763,7 @@ class JobEnvelopeSerializer(rfs.ListSerializer):
 
 class JobResponseSerializer(rfs.ModelSerializer):
     STATUS_ACCEPTED = "accepted"
+    STATUS_EXISTS = "exists"
     STATUS_NOT_AVAILABLE = "not_available"
 
     job_id = rfs.IntegerField(source="pk")
@@ -789,9 +792,13 @@ class JobResponseSerializer(rfs.ModelSerializer):
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Job):
         result = super().to_representation(instance)
-        result["status"] = self.STATUS_ACCEPTED
+        if instance.status in instance.Status.final_statuses():
+            status = self.STATUS_EXISTS
+        else:
+            status = self.STATUS_ACCEPTED
+        result["status"] = status
         return result
 
     def get_initial(self):

@@ -16,6 +16,7 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
         "disabled",
         "get_analyzers",
         "get_connectors",
+        "get_pivots",
         "get_visualizers",
         "runtime_configuration",
         "scan_mode",
@@ -33,6 +34,10 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
     @admin.display(description="Connectors")
     def get_connectors(self, obj: PlaybookConfig):
         return self._get_plugins(obj.connectors.all())
+
+    @admin.display(description="Pivots")
+    def get_pivots(self, obj: PlaybookConfig):
+        return self._get_plugins(obj.pivots.all())
 
     @admin.display(description="Visualizers")
     def get_visualizers(self, obj: PlaybookConfig):

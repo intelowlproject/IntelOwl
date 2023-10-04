@@ -370,6 +370,16 @@ const playbookTableColumns = [
     Filter: SelectColumnFilter,
   },
   {
+    Header: "Pivots",
+    id: "pivots",
+    accessor: (row) => row.pivots,
+    Cell: ({ value }) => (
+      <PlaybooksCollapse value={value} pluginType_="pivots" />
+    ),
+    disableSortBy: true,
+    Filter: SelectColumnFilter,
+  },
+  {
     Header: "Visualizers",
     id: "visualizers",
     accessor: (row) => row.visualizers,

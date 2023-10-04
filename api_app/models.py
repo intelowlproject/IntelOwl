@@ -473,7 +473,10 @@ class Job(models.Model):
     def pivots_to_execute(self) -> PythonConfigQuerySet:
         from api_app.pivots_manager.models import PivotConfig
 
-        qs = PivotConfig.objects.all()
+        if self.playbook_to_execute:
+            qs = self.playbook_to_execute.pivots
+        else:
+            qs = PivotConfig.objects
 
         valid_analyzers = list(
             self.analyzers_to_execute.all().values_list("pk", flat=True)

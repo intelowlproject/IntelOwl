@@ -33,6 +33,10 @@ class PlaybookConfig(AbstractConfig):
     connectors = models.ManyToManyField(
         "connectors_manager.ConnectorConfig", related_name="playbooks", blank=True
     )
+    pivots = models.ManyToManyField(
+        "pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True
+    )
+
     runtime_configuration = models.JSONField(
         blank=True,
         default=default_runtime,

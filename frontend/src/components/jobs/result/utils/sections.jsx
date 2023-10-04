@@ -348,6 +348,30 @@ export function JobInfoCard({ job }) {
   );
 }
 
+export function reportedVisualizerNumber(
+  visualizersReportedList,
+  visualizersToExecute,
+) {
+  /**
+   * Return the number of visualizer in the final statuses
+   */
+  let visualizersNumber = 0;
+  visualizersToExecute.forEach((visualizer) => {
+    // count reports that have 'config' === 'visualizer' (pages from the same visualizer) and are in a final statuses
+    let count = 0;
+    visualizersReportedList.forEach((report) => {
+      if (
+        report.config === visualizer &&
+        Object.values(pluginFinalStatuses).includes(report.status)
+      )
+        count += 1;
+    });
+    // reports relating to pages from the same visualizer are counted only once
+    if (count >= 1) visualizersNumber += 1;
+  });
+  return visualizersNumber;
+}
+
 export function reportedPluginNumber(pluginList) {
   /**
    * Return the number of plugin in the final statuses
@@ -363,7 +387,10 @@ export function JobIsRunningAlert({ job }) {
   const analizersReported = reportedPluginNumber(job.analyzer_reports);
   const connectorsReported = reportedPluginNumber(job.connector_reports);
   const pivotsReported = reportedPluginNumber(job.pivot_reports);
-  const visualizersReported = reportedPluginNumber(job.visualizer_reports);
+  const visualizersReported = reportedVisualizerNumber(
+    job.visualizer_reports,
+    job.visualizers_to_execute,
+  );
 
   /* Check if analyzers/connectors/visualizers are completed
     The analyzers are completed from the "analyzers_completed" status (index=3) to the last status 

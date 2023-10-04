@@ -4,7 +4,10 @@ import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { JobActionsBar } from "../../../../../src/components/jobs/result/utils/sections";
+import {
+  JobActionsBar,
+  reportedVisualizerNumber,
+} from "../../../../../src/components/jobs/result/utils/sections";
 
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
@@ -241,5 +244,105 @@ describe("test JobActionsBar", () => {
         ],
       );
     });
+  });
+
+  test("reportedVisualizerNumber function - 2 visualizers and 3 pages", async () => {
+    const visualizersReportedList = [
+      {
+        id: 1,
+        name: "DNS1",
+        process_time: 0,
+        report: [],
+        status: "SUCCESS",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "DNS",
+        type: "visualizer",
+      },
+      {
+        id: 2,
+        name: "IP1",
+        process_time: 0,
+        report: [],
+        status: "FAILED",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "IP",
+        type: "visualizer",
+      },
+      {
+        id: 3,
+        name: "IP2",
+        process_time: 0,
+        report: [],
+        status: "SUCCESS",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "IP",
+        type: "visualizer",
+      },
+      {
+        id: 4,
+        name: "IP3",
+        process_time: 0,
+        report: [],
+        status: "RUNNING",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "IP",
+        type: "visualizer",
+      },
+    ];
+    const visualizersToExecute = ["DNS", "IP"];
+    const result = reportedVisualizerNumber(
+      visualizersReportedList,
+      visualizersToExecute,
+    );
+    expect(result).toBe(2);
+  });
+
+  test("reportedVisualizerNumber function - all visualizars in running", async () => {
+    const visualizersReportedList = [
+      {
+        id: 1,
+        name: "DNS1",
+        process_time: 0,
+        report: [],
+        status: "RUNNING",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "DNS",
+        type: "visualizer",
+      },
+      {
+        id: 2,
+        name: "IP1",
+        process_time: 0,
+        report: [],
+        status: "RUNNING",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "IP",
+        type: "visualizer",
+      },
+    ];
+    const visualizersToExecute = ["DNS", "IP"];
+    const result = reportedVisualizerNumber(
+      visualizersReportedList,
+      visualizersToExecute,
+    );
+    expect(result).toBe(0);
   });
 });

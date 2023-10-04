@@ -75,7 +75,7 @@ const observableType2RegExMap = {
 };
 
 const sanitizeObservable = (observable) =>
-  observable.replaceAll("[", "").replaceAll("]", "");
+  observable.replaceAll("[", "").replaceAll("]", "").trim();
 
 // Component
 export default function ScanForm() {
@@ -462,7 +462,7 @@ export default function ScanForm() {
   // wait the user terminated to typing and then perform the request to recent scans
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      setRecentScansInput(inputValue);
+      setRecentScansInput(sanitizeObservable(inputValue));
       console.debug(inputValue);
     }, 1000);
     return () => clearTimeout(timer);

@@ -25,16 +25,13 @@ export function VerticalListVisualizer({
 }) {
   const [isListOpen, setIsListOpen] = useState(startOpen);
   const toggleList = () => setIsListOpen(!isListOpen);
+  const color = name.props.color.replace("bg-", "");
 
   return (
     <div className={size} id={id}>
-      <Card className={disable ? "opacity-50" : ""}>
+      <Card className={`${disable ? "opacity-50" : ""} border-${color}`}>
         <CardTitle className="p-1 mb-0">
-          <Button
-            className="p-0 w-100 px-1"
-            onClick={toggleList}
-            color={name.props.color.replace("bg-", "")}
-          >
+          <Button className="p-0 w-100 px-1" onClick={toggleList} color={color}>
             <div
               className={`d-flex align-items-center text-capitalize justify-content-${alignment}`}
             >

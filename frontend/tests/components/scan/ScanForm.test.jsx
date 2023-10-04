@@ -2152,4 +2152,128 @@ describe("test ScanForm component", () => {
     // check playbooks has been loaded
     expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
   });
+
+  test("toast new job", async () => {
+    axios.post.mockImplementation(() =>
+      Promise.resolve({
+        data: {
+          results: [
+            {
+              job_id: 1,
+              analyzers_running: [],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: "TEST_PLAYBOOK_GENERIC",
+              status: "accepted",
+            },
+          ],
+          count: 1,
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "genericText");
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_GENERIC")).toBeInTheDocument();
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["generic", "genericText"]],
+            playbook_requested: "TEST_PLAYBOOK_GENERIC",
+            tlp: "AMBER",
+            scan_mode: 1,
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/1");
+    });
+
+    setTimeout(() => {
+      expect(
+        screen.getByText("Created new Job with ID(s) #1"),
+      ).toBeInTheDocument();
+    }, 3000);
+  });
+
+  test("toast existing job", async () => {
+    axios.post.mockImplementation(() =>
+      Promise.resolve({
+        data: {
+          results: [
+            {
+              job_id: 1,
+              analyzers_running: [],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: "TEST_PLAYBOOK_GENERIC",
+              status: "exists",
+            },
+          ],
+          count: 1,
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "genericText");
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_GENERIC")).toBeInTheDocument();
+    // check scan is enabled
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+    await waitFor(() => {
+      expect(axios.post.mock.calls).toEqual([
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["generic", "genericText"]],
+            playbook_requested: "TEST_PLAYBOOK_GENERIC",
+            tlp: "AMBER",
+            scan_mode: 1,
+          },
+        ],
+      ]);
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/1");
+    });
+
+    setTimeout(() => {
+      expect(
+        screen.getByText("Reported existing Job with ID(s) #1"),
+      ).toBeInTheDocument();
+    }, 3000);
+  });
 });

@@ -10,7 +10,7 @@ class Compare(Pivot):
         try:
             content = next(self.related_reports)
         except StopIteration:
-            raise
+            raise RuntimeError("Not found report")
 
         for key in field.split("."):
             try:

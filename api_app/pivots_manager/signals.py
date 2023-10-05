@@ -38,7 +38,7 @@ def m2m_changed_pivot_config_analyzer_config(
         )
     if action.startswith("post"):
         plugins_name = ", ".join(
-            [instance.related_configs.all().values_list("name", flat=True)]
+            instance.related_configs.all().values_list("name", flat=True)
         )
         instance.description = (
             f"Pivot object for plugins {plugins_name}"
@@ -65,7 +65,7 @@ def m2m_changed_pivot_config_connector_config(
         )
     if action.startswith("post"):
         plugins_name = ", ".join(
-            [instance.related_configs.all().values_list("name", flat=True)]
+            instance.related_configs.all().values_list("name", flat=True)
         )
         instance.description = (
             f"Pivot object for plugins {plugins_name}"

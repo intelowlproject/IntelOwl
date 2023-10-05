@@ -83,7 +83,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     def fail_job(job):
         logger.error(
             f"found stuck analysis, job_id:{job.id}."
-            f"Setting the job to status to {Job.Status.FAILED.value}'"
+            f"Setting the job to status {Job.Status.FAILED.value}'"
         )
         job.status = Job.Status.FAILED.value
         job.finished_analysis_time = now()
@@ -113,6 +113,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
                 # if it's still pending, we are killing
                 fail_job(running_job)
             else:
+                logger.info(f"Running again job {running_job}")
                 # we are trying to execute again all pending
                 # (and technically, but it is not the case here) all failed reports
                 running_job.retry()

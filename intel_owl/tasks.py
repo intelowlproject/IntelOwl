@@ -112,7 +112,10 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
             ):
                 # if it's still pending, we are killing
                 fail_job(running_job)
-            else:
+            # the job is pending for 1 cycle
+            elif running_job.received_request_time < (
+                now() - datetime.timedelta(minutes=minutes_ago)
+            ):
                 logger.info(f"Running again job {running_job}")
                 # we are trying to execute again all pending
                 # (and technically, but it is not the case here) all failed reports

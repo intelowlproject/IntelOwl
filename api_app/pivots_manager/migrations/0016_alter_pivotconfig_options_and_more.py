@@ -36,7 +36,6 @@ class Migration(migrations.Migration):
             name="related_analyzer_configs",
             field=models.ManyToManyField(
                 blank=True,
-                null=True,
                 related_name="pivots",
                 to="analyzers_manager.analyzerconfig",
             ),
@@ -46,7 +45,6 @@ class Migration(migrations.Migration):
             name="related_connector_configs",
             field=models.ManyToManyField(
                 blank=True,
-                null=True,
                 related_name="pivots",
                 to="connectors_manager.connectorconfig",
             ),

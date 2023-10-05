@@ -2,6 +2,7 @@ import logging
 import typing
 from typing import Type
 
+from api_app.pivots_manager.queryset import PivotConfigQuerySet
 from api_app.queryset import PythonConfigQuerySet
 from api_app.validators import plugin_name_validator
 
@@ -70,6 +71,7 @@ class PivotMap(models.Model):
 
 
 class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
+    objects = PivotConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100, null=False, validators=[plugin_name_validator], unique=True
     )

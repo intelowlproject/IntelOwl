@@ -474,26 +474,10 @@ class Job(models.Model):
         from api_app.pivots_manager.models import PivotConfig
 
         if self.playbook_to_execute:
-            qs = self.playbook_to_execute.pivots
-        else:
-            qs = PivotConfig.objects
-
-        valid_analyzers = list(
-            self.analyzers_to_execute.all().values_list("pk", flat=True)
+            return self.playbook_to_execute.pivots.all()
+        return PivotConfig.objects.valid(
+            self.analyzers_to_execute.all(), self.connectors_to_execute.all()
         )
-        if valid_analyzers:
-            qs = qs.many_to_many_to_array("related_analyzer_configs")
-            qs = qs.filter(related_analyzer_configs_array__contained_by=valid_analyzers)
-        valid_connectors = list(
-            self.connectors_to_execute.all().values_list("pk", flat=True)
-        )
-        if valid_connectors:
-            qs = qs.many_to_many_to_array("related_connector_configs")
-            qs = qs.filter(
-                related_connector_configs_array__contained_by=valid_connectors
-            )
-        logger.info(f"Pivots are {qs.values_list('name', flat=True)}")
-        return qs
 
     @property
     def _final_status_signature(self) -> Signature:

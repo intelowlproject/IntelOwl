@@ -36,6 +36,7 @@ class PlaybookConfig(AbstractConfig):
     pivots = models.ManyToManyField(
         "pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True
     )
+
     runtime_configuration = models.JSONField(
         blank=True,
         default=default_runtime,
@@ -59,19 +60,6 @@ class PlaybookConfig(AbstractConfig):
     class Meta:
         ordering = ["name", "disabled"]
 
-    def clean_pivots(self):
-        for pivot in self.pivots.all():
-            if (
-                not self.analyzers.filter(python__module=pivot.python_module).exists()
-                and not self.connectors.filter(
-                    python_module=pivot.python_module
-                ).exists()
-            ):
-                raise ValidationError(
-                    f"You can't use {pivot.name} here: "
-                    "the python module is not used by this playbook"
-                )
-
     def clean_scan(self):
         if (
             self.scan_mode == ScanMode.FORCE_NEW_ANALYSIS.value
@@ -93,7 +81,6 @@ class PlaybookConfig(AbstractConfig):
     def clean(self) -> None:
         super().clean()
         self.clean_scan()
-        self.clean_pivots()
 
     def is_sample(self) -> bool:
         return AllTypes.FILE.value in self.type

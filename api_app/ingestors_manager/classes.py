@@ -61,7 +61,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
         self._config: IngestorConfig
         # exhaust generator
         deque(
-            self._config._create_jobs(
+            self._config.create_jobs(
                 # every job created from an ingestor
                 content,
                 TLP.CLEAR.value,

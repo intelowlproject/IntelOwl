@@ -94,6 +94,16 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         blank=False,
     )
 
+    def _generate_full_description(self) -> str:
+        plugins_name = ", ".join(
+            self.related_configs.all().values_list("name", flat=True)
+        )
+        return (
+            f"Pivot for plugins {plugins_name}"
+            " that executes"
+            f" playbook {self.playbook_to_execute.name}"
+        )
+
     @property
     def related_configs(self) -> PythonConfigQuerySet:
         return (

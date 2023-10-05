@@ -10,9 +10,12 @@ def pre_save_pivot_config(
     sender, instance: PivotConfig, raw, using, update_fields, *args, **kwargs
 ):
     try:
-        instance.description = (
-            f"Pivot that executes playbook {instance.playbook_to_execute.name}"
-        )
+        if instance.pk:
+            instance.description = instance._generate_full_description()
+        else:
+            instance.description = (
+                f"Pivot that executes playbook {instance.playbook_to_execute.name}"
+            )
     except AttributeError:
         # this happens when
         # an integrity error will be raised because some fields are missing
@@ -37,14 +40,8 @@ def m2m_changed_pivot_config_analyzer_config(
             "You can't set both analyzers and connectors configs to a pivot"
         )
     if action.startswith("post"):
-        plugins_name = ", ".join(
-            instance.related_configs.all().values_list("name", flat=True)
-        )
-        instance.description = (
-            f"Pivot object for plugins {plugins_name}"
-            " that executes"
-            f" playbook {instance.playbook_to_execute.name}"
-        )
+        instance.description = instance._generate_full_description()
+        instance.save()
 
 
 @receiver(m2m_changed, sender=PivotConfig.related_connector_configs.through)
@@ -64,11 +61,5 @@ def m2m_changed_pivot_config_connector_config(
             "You can't set both analyzers and connectors configs to a pivot"
         )
     if action.startswith("post"):
-        plugins_name = ", ".join(
-            instance.related_configs.all().values_list("name", flat=True)
-        )
-        instance.description = (
-            f"Pivot object for plugins {plugins_name}"
-            " that executes"
-            f" playbook {instance.playbook_to_execute.name}"
-        )
+        instance.description = instance._generate_full_description()
+        instance.save()

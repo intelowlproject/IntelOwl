@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
@@ -19,9 +20,13 @@ class PivotConfigTestCase(CustomTestCase):
             ).first(),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
-        pc.related_analyzer_configs.set([AnalyzerConfig.objects.first()])
-        with self.assertRaises(ValidationError):
-            pc.related_connector_configs.set([ConnectorConfig.objects.first()])
+        ac = AnalyzerConfig.objects.first()
+        pc.related_analyzer_configs.set([ac])
+        self.assertIn(ac.name, pc.description)
+        with transaction.atomic():
+            with self.assertRaises(ValidationError):
+                pc.related_connector_configs.set([ConnectorConfig.objects.first()])
+        self.assertFalse(pc.related_connector_configs.exists())
         pc.delete()
 
     def test_clean_valid(self):

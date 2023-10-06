@@ -165,31 +165,67 @@ export async function createJob(formValues) {
     });
     // handle response/error
     if (respData.every((element) => element.status === "accepted")) {
-      const jobIds = respData.map((x) => parseInt(x.job_id, 10));
-      addToast(
-        `Created new Job with ID(s) #${jobIds.join(", ")}!`,
-        <div>
-          <ContentSection className="text-light">
-            <strong>Analyzers:</strong>&nbsp;
-            {Array.from(analyzersRunning)?.join(", ")}
-          </ContentSection>
-          {connectorsRunning.length > 0 && (
+      const jobIdsAccepted = [];
+      const jobIdsExists = [];
+      respData.forEach((x) => {
+        if (x.already_exists) {
+          jobIdsExists.push(parseInt(x.job_id, 10));
+        } else {
+          jobIdsAccepted.push(parseInt(x.job_id, 10));
+        }
+      });
+      if (jobIdsAccepted.length > 0) {
+        addToast(
+          `Created new Job with ID(s) #${jobIdsAccepted.join(", ")}!`,
+          <div>
             <ContentSection className="text-light">
-              <strong>Connectors:</strong>&nbsp;
-              {Array.from(connectorsRunning).join(", ")}
+              <strong>Analyzers:</strong>&nbsp;
+              {Array.from(analyzersRunning)?.join(", ")}
             </ContentSection>
-          )}
-          {warnings.length > 0 && (
-            <ContentSection className="bg-accent text-darker">
-              <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+            {connectorsRunning.length > 0 && (
+              <ContentSection className="text-light">
+                <strong>Connectors:</strong>&nbsp;
+                {Array.from(connectorsRunning).join(", ")}
+              </ContentSection>
+            )}
+            {warnings.length > 0 && (
+              <ContentSection className="bg-accent text-darker">
+                <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+              </ContentSection>
+            )}
+          </div>,
+          "success",
+          true,
+          10000,
+        );
+      }
+      // toast for existing jobs
+      if (jobIdsExists.length > 0) {
+        addToast(
+          `Reported existing Job with ID(s) #${jobIdsExists.join(", ")}!`,
+          <div>
+            <ContentSection className="text-light">
+              <strong>Analyzers:</strong>&nbsp;
+              {Array.from(analyzersRunning)?.join(", ")}
             </ContentSection>
-          )}
-        </div>,
-        "success",
-        true,
-        10000,
-      );
-      return Promise.resolve(jobIds);
+            {connectorsRunning.length > 0 && (
+              <ContentSection className="text-light">
+                <strong>Connectors:</strong>&nbsp;
+                {Array.from(connectorsRunning).join(", ")}
+              </ContentSection>
+            )}
+            {warnings.length > 0 && (
+              <ContentSection className="bg-accent text-darker">
+                <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+              </ContentSection>
+            )}
+          </div>,
+          "info",
+          true,
+          10000,
+        );
+      }
+      return Promise.resolve(jobIdsAccepted.concat(jobIdsExists));
     }
 
     // else

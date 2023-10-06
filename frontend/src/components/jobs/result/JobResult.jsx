@@ -113,7 +113,14 @@ export default function JobResult() {
       loading={initialLoading}
       error={error}
       render={() => (
-        <JobOverview isRunningJob={isRunning} job={job} refetch={refetch} />
+        <JobOverview
+          isRunningJob={isRunning}
+          job={job}
+          refetch={() => {
+            console.debug("called refetch");
+            refetch();
+          }}
+        />
       )}
     />
   );

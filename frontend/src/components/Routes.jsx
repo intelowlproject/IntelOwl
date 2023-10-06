@@ -122,8 +122,21 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
+  // this is needed from start scan: we don't know visualizers before enter in the job
   {
-    path: "/jobs/:id",
+    path: `/jobs/:id/:section`,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <JobResult />
+      </Suspense>
+    ),
+  },
+  {
+    /*
+      ex: jobs/1/visualizer/DNS
+      ex: jobs/1/raw/analyzers
+    */
+    path: `/jobs/:id/:section/:subSection`,
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <JobResult />

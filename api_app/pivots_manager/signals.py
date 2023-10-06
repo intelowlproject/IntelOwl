@@ -1,5 +1,11 @@
 from django.core.exceptions import ValidationError
-from django.db.models.signals import m2m_changed, post_delete, post_migrate, post_save, pre_save
+from django.db.models.signals import (
+    m2m_changed,
+    post_delete,
+    post_migrate,
+    post_save,
+    pre_save,
+)
 from django.dispatch import receiver
 
 from api_app.pivots_manager.apps import PivotsManagerConfig
@@ -23,7 +29,7 @@ def pre_save_pivot_config(
         pass
     return instance
 
-  
+
 @receiver(post_save, sender=PivotConfig)
 def post_save_pivot_config(sender, instance: PivotConfig, *args, **kwargs):
     instance.delete_class_cache_keys()
@@ -43,7 +49,7 @@ def post_migrate_pivot(
     if plan:
         PivotConfig.delete_class_cache_keys()
 
-        
+
 @receiver(m2m_changed, sender=PivotConfig.related_analyzer_configs.through)
 def m2m_changed_pivot_config_analyzer_config(
     sender,

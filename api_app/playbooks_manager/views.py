@@ -32,7 +32,11 @@ class PlaybookConfigViewSet(
             self.serializer_class.Meta.model.objects.visible_for_user(self.request.user)
             .ordered_for_user(self.request.user)
             .prefetch_related(
-                "analyzers", "connectors", "pivots", "visualizers", "tags",
+                "analyzers",
+                "connectors",
+                "pivots",
+                "visualizers",
+                "tags",
             )
         )
 

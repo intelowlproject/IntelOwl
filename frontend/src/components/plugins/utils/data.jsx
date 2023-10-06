@@ -274,20 +274,6 @@ const pivotTableColumns = [
     maxWidth: 100,
   },
   {
-    Header: "Enabled for organization",
-    id: "enabled_for_organization",
-    Cell: ({ row: { original } }) => (
-      <OrganizationPluginStateToggle
-        pluginName={original?.name}
-        disabled={original?.orgPluginDisabled}
-        refetch={original?.refetch}
-        type={original?.plugin_type}
-      />
-    ),
-    disableSortBy: true,
-    maxWidth: 100,
-  },
-  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -311,64 +297,22 @@ const pivotTableColumns = [
     Filter: SelectColumnFilter,
     maxWidth: 145,
   },
-];
-
-const pivotTableColumns = [
-  ...pluginTableColumns,
   {
-    Header: "Configured",
-    id: "configured",
-    accessor: "verification.configured",
-    Cell: ({ row: { original } }) => (
-      <PluginVerificationIcon
-        pluginName={original?.name}
-        verification={original?.verification}
-      />
-    ),
-    Filter: SelectOptionsFilter,
-    selectOptions: ["true", "false"],
+    Header: "Actions",
+    id: "actions",
+    accessor: (r) => r,
     disableSortBy: true,
-    maxWidth: 100,
-  },
-  {
-    Header: "Enabled for organization",
-    id: "enabled_for_organization",
-    Cell: ({ row: { original } }) => (
-      <OrganizationPluginStateToggle
-        pluginName={original?.name}
-        disabled={original?.orgPluginDisabled}
-        refetch={original?.refetch}
-        type={original?.plugin_type}
-      />
-    ),
-    disableSortBy: true,
-    maxWidth: 100,
-  },
-  {
-    Header: "Description",
-    id: "description",
-    accessor: "description",
-    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
-    disableSortBy: true,
-    Filter: DefaultColumnFilter,
-  },
-  {
-    Header: "Playbook executed",
-    id: "playbook",
-    accessor: "playbook_to_execute",
-    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
-    Filter: SelectColumnFilter,
-    maxWidth: 145,
-  },
-  {
-    Header: "Related config",
-    id: "related_configs",
-    accessor: (row) => row.related_configs,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_="configurations" />
+      <div className="d-flex justify-content-center mx-2">
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={value?.orgPluginDisabled}
+          refetch={value?.refetch}
+          type={value?.plugin_type}
+        />
+      </div>
     ),
-    disableSortBy: true,
-    Filter: SelectColumnFilter,
+    maxWidth: 125,
   },
 ];
 // Playbooks columns: these columns are shown for the playbooks

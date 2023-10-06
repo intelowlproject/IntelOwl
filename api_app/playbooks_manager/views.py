@@ -6,7 +6,7 @@ import logging
 from drf_spectacular.utils import extend_schema as add_docs
 from rest_framework import mixins, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api_app.playbooks_manager.serializers import PlaybookConfigSerializer
@@ -35,13 +35,6 @@ class PlaybookConfigViewSet(
                 "analyzers", "connectors", "pivots", "visualizers", "tags",
             )
         )
-
-    def get_permissions(self):
-        permissions = super().get_permissions()
-        if self.request.method in ["DELETE"]:
-            permissions.append((IsAdminUser)())
-        return permissions
-
 
     @add_docs(
         description="This endpoint allows to start a Job related to an observable",

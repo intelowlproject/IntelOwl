@@ -60,7 +60,7 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
           <FormGroup row className="d-flex flex-wrap">
             <Col>
               <div className="p-3">
-                <Label className="required" for="forminput-username" md={12}>
+                <Label className="required" for="forminput-name" md={12}>
                   Playbook name
                 </Label>
                 <Input
@@ -68,12 +68,14 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
                   id="forminput-name"
                   type="text"
                   name="name"
+                  onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                 />
+                {formik.touched.name && <small>{formik.errors.name}</small>}
               </div>
 
               <div className="p-3">
-                <Label className="required" for="forminput-name" md={12}>
+                <Label className="required" for="forminput-description" md={12}>
                   Playbook description
                 </Label>
                 <textarea
@@ -113,11 +115,11 @@ function SaveAsPlaybookIcon() {
 }
 
 export function SaveAsPlaybookButton({ job }) {
-  initialValues.analyzers = job.analyzers;
-  initialValues.connectors = job.connectors;
-  initialValues.pivots = job.pivots;
-  initialValues.runtimeConfiguration = job.runtimeConfiguration;
-  initialValues.tags = job.tags;
+  initialValues.analyzers = job.analyzers_to_execute;
+  initialValues.connectors = job.connectors_to_execute;
+  initialValues.pivots = job.pivots_to_execute;
+  initialValues.runtimeConfiguration = job.runtime_configuration;
+  if (job.tags.length) initialValues.tags = job.tags;
   initialValues.tlp = job.tlp;
   initialValues.scan_mode = job.scan_mode;
   initialValues.scan_check_time = job.scan_check_time;

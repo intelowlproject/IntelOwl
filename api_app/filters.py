@@ -2,7 +2,10 @@
 # See the file 'LICENSE' for copying permission.
 
 import rest_framework_filters as filters
-from django.db.models import Q
+from django.contrib.admin import SimpleListFilter
+from django.db.models import Q, QuerySet
+from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
 
 from .analyzers_manager.constants import ObservableTypes
 from .models import Job
@@ -61,3 +64,28 @@ class JobFilter(filters.FilterSet):
             "tlp": ["exact"],
             "status": ["exact"],
         }
+
+
+class QueueListFilter(SimpleListFilter):
+    title = _("queue")
+
+    parameter_name = "queue"
+
+    def __init__(
+        self, request: HttpRequest, params: dict[str, str], model, model_admin
+    ):
+        self.model = model
+        super().__init__(request, params, model, model_admin)
+
+    def lookups(self, request: HttpRequest, model_admin):
+        configs = (
+            self.model.objects.values_list("config__queue", flat=True)
+            .order_by()
+            .distinct()
+        )
+        return [(config, config) for config in configs]
+
+    def queryset(self, request: HttpRequest, queryset: QuerySet):
+        if self.value():
+            return queryset.filter(config__queue=self.value())
+        return queryset

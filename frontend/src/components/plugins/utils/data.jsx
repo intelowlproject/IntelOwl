@@ -362,7 +362,7 @@ const playbookTableColumns = [
     disableSortBy: true,
     Filter: SelectColumnFilter,
   },
-{
+  {
     Header: "Pivots",
     id: "pivots",
     accessor: (row) => row.pivots,
@@ -395,7 +395,7 @@ const playbookTableColumns = [
       </div>
     ),
     maxWidth: 125,
-}
+  },
 ];
 
 // Visualizers columns: these columns are shown for the visualizers

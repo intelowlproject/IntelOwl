@@ -2153,7 +2153,7 @@ describe("test ScanForm component", () => {
     expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
   });
 
-  test("toast new job", async () => {
+  test("toast new job with playbook", async () => {
     axios.post.mockImplementation(() =>
       Promise.resolve({
         data: {
@@ -2165,6 +2165,7 @@ describe("test ScanForm component", () => {
               visualizers_running: [],
               playbook_running: "TEST_PLAYBOOK_GENERIC",
               status: "accepted",
+              already_exists: false,
             },
           ],
           count: 1,
@@ -2215,7 +2216,7 @@ describe("test ScanForm component", () => {
     }, 3000);
   });
 
-  test("toast existing job", async () => {
+  test("toast existing job with playbook", async () => {
     axios.post.mockImplementation(() =>
       Promise.resolve({
         data: {
@@ -2226,7 +2227,8 @@ describe("test ScanForm component", () => {
               connectors_running: [],
               visualizers_running: [],
               playbook_running: "TEST_PLAYBOOK_GENERIC",
-              status: "exists",
+              status: "accepted",
+              already_exists: true,
             },
           ],
           count: 1,

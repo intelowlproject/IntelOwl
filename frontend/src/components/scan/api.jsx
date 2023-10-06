@@ -73,18 +73,15 @@ export async function createPlaybookJob(formValues) {
     });
 
     // handle response/error
-    if (
-      respData.every(
-        (element) =>
-          element.status === "accepted" || element.status === "exists",
-      )
-    ) {
+    if (respData.every((element) => element.status === "accepted")) {
       const jobIdsAccepted = [];
       const jobIdsExists = [];
       respData.forEach((x) => {
-        if (x.status === "accepted")
+        if (x.already_exists) {
+          jobIdsExists.push(parseInt(x.job_id, 10));
+        } else {
           jobIdsAccepted.push(parseInt(x.job_id, 10));
-        if (x.status === "exists") jobIdsExists.push(parseInt(x.job_id, 10));
+        }
       });
       // toast for accepted jobs
       if (jobIdsAccepted.length > 0) {
@@ -167,12 +164,7 @@ export async function createJob(formValues) {
       if (x.warnings) warnings.push(...x.warnings);
     });
     // handle response/error
-    if (
-      respData.every(
-        (element) =>
-          element.status === "accepted" || element.status === "exists",
-      )
-    ) {
+    if (respData.every((element) => element.status === "accepted")) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
       addToast(
         `Created new Job with ID(s) #${jobIds.join(", ")}!`,

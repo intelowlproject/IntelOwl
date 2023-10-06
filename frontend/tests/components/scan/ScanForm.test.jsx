@@ -2245,7 +2245,10 @@ describe("test ScanForm component", () => {
     const firstObservableInputElement = screen.getByRole("textbox", {
       name: "",
     });
-    await user.type(firstObservableInputElement, "previouslyAnalyzerObservable");
+    await user.type(
+      firstObservableInputElement,
+      "previouslyAnalyzerObservable",
+    );
     // check playbooks has been loaded
     expect(screen.getByText("TEST_PLAYBOOK_GENERIC")).toBeInTheDocument();
     // check scan is enabled
@@ -2321,12 +2324,15 @@ describe("test ScanForm component", () => {
     // add value
     const addObservableButton = screen.getByText("Add new value");
     expect(addObservableButton).toBeInTheDocument();
-    await user.click(addObservableButton)
+    await user.click(addObservableButton);
     // add second observable
     const secondObservableInputElement = screen.getAllByRole("textbox", {
       name: "",
     })[1];
-    await user.type(secondObservableInputElement, "previouslyAnalyzerObservable");
+    await user.type(
+      secondObservableInputElement,
+      "previouslyAnalyzerObservable",
+    );
     // check playbooks has been loaded
     expect(screen.getByText("TEST_PLAYBOOK_GENERIC")).toBeInTheDocument();
     // check scan is enabled
@@ -2342,7 +2348,10 @@ describe("test ScanForm component", () => {
         [
           PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
           {
-            observables: [["generic", "newObservable"], ["generic", "previouslyAnalyzerObservable"]],
+            observables: [
+              ["generic", "newObservable"],
+              ["generic", "previouslyAnalyzerObservable"],
+            ],
             playbook_requested: "TEST_PLAYBOOK_GENERIC",
             tlp: "AMBER",
             scan_mode: 1,
@@ -2369,14 +2378,14 @@ describe("test ScanForm component", () => {
         data: {
           results: [
             {
-              "job_id": 1,
-              "analyzers_running": ["TEST_ANALYZER"],
-              "connectors_running": [],
-              "visualizers_running": [],
-              "playbook_running": null,
-              "status": "accepted",
-              "already_exists": false
-            }
+              job_id: 1,
+              analyzers_running: ["TEST_ANALYZER"],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: null,
+              status: "accepted",
+              already_exists: false,
+            },
           ],
           count: 1,
         },
@@ -2423,11 +2432,11 @@ describe("test ScanForm component", () => {
         [
           ANALYZE_MULTIPLE_OBSERVABLE_URI,
           {
-            "observables": [["generic", "newObservable"]],
-            "tlp": "AMBER",
-            "scan_mode": 2,
-            "analyzers_requested": ["TEST_ANALYZER"],
-            "scan_check_time": "24:00:00"
+            observables: [["generic", "newObservable"]],
+            tlp: "AMBER",
+            scan_mode: 2,
+            analyzers_requested: ["TEST_ANALYZER"],
+            scan_check_time: "24:00:00",
           },
         ],
       ]);
@@ -2448,14 +2457,14 @@ describe("test ScanForm component", () => {
         data: {
           results: [
             {
-              "job_id": 2,
-              "analyzers_running": ["TEST_ANALYZER"],
-              "connectors_running": [],
-              "visualizers_running": [],
-              "playbook_running": null,
-              "status": "accepted",
-              "already_exists": true
-            }
+              job_id: 2,
+              analyzers_running: ["TEST_ANALYZER"],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: null,
+              status: "accepted",
+              already_exists: true,
+            },
           ],
           count: 1,
         },
@@ -2471,7 +2480,10 @@ describe("test ScanForm component", () => {
     const firstObservableInputElement = screen.getByRole("textbox", {
       name: "",
     });
-    await user.type(firstObservableInputElement, "previouslyAnalyzerObservable");
+    await user.type(
+      firstObservableInputElement,
+      "previouslyAnalyzerObservable",
+    );
     const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
     expect(analyzerSelectionRadioButton).toBeInTheDocument();
     await user.click(analyzerSelectionRadioButton);
@@ -2502,11 +2514,11 @@ describe("test ScanForm component", () => {
         [
           ANALYZE_MULTIPLE_OBSERVABLE_URI,
           {
-            "observables": [["generic", "previouslyAnalyzerObservable"]],
-            "tlp": "AMBER",
-            "scan_mode": 2,
-            "analyzers_requested": ["TEST_ANALYZER"],
-            "scan_check_time": "24:00:00"
+            observables: [["generic", "previouslyAnalyzerObservable"]],
+            tlp: "AMBER",
+            scan_mode: 2,
+            analyzers_requested: ["TEST_ANALYZER"],
+            scan_check_time: "24:00:00",
           },
         ],
       ]);
@@ -2527,23 +2539,23 @@ describe("test ScanForm component", () => {
         data: {
           results: [
             {
-              "job_id": 1,
-              "analyzers_running": ["TEST_ANALYZER"],
-              "connectors_running": [],
-              "visualizers_running": [],
-              "playbook_running": null,
-              "status": "accepted",
-              "already_exists": false
+              job_id: 1,
+              analyzers_running: ["TEST_ANALYZER"],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: null,
+              status: "accepted",
+              already_exists: false,
             },
             {
-              "job_id": 2,
-              "analyzers_running": ["TEST_ANALYZER"],
-              "connectors_running": [],
-              "visualizers_running": [],
-              "playbook_running": null,
-              "status": "accepted",
-              "already_exists": true
-            }
+              job_id: 2,
+              analyzers_running: ["TEST_ANALYZER"],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: null,
+              status: "accepted",
+              already_exists: true,
+            },
           ],
           count: 2,
         },
@@ -2563,12 +2575,15 @@ describe("test ScanForm component", () => {
     // add value
     const addObservableButton = screen.getByText("Add new value");
     expect(addObservableButton).toBeInTheDocument();
-    await user.click(addObservableButton)
+    await user.click(addObservableButton);
     // add second observable
     const secondObservableInputElement = screen.getAllByRole("textbox", {
       name: "",
     })[1];
-    await user.type(secondObservableInputElement, "previouslyAnalyzerObservable");
+    await user.type(
+      secondObservableInputElement,
+      "previouslyAnalyzerObservable",
+    );
 
     const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
     expect(analyzerSelectionRadioButton).toBeInTheDocument();
@@ -2600,11 +2615,14 @@ describe("test ScanForm component", () => {
         [
           ANALYZE_MULTIPLE_OBSERVABLE_URI,
           {
-            "observables": [["generic", "newObservable"], ["generic", "previouslyAnalyzerObservable"]],
-            "tlp": "AMBER",
-            "scan_mode": 2,
-            "analyzers_requested": ["TEST_ANALYZER"],
-            "scan_check_time": "24:00:00"
+            observables: [
+              ["generic", "newObservable"],
+              ["generic", "previouslyAnalyzerObservable"],
+            ],
+            tlp: "AMBER",
+            scan_mode: 2,
+            analyzers_requested: ["TEST_ANALYZER"],
+            scan_check_time: "24:00:00",
           },
         ],
       ]);

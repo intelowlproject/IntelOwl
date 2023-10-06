@@ -241,7 +241,7 @@ class IPReputationServices(Visualizer):
             logger.warning("Crowdsec report does not exist")
             return None, None
         else:
-            classifications = analyzer_report.report.get("classifications", [])
+            classifications = analyzer_report.report.get("classifications", {})
             sub_classifications = classifications.get("classifications", [])
             false_positives = classifications.get("false_positives", [])
             all_class = sub_classifications + false_positives

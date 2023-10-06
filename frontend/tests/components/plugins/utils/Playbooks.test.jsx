@@ -149,16 +149,24 @@ describe("test Playbooks component", () => {
       name: "Description",
     });
     expect(descriptionColumnHeader).toBeInTheDocument();
-    const typeColumnHeader = screen.getByRole("columnheader", { name: "Type" });
+    const typeColumnHeader = screen.getByRole("columnheader", { name: "Supported types All" });
     expect(typeColumnHeader).toBeInTheDocument();
     const analyzersExecutedColumnHeader = screen.getByRole("columnheader", {
-      name: "Analyzers executed All",
+      name: "Analyzers All",
     });
     expect(analyzersExecutedColumnHeader).toBeInTheDocument();
     const connectorsExecutedColumnHeader = screen.getByRole("columnheader", {
-      name: "Connectors executed All",
+      name: "Connectors All",
     });
     expect(connectorsExecutedColumnHeader).toBeInTheDocument();
+    const pivotsExecutedColumnHeader = screen.getByRole("columnheader", {
+      name: "Pivots All",
+    });
+    expect(pivotsExecutedColumnHeader).toBeInTheDocument();
+    const visualizersExecutedColumnHeader = screen.getByRole("columnheader", {
+      name: "Visualizers All",
+    });
+    expect(visualizersExecutedColumnHeader).toBeInTheDocument();
     const actionColumnHeader = screen.getByRole("columnheader", {
       name: "Actions",
     });

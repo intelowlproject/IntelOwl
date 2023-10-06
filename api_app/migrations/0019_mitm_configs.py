@@ -74,7 +74,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("playbooks_manager", "0004_datamigration"),
         ("analyzers_manager", "0006_analyzerconfig_disabled_in_org"),

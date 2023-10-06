@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from abc import ABCMeta
 
 import requests
 
@@ -14,7 +15,7 @@ from api_app.analyzers_manager.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-class TriageMixin(BaseAnalyzerMixin):
+class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"
     private_url: str = "https://private.tria.ge/api/v0/"
@@ -24,11 +25,6 @@ class TriageMixin(BaseAnalyzerMixin):
     _api_key_name: str
     report_type: str
     max_tries: int
-
-    @property
-    def python_base_path(self) -> str:
-        # this is just to avoid errors with the Abstract class
-        return ""
 
     def config(self):
         super().config()
@@ -43,10 +39,6 @@ class TriageMixin(BaseAnalyzerMixin):
         self.poll_distance = 3
         self.final_report = {}
         self.response = None
-
-    def run(self):
-        # this should be implemented by the extended classes
-        pass
 
     @property
     def session(self):

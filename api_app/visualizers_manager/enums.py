@@ -68,6 +68,9 @@ class VisualizableIcon(enum.Enum):
     EXIT = "exit"
     CONNECTION = "connection"
     LOCKER = "locker"
+    VMWare = "vmware"
+    VIRTUAL_HOST = "virtualHost"
+    NETWORK_NODE = "networkNode"
     # external services
     OTX = "otx"
     GITHUB = "github"

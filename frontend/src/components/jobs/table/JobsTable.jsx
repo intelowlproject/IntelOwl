@@ -12,6 +12,7 @@ import {
 
 import { JOB_BASE_URI } from "../../../constants/api";
 import { jobTableColumns } from "./data";
+import { useGuideContext } from "../../../contexts/GuideContext";
 
 // constants
 const toPassTableProps = {
@@ -48,6 +49,17 @@ export default function JobsTable() {
     toPassTableProps,
   );
 
+  const { guideState, setGuideState } = useGuideContext();
+
+  React.useEffect(() => {
+    if (guideState.tourActive) {
+      setTimeout(() => {
+        setGuideState({ run: true, stepIndex: 7 });
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,7 +70,7 @@ export default function JobsTable() {
       {/* Basic */}
       <Row className="mb-2">
         <Col>
-          <h1>
+          <h1 id="jobsHistory">
             Jobs History&nbsp;
             <small className="text-muted">{data?.count} total</small>
           </h1>

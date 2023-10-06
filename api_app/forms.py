@@ -1,6 +1,6 @@
 from django import forms
 
-from api_app.models import Parameter, PluginConfig
+from api_app.models import Parameter
 
 
 class MultilineJSONField(forms.JSONField):
@@ -31,28 +31,11 @@ class ParameterInlineForm(forms.ModelForm):
 
     class Meta:
         model = Parameter
-        fields = ["name", "type", "description", "is_secret", "required"]
-
-    def __init__(self, *args, **kwargs):
-        instance: Parameter = kwargs.get("instance")
-        if instance:
-            try:
-                pc = PluginConfig.objects.get(parameter=instance, owner__isnull=True)
-            except PluginConfig.DoesNotExist:
-                default = None
-            else:
-                default = pc.value
-            kwargs["initial"] = {"default": default}
-        super().__init__(*args, **kwargs)
-
-    def save(self, commit: bool = ...):
-        instance = super().save(commit=commit)
-        if (default_value := self.cleaned_data["default"]) is not None:
-            PluginConfig.objects.update_or_create(
-                owner=None,
-                for_organization=False,
-                parameter=instance,
-                defaults={"value": default_value},
-            )
-
-        return instance
+        fields = [
+            "name",
+            "type",
+            "description",
+            "is_secret",
+            "required",
+            "python_module",
+        ]

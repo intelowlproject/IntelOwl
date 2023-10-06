@@ -1,15 +1,26 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import enum
 import typing
+from pathlib import PosixPath
 
 import _operator
 from django.db import models
 
 
-class Position(models.TextChoices):
-    LEFT = "left"
-    CENTER = "center"
-    RIGHT = "right"
+class PythonModuleBasePaths(models.TextChoices):
+    ObservableAnalyzer = (
+        PosixPath("api_app.analyzers_manager.observable_analyzers"),
+        "Observable Analyzer",
+    )
+    FileAnalyzer = (
+        PosixPath("api_app.analyzers_manager.file_analyzers"),
+        "File Analyzer",
+    )
+    Connector = PosixPath("api_app.connectors_manager.connectors"), "Connector"
+    Ingestor = PosixPath("api_app.ingestors_manager.ingestors"), "Ingestor"
+    Visualizer = PosixPath("api_app.visualizers_manager.visualizers"), "Visualizer"
+    Pivot = PosixPath("api_app.pivots_manager.pivots"), "Pivot"
 
 
 class TLP(models.TextChoices):
@@ -46,11 +57,15 @@ class Status(models.TextChoices):
     RUNNING = "running", "running"
 
     ANALYZERS_RUNNING = "analyzers_running", "analyzers_running"
-    CONNECTORS_RUNNING = "connectors_running", "connectors_running"
-    VISUALIZERS_RUNNING = "visualizers_running", "visualizers_running"
-
     ANALYZERS_COMPLETED = "analyzers_completed", "analyzers_completed"
+
+    CONNECTORS_RUNNING = "connectors_running", "connectors_running"
     CONNECTORS_COMPLETED = "connectors_completed", "connectors_completed"
+
+    PIVOTS_RUNNING = "pivots_running", "pivots_running"
+    PIVOTS_COMPLETED = "pivots_completed", "pivots_completed"
+
+    VISUALIZERS_RUNNING = "visualizers_running", "visualizers_running"
     VISUALIZERS_COMPLETED = "visualizers_completed", "visualizers_completed"
 
     REPORTED_WITHOUT_FAILS = "reported_without_fails", "reported_without_fails"
@@ -59,20 +74,20 @@ class Status(models.TextChoices):
     FAILED = "failed", "failed"
 
     @classmethod
+    def get_enums_with_suffix(
+        cls, suffix: str
+    ) -> typing.Generator[enum.Enum, None, None]:
+        for key in cls:
+            if key.name.endswith(suffix):
+                yield key
+
+    @classmethod
     def running_statuses(cls) -> typing.List["Status"]:
-        return [
-            cls.ANALYZERS_RUNNING,
-            cls.CONNECTORS_RUNNING,
-            cls.VISUALIZERS_RUNNING,
-        ]
+        return list(cls.get_enums_with_suffix("_RUNNING"))
 
     @classmethod
     def partial_statuses(cls) -> typing.List["Status"]:
-        return [
-            cls.ANALYZERS_COMPLETED,
-            cls.CONNECTORS_COMPLETED,
-            cls.VISUALIZERS_COMPLETED,
-        ]
+        return list(cls.get_enums_with_suffix("_COMPLETED"))
 
     @classmethod
     def final_statuses(cls) -> typing.List["Status"]:

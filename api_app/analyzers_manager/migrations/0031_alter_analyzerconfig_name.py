@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "0030_alter_analyzerconfig_options"),
         ("visualizers_manager", "0022_remove_visualizerconfig_analyzers_and_more"),

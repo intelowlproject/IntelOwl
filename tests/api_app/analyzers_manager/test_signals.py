@@ -3,6 +3,8 @@ import json
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import PythonModule
 from tests import CustomTestCase
 
 
@@ -11,7 +13,10 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         crontab, created = CrontabSchedule.objects.get_or_create(minute=22)
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
@@ -27,7 +32,9 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         self.assertFalse(ac.update_task.enabled)
         self.assertEqual(ac.update_task.crontab, crontab)
         self.assertEqual(ac.update_task.queue, "default")
-        self.assertEqual(json.loads(ac.update_task.kwargs)["config_pk"], ac.pk)
+        self.assertEqual(
+            json.loads(ac.update_task.kwargs)["python_module_pk"], ac.python_module.pk
+        )
         ac.delete()
         if created:
             crontab.delete()
@@ -36,7 +43,10 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         crontab, created = CrontabSchedule.objects.get_or_create(minute=22)
         ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,

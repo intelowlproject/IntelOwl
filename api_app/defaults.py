@@ -11,6 +11,7 @@ def default_runtime():
     return {
         "analyzers": {},
         "connectors": {},
+        "pivots": {},
         "visualizers": {},
     }
 

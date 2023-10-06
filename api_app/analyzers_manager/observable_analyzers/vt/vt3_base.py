@@ -184,7 +184,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             result["performed_rescan_because_report_was_old"] = True
 
         if obs_clfn == self.ObservableTypes.HASH:
-
             # Include behavioral report, if flag enabled
             if self.include_behaviour_summary:
                 sandbox_analysis = (

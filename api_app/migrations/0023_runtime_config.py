@@ -16,7 +16,6 @@ def migrate_runtime_config(apps, schema_editor):
     VisualizerReport = apps.get_model("visualizers_manager", "VisualizerReport")
 
     for job in Job.objects.all():
-
         for report in AnalyzerReport.objects.filter(job=job):
             if report.runtime_configuration:
                 job.runtime_configuration["analyzers"][
@@ -56,7 +55,6 @@ def reverse_migrate_runtime_config(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0022_single_playbook_post_migration"),
         ("analyzers_manager", "00012_remove_parent_playbook"),

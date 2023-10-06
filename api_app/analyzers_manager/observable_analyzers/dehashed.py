@@ -31,10 +31,11 @@ class DehashedSearch(ObservableAnalyzer):
     def run(self):
         # try to identify search operator
         self.__identify_search_operator()
-        if self.operator == "name" and " " in self.observable_name:
+        if self.operator in ["name", "address"] and " " in self.observable_name:
             # this is to allow to do "match_phrase" queries
             # ex: "John Smith" would match the entire phrase
             # ex: John Smith would match also John alone
+            # same for the addresses
             cleaned_observable_name = f'"{self.observable_name}"'
         else:
             cleaned_observable_name = self.observable_name
@@ -65,6 +66,11 @@ class DehashedSearch(ObservableAnalyzer):
         elif self.observable_classification == ObservableTypes.GENERIC:
             if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
                 self.operator = "email"
+            # order matters! it's important "address" is placed before "phone"
+            elif " " in self.observable_name and re.match(
+                r"\d.*[a-zA-Z]|[a-zA-Z].*\d", self.observable_name
+            ):
+                self.operator = "address"
             elif re.match(r"\+?\d+", self.observable_name):
                 self.operator = "phone"
             elif " " in self.observable_name:

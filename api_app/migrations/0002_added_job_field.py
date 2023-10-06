@@ -6,7 +6,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [("api_app", "0001_initial")]

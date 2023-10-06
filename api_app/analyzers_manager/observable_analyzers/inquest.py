@@ -46,8 +46,6 @@ class InQuest(ObservableAnalyzer):
         return type_
 
     def run(self):
-        result = {}
-        link = ""
         headers = {"Content-Type": "application/json"}
         # optional API key
         if hasattr(self, "_api_key_name"):
@@ -106,7 +104,7 @@ class InQuest(ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.base_url + uri, headers=headers)
+            response = requests.get(self.base_url + uri, headers=headers, timeout=30)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

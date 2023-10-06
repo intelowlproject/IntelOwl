@@ -10,6 +10,7 @@ export const ANALYZE_MULTIPLE_FILES_URI = `${API_BASE_URI}/analyze_multiple_file
 export const ANALYZE_MULTIPLE_OBSERVABLE_URI = `${API_BASE_URI}/analyze_multiple_observables`;
 export const ANALYZERS_CONFIG_URI = `${API_BASE_URI}/analyzer`;
 export const CONNECTORS_CONFIG_URI = `${API_BASE_URI}/connector`;
+export const PIVOTS_CONFIG_URI = `${API_BASE_URI}/pivot`;
 export const VISUALIZERS_CONFIG_URI = `${API_BASE_URI}/visualizer`;
 export const INGESTORS_CONFIG_URI = `${API_BASE_URI}/ingestor`;
 export const PLAYBOOKS_CONFIG_URI = `${API_BASE_URI}/playbook`;
@@ -22,6 +23,8 @@ export const JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_BASE_URI}/aggregate/observa
 export const JOB_AGG_FILE_MIMETYPE_URI = `${JOB_BASE_URI}/aggregate/file_mimetype`;
 export const JOB_AGG_OBS_NAME_URI = `${JOB_BASE_URI}/aggregate/observable_name`;
 export const JOB_AGG_FILE_MD5_URI = `${JOB_BASE_URI}/aggregate/md5`;
+export const JOB_RECENT_SCANS = `${JOB_BASE_URI}/recent_scans`;
+export const JOB_RECENT_SCANS_USER = `${JOB_BASE_URI}/recent_scans_user`;
 
 // user
 export const USERACCESS_URI = `${API_BASE_URI}/me/access`;

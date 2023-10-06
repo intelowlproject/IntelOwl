@@ -78,7 +78,6 @@ class MWDB_Scan(FileAnalyzer):
         if recursive:
             for new_base in base[key]:
                 if base["type"] == "file":
-
                     # otherwise we have an infinite loop
                     if key == "parents":
                         self.adjust_relations(new_base, key="parents", recursive=True)

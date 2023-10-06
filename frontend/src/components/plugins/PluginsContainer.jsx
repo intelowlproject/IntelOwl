@@ -4,6 +4,7 @@ import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { TiFlowChildren, TiBook } from "react-icons/ti";
 import { IoIosEye } from "react-icons/io";
 import { MdInput } from "react-icons/md";
+import { PiGraphFill } from "react-icons/pi";
 
 import {
   RouterTabs,
@@ -13,9 +14,11 @@ import {
 import { Link } from "react-router-dom";
 import { Button, Col } from "reactstrap";
 import { useOrganizationStore } from "../../stores";
+import { useGuideContext } from "../../contexts/GuideContext";
 
 const Analyzers = React.lazy(() => import("./utils/Analyzers"));
 const Connectors = React.lazy(() => import("./utils/Connectors"));
+const Pivots = React.lazy(() => import("./utils/Pivots"));
 const Visualizers = React.lazy(() => import("./utils/Visualizers"));
 const Ingestors = React.lazy(() => import("./utils/Ingestors"));
 const Playbooks = React.lazy(() => import("./utils/Playbooks"));
@@ -25,7 +28,7 @@ const routes = [
     key: "plugins-analyzers",
     location: "analyzers",
     Title: () => (
-      <span>
+      <span id="Analyzers">
         <AiOutlineApi />
         &nbsp;Analyzers
       </span>
@@ -40,7 +43,7 @@ const routes = [
     key: "plugins-connectors",
     location: "connectors",
     Title: () => (
-      <span>
+      <span id="Connectors">
         <TiFlowChildren />
         &nbsp;Connectors
       </span>
@@ -48,6 +51,21 @@ const routes = [
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
         <Connectors />
+      </Suspense>
+    ),
+  },
+  {
+    key: "plugins-pivots",
+    location: "pivots",
+    Title: () => (
+      <span id="Pivots">
+        <PiGraphFill />
+        &nbsp;Pivots
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Pivots />
       </Suspense>
     ),
   },
@@ -115,6 +133,17 @@ export default function PluginsContainer() {
     ),
   );
 
+  const { guideState, setGuideState } = useGuideContext();
+
+  React.useEffect(() => {
+    if (guideState.tourActive) {
+      setTimeout(() => {
+        setGuideState({ run: true, stepIndex: 1 });
+      }, 200);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // on component mount
   React.useEffect(() => {
     if (!isUserOwner) {
@@ -146,8 +175,13 @@ export default function PluginsContainer() {
           to="/me/config"
           style={{ color: "inherit", textDecoration: "inherit" }}
         >
-          <Button size="sm" color="darker" onClick={() => null}>
-            <BsSliders className="me-2" />
+          <Button
+            id="pluginconfigbutton"
+            size="sm"
+            color="darker"
+            onClick={() => null}
+          >
+            <BsSliders className="me-2" id="plugin_config" />
             Your plugin config
           </Button>
         </Link>

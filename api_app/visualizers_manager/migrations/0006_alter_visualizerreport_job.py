@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0019_mitm_configs"),
         ("visualizers_manager", "0005_visualizerconfig_disabled_in_org"),

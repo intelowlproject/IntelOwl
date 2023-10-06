@@ -26,17 +26,18 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
     connectors = rfs.PrimaryKeyRelatedField(
         many=True, queryset=ConnectorConfig.objects.all(), required=True
     )
-    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
-
     pivots = rfs.PrimaryKeyRelatedField(
         many=True, queryset=PivotConfig.objects.all(), required=True
     )
+    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
+
     runtime_configuration = rfs.DictField(required=True)
 
     scan_mode = rfs.ChoiceField(choices=ScanMode.choices, required=True)
     scan_check_time = rfs.DurationField(required=True, allow_null=True)
     tags = TagSerializer(required=False, allow_empty=True, many=True)
     tlp = rfs.CharField(read_only=True)
+    weight = rfs.IntegerField(read_only=True, required=False, allow_null=True)
 
     def create(self, validated_data):
         types_supported = list(

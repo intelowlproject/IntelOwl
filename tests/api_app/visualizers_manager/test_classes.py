@@ -5,7 +5,8 @@
 from kombu import uuid
 
 from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.models import Job
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import Job, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
@@ -124,7 +125,6 @@ class VisualizableBoolTestCase(CustomTestCase):
 
 class VisualizableTitleTestCase(CustomTestCase):
     def test_to_dict(self):
-
         title = VisualizableBase(
             value="test_title", color=VisualizableColor.DARK, link="http://test_title"
         )
@@ -184,7 +184,6 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         self.assertCountEqual(vvl.to_dict(), expected_result)
 
     def test_to_dict_values_empty(self):
-
         name = VisualizableBase(value="test")
         vvl = VisualizableVerticalList(name=name, value=[])
         expected_result = {
@@ -278,7 +277,12 @@ class VisualizerTestCase(CustomTestCase):
             status="reported_without_fails",
         )
         vc = VisualizerConfig.objects.create(
-            name="test", python_module="yara.Yara", description="test", playbook=pc
+            name="test",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
+            ),
+            description="test",
+            playbook=pc,
         )
         ar = AnalyzerReport.objects.create(
             config=pc.analyzers.first(), job=job, task_id=uuid()
@@ -350,7 +354,9 @@ class ErrorHandlerTestCase(CustomTestCase):
             )
 
         @property
-        @visualizable_error_handler_with_params("error component", VisualizableSize.S_2)
+        @visualizable_error_handler_with_params(
+            "error component", error_size=VisualizableSize.S_2
+        )
         def error(self):
             raise Exception("this is an exception to test the error")
 

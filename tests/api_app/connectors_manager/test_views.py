@@ -12,7 +12,6 @@ from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 class ConnectorConfigViewSetTestCase(
     AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
 ):
-
     URL = "/api/connector"
 
     @classmethod
@@ -27,12 +26,14 @@ class ConnectorConfigViewSetTestCase(
             value="test",
             for_organization=False,
             owner=None,
+            connector_config=connector,
         )
         pc2 = PluginConfig.objects.create(
             parameter=connector.parameters.get(name="url_key_name"),
             value="https://test",
             for_organization=False,
             owner=None,
+            connector_config=connector,
         )
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")
         self.assertEqual(response.status_code, 403)

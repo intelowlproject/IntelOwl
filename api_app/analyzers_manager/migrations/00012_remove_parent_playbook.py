@@ -18,7 +18,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "00011_vt_url_subpath"),
         ("api_app", "0022_single_playbook_post_migration"),

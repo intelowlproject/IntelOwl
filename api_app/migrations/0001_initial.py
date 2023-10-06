@@ -12,7 +12,6 @@ import api_app.models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []

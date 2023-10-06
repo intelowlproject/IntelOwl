@@ -18,7 +18,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("connectors_manager", "0009_parent_playbook_foreign_key"),
         ("api_app", "0022_single_playbook_post_migration"),

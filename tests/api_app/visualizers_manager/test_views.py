@@ -10,7 +10,6 @@ from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 class VisualizerConfigViewSetTestCase(
     AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase
 ):
-
     URL = "/api/visualizer"
 
     @classmethod

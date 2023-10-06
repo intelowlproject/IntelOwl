@@ -36,6 +36,7 @@ class PlaybookConfig(AbstractConfig):
     pivots = models.ManyToManyField(
         "pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True
     )
+
     runtime_configuration = models.JSONField(
         blank=True,
         default=default_runtime,
@@ -58,6 +59,20 @@ class PlaybookConfig(AbstractConfig):
 
     class Meta:
         ordering = ["name", "disabled"]
+
+    def _generate_tlp(self) -> str:
+        tlps = [
+            TLP[x]
+            for x in list(self.analyzers.values_list("maximum_tlp", flat=True))
+            + list(self.connectors.values_list("maximum_tlp", flat=True))
+        ]
+        # analyzer -> amber
+        # playbook -> green  => analyzer it is executed
+        # --------------
+        # analyzer -> amber
+        # playbook -> red => analyzer it is not executed
+        # ========> the playbook tlp is the minimum of all tlp of all plugins
+        return min(tlps + [TLP[self.tlp]], default=TLP.CLEAR).value
 
     def clean_scan(self):
         if (

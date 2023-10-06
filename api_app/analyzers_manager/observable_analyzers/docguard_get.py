@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class DocGuard_Hash(classes.ObservableAnalyzer):
-
     base_url: str = "https://api.docguard.net:8443/api/FileAnalyzing/GetByHash/"
 
     _api_key_name: str

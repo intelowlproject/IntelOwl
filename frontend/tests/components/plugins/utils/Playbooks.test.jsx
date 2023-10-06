@@ -149,7 +149,9 @@ describe("test Playbooks component", () => {
       name: "Description",
     });
     expect(descriptionColumnHeader).toBeInTheDocument();
-    const typeColumnHeader = screen.getByRole("columnheader", { name: "Supported types All" });
+    const typeColumnHeader = screen.getByRole("columnheader", {
+      name: "Supported types All",
+    });
     expect(typeColumnHeader).toBeInTheDocument();
     const analyzersExecutedColumnHeader = screen.getByRole("columnheader", {
       name: "Analyzers All",

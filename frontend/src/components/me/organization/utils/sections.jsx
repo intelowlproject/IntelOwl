@@ -228,7 +228,12 @@ export function MembersList() {
           {sortedMembers?.length && (
             <ol>
               {sortedMembers.map(
-                ({ username, full_name: fullName, joined }) => (
+                ({
+                  username,
+                  full_name: fullName,
+                  joined,
+                  is_admin: isAdmin,
+                }) => (
                   <li key={`memberlist-${username}`}>
                     <Row>
                       <Col sm={5} title="Name and Username">
@@ -237,8 +242,8 @@ export function MembersList() {
                       </Col>
                       <Col sm={5} title="Joining Date">
                         <DateHoverable
-                          date={joined}
-                          format="PPP"
+                          value={joined}
+                          format="do MMMM yyyy"
                           className="text-secondary user-select-none"
                         />
                       </Col>
@@ -252,7 +257,10 @@ export function MembersList() {
                             />
                           )
                         ) : (
-                          <Badge color="info">admin</Badge>
+                          <Badge color="info">Owner</Badge>
+                        )}
+                        {owner?.username !== username && isAdmin && (
+                          <Badge color="info">Admin</Badge>
                         )}
                       </Col>
                     </Row>

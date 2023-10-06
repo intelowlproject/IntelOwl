@@ -4,6 +4,7 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Badge,
 } from "reactstrap";
 import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
@@ -12,7 +13,7 @@ import { RiLockPasswordFill } from "react-icons/ri";
 
 import { UserBubble, DropdownNavLink } from "@certego/certego-ui";
 
-import { useAuthStore } from "../../stores";
+import { useAuthStore, useOrganizationStore } from "../../stores";
 
 /**
  * @type {component}
@@ -21,6 +22,35 @@ import { useAuthStore } from "../../stores";
 export default function UserMenu(props) {
   // auth store
   const user = useAuthStore(React.useCallback((s) => s.user, []));
+  const {
+    organization: { owner },
+    members,
+    fetchAll,
+  } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        organization: state.organization,
+        members: state.members,
+        fetchAll: state.fetchAll,
+      }),
+      [],
+    ),
+  );
+
+  React.useEffect(() => {
+    fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function isAdminUser(username) {
+    let isAdmin = false;
+    members.forEach((member) => {
+      if (member.username === username && member.is_admin) {
+        isAdmin = true;
+      }
+    });
+    return isAdmin;
+  }
 
   return (
     <UncontrolledDropdown nav inNavbar {...props}>
@@ -39,6 +69,16 @@ export default function UserMenu(props) {
         {/* Invitations */}
         <DropdownNavLink to="/me/organization">
           <BsPeopleFill className="me-2" /> Organization
+          {owner?.username === user.username && (
+            <Badge className="mx-3" color="info">
+              Owner
+            </Badge>
+          )}
+          {owner?.username !== user.username && isAdminUser(user.username) && (
+            <Badge className="mx-3" color="info">
+              Admin
+            </Badge>
+          )}
         </DropdownNavLink>
         {/* API Access/Sessions */}
         <DropdownNavLink to="/me/sessions">

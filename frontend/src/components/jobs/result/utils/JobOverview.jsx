@@ -25,6 +25,7 @@ import {
 } from "./tables";
 import {
   reportedPluginNumber,
+  reportedVisualizerNumber,
   JobInfoCard,
   JobIsRunningAlert,
   JobActionsBar,
@@ -90,7 +91,11 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>
             <Badge className="ms-2">
-              {reportedPluginNumber(job.visualizer_reports)} /&nbsp;
+              {reportedVisualizerNumber(
+                job.visualizer_reports,
+                job.visualizers_to_execute,
+              )}{" "}
+              /&nbsp;
               {job.visualizers_to_execute.length}
             </Badge>
           </div>

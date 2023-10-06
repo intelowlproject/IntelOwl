@@ -3,18 +3,34 @@ from typing import Any
 from django.core.files import File
 
 from api_app.pivots_manager.classes import Pivot
+from api_app.pivots_manager.models import PivotConfig
 
 
 class SelfAnalyzable(Pivot):
     def should_run(self) -> bool:
-        return True
+        self._config: PivotConfig
+        # if the pivot is executed, we should check to not have an infinite loop.
+        # meaning that the playbook that we will run does not have
+        # all the analyzers that are required to run the pivot again
+        if super().should_run():
+            related_config_class = self.related_configs.model
+            related_configs_pk = set(self.related_configs.values_list("pk", flat=True))
+            # the configs that the playbook execute that could match
+            playbook_configs = set(
+                related_config_class.objects.filter(
+                    playbooks=self._config.playbook_to_execute
+                ).values_list("pk", flat=True)
+            )
+            if related_configs_pk.issubset(playbook_configs):
+                self.report.errors.append(
+                    f"Found infinite loop in {self._config.name}."
+                )
+                return False
+            return True
+        return False
 
     def get_value_to_pivot_to(self) -> Any:
-        obj = self._job.analyzed_object
-        # the 7 is because the file name follow this syntax
-        # `f"job_{now}_{filename}"` where
-        # `now = timezone.now().strftime("%Y_%m_%d_%H_%M_%S")`
-        # meaning that the real filename is actually after 7 underscores
-        name = "_".join(obj.name.split("_")[7:])
-
-        return File(obj, name=name)
+        if self._job.is_sample:
+            return File(self._job.analyzed_object, name=self._job.analyzed_object_name)
+        else:
+            return self._job.analyzed_object_name

@@ -27,11 +27,11 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
     connectors = rfs.PrimaryKeyRelatedField(
         many=True, queryset=ConnectorConfig.objects.all(), required=True
     )
-    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
-
     pivots = rfs.PrimaryKeyRelatedField(
         many=True, queryset=PivotConfig.objects.all(), required=True
     )
+    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
+
     runtime_configuration = rfs.DictField(required=True)
 
     scan_mode = rfs.ChoiceField(choices=ScanMode.choices, required=True)

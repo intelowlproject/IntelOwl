@@ -40,7 +40,6 @@ class CreateJobsFromPlaybookInterface:
             data={
                 "playbooks_requested": [self.playbook_to_execute.pk],
                 "observables": [(None, value) for value in values],
-                "send_task": True,
                 "tlp": tlp,
             },
             context={"request": MockUpRequest(user=user)},
@@ -62,7 +61,6 @@ class CreateJobsFromPlaybookInterface:
         query_dict = QueryDict(mutable=True)
         data = {
             "playbooks_requested": self.playbook_to_execute.pk,
-            "send_task": True,
             "tlp": tlp,
         }
         query_dict.update(data)
@@ -73,7 +71,7 @@ class CreateJobsFromPlaybookInterface:
             many=True,
         )
 
-    def _create_jobs(
+    def create_jobs(
         self, value: Any, tlp: str, user: User, send_task: bool = True
     ) -> Generator["Job", None, None]:
         try:

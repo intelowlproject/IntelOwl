@@ -764,7 +764,6 @@ class JobEnvelopeSerializer(rfs.ListSerializer):
 
 class JobResponseSerializer(rfs.ModelSerializer):
     STATUS_ACCEPTED = "accepted"
-    STATUS_EXISTS = "exists"
     STATUS_NOT_AVAILABLE = "not_available"
 
     job_id = rfs.IntegerField(source="pk")
@@ -795,11 +794,10 @@ class JobResponseSerializer(rfs.ModelSerializer):
 
     def to_representation(self, instance: Job):
         result = super().to_representation(instance)
-        if instance.status in instance.Status.final_statuses():
-            status = self.STATUS_EXISTS
-        else:
-            status = self.STATUS_ACCEPTED
-        result["status"] = status
+        result["status"] = self.STATUS_ACCEPTED
+        result["already_exists"] = (
+            True if instance.status in instance.Status.final_statuses() else False
+        )
         return result
 
     def get_initial(self):

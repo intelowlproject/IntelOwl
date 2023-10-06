@@ -1,26 +1,46 @@
+from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
-from api_app.choices import TLP
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
-@receiver(m2m_changed, sender=PlaybookConfig)
-def m2m_changed_playbook_config(
+@receiver(m2m_changed, sender=PlaybookConfig.analyzers.through)
+def m2m_changed_analyzers_playbook_config(
     sender, instance: PlaybookConfig, action, reverse, model, pk_set, *args, **kwargs
 ):
     if action == "post_add":
-        tlps = [
-            TLP[x]
-            for x in model.objects.filter(pk__in=pk_set).values_list(
-                "maximum_tlp", flat=True
-            )
-        ]
-        # analyzer -> amber
-        # playbook -> green  => analyzer it is executed
-        # --------------
-        # analyzer -> amber
-        # playbook -> red => analyzer it is not executed
-        # ========> the playbook tlp is the minimum of all tlp of all plugins
-        instance.tlp = min(tlps + [TLP[instance.tlp]], default=TLP.CLEAR).value
+        instance.tlp = instance._generate_tlp()
+        instance.save()
     return instance
+
+
+@receiver(m2m_changed, sender=PlaybookConfig.connectors.through)
+def m2m_changed_connectors_playbook_config(
+    sender, instance: PlaybookConfig, action, reverse, model, pk_set, *args, **kwargs
+):
+    if action == "post_add":
+        instance.tlp = instance._generate_tlp()
+        instance.save()
+    return instance
+
+
+@receiver(m2m_changed, sender=PlaybookConfig.pivots.through)
+def m2m_changed_pivots_playbook_config(
+    sender,
+    instance: PlaybookConfig,
+    action: str,
+    reverse,
+    model,
+    pk_set,
+    using,
+    *args,
+    **kwargs,
+):
+    if action == "pre_add":
+        valid_objects = model.objects.filter(pk__in=pk_set).valid(
+            instance.analyzers.all(), instance.connectors.all()
+        )
+        wrong_pks = ", ".join([pk for pk in pk_set if pk not in valid_objects])
+        if wrong_pks:
+            raise ValidationError(f"You can't set pivots {wrong_pks}")

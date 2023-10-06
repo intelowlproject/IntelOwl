@@ -121,6 +121,7 @@ describe("VerticalListVisualizer component", () => {
     const mainComponent = container.firstChild;
     expect(mainComponent.className).toContain("col-2");
     expect(mainComponent.firstChild.className).toContain("card");
+    expect(mainComponent.firstChild.className).toContain("border-success");
     // check button
     const dropdownButton = screen.getByRole("button", {
       name: "title (all params)",
@@ -188,6 +189,7 @@ describe("VerticalListVisualizer component", () => {
     expect(mainComponent.className).toContain("col-2");
     expect(mainComponent.firstChild.className).toContain("card");
     expect(mainComponent.firstChild.className).toContain("opacity-50");
+    expect(mainComponent.firstChild.className).toContain("border-success");
     // check button
     const dropdownButton = screen.getByRole("button", {
       name: "title (all params - disable)",

@@ -32,7 +32,7 @@ class PlaybookConfigViewSet(
             self.serializer_class.Meta.model.objects.visible_for_user(self.request.user)
             .ordered_for_user(self.request.user)
             .prefetch_related(
-                "analyzers", "connectors", "visualizers", "tags", "pivots"
+                "analyzers", "connectors", "pivots", "visualizers", "tags",
             )
         )
 
@@ -41,6 +41,7 @@ class PlaybookConfigViewSet(
         if self.request.method in ["DELETE"]:
             permissions.append((IsAdminUser)())
         return permissions
+
 
     @add_docs(
         description="This endpoint allows to start a Job related to an observable",

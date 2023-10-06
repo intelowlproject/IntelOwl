@@ -36,6 +36,7 @@ class PlaybookConfig(AbstractConfig, ModelWithOwnership):
     pivots = models.ManyToManyField(
         "pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True
     )
+
     runtime_configuration = models.JSONField(
         blank=True,
         default=default_runtime,
@@ -74,18 +75,19 @@ class PlaybookConfig(AbstractConfig, ModelWithOwnership):
                     "the python module is not used by this playbook"
                 )
 
-    def clean_pivots(self):
-        for pivot in self.pivots.all():
-            if (
-                not self.analyzers.filter(python__module=pivot.python_module).exists()
-                and not self.connectors.filter(
-                    python_module=pivot.python_module
-                ).exists()
-            ):
-                raise ValidationError(
-                    f"You can't use {pivot.name} here: "
-                    "the python module is not used by this playbook"
-                )
+    def _generate_tlp(self) -> str:
+        tlps = [
+            TLP[x]
+            for x in list(self.analyzers.values_list("maximum_tlp", flat=True))
+            + list(self.connectors.values_list("maximum_tlp", flat=True))
+        ]
+        # analyzer -> amber
+        # playbook -> green  => analyzer it is executed
+        # --------------
+        # analyzer -> amber
+        # playbook -> red => analyzer it is not executed
+        # ========> the playbook tlp is the minimum of all tlp of all plugins
+        return min(tlps + [TLP[self.tlp]], default=TLP.CLEAR).value
 
     def clean_scan(self):
         if (
@@ -109,7 +111,6 @@ class PlaybookConfig(AbstractConfig, ModelWithOwnership):
         super().clean()
         self.clean_scan()
         self.clean_pivots()
-        self.clean_for_organization()
 
     def is_sample(self) -> bool:
         return AllTypes.FILE.value in self.type

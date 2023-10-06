@@ -41,6 +41,22 @@ function prettifyErrors(errorResponse) {
   return JSON.stringify(errorResponse.response.data);
 }
 
+function toastBody(respData, warnings) {
+  return (
+    <div>
+      <ContentSection className="text-light">
+        <strong>Playbooks:</strong>&nbsp;
+        {respData[0].playbook_running}
+      </ContentSection>
+      {warnings.length > 0 && (
+        <ContentSection className="bg-accent text-darker">
+          <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+        </ContentSection>
+      )}
+    </div>
+  );
+}
+
 export async function createPlaybookJob(formValues) {
   try {
     // new scan
@@ -49,12 +65,10 @@ export async function createPlaybookJob(formValues) {
         ? await _startPlaybookFile(formValues)
         : await _startPlaybookObservable(formValues);
 
-    const playbooksRunning = new Set();
     const warnings = [];
     const respData = resp.data.results;
 
     respData.forEach((x) => {
-      if (x.playbook_running) playbooksRunning.add(x.playbook_running);
       if (x.warnings) warnings.push(...x.warnings);
     });
 
@@ -65,25 +79,34 @@ export async function createPlaybookJob(formValues) {
           element.status === "accepted" || element.status === "exists",
       )
     ) {
-      const jobIds = respData.map((x) => parseInt(x.job_id, 10));
-      addToast(
-        `Created new Job with ID(s) #${jobIds.join(", ")}!`,
-        <div>
-          <ContentSection className="text-light">
-            <strong>Playbooks:</strong>&nbsp;
-            {Array.from(playbooksRunning)?.join(", ")}
-          </ContentSection>
-          {warnings.length > 0 && (
-            <ContentSection className="bg-accent text-darker">
-              <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
-            </ContentSection>
-          )}
-        </div>,
-        "success",
-        true,
-        10000,
-      );
-      return Promise.resolve(jobIds);
+      const jobIdsAccepted = [];
+      const jobIdsExists = [];
+      respData.forEach((x) => {
+        if (x.status === "accepted")
+          jobIdsAccepted.push(parseInt(x.job_id, 10));
+        if (x.status === "exists") jobIdsExists.push(parseInt(x.job_id, 10));
+      });
+      // toast for accepted jobs
+      if (jobIdsAccepted.length > 0) {
+        addToast(
+          `Created new Job with ID(s) #${jobIdsAccepted.join(", ")}!`,
+          toastBody(respData, warnings),
+          "success",
+          true,
+          10000,
+        );
+      }
+      // toast for existing jobs
+      if (jobIdsExists.length > 0) {
+        addToast(
+          `Reported existing Job with ID(s) #${jobIdsExists.join(", ")}!`,
+          toastBody(respData, warnings),
+          "info",
+          true,
+          10000,
+        );
+      }
+      return Promise.resolve(jobIdsAccepted.concat(jobIdsExists));
     }
     // else
     addToast("Failed!", respData?.message, "danger");

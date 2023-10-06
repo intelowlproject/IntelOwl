@@ -2,6 +2,8 @@ import datetime
 import uuid
 from typing import TYPE_CHECKING, Generator
 
+from django.contrib.postgres.expressions import ArraySubquery
+
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
 
@@ -41,6 +43,18 @@ class CleanOnCreateQuerySet(models.QuerySet):
         self._for_write = True
         obj.save(force_insert=True, using=self.db)
         return obj
+
+    def many_to_many_to_array(self, field: str, field_to_save: str = None):
+        if not field_to_save:
+            field_to_save = f"{field}_array"
+        return self.annotate(
+            **{
+                field_to_save: ArraySubquery(
+                    self.model.objects.filter(pk=OuterRef("pk")).values(f"{field}__pk"),
+                    default=Value([]),
+                )
+            }
+        )
 
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
@@ -296,7 +310,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                                             OuterRef("pk")
                                         )
                                     },
-                                    parameter__required=True
+                                    parameter__required=True,
                                 )
                                 .visible_for_user(user)
                                 .values("parameter__pk")

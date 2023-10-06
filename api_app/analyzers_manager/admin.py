@@ -19,4 +19,5 @@ class AnalyzerConfigAdminView(PythonConfigAdminView):
         "maximum_tlp",
         "update_schedule",
     )
+    list_filter = ["type", "maximum_tlp"] + PythonConfigAdminView.list_filter
     exclude = ["update_task"]

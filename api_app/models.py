@@ -327,7 +327,7 @@ class Job(models.Model):
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_analyzer_config__isnull=False
+                    pk__in=failed_pivot_reports, related_analyzer_configs__isnull=False
                 )
             )
             | self._get_signatures(
@@ -335,7 +335,7 @@ class Job(models.Model):
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_connector_config__isnull=False
+                    pk__in=failed_pivot_reports, related_connector_configs__isnull=False
                 )
             )
             | self._get_signatures(
@@ -475,21 +475,10 @@ class Job(models.Model):
     def pivots_to_execute(self) -> PythonConfigQuerySet:
         from api_app.pivots_manager.models import PivotConfig
 
-        valid_python_modules_analyzers = self.analyzers_to_execute.all().values_list(
-            "pk", flat=True
-        )
-        valid_python_modules_connectors = self.connectors_to_execute.all().values_list(
-            "pk", flat=True
-        )
-
         if self.playbook_to_execute:
-            return self.playbook_to_execute.pivots.filter(
-                Q(related_analyzer_config__in=valid_python_modules_analyzers)
-                | Q(related_connector_config__in=valid_python_modules_connectors)
-            )
-        return PivotConfig.objects.filter(
-            Q(related_analyzer_config__in=valid_python_modules_analyzers)
-            | Q(related_connector_config__in=valid_python_modules_connectors)
+            return self.playbook_to_execute.pivots.all()
+        return PivotConfig.objects.valid(
+            self.analyzers_to_execute.all(), self.connectors_to_execute.all()
         )
 
     @property
@@ -507,11 +496,11 @@ class Job(models.Model):
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.filter(related_analyzer_config__isnull=False)
+                self.pivots_to_execute.filter(related_analyzer_configs__isnull=False)
             )
             | self._get_signatures(self.connectors_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.filter(related_connector_config__isnull=False)
+                self.pivots_to_execute.filter(related_connector_configs__isnull=False)
             )
             | self._get_signatures(self.visualizers_to_execute.all())
             | self._final_status_signature

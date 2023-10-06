@@ -7,10 +7,10 @@ class Compare(Pivot):
     field_to_compare: str
 
     def _get_value(self, field: str) -> Any:
-        try:
-            content = next(self.related_reports)
-        except StopIteration:
-            raise RuntimeError("Not found report")
+        report = self.related_reports.first()
+        if not report:
+            raise RuntimeError("No report found")
+        content = report.report
 
         for key in field.split("."):
             try:

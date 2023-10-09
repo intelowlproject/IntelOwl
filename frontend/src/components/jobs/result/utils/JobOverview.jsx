@@ -194,8 +194,11 @@ export default function JobOverview({
   useEffect(() => {
     console.debug("JobOverview - check to set default visualizer");
     // check visualizers have been loaded and user didn't changed page
+    console.debug(`Ui elements number: ${UIElements.length}`);
     if (UIElements.length !== 0 && !location.state?.userChanged) {
+      console.debug("updated visualizers");
       if (!subSection) {
+        console.debug(`navigate to visualizer: ${UIElements[0].id}`);
         // in case no section is selected (ex: from start scan) redirect to a visualizer
         navigate(
           `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${UIElements[0].id}`,
@@ -204,11 +207,15 @@ export default function JobOverview({
         subSection === LOADING_VISUALIZER_UI_ELEMENT_CODE &&
         UIElements[0].id !== LOADING_VISUALIZER_UI_ELEMENT_CODE
       ) {
+        console.debug(
+          `navigate away from loading visualizer to: ${UIElements[0].id}`,
+        );
         // in case we are in the loading page and we update the visualizer change page (if they are different from loading)
         navigate(
           `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${UIElements[0].id}`,
         );
       } else if (subSection === NO_VISUALIZER_UI_ELEMENT_CODE) {
+        console.debug("navigate to raw data - analyzer");
         // in case there is no visualizer redirect to raw data
         navigate(
           `/jobs/${job.id}/${jobResultSection.RAW}/${rawElements[0].id}`,

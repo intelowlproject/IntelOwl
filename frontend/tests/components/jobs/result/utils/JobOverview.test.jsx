@@ -6,7 +6,6 @@ import userEvent from "@testing-library/user-event";
 import { JobOverview } from "../../../../../src/components/jobs/result/utils";
 
 describe("test JobOverview (job report)", () => {
-
   test("test utility bar", () => {
     const { container } = render(
       <BrowserRouter>
@@ -53,7 +52,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -67,7 +66,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
             visualizer_reports: [],
             playbook_requested: null,
-            playbook_to_execute: null,          
+            playbook_to_execute: null,
           }}
         />
       </BrowserRouter>,
@@ -96,7 +95,7 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
-  })
+  });
 
   test("metadata section", () => {
     const { container } = render(
@@ -144,7 +143,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -158,7 +157,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
             visualizer_reports: [],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -212,9 +211,9 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(JobInfoCardSection).getByText("TestPlaybook"),
     ).toBeInTheDocument();
-  })
+  });
 
-  test("move from raw to visualizer-Test page", async() => {
+  test("move from raw to visualizer-Test page", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -260,7 +259,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -274,29 +273,29 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["TestVisualizer"],
             visualizer_reports: [
               {
-                "id": 730,
-                "name": "Test page 1",
-                "process_time": 0.0,
-                "status": "SUCCESS",
-                "errors": [],
-                "start_time": "2023-10-05T15:57:51.350841Z",
-                "end_time": "2023-10-05T15:57:51.547472Z",
-                "runtime_configuration": {},
-                "config": "TestVisualizer",
-                "type": "visualizer",
-                "report": [
+                id: 730,
+                name: "Test page 1",
+                process_time: 0.0,
+                status: "SUCCESS",
+                errors: [],
+                start_time: "2023-10-05T15:57:51.350841Z",
+                end_time: "2023-10-05T15:57:51.547472Z",
+                runtime_configuration: {},
+                config: "TestVisualizer",
+                type: "visualizer",
+                report: [
                   {
-                    "level": 1,
-                    "elements": {
-                        "type": "horizontal_list",
-                        "values": []
-                    }
-                  }
-                ]
-              }
+                    level: 1,
+                    elements: {
+                      type: "horizontal_list",
+                      values: [],
+                    },
+                  },
+                ],
+              },
             ],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -324,12 +323,14 @@ describe("test JobOverview (job report)", () => {
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    
-    await user.click(visualizerButton)
-    expect(global.location.pathname).toEqual("/jobs/3/visualizer/Test%20page%201");
-  })
 
-  test("move from raw to visualizer-loading", async() => {
+    await user.click(visualizerButton);
+    expect(global.location.pathname).toEqual(
+      "/jobs/3/visualizer/Test%20page%201",
+    );
+  });
+
+  test("move from raw to visualizer-loading", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -375,7 +376,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -389,21 +390,21 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["TestVisualizer"],
             visualizer_reports: [
               {
-                "id": 730,
-                "name": "Test page 1",
-                "process_time": 0.0,
-                "status": "RUNNING",
-                "errors": [],
-                "start_time": "2023-10-05T15:57:51.350841Z",
-                "end_time": "2023-10-05T15:57:51.547472Z",
-                "runtime_configuration": {},
-                "config": "TestVisualizer",
-                "type": "visualizer",
-                "report": []
-              }
+                id: 730,
+                name: "Test page 1",
+                process_time: 0.0,
+                status: "RUNNING",
+                errors: [],
+                start_time: "2023-10-05T15:57:51.350841Z",
+                end_time: "2023-10-05T15:57:51.547472Z",
+                runtime_configuration: {},
+                config: "TestVisualizer",
+                type: "visualizer",
+                report: [],
+              },
             ],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -431,12 +432,12 @@ describe("test JobOverview (job report)", () => {
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    
-    await user.click(visualizerButton)
-    expect(global.location.pathname).toEqual("/jobs/4/visualizer/loading");
-  })
 
-  test("move from raw to visualizer-no_visualizer", async() => {
+    await user.click(visualizerButton);
+    expect(global.location.pathname).toEqual("/jobs/4/visualizer/loading");
+  });
+
+  test("move from raw to visualizer-no_visualizer", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -482,7 +483,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -496,7 +497,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
             visualizer_reports: [],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -524,12 +525,14 @@ describe("test JobOverview (job report)", () => {
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    
-    await user.click(visualizerButton)
-    expect(global.location.pathname).toEqual("/jobs/5/visualizer/no-visualizer");
-  })
 
-  test("move from visualizer-Test page 1 to visualizer-Test page 2", async() => {
+    await user.click(visualizerButton);
+    expect(global.location.pathname).toEqual(
+      "/jobs/5/visualizer/no-visualizer",
+    );
+  });
+
+  test("move from visualizer-Test page 1 to visualizer-Test page 2", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -575,7 +578,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -589,50 +592,50 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["TestVisualizer"],
             visualizer_reports: [
               {
-                "id": 730,
-                "name": "Test page 1",
-                "process_time": 0.0,
-                "status": "SUCCESS",
-                "errors": [],
-                "start_time": "2023-10-05T15:57:51.350841Z",
-                "end_time": "2023-10-05T15:57:51.547472Z",
-                "runtime_configuration": {},
-                "config": "TestVisualizer",
-                "type": "visualizer",
-                "report": [
+                id: 730,
+                name: "Test page 1",
+                process_time: 0.0,
+                status: "SUCCESS",
+                errors: [],
+                start_time: "2023-10-05T15:57:51.350841Z",
+                end_time: "2023-10-05T15:57:51.547472Z",
+                runtime_configuration: {},
+                config: "TestVisualizer",
+                type: "visualizer",
+                report: [
                   {
-                    "level": 1,
-                    "elements": {
-                        "type": "horizontal_list",
-                        "values": []
-                    }
-                  }
-                ]
+                    level: 1,
+                    elements: {
+                      type: "horizontal_list",
+                      values: [],
+                    },
+                  },
+                ],
               },
               {
-                "id": 731,
-                "name": "Test page 2",
-                "process_time": 0.0,
-                "status": "SUCCESS",
-                "errors": [],
-                "start_time": "2023-10-05T15:57:51.350841Z",
-                "end_time": "2023-10-05T15:57:51.547472Z",
-                "runtime_configuration": {},
-                "config": "TestVisualizer",
-                "type": "visualizer",
-                "report": [
+                id: 731,
+                name: "Test page 2",
+                process_time: 0.0,
+                status: "SUCCESS",
+                errors: [],
+                start_time: "2023-10-05T15:57:51.350841Z",
+                end_time: "2023-10-05T15:57:51.547472Z",
+                runtime_configuration: {},
+                config: "TestVisualizer",
+                type: "visualizer",
+                report: [
                   {
-                    "level": 1,
-                    "elements": {
-                        "type": "horizontal_list",
-                        "values": []
-                    }
-                  }
-                ]
+                    level: 1,
+                    elements: {
+                      type: "horizontal_list",
+                      values: [],
+                    },
+                  },
+                ],
               },
             ],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -654,12 +657,14 @@ describe("test JobOverview (job report)", () => {
     // check active subsection
     expect(firstPageReport.closest("a").className).toContain("active");
     expect(secondPageReport.closest("a").className).not.toContain("active");
-    
-    await user.click(secondPageReport)
-    expect(global.location.pathname).toEqual("/jobs/6/visualizer/Test%20page%202");
-  })
 
-  test("move from visualizer-Test page 1 to raw-analyzer", async() => {
+    await user.click(secondPageReport);
+    expect(global.location.pathname).toEqual(
+      "/jobs/6/visualizer/Test%20page%202",
+    );
+  });
+
+  test("move from visualizer-Test page 1 to raw-analyzer", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -705,7 +710,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -719,29 +724,29 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: ["TestVisualizer"],
             visualizer_reports: [
               {
-                "id": 730,
-                "name": "Test page 1",
-                "process_time": 0.0,
-                "status": "SUCCESS",
-                "errors": [],
-                "start_time": "2023-10-05T15:57:51.350841Z",
-                "end_time": "2023-10-05T15:57:51.547472Z",
-                "runtime_configuration": {},
-                "config": "TestVisualizer",
-                "type": "visualizer",
-                "report": [
+                id: 730,
+                name: "Test page 1",
+                process_time: 0.0,
+                status: "SUCCESS",
+                errors: [],
+                start_time: "2023-10-05T15:57:51.350841Z",
+                end_time: "2023-10-05T15:57:51.547472Z",
+                runtime_configuration: {},
+                config: "TestVisualizer",
+                type: "visualizer",
+                report: [
                   {
-                    "level": 1,
-                    "elements": {
-                        "type": "horizontal_list",
-                        "values": []
-                    }
-                  }
-                ]
+                    level: 1,
+                    elements: {
+                      type: "horizontal_list",
+                      values: [],
+                    },
+                  },
+                ],
               },
             ],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -760,12 +765,12 @@ describe("test JobOverview (job report)", () => {
     expect(firstPageReport).toBeInTheDocument();
     // check active subsection
     expect(firstPageReport.closest("a").className).toContain("active");
-    
-    await user.click(rawButton)
-    expect(global.location.pathname).toEqual("/jobs/7/raw/analyzer");
-  })
 
-  test("move from raw-analyzer to raw-connector", async() => {
+    await user.click(rawButton);
+    expect(global.location.pathname).toEqual("/jobs/7/raw/analyzer");
+  });
+
+  test("move from raw-analyzer to raw-connector", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -811,7 +816,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -825,7 +830,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
             visualizer_reports: [],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -853,12 +858,12 @@ describe("test JobOverview (job report)", () => {
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    
-    await user.click(connectorReport)
-    expect(global.location.pathname).toEqual("/jobs/8/raw/connector");
-  })
 
-  test("move from raw-analyzer to raw-pivot", async() => {
+    await user.click(connectorReport);
+    expect(global.location.pathname).toEqual("/jobs/8/raw/connector");
+  });
+
+  test("move from raw-analyzer to raw-pivot", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -904,7 +909,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -918,7 +923,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
             visualizer_reports: [],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -946,12 +951,12 @@ describe("test JobOverview (job report)", () => {
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    
-    await user.click(pivotReport)
-    expect(global.location.pathname).toEqual("/jobs/9/raw/pivot");
-  })
 
-  test("move from raw-analyzer to raw-visualizer", async() => {
+    await user.click(pivotReport);
+    expect(global.location.pathname).toEqual("/jobs/9/raw/pivot");
+  });
+
+  test("move from raw-analyzer to raw-visualizer", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -997,7 +1002,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -1011,7 +1016,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
             visualizer_reports: [],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -1039,12 +1044,12 @@ describe("test JobOverview (job report)", () => {
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    
-    await user.click(visualizerReport)
-    expect(global.location.pathname).toEqual("/jobs/10/raw/visualizer");
-  })
 
-  test("move from raw-visualizer to raw-analyzer", async() => {
+    await user.click(visualizerReport);
+    expect(global.location.pathname).toEqual("/jobs/10/raw/visualizer");
+  });
+
+  test("move from raw-visualizer to raw-analyzer", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -1090,7 +1095,7 @@ describe("test JobOverview (job report)", () => {
             finished_analysis_time: "2023-05-31T08:19:04.484684",
             process_time: 0.23,
             tlp: "AMBER",
-            errors: [],  
+            errors: [],
             analyzers_requested: ["Classic_DNS"],
             analyzers_to_execute: [],
             analyzer_reports: [],
@@ -1104,7 +1109,7 @@ describe("test JobOverview (job report)", () => {
             visualizers_to_execute: [],
             visualizer_reports: [],
             playbook_requested: "TestPlaybook",
-            playbook_to_execute: "TestPlaybook",          
+            playbook_to_execute: "TestPlaybook",
           }}
         />
       </BrowserRouter>,
@@ -1132,8 +1137,8 @@ describe("test JobOverview (job report)", () => {
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).toContain("active");
-    
-    await user.click(analyzerReport)
+
+    await user.click(analyzerReport);
     expect(global.location.pathname).toEqual("/jobs/11/raw/analyzer");
-  })
+  });
 });

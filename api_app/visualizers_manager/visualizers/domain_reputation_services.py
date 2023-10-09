@@ -179,6 +179,7 @@ class DomainReputationServices(Visualizer):
                 ],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
             )
             return otx_report

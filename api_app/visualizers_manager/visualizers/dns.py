@@ -104,18 +104,6 @@ class DNS(Visualizer):
 
         page = self.Page(name="DNS")
 
-        # TODO: remove this mock
-        first_level_elements.append(
-            self.VList(
-                name=self.Base(value="test", disable=False),
-                value=[self.Base(value=str(e), disable=False) for e in range(0, 10)],
-                disable=False,
-                open=True,
-                max_elements_number=7,
-                report=self.analyzer_reports()[0],
-            )
-        )
-
         page.add_level(
             level=1,
             horizontal_list=self.HList(value=first_level_elements),

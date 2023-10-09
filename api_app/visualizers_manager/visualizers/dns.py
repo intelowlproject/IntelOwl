@@ -29,11 +29,7 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.quad9_dns_
 )
 from api_app.choices import ObservableClassification
 from api_app.models import Job
-from api_app.visualizers_manager.classes import (
-    VisualizableObject,
-    VisualizableVerticalListConfig,
-    Visualizer,
-)
+from api_app.visualizers_manager.classes import VisualizableObject, Visualizer
 from api_app.visualizers_manager.decorators import (
     visualizable_error_handler_with_params,
 )
@@ -113,14 +109,10 @@ class DNS(Visualizer):
             self.VList(
                 name=self.Base(value="test", disable=False),
                 value=[self.Base(value=str(e), disable=False) for e in range(0, 10)],
-                truncate_config=VisualizableVerticalListConfig(
-                    max_elements_number=5,
-                    job_url=self._job.url,
-                    plugin_type="analyzer",
-                    plugin_name="Test",
-                ),
                 disable=False,
                 open=True,
+                max_elements_number=7,
+                report=self.analyzer_reports()[0],
             )
         )
 

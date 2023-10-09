@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 import abc
 import logging
-from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Type, Union
 
@@ -10,6 +9,7 @@ from django.db.models import QuerySet
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
+from api_app.models import AbstractReport
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,
@@ -180,16 +180,6 @@ class VisualizableListMixin:
         return result
 
 
-@dataclass
-class VisualizableVerticalListConfig:
-    """This class contains the fields required to truncate the VerticalList"""
-
-    max_elements_number: int
-    job_url: str
-    plugin_type: str
-    plugin_name: str
-
-
 class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
@@ -201,7 +191,8 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
-        truncate_config: VisualizableVerticalListConfig = None,
+        max_elements_number: int = -1,
+        report: AbstractReport = None,
     ):
         super().__init__(
             size=size,
@@ -218,10 +209,11 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         if fill_empty and not value:
             value = [VisualizableBase(value="no data available", disable=False)]
         self.value = value
-        self.truncate_config = truncate_config
         self.name = name
         self.add_count_in_title = add_count_in_title
         self.open = open
+        self.max_elements_number = max_elements_number
+        self.report = report
 
     @property
     def attributes(self) -> List[str]:
@@ -235,21 +227,19 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         return VisualizableBase(
             value="...",
             bold=True,
-            link=f"{self.truncate_config.job_url}/raw/{self.truncate_config.plugin_type}",  # noqa e501
-            description=f"Inspect {self.truncate_config.plugin_name} "
-            f"{self.truncate_config.plugin_type} to view all the results.",
+            link=f"{self.report.job.url}/raw/{self.report.config.plugin_name.lower()}",
+            description=f"Inspect {self.report.config.name} "
+            f"{self.report.config.plugin_name.lower()} to view all the results.",
             disable=False,
         )
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        if self and self.truncate_config:
+        if self and self.max_elements_number > 0:
             current_elements_number = len(result["values"])
-            result["values"] = result["values"][
-                : self.truncate_config.max_elements_number
-            ]
+            result["values"] = result["values"][: self.max_elements_number]
             # if there are some elements that i'm not displaying
-            if current_elements_number - self.truncate_config.max_elements_number > 0:
+            if current_elements_number - self.max_elements_number > 0:
                 result["values"].append(self.more_elements_object.to_dict())
 
         return result

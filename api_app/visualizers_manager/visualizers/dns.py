@@ -103,7 +103,6 @@ class DNS(Visualizer):
                 )
 
         page = self.Page(name="DNS")
-
         page.add_level(
             level=1,
             horizontal_list=self.HList(value=first_level_elements),

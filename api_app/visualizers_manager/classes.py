@@ -224,13 +224,22 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
 
     @property
     def more_elements_object(self) -> VisualizableBase:
+        link = ""
+        description = ""
+        disable = True
+        if self.report:
+            link = f"{self.report.job.url}/raw/{self.report.config.plugin_name.lower()}"
+            description = (
+                f"Inspect {self.report.config.name} "
+                f"{self.report.config.plugin_name.lower()} to view all the results."
+            )
+            disable = False
         return VisualizableBase(
             value="...",
             bold=True,
-            link=f"{self.report.job.url}/raw/{self.report.config.plugin_name.lower()}",
-            description=f"Inspect {self.report.config.name} "
-            f"{self.report.config.plugin_name.lower()} to view all the results.",
-            disable=False,
+            link=link,
+            description=description,
+            disable=disable,
         )
 
     def to_dict(self) -> Dict:

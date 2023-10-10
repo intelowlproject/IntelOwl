@@ -41,16 +41,20 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
     is_deletable = rfs.SerializerMethodField()
 
     def get_is_deletable(self, instance: PlaybookConfig):
-        # a playbook is deletable if is not a default one
-        if instance.owner:
-            # if is a custom playbook,
-            # it is deletable by the owner of the playbook or by an admin
-            if (
-                instance.owner != self.context["request"].user
-                and not self.context["request"].user.membership.is_admin
-            ):
-                return False
+        # if the user is system administrator (not org admin),
+        # every playbook is deletable
+        if self.context["request"].user.is_superuser:
             return True
+        # if the playbook is not a default one
+        if instance.owner:
+            # it is deletable by the owner of the playbook
+            # or by an admin of the same organization
+            if instance.owner == self.context["request"].user or (
+                self.context["request"].user.membership.is_admin
+                and self.context["request"].user.membership.organization
+                == instance.organization
+            ):
+                return True
         return False
 
     def create(self, validated_data):

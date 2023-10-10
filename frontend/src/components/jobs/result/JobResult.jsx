@@ -27,6 +27,8 @@ export default function JobResult() {
   // from props
   const params = useParams();
   const jobId = params.id;
+  const { section } = params;
+  const { subSection } = params;
 
   // API to download the job data
   const [{ data: job, loading, error }, refetch] = useAxios({
@@ -113,7 +115,13 @@ export default function JobResult() {
       loading={initialLoading}
       error={error}
       render={() => (
-        <JobOverview isRunningJob={isRunning} job={job} refetch={refetch} />
+        <JobOverview
+          isRunningJob={isRunning}
+          job={job}
+          refetch={refetch}
+          section={section}
+          subSection={subSection}
+        />
       )}
     />
   );

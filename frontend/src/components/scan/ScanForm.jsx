@@ -47,7 +47,7 @@ import {
   TLP_DESCRIPTION_MAP,
   scanTypes,
 } from "../../constants";
-import { scanMode } from "../../constants/constants";
+import { scanMode, jobResultSection } from "../../constants/constants";
 import { TLPTag, markdownToHtml, JobTag } from "../common";
 import {
   RuntimeConfigurationModal,
@@ -210,7 +210,11 @@ export default function ScanForm() {
         if (jobIds.length > 1) {
           setTimeout(() => navigate(`/jobs/`), 1000);
         } else {
-          setTimeout(() => navigate(`/jobs/${jobIds[0]}`), 1000);
+          setTimeout(
+            () =>
+              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
+            1000,
+          );
         }
       } catch (e) {
         // handled inside createJob
@@ -433,7 +437,11 @@ export default function ScanForm() {
         if (jobIds.length > 1) {
           setTimeout(() => navigate(`/jobs/`), 1000);
         } else {
-          setTimeout(() => navigate(`/jobs/${jobIds[0]}`), 1000);
+          setTimeout(
+            () =>
+              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
+            1000,
+          );
         }
       } catch (e) {
         // handled inside createPlaybookJob

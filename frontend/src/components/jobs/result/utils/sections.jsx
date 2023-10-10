@@ -44,6 +44,7 @@ import {
   pluginFinalStatuses,
   jobStatuses,
   scanMode,
+  jobResultSection,
 } from "../../../../constants/constants";
 
 function DeleteIcon() {
@@ -137,11 +138,17 @@ export function JobActionsBar({ job, refetch }) {
     if (job.playbook_to_execute) {
       console.debug("retrying Playbook");
       const jobId = await createPlaybookJob(formValues).then(refetch);
-      setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);
+      setTimeout(
+        () => navigate(`/jobs/${jobId[0]}/${jobResultSection.VISUALIZER}/`),
+        1000,
+      );
     } else {
       console.debug("retrying Job");
       const jobId = await createJob(formValues).then(refetch);
-      setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);
+      setTimeout(
+        () => navigate(`/jobs/${jobId[0]}/${jobResultSection.VISUALIZER}/`),
+        1000,
+      );
     }
   };
 

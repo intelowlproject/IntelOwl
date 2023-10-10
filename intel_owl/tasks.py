@@ -9,7 +9,7 @@ import logging
 import typing
 import uuid
 
-from celery import shared_task, signals, Task
+from celery import Task, shared_task, signals
 from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
 from celery.worker.request import Request

@@ -9,6 +9,7 @@ from django.db.models import QuerySet
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
+from api_app.models import AbstractReport
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,
@@ -185,12 +186,13 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         name: VisualizableBase,
         value: List[VisualizableObject],
         open: bool = False,  # noqa
-        max_elements_number: int = -1,
         add_count_in_title: bool = True,
         fill_empty: bool = True,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
+        max_elements_number: int = -1,
+        report: AbstractReport = None,
     ):
         super().__init__(
             size=size,
@@ -207,10 +209,11 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         if fill_empty and not value:
             value = [VisualizableBase(value="no data available", disable=False)]
         self.value = value
-        self.max_elements_number = max_elements_number
         self.name = name
         self.add_count_in_title = add_count_in_title
         self.open = open
+        self.max_elements_number = max_elements_number
+        self.report = report
 
     @property
     def attributes(self) -> List[str]:
@@ -221,7 +224,23 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
 
     @property
     def more_elements_object(self) -> VisualizableBase:
-        return VisualizableBase(value="...", bold=True)
+        link = ""
+        description = ""
+        disable = True
+        if self.report:
+            link = f"{self.report.job.url}/raw/{self.report.config.plugin_name.lower()}"
+            description = (
+                f"Inspect {self.report.config.name} "
+                f"{self.report.config.plugin_name.lower()} to view all the results."
+            )
+            disable = False
+        return VisualizableBase(
+            value="...",
+            bold=True,
+            link=link,
+            description=description,
+            disable=disable,
+        )
 
     def to_dict(self) -> Dict:
         result = super().to_dict()

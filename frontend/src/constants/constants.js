@@ -54,3 +54,8 @@ export const scanMode = Object.freeze({
   FORCE_NEW_ANALYSIS: "1",
   CHECK_PREVIOUS_ANALYSIS: "2",
 });
+
+export const jobResultSection = Object.freeze({
+  RAW: "raw",
+  VISUALIZER: "visualizer",
+});

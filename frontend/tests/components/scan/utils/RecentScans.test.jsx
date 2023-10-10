@@ -229,7 +229,7 @@ describe("Recent Scans test", () => {
 
       // check redirect to job page
       user.click(firstCard);
-      expect(global.location.pathname).toEqual("/jobs/1");
+      expect(global.location.pathname).toEqual("/jobs/1/visualizer/");
     });
   });
 });

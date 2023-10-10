@@ -238,7 +238,21 @@ describe("test ScanForm component", () => {
 
   beforeAll(() => {
     axios.post.mockImplementation(() =>
-      Promise.resolve({ data: { results: [], count: 0 } }),
+      Promise.resolve({
+        data: {
+          results: [
+            {
+              job_id: 1,
+              analyzers_running: [],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: "TEST_PLAYBOOK_GENERIC",
+              status: "accepted",
+            },
+          ],
+          count: 1,
+        },
+      }),
     );
   });
 
@@ -791,7 +805,7 @@ describe("test ScanForm component", () => {
         ],
       );
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -873,7 +887,7 @@ describe("test ScanForm component", () => {
         ],
       );
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -945,7 +959,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1025,7 +1039,7 @@ describe("test ScanForm component", () => {
         scan_mode: "1",
       });
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1116,7 +1130,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1213,7 +1227,7 @@ describe("test ScanForm component", () => {
         scan_mode: "1",
       });
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1277,7 +1291,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1358,7 +1372,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1423,7 +1437,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1504,7 +1518,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1567,7 +1581,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1648,7 +1662,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1724,7 +1738,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1818,7 +1832,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1888,7 +1902,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -1982,7 +1996,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -2047,7 +2061,7 @@ describe("test ScanForm component", () => {
         scan_mode: "1",
       });
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -2130,7 +2144,7 @@ describe("test ScanForm component", () => {
         scan_check_time: "24:00:00",
       });
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
   });
 
@@ -2206,7 +2220,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
 
     setTimeout(() => {
@@ -2272,7 +2286,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/2");
+      expect(global.location.pathname).toContain("/jobs/2/visualizer/");
     });
 
     setTimeout(() => {
@@ -2441,7 +2455,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1");
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
 
     setTimeout(() => {
@@ -2523,7 +2537,7 @@ describe("test ScanForm component", () => {
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/2");
+      expect(global.location.pathname).toContain("/jobs/2/visualizer/");
     });
 
     setTimeout(() => {

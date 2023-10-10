@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody } from "reactstrap";
 import { DateHoverable, Loader } from "@certego/certego-ui";
 import useRecentScansStore from "../../../stores/useRecentScansStore";
+import { jobResultSection } from "../../../constants/constants";
 
 function RecentScansCard({
   pk,
@@ -18,7 +19,7 @@ function RecentScansCard({
   const navigate = useNavigate();
   const onClick = React.useCallback(
     (jobId) => {
-      navigate(`/jobs/${jobId}`);
+      navigate(`/jobs/${jobId}/${jobResultSection.VISUALIZER}/`);
     },
     [navigate],
   );

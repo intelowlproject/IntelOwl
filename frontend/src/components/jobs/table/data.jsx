@@ -6,8 +6,8 @@ import {
   DefaultColumnFilter,
   SelectOptionsFilter,
   LinkOpenViewIcon,
-  SlicedText,
   DateHoverable,
+  CopyToClipboardButton,
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
@@ -60,11 +60,15 @@ const jobTableColumns = [
     id: "user",
     accessor: "user.username",
     Cell: ({ value, row: { original: job } }) => (
-      <SlicedText
+      <CopyToClipboardButton
+        showOnHover
         id={`table-user-${job?.id}`}
         key={`table-user-${job?.id}`}
-        value={value}
-      />
+        text={value}
+        className="d-block text-truncate"
+      >
+        {value}
+      </CopyToClipboardButton>
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -74,11 +78,15 @@ const jobTableColumns = [
     id: "name",
     accessor: (r) => r.observable_name || r.file_name,
     Cell: ({ value, row: { original: job } }) => (
-      <SlicedText
+      <CopyToClipboardButton
+        showOnHover
         id={`table-name-${job?.id}`}
         key={`table-name-${job?.id}`}
-        value={value}
-      />
+        text={value}
+        className="d-block text-truncate"
+      >
+        {value}
+      </CopyToClipboardButton>
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -88,11 +96,15 @@ const jobTableColumns = [
     id: "md5",
     accessor: "md5",
     Cell: ({ value, row: { original: job } }) => (
-      <SlicedText
+      <CopyToClipboardButton
+        showOnHover
         id={`table-md5-${job?.id}`}
         key={`table-md5-${job?.id}`}
-        value={value}
-      />
+        text={value}
+        className="d-block text-truncate"
+      >
+        {value}
+      </CopyToClipboardButton>
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,

@@ -72,6 +72,7 @@ class TagAdminView(admin.ModelAdmin):
 @admin.register(PluginConfig)
 class PluginConfigAdminView(admin.ModelAdmin):
     list_display = (
+        "pk",
         "get_config",
         "parameter",
         "for_organization",

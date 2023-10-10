@@ -198,21 +198,26 @@ export default function JobOverview({
     if (UIElements.length !== 0 && !location.state?.userChanged) {
       console.debug("updated visualizers");
       if (!subSection) {
-        console.debug(`navigate to visualizer: ${UIElements[0].id}`);
+        console.debug(
+          `navigate to visualizer: ${
+            UIElements[0].id
+          }, encoded: ${encodeURIComponent(UIElements[0].id)}`,
+        );
         // in case no section is selected (ex: from start scan) redirect to a visualizer
         navigate(
-          `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${UIElements[0].id}`,
+          `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${encodeURIComponent(
+            UIElements[0].id,
+          )}`,
         );
       } else if (
         subSection === LOADING_VISUALIZER_UI_ELEMENT_CODE &&
         UIElements[0].id !== LOADING_VISUALIZER_UI_ELEMENT_CODE
       ) {
-        console.debug(
-          `navigate away from loading visualizer to: ${UIElements[0].id}`,
-        );
         // in case we are in the loading page and we update the visualizer change page (if they are different from loading)
         navigate(
-          `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${UIElements[0].id}`,
+          `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${encodeURIComponent(
+            UIElements[0].id,
+          )}`,
         );
       } else if (subSection === NO_VISUALIZER_UI_ELEMENT_CODE) {
         console.debug("navigate to raw data - analyzer");
@@ -264,7 +269,9 @@ export default function JobOverview({
                   color={isSelectedUI ? "primary" : "tertiary"}
                   onClick={() =>
                     navigate(
-                      `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${UIElements[0].id}`,
+                      `/jobs/${job.id}/${
+                        jobResultSection.VISUALIZER
+                      }/${encodeURIComponent(UIElements[0].id)}`,
                       { state: { userChanged: true } },
                     )
                   }
@@ -303,7 +310,11 @@ export default function JobOverview({
                             }`}
                             onClick={() =>
                               navigate(
-                                `/jobs/${job.id}/${section}/${componentsObject.id}`,
+                                `/jobs/${
+                                  job.id
+                                }/${section}/${encodeURIComponent(
+                                  componentsObject.id,
+                                )}`,
                                 { state: { userChanged: true } },
                               )
                             }

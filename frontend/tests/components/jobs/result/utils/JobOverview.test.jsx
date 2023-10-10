@@ -532,13 +532,13 @@ describe("test JobOverview (job report)", () => {
     );
   });
 
-  test("move from visualizer-Test page 1 to visualizer-Test page 2", async () => {
+  test("move from visualizer-Test page 1/2 to visualizer-Test page 2/2", async () => {
     render(
       <BrowserRouter>
         <JobOverview
           isRunningJob={false}
           section="visualizer"
-          subSection="Test page 1"
+          subSection="Test page 1/2"
           refetch={() => {}}
           job={{
             id: 6,
@@ -593,7 +593,7 @@ describe("test JobOverview (job report)", () => {
             visualizer_reports: [
               {
                 id: 730,
-                name: "Test page 1",
+                name: "Test page 1/2",
                 process_time: 0.0,
                 status: "SUCCESS",
                 errors: [],
@@ -614,7 +614,7 @@ describe("test JobOverview (job report)", () => {
               },
               {
                 id: 731,
-                name: "Test page 2",
+                name: "Test page 2/2",
                 process_time: 0.0,
                 status: "SUCCESS",
                 errors: [],
@@ -650,9 +650,9 @@ describe("test JobOverview (job report)", () => {
     expect(rawButton).toBeInTheDocument();
     expect(rawButton.className).toContain("btn-outline-tertiary"); // not selected
     // check subsections available
-    const firstPageReport = screen.getByText("Test page 1");
+    const firstPageReport = screen.getByText("Test page 1/2");
     expect(firstPageReport).toBeInTheDocument();
-    const secondPageReport = screen.getByText("Test page 2");
+    const secondPageReport = screen.getByText("Test page 2/2");
     expect(secondPageReport).toBeInTheDocument();
     // check active subsection
     expect(firstPageReport.closest("a").className).toContain("active");
@@ -660,7 +660,7 @@ describe("test JobOverview (job report)", () => {
 
     await user.click(secondPageReport);
     expect(global.location.pathname).toEqual(
-      "/jobs/6/visualizer/Test%20page%202",
+      "/jobs/6/visualizer/Test%20page%202%2F2",
     );
   });
 

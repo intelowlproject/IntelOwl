@@ -40,10 +40,7 @@ class XlmMacroDeobfuscator(FileAnalyzer):
         try:
             results = {"output": process_file(**args)}
             if xlmpassword:
-                results["correct_password"] = xlmpassword
-                results["decrypted"] = True
-            else:
-                results["was_unencrypted"] = True
+                results["password_tested_for_decryption"] = xlmpassword
             return results
         except Exception as e:
             if "Failed to decrypt" in str(e):

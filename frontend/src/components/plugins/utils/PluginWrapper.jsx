@@ -84,7 +84,10 @@ export default function PluginWrapper({
           </h1>
           <span className="text-muted">
             {description} Fore more info check the{" "}
-            <Link to="https://intelowl.readthedocs.io/en/latest/Usage.html#plugins">
+            <Link
+              to="https://intelowl.readthedocs.io/en/latest/Usage.html#plugins"
+              target="_blank"
+            >
               official doc
             </Link>
           </span>

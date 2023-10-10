@@ -9,9 +9,10 @@ import logging
 import typing
 import uuid
 
-from celery import shared_task, signals
+from celery import Task, shared_task, signals
 from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
+from celery.worker.request import Request
 from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
@@ -24,6 +25,23 @@ from intel_owl.celery import app
 logger = logging.getLogger(__name__)
 
 
+class FailureLoggedRequest(Request):
+    def on_timeout(self, soft, timeout):
+        super().on_timeout(soft, timeout)
+        if not soft:
+            logger.warning(f"A hard timeout was enforced for task {self.task.name}")
+
+    def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
+        logger.critical(f"Failure detected for task {self.task.name}")
+        super().on_failure(
+            exc_info, send_failed_event=send_failed_event, return_ok=return_ok
+        )
+
+
+class FailureLoggedTask(Task):
+    Request = FailureLoggedRequest
+
+
 @control_command(
     args=[("python_module_pk", int)],
 )
@@ -34,7 +52,7 @@ def update_plugin(state, python_module_pk: int):
     pm.python_class.update()
 
 
-@shared_task(soft_time_limit=300)
+@shared_task(base=FailureLoggedTask, soft_time_limit=300)
 def execute_ingestor(config_pk: str):
     from api_app.ingestors_manager.classes import Ingestor
     from api_app.ingestors_manager.models import IngestorConfig
@@ -49,7 +67,7 @@ def execute_ingestor(config_pk: str):
         logger.info(f"Executing ingestor {config.name}")
 
 
-@shared_task(soft_time_limit=10000)
+@shared_task(base=FailureLoggedTask, soft_time_limit=10000)
 def remove_old_jobs():
     """
     this is to remove old jobs to avoid to fill the database.
@@ -70,7 +88,7 @@ def remove_old_jobs():
     return num_jobs_to_delete
 
 
-@shared_task(soft_time_limit=120)
+@shared_task(base=FailureLoggedTask, soft_time_limit=120)
 def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     """
     In case the analysis is stuck for whatever reason,
@@ -126,7 +144,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     return jobs_id_stuck
 
 
-@shared_task(soft_time_limit=150)
+@shared_task(base=FailureLoggedTask, soft_time_limit=150)
 def update(python_module_pk: int):
     from api_app.models import PythonModule
     from intel_owl.celery import broadcast
@@ -151,7 +169,7 @@ def update(python_module_pk: int):
     return False
 
 
-@shared_task(soft_time_limit=100)
+@shared_task(base=FailureLoggedTask, soft_time_limit=100)
 def update_notifications_with_releases():
     from django.core import management
 
@@ -173,7 +191,7 @@ def job_set_final_status(job_id: int):
     job.set_final_status()
 
 
-@shared_task(name="job_set_pipeline_status", soft_time_limit=30)
+@shared_task(base=FailureLoggedTask, name="job_set_pipeline_status", soft_time_limit=30)
 def job_set_pipeline_status(job_id: int, status: str):
     from api_app.models import Job
 
@@ -185,7 +203,7 @@ def job_set_pipeline_status(job_id: int, status: str):
         job.save(update_fields=["status"])
 
 
-@shared_task(name="job_pipeline", soft_time_limit=100)
+@shared_task(base=FailureLoggedTask, name="job_pipeline", soft_time_limit=100)
 def job_pipeline(
     job_id: int,
 ):
@@ -206,7 +224,7 @@ def job_pipeline(
             report.save()
 
 
-@shared_task(name="run_plugin", soft_time_limit=500)
+@shared_task(base=FailureLoggedTask, name="run_plugin", soft_time_limit=500)
 def run_plugin(
     job_id: int,
     python_module_pk: int,
@@ -236,7 +254,7 @@ def run_plugin(
         )
 
 
-@shared_task(name="create_caches", soft_time_limit=200)
+@shared_task(base=FailureLoggedTask, name="create_caches", soft_time_limit=200)
 def create_caches(user_pk: int):
     # we create the cache hit
     from certego_saas.apps.user.models import User

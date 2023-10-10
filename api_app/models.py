@@ -909,6 +909,11 @@ class PythonConfig(AbstractConfig):
 
     @classmethod
     @property
+    def report_class(cls) -> Type[AbstractReport]:
+        return cls.reports.rel.related_model
+
+    @classmethod
+    @property
     def plugin_type(cls) -> str:
         # retro compatibility
 

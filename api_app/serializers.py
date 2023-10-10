@@ -119,9 +119,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     tags_labels = rfs.ListField(
         child=rfs.CharField(required=True), default=list, required=False
     )
-    runtime_configuration = rfs.JSONField(
-        required=False, default=default_runtime, write_only=True
-    )
+    runtime_configuration = rfs.JSONField(required=False, write_only=True)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
 
     connectors_requested = rfs.PrimaryKeyRelatedField(
@@ -170,6 +168,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "scan_mode",
             "scan_check_time",
             "tlp",
+            "runtime_configuration",
         ]:
             if attribute not in attrs:
                 if playbook := attrs.get("playbook_requested"):

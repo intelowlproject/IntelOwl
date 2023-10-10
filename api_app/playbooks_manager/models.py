@@ -87,7 +87,7 @@ class PlaybookConfig(AbstractConfig, ModelWithOwnership):
         # analyzer -> amber
         # playbook -> red => analyzer it is not executed
         # ========> the playbook tlp is the minimum of all tlp of all plugins
-        return min(tlps + [TLP[self.tlp]], default=TLP.CLEAR).value
+        return min(tlps, default=TLP.CLEAR).value
 
     def clean_scan(self):
         if (

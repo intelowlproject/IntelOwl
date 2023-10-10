@@ -1,6 +1,8 @@
 import abc
 import logging
-from typing import Any, Generator, Type
+from typing import Any, Type
+
+from django.db.models import QuerySet
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
@@ -26,9 +28,11 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
         return self._config.related_configs
 
     @property
-    def related_reports(self) -> Generator[AbstractReport, None, None]:
-        for related_config in self.related_configs:
-            yield related_config.reports.get(job=self._job)
+    def related_reports(self) -> QuerySet:
+        report_class: Type[AbstractReport] = self.related_configs.model.report_class
+        return report_class.objects.filter(
+            config__in=self.related_configs, job=self._job
+        )
 
     @classmethod
     @property

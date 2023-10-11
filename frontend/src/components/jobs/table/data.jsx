@@ -12,7 +12,8 @@ import {
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
 import { TLP_CHOICES, ALL_CLASSIFICATIONS } from "../../../constants";
-import { jobStatuses } from "../../../constants/constants";
+
+import { jobStatuses, jobResultSection } from "../../../constants/constants";
 import { PlaybookInfoPopoverIcon } from "./utils";
 
 const process_time_mmss = (value) =>
@@ -30,7 +31,7 @@ const jobTableColumns = [
         <p>#{id}</p>
         <LinkOpenViewIcon
           id={id}
-          href={`/jobs/${id}`}
+          href={`/jobs/${id}/${jobResultSection.VISUALIZER}`}
           tooltip="View Job Report"
         />
       </div>

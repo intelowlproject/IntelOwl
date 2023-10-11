@@ -95,10 +95,10 @@ describe("test PlaybookInfoPopoverIcon", () => {
       const playbookInfoCardHeader = screen.getByText("playbook_test");
       expect(playbookInfoCardHeader).toBeInTheDocument();
       // card body
-      expect(screen.getByText("1/1 analyzers")).toBeInTheDocument();
-      expect(screen.getByText("0/0 connectors")).toBeInTheDocument();
-      expect(screen.getByText("0/all pivots")).toBeInTheDocument();
-      expect(screen.getByText("0/all visualizers")).toBeInTheDocument();
+      expect(screen.getByText("1 analyzers")).toBeInTheDocument();
+      expect(screen.getByText("0 connectors")).toBeInTheDocument();
+      expect(screen.getByText("0 pivots")).toBeInTheDocument();
+      expect(screen.getByText("0 visualizers")).toBeInTheDocument();
     });
   });
 
@@ -191,10 +191,10 @@ describe("test PlaybookInfoPopoverIcon", () => {
       const playbookInfoCardHeader = screen.getByText("Custom analysis");
       expect(playbookInfoCardHeader).toBeInTheDocument();
       // card body
-      expect(screen.getByText("1/1 analyzers")).toBeInTheDocument();
-      expect(screen.getByText("0/0 connectors")).toBeInTheDocument();
-      expect(screen.getByText("0/all pivots")).toBeInTheDocument();
-      expect(screen.getByText("0/all visualizers")).toBeInTheDocument();
+      expect(screen.getByText("1 analyzers")).toBeInTheDocument();
+      expect(screen.getByText("0 connectors")).toBeInTheDocument();
+      expect(screen.getByText("0 pivots")).toBeInTheDocument();
+      expect(screen.getByText("0 visualizers")).toBeInTheDocument();
     });
   });
 });

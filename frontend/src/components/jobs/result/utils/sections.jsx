@@ -374,7 +374,7 @@ export function reportedVisualizerNumber(
         count += 1;
     });
     // reports relating to pages from the same visualizer are counted only once
-    if (count >= 1) visualizersNumber += 1;
+    if (count === visualizersToExecute.length) visualizersNumber += 1;
   });
   return visualizersNumber;
 }
@@ -490,6 +490,14 @@ export function JobIsRunningAlert({ job }) {
         </div>
       </IconAlert>
     </Fade>
+  );
+}
+
+export function ReportedPluginTooltip({ id, pluginName }) {
+  return (
+    <UncontrolledTooltip placement="top" target={id}>
+      {pluginName} reported / {pluginName} executed
+    </UncontrolledTooltip>
   );
 }
 

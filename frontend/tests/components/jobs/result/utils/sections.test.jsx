@@ -306,7 +306,7 @@ describe("test JobActionsBar", () => {
       visualizersReportedList,
       visualizersToExecute,
     );
-    expect(result).toBe(2);
+    expect(result).toBe(1);
   });
 
   test("reportedVisualizerNumber function - all visualizars in running", async () => {

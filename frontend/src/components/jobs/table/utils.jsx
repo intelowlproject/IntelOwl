@@ -4,6 +4,7 @@ import { MdInfo } from "react-icons/md";
 import PropTypes from "prop-types";
 
 export function PlaybookExecutedInfoCard({ job }) {
+  console.debug(job);
   return (
     <Card className="border-dark p-0">
       <CardHeader className="d-flex align-items-center bg-body p-2 h6">
@@ -11,16 +12,10 @@ export function PlaybookExecutedInfoCard({ job }) {
       </CardHeader>
       <CardBody className="bg-darker border-top border-tertiary">
         <div className="d-flex flex-column justify-content-center">
-          <span>
-            {job.analyzers_to_execute.length}/{job.analyzers_requested.length}{" "}
-            analyzers
-          </span>
-          <span>
-            {job.connectors_to_execute.length}/{job.connectors_requested.length}{" "}
-            connectors
-          </span>
-          <span>{job.pivots_to_execute.length}/all pivots</span>
-          <span>{job.visualizers_to_execute.length}/all visualizers</span>
+          <span>{job.analyzers_to_execute.length} analyzers</span>
+          <span>{job.connectors_to_execute.length} connectors</span>
+          <span>{job.pivots_to_execute.length} pivots</span>
+          <span>{job.visualizers_to_execute.length} visualizers</span>
         </div>
       </CardBody>
     </Card>

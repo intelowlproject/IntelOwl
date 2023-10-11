@@ -13,6 +13,7 @@ import {
 import { JobTag, StatusTag, TLPTag } from "../../common";
 import { TLP_CHOICES, ALL_CLASSIFICATIONS } from "../../../constants";
 import { jobStatuses } from "../../../constants/constants";
+import { PlaybookInfoPopoverIcon } from "./utils";
 
 const process_time_mmss = (value) =>
   new Date(value * 1000).toISOString().substring(14, 19);
@@ -68,6 +69,7 @@ const jobTableColumns = [
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
+    maxWidth: 120,
   },
   {
     Header: "Name",
@@ -98,87 +100,68 @@ const jobTableColumns = [
     Filter: DefaultColumnFilter,
   },
   {
-    Header: "Settings",
-    columns: [
-      {
-        Header: "Type",
-        id: "type",
-        accessor: (r) => r.observable_classification || r.file_mimetype,
-        disableSortBy: true,
-        maxWidth: 100,
-        Filter: SelectOptionsFilter,
-        selectOptions: ALL_CLASSIFICATIONS,
-      },
-      {
-        Header: "TLP",
-        id: "tlp",
-        accessor: "tlp",
-        Cell: ({ value }) => <TLPTag value={value} />,
-        disableSortBy: true,
-        Filter: SelectOptionsFilter,
-        selectOptions: TLP_CHOICES,
-        maxWidth: 100,
-      },
-      {
-        Header: "Tags",
-        id: "tags",
-        accessor: "tags",
-        Cell: ({ value }) =>
-          value.map((tag) => (
-            <JobTag
-              key={`jobtable-tags-${tag.label}`}
-              tag={tag}
-              className="ms-2"
-            />
-          )),
-        disableSortBy: true,
-        maxWidth: 100,
-        Filter: DefaultColumnFilter,
-        filterValueAccessorFn: (tags) => tags.map((t) => t.label),
-      },
-    ],
+    Header: "Type",
+    id: "type",
+    accessor: (r) => r.observable_classification || r.file_mimetype,
+    disableSortBy: true,
+    maxWidth: 100,
+    Filter: SelectOptionsFilter,
+    selectOptions: ALL_CLASSIFICATIONS,
   },
   {
-    Header: "Computed",
-    columns: [
-      {
-        Header: "Plugins Executed",
-        id: "plugins",
-        accessor: (r) => r,
-        Cell: ({ value: job }) => (
-          <div className="d-flex flex-column justify-content-center">
-            <span>
-              {job.analyzers_to_execute.length}/{job.analyzers_requested.length}{" "}
-              analyzers
-            </span>
-            <span>
-              {job.connectors_to_execute.length}/
-              {job.connectors_requested.length} connectors
-            </span>
-            <span>{job.pivots_to_execute.length}/ all pivots</span>
-            <span>{job.visualizers_to_execute.length}/all visualizers</span>
-          </div>
-        ),
-        disableSortBy: true,
-        maxWidth: 175,
-      },
-      {
-        Header: "Process Time (mm:ss)",
-        id: "process_time",
-        accessor: "process_time",
-        Cell: ({ value }) => <span>{process_time_mmss(value)}</span>,
-        maxWidth: 125,
-      },
-      {
-        Header: "Status",
-        id: "status",
-        accessor: "status",
-        Cell: ({ value }) => <StatusTag status={value} />,
-        disableSortBy: true,
-        Filter: SelectOptionsFilter,
-        selectOptions: Object.values(jobStatuses),
-      },
-    ],
+    Header: "TLP",
+    id: "tlp",
+    accessor: "tlp",
+    Cell: ({ value }) => <TLPTag value={value} />,
+    disableSortBy: true,
+    Filter: SelectOptionsFilter,
+    selectOptions: TLP_CHOICES,
+    maxWidth: 90,
+  },
+  {
+    Header: "Tags",
+    id: "tags",
+    accessor: "tags",
+    Cell: ({ value }) =>
+      value.map((tag) => (
+        <JobTag key={`jobtable-tags-${tag.label}`} tag={tag} className="ms-2" />
+      )),
+    disableSortBy: true,
+    maxWidth: 100,
+    Filter: DefaultColumnFilter,
+    filterValueAccessorFn: (tags) => tags.map((t) => t.label),
+  },
+  {
+    Header: "Playbook Executed",
+    id: "playbook_to_execute",
+    accessor: (r) => r,
+    Cell: ({ value: job }) => (
+      <div className="d-flex justify-content-between">
+        <span className="d-block text-truncate">
+          {job.playbook_to_execute || "Custom Analysis"}
+        </span>
+        <PlaybookInfoPopoverIcon job={job} />
+      </div>
+    ),
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    maxWidth: 180,
+  },
+  {
+    Header: "Process Time (mm:ss)",
+    id: "process_time",
+    accessor: "process_time",
+    Cell: ({ value }) => <span>{process_time_mmss(value)}</span>,
+    maxWidth: 125,
+  },
+  {
+    Header: "Status",
+    id: "status",
+    accessor: "status",
+    Cell: ({ value }) => <StatusTag status={value} />,
+    disableSortBy: true,
+    Filter: SelectOptionsFilter,
+    selectOptions: Object.values(jobStatuses),
   },
 ];
 

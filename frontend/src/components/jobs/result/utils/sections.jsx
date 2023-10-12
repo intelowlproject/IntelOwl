@@ -365,16 +365,17 @@ export function reportedVisualizerNumber(
   let visualizersNumber = 0;
   visualizersToExecute.forEach((visualizer) => {
     // count reports that have 'config' === 'visualizer' (pages from the same visualizer) and are in a final statuses
-    let count = 0;
+    let visualizersInFinalStatus = 0;
+    let visualizerPages = 0;
     visualizersReportedList.forEach((report) => {
-      if (
-        report.config === visualizer &&
-        Object.values(pluginFinalStatuses).includes(report.status)
-      )
-        count += 1;
+      if (report.config === visualizer) {
+        visualizerPages += 1;
+        if (Object.values(pluginFinalStatuses).includes(report.status))
+          visualizersInFinalStatus += 1;
+      }
     });
-    // reports relating to pages from the same visualizer are counted only once
-    if (count === visualizersToExecute.length) visualizersNumber += 1;
+    // visualizer is completed if all pages are in a final statuses
+    if (visualizersInFinalStatus === visualizerPages) visualizersNumber += 1;
   });
   return visualizersNumber;
 }

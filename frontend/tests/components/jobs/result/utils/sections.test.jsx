@@ -246,7 +246,7 @@ describe("test JobActionsBar", () => {
     });
   });
 
-  test("reportedVisualizerNumber function - 2 visualizers and 3 pages", async () => {
+  test("reportedVisualizerNumber function - 2 visualizers (1 completed and 1 running)", async () => {
     const visualizersReportedList = [
       {
         id: 1,
@@ -309,7 +309,7 @@ describe("test JobActionsBar", () => {
     expect(result).toBe(1);
   });
 
-  test("reportedVisualizerNumber function - all visualizars in running", async () => {
+  test("reportedVisualizerNumber function - all visualizers in running", async () => {
     const visualizersReportedList = [
       {
         id: 1,
@@ -344,5 +344,42 @@ describe("test JobActionsBar", () => {
       visualizersToExecute,
     );
     expect(result).toBe(0);
+  });
+
+  test("reportedVisualizerNumber function - all visualizers reported", async () => {
+    const visualizersReportedList = [
+      {
+        id: 1,
+        name: "DNS1",
+        process_time: 0,
+        report: [],
+        status: "FAILED",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "DNS",
+        type: "visualizer",
+      },
+      {
+        id: 2,
+        name: "IP1",
+        process_time: 0,
+        report: [],
+        status: "SUCCESS",
+        errors: [],
+        start_time: "2023-10-04T07:51:31.448024Z",
+        end_time: "2023-10-04T07:51:31.448030Z",
+        runtime_configuration: {},
+        config: "IP",
+        type: "visualizer",
+      },
+    ];
+    const visualizersToExecute = ["DNS", "IP"];
+    const result = reportedVisualizerNumber(
+      visualizersReportedList,
+      visualizersToExecute,
+    );
+    expect(result).toBe(2);
   });
 });

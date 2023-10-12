@@ -74,11 +74,11 @@ describe("test PlaybookInfoPopoverIcon", () => {
             playbook_requested: "playbook_test",
             playbook_to_execute: "playbook_test",
             analyzers_requested: ["Classic_DNS"],
-            connectors_requested: [],
+            connectors_requested: ["connector1", "connector2"],
             analyzers_to_execute: ["Classic_DNS"],
-            connectors_to_execute: [],
-            visualizers_to_execute: [],
-            pivots_to_execute: [],
+            connectors_to_execute: ["connector1", "connector2"],
+            visualizers_to_execute: ["IP", "Dns"],
+            pivots_to_execute: ["test_pivot"],
           }}
         />
       </BrowserRouter>,
@@ -96,9 +96,9 @@ describe("test PlaybookInfoPopoverIcon", () => {
       expect(playbookInfoCardHeader).toBeInTheDocument();
       // card body
       expect(screen.getByText("1 analyzers")).toBeInTheDocument();
-      expect(screen.getByText("0 connectors")).toBeInTheDocument();
-      expect(screen.getByText("0 pivots")).toBeInTheDocument();
-      expect(screen.getByText("0 visualizers")).toBeInTheDocument();
+      expect(screen.getByText("2 connectors")).toBeInTheDocument();
+      expect(screen.getByText("1 pivots")).toBeInTheDocument();
+      expect(screen.getByText("2 visualizers")).toBeInTheDocument();
     });
   });
 
@@ -170,11 +170,11 @@ describe("test PlaybookInfoPopoverIcon", () => {
             playbook_requested: "",
             playbook_to_execute: "",
             analyzers_requested: ["Classic_DNS"],
-            connectors_requested: [],
+            connectors_requested: ["connector1", "connector2"],
             analyzers_to_execute: ["Classic_DNS"],
-            connectors_to_execute: [],
+            connectors_to_execute: ["connector1", "connector2"],
             visualizers_to_execute: [],
-            pivots_to_execute: [],
+            pivots_to_execute: ["test_pivot"],
           }}
         />
       </BrowserRouter>,
@@ -192,8 +192,8 @@ describe("test PlaybookInfoPopoverIcon", () => {
       expect(playbookInfoCardHeader).toBeInTheDocument();
       // card body
       expect(screen.getByText("1 analyzers")).toBeInTheDocument();
-      expect(screen.getByText("0 connectors")).toBeInTheDocument();
-      expect(screen.getByText("0 pivots")).toBeInTheDocument();
+      expect(screen.getByText("2 connectors")).toBeInTheDocument();
+      expect(screen.getByText("1 pivots")).toBeInTheDocument();
       expect(screen.getByText("0 visualizers")).toBeInTheDocument();
     });
   });

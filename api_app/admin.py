@@ -5,17 +5,8 @@ from django.contrib import admin
 from django.db.models import JSONField
 from prettyjson.widgets import PrettyJSONWidget
 
-from .filters import QueueListFilter
 from .forms import ParameterInlineForm
-from .models import (
-    AbstractConfig,
-    Job,
-    Parameter,
-    PluginConfig,
-    PythonConfig,
-    PythonModule,
-    Tag,
-)
+from .models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule, Tag
 from .tabulars import (
     ParameterInline,
     PluginConfigInlineForParameter,
@@ -165,11 +156,7 @@ class PythonConfigAdminView(AbstractConfigAdminView):
         "python_module",
         "disabled",
         "disabled_in_orgs",
-        "get_queue",
+        "routing_key",
     )
     inlines = [PluginConfigInlineForPythonConfig]
-    list_filter = [QueueListFilter]
-
-    @admin.display(description="Queue")
-    def get_queue(self, instance: PythonConfig):
-        return instance.queue
+    list_filter = ["routing_key"]

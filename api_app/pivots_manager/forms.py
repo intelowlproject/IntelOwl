@@ -16,7 +16,8 @@ class PivotConfigAdminForm(forms.ModelForm):
         fields = [
             "name",
             "description",
-            "config",
+            "routing_key",
+            "soft_time_limit",
             "disabled",
             "disabled_in_organizations",
             "python_module",

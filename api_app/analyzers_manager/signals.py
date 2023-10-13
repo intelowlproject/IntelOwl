@@ -10,6 +10,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 
 @receiver(pre_save, sender=AnalyzerConfig)
 def pre_save_analyzer_config(sender, instance: AnalyzerConfig, *args, **kwargs):
+    from intel_owl.tasks import update
+
     if (
         hasattr(instance.python_module.python_class, "_update")
         and callable(instance.python_module.python_class._update)
@@ -18,7 +20,7 @@ def pre_save_analyzer_config(sender, instance: AnalyzerConfig, *args, **kwargs):
     ):
         periodic_task = PeriodicTask.objects.update_or_create(
             name=f"{instance.name.title()}Analyzer",
-            task="intel_owl.tasks.update",
+            task=f"{update.__module__}.{update.__name__}",
             defaults={
                 "crontab": instance.update_schedule,
                 "queue": instance.queue,

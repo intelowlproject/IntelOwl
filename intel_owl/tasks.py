@@ -27,13 +27,14 @@ logger = logging.getLogger(__name__)
 
 class FailureLoggedRequest(Request):
     def on_timeout(self, soft, timeout):
-        super().on_timeout(soft, timeout)
+        result = super().on_timeout(soft, timeout)
         if not soft:
             logger.warning(f"A hard timeout was enforced for task {self.task.name}")
+        return result
 
     def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
         logger.critical(f"Failure detected for task {self.task.name}")
-        super().on_failure(
+        return super().on_failure(
             exc_info, send_failed_event=send_failed_event, return_ok=return_ok
         )
 
@@ -299,12 +300,13 @@ def create_caches(user_pk: int):
 
 @signals.beat_init.connect
 def beat_init_connect(*args, sender: Consumer = None, **kwargs):
+    from api_app.models import PythonConfig
     from certego_saas.models import User
 
     logger.info("Starting beat_init signal")
-
+    # update of plugins that needs it
     for task in PeriodicTask.objects.filter(
-        enabled=True, task="intel_owl.tasks.update"
+        enabled=True, task=f"{update.__module__}.{update.__name__}"
     ):
         python_module_pk = json.loads(task.kwargs)["python_module_pk"]
         logger.info(f"Updating {python_module_pk}")
@@ -314,7 +316,7 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
             args=[python_module_pk],
         )
 
-    # we are not considering system users
+    # creating cache excluding system users
     for user in User.objects.exclude(email=""):
         logger.info(f"Creating cache for user {user.username}")
         create_caches.apply_async(
@@ -322,6 +324,17 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )
+    # fixing routing_keys
+    for class_ in PythonConfig.get_subclasses():
+        updated = class_.objects.exclude(routing_key__in=settings.CELERY_QUEUES).update(
+            routing_key=settings.DEFAULT_QUEUE
+        )
+        if updated:
+            logger.warning(
+                f"There were {updated} {class_.__name__} configurations"
+                " with a queue not configured."
+                f" It was automatically changed to {settings.DEFAULT_QUEUE}"
+            )
 
 
 # set logger

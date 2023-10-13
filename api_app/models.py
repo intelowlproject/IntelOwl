@@ -269,6 +269,17 @@ class Job(models.Model):
         )
 
     @cached_property
+    def parent_job(self) -> Optional["Job"]:
+        from api_app.pivots_manager.models import PivotMap
+
+        try:
+            pm = PivotMap.objects.get(ending_job=self)
+        except PivotMap.DoesNotExist:
+            return None
+        else:
+            return pm.starting_job
+
+    @cached_property
     def sha1(self) -> str:
         return calculate_sha1(
             self.file.read() if self.is_sample else self.observable_name.encode("utf-8")

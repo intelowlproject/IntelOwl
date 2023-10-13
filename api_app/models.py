@@ -495,11 +495,15 @@ class Job(models.Model):
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.filter(related_analyzer_configs__isnull=False)
+                self.pivots_to_execute.filter(
+                    related_analyzer_configs__isnull=False
+                ).distinct()
             )
             | self._get_signatures(self.connectors_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.filter(related_connector_configs__isnull=False)
+                self.pivots_to_execute.filter(
+                    related_connector_configs__isnull=False
+                ).distinct()
             )
             | self._get_signatures(self.visualizers_to_execute.all())
             | self._final_status_signature

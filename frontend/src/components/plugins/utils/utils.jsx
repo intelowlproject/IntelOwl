@@ -22,7 +22,7 @@ import {
 
 import { IconButton, BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
 
-import { markdownToHtml, TLPTag } from "../../common";
+import { markdownToHtml, TLPTag, JobTag } from "../../common";
 import {
   useOrganizationStore,
   usePluginConfigurationStore,
@@ -32,9 +32,17 @@ import {
   CONNECTORS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
 } from "../../../constants/api";
-import { pluginType } from "../../../constants/constants";
+import { pluginType, scanMode } from "../../../constants/constants";
 
 const { checkPluginHealth } = usePluginConfigurationStore.getState();
+
+function parseScanCheckTime(time) {
+  // scan_check_time is in format days:hours:minutes:seconds, we need to convert them to hours
+  const [daysAgo, hoursAgo] = time
+    .split(":")
+    .map((token) => parseInt(token, 10));
+  return daysAgo * 24 + hoursAgo;
+}
 
 export function PluginInfoCard({ pluginInfo }) {
   console.debug(pluginInfo);
@@ -171,6 +179,41 @@ export function PluginInfoCard({ pluginInfo }) {
                   )}
                 </li>
               ))}
+            </ul>
+          </div>
+        )}
+        {!pluginInfo?.plugin_type && (
+          <div>
+            <h6 className="text-secondary">Advanced Settings &nbsp;</h6>
+            <ul>
+              {pluginInfo?.tlp && (
+                <li>
+                  <strong>TLP:</strong>{" "}
+                  <TLPTag className="ms-auto me-0" value={pluginInfo.tlp} />
+                </li>
+              )}
+              {pluginInfo?.scan_mode && (
+                <li>
+                  <strong>Scan mode:</strong>{" "}
+                  {pluginInfo.scan_mode === scanMode[0]
+                    ? "force new analysis"
+                    : `a new scan is not performed if there is a similar one finished in the last 
+                ${parseScanCheckTime(pluginInfo?.scan_check_time)} hours`}
+                </li>
+              )}
+              {pluginInfo?.tags.length > 0 && (
+                <li>
+                  {" "}
+                  <strong>Tags:</strong>
+                  {pluginInfo.tags.map((tag) => (
+                    <JobTag
+                      key={`jobtable-tags-${tag.label}`}
+                      tag={tag}
+                      className="ms-2"
+                    />
+                  ))}
+                </li>
+              )}
             </ul>
           </div>
         )}

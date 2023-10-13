@@ -117,6 +117,7 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         return "5"
 
     @classmethod
+    @property
     def serializer_class(cls) -> Type["PythonConfigSerializer"]:
         from api_app.pivots_manager.serializers import PivotConfigSerializer
 

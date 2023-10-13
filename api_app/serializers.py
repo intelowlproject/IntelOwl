@@ -1024,15 +1024,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         return result
 
 
-class _ConfigSerializer(rfs.Serializer):
-    """
-    To validate `config` attr.
-    """
-
-    queue = rfs.CharField(required=True)
-    soft_time_limit = rfs.IntegerField(required=True)
-
-
 class ParamListSerializer(rfs.ListSerializer):
     @property
     def data(self):
@@ -1133,15 +1124,27 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):
-    config = _ConfigSerializer(required=True)
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = ["disabled_in_organizations", "python_module"]
+        exclude = [
+            "disabled_in_organizations",
+            "python_module",
+            "routing_key",
+            "soft_time_limit",
+        ]
         list_serializer_class = PythonListConfigSerializer
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["config"] = {
+            "queue": instance.routing_key,
+            "soft_time_limit": instance.soft_time_limit,
+        }
+        return result
 
 
 class PythonConfigSerializerForMigration(PythonConfigSerializer):

@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 /* eslint-disable react/prop-types */
 import React from "react";
+import { Input } from "reactstrap";
+import classnames from "classnames";
 
 import {
   DefaultColumnFilter,
@@ -11,8 +13,11 @@ import {
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
-import { TLP_CHOICES, ALL_CLASSIFICATIONS } from "../../../constants";
-
+import {
+  TLP_CHOICES,
+  FILE_MIME_TYPES,
+  OBSERVABLE_CLASSIFICATION,
+} from "../../../constants";
 import { jobStatuses, jobResultSection } from "../../../constants/constants";
 import { PlaybookInfoPopoverIcon } from "./utils";
 
@@ -102,12 +107,76 @@ const jobTableColumns = [
   },
   {
     Header: "Type",
+    id: "is_sample",
+    accessor: (r) => r.is_sample,
+    Cell: ({ value }) => (value ? "file" : "observable"),
+    disableSortBy: true,
+    maxWidth: 100,
+    Filter: ({
+      column: { filterValue: isSampleStr, setFilter, id, selectOptions },
+    }) => {
+      const onChange = (dropdownSelector) => {
+        /* in case the user selected a value from the dropodown ("file", "observable")
+                we need to convert it to a boolean value, because we will send the request to the backend
+                for the field is_sample that requires a bool.
+              */
+        if (dropdownSelector.target.value) {
+          /* even if the backend requires a bool, we need to cast it to string or 
+                the library won't send the request for the false case (observable filter)
+              */
+          setFilter((dropdownSelector.target.value === "file").toString());
+        } else {
+          /* in case of no selection set to undefined, in this way the library will remove the param from the request
+                this is the "all" case (both samples and observables)
+              */
+          setFilter(undefined);
+        }
+      };
+
+      // this is the label to show in the dropdown as selected element
+      let SelectedDropdownElementlabel = "All";
+      if (isSampleStr !== undefined) {
+        SelectedDropdownElementlabel =
+          isSampleStr === "true" ? "file" : "observable";
+      }
+
+      return (
+        <Input
+          id={`datatable-select-${id}`}
+          type="select"
+          className={classnames(
+            {
+              "bg-body border-secondary": isSampleStr,
+            },
+            "custom-select-sm input-dark",
+          )}
+          value={SelectedDropdownElementlabel}
+          onChange={onChange}
+        >
+          <option value="">All</option>
+          {selectOptions.map((value) => (
+            <option
+              key={`datatable-select-${id}-option-${value}`}
+              value={value}
+            >
+              {value}
+            </option>
+          ))}
+        </Input>
+      );
+    },
+    selectOptions: ["file", "observable"],
+  },
+  {
+    Header: "SubType",
     id: "type",
     accessor: (r) => r.observable_classification || r.file_mimetype,
     disableSortBy: true,
     maxWidth: 100,
     Filter: SelectOptionsFilter,
-    selectOptions: ALL_CLASSIFICATIONS,
+    selectOptions: Object.values(OBSERVABLE_CLASSIFICATION)
+      .sort()
+      .concat(Object.values(FILE_MIME_TYPES).sort()),
   },
   {
     Header: "TLP",

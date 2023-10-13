@@ -11,6 +11,7 @@ import uuid
 from typing import Any, Dict, Generator, List, Union
 
 import django.core.exceptions
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import QueryDict
@@ -24,7 +25,6 @@ from rest_framework.fields import SerializerMethodField
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.apps.user.models import User
-from intel_owl.celery import DEFAULT_QUEUE
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.models import AnalyzerConfig, MimeTypes
@@ -315,7 +315,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             logger.info(f"Sending task for job {job.pk}")
             job_pipeline.apply_async(
                 args=[job.pk],
-                routing_key=DEFAULT_QUEUE,
+                routing_key=settings.DEFAULT_QUEUE,
                 MessageGroupId=str(uuid.uuid4()),
             )
 

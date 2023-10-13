@@ -6,6 +6,7 @@ import sys
 
 from ._util import get_secret
 from .aws import AWS_SQS, AWS_USER_NUMBER
+
 RESULT_BACKEND = "django-db"
 BROKER_URL = get_secret(
     "BROKER_URL", "sqs://" if AWS_SQS else "amqp://guest:guest@rabbitmq:5672"

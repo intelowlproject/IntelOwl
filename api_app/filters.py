@@ -22,13 +22,15 @@ class JobFilter(filters.FilterSet):
     file_name = filters.CharFilter(lookup_expr="icontains")
     file_mimetype = filters.CharFilter(lookup_expr="icontains")
     tags = filters.BaseInFilter(field_name="tags__label", lookup_expr="in")
+    playbook_to_execute = filters.CharFilter(
+        field_name="playbook_to_execute__name", lookup_expr="in"
+    )
 
     # extra
     user = filters.CharFilter(method="filter_for_user")
     id = filters.CharFilter(method="filter_for_id")
     type = filters.CharFilter(method="filter_for_type")
     name = filters.CharFilter(method="filter_for_name")
-    playbook_to_execute = filters.CharFilter(method="filter_for_playbook_to_execute")
 
     @staticmethod
     def filter_for_user(queryset, value, user, *args, **kwargs):
@@ -55,14 +57,6 @@ class JobFilter(filters.FilterSet):
         return queryset.filter(
             Q(observable_name__icontains=name) | Q(file_name__icontains=name)
         )
-
-    @staticmethod
-    def filter_for_playbook_to_execute(
-        queryset, value, playbook_to_execute, *args, **kwargs
-    ):
-        if playbook_to_execute.lower() == "custom analysis":
-            return queryset.filter(playbook_to_execute=None)
-        return queryset.filter(playbook_to_execute__name__icontains=playbook_to_execute)
 
     class Meta:
         model = Job

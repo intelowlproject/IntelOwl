@@ -125,7 +125,7 @@ class Tag(models.Model):
     )
 
     def __str__(self):
-        return f'Tag(label="{self.label}")'
+        return self.label
 
 
 class Comment(models.Model):

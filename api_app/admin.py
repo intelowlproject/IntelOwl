@@ -37,6 +37,7 @@ class JobAdminView(admin.ModelAdmin):
         "analyzers_executed",
         "connectors_executed",
         "visualizers_executed",
+        "get_tags",
     )
     list_display_link = (
         "id",
@@ -48,10 +49,11 @@ class JobAdminView(admin.ModelAdmin):
         "observable_name",
         "file_name",
     )
-    list_filter = (
-        "status",
-        "user",
-    )
+    list_filter = ("status", "user", "tags")
+
+    @admin.display(description="Tags")
+    def get_tags(self, instance: Job):
+        return [tag.label for tag in instance.tags.all()]
 
     def analyzers_executed(self, instance: Job):  # noqa
         return [analyzer.name for analyzer in instance.analyzers_to_execute.all()]

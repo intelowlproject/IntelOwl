@@ -56,7 +56,7 @@ from api_app.validators import (
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
-from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
+from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -342,7 +342,8 @@ class Job(models.Model):
             | self._final_status_signature
         )
         runner.apply_async(
-            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+            queue=get_queue_name(settings.CONFIG_QUEUE),
+            MessageGroupId=str(uuid.uuid4()),
         )
 
     def set_final_status(self) -> None:
@@ -484,7 +485,7 @@ class Job(models.Model):
         return tasks.job_set_final_status.signature(
             args=[self.pk],
             kwargs={},
-            queue=get_queue_name(DEFAULT_QUEUE),
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
@@ -504,7 +505,8 @@ class Job(models.Model):
             | self._final_status_signature
         )
         runner.apply_async(
-            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+            queue=get_queue_name(settings.CONFIG_QUEUE),
+            MessageGroupId=str(uuid.uuid4()),
         )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
@@ -1019,7 +1021,7 @@ class PythonConfig(AbstractConfig):
         return tasks.job_set_pipeline_status.signature(
             args=[job.pk, status],
             kwargs={},
-            queue=get_queue_name(DEFAULT_QUEUE),
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
@@ -1029,9 +1031,9 @@ class PythonConfig(AbstractConfig):
         if queue not in settings.CELERY_QUEUES:
             logger.warning(
                 f"Analyzer {self.name} has a wrong queue."
-                f" Setting to `{DEFAULT_QUEUE}`"
+                f" Setting to `{settings.DEFAULT_QUEUE}`"
             )
-            self.config["queue"] = DEFAULT_QUEUE
+            self.config["queue"] = settings.DEFAULT_QUEUE
 
     def clean(self):
         super().clean()
@@ -1058,7 +1060,7 @@ class PythonConfig(AbstractConfig):
     def queue(self):
         queue = self.config["queue"]
         if queue not in settings.CELERY_QUEUES:
-            queue = DEFAULT_QUEUE
+            queue = settings.DEFAULT_QUEUE
         return get_queue_name(queue)
 
     @cached_property

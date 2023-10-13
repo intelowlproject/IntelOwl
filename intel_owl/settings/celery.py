@@ -13,7 +13,8 @@ BROKER_URL = get_secret(
 RESULT_BACKEND = "django-db"
 CELERY_QUEUES = get_secret("CELERY_QUEUES", "default").split(",")
 BROADCAST_QUEUE = "broadcast"
-
+CONFIG_QUEUE = "config"
+DEFAULT_QUEUE = "default"
 if AWS_SQS and not AWS_USER_NUMBER:
     print("you must specify the USER NUMBER")
     sys.exit(4)

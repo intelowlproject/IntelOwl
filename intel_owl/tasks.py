@@ -318,7 +318,7 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
     for user in User.objects.exclude(email=""):
         logger.info(f"Creating cache for user {user.username}")
         create_caches.apply_async(
-            routing_key=settings.CONFIG_QUEUE,
+            routing_key=settings.DEFAULT_QUEUE,
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )

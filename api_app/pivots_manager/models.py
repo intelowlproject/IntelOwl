@@ -113,6 +113,7 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         )
 
     @classmethod
+    @property
     def plugin_type(cls) -> str:
         return "5"
 
@@ -124,6 +125,7 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         return PivotConfigSerializer
 
     @classmethod
+    @property
     def config_exception(cls):
         return PivotConfigurationException
 

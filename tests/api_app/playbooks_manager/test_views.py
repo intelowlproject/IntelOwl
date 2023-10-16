@@ -28,7 +28,6 @@ class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTest
             description="test",
             disabled=False,
             type="file",
-            config={"soft_time_limit": 100, "queue": "default"},
         )
 
         response = self.client.post(

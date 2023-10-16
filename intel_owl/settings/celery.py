@@ -16,9 +16,9 @@ BROADCAST_QUEUE = "broadcast"
 CONFIG_QUEUE = "config"
 
 CELERY_QUEUES = get_secret("CELERY_QUEUES", DEFAULT_QUEUE).split(",")
-
-if CONFIG_QUEUE not in CELERY_QUEUES:
-    CELERY_QUEUES.append(CONFIG_QUEUE)
+for queue in [DEFAULT_QUEUE, CONFIG_QUEUE]:
+    if queue not in CELERY_QUEUES:
+        CELERY_QUEUES.append(queue)
 
 if AWS_SQS and not AWS_USER_NUMBER:
     print("you must specify the USER NUMBER")

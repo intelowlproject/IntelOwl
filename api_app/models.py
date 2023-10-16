@@ -940,7 +940,9 @@ class AbstractReport(models.Model):
 class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
     soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
-    routing_key = models.CharField(max_length=50, validators=[validate_routing_key])
+    routing_key = models.CharField(
+        max_length=50, validators=[validate_routing_key], default="default"
+    )
     python_module = models.ForeignKey(
         PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
     )

@@ -39,7 +39,6 @@ class Migration(migrations.Migration):
                 max_length=50,
                 validators=[api_app.validators.validate_routing_key],
             ),
-            preserve_default=False,
         ),
         migrations.AddField(
             model_name="analyzerconfig",

@@ -26,7 +26,6 @@ class PluginTestCase(CustomTestCase):
             ),
             description="test",
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
             run_on_failure=False,
         )
         self.job.connectors_to_execute.set([self.cc])

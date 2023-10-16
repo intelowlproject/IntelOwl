@@ -238,6 +238,9 @@ class Job(models.Model):
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
+    warnings = pg_fields.ArrayField(
+        models.CharField(max_length=900), blank=True, default=list, null=True
+    )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
@@ -395,11 +398,6 @@ class Job(models.Model):
             return None
         td = self.finished_analysis_time - self.received_request_time
         return round(td.total_seconds(), 2)
-
-    def append_error(self, err_msg: str, save=True) -> None:
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
 
     def update_status(self, status: str, save=True) -> None:
         self.status = status
@@ -930,11 +928,6 @@ class AbstractReport(models.Model):
     def process_time(self) -> float:
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
-
-    def append_error(self, err_msg: str, save=True):
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
 
 
 class PythonConfig(AbstractConfig):

@@ -59,8 +59,8 @@ class AbstractConfigTestCase(CustomTestCase):
             routing_key="wrong_key",
             playbook=PlaybookConfig.objects.first(),
         )
-        muc.full_clean()
-        self.assertEqual(muc.queue, "default")
+        with self.assertRaises(ValidationError):
+            muc.full_clean()
 
     def test_is_configured_no_secrets(self):
         muc, _ = VisualizerConfig.objects.get_or_create(

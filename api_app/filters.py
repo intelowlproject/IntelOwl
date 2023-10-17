@@ -23,7 +23,7 @@ class JobFilter(filters.FilterSet):
     file_mimetype = filters.CharFilter(lookup_expr="icontains")
     tags = filters.BaseInFilter(field_name="tags__label", lookup_expr="in")
     playbook_to_execute = filters.CharFilter(
-        field_name="playbook_to_execute__name", lookup_expr="in"
+        field_name="playbook_to_execute__name", lookup_expr="icontains"
     )
 
     # extra

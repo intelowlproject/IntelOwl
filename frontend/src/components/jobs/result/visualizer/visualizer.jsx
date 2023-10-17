@@ -146,41 +146,34 @@ export default function VisualizerReport({ visualizerReport }) {
     validateLevel(levelElement),
   );
   validatedLevels.sort(
-    (firstLevel, secondLevel) => firstLevel.level - secondLevel.level,
+    (firstLevel, secondLevel) =>
+      firstLevel.levelPosition - secondLevel.levelPosition,
   );
 
   console.debug("VisualizerReport - validatedLevels");
   console.debug(validatedLevels);
 
   // convert data to elements
-  const levels = validatedLevels.map((level) =>
-    convertToElement(
+  const levels = validatedLevels.map((level) => ({
+    levelSize: level.levelSize,
+    elements: convertToElement(
       level.elements,
       `page${visualizerReport.id}-level${level.level}`,
     ),
-  );
+  }));
 
   console.debug("VisualizerReport - levels");
   console.debug(levels);
 
   // generate the levels/rows
-  let levelElements = levels.map((levelData, levelIndex) => {
-    let levelSize = levelIndex * 2 + 3;
-    if (levelSize > 6) {
-      levelSize = 6;
-    }
-    return (
-      <div className={`h${levelSize}`}>
-        {levelData}
-        {levelIndex + 1 !== levels.length && (
-          <hr className="border-gray flex-grow-1 my-2" />
-        )}
-      </div>
-    );
-  });
-
-  console.debug("VisualizerReport - levelElements");
-  console.debug(levelElements);
+  let levelElements = levels.map((levelData, levelIndex) => (
+    <div className={levelData.levelSize}>
+      {levelData.elements}
+      {levelIndex + 1 !== levels.length && (
+        <hr className="border-gray flex-grow-1 my-2" />
+      )}
+    </div>
+  ));
 
   if (levelElements.length === 0) {
     levelElements = (

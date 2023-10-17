@@ -1,5 +1,12 @@
 import { VisualizerComponentType } from "./elements/const";
 
+function parseLevelSize(value) {
+  if (["1", "2", "3", "4", "5", "6"].includes(value)) {
+    return `h${value}`;
+  }
+  return "h6";
+}
+
 // common visualizer field components properties
 function parseBool(value) {
   if (typeof value === "object") {
@@ -11,7 +18,7 @@ function parseBool(value) {
   return !!value;
 }
 
-function parseSize(value) {
+function parseElementSize(value) {
   if (
     [
       "1",
@@ -89,7 +96,7 @@ function parseElementFields(rawElement) {
   const validatedFields = {
     type: parseComponentType(rawElement.type),
     disable: parseBool(rawElement.disable),
-    size: parseSize(rawElement.size),
+    size: parseElementSize(rawElement.size),
     alignment: parseAlignment(rawElement.alignment),
   };
 
@@ -138,7 +145,8 @@ function parseElementFields(rawElement) {
 
 // validate the visualizer rows
 export function validateLevel(levelRawData) {
-  const level = parseFloat(levelRawData.level);
+  const levelPosition = parseFloat(levelRawData.level_position);
+  const levelSize = parseLevelSize(levelRawData.level_size);
   const elements = parseElementFields(levelRawData.elements);
-  return { level, elements };
+  return { levelPosition, levelSize, elements };
 }

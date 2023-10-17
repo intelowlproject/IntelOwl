@@ -104,11 +104,13 @@ class DNS(Visualizer):
 
         page = self.Page(name="DNS")
         page.add_level(
-            level=1,
+            level_position=1,
+            level_size=self.LevelSize.S_3,
             horizontal_list=self.HList(value=first_level_elements),
         )
         page.add_level(
-            level=2,
+            level_position=2,
+            level_size=self.LevelSize.S_5,
             horizontal_list=self.HList(value=second_level_elements),
         )
         logger.debug(f"levels: {page.to_dict()}")

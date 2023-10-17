@@ -190,7 +190,7 @@ const analyzersTableColumns = [
         {value?.docker_based && (
           <PluginHealthCheckButton
             pluginName={value.name}
-            pluginType="analyzer"
+            pluginType_="analyzer"
           />
         )}
       </div>
@@ -248,7 +248,7 @@ const connectorTableColumns = [
         />
         <PluginHealthCheckButton
           pluginName={value?.name}
-          pluginType="connector"
+          pluginType_="connector"
         />
       </div>
     ),

@@ -382,7 +382,8 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
         pivot_page = self.Page(name="Job Pivots")
         pivot_page.add_level(
-            level=1,
+            level_position=1,
+            level_size=self.LevelSize.S_3,
             horizontal_list=self.HList(
                 value=[
                     # parent job

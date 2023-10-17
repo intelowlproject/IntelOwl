@@ -511,7 +511,7 @@ describe("visualizer data validation", () => {
         ],
       },
       levelPosition: 1,
-      levelSize: "h2"
+      levelSize: "h2",
     });
   });
 });

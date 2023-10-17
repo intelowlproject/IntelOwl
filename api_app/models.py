@@ -239,7 +239,7 @@ class Job(models.Model):
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
     warnings = pg_fields.ArrayField(
-        models.CharField(max_length=900), blank=True, default=list, null=True
+        models.TextField(), blank=True, default=list, null=True
     )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)

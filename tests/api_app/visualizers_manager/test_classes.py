@@ -12,6 +12,7 @@ from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
     VisualizableHorizontalList,
+    VisualizableLevelSize,
     VisualizableObject,
     VisualizablePage,
     VisualizableTitle,
@@ -252,9 +253,12 @@ class VisualizablePageTestCase(CustomTestCase):
         )
         vvl = VisualizableHorizontalList(value=[value])
         vl = VisualizablePage()
-        vl.add_level(level=0, horizontal_list=vvl)
+        vl.add_level(
+            level_position=1, level_size=VisualizableLevelSize.S_2, horizontal_list=vvl
+        )
         expected_result = {
-            "level": 0,
+            "level_position": 1,
+            "level_size": "2",
             "elements": vvl.to_dict(),
         }
         self.assertEqual(vl.to_dict()[1][0], expected_result)

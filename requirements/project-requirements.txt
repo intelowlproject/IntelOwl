@@ -32,7 +32,7 @@ dataclasses==0.6
 flower==2.0.0
 
 # plugins
-GitPython==3.1.32
+GitPython==3.1.37
 checkdmarc==4.8.4
 dnspython==2.4.0
 dnstwist[full]==20230918

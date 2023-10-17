@@ -15,7 +15,7 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
+import { VscGlobe, VscFile } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
 import {
   MdDeleteOutline,
@@ -100,21 +100,6 @@ export function JobActionsBar({ job, refetch }) {
     fileLink.click();
   };
 
-  const onViewRawJsonBtnClick = async () => {
-    addToast(
-      "Link will be opened in a new tab shortly...",
-      null,
-      "spinner",
-      false,
-      2000,
-    );
-    const url = window.URL.createObjectURL(
-      new Blob([JSON.stringify(job, null, 2)], {
-        type: "application/json",
-      }),
-    );
-    setTimeout(() => window.open(url, "rel=noopener,noreferrer"), 250);
-  };
   const shareText = `Checkout this job (#${job.id}, ${
     job.is_sample ? job.file_name : job.observable_name
   }) on IntelOwl`;
@@ -200,10 +185,6 @@ export function JobActionsBar({ job, refetch }) {
           &nbsp;Sample
         </Button>
       )}
-      <Button size="sm" color="darker" onClick={onViewRawJsonBtnClick}>
-        <VscJson />
-        &nbsp;Raw JSON
-      </Button>
       <SocialShareBtn
         id="analysis-actions-share"
         url={window.location.href}

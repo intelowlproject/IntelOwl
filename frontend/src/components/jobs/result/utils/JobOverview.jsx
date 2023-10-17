@@ -15,7 +15,7 @@ import {
   Spinner,
 } from "reactstrap";
 
-import { GoBackButton, Loader } from "@certego/certego-ui";
+import { GoBackButton, Loader, NewJsonRenderer } from "@certego/certego-ui";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -136,6 +136,25 @@ export default function JobOverview({
           </div>
         ),
         report: <VisualizersReportTable job={job} refetch={refetch} />,
+      },
+      {
+        id: "full",
+        nav: (
+          <div className="d-flex-center">
+            <strong>Full Report</strong>
+          </div>
+        ),
+        report: (
+          <NewJsonRenderer
+            collapsed={1}
+            onEdit={() => null}
+            key={job.id}
+            id={`jobreport-jsoninput-${job.id}`}
+            jsonData={job}
+            // style={{ height: "50vh", width: "90vw", overflow: "scroll" }}
+            style={{ height: "60vh", overflow: "scroll" }}
+          />
+        ),
       },
     ],
     [job, refetch],

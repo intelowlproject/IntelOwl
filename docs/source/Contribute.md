@@ -158,8 +158,27 @@ cd certego-ui/example/
 npm i
 npm start
 ```
+## How to add a new Plugin
 
-## How to add a new analyzer
+There are two possible cases:
+1. You are creating an entirely new Plugin, meaning that you actually wrote python code
+2. You are creating a new Configuration for some code that already exists.
+
+If you are doing the step number `2`, you can skip this paragraph.
+
+First, you need to create the python code that will be actually executed. You can easily take other plugins as example to write this.
+Then, you have to create a `Python Module` model. You can do this in the `django admin`: 
+You have to specify which type of Plugin you wrote, and its python module. Again, you can use as an example an already configured `Python Module`.
+Finally, you should add every `Parameter` that the python code requires (the class attributes that you needed):
+      1. *name: Name of the parameter that will be dynamically added to the python class (if is a secret, in the python code a `_` wil be prepended to the name)
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. *is_secret: `true` or `false`
+
+At this point, you can follow the specific guide for each plugin 
+
+### How to add a new Analyzer
 
 You may want to look at a few existing examples to start to build a new one, such as:
 
@@ -179,33 +198,27 @@ After having written the new python module, you have to remember to:
    4. *Config:
       1. *Queue: celery queue that will be used
       2. *Soft_time_limit: maximum time for the task execution
-   5. *Parameters (at the bottom of the page)
-      1. *name
-      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-      3. *description
-      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
-      5. default:  default value provided for the parameter
-   6. *Type: `observable` or `file`
-   7. *Docker based: if the analyzer run through a docker instance
-   8. *Maximum tlp: maximum tlp to allow the run on the connector
-   9. ~Observable supported: required if `type` is `observable`
-   10. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
-   11. Run hash: if the analyzer supports hash as inputs
-   12. ~Run hash type: required if `run hash` is `True`
-   13. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
+   5. *Type: `observable` or `file`
+   6. *Docker based: if the analyzer run through a docker instance
+   7. *Maximum tlp: maximum tlp to allow the run on the connector
+   8. ~Observable supported: required if `type` is `observable`
+   9. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
+   10. Run hash: if the analyzer supports hash as inputs
+   11. ~Run hash type: required if `run hash` is `True`
+   12. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
-4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
+5. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
    1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer (you will find it under `api_app/analyzers_manager/migrations`). The script will create the following models:
       1. AnalyzerConfig
       2. Parameter
       3. PluginConfig
    2. Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin AnalyzerConfig <new_analyzer_name>`
     
-5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
+6. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
-6. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
+7. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
-### Integrating a docker based analyzer
+#### Integrating a docker based analyzer
 
 If the analyzer you wish to integrate doesn't exist as a public API or python package, it should be integrated with its own docker image
 which can be queried from the main Django app.
@@ -216,7 +229,7 @@ which can be queried from the main Django app.
 - If your docker-image uses any environment variables, add them in the `docker/env_file_integrations_template`.
 - Rest of the steps remain same as given under "How to add a new analyzer".
 
-## How to add a new connector
+### How to add a new Connector
 
 You may want to look at a few existing examples to start to build a new one:
 
@@ -234,14 +247,8 @@ After having written the new python module, you have to remember to:
    4. *Config:
       1. *Queue: celery queue that will be used
       2. *Soft_time_limit: maximum time for the task execution
-   5. *Parameters (at the bottom of the page)
-      1. *name
-      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-      3. *description
-      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
-      5. default:  default value provided for the parameter
-   7. *Maximum tlp: maximum tlp to allow the run on the connector
-   8. *Run on failure: if the connector should be run even if the job fails
+   5. *Maximum tlp: maximum tlp to allow the run on the connector
+   6. *Run on failure: if the connector should be run even if the job fails
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
    1. You can use the django management command `dumpplugin` to automatically create the migration file for your new connector (you will find it under `api_app/connectors_manager/migrations`). The script will create the following models:
@@ -251,9 +258,9 @@ After having written the new python module, you have to remember to:
    2. Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin ConnectorConfig <new_connector_name>`
 
 
-## How to add a new Visualizer
+### How to add a new Visualizer
 
-### Configuration
+#### Configuration
 1. Put the module in the `visualizers` directory
 2. Remember to use `_monkeypatch()` in its class to create automated tests for the new visualizer. This is a trick to have tests in the same class of its visualizer.
 3. Create the configuration inside django admin in `Visualizers_manager/VisualizerConfigs` (* = mandatory, ~ = mandatory on conditions)
@@ -263,13 +270,7 @@ After having written the new python module, you have to remember to:
    4. *Config:
       1. *Queue: celery queue that will be used
       2. *Soft_time_limit: maximum time for the task execution
-   5. *Parameters (at the bottom of the page)
-      1. *name
-      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-      3. *description
-      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
-      5. default:  default value provided for the parameter
-   6. *Playbook: Playbook that **must** have run to execute the visualizer
+   5. *Playbook: Playbook that **must** have run to execute the visualizer
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
    1. You can use the django management command `dumpplugin` to automatically create the migration file for your new visualizer (you will find it under `api_app/visualizers_manager/migrations`). The script will create the following models:
@@ -279,7 +280,7 @@ After having written the new python module, you have to remember to:
    2. Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin VisualizerConfig <new_visualizer_name>`
 
 
-### Python class
+#### Python class
 
 The visualizers python code could be not immediate, so a small digression on _how_ it works is necessary.
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
@@ -310,7 +311,7 @@ You may want to look at a few existing examples to start to build a new one:
 - [dns.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/dns.py)
 - [yara.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/yara.py)
 
-## Hot to add a new Ingestor
+### Hot to add a new Ingestor
 1. Put the module in the `ingestors` directory
 2. Remember to use `_monkeypatch()` in its class to create automated tests for the new ingestor. This is a trick to have tests in the same class of its ingestor.
 3. Create the configuration inside django admin in `Ingestors_manager/IngestorConfigs` (* = mandatory, ~ = mandatory on conditions)
@@ -320,14 +321,8 @@ You may want to look at a few existing examples to start to build a new one:
    4. *Config:
       1. *Queue: celery queue that will be used
       2. *Soft_time_limit: maximum time for the task execution
-   5. *Parameters (at the bottom of the page)
-      1. *name
-      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-      3. *description
-      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
-      5. default:  default value provided for the parameter
-   6. *Playbook to Execute: Playbook that **will** be executed on every IOC retrieved
-   7. *Schedule: Crontab object that describes the schedule of the ingestor. You are able to create a new clicking the `plus` symbol.
+   5. *Playbook to Execute: Playbook that **will** be executed on every IOC retrieved
+   6. *Schedule: Crontab object that describes the schedule of the ingestor. You are able to create a new clicking the `plus` symbol.
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
    1. You can use the django management command `dumpplugin` to automatically create the migration file for your new ingestor (you will find it under `api_app/ingestors_manager/migrations`).

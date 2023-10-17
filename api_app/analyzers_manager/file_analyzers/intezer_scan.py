@@ -14,7 +14,6 @@ from tests.mock_utils import if_mock_connections, patch
 
 
 class IntezerScan(FileAnalyzer):
-
     soft_time_limit: int
     disable_dynamic_unpacking: bool
     disable_static_unpacking: bool

@@ -2,17 +2,20 @@
 # See the file 'LICENSE' for copying permission.
 import datetime
 
+from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-from api_app.models import Job, Parameter, PluginConfig
+from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
     FileAnalysisSerializer,
+    JobRecentScanSerializer,
     JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
@@ -26,28 +29,63 @@ from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
 
+User = get_user_model()
+
+
+class JobRecentScanSerializerTestCase(CustomTestCase):
+    def test_to_representation(self):
+        j1 = Job.objects.create(
+            **{
+                "user": self.user,
+                "is_sample": False,
+                "observable_name": "gigatest.com",
+                "observable_classification": "domain",
+                "finished_analysis_time": now() - datetime.timedelta(hours=2),
+            }
+        )
+        data = JobRecentScanSerializer(j1).data
+        self.assertIn("pk", data)
+        self.assertIn("playbook", data)
+        self.assertIn("user", data)
+        self.assertIn("importance", data)
+        self.assertIn("tlp", data)
+
 
 class PluginConfigSerializerTestCase(CustomTestCase):
     def test_to_representation(self):
         org = Organization.objects.create(name="test_org")
 
         m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
+        param = Parameter.objects.filter(
+            python_module__base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            type="str",
+        ).first()
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
             for_organization=True,
         )
-        data = PluginConfigSerializer(pc).data
+        data = PluginConfigSerializer(
+            pc, context={"request": MockUpRequest(user=self.user)}
+        ).data
         self.assertEqual(org.name, data["organization"])
         pc.delete()
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
-            parameter=Parameter.objects.first(),
+            parameter=param,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=param.python_module
+            ).first(),
             for_organization=False,
         )
-        data = PluginConfigSerializer(pc).data
+        data = PluginConfigSerializer(
+            pc, context={"request": MockUpRequest(user=self.user)}
+        ).data
         self.assertIsNone(data["organization"])
         m1.delete()
         org.delete()
@@ -79,6 +117,67 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         org.delete()
         pc.delete()
 
+    def test_validate(self):
+        org = Organization.objects.create(name="test_org")
+        m1 = Membership.objects.create(
+            user=self.superuser, organization=org, is_owner=True
+        )
+        m2 = Membership.objects.create(
+            user=self.admin, organization=org, is_owner=False, is_admin=True
+        )
+        m3 = Membership.objects.create(
+            user=self.user, organization=org, is_owner=False, is_admin=False
+        )
+
+        payload = {
+            "create": True,
+            "edit": False,
+            "type": "1",
+            "plugin_name": "DNS0_EU",
+            "attribute": "query_type",
+            "value": "AA",
+            "organization": "test_org",
+            "config_type": "1",
+        }
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.superuser)},
+        )
+        serializer.is_valid(raise_exception=True)
+        pc: PluginConfig = serializer.save()
+        self.assertTrue(pc.for_organization)
+        pc.delete()
+
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.admin)},
+        )
+        serializer.is_valid(raise_exception=True)
+        pc: PluginConfig = serializer.save()
+        self.assertTrue(pc.for_organization)
+        pc.delete()
+
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.user)},
+        )
+        with self.assertRaises(ValidationError):
+            serializer.is_valid(raise_exception=True)
+        self.assertTrue(pc.for_organization)
+
+        serializer = PluginConfigSerializer(
+            data=payload,
+            context={"request": MockUpRequest(user=self.guest)},
+        )
+        with self.assertRaises(ValidationError):
+            serializer.is_valid(raise_exception=True)
+        self.assertTrue(pc.for_organization)
+
+        m1.delete()
+        m2.delete()
+        m3.delete()
+        org.delete()
+
 
 class JobSerializerTestCase(CustomTestCase):
     def test_validate(self):
@@ -100,8 +199,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             data={}, context={"request": MockUpRequest(self.user)}
         )
         self.ajcs.Meta.model = Job
-        self.ajcs.all_analyzers = False
-        self.ajcs.all_connectors = False
 
     def test_check_previous_job(self):
         Job.objects.all().delete()
@@ -167,7 +264,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         self.assertIn("scan_mode", data)
         self.assertIn("scan_check_time", data)
         self.assertIn("tlp", data)
-        self.assertIn("tags", data)
 
     def test_validate_playbook_and_analyzers(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
@@ -190,11 +286,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         p.save()
         self.ajcs.validate({"playbook_requested": p, "tlp": "CLEAR"})
 
-    def test_validate_analyzers_requested(self):
-        analyzers = self.ajcs.filter_analyzers_requested([])
-        self.assertEqual(len(analyzers), AnalyzerConfig.objects.all().count())
-        self.assertTrue(self.ajcs.all_analyzers)
-
     def test_filter_analyzers_not_runnable(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.disabled = True
@@ -211,7 +302,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         previous_tlp = a.maximum_tlp
         a.maximum_tlp = "CLEAR"
         a.save()
-        self.ajcs.all_analyzers = False
         with self.assertRaises(ValidationError):
             self.ajcs.set_analyzers_to_execute([a], "GREEN")
 
@@ -225,11 +315,30 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_connectors_is_runnable(self):
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=True,
             maximum_tlp="CLEAR",
+        )
+        pc = PluginConfig.objects.create(
+            parameter=Parameter.objects.get(
+                name="api_key_name", python_module=cc.python_module
+            ),
+            connector_config=cc,
+            value="test",
+            owner=None,
+            for_organization=False,
+        )
+        pc2 = PluginConfig.objects.create(
+            parameter=Parameter.objects.get(
+                name="url_key_name", python_module=cc.python_module
+            ),
+            connector_config=cc,
+            value="test.com",
+            owner=None,
+            for_organization=False,
         )
 
         self.assertFalse(cc.is_runnable(self.user))
@@ -243,16 +352,37 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             self.ajcs, [cc], "CLEAR"
         )
         self.assertCountEqual(connectors, [cc])
+        pc.delete()
+        pc2.delete()
         cc.delete()
 
     def test_filter_connectors_tlp(self):
         cc = ConnectorConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
+            ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
             maximum_tlp="CLEAR",
+        )
+        pc = PluginConfig.objects.create(
+            parameter=Parameter.objects.get(
+                name="api_key_name", python_module=cc.python_module
+            ),
+            connector_config=cc,
+            value="test",
+            owner=None,
+            for_organization=False,
+        )
+        pc2 = PluginConfig.objects.create(
+            parameter=Parameter.objects.get(
+                name="url_key_name", python_module=cc.python_module
+            ),
+            connector_config=cc,
+            value="test.com",
+            owner=None,
+            for_organization=False,
         )
         connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
             self.ajcs, [cc], "GREEN"
@@ -263,6 +393,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         )
         self.assertCountEqual(connectors, [cc])
         cc.delete()
+        pc.delete()
+        pc2.delete()
 
     def test_filter_visualizers_all(self):
         v = VisualizerConfig.objects.get(name="Yara")
@@ -317,8 +449,6 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         self.fas = FileAnalysisSerializer(
             data={}, context={"request": MockUpRequest(self.user)}
         )
-        self.fas.all_analyzers = False
-        self.fas.all_connectors = False
 
     def test_filter_analyzers_type(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
@@ -344,9 +474,11 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_analyzer_mimetype(self):
         a = AnalyzerConfig.objects.create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
             supported_filetypes=["text/rtf"],
             type="file",
@@ -384,8 +516,6 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         self.oass = ObservableAnalysisSerializer(
             data={}, context={"request": MockUpRequest(self.user)}
         )
-        self.oass.all_analyzers = False
-        self.oass.all_connectors = False
 
     def test_filter_analyzers_type(self):
         a = AnalyzerConfig.objects.get(name="Yara")
@@ -488,48 +618,54 @@ class JobResponseSerializerTestCase(CustomTestCase):
 
 class AbstractListConfigSerializerTestCase(CustomTestCase):
     def test_to_representation(self):
-        cc = ConnectorConfig.objects.create(
+        # this analyzer has 0 missing secrets
+        ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value, module="apkid.APKiD"
+            ),
             description="test",
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
         )
-        ccs = PythonListConfigSerializer(
+        acs = PythonListConfigSerializer(
             context={"request": MockUpRequest(self.user)},
-            child=ConnectorConfigSerializer(),
+            child=AnalyzerConfigSerializer(),
         )
-        result = list(ccs.to_representation([cc]))
+        result = list(acs.to_representation([ac]))
         self.assertEqual(1, len(result))
         result = result[0]
         self.assertIn("verification", result)
+        self.assertIn("missing_secrets", result["verification"])
+        self.assertFalse(
+            result["verification"]["missing_secrets"],
+            result["verification"]["missing_secrets"],
+        )
         self.assertIn("configured", result["verification"])
         self.assertTrue(result["verification"]["configured"])
-        self.assertIn("missing_secrets", result["verification"])
-        self.assertFalse(result["verification"]["missing_secrets"])
-        cc.delete()
+        ac.delete()
 
-        cc = ConnectorConfig.objects.create(
+        ac = AnalyzerConfig.objects.create(
             name="test",
-            python_module="misp.MISP",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value, module="apkid.APKiD"
+            ),
             description="test",
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
         )
         param: Parameter = Parameter.objects.create(
-            connector_config=cc,
+            python_module=ac.python_module,
             name="test",
             type="str",
             required=True,
             is_secret=True,
         )
-        ccs = PythonListConfigSerializer(
+        acs = PythonListConfigSerializer(
             context={"request": MockUpRequest(self.user)},
-            child=ConnectorConfigSerializer(),
+            child=AnalyzerConfigSerializer(),
         )
-        result = list(ccs.to_representation([cc]))
+        result = list(acs.to_representation([ac]))
         self.assertEqual(1, len(result))
         result = result[0]
 
@@ -540,4 +676,4 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
         self.assertEqual(1, len(result["verification"]["missing_secrets"]))
         self.assertEqual("test", result["verification"]["missing_secrets"][0])
         param.delete()
-        cc.delete()
+        ac.delete()

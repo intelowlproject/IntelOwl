@@ -193,6 +193,7 @@ class IPReputationServices(Visualizer):
                 value=[self.Base(c, disable=disabled) for c in categories_extracted],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
                 size=VisualizableSize.S_2,
             )
@@ -226,12 +227,15 @@ class IPReputationServices(Visualizer):
                 value=[self.Base(h, disable=disabled) for h in honeypots],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
                 size=VisualizableSize.S_2,
             )
             return gb_report
 
-    @visualizable_error_handler_with_params("Crowdsec Behaviors")
+    @visualizable_error_handler_with_params(
+        "Crowdsec Classifications", "Crowdsec Behaviors"
+    )
     def _crowdsec(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="Crowdsec")
@@ -239,7 +243,7 @@ class IPReputationServices(Visualizer):
             logger.warning("Crowdsec report does not exist")
             return None, None
         else:
-            classifications = analyzer_report.report.get("classifications", [])
+            classifications = analyzer_report.report.get("classifications", {})
             sub_classifications = classifications.get("classifications", [])
             false_positives = classifications.get("false_positives", [])
             all_class = sub_classifications + false_positives
@@ -256,6 +260,7 @@ class IPReputationServices(Visualizer):
                 ],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
                 size=VisualizableSize.S_2,
             )
@@ -274,6 +279,7 @@ class IPReputationServices(Visualizer):
                 ],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
                 size=VisualizableSize.S_2,
             )
@@ -305,6 +311,7 @@ class IPReputationServices(Visualizer):
                 ],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
                 size=VisualizableSize.S_4,
             )
@@ -331,6 +338,7 @@ class IPReputationServices(Visualizer):
                 value=[self.Base(f, disable=disabled) for f in found_in_lists],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
             )
             return otx_report

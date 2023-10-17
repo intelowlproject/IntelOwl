@@ -11,10 +11,7 @@ import {
   PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../constants/api";
-import useRecentScansStore from "../../stores/useRecentScansStore";
 import { scanMode } from "../../constants/constants";
-
-const { append: appendToRecentScans } = useRecentScansStore.getState();
 
 function prettifyErrors(errorResponse) {
   // only validation errors returns an array of errors
@@ -44,52 +41,91 @@ function prettifyErrors(errorResponse) {
   return JSON.stringify(errorResponse.response.data);
 }
 
+function playbookToastBody(respData, warnings) {
+  return (
+    <div>
+      <ContentSection className="text-light">
+        <strong>Playbooks:</strong>&nbsp;
+        {respData[0].playbook_running}
+      </ContentSection>
+      {warnings.length > 0 && (
+        <ContentSection className="bg-accent text-darker">
+          <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+        </ContentSection>
+      )}
+    </div>
+  );
+}
+
+function customToastBody(analyzersRunning, connectorsRunning, warnings) {
+  return (
+    <div>
+      <ContentSection className="text-light">
+        <strong>Analyzers:</strong>&nbsp;
+        {Array.from(analyzersRunning)?.join(", ")}
+      </ContentSection>
+      {connectorsRunning.length > 0 && (
+        <ContentSection className="text-light">
+          <strong>Connectors:</strong>&nbsp;
+          {Array.from(connectorsRunning).join(", ")}
+        </ContentSection>
+      )}
+      {warnings.length > 0 && (
+        <ContentSection className="bg-accent text-darker">
+          <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+        </ContentSection>
+      )}
+    </div>
+  );
+}
+
 export async function createPlaybookJob(formValues) {
-  // new scan
-  const resp =
-    formValues.classification === "file"
-      ? await _startPlaybookFile(formValues)
-      : await _startPlaybookObservable(formValues);
-
-  const playbooksRunning = new Set();
-  const warnings = [];
-  const respData = resp.data.results;
-
-  respData.forEach((x) => {
-    if (x.playbook_running) playbooksRunning.add(x.playbook_running);
-    if (x.warnings) warnings.push(...x.warnings);
-  });
-
   try {
+    // new scan
+    const resp =
+      formValues.classification === "file"
+        ? await _startPlaybookFile(formValues)
+        : await _startPlaybookObservable(formValues);
+
+    const warnings = [];
+    const respData = resp.data.results;
+
+    respData.forEach((x) => {
+      if (x.warnings) warnings.push(...x.warnings);
+    });
+
     // handle response/error
-    if (
-      respData.every(
-        (element) =>
-          element.status === "accepted" || element.status === "running",
-      )
-    ) {
-      const jobIds = respData.map((x) => parseInt(x.job_id, 10));
-      jobIds.forEach((jobId) => {
-        appendToRecentScans(jobId, "success");
+    if (respData.every((element) => element.status === "accepted")) {
+      const jobIdsAccepted = [];
+      const jobIdsExists = [];
+      respData.forEach((x) => {
+        if (x.already_exists) {
+          jobIdsExists.push(parseInt(x.job_id, 10));
+        } else {
+          jobIdsAccepted.push(parseInt(x.job_id, 10));
+        }
       });
-      addToast(
-        `Created new Job with ID(s) #${jobIds.join(", ")}!`,
-        <div>
-          <ContentSection className="text-light">
-            <strong>Playbooks:</strong>&nbsp;
-            {Array.from(playbooksRunning)?.join(", ")}
-          </ContentSection>
-          {warnings.length > 0 && (
-            <ContentSection className="bg-accent text-darker">
-              <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
-            </ContentSection>
-          )}
-        </div>,
-        "success",
-        true,
-        10000,
-      );
-      return Promise.resolve(jobIds);
+      // toast for accepted jobs
+      if (jobIdsAccepted.length > 0) {
+        addToast(
+          `Created new Job with ID(s) #${jobIdsAccepted.join(", ")}!`,
+          playbookToastBody(respData, warnings),
+          "success",
+          true,
+          10000,
+        );
+      }
+      // toast for existing jobs
+      if (jobIdsExists.length > 0) {
+        addToast(
+          `Reported existing Job with ID(s) #${jobIdsExists.join(", ")}!`,
+          playbookToastBody(respData, warnings),
+          "info",
+          true,
+          10000,
+        );
+      }
+      return Promise.resolve(jobIdsAccepted.concat(jobIdsExists));
     }
     // else
     addToast("Failed!", respData?.message, "danger");
@@ -134,10 +170,11 @@ export async function createJob(formValues) {
         ? await _analyzeFile(formValues)
         : await _analyzeObservable(formValues);
 
+    const warnings = [];
     const respData = resp.data.results;
+
     const analyzersRunning = new Set();
     const connectorsRunning = new Set();
-    const warnings = [];
     respData.forEach((x) => {
       if (x.analyzers_running)
         x.analyzers_running.forEach((analyzer) =>
@@ -150,40 +187,36 @@ export async function createJob(formValues) {
       if (x.warnings) warnings.push(...x.warnings);
     });
     // handle response/error
-    if (
-      respData.every(
-        (element) =>
-          element.status === "accepted" || element.status === "running",
-      )
-    ) {
-      const jobIds = respData.map((x) => parseInt(x.job_id, 10));
-      jobIds.forEach((jobId) => {
-        appendToRecentScans(jobId, "success");
+    if (respData.every((element) => element.status === "accepted")) {
+      const jobIdsAccepted = [];
+      const jobIdsExists = [];
+      respData.forEach((x) => {
+        if (x.already_exists) {
+          jobIdsExists.push(parseInt(x.job_id, 10));
+        } else {
+          jobIdsAccepted.push(parseInt(x.job_id, 10));
+        }
       });
-      addToast(
-        `Created new Job with ID(s) #${jobIds.join(", ")}!`,
-        <div>
-          <ContentSection className="text-light">
-            <strong>Analyzers:</strong>&nbsp;
-            {Array.from(analyzersRunning)?.join(", ")}
-          </ContentSection>
-          {connectorsRunning.length > 0 && (
-            <ContentSection className="text-light">
-              <strong>Connectors:</strong>&nbsp;
-              {Array.from(connectorsRunning).join(", ")}
-            </ContentSection>
-          )}
-          {warnings.length > 0 && (
-            <ContentSection className="bg-accent text-darker">
-              <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
-            </ContentSection>
-          )}
-        </div>,
-        "success",
-        true,
-        10000,
-      );
-      return Promise.resolve(jobIds);
+      if (jobIdsAccepted.length > 0) {
+        addToast(
+          `Created new Job with ID(s) #${jobIdsAccepted.join(", ")}!`,
+          customToastBody(analyzersRunning, connectorsRunning, warnings),
+          "success",
+          true,
+          10000,
+        );
+      }
+      // toast for existing jobs
+      if (jobIdsExists.length > 0) {
+        addToast(
+          `Reported existing Job with ID(s) #${jobIdsExists.join(", ")}!`,
+          customToastBody(analyzersRunning, connectorsRunning, warnings),
+          "info",
+          true,
+          10000,
+        );
+      }
+      return Promise.resolve(jobIdsAccepted.concat(jobIdsExists));
     }
 
     // else
@@ -204,17 +237,31 @@ async function _analyzeObservable(formValues) {
   });
   const body = {
     observables,
-    analyzers_requested: formValues.analyzers,
-    connectors_requested: formValues.connectors,
     tlp: formValues.tlp,
-    runtime_configuration: formValues.runtime_configuration,
-    tags_labels: formValues.tags_labels,
     scan_mode: parseInt(formValues.scan_mode, 10),
   };
+  // analyzers
+  if (formValues.analyzers.length) {
+    body.analyzers_requested = formValues.analyzers;
+  }
+  // connectors
+  if (formValues.connectors.length) {
+    body.connectors_requested = formValues.connectors;
+  }
+  // tags
+  if (formValues.tags_labels.length) {
+    body.tags_labels = formValues.tags_labels;
+  }
+  // runtime configuration
+  if (
+    formValues.runtime_configuration != null &&
+    Object.keys(formValues.runtime_configuration).length
+  ) {
+    body.runtime_configuration = formValues.runtime_configuration;
+  }
+  // scan mode
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
-  } else {
-    body.scan_check_time = null;
+    body.scan_check_time = `${formValues.scan_check_time}:00:00`;
   }
   return axios.post(ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }
@@ -257,7 +304,7 @@ async function _analyzeFile(formValues) {
   body.append("scan_mode", formValues.scan_mode);
   // scan check time
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+    body.append("scan_check_time", `${formValues.scan_check_time}:00:00`);
   }
   console.debug("_analyzeFile", body);
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
@@ -281,7 +328,7 @@ async function _startPlaybookFile(formValues) {
   body.append("scan_mode", formValues.scan_mode);
   // scan check time
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.append("scan_check_time", `${formValues.hoursAgo}:00:00`);
+    body.append("scan_check_time", `${formValues.scan_check_time}:00:00`);
   }
   console.debug("_analyzeFile", body);
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);
@@ -296,14 +343,14 @@ async function _startPlaybookObservable(formValues) {
   const body = {
     observables,
     playbook_requested: formValues.playbook,
-    tags_labels: formValues.tags_labels,
     tlp: formValues.tlp,
     scan_mode: parseInt(formValues.scan_mode, 10),
   };
+  if (formValues.tags_labels.length) {
+    body.tags_labels = formValues.tags_labels;
+  }
   if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.scan_check_time = `${formValues.hoursAgo}:00:00`;
-  } else {
-    body.scan_check_time = null;
+    body.scan_check_time = `${formValues.scan_check_time}:00:00`;
   }
   console.debug("_analyzeObservable", body);
   return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI, body);

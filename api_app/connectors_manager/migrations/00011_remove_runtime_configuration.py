@@ -7,7 +7,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("connectors_manager", "0010_remove_parent_playbook"),
         ("api_app", "0023_runtime_config"),

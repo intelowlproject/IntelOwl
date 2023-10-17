@@ -13,7 +13,6 @@ import api_app.validators
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -50,7 +49,6 @@ class Migration(migrations.Migration):
                     "config",
                     models.JSONField(
                         default=api_app.defaults.config_default,
-                        validators=[api_app.validators.validate_config],
                     ),
                 ),
                 (

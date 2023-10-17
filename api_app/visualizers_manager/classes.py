@@ -5,10 +5,11 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Type, Union
 
-from django.conf import settings
 from django.db.models import QuerySet
 
+from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
+from api_app.models import AbstractReport
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,
@@ -185,12 +186,13 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         name: VisualizableBase,
         value: List[VisualizableObject],
         open: bool = False,  # noqa
-        max_elements_number: int = -1,
         add_count_in_title: bool = True,
         fill_empty: bool = True,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
+        max_elements_number: int = -1,
+        report: AbstractReport = None,
     ):
         super().__init__(
             size=size,
@@ -207,10 +209,11 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         if fill_empty and not value:
             value = [VisualizableBase(value="no data available", disable=False)]
         self.value = value
-        self.max_elements_number = max_elements_number
         self.name = name
         self.add_count_in_title = add_count_in_title
         self.open = open
+        self.max_elements_number = max_elements_number
+        self.report = report
 
     @property
     def attributes(self) -> List[str]:
@@ -221,7 +224,23 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
 
     @property
     def more_elements_object(self) -> VisualizableBase:
-        return VisualizableBase(value="...", bold=True)
+        link = ""
+        description = ""
+        disable = True
+        if self.report:
+            link = f"{self.report.job.url}/raw/{self.report.config.plugin_name.lower()}"
+            description = (
+                f"Inspect {self.report.config.name} "
+                f"{self.report.config.plugin_name.lower()} to view all the results."
+            )
+            disable = False
+        return VisualizableBase(
+            value="...",
+            bold=True,
+            link=link,
+            description=description,
+            disable=disable,
+        )
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
@@ -301,7 +320,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_VISUALIZER_PYTHON_PATH
+        return PythonModuleBasePaths.Visualizer.value
 
     @classmethod
     @property
@@ -323,7 +342,69 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         super().before_run()
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
+    def create_pivot_page(self) -> VisualizablePage:
+        from api_app.pivots_manager.models import PivotMap
+
+        try:
+            parent_job = PivotMap.objects.get(ending_job_id=self.job_id).starting_job
+        except PivotMap.DoesNotExist:
+            parent_value = self.Base(value="", disable=True)
+            disable_parent = True
+        else:
+            parent_value = self.Base(
+                value=f"Job #{parent_job.id}: {parent_job.analyzed_object_name} "
+                f"- playbook: {parent_job.playbook_requested.name}",
+                link=parent_job.url,
+                color=self.Color.DARK,
+                disable=True,
+            )
+            disable_parent = False
+
+        pivot_page = self.Page(name="Job Pivots")
+        pivot_page.add_level(
+            level=1,
+            horizontal_list=self.HList(
+                value=[
+                    # parent job
+                    self.Title(
+                        title=self.Base(value="Parent job", disable=disable_parent),
+                        value=parent_value,
+                        disable=disable_parent,
+                    ),
+                    # children jobs
+                    self.VList(
+                        name=self.Base(value="children jobs", disable=False),
+                        value=[
+                            self.HList(
+                                value=[
+                                    self.Base(
+                                        value=f"Job #{pivot_map.ending_job_id}: "
+                                        f"{pivot_map.ending_job.analyzed_object_name} "
+                                        "- playbook: "
+                                        f"{pivot_map.ending_job.playbook_requested.name}",  # noqa e501
+                                        link=pivot_map.ending_job.url,
+                                        disable=False,
+                                    )
+                                ]
+                            )
+                            for pivot_map in PivotMap.objects.filter(
+                                starting_job_id=self.job_id
+                            )
+                        ],
+                        disable=False,
+                        open=True,
+                    ),
+                ]
+            ),
+        )
+        return pivot_page
+
     def after_run_success(self, content):
+        if self._job.pivotreports.filter(
+            status=VisualizerReport.Status.SUCCESS.value
+        ).exists():
+            pivot_page = self.create_pivot_page()
+            content.append(pivot_page.to_dict())
 
         if not isinstance(content, list):
             raise VisualizerRunException(
@@ -364,3 +445,8 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         from api_app.connectors_manager.models import ConnectorReport
 
         return ConnectorReport.objects.filter(job=self._job)
+
+    def pivots_reports(self) -> QuerySet:
+        from api_app.pivots_manager.models import PivotReport
+
+        return PivotReport.objects.filter(job=self._job)

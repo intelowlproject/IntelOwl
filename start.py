@@ -20,6 +20,8 @@ except ImportError:
 
 load_dotenv("docker/.env")
 CURRENT_VERSION = os.getenv("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
+PYELASTIC_DEFAULT_VERSION = "7.2.2"
+PYCTI_DEFAULT_VERSION = "5.10.0"
 
 DOCKER_ANALYZERS = [
     "tor_analyzers",
@@ -61,6 +63,15 @@ PATH_MAPPING["all_analyzers.test"] = [
 
 
 def version_regex(arg_value, pat=re.compile(r"^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$")):
+    if not pat.match(arg_value):
+        print(f"type error for version {arg_value}")
+        raise argparse.ArgumentTypeError
+    return arg_value
+
+
+def generic_version_regex(
+    arg_value, pat=re.compile(r"^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$")
+):
     if not pat.match(arg_value):
         print(f"type error for version {arg_value}")
         raise argparse.ArgumentTypeError
@@ -171,6 +182,25 @@ def start():
         "and Kibana on your machine (might need >=16GB of RAM)",
     )
     parser.add_argument(
+        "--pyelastic-version",
+        required=False,
+        type=generic_version_regex,
+        default=PYELASTIC_DEFAULT_VERSION,
+        help="The py-elasticsearch version to choose."
+        " This must match the server version"
+        " you are connecting to."
+        f" Default is {PYELASTIC_DEFAULT_VERSION}",
+    )
+    parser.add_argument(
+        "--pycti-version",
+        required=False,
+        type=generic_version_regex,
+        default=PYCTI_DEFAULT_VERSION,
+        help="The pycti version to choose. This must match the OpenCTI server version"
+        " you are connecting to."
+        f" Default is {PYCTI_DEFAULT_VERSION}",
+    )
+    parser.add_argument(
         "--https",
         required=False,
         action="store_true",
@@ -191,8 +221,25 @@ def start():
     if args.mode in ["test", "ci"]:
         is_test = True
         test_appendix = ".test"
+
+    os.environ["PYELASTIC_VERSION"] = args.pyelastic_version
+    os.environ["PYCTI_VERSION"] = args.pycti_version
+    if (not args.mode == "test" or args.docker_command not in ["up", "build"]) and (
+        args.pyelastic_version != PYELASTIC_DEFAULT_VERSION
+        or args.pycti_version != PYCTI_DEFAULT_VERSION
+    ):
+        print(
+            "pycti_version and pyelastic_version options are valid only while"
+            " running in 'test' mode"
+            " and while building a new image."
+            " This is because they can change the version of those library only during"
+            " the build of a new Docker Image."
+        )
+        sys.exit(11)
+
     # load relevant .env file
     load_dotenv("docker/.env.start" + test_appendix)
+
     docker_flags = [
         args.__dict__[docker_analyzer] for docker_analyzer in DOCKER_ANALYZERS
     ]

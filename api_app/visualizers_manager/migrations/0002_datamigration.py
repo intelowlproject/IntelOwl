@@ -38,7 +38,6 @@ def delete_configurations(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("visualizers_manager", "0001_initial"),
         ("analyzers_manager", "0004_datamigration"),

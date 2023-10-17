@@ -191,3 +191,7 @@ section.fixed-bottom {
 .list-group-item {
   color: white;
 }
+
+input[type="file"]::file-selector-button {
+  background-color: $primary;
+}

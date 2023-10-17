@@ -106,7 +106,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "0022_otx_check_hash_timeout"),
         ("api_app", "0027_parameter"),

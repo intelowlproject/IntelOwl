@@ -1,4 +1,5 @@
 import { PUBLIC_URL } from "../../constants/environment";
+import { jobResultSection } from "../../constants/constants";
 
 // This function is used to generate a notification when a Job is terminated
 export function generateJobNotification(observableName, jobId) {
@@ -28,7 +29,10 @@ export function generateJobNotification(observableName, jobId) {
 
       // navigate to the Job report page when clicked
       notification.addEventListener("click", () => {
-        window.open(`/jobs/${jobId}`, '_blank,noopener,noreferrer"');
+        window.open(
+          `/jobs/${jobId}/${jobResultSection.VISUALIZER}`,
+          '_blank,noopener,noreferrer"',
+        );
       });
     } else {
       // eslint-disable-next-line no-console

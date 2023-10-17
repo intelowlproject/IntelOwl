@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("certego_saas_organization", "0001_initial"),
         ("playbooks_manager", "0015_dns_playbook"),

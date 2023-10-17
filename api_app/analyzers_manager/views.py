@@ -29,9 +29,6 @@ class AnalyzerConfigViewSet(PythonConfigViewSet):
     serializer_class = AnalyzerConfigSerializer
     filterset_class = AnalyzerConfigFilter
 
-    def get_queryset(self):
-        return super().get_queryset().prefetch_related("parameters")
-
     @add_docs(
         description="Update plugin with latest configuration",
         request=None,
@@ -51,7 +48,7 @@ class AnalyzerConfigViewSet(PythonConfigViewSet):
     def pull(self, request, pk=None):
         logger.info(f"update request from user {request.user}, name {pk}")
         obj: AnalyzerConfig = self.get_object()
-        success = obj.python_class.update()
+        success = obj.python_module.python_class.update()
         if not success:
             raise ValidationError({"detail": "No update implemented"})
 

@@ -166,11 +166,16 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
 
     def test_ordered_for_user(self):
         pc2 = PlaybookConfig.objects.create(
-            name="third", type=["ip"], description="test"
+            name="fourth", type=["ip"], description="test"
         )
         pc3 = PlaybookConfig.objects.create(
             name="second", type=["ip"], description="test"
         )
+
+        pc4 = PlaybookConfig.objects.create(
+            name="asecond", type=["ip"], description="test"
+        )
+
         pc = PlaybookConfig.objects.create(
             name="zz_first", type=["ip"], description="test"
         )
@@ -183,17 +188,45 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             playbook_to_execute=pc,
             finished_analysis_time=now(),
         )
+        j2 = Job.objects.create(
+            user=self.user,
+            observable_name="test3.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc,
+            finished_analysis_time=now(),
+        )
 
+        j3 = Job.objects.create(
+            user=self.user,
+            observable_name="test3.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc3,
+            finished_analysis_time=now(),
+        )
+        j4 = Job.objects.create(
+            user=self.user,
+            observable_name="test3.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            playbook_to_execute=pc4,
+            finished_analysis_time=now(),
+        )
         pcs = (
             PlaybookConfig.objects.ordered_for_user(self.user)
             .filter(description="test")
             .values_list("name", flat=True)
         )
-        self.assertEqual(3, len(pcs))
+        self.assertEqual(4, len(pcs))
         self.assertEqual("zz_first", pcs[0])
-        self.assertEqual("second", pcs[1])
-        self.assertEqual("third", pcs[2])
+        self.assertEqual("asecond", pcs[1])
+        self.assertEqual("second", pcs[2])
+        self.assertEqual("fourth", pcs[3])
+        j1.delete()
+        j2.delete()
+        j3.delete()
+        j4.delete()
         pc.delete()
         pc2.delete()
         pc3.delete()
-        j1.delete()

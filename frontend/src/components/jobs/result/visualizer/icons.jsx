@@ -22,7 +22,7 @@ import {
 import { FaBiohazard, FaLock } from "react-icons/fa";
 import { HiMagnifyingGlassCircle } from "react-icons/hi2";
 import { ImExit } from "react-icons/im";
-import { SiVirustotal } from "react-icons/si";
+import { SiVirustotal, SiVirtualbox, SiVmware } from "react-icons/si";
 import { RiAlarmWarningFill, RiAliensFill } from "react-icons/ri";
 
 import { GiLighthouse, GiRetroController } from "react-icons/gi";
@@ -32,7 +32,7 @@ import {
   MdEmail,
   MdSignalWifiStatusbarConnectedNoInternet2,
 } from "react-icons/md";
-import { TbFishHook } from "react-icons/tb";
+import { TbFishHook, TbNetwork } from "react-icons/tb";
 import { PUBLIC_URL } from "../../../../constants/environment";
 
 const generalIcons = Object.freeze({
@@ -59,6 +59,9 @@ const generalIcons = Object.freeze({
   exit: <ImExit />,
   connection: <MdSignalWifiStatusbarConnectedNoInternet2 />,
   locker: <FaLock />,
+  virtualHost: <SiVirtualbox />,
+  networkNode: <TbNetwork />,
+  vmware: <SiVmware style={{ width: "40px", height: "24px" }} />,
   // external services
   virusTotal: (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -146,7 +149,7 @@ export function getIcon(iconCode) {
    we would need to known the code of all flags and it's too expensive
   */
   if (!selectedIcon) {
-    return <span className={` mx-1 fi fi-${iconCode}`} />;
+    return <span className={` mx-1 fi fi-${iconCode.toLowerCase()}`} />;
   }
   return selectedIcon;
 }

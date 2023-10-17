@@ -3,21 +3,30 @@
 
 from django.contrib import admin
 
-from api_app.pivots_manager.forms import PivotConfigModelForm
-from api_app.pivots_manager.models import Pivot, PivotConfig
+from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
+from api_app.pivots_manager.forms import PivotConfigAdminForm
+from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
+
+
+@admin.register(PivotReport)
+class PivotReportAdminView(AbstractReportAdminView):
+    ...
 
 
 @admin.register(PivotConfig)
-class PivotConfigAdminView(admin.ModelAdmin):
-    list_display = ["name", "config", "field", "playbook_to_execute"]
-    form = PivotConfigModelForm
+class PivotConfigAdminView(PythonConfigAdminView):
+    list_display = PythonConfigAdminView.list_display + (
+        "get_related_configs",
+        "playbook_to_execute",
+    )
+    form = PivotConfigAdminForm
+    filter_horizontal = ["related_analyzer_configs", "related_connector_configs"]
+
+    @admin.display(description="Related Configs")
+    def get_related_configs(self, instance: PivotConfig):
+        return instance.related_configs.values_list("name", flat=True)
 
 
-@admin.register(Pivot)
-class PivotAdminView(admin.ModelAdmin):
-
-    list_display = ["starting_job", "configuration", "value", "ending_job", "owner"]
-
-    @staticmethod
-    def configuration(instance: Pivot) -> str:
-        return instance.config.name
+@admin.register(PivotMap)
+class PivotMapAdminView(admin.ModelAdmin):
+    list_display = ["pk", "starting_job", "pivot_config", "ending_job", "owner"]

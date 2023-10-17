@@ -4,10 +4,8 @@ import { create } from "zustand";
 import { addToast } from "@certego/certego-ui";
 
 import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/api";
-import useRecentScansStore from "./useRecentScansStore";
 
 // constants
-const onLogout = useRecentScansStore.getState().clear;
 const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";
 
 // hook/ store see: https://github.com/pmndrs/zustand
@@ -72,7 +70,6 @@ const useAuthStore = create((set, get) => ({
       const onLogoutCb = () => {
         get().deleteToken();
         set({ loading: false });
-        onLogout();
         addToast("Logged out!", null, "info");
       };
       return axios

@@ -16,27 +16,32 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
         "disabled",
         "get_analyzers",
         "get_connectors",
-        "get_visualizers",
         "get_pivots",
+        "get_visualizers",
         "runtime_configuration",
         "scan_mode",
     )
+    filter_horizontal = ["analyzers", "connectors", "tags"]
 
     @staticmethod
     def _get_plugins(qs):
         return [elem.name for elem in qs]
 
+    @admin.display(description="Analyzers")
     def get_analyzers(self, obj: PlaybookConfig):
         return self._get_plugins(obj.analyzers.all())
 
+    @admin.display(description="Connectors")
     def get_connectors(self, obj: PlaybookConfig):
         return self._get_plugins(obj.connectors.all())
 
-    def get_visualizers(self, obj: PlaybookConfig):
-        return self._get_plugins(obj.visualizers.all())
-
+    @admin.display(description="Pivots")
     def get_pivots(self, obj: PlaybookConfig):
         return self._get_plugins(obj.pivots.all())
+
+    @admin.display(description="Visualizers")
+    def get_visualizers(self, obj: PlaybookConfig):
+        return self._get_plugins(obj.visualizers.all())
 
     @staticmethod
     def scan_mode(obj: PlaybookConfig) -> str:

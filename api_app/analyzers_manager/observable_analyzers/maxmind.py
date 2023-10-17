@@ -18,7 +18,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from api_app.models import Parameter, PluginConfig
+from api_app.models import PluginConfig
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,6 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
-
     _api_key_name: str
 
     def run(self):
@@ -58,18 +57,13 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _get_api_key(cls) -> Optional[str]:
-        from api_app.analyzers_manager.models import AnalyzerConfig
-
-        for config in AnalyzerConfig.objects.filter(
-            python_module=cls.python_module, disabled=False
+        for plugin in PluginConfig.objects.filter(
+            parameter__python_module=cls.python_module,
+            parameter__is_secret=True,
+            parameter__name="api_key_name",
         ):
-            for plugin in PluginConfig.objects.filter(
-                param=Parameter.objects.get(
-                    analyzer_config=config, name="api_key_name", is_secret=True
-                ),
-            ):
-                if plugin.value:
-                    return plugin.value
+            if plugin.value:
+                return plugin.value
         return None
 
     @classmethod
@@ -81,7 +75,6 @@ class Maxmind(classes.ObservableAnalyzer):
 
         db_location = _get_db_location(db)
         try:
-
             db_name_wo_ext = db[:-5]
             logger.info(f"starting download of db {db_name_wo_ext} from maxmind")
             url = (

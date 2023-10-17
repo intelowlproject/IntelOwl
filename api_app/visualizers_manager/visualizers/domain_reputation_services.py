@@ -179,6 +179,7 @@ class DomainReputationServices(Visualizer):
                 ],
                 open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
             )
             return otx_report
@@ -192,11 +193,7 @@ class DomainReputationServices(Visualizer):
             Q(config__name__endswith="Malicious_Detector")
             | Q(config__name="GoogleSafebrowsing")
         ):
-
             printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-            logger.debug(f"{printable_analyzer_name=}")
-            logger.debug(f"{analyzer_report.config.python_complete_path=}")
-            logger.debug(f"{analyzer_report=}")
             third_level_elements.append(
                 self.Bool(
                     value=printable_analyzer_name,

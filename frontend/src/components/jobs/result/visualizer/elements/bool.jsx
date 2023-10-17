@@ -17,9 +17,12 @@ export function BooleanVisualizer({
   description,
 }) {
   let coreComponent = (
-    <span className={italic ? "fst-italic" : ""} id={`${id}-tooltip`}>
-      {value} {icon}
-    </span>
+    <React.Fragment>
+      {icon}
+      <span className={italic ? "fst-italic" : ""} id={`${id}-tooltip`}>
+        {value}
+      </span>
+    </React.Fragment>
   );
   // link added only in case is available and the component is not disabled, or it will be clickable
   if (link && !disable) {
@@ -32,7 +35,9 @@ export function BooleanVisualizer({
       <Badge
         pill
         color={disable ? "gray" : activeColor}
-        className={`w-100 text-wrap ${disable ? "opacity-25" : ""}`}
+        className={`w-100 text-wrap text-capitalize ${
+          disable ? "opacity-25" : ""
+        }`}
       >
         {coreComponent}
       </Badge>

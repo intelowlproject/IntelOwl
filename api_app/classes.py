@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.models import AbstractReport, Job, PythonConfig
+from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +25,9 @@ class Plugin(metaclass=ABCMeta):
         config: PythonConfig,
         job_id: int,
         runtime_configuration: dict,
-        task_id: int,
+        task_id: str,
         **kwargs,
     ):
-
         self._config = config
         self.job_id = job_id
         self.runtime_configuration = runtime_configuration
@@ -36,7 +35,9 @@ class Plugin(metaclass=ABCMeta):
 
         self.kwargs = kwargs
         # some post init processing
-        self.report: AbstractReport = self.init_report_object()
+        self.report: AbstractReport = self._config.generate_empty_report(
+            self._job, task_id, AbstractReport.Status.RUNNING.value
+        )
         # monkeypatch if in test suite
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
             self._monkeypatch()
@@ -45,7 +46,7 @@ class Plugin(metaclass=ABCMeta):
     @property
     @abstractmethod
     def python_base_path(cls) -> PosixPath:
-        raise NotImplementedError()
+        ...
 
     @classmethod
     def all_subclasses(cls):
@@ -89,8 +90,6 @@ class Plugin(metaclass=ABCMeta):
         """
         function called directly before run function.
         """
-        self.report.status = self.report.Status.RUNNING.value
-        self.report.save(update_fields=["status"])
 
     @abstractmethod
     def run(self) -> dict:
@@ -99,7 +98,6 @@ class Plugin(metaclass=ABCMeta):
         Should be overwritten in child class
         :returns report
         """
-        raise NotImplementedError()
 
     def after_run(self):
         """
@@ -108,22 +106,12 @@ class Plugin(metaclass=ABCMeta):
         self.report.end_time = timezone.now()
         self.report.save()
 
-    def after_run_success(self, content: typing.Union[typing.Dict, typing.Iterable]):
+    def after_run_success(self, content: typing.Any):
         if isinstance(content, typing.Generator):
             content = list(content)
         self.report.report = content
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
-
-    def execute_pivots(self) -> None:
-        from api_app.pivots_manager.models import PivotConfig
-
-        if self._job.playbook_to_execute:
-            for pivot in self._config.pivots.annotate_runnable(self._job.user).filter(
-                used_by_playbooks=self._job.playbook_to_execute, runnable=True
-            ):
-                pivot: PivotConfig
-                pivot.pivot_job(self._job)
 
     def log_error(self, e):
         if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):
@@ -160,22 +148,6 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    def init_report_object(self) -> AbstractReport:
-        """
-        Returns report object set in *__init__* fn
-        """
-        # unique constraint ensures only one report is possible
-        # update case: recurring plugin run
-        _report, _ = self.report_model.objects.update_or_create(
-            job_id=self.job_id,
-            config=self._config,
-            defaults={
-                "status": AbstractReport.Status.PENDING.value,
-                "task_id": self.task_id,
-            },
-        )
-        return _report
-
     @abstractmethod
     def get_exceptions_to_catch(self) -> list:
         """
@@ -190,7 +162,8 @@ class Plugin(metaclass=ABCMeta):
         """
         return (
             f"{self.__repr__()}."
-            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
+            f" {'Unexpected error' if is_base_err else f'{self.config_model.__name__} error'}:"  # noqa
+            f" '{err}'"
         )
 
     def start(self, *args, **kwargs):
@@ -207,7 +180,6 @@ class Plugin(metaclass=ABCMeta):
             self.after_run_failed(e)
         else:
             self.after_run_success(_result)
-            self.execute_pivots()
         finally:
             # add end time of process
             self.after_run()
@@ -237,8 +209,10 @@ class Plugin(metaclass=ABCMeta):
 
     @classmethod
     @property
-    def python_module(cls) -> str:
+    def python_module(cls) -> PythonModule:
         valid_module = cls.__module__.replace(str(cls.python_base_path), "")
         # remove the starting dot
         valid_module = valid_module[1:]
-        return f"{valid_module}.{cls.__name__}"
+        return PythonModule.objects.get(
+            module=f"{valid_module}.{cls.__name__}", base_path=cls.python_base_path
+        )

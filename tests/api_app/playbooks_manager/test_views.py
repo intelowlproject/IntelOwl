@@ -3,14 +3,14 @@
 from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.choices import ScanMode
+from api_app.choices import PythonModuleBasePaths, ScanMode
+from api_app.models import PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
 
 class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTestCase):
-
     URL = "/api/playbook"
 
     @classmethod
@@ -21,11 +21,13 @@ class PlaybookViewTestCase(AbstractConfigViewSetTestCaseMixin, CustomViewSetTest
     def test_create(self):
         ac, _ = AnalyzerConfig.objects.get_or_create(
             name="test",
-            python_module="yara_scan.YaraScan",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                module="yara_scan.YaraScan",
+            ),
             description="test",
             disabled=False,
             type="file",
-            config={"soft_time_limit": 100, "queue": "default"},
         )
 
         response = self.client.post(

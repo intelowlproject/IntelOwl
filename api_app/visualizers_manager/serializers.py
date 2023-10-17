@@ -6,7 +6,7 @@ from rest_framework import serializers as rfs
 from ..serializers import (
     AbstractReportSerializer,
     PythonConfigSerializer,
-    PythonListConfigSerializer,
+    PythonConfigSerializerForMigration,
 )
 from .models import VisualizerConfig, VisualizerReport
 
@@ -14,12 +14,20 @@ from .models import VisualizerConfig, VisualizerReport
 class VisualizerConfigSerializer(PythonConfigSerializer):
     class Meta:
         model = VisualizerConfig
-        fields = rfs.ALL_FIELDS
-        list_serializer_class = PythonListConfigSerializer
+        exclude = PythonConfigSerializer.Meta.exclude
+        list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
+
+
+class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration):
+    class Meta:
+        model = VisualizerConfig
+        exclude = PythonConfigSerializerForMigration.Meta.exclude
 
 
 class VisualizerReportSerializer(AbstractReportSerializer):
     name = rfs.SerializerMethodField()
+
+    config = rfs.PrimaryKeyRelatedField(queryset=VisualizerConfig.objects.all())
 
     @classmethod
     def get_name(cls, instance: VisualizerReport):
@@ -27,4 +35,4 @@ class VisualizerReportSerializer(AbstractReportSerializer):
 
     class Meta:
         model = VisualizerReport
-        fields = AbstractReportSerializer.Meta.fields
+        fields = AbstractReportSerializer.Meta.fields + ("config",)

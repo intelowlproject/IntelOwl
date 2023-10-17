@@ -1,11 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from rest_framework import serializers as rfs
 
 from ..serializers import (
     AbstractReportSerializer,
     PythonConfigSerializer,
-    PythonListConfigSerializer,
+    PythonConfigSerializerForMigration,
 )
 from .models import ConnectorConfig, ConnectorReport
 
@@ -13,8 +12,14 @@ from .models import ConnectorConfig, ConnectorReport
 class ConnectorConfigSerializer(PythonConfigSerializer):
     class Meta:
         model = ConnectorConfig
-        fields = rfs.ALL_FIELDS
-        list_serializer_class = PythonListConfigSerializer
+        exclude = PythonConfigSerializer.Meta.exclude
+        list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
+
+
+class ConnectorConfigSerializerForMigration(PythonConfigSerializerForMigration):
+    class Meta:
+        model = ConnectorConfig
+        exclude = PythonConfigSerializerForMigration.Meta.exclude
 
 
 class ConnectorReportSerializer(AbstractReportSerializer):

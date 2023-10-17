@@ -1,36 +1,39 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import axios from "axios";
 
-// constants
-const LOCALSTORAGE_KEY = "intelowl-recent-scans-store";
-const useRecentScansStore = create(
-  persist(
-    (set) => ({
-      jobIdStatusMap: {}, // {1: "success"}
-      append: (id, status) => {
-        set((state) => ({
-          jobIdStatusMap: {
-            // all this shitty logic is just to limit the object length to latest 10
-            ...Object.fromEntries(
-              Object.entries(state.jobIdStatusMap)
-                .sort(([k1], [k2]) => k1 - k2)
-                .slice(
-                  Math.max(Object.keys(state.jobIdStatusMap).length - 9, 0),
-                ),
-            ),
-            [id]: status,
-          },
-        }));
-      },
-      clear: () => {
-        localStorage.removeItem(LOCALSTORAGE_KEY);
-      },
-    }),
-    {
-      name: LOCALSTORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-);
+import { JOB_RECENT_SCANS, JOB_RECENT_SCANS_USER } from "../constants/api";
+
+const useRecentScansStore = create((set, _get) => ({
+  loadingScansUser: true,
+  loadingScansInsertedAnalyzable: true,
+  recentScansUserError: null,
+  recentScansError: null,
+  recentScansUser: [],
+  recentScans: [],
+  fetchRecentScansUser: async () => {
+    try {
+      set({ loadingScansUser: true });
+      const resp = await axios.post(JOB_RECENT_SCANS_USER);
+      set({
+        recentScansUser: resp.data,
+        loadingScansUser: false,
+      });
+    } catch (e) {
+      set({ recentScansUserError: e, loadingScansUser: false });
+    }
+  },
+  fetchRecentscans: async (md5) => {
+    try {
+      set({ loadingScansInsertedAnalyzable: true });
+      const resp = await axios.post(JOB_RECENT_SCANS, { md5 });
+      set({
+        recentScans: resp.data,
+        loadingScansInsertedAnalyzable: false,
+      });
+    } catch (e) {
+      set({ recentScansError: e, loadingScansInsertedAnalyzable: false });
+    }
+  },
+}));
 
 export default useRecentScansStore;

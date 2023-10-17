@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class YARAifyFileScan(FileAnalyzer, YARAify):
-
     _api_key_identifier: str
     send_file: bool
     clamav_scan: bool

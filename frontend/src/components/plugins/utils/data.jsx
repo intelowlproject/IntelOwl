@@ -264,6 +264,64 @@ const connectorTableColumns = [
   },
 ];
 
+const pivotTableColumns = [
+  ...pluginTableColumns,
+  {
+    Header: "Configured",
+    id: "configured",
+    accessor: "verification.configured",
+    Cell: ({ row: { original } }) => (
+      <PluginVerificationIcon
+        pluginName={original?.name}
+        verification={original?.verification}
+      />
+    ),
+    Filter: SelectOptionsFilter,
+    selectOptions: ["true", "false"],
+    disableSortBy: true,
+    maxWidth: 100,
+  },
+  {
+    Header: "Enabled for organization",
+    id: "enabled_for_organization",
+    Cell: ({ row: { original } }) => (
+      <OrganizationPluginStateToggle
+        pluginName={original?.name}
+        disabled={original?.orgPluginDisabled}
+        refetch={original?.refetch}
+        type={original?.plugin_type}
+      />
+    ),
+    disableSortBy: true,
+    maxWidth: 100,
+  },
+  {
+    Header: "Description",
+    id: "description",
+    accessor: "description",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+  },
+  {
+    Header: "Playbook executed",
+    id: "playbook",
+    accessor: "playbook_to_execute",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    Filter: SelectColumnFilter,
+    maxWidth: 145,
+  },
+  {
+    Header: "Related config",
+    id: "related_configs",
+    accessor: (row) => row.related_configs,
+    Cell: ({ value }) => (
+      <PlaybooksCollapse value={value} pluginType_="configurations" />
+    ),
+    disableSortBy: true,
+    Filter: SelectColumnFilter,
+  },
+];
 // Playbooks columns: these columns are shown for the playbooks
 const playbookTableColumns = [
   ...pluginTableColumns,
@@ -277,18 +335,24 @@ const playbookTableColumns = [
     minWidth: 200,
   },
   {
-    Header: "Type",
-    id: "type",
+    Header: "Supported types",
+    id: "supported_types",
     accessor: "type",
-    Cell: ({ value }) => <code>{JSON.stringify(value, null, 2)}</code>,
+    Cell: ({ value }) => (
+      <ul className="d-flex flex-column align-items-start">
+        {value?.sort().map((v) => (
+          <li key={v}>{v}</li>
+        ))}
+      </ul>
+    ),
     disableSortBy: true,
-    Filter: DefaultColumnFilter,
-    minWidth: 180,
+    Filter: SelectColumnFilter,
   },
   {
-    Header: "Analyzers executed",
-    id: "analyzers_executed",
+    Header: "Analyzers",
+    id: "analyzers",
     accessor: (row) => Object.keys(row.analyzers),
+
     Cell: ({ value }) => (
       <PlaybooksCollapse value={value} pluginType_="analyzers" />
     ),
@@ -296,11 +360,31 @@ const playbookTableColumns = [
     Filter: SelectColumnFilter,
   },
   {
-    Header: "Connectors executed",
-    id: "connectors_executed",
+    Header: "Connectors",
+    id: "connectors",
     accessor: (row) => Object.keys(row.connectors),
     Cell: ({ value }) => (
       <PlaybooksCollapse value={value} pluginType_="connectors" />
+    ),
+    disableSortBy: true,
+    Filter: SelectColumnFilter,
+  },
+  {
+    Header: "Pivots",
+    id: "pivots",
+    accessor: (row) => row.pivots,
+    Cell: ({ value }) => (
+      <PlaybooksCollapse value={value} pluginType_="pivots" />
+    ),
+    disableSortBy: true,
+    Filter: SelectColumnFilter,
+  },
+  {
+    Header: "Visualizers",
+    id: "visualizers",
+    accessor: (row) => row.visualizers,
+    Cell: ({ value }) => (
+      <PlaybooksCollapse value={value} pluginType_="visualizers" />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -410,6 +494,7 @@ const ingestorTableColumns = [
 export {
   analyzersTableColumns,
   connectorTableColumns,
+  pivotTableColumns,
   visualizerTableColumns,
   ingestorTableColumns,
   playbookTableColumns,

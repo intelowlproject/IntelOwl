@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Container, Col } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
+import { Link } from "react-router-dom";
 
 import {
   Loader,
@@ -81,7 +82,15 @@ export default function PluginWrapper({
             {heading}&nbsp;
             <small className="text-muted">{dataList?.length} total</small>
           </h1>
-          <span className="text-muted">{description}</span>
+          <span className="text-muted">
+            {description} Fore more info check the{" "}
+            <Link
+              to="https://intelowl.readthedocs.io/en/latest/Usage.html#plugins"
+              target="_blank"
+            >
+              official doc
+            </Link>
+          </span>
         </Col>
       </div>
       {/* Actions */}

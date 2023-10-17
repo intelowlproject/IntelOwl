@@ -51,10 +51,20 @@ class CAPEsandbox(FileAnalyzer):
     # CapeSandbox SSL certificate (multiline string).
     _certificate: str
 
+    @staticmethod
+    def _clean_certificate(cert):
+        return (
+            cert.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN_CERTIFICATE-----")
+            .replace("-----END CERTIFICATE-----", "-----END_CERTIFICATE-----")
+            .replace(" ", "\n")
+            .replace("-----BEGIN_CERTIFICATE-----", "-----BEGIN CERTIFICATE-----")
+            .replace("-----END_CERTIFICATE-----", "-----END CERTIFICATE-----")
+        )
+
     def config(self):
         super().config()
         self.__cert_file = NamedTemporaryFile(mode="w")
-        self.__cert_file.write(self._certificate)
+        self.__cert_file.write(self._clean_certificate(self._certificate))
         self.__cert_file.flush()
         self.__session = requests.Session()
         self.__session.verify = self.__cert_file.name
@@ -121,7 +131,6 @@ class CAPEsandbox(FileAnalyzer):
                     and values[0]
                     == "Not unique, as unique option set on submit or in conf/web.conf"
                 ):
-
                     #    The above response is only returned when
                     #    a sample that has been already
                     #    uploaded once is uploaded again.
@@ -156,7 +165,7 @@ class CAPEsandbox(FileAnalyzer):
                         self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + status_id
-                        + "/json"
+                        + "/litereport"
                     )
                     to_respond["result_url"] = gui_report_url
 
@@ -231,7 +240,7 @@ class CAPEsandbox(FileAnalyzer):
                         self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + str(task_id)
-                        + "/json"
+                        + "/litereport"
                     )
                     try:
                         final_request = self.__session.get(
@@ -241,6 +250,16 @@ class CAPEsandbox(FileAnalyzer):
                     except requests.RequestException as e:
                         raise AnalyzerRunException(e)
 
+                    results = final_request.json()
+
+                    # the task was being processed
+                    if (
+                        "error" in results
+                        and results["error"]
+                        and results["error_value"] == "Task is still being analyzed"
+                    ):
+                        raise self.ContinuePolling("Task still processing")
+
                     logger.info(
                         f" Job: {self.job_id} ->"
                         f"Poll number #{attempt}/{self.max_tries} fetched"
@@ -248,7 +267,6 @@ class CAPEsandbox(FileAnalyzer):
                         " stopping polling.."
                     )
 
-                    results = final_request.json()
                     break
 
                 else:

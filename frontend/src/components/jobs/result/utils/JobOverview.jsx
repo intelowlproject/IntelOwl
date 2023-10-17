@@ -30,6 +30,7 @@ import {
   JobInfoCard,
   JobIsRunningAlert,
   JobActionsBar,
+  ReportedPluginTooltip,
 } from "./sections";
 import { StatusIcon } from "../../../common";
 import VisualizerReport from "../visualizer/visualizer";
@@ -69,10 +70,14 @@ export default function JobOverview({
         nav: (
           <div className="d-flex-center">
             <strong>Analyzers Report</strong>
-            <Badge className="ms-2">
+            <Badge id="analyzersReportsBadge" className="ms-2">
               {reportedPluginNumber(job.analyzer_reports)} /&nbsp;
               {job.analyzers_to_execute.length}
             </Badge>
+            <ReportedPluginTooltip
+              id="analyzersReportsBadge"
+              pluginName="analyzers"
+            />
           </div>
         ),
         report: <AnalyzersReportTable job={job} refetch={refetch} />,
@@ -82,10 +87,14 @@ export default function JobOverview({
         nav: (
           <div className="d-flex-center">
             <strong>Connectors Report</strong>
-            <Badge className="ms-2">
+            <Badge id="connectorsReportsBadge" className="ms-2">
               {reportedPluginNumber(job.connector_reports)} /&nbsp;
               {job.connectors_to_execute.length}
             </Badge>
+            <ReportedPluginTooltip
+              id="connectorsReportsBadge"
+              pluginName="connectors"
+            />
           </div>
         ),
         report: <ConnectorsReportTable job={job} refetch={refetch} />,
@@ -95,10 +104,14 @@ export default function JobOverview({
         nav: (
           <div className="d-flex-center">
             <strong>Pivots Report</strong>
-            <Badge className="ms-2">
+            <Badge id="pivotsReportsBadge" className="ms-2">
               {reportedPluginNumber(job.pivot_reports)} /&nbsp;
               {job.pivots_to_execute.length}
             </Badge>
+            <ReportedPluginTooltip
+              id="pivotsReportsBadge"
+              pluginName="pivots"
+            />
           </div>
         ),
         report: <PivotsReportTable job={job} refetch={refetch} />,
@@ -108,7 +121,7 @@ export default function JobOverview({
         nav: (
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>
-            <Badge className="ms-2">
+            <Badge id="visualizersReportsBadge" className="ms-2">
               {reportedVisualizerNumber(
                 job.visualizer_reports,
                 job.visualizers_to_execute,
@@ -116,6 +129,10 @@ export default function JobOverview({
               /&nbsp;
               {job.visualizers_to_execute.length}
             </Badge>
+            <ReportedPluginTooltip
+              id="visualizersReportsBadge"
+              pluginName="visualizers"
+            />
           </div>
         ),
         report: <VisualizersReportTable job={job} refetch={refetch} />,

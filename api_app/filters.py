@@ -19,6 +19,9 @@ class JobFilter(filters.FilterSet):
     file_name = filters.CharFilter(lookup_expr="icontains")
     file_mimetype = filters.CharFilter(lookup_expr="icontains")
     tags = filters.BaseInFilter(field_name="tags__label", lookup_expr="in")
+    playbook_to_execute = filters.CharFilter(
+        field_name="playbook_to_execute__name", lookup_expr="icontains"
+    )
 
     # extra
     user = filters.CharFilter(method="filter_for_user")

@@ -321,10 +321,26 @@ export function JobInfoCard({ job }) {
           >
             {[
               [
+                "Playbook",
+                <PlaybookTag
+                  key={job.playbook_to_execute}
+                  playbook={job.playbook_to_execute}
+                  className="mr-2"
+                />,
+              ],
+              [
                 "Tags",
                 job.tags.map((tag) => (
                   <JobTag key={tag.label} tag={tag} className="me-2" />
                 )),
+              ],
+              [
+                "Warning(s)",
+                <ul className="text-warning">
+                  {job.warnings.map((error) => (
+                    <li>{error}</li>
+                  ))}
+                </ul>,
               ],
               [
                 "Error(s)",
@@ -333,14 +349,6 @@ export function JobInfoCard({ job }) {
                     <li>{error}</li>
                   ))}
                 </ul>,
-              ],
-              [
-                "Playbook",
-                <PlaybookTag
-                  key={job.playbook_to_execute}
-                  playbook={job.playbook_to_execute}
-                  className="mr-2"
-                />,
               ],
             ].map(([key, value]) => (
               <ListGroupItem key={key}>

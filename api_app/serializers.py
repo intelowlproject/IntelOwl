@@ -306,7 +306,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 job = super().create(validated_data)
         else:
             job = super().create(validated_data)
-        job.errors = warnings
+        job.warnings = warnings
         job.save()
         logger.info(f"Job {job.pk} created")
         if send_task:

@@ -27,6 +27,9 @@ const onValidate = (values) => {
   } else if (values.name.length < minLength) {
     errors.name = `This field must be at least ${minLength} characters long`;
   }
+  if (!values.description) {
+    errors.description = "This field is required.";
+  }
   return errors;
 };
 
@@ -71,7 +74,9 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                 />
-                {formik.touched.name && <small>{formik.errors.name}</small>}
+                {formik.touched.name && (
+                  <small className="text-danger">{formik.errors.name}</small>
+                )}
               </div>
 
               <div className="p-3">
@@ -83,8 +88,14 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
                   type="text"
                   name="description"
                   style={{ width: "-webkit-fill-available" }}
+                  onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                 />
+                {formik.touched.description && (
+                  <small className="text-danger">
+                    {formik.errors.description}
+                  </small>
+                )}
               </div>
               <div className="p-3 d-flex justify-content-center">
                 <Button

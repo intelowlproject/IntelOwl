@@ -91,9 +91,6 @@ describe("test JobOverview (job report)", () => {
       within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Raw JSON" }),
-    ).toBeInTheDocument();
-    expect(
       within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
   });
@@ -322,11 +319,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
     expect(global.location.pathname).toEqual(
@@ -433,11 +433,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
     expect(global.location.pathname).toEqual("/jobs/4/visualizer/loading");
@@ -527,11 +530,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
     expect(global.location.pathname).toEqual(
@@ -866,11 +872,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
 
     await user.click(connectorReport);
     expect(global.location.pathname).toEqual("/jobs/8/raw/connector");
@@ -960,11 +969,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
 
     await user.click(pivotReport);
     expect(global.location.pathname).toEqual("/jobs/9/raw/pivot");
@@ -1054,14 +1066,114 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerReport);
     expect(global.location.pathname).toEqual("/jobs/10/raw/visualizer");
+  });
+
+  test("move from raw-analyzer to raw-global", async () => {
+    render(
+      <BrowserRouter>
+        <JobOverview
+          isRunningJob={false}
+          section="raw"
+          subSection="analyzer"
+          refetch={() => {}}
+          job={{
+            id: 10,
+            user: {
+              username: "test",
+            },
+            tags: [],
+            comments: [
+              {
+                id: 1,
+                content: "test comment",
+                created_at: "2023-05-31T09:00:14.352880Z",
+                user: {
+                  username: "test",
+                },
+              },
+            ],
+            permissions: {
+              kill: true,
+              delete: true,
+              plugin_actions: true,
+            },
+            is_sample: false,
+            md5: "f9bc35a57b22f82c94dbcc420f71b903",
+            observable_name: "dns.google.com",
+            observable_classification: "domain",
+            file_name: "",
+            file_mimetype: "",
+            status: "reported_without_fails",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              pivots: {},
+              visualizers: {},
+            },
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
+            process_time: 0.23,
+            tlp: "AMBER",
+            warnings: [],
+            errors: [],
+            analyzers_requested: ["Classic_DNS"],
+            analyzers_to_execute: [],
+            analyzer_reports: [],
+            connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
+            connectors_to_execute: [],
+            connector_reports: [],
+            pivots_requested: [],
+            pivots_to_execute: [],
+            pivot_reports: [],
+            visualizers_requested: [],
+            visualizers_to_execute: [],
+            visualizer_reports: [],
+            playbook_requested: "TestPlaybook",
+            playbook_to_execute: "TestPlaybook",
+          }}
+        />
+      </BrowserRouter>,
+    );
+    const user = userEvent.setup();
+
+    // check sections visualizer/raw
+    const visualizerButton = screen.getByRole("button", { name: "Visualizer" });
+    expect(visualizerButton).toBeInTheDocument();
+    expect(visualizerButton.className).toContain("btn-outline-tertiary"); // not selected
+    const rawButton = screen.getByRole("button", { name: "Raw" });
+    expect(rawButton).toBeInTheDocument();
+    expect(rawButton.className).toContain("btn-primary"); // selected
+    // check subsections available
+    const analyzerReport = screen.getByText("Analyzers Report");
+    expect(analyzerReport).toBeInTheDocument();
+    const connectorReport = screen.getByText("Connectors Report");
+    expect(connectorReport).toBeInTheDocument();
+    const pivotReport = screen.getByText("Pivots Report");
+    expect(pivotReport).toBeInTheDocument();
+    const visualizerReport = screen.getByText("Visualizers Report");
+    expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
+    // check active subsection
+    expect(analyzerReport.closest("a").className).toContain("active");
+    expect(connectorReport.closest("a").className).not.toContain("active");
+    expect(pivotReport.closest("a").className).not.toContain("active");
+    expect(visualizerReport.closest("a").className).not.toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
+
+    await user.click(globalReport);
+    expect(global.location.pathname).toEqual("/jobs/10/raw/global");
   });
 
   test("move from raw-visualizer to raw-analyzer", async () => {
@@ -1148,11 +1260,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
+    const globalReport = screen.getByText("Global Report");
+    expect(globalReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).not.toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).toContain("active");
+    expect(globalReport.closest("a").className).not.toContain("active");
 
     await user.click(analyzerReport);
     expect(global.location.pathname).toEqual("/jobs/11/raw/analyzer");

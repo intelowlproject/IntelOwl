@@ -34,8 +34,6 @@ import {
 } from "../../../constants/api";
 import { pluginType, scanMode } from "../../../constants/constants";
 
-const { checkPluginHealth } = usePluginConfigurationStore.getState();
-
 export function parseScanCheckTime(time) {
   // scan_check_time is in format days:hours:minutes:seconds, we need to convert them to hours
   const [daysAgo, hoursAgo] = time
@@ -271,6 +269,14 @@ function PluginHealthSpinner() {
 }
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
+  const { checkPluginHealth } = usePluginConfigurationStore(
+    React.useCallback(
+      (state) => ({
+        checkPluginHealth: state.checkPluginHealth,
+      }),
+      [],
+    ),
+  );
   const [isLoading, setIsLoading] = React.useState(false);
   const [isHealthy, setIsHealthy] = React.useState(undefined);
 

@@ -138,10 +138,10 @@ export default function JobOverview({
         report: <VisualizersReportTable job={job} refetch={refetch} />,
       },
       {
-        id: "global",
+        id: "full",
         nav: (
           <div className="d-flex-center">
-            <strong>Global Report</strong>
+            <strong>Full Report</strong>
           </div>
         ),
         report: (

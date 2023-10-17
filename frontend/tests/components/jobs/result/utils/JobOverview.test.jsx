@@ -319,14 +319,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
     expect(global.location.pathname).toEqual(
@@ -433,14 +433,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
     expect(global.location.pathname).toEqual("/jobs/4/visualizer/loading");
@@ -530,14 +530,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
     expect(global.location.pathname).toEqual(
@@ -872,14 +872,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(connectorReport);
     expect(global.location.pathname).toEqual("/jobs/8/raw/connector");
@@ -969,14 +969,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(pivotReport);
     expect(global.location.pathname).toEqual("/jobs/9/raw/pivot");
@@ -1066,20 +1066,20 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerReport);
     expect(global.location.pathname).toEqual("/jobs/10/raw/visualizer");
   });
 
-  test("move from raw-analyzer to raw-global", async () => {
+  test("move from raw-analyzer to raw-full", async () => {
     render(
       <BrowserRouter>
         <JobOverview
@@ -1163,17 +1163,17 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).not.toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
-    await user.click(globalReport);
-    expect(global.location.pathname).toEqual("/jobs/10/raw/global");
+    await user.click(fullReport);
+    expect(global.location.pathname).toEqual("/jobs/10/raw/full");
   });
 
   test("move from raw-visualizer to raw-analyzer", async () => {
@@ -1260,14 +1260,14 @@ describe("test JobOverview (job report)", () => {
     expect(pivotReport).toBeInTheDocument();
     const visualizerReport = screen.getByText("Visualizers Report");
     expect(visualizerReport).toBeInTheDocument();
-    const globalReport = screen.getByText("Global Report");
-    expect(globalReport).toBeInTheDocument();
+    const fullReport = screen.getByText("Full Report");
+    expect(fullReport).toBeInTheDocument();
     // check active subsection
     expect(analyzerReport.closest("a").className).not.toContain("active");
     expect(connectorReport.closest("a").className).not.toContain("active");
     expect(pivotReport.closest("a").className).not.toContain("active");
     expect(visualizerReport.closest("a").className).toContain("active");
-    expect(globalReport.closest("a").className).not.toContain("active");
+    expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(analyzerReport);
     expect(global.location.pathname).toEqual("/jobs/11/raw/analyzer");

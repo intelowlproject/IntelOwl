@@ -31,6 +31,7 @@ class AnalyzerReport(AbstractReport):
 
 
 class MimeTypes(models.TextChoices):
+    # IMPORTANT! in case you update this Enum remember to update also the frontend
     WSCRIPT = "application/w-script-file"
     JAVASCRIPT1 = "application/javascript"
     JAVASCRIPT2 = "application/x-javascript"
@@ -80,6 +81,7 @@ class MimeTypes(models.TextChoices):
     PKCS7 = "application/pkcs7-signature"
     XPKCS7 = "application/x-pkcs7-signature"
     MIXED = "multipart/mixed"
+    X_SHELLSCRIPT = "text/x-shellscript"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:

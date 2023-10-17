@@ -64,7 +64,6 @@ if settings.AWS_SQS:
 else:
     BROKER_TRANSPORT_OPTIONS = {}
 
-DEFAULT_QUEUE = settings.CELERY_QUEUES[0]
 task_queues = [
     Queue(
         get_queue_name(key),
@@ -83,7 +82,7 @@ if not settings.AWS_SQS:
         )
     )
 app.conf.update(
-    task_default_queue=get_queue_name(DEFAULT_QUEUE),
+    task_default_queue=get_queue_name(settings.DEFAULT_QUEUE),
     task_queues=task_queues,
     task_time_limit=1800,
     broker_url=settings.BROKER_URL,
@@ -131,6 +130,6 @@ def broadcast(function, queue: str = None, arguments: Dict = None):
     else:
         if queue:
             if queue not in settings.CELERY_QUEUES:
-                queue = DEFAULT_QUEUE
+                queue = settings.DEFAULT_QUEUE
             queue = [f"celery@worker_{queue}"]
         app.control.broadcast(function.__name__, destination=queue, arguments=arguments)

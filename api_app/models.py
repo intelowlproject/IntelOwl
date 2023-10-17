@@ -20,7 +20,7 @@ from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MinLengthValidator, RegexValidator
+from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import BaseConstraint, Q, QuerySet, UniqueConstraint
 from django.urls import reverse
@@ -41,7 +41,7 @@ from api_app.choices import (
 if typing.TYPE_CHECKING:
     from api_app.classes import Plugin
 
-from api_app.defaults import config_default, default_runtime, file_directory_path
+from api_app.defaults import default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
@@ -52,13 +52,13 @@ from api_app.queryset import (
 )
 from api_app.validators import (
     plugin_name_validator,
-    validate_config,
+    validate_routing_key,
     validate_runtime_configuration,
 )
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
-from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
+from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class Tag(models.Model):
     )
 
     def __str__(self):
-        return f'Tag(label="{self.label}")'
+        return self.label
 
 
 class Comment(models.Model):
@@ -240,6 +240,9 @@ class Job(models.Model):
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
+    warnings = pg_fields.ArrayField(
+        models.TextField(), blank=True, default=list, null=True
+    )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
@@ -269,6 +272,17 @@ class Job(models.Model):
         return calculate_sha256(
             self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
         )
+
+    @cached_property
+    def parent_job(self) -> Optional["Job"]:
+        from api_app.pivots_manager.models import PivotMap
+
+        try:
+            pm = PivotMap.objects.get(ending_job=self)
+        except PivotMap.DoesNotExist:
+            return None
+        else:
+            return pm.starting_job
 
     @cached_property
     def sha1(self) -> str:
@@ -344,7 +358,8 @@ class Job(models.Model):
             | self._final_status_signature
         )
         runner.apply_async(
-            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+            routing_key=settings.CONFIG_QUEUE,
+            MessageGroupId=str(uuid.uuid4()),
         )
 
     def set_final_status(self) -> None:
@@ -385,11 +400,6 @@ class Job(models.Model):
             return None
         td = self.finished_analysis_time - self.received_request_time
         return round(td.total_seconds(), 2)
-
-    def append_error(self, err_msg: str, save=True) -> None:
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
 
     def update_status(self, status: str, save=True) -> None:
         self.status = status
@@ -486,7 +496,7 @@ class Job(models.Model):
         return tasks.job_set_final_status.signature(
             args=[self.pk],
             kwargs={},
-            queue=get_queue_name(DEFAULT_QUEUE),
+            routing_key=settings.CONFIG_QUEUE,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
@@ -496,17 +506,22 @@ class Job(models.Model):
         runner = (
             self._get_signatures(self.analyzers_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.filter(related_analyzer_configs__isnull=False)
+                self.pivots_to_execute.filter(
+                    related_analyzer_configs__isnull=False
+                ).distinct()
             )
             | self._get_signatures(self.connectors_to_execute.all())
             | self._get_signatures(
-                self.pivots_to_execute.filter(related_connector_configs__isnull=False)
+                self.pivots_to_execute.filter(
+                    related_connector_configs__isnull=False
+                ).distinct()
             )
             | self._get_signatures(self.visualizers_to_execute.all())
             | self._final_status_signature
         )
         runner.apply_async(
-            queue=get_queue_name(DEFAULT_QUEUE), MessageGroupId=str(uuid.uuid4())
+            routing_key=settings.CONFIG_QUEUE,
+            MessageGroupId=str(uuid.uuid4()),
         )
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
@@ -879,18 +894,12 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
-    def append_error(self, err_msg: str, save=True):
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
-
 
 class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
-    config = models.JSONField(
-        blank=False,
-        default=config_default,
-        validators=[validate_config],
+    soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
+    routing_key = models.CharField(
+        max_length=50, validators=[validate_routing_key], default="default"
     )
     python_module = models.ForeignKey(
         PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
@@ -911,6 +920,17 @@ class PythonConfig(AbstractConfig):
     @property
     def report_class(cls) -> Type[AbstractReport]:
         return cls.reports.rel.related_model
+
+    @classmethod
+    def get_subclasses(cls) -> typing.List["PythonConfig"]:
+        from django.contrib.contenttypes.models import ContentType
+
+        child_models = [ct.model_class() for ct in ContentType.objects.all()]
+        return [
+            model
+            for model in child_models
+            if (model is not None and issubclass(model, cls) and model is not cls)
+        ]
 
     @classmethod
     @property
@@ -984,23 +1004,14 @@ class PythonConfig(AbstractConfig):
         return tasks.job_set_pipeline_status.signature(
             args=[job.pk, status],
             kwargs={},
-            queue=get_queue_name(DEFAULT_QUEUE),
+            routing_key=settings.CONFIG_QUEUE,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
 
-    def clean_config_queue(self):
-        queue = self.config["queue"]
-        if queue not in settings.CELERY_QUEUES:
-            logger.warning(
-                f"Analyzer {self.name} has a wrong queue."
-                f" Setting to `{DEFAULT_QUEUE}`"
-            )
-            self.config["queue"] = DEFAULT_QUEUE
-
-    def clean(self):
-        super().clean()
-        self.clean_config_queue()
+    @property
+    def queue(self):
+        return get_queue_name(self.routing_key)
 
     @property
     def options(self) -> QuerySet:
@@ -1018,21 +1029,6 @@ class PythonConfig(AbstractConfig):
     def _is_configured(self, user: User = None) -> bool:
         pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
         return pc.configured
-
-    @cached_property
-    def queue(self):
-        queue = self.config["queue"]
-        if queue not in settings.CELERY_QUEUES:
-            queue = DEFAULT_QUEUE
-        return get_queue_name(queue)
-
-    @cached_property
-    def routing_key(self):
-        return self.config["queue"]
-
-    @cached_property
-    def soft_time_limit(self):
-        return self.config["soft_time_limit"]
 
     @classmethod
     @property

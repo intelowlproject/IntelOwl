@@ -34,7 +34,6 @@ class ConnectorTestCase(CustomTestCase):
             python_module=pm,
             description="test",
             disabled=True,
-            config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
         )
         with self.assertRaises(ConnectorRunException):
@@ -79,7 +78,6 @@ class ConnectorTestCase(CustomTestCase):
             ),
             description="test",
             disabled=True,
-            config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
             run_on_failure=False,
         )

@@ -113,6 +113,11 @@ LOGGING = {
             "level": INFO_OR_DEBUG_LEVEL,
             "propagate": True,
         },
+        "intel_owl.tasks": {
+            "handlers": ["celery", "celery_error"],
+            "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
+        },
         "celery": {
             "handlers": ["celery", "celery_error"],
             "level": INFO_OR_DEBUG_LEVEL,

@@ -457,12 +457,12 @@ export default function ScanForm() {
     formik.setFieldValue("tlp", tlp, false);
     formik.setFieldValue("scan_mode", _scanMode, false);
     // null for playbooks with force new
-    console.debug("scanCheckTime");
-    console.debug(scanCheckTime);
+    console.debug(`scanCheckTime : ${scanCheckTime}`);
     if (scanCheckTime) {
-      // scan_check_time is in format day hours:minutes:seconds, we need to convert them to hours
-      const daysAgo = parseInt(scanCheckTime.split(" ")[0], 10);
-      const hoursAgo = parseInt(scanCheckTime.split(" ")[1].split(":")[0], 10);
+      // scan_check_time is in format days:hours:minutes:seconds, we need to convert them to hours
+      const [daysAgo, hoursAgo] = scanCheckTime
+        .split(":")
+        .map((token) => parseInt(token, 10));
       formik.setFieldValue("scan_check_time", daysAgo * 24 + hoursAgo, false);
     }
   };

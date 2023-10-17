@@ -384,7 +384,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             yield tasks.run_plugin.signature(
                 args,
                 {},
-                queue=config.queue,
+                routing_key=config.routing_key,
                 soft_time_limit=config.soft_time_limit,
                 task_id=task_id,
                 immutable=True,

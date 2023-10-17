@@ -12,31 +12,19 @@ plugin_name_validator = RegexValidator(
 )
 
 
+def validate_routing_key(value):
+    from django.conf import settings
+
+    if value not in settings.CELERY_QUEUES:
+        raise ValidationError(f"Routing key {value} is not supported")
+    return True
+
+
 def validate_schema(value, schema):
     try:
         return jsonschema.validate(value, schema=schema)
     except jsonschema.exceptions.ValidationError as e:
         raise ValidationError(e.message)
-
-
-def validate_config(value):
-    schema = {
-        "type": "object",
-        "title": "Config",
-        "properties": {
-            "soft_time_limit": {
-                "title": "Execution soft time limit",
-                "type": "integer",
-            },
-            "queue": {
-                "title": "Celery queue",
-                "type": "string",
-            },
-        },
-        "required": ["soft_time_limit", "queue"],
-        "additionalProperties": False,
-    }
-    return validate_schema(value, schema)
 
 
 def validate_secrets(value):

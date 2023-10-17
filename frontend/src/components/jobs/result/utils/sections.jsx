@@ -321,10 +321,26 @@ export function JobInfoCard({ job }) {
           >
             {[
               [
+                "Playbook",
+                <PlaybookTag
+                  key={job.playbook_to_execute}
+                  playbook={job.playbook_to_execute}
+                  className="mr-2"
+                />,
+              ],
+              [
                 "Tags",
                 job.tags.map((tag) => (
                   <JobTag key={tag.label} tag={tag} className="me-2" />
                 )),
+              ],
+              [
+                "Warning(s)",
+                <ul className="text-warning">
+                  {job.warnings.map((error) => (
+                    <li>{error}</li>
+                  ))}
+                </ul>,
               ],
               [
                 "Error(s)",
@@ -333,14 +349,6 @@ export function JobInfoCard({ job }) {
                     <li>{error}</li>
                   ))}
                 </ul>,
-              ],
-              [
-                "Playbook",
-                <PlaybookTag
-                  key={job.playbook_to_execute}
-                  playbook={job.playbook_to_execute}
-                  className="mr-2"
-                />,
               ],
             ].map(([key, value]) => (
               <ListGroupItem key={key}>
@@ -365,16 +373,17 @@ export function reportedVisualizerNumber(
   let visualizersNumber = 0;
   visualizersToExecute.forEach((visualizer) => {
     // count reports that have 'config' === 'visualizer' (pages from the same visualizer) and are in a final statuses
-    let count = 0;
+    let visualizersInFinalStatus = 0;
+    let visualizerPages = 0;
     visualizersReportedList.forEach((report) => {
-      if (
-        report.config === visualizer &&
-        Object.values(pluginFinalStatuses).includes(report.status)
-      )
-        count += 1;
+      if (report.config === visualizer) {
+        visualizerPages += 1;
+        if (Object.values(pluginFinalStatuses).includes(report.status))
+          visualizersInFinalStatus += 1;
+      }
     });
-    // reports relating to pages from the same visualizer are counted only once
-    if (count >= 1) visualizersNumber += 1;
+    // visualizer is completed if all pages are in a final statuses
+    if (visualizersInFinalStatus === visualizerPages) visualizersNumber += 1;
   });
   return visualizersNumber;
 }
@@ -490,6 +499,14 @@ export function JobIsRunningAlert({ job }) {
         </div>
       </IconAlert>
     </Fade>
+  );
+}
+
+export function ReportedPluginTooltip({ id, pluginName }) {
+  return (
+    <UncontrolledTooltip placement="top" target={id}>
+      {pluginName} reported / {pluginName} executed
+    </UncontrolledTooltip>
   );
 }
 

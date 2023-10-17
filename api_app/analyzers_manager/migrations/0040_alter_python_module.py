@@ -22,8 +22,8 @@ def migrate(apps, schema_editor):
             ).pk
         else:
             kwargs["python_module_pk"] = config.python_module2.pk
-            task.kwargs = json.dumps(kwargs)
-            task.save()
+        task.kwargs = json.dumps(kwargs)
+        task.save()
 
 
 def reverse_migrate(apps, schema_editor):

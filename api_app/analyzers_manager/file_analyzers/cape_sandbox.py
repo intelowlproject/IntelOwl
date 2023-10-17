@@ -44,6 +44,8 @@ class CAPEsandbox(FileAnalyzer):
     max_tries: int
     # Seconds to wait before moving on to the next poll attempt.
     poll_distance: int
+    # python requests HTTP GET/POST timeout
+    requests_timeout: int
     # Token for Token Auth.
     _api_key_name: str
     # URL for the CapeSandbox instance.
@@ -103,6 +105,7 @@ class CAPEsandbox(FileAnalyzer):
                     "file": (self.filename, self.read_file_bytes()),
                 },
                 data=data,
+                timeout=self.requests_timeout
             )
             response.raise_for_status()
         except requests.RequestException as e:
@@ -172,6 +175,7 @@ class CAPEsandbox(FileAnalyzer):
                     try:
                         final_request = self.__session.get(
                             report_url,
+                            timeout=self.requests_timeout
                         )
                     except requests.RequestException as e:
                         raise AnalyzerRunException(e)
@@ -184,7 +188,7 @@ class CAPEsandbox(FileAnalyzer):
         db_search_url = self._url_key_name + "/apiv2/tasks/search/md5/" + self.md5
 
         try:
-            q = self.__session.get(db_search_url)
+            q = self.__session.get(db_search_url, timeout=self.requests_timeout)
             q.raise_for_status()
 
         except requests.RequestException as e:
@@ -204,6 +208,9 @@ class CAPEsandbox(FileAnalyzer):
         self,
         task_id,
     ) -> dict:
+        logger.info(f"Job: {self.job_id} -> Sleeping for the entire duration of the analysis: {self.timeout}s")
+        time.sleep(self.timeout)
+
         results = None
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
         for try_ in range(self.max_tries):
@@ -214,7 +221,7 @@ class CAPEsandbox(FileAnalyzer):
                     f"Starting poll number #{attempt}/{self.max_tries}"
                 )
                 try:
-                    request = self.__session.get(status_api)
+                    request = self.__session.get(status_api, timeout=self.requests_timeout)
                     # 429 Rate Limit is caught by the raise_for_status
                     request.raise_for_status()
                 except requests.RequestException as e:
@@ -245,6 +252,7 @@ class CAPEsandbox(FileAnalyzer):
                     try:
                         final_request = self.__session.get(
                             report_url,
+                            timeout=self.requests_timeout
                         )
                         final_request.raise_for_status()
                     except requests.RequestException as e:

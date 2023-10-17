@@ -158,7 +158,7 @@ export default function VisualizerReport({ visualizerReport }) {
     levelSize: level.levelSize,
     elements: convertToElement(
       level.elements,
-      `page${visualizerReport.id}-level${level.level}`,
+      `page${visualizerReport.id}-level${level.levelPosition}`,
     ),
   }));
 

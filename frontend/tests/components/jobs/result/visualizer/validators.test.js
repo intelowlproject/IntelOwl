@@ -5,7 +5,8 @@ const {
 describe("visualizer data validation", () => {
   test("Validate only required fields (one element for each component type) and check validation is recursive", () => {
     const validatedLevel = validateLevel({
-      level: 0,
+      level_position: 1,
+      level_size: "3",
       elements: {
         type: "horizontal_list",
         values: [
@@ -19,7 +20,8 @@ describe("visualizer data validation", () => {
       },
     });
     expect(validatedLevel).toStrictEqual({
-      level: 0,
+      levelPosition: 1,
+      levelSize: "h3",
       elements: {
         alignment: "around",
         disable: false,
@@ -137,7 +139,8 @@ describe("visualizer data validation", () => {
 
   test("Validate all fields (one component for each type)", () => {
     const validatedLevel = validateLevel({
-      level: 0,
+      level_position: 1,
+      level_size: "5",
       elements: {
         type: "horizontal_list",
         values: [
@@ -457,13 +460,15 @@ describe("visualizer data validation", () => {
           },
         ],
       },
-      level: 0,
+      levelSize: "h5",
+      levelPosition: 1,
     });
   });
 
   test("Validate invalid params (one for each type)", () => {
     const validatedLevel = validateLevel({
-      level: 0,
+      level_position: 1,
+      level_size: "2",
       elements: {
         type: "horizontal_list",
         values: [
@@ -505,7 +510,8 @@ describe("visualizer data validation", () => {
           },
         ],
       },
-      level: 0,
+      levelPosition: 1,
+      levelSize: "h2"
     });
   });
 });

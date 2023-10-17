@@ -36,7 +36,7 @@ import { pluginType, scanMode } from "../../../constants/constants";
 
 const { checkPluginHealth } = usePluginConfigurationStore.getState();
 
-function parseScanCheckTime(time) {
+export function parseScanCheckTime(time) {
   // scan_check_time is in format days:hours:minutes:seconds, we need to convert them to hours
   const [daysAgo, hoursAgo] = time
     .split(":")

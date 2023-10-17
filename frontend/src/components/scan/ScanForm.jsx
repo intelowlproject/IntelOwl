@@ -56,6 +56,7 @@ import {
 } from "./utils";
 import { createJob, createPlaybookJob } from "./api";
 import { useGuideContext } from "../../contexts/GuideContext";
+import { parseScanCheckTime } from "../plugins/utils/utils";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -459,11 +460,11 @@ export default function ScanForm() {
     // null for playbooks with force new
     console.debug(`scanCheckTime : ${scanCheckTime}`);
     if (scanCheckTime) {
-      // scan_check_time is in format days:hours:minutes:seconds, we need to convert them to hours
-      const [daysAgo, hoursAgo] = scanCheckTime
-        .split(":")
-        .map((token) => parseInt(token, 10));
-      formik.setFieldValue("scan_check_time", daysAgo * 24 + hoursAgo, false);
+      formik.setFieldValue(
+        "scan_check_time",
+        parseScanCheckTime(scanCheckTime),
+        false,
+      );
     }
   };
 

@@ -25,6 +25,7 @@ from rest_framework.fields import SerializerMethodField
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.apps.user.models import User
+from intel_owl.celery import get_queue_name
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.models import AnalyzerConfig, MimeTypes
@@ -315,7 +316,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             logger.info(f"Sending task for job {job.pk}")
             job_pipeline.apply_async(
                 args=[job.pk],
-                routing_key=settings.DEFAULT_QUEUE,
+                queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
             )
 

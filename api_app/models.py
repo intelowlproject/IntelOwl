@@ -340,7 +340,7 @@ class Job(models.Model):
         )
 
         runner.apply_async(
-            routing_key=settings.CONFIG_QUEUE,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
         )
 
@@ -478,7 +478,7 @@ class Job(models.Model):
         return tasks.job_set_final_status.signature(
             args=[self.pk],
             kwargs={},
-            routing_key=settings.CONFIG_QUEUE,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
@@ -517,7 +517,7 @@ class Job(models.Model):
             self.visualizers_to_execute.all(),
         )
         runner.apply_async(
-            routing_key=settings.CONFIG_QUEUE,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
         )
 
@@ -1038,7 +1038,7 @@ class PythonConfig(AbstractConfig):
         return tasks.job_set_pipeline_status.signature(
             args=[job.pk, status],
             kwargs={},
-            routing_key=settings.CONFIG_QUEUE,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )

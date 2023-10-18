@@ -20,7 +20,7 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.choices import Status
 from intel_owl import secrets
-from intel_owl.celery import app
+from intel_owl.celery import app, get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -311,7 +311,7 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
         python_module_pk = json.loads(task.kwargs)["python_module_pk"]
         logger.info(f"Updating {python_module_pk}")
         update.apply_async(
-            routing_key=settings.DEFAULT_QUEUE,
+            queue=get_queue_name(settings.DEFAULT_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
             args=[python_module_pk],
         )
@@ -320,14 +320,14 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
     for user in User.objects.exclude(email=""):
         logger.info(f"Creating cache for user {user.username}")
         create_caches.apply_async(
-            routing_key=settings.DEFAULT_QUEUE,
+            queue=get_queue_name(settings.DEFAULT_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )
     # fixing routing_keys
     for class_ in PythonConfig.get_subclasses():
         updated = class_.objects.exclude(routing_key__in=settings.CELERY_QUEUES).update(
-            routing_key=settings.DEFAULT_QUEUE
+            queue=get_queue_name(settings.DEFAULT_QUEUE)
         )
         if updated:
             logger.warning(

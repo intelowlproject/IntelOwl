@@ -44,7 +44,7 @@ class CAPEsandbox(FileAnalyzer):
     max_tries: int
     # Seconds to wait before moving on to the next poll attempt.
     poll_distance: int
-    # python requests HTTP GET/POST timeout
+    # Python requests HTTP GET/POST timeout
     requests_timeout: int
     # Token for Token Auth.
     _api_key_name: str

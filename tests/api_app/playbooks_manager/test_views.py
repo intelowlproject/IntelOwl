@@ -6,6 +6,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths, ScanMode
 from api_app.models import PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
+from certego_saas.apps.organization.membership import Membership
+from certego_saas.apps.organization.organization import Organization
 from tests import CustomViewSetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
@@ -43,15 +45,73 @@ class PlaybookConfigViewSetTestCase(
         self.assertEqual(response.status_code, 403, response.json())
 
     def test_delete(self):
-        p = PlaybookConfig.objects.create(name="test", type=["ip"], tlp="CLEAR")
+        org1, _ = Organization.objects.get_or_create(name="test")
+        m_user, _ = Membership.objects.get_or_create(
+            user=self.user, organization=org1, is_owner=False
+        )
+        m_owner, _ = Membership.objects.get_or_create(
+            user=self.superuser, organization=org1, is_owner=True
+        )
+        p_default = PlaybookConfig.objects.create(
+            name="test1", type=["ip"], tlp="CLEAR", owner=None
+        )
+        p_custom_user = PlaybookConfig.objects.create(
+            name="test2", type=["ip"], tlp="CLEAR", owner=m_user.user
+        )
+        p_custom_org1 = PlaybookConfig.objects.create(
+            name="test3",
+            type=["ip"],
+            tlp="CLEAR",
+            owner=m_owner.user,
+            for_organization=True,
+        )
 
-        response = self.client.delete(f"{self.URL}/{p.pk}")
+        self.client.force_authenticate(m_owner.user)
+        # 1. owner/admin can't delete a playbook created by an user
+        response = self.client.delete(f"{self.URL}/{p_custom_user.pk}")
+        self.assertEqual(
+            response.status_code, 404
+        )  # can't see this playbook in his queryset
+
+        self.client.force_authenticate(m_user.user)
+        # 2. user can't delete default playbook
+        response = self.client.delete(f"{self.URL}/{p_default.pk}")
         self.assertEqual(response.status_code, 403, response.json())
-
-        p.owner = self.user
-        p.save()
-        response = self.client.delete(f"{self.URL}/{p.pk}")
+        # 3. user can't delete playbook creted by an owner/admin for the organization
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        self.assertEqual(response.status_code, 403, response.json())
+        # 4. user can delete custom playbook created by itself
+        response = self.client.delete(f"{self.URL}/{p_custom_user.pk}")
         self.assertEqual(response.status_code, 204)
+        # 5. owner/admin can't delete default playbook
+        m_user.is_owner = True
+        m_user.is_admin = True
+        m_user.save()
+        response = self.client.delete(f"{self.URL}/{p_default.pk}")
+        self.assertEqual(response.status_code, 403, response.json())
+        # 6. owner/admin can delete playbook creted by an admin of the organization
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        self.assertEqual(response.status_code, 204)
+        # 7. user can't delete a playbook created by an user of another organization
+        org2, _ = Organization.objects.get_or_create(name="test2")
+        m_user_org2, _ = Membership.objects.get_or_create(
+            user=self.admin, organization=org2, is_owner=False
+        )
+        p_custom_org1 = PlaybookConfig.objects.create(
+            name="test4", type=["ip"], tlp="CLEAR", owner=m_user.user
+        )
+        self.client.force_authenticate(m_user_org2.user)
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        self.assertEqual(response.status_code, 404)
+        # 8. owner/admin can't delete a playbook created by an admin of another org
+        m_user_org2.is_owner = True
+        m_user_org2.is_admin = True
+        m_user_org2.save()
+        p_custom_org1.for_organization = True
+        p_custom_org1.owner = m_owner.user
+        p_custom_org1.save()
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        self.assertEqual(response.status_code, 404)
 
     def test_create(self):
         ac, _ = AnalyzerConfig.objects.get_or_create(

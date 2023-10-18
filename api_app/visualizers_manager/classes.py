@@ -378,41 +378,43 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
         pivot_page = self.Page(name="Job Pivots")
         pivot_page.add_level(
-            level_position=1,
-            level_size=self.LevelSize.S_3,
-            horizontal_list=self.HList(
-                value=[
-                    # parent job
-                    self.Title(
-                        title=self.Base(value="Parent job", disable=disable_parent),
-                        value=parent_value,
-                        disable=disable_parent,
-                    ),
-                    # children jobs
-                    self.VList(
-                        name=self.Base(value="children jobs", disable=False),
-                        value=[
-                            self.HList(
-                                value=[
-                                    self.Base(
-                                        value=f"Job #{pivot_map.ending_job_id}: "
-                                        f"{pivot_map.ending_job.analyzed_object_name} "
-                                        "- playbook: "
-                                        f"{pivot_map.ending_job.playbook_requested.name}",  # noqa e501
-                                        link=pivot_map.ending_job.url,
-                                        disable=False,
-                                    )
-                                ]
-                            )
-                            for pivot_map in PivotMap.objects.filter(
-                                starting_job_id=self.job_id
-                            )
-                        ],
-                        disable=False,
-                        open=True,
-                    ),
-                ]
-            ),
+            VisualizableLevel(
+                position=1,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(
+                    value=[
+                        # parent job
+                        self.Title(
+                            title=self.Base(value="Parent job", disable=disable_parent),
+                            value=parent_value,
+                            disable=disable_parent,
+                        ),
+                        # children jobs
+                        self.VList(
+                            name=self.Base(value="children jobs", disable=False),
+                            value=[
+                                self.HList(
+                                    value=[
+                                        self.Base(
+                                            value=f"Job #{pivot_map.ending_job_id}: "
+                                            f"{pivot_map.ending_job.analyzed_object_name} "  # noqa e501
+                                            "- playbook: "
+                                            f"{pivot_map.ending_job.playbook_requested.name}",  # noqa e501
+                                            link=pivot_map.ending_job.url,
+                                            disable=False,
+                                        )
+                                    ]
+                                )
+                                for pivot_map in PivotMap.objects.filter(
+                                    starting_job_id=self.job_id
+                                )
+                            ],
+                            disable=False,
+                            open=True,
+                        ),
+                    ]
+                ),
+            )
         )
         return pivot_page
 

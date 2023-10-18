@@ -307,51 +307,51 @@ class Job(models.Model):
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)
-        failed_analyzers_reports = self.analyzerreports.filter(
+        failed_analyzers = self.analyzerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-        failed_connector_reports = self.connectorreports.filter(
+        ).values_list("config__pk", flat=True)
+        failed_connector = self.connectorreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-        failed_pivot_reports = self.pivotreports.filter(
+        ).values_list("config__pk", flat=True)
+        failed_pivot = self.pivotreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
+        ).values_list("config__pk", flat=True)
 
-        failed_visualizer_reports = self.visualizerreports.filter(
+        failed_visualizer = self.visualizerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
+        ).values_list("config__pk", flat=True)
 
         runner = (
             self._get_signatures(
-                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
+                self.analyzers_to_execute.filter(pk__in=failed_analyzers)
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_analyzer_configs__isnull=False
+                    pk__in=failed_pivot, related_analyzer_configs__isnull=False
                 )
             )
             | self._get_signatures(
-                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
+                self.connectors_to_execute.filter(pk__in=failed_connector)
             )
             | self._get_signatures(
                 self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_connector_configs__isnull=False
+                    pk__in=failed_pivot, related_connector_configs__isnull=False
                 )
             )
             | self._get_signatures(
-                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
+                self.visualizers_to_execute.filter(pk__in=failed_visualizer)
             )
             | self._final_status_signature
         )

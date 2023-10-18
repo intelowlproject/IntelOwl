@@ -332,29 +332,13 @@ class Job(models.Model):
                 AbstractReport.Status.PENDING.value,
             ]
         ).values_list("config__pk", flat=True)
-
-        runner = (
-            self._get_signatures(
-                self.analyzers_to_execute.filter(pk__in=failed_analyzers)
-            )
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    pk__in=failed_pivot, related_analyzer_configs__isnull=False
-                )
-            )
-            | self._get_signatures(
-                self.connectors_to_execute.filter(pk__in=failed_connector)
-            )
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    pk__in=failed_pivot, related_connector_configs__isnull=False
-                )
-            )
-            | self._get_signatures(
-                self.visualizers_to_execute.filter(pk__in=failed_visualizer)
-            )
-            | self._final_status_signature
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.filter(pk__in=failed_analyzers),
+            self.pivots_to_execute.filter(pk__in=failed_pivot),
+            self.connectors_to_execute.filter(pk__in=failed_connector),
+            self.visualizers_to_execute.filter(pk__in=failed_visualizer),
         )
+
         runner.apply_async(
             routing_key=settings.CONFIG_QUEUE,
             MessageGroupId=str(uuid.uuid4()),
@@ -499,23 +483,38 @@ class Job(models.Model):
             MessageGroupId=str(uuid.uuid4()),
         )
 
+    def _get_pipeline(
+        self,
+        analyzers: PythonConfigQuerySet,
+        pivots: PythonConfigQuerySet,
+        connectors: PythonConfigQuerySet,
+        visualizers: PythonConfigQuerySet,
+    ) -> Signature:
+        runner = self._get_signatures(analyzers.distinct())
+        pivots_analyzers = pivots.filter(
+            related_analyzer_configs__isnull=False
+        ).distinct()
+        if pivots_analyzers.exists():
+            runner |= self._get_signatures(pivots_analyzers)
+        if connectors.exists():
+            runner |= self._get_signatures(connectors)
+            pivots_connectors = pivots.filter(
+                related_connector_configs__isnull=False
+            ).distinct()
+            if pivots_connectors.exists():
+                runner |= self._get_signatures(pivots_connectors)
+        if visualizers.exists():
+            runner |= self._get_signatures(visualizers)
+        runner |= self._final_status_signature
+        return runner
+
     def execute(self):
         self.update_status(Job.Status.RUNNING)
-        runner = (
-            self._get_signatures(self.analyzers_to_execute.all())
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    related_analyzer_configs__isnull=False
-                ).distinct()
-            )
-            | self._get_signatures(self.connectors_to_execute.all())
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    related_connector_configs__isnull=False
-                ).distinct()
-            )
-            | self._get_signatures(self.visualizers_to_execute.all())
-            | self._final_status_signature
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.all(),
+            self.pivots_to_execute.all(),
+            self.connectors_to_execute.all(),
+            self.visualizers_to_execute.all(),
         )
         runner.apply_async(
             routing_key=settings.CONFIG_QUEUE,

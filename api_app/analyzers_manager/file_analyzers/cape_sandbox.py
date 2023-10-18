@@ -208,7 +208,8 @@ class CAPEsandbox(FileAnalyzer):
         task_id,
     ) -> dict:
         logger.info(
-            f"Job: {self.job_id} -> Sleeping for the entire duration of the analysis: {self.timeout}s"
+            f"Job: {self.job_id} ->"
+            "Sleeping for the entire duration of the analysis: {self.timeout}s"
         )
         time.sleep(self.timeout)
 

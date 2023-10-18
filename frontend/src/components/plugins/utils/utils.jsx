@@ -411,10 +411,12 @@ export function PlaybooksDeletionButton({ playbookName }) {
     );
 
   const onClick = async () => {
-    const success = await deletePlaybook(playbookName);
-    setShowModal(false);
-    if (success) {
+    try {
+      await deletePlaybook(playbookName);
+      setShowModal(false);
       await retrievePlaybooksConfiguration();
+    } catch {
+      // handle error in deletePlaybook
     }
   };
 
@@ -430,6 +432,7 @@ export function PlaybooksDeletionButton({ playbookName }) {
         titlePlacement="top"
       />
       <Modal
+        id={`modal-playbook-deletion-${playbookName}`}
         autoFocus
         centered
         zIndex="1050"

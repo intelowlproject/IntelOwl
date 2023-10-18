@@ -327,7 +327,7 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
     # fixing routing_keys
     for class_ in PythonConfig.get_subclasses():
         updated = class_.objects.exclude(routing_key__in=settings.CELERY_QUEUES).update(
-            queue=get_queue_name(settings.DEFAULT_QUEUE)
+            routing_key=settings.DEFAULT_QUEUE
         )
         if updated:
             logger.warning(

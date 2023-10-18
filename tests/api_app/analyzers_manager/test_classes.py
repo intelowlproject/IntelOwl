@@ -24,8 +24,9 @@ class FileAnalyzerTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
         # we need the polling not to sleep at the beginning for too long otherwise the test goes into TimeoutError
-        PluginConfig.objects.filter(analyzer_config__name="CapeSandbox", parameter__name="timeout").update(value=10)
-
+        PluginConfig.objects.filter(
+            analyzer_config__name = "CapeSandbox", parameter__name = "timeout"
+        ).update(value=10)
 
     def _create_jobs(self):
         for sample_name, mimetype in zip(

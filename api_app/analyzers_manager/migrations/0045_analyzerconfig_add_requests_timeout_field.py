@@ -8,11 +8,10 @@ def migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
 
     pm = PythonModule.objects.get(
-        module="cape_sandbox.CAPEsandbox", base_path="api_app.analyzers_manager.file_analyzers"
+        module="cape_sandbox.CAPEsandbox",
+        base_path="api_app.analyzers_manager.file_analyzers",
     )
-    ac = AnalyzerConfig.objects.filter(
-        python_module=pm
-    )
+    ac = AnalyzerConfig.objects.filter(python_module=pm)
     p, _ = Parameter.objects.get_or_create(
         name="requests_timeout",
         type="int",
@@ -27,7 +26,7 @@ def migrate(apps, schema_editor):
             value=10,
             parameter=p,
             for_organization=False,
-            analyzer_config=real_ac
+            analyzer_config=real_ac,
         )
     pm.save()
 
@@ -39,21 +38,13 @@ def reverse_migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
 
     pm = PythonModule.objects.get(
-        module="cape_sandbox.CAPEsandbox", base_path="api_app.analyzers_manager.file_analyzers"
+        module="cape_sandbox.CAPEsandbox",
+        base_path="api_app.analyzers_manager.file_analyzers",
     )
-    ac = AnalyzerConfig.objects.filter(
-        name="CapeSandbox",
-        python_module=pm
-    )
-    p = Parameter.objects.get(
-        python_module=pm,
-        name="requests_timeout"
-    )
+    ac = AnalyzerConfig.objects.filter(name="CapeSandbox", python_module=pm)
+    p = Parameter.objects.get(python_module=pm, name="requests_timeout")
     for real_ac in ac:
-        pc = PluginConfig.objects.get(
-            parameter=p,
-            analyzer_config=real_ac
-        )
+        pc = PluginConfig.objects.get(parameter=p, analyzer_config=real_ac)
         pc.delete()
         real_ac.save()
 

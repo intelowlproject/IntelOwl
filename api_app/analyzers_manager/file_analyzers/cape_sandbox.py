@@ -105,7 +105,7 @@ class CAPEsandbox(FileAnalyzer):
                     "file": (self.filename, self.read_file_bytes()),
                 },
                 data=data,
-                timeout=self.requests_timeout
+                timeout=self.requests_timeout,
             )
             response.raise_for_status()
         except requests.RequestException as e:
@@ -174,8 +174,7 @@ class CAPEsandbox(FileAnalyzer):
 
                     try:
                         final_request = self.__session.get(
-                            report_url,
-                            timeout=self.requests_timeout
+                            report_url, timeout=self.requests_timeout
                         )
                     except requests.RequestException as e:
                         raise AnalyzerRunException(e)
@@ -208,7 +207,9 @@ class CAPEsandbox(FileAnalyzer):
         self,
         task_id,
     ) -> dict:
-        logger.info(f"Job: {self.job_id} -> Sleeping for the entire duration of the analysis: {self.timeout}s")
+        logger.info(
+            f"Job: {self.job_id} -> Sleeping for the entire duration of the analysis: {self.timeout}s"
+        )
         time.sleep(self.timeout)
 
         results = None
@@ -221,7 +222,9 @@ class CAPEsandbox(FileAnalyzer):
                     f"Starting poll number #{attempt}/{self.max_tries}"
                 )
                 try:
-                    request = self.__session.get(status_api, timeout=self.requests_timeout)
+                    request = self.__session.get(
+                        status_api, timeout=self.requests_timeout
+                    )
                     # 429 Rate Limit is caught by the raise_for_status
                     request.raise_for_status()
                 except requests.RequestException as e:
@@ -251,8 +254,7 @@ class CAPEsandbox(FileAnalyzer):
                     )
                     try:
                         final_request = self.__session.get(
-                            report_url,
-                            timeout=self.requests_timeout
+                            report_url, timeout=self.requests_timeout
                         )
                         final_request.raise_for_status()
                     except requests.RequestException as e:

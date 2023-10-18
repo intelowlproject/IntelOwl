@@ -284,42 +284,37 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
         return result
 
 
-class VisualizablePage:
-    def __init__(self, name: str = None):
-        self._levels = {}
-        self.name = name
-
-    def add_level(
+class VisualizableLevel:
+    def __init__(
         self,
-        level_position: int,
-        level_size: VisualizableLevelSize = VisualizableLevelSize.S_6,
+        position: int,
+        size: VisualizableLevelSize = VisualizableLevelSize.S_6,
         horizontal_list: VisualizableHorizontalList = VisualizableHorizontalList(
             value=[]
         ),
     ):
-        self._levels[level_position] = {
-            "level_size": level_size,
-            "elements": horizontal_list,
+        self._position = position
+        self._size = size
+        self._horizontal_list = horizontal_list
+
+    def to_dict(self):
+        return {
+            "level_position": self._position,
+            "level_size": self._size.value,
+            "elements": self._horizontal_list.to_dict(),
         }
 
-    def update_level(
-        self, level_position: int, *elements, level_size: VisualizableLevelSize = None
-    ):
-        if level_position not in self._levels:
-            raise KeyError(f"Level {level_position} was not defined")
-        if level_size:
-            self._levels[level_position]["level_size"] = level_size
-        self._levels[level_position]["elements"].value.extend(list(elements))
+
+class VisualizablePage:
+    def __init__(self, name: str = None):
+        self._levels = []
+        self.name = name
+
+    def add_level(self, level: VisualizableLevel):
+        self._levels.append(level)
 
     def to_dict(self) -> Tuple[str, List[Dict]]:
-        return self.name, [
-            {
-                "level_position": level_position,
-                "level_size": level["level_size"].value,
-                "elements": level["elements"].to_dict(),
-            }
-            for level_position, level in self._levels.items()
-        ]
+        return self.name, [level.to_dict() for level in self._levels]
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
@@ -336,6 +331,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
     LevelSize = VisualizableLevelSize
     Page = VisualizablePage
+    Level = VisualizableLevel
 
     @classmethod
     @property

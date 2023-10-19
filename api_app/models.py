@@ -516,10 +516,7 @@ class Job(models.Model):
             self.connectors_to_execute.all(),
             self.visualizers_to_execute.all(),
         )
-        runner.apply_async(
-            queue=get_queue_name(settings.CONFIG_QUEUE),
-            MessageGroupId=str(uuid.uuid4()),
-        )
+        runner()
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:

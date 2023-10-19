@@ -13,6 +13,7 @@ import { RiLoader2Fill } from "react-icons/ri";
 
 import { UncontrolledTooltip } from "reactstrap";
 import { STATUS_COLORMAP } from "../../constants";
+import { jobFinalStatuses } from "../../constants/constants";
 
 const STATUS_ICON_MAP = {
   pending: MdOutlinePending,
@@ -48,13 +49,15 @@ export default function StatusIcon(props) {
         className={iconClassName}
         {...rest}
       />
-      <UncontrolledTooltip
-        target={`statusicon-${statusLower}`}
-        trigger="hover"
-        className="p-0 m-0"
-      >
-        {statusLower}
-      </UncontrolledTooltip>
+      {Object.values(jobFinalStatuses).includes(statusLower) && (
+        <UncontrolledTooltip
+          target={`statusicon-${statusLower}`}
+          trigger="hover"
+          className="p-0 m-0"
+        >
+          {statusLower}
+        </UncontrolledTooltip>
+      )}
     </>
   );
 }

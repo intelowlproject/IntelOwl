@@ -9,9 +9,10 @@ import logging
 import typing
 import uuid
 
-from celery import shared_task, signals
+from celery import Task, shared_task, signals
 from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
+from celery.worker.request import Request
 from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
@@ -19,9 +20,27 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.choices import Status
 from intel_owl import secrets
-from intel_owl.celery import app
+from intel_owl.celery import app, get_queue_name
 
 logger = logging.getLogger(__name__)
+
+
+class FailureLoggedRequest(Request):
+    def on_timeout(self, soft, timeout):
+        result = super().on_timeout(soft, timeout)
+        if not soft:
+            logger.warning(f"A hard timeout was enforced for task {self.task.name}")
+        return result
+
+    def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
+        logger.critical(f"Failure detected for task {self.task.name}")
+        return super().on_failure(
+            exc_info, send_failed_event=send_failed_event, return_ok=return_ok
+        )
+
+
+class FailureLoggedTask(Task):
+    Request = FailureLoggedRequest
 
 
 @control_command(
@@ -34,7 +53,7 @@ def update_plugin(state, python_module_pk: int):
     pm.python_class.update()
 
 
-@shared_task(soft_time_limit=300)
+@shared_task(base=FailureLoggedTask, soft_time_limit=300)
 def execute_ingestor(config_pk: str):
     from api_app.ingestors_manager.classes import Ingestor
     from api_app.ingestors_manager.models import IngestorConfig
@@ -49,7 +68,7 @@ def execute_ingestor(config_pk: str):
         logger.info(f"Executing ingestor {config.name}")
 
 
-@shared_task(soft_time_limit=10000)
+@shared_task(base=FailureLoggedTask, soft_time_limit=10000)
 def remove_old_jobs():
     """
     this is to remove old jobs to avoid to fill the database.
@@ -70,7 +89,7 @@ def remove_old_jobs():
     return num_jobs_to_delete
 
 
-@shared_task(soft_time_limit=120)
+@shared_task(base=FailureLoggedTask, soft_time_limit=120)
 def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     """
     In case the analysis is stuck for whatever reason,
@@ -126,7 +145,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     return jobs_id_stuck
 
 
-@shared_task(soft_time_limit=150)
+@shared_task(base=FailureLoggedTask, soft_time_limit=150)
 def update(python_module_pk: int):
     from api_app.models import PythonModule
     from intel_owl.celery import broadcast
@@ -151,7 +170,7 @@ def update(python_module_pk: int):
     return False
 
 
-@shared_task(soft_time_limit=100)
+@shared_task(base=FailureLoggedTask, soft_time_limit=100)
 def update_notifications_with_releases():
     from django.core import management
 
@@ -173,7 +192,7 @@ def job_set_final_status(job_id: int):
     job.set_final_status()
 
 
-@shared_task(name="job_set_pipeline_status", soft_time_limit=30)
+@shared_task(base=FailureLoggedTask, name="job_set_pipeline_status", soft_time_limit=30)
 def job_set_pipeline_status(job_id: int, status: str):
     from api_app.models import Job
 
@@ -185,7 +204,7 @@ def job_set_pipeline_status(job_id: int, status: str):
         job.save(update_fields=["status"])
 
 
-@shared_task(name="job_pipeline", soft_time_limit=100)
+@shared_task(base=FailureLoggedTask, name="job_pipeline", soft_time_limit=100)
 def job_pipeline(
     job_id: int,
 ):
@@ -206,7 +225,7 @@ def job_pipeline(
             report.save()
 
 
-@shared_task(name="run_plugin", soft_time_limit=500)
+@shared_task(base=FailureLoggedTask, name="run_plugin", soft_time_limit=500)
 def run_plugin(
     job_id: int,
     python_module_pk: int,
@@ -217,6 +236,9 @@ def run_plugin(
     from api_app.classes import Plugin
     from api_app.models import PythonModule
 
+    logger.info(
+        f"Configuring plugin {plugin_config_pk} for job {job_id} with task {task_id}"
+    )
     plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
         pk=python_module_pk
     ).python_class
@@ -227,6 +249,9 @@ def run_plugin(
         runtime_configuration=runtime_configuration,
         task_id=task_id,
     )
+    logger.info(
+        f"Starting plugin {plugin_config_pk} for job {job_id} with task {task_id}"
+    )
     try:
         plugin.start()
     except Exception as e:
@@ -236,7 +261,7 @@ def run_plugin(
         )
 
 
-@shared_task(name="create_caches", soft_time_limit=200)
+@shared_task(base=FailureLoggedTask, name="create_caches", soft_time_limit=200)
 def create_caches(user_pk: int):
     # we create the cache hit
     from certego_saas.apps.user.models import User
@@ -281,30 +306,41 @@ def create_caches(user_pk: int):
 
 @signals.beat_init.connect
 def beat_init_connect(*args, sender: Consumer = None, **kwargs):
+    from api_app.models import PythonConfig
     from certego_saas.models import User
-    from intel_owl.celery import DEFAULT_QUEUE
 
     logger.info("Starting beat_init signal")
-
+    # update of plugins that needs it
     for task in PeriodicTask.objects.filter(
-        enabled=True, task="intel_owl.tasks.update"
+        enabled=True, task=f"{update.__module__}.{update.__name__}"
     ):
         python_module_pk = json.loads(task.kwargs)["python_module_pk"]
         logger.info(f"Updating {python_module_pk}")
         update.apply_async(
-            routing_key=DEFAULT_QUEUE,
+            queue=get_queue_name(settings.DEFAULT_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
             args=[python_module_pk],
         )
 
-    # we are not considering system users
+    # creating cache excluding system users
     for user in User.objects.exclude(email=""):
         logger.info(f"Creating cache for user {user.username}")
         create_caches.apply_async(
-            routing_key=DEFAULT_QUEUE,
+            queue=get_queue_name(settings.DEFAULT_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )
+    # fixing routing_keys
+    for class_ in PythonConfig.get_subclasses():
+        updated = class_.objects.exclude(routing_key__in=settings.CELERY_QUEUES).update(
+            routing_key=settings.DEFAULT_QUEUE
+        )
+        if updated:
+            logger.warning(
+                f"There were {updated} {class_.__name__} configurations"
+                " with a queue not configured."
+                f" It was automatically changed to {settings.DEFAULT_QUEUE}"
+            )
 
 
 # set logger

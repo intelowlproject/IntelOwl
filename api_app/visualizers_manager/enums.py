@@ -4,7 +4,23 @@
 import enum
 
 
+class VisualizableLevelSize(enum.Enum):
+    """Level sizes in Page elements (same of html headers)"""
+
+    S_1 = "1"
+    S_2 = "2"
+    S_3 = "3"
+    S_4 = "4"
+    S_5 = "5"
+    S_6 = "6"
+
+    def __str__(self):
+        return self.value
+
+
 class VisualizableSize(enum.Enum):
+    """Horizontal sizes of Visualizable elements (same of bootstrap)"""
+
     S_1 = "1"
     S_2 = "2"
     S_3 = "3"
@@ -92,6 +108,8 @@ class VisualizableIcon(enum.Enum):
 
 
 class VisualizableAlignment(enum.Enum):
+    """Alignmnets for VisualizableHorizontalList elements (same of bootstrap)"""
+
     START = "start"
     CENTER = "center"
     END = "end"

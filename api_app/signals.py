@@ -38,8 +38,10 @@ def post_migrate_beat(
 ):
     from django_celery_beat.models import PeriodicTask
 
+    from intel_owl.tasks import update
+
     for task in PeriodicTask.objects.filter(
-        enabled=True, task="intel_owl.tasks.update"
+        enabled=True, task=f"{update.__module__}.{update.__name__}"
     ):
         task.enabled &= settings.REPO_DOWNLOADER_ENABLED
         task.save()

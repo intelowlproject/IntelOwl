@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Container, Row, Col } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 
@@ -60,7 +60,13 @@ export default function JobsTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  /* This useEffect cause an error in local development (axios CanceledError) because it is called twice.
+    The first call is trying to update state asynchronously, 
+    but the update couldn't happen when the component is unmounted
+
+    Attention! we cannot remove it: this update the job list after the user start a new scan
+  */
+  React.useEffect(() => {
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -194,7 +194,7 @@ const analyzersTableColumns = [
       value?.docker_based && (
         <PluginHealthCheckButton
           pluginName={value.name}
-          pluginType="analyzer"
+          pluginType_="analyzer"
         />
       ),
     maxWidth: 115,
@@ -257,7 +257,7 @@ const connectorTableColumns = [
     Cell: ({ value }) => (
       <PluginHealthCheckButton
         pluginName={value?.name}
-        pluginType="connector"
+        pluginType_="connector"
       />
     ),
     maxWidth: 125,

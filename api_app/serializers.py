@@ -11,6 +11,7 @@ import uuid
 from typing import Any, Dict, Generator, List, Union
 
 import django.core.exceptions
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import QueryDict
@@ -24,7 +25,7 @@ from rest_framework.fields import SerializerMethodField
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.apps.user.models import User
-from intel_owl.celery import DEFAULT_QUEUE
+from intel_owl.celery import get_queue_name
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.models import AnalyzerConfig, MimeTypes
@@ -118,9 +119,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     tags_labels = rfs.ListField(
         child=rfs.CharField(required=True), default=list, required=False
     )
-    runtime_configuration = rfs.JSONField(
-        required=False, default=default_runtime, write_only=True
-    )
+    runtime_configuration = rfs.JSONField(required=False, write_only=True)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
 
     connectors_requested = rfs.PrimaryKeyRelatedField(
@@ -169,6 +168,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "scan_mode",
             "scan_check_time",
             "tlp",
+            "runtime_configuration",
         ]:
             if attribute not in attrs:
                 if playbook := attrs.get("playbook_requested"):
@@ -307,7 +307,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 job = super().create(validated_data)
         else:
             job = super().create(validated_data)
-        job.errors = warnings
+        job.warnings = warnings
         job.save()
         logger.info(f"Job {job.pk} created")
         if send_task:
@@ -316,7 +316,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             logger.info(f"Sending task for job {job.pk}")
             job_pipeline.apply_async(
                 args=[job.pk],
-                routing_key=DEFAULT_QUEUE,
+                queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
             )
 
@@ -1025,15 +1025,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         return result
 
 
-class _ConfigSerializer(rfs.Serializer):
-    """
-    To validate `config` attr.
-    """
-
-    queue = rfs.CharField(required=True)
-    soft_time_limit = rfs.IntegerField(required=True)
-
-
 class ParamListSerializer(rfs.ListSerializer):
     @property
     def data(self):
@@ -1134,15 +1125,27 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):
-    config = _ConfigSerializer(required=True)
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = ["disabled_in_organizations", "python_module"]
+        exclude = [
+            "disabled_in_organizations",
+            "python_module",
+            "routing_key",
+            "soft_time_limit",
+        ]
         list_serializer_class = PythonListConfigSerializer
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["config"] = {
+            "queue": instance.routing_key,
+            "soft_time_limit": instance.soft_time_limit,
+        }
+        return result
 
 
 class PythonConfigSerializerForMigration(PythonConfigSerializer):

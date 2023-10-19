@@ -15,7 +15,7 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
+import { VscGlobe, VscFile } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
 import {
   MdDeleteOutline,
@@ -44,6 +44,7 @@ import {
   pluginFinalStatuses,
   jobStatuses,
   scanMode,
+  jobResultSection,
 } from "../../../../constants/constants";
 
 function DeleteIcon() {
@@ -99,21 +100,6 @@ export function JobActionsBar({ job, refetch }) {
     fileLink.click();
   };
 
-  const onViewRawJsonBtnClick = async () => {
-    addToast(
-      "Link will be opened in a new tab shortly...",
-      null,
-      "spinner",
-      false,
-      2000,
-    );
-    const url = window.URL.createObjectURL(
-      new Blob([JSON.stringify(job, null, 2)], {
-        type: "application/json",
-      }),
-    );
-    setTimeout(() => window.open(url, "rel=noopener,noreferrer"), 250);
-  };
   const shareText = `Checkout this job (#${job.id}, ${
     job.is_sample ? job.file_name : job.observable_name
   }) on IntelOwl`;
@@ -137,11 +123,17 @@ export function JobActionsBar({ job, refetch }) {
     if (job.playbook_to_execute) {
       console.debug("retrying Playbook");
       const jobId = await createPlaybookJob(formValues).then(refetch);
-      setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);
+      setTimeout(
+        () => navigate(`/jobs/${jobId[0]}/${jobResultSection.VISUALIZER}/`),
+        1000,
+      );
     } else {
       console.debug("retrying Job");
       const jobId = await createJob(formValues).then(refetch);
-      setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);
+      setTimeout(
+        () => navigate(`/jobs/${jobId[0]}/${jobResultSection.VISUALIZER}/`),
+        1000,
+      );
     }
   };
 
@@ -193,10 +185,6 @@ export function JobActionsBar({ job, refetch }) {
           &nbsp;Sample
         </Button>
       )}
-      <Button size="sm" color="darker" onClick={onViewRawJsonBtnClick}>
-        <VscJson />
-        &nbsp;Raw JSON
-      </Button>
       <SocialShareBtn
         id="analysis-actions-share"
         url={window.location.href}
@@ -314,10 +302,26 @@ export function JobInfoCard({ job }) {
           >
             {[
               [
+                "Playbook",
+                <PlaybookTag
+                  key={job.playbook_to_execute}
+                  playbook={job.playbook_to_execute}
+                  className="mr-2"
+                />,
+              ],
+              [
                 "Tags",
                 job.tags.map((tag) => (
                   <JobTag key={tag.label} tag={tag} className="me-2" />
                 )),
+              ],
+              [
+                "Warning(s)",
+                <ul className="text-warning">
+                  {job.warnings.map((error) => (
+                    <li>{error}</li>
+                  ))}
+                </ul>,
               ],
               [
                 "Error(s)",
@@ -326,14 +330,6 @@ export function JobInfoCard({ job }) {
                     <li>{error}</li>
                   ))}
                 </ul>,
-              ],
-              [
-                "Playbook",
-                <PlaybookTag
-                  key={job.playbook_to_execute}
-                  playbook={job.playbook_to_execute}
-                  className="mr-2"
-                />,
               ],
             ].map(([key, value]) => (
               <ListGroupItem key={key}>
@@ -358,16 +354,17 @@ export function reportedVisualizerNumber(
   let visualizersNumber = 0;
   visualizersToExecute.forEach((visualizer) => {
     // count reports that have 'config' === 'visualizer' (pages from the same visualizer) and are in a final statuses
-    let count = 0;
+    let visualizersInFinalStatus = 0;
+    let visualizerPages = 0;
     visualizersReportedList.forEach((report) => {
-      if (
-        report.config === visualizer &&
-        Object.values(pluginFinalStatuses).includes(report.status)
-      )
-        count += 1;
+      if (report.config === visualizer) {
+        visualizerPages += 1;
+        if (Object.values(pluginFinalStatuses).includes(report.status))
+          visualizersInFinalStatus += 1;
+      }
     });
-    // reports relating to pages from the same visualizer are counted only once
-    if (count >= 1) visualizersNumber += 1;
+    // visualizer is completed if all pages are in a final statuses
+    if (visualizersInFinalStatus === visualizerPages) visualizersNumber += 1;
   });
   return visualizersNumber;
 }
@@ -483,6 +480,14 @@ export function JobIsRunningAlert({ job }) {
         </div>
       </IconAlert>
     </Fade>
+  );
+}
+
+export function ReportedPluginTooltip({ id, pluginName }) {
+  return (
+    <UncontrolledTooltip placement="top" target={id}>
+      {pluginName} reported / {pluginName} executed
+    </UncontrolledTooltip>
   );
 }
 

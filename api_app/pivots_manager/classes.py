@@ -1,6 +1,6 @@
 import abc
 import logging
-from typing import Any, Type
+from typing import Any, Optional, Tuple, Type
 
 from django.db.models import QuerySet
 
@@ -44,19 +44,23 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
     def config_model(cls) -> Type[PivotConfig]:
         return PivotConfig
 
-    def should_run(self) -> bool:
+    def should_run(self) -> Tuple[bool, Optional[str]]:
         # by default, the pivot run IF every report attached to it was success
-        return all(
+        result = all(
             x.status == self.report_model.Status.SUCCESS.value
             for x in self.related_reports
+        )
+        return (
+            result,
+            f"All necessary reports{'' if result else ' do not'} have success status",
         )
 
     def get_value_to_pivot_to(self) -> Any:
         raise NotImplementedError()
 
     def run(self) -> Any:
-        to_run = self.should_run()
-        report = {"create_job": to_run, "jobs_id": []}
+        to_run, motivation = self.should_run()
+        report = {"create_job": to_run, "motivation": motivation, "jobs_id": []}
         if to_run:
             content = self.get_value_to_pivot_to()
             logger.info(f"Creating jobs from {content}")

@@ -47,7 +47,7 @@ import {
   TLP_DESCRIPTION_MAP,
   scanTypes,
 } from "../../constants";
-import { scanMode } from "../../constants/constants";
+import { scanMode, jobResultSection } from "../../constants/constants";
 import { TLPTag, markdownToHtml, JobTag } from "../common";
 import {
   RuntimeConfigurationModal,
@@ -56,6 +56,7 @@ import {
 } from "./utils";
 import { createJob, createPlaybookJob } from "./api";
 import { useGuideContext } from "../../contexts/GuideContext";
+import { parseScanCheckTime } from "../plugins/utils/utils";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -210,7 +211,11 @@ export default function ScanForm() {
         if (jobIds.length > 1) {
           setTimeout(() => navigate(`/jobs/`), 1000);
         } else {
-          setTimeout(() => navigate(`/jobs/${jobIds[0]}`), 1000);
+          setTimeout(
+            () =>
+              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
+            1000,
+          );
         }
       } catch (e) {
         // handled inside createJob
@@ -433,7 +438,11 @@ export default function ScanForm() {
         if (jobIds.length > 1) {
           setTimeout(() => navigate(`/jobs/`), 1000);
         } else {
-          setTimeout(() => navigate(`/jobs/${jobIds[0]}`), 1000);
+          setTimeout(
+            () =>
+              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
+            1000,
+          );
         }
       } catch (e) {
         // handled inside createPlaybookJob
@@ -449,13 +458,13 @@ export default function ScanForm() {
     formik.setFieldValue("tlp", tlp, false);
     formik.setFieldValue("scan_mode", _scanMode, false);
     // null for playbooks with force new
-    console.debug("scanCheckTime");
-    console.debug(scanCheckTime);
+    console.debug(`scanCheckTime : ${scanCheckTime}`);
     if (scanCheckTime) {
-      // scan_check_time is in format day hours:minutes:seconds, we need to convert them to hours
-      const daysAgo = parseInt(scanCheckTime.split(" ")[0], 10);
-      const hoursAgo = parseInt(scanCheckTime.split(" ")[1].split(":")[0], 10);
-      formik.setFieldValue("scan_check_time", daysAgo * 24 + hoursAgo, false);
+      formik.setFieldValue(
+        "scan_check_time",
+        parseScanCheckTime(scanCheckTime),
+        false,
+      );
     }
   };
 

@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Generator
 
 from django.contrib.postgres.expressions import ArraySubquery
 
+from intel_owl.celery import get_queue_name
+
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
 
@@ -380,7 +382,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             yield tasks.run_plugin.signature(
                 args,
                 {},
-                queue=config.queue,
+                queue=get_queue_name(config.routing_key),
                 soft_time_limit=config.soft_time_limit,
                 task_id=task_id,
                 immutable=True,

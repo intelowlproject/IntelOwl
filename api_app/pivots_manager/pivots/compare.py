@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional, Tuple
 
 from api_app.pivots_manager.classes import Pivot
 
@@ -25,18 +25,18 @@ class Compare(Pivot):
             raise ValueError(f"You can't use a {type(content)} as pivot")
         return content
 
-    def should_run(self) -> bool:
+    def should_run(self) -> Tuple[bool, Optional[str]]:
         if len(list(self.related_reports)) != 1:
-            self.report.errors.append(
-                f"Unable to run pivot {self._config.name}"
-                " because attached to more than one configuration"
+            return (
+                False,
+                f"Unable to run pivot {self._config.name} "
+                "because attached to more than one configuration",
             )
-            return False
         try:
             self._value = self._get_value(self.field_to_compare)
-        except (RuntimeError, ValueError):
-            return False
-        return True and super().should_run()
+        except (RuntimeError, ValueError) as e:
+            return False, str(e)
+        return super().should_run()
 
     def get_value_to_pivot_to(self) -> Any:
         return self._value

@@ -328,7 +328,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         job = self.get_object()
         if job.status not in Job.Status.final_statuses():
             raise ValidationError({"detail": "Job is running"})
-        job.execute()
+        job.retry()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @add_docs(

@@ -1,15 +1,21 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from api_app.pivots_manager.models import PivotConfig, PivotMap
+from api_app.pivots_manager.models import PivotMap, PivotReport
 from api_app.pivots_manager.permissions import PivotOwnerPermission
 from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotMapSerializer
-from api_app.views import AbstractConfigViewSet
+from api_app.views import PluginActionViewSet, PythonConfigViewSet
 
 
-class PivotConfigViewSet(AbstractConfigViewSet):
+class PivotConfigViewSet(PythonConfigViewSet):
     serializer_class = PivotConfigSerializer
-    queryset = PivotConfig.objects.all()
+
+
+class PivotActionViewSet(PluginActionViewSet):
+    @classmethod
+    @property
+    def report_model(cls):
+        return PivotReport
 
 
 class PivotMapViewSet(viewsets.ReadOnlyModelViewSet):

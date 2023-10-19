@@ -550,11 +550,13 @@ export default function ScanForm() {
       newAnalysisType === scanTypes.playbooks
     ) {
       setScanType(newAnalysisType);
-      // if an observable is typed set a default playbook
+      // if an observable or file is loaded set a default playbook
       if (
-        formik.values.observable_names.length &&
-        formik.values.observable_names[0] !== "" &&
-        Object.keys(formik.values.playbook).length === 0
+        (formik.values.observable_names.length &&
+          formik.values.observable_names[0] !== "") ||
+        (formik.values.files.length &&
+          formik.values.files[0] !== "" &&
+          Object.keys(formik.values.playbook).length === 0)
       ) {
         updateSelectedPlaybook(
           playbookOptions(formik.values.classification)[0],
@@ -563,13 +565,15 @@ export default function ScanForm() {
     }
   };
 
-  // useEffect for setting the default playbook if the observable is typed before playbooks are fetched
+  // useEffect for setting the default playbook if an observableor a file is loaded before playbooks are fetched
   useEffect(() => {
     if (
-      formik.values.observable_names.length &&
-      formik.values.observable_names[0] !== "" &&
-      Object.keys(formik.values.playbook).length === 0 &&
-      formik.values.analysisOptionValues === scanTypes.playbooks
+      (formik.values.observable_names.length &&
+        formik.values.observable_names[0] !== "") ||
+      (formik.values.files.length &&
+        formik.values.files[0] !== "" &&
+        Object.keys(formik.values.playbook).length === 0 &&
+        formik.values.analysisOptionValues === scanTypes.playbooks)
     ) {
       updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
     }

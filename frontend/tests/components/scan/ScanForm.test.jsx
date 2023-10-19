@@ -527,8 +527,7 @@ describe("test ScanForm component", () => {
     );
   });
 
-  // file and no playbook
-  test("form validation - file selection and no playbook", async () => {
+  test("form validation - file selection and change the analysis type", async () => {
     const user = userEvent.setup();
 
     render(
@@ -560,11 +559,11 @@ describe("test ScanForm component", () => {
     const playbookSelectionRadioButton = screen.getAllByRole("radio")[2];
     expect(playbookSelectionRadioButton).toBeInTheDocument();
     await user.click(playbookSelectionRadioButton);
-    expect(screen.queryByText("TEST_PLAYBOOK_FILE")).toBeNull();
+    expect(screen.queryByText("TEST_PLAYBOOK_FILE")).toBeInTheDocument();
     // check scan is enabled
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
-    expect(startScanButton.className).toContain("disabled");
+    expect(startScanButton.className).not.toContain("disabled");
     expect(RecentScans).toHaveBeenCalledWith(
       { classification: "file", param: testImageFiles[0] },
       {},

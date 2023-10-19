@@ -306,7 +306,7 @@ describe("test ScanForm component", () => {
     );
   });
 
-  test("form validation - observable selected and no playbook", async () => {
+  test("form validation - selected observable and change the analysis type", async () => {
     const user = userEvent.setup();
 
     render(
@@ -335,10 +335,10 @@ describe("test ScanForm component", () => {
     const playbookSelectionRadioButton = screen.getAllByRole("radio")[2];
     expect(playbookSelectionRadioButton).toBeInTheDocument();
     await user.click(playbookSelectionRadioButton);
-    expect(screen.queryByText("TEST_PLAYBOOK_DOMAIN")).toBeNull();
+    expect(screen.queryByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();
-    expect(startScanButton.className).toContain("disabled");
+    expect(startScanButton.className).not.toContain("disabled");
   });
 
   test("form validation - observable and playbook selected", async () => {

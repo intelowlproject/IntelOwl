@@ -525,6 +525,57 @@ export default function ScanForm() {
     );
   };
 
+  const [scanType, setScanType] = React.useState(
+    formik.values.analysisOptionValues,
+  );
+
+  const updateAnalysisOptionValues = (newAnalysisType) => {
+    if (
+      scanType === scanTypes.playbooks &&
+      newAnalysisType === scanTypes.analyzers_and_connectors
+    ) {
+      setScanType(newAnalysisType);
+      // reset playbook
+      formik.setFieldValue("playbook", formik.initialValues.playbook, false);
+      // reset advanced configuration
+      updateAdvancedConfig(
+        formik.initialValues.tags,
+        formik.initialValues.tlp,
+        formik.initialValues.scan_mode,
+        "1 00:00:00",
+      );
+    }
+    if (
+      scanType === scanTypes.analyzers_and_connectors &&
+      newAnalysisType === scanTypes.playbooks
+    ) {
+      setScanType(newAnalysisType);
+      // if an observable is typed set a default playbook
+      if (
+        formik.values.observable_names.length &&
+        formik.values.observable_names[0] !== "" &&
+        Object.keys(formik.values.playbook).length === 0
+      ) {
+        updateSelectedPlaybook(
+          playbookOptions(formik.values.classification)[0],
+        );
+      }
+    }
+  };
+
+  // useEffect for setting the default playbook if the observable is typed before playbooks are fetched
+  useEffect(() => {
+    if (
+      formik.values.observable_names.length &&
+      formik.values.observable_names[0] !== "" &&
+      Object.keys(formik.values.playbook).length === 0 &&
+      formik.values.analysisOptionValues === scanTypes.playbooks
+    ) {
+      updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbooksLoading]);
+
   useEffect(() => {
     if (observableParam) {
       updateSelectedObservable(observableParam, 0);
@@ -543,10 +594,6 @@ export default function ScanForm() {
     formik.validateForm();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
-
-  const [scanType, setScanType] = React.useState(
-    formik.values.analysisOptionValues,
-  );
 
   const [isModalOpen, setModalOpen] = React.useState(false);
   const toggleModal = React.useCallback(
@@ -757,21 +804,7 @@ export default function ScanForm() {
                         type="radio"
                         name="analysisOptionValues"
                         value={type_}
-                        onClick={() => {
-                          setScanType(type_);
-                          formik.setFieldValue(
-                            "playbook",
-                            formik.initialValues.playbook,
-                            false,
-                          ); // reset playbook
-                          // reset advanced configuration
-                          updateAdvancedConfig(
-                            formik.initialValues.tags,
-                            formik.initialValues.tlp,
-                            formik.initialValues.scan_mode,
-                            "1 00:00:00",
-                          );
-                        }}
+                        onClick={() => updateAnalysisOptionValues(type_)}
                       />
                       <Label check>{type_}</Label>
                     </Col>
@@ -854,18 +887,22 @@ export default function ScanForm() {
                 <Label id="selectplugins" sm={3} htmlFor="playbook">
                   Select Playbook
                 </Label>
-                {!(playbooksLoading || playbooksError) && (
-                  <Col sm={9}>
-                    <ReactSelect
-                      isClearable={false}
-                      options={playbookOptions(formik.values.classification)}
-                      styles={selectStyles}
-                      value={formik.values.playbook}
-                      onChange={(v) => updateSelectedPlaybook(v)}
-                    />
-                    {DangerErrorMessage("playbook")}
-                  </Col>
-                )}
+                <Col sm={9}>
+                  <Loader
+                    loading={playbooksLoading}
+                    error={playbooksError}
+                    render={() => (
+                      <ReactSelect
+                        isClearable={false}
+                        options={playbookOptions(formik.values.classification)}
+                        styles={selectStyles}
+                        value={formik.values.playbook}
+                        onChange={(v) => updateSelectedPlaybook(v)}
+                      />
+                    )}
+                  />
+                  {DangerErrorMessage("playbook")}
+                </Col>
               </FormGroup>
             )}
 

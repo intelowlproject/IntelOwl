@@ -448,7 +448,7 @@ class Job(models.Model):
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def _get_signatures(self, queryset: JobQuerySet) -> Signature:
+    def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
         signatures = list(
             queryset.annotate_runnable(self.user)

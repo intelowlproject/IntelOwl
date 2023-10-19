@@ -236,6 +236,9 @@ def run_plugin(
     from api_app.classes import Plugin
     from api_app.models import PythonModule
 
+    logger.info(
+        f"Configuring plugin {plugin_config_pk} for job {job_id} with task {task_id}"
+    )
     plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
         pk=python_module_pk
     ).python_class
@@ -245,6 +248,9 @@ def run_plugin(
         job_id=job_id,
         runtime_configuration=runtime_configuration,
         task_id=task_id,
+    )
+    logger.info(
+        f"Starting plugin {plugin_config_pk} for job {job_id} with task {task_id}"
     )
     try:
         plugin.start()

@@ -238,7 +238,12 @@ export function MembersList() {
                     <Row>
                       <Col sm={5} title="Name and Username">
                         {fullName}&nbsp;
-                        <span className="text-muted">(@{username})</span>
+                        <span
+                          id={`memberlist-username-${username}`}
+                          className="text-muted"
+                        >
+                          (@{username})
+                        </span>
                       </Col>
                       <Col sm={5} title="Joining Date">
                         <DateHoverable
@@ -257,10 +262,20 @@ export function MembersList() {
                             />
                           )
                         ) : (
-                          <Badge color="info">Owner</Badge>
+                          <Badge
+                            id={`memberlist-badge-owner-${username}`}
+                            color="info"
+                          >
+                            Owner
+                          </Badge>
                         )}
                         {owner?.username !== username && isAdmin && (
-                          <Badge color="info">Admin</Badge>
+                          <Badge
+                            id={`memberlist-badge-admin-${username}`}
+                            color="info"
+                          >
+                            Admin
+                          </Badge>
                         )}
                       </Col>
                     </Row>

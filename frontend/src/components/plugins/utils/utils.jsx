@@ -12,13 +12,13 @@ import {
   UncontrolledPopover,
   Button,
   Collapse,
+  Modal,
+  ModalHeader,
+  ModalBody,
 } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
-import {
-  MdInfo,
-  MdOutlineCheckCircleOutline,
-  MdOutlineHideSource,
-} from "react-icons/md";
+import { MdInfo, MdDelete } from "react-icons/md";
+import { BsPeopleFill } from "react-icons/bs";
 
 import { IconButton, BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
 
@@ -317,6 +317,7 @@ export function OrganizationPluginStateToggle({
   const {
     isUserOwner,
     organization,
+    noOrg,
     fetchAll: fetchAllOrganizations,
   } = useOrganizationStore(
     React.useCallback(
@@ -324,14 +325,17 @@ export function OrganizationPluginStateToggle({
         fetchAll: state.fetchAll,
         isUserOwner: state.isUserOwner,
         organization: state.organization,
+        noOrg: state.noOrg,
       }),
       [],
     ),
   );
-  let title = disabled ? "Enable" : "Disable";
-  if (!organization.name) title = "You're not a part of any organization";
-  else if (!isUserOwner)
+  let title = disabled
+    ? `Enable ${pluginName} for organization`
+    : `Disable ${pluginName} for organization`;
+  if (!isUserOwner) {
     title = `You're not an owner of your organization - ${organization.name}`;
+  }
   let baseUrl = "";
   if (type === pluginType.ANALYZER) {
     baseUrl = ANALYZERS_CONFIG_URI;
@@ -342,22 +346,26 @@ export function OrganizationPluginStateToggle({
   }
 
   const onClick = async () => {
-    if (disabled) await axios.delete(`${baseUrl}/${pluginName}/organization`);
-    else await axios.post(`${baseUrl}/${pluginName}/organization`);
-    fetchAllOrganizations();
-    refetch();
+    if (isUserOwner) {
+      if (disabled) await axios.delete(`${baseUrl}/${pluginName}/organization`);
+      else await axios.post(`${baseUrl}/${pluginName}/organization`);
+      fetchAllOrganizations();
+      refetch();
+    }
   };
   return (
-    <div className="d-flex flex-column align-items-center">
-      <IconButton
-        id={`table-pluginstatebtn__${pluginName}`}
-        color={disabled ? "danger" : "info"}
-        size="sm"
-        Icon={disabled ? MdOutlineHideSource : MdOutlineCheckCircleOutline}
-        title={title}
-        onClick={onClick}
-        titlePlacement="top"
-      />
+    <div className={`d-flex align-items-center ${noOrg ? "" : "px-2"}`}>
+      {!noOrg && (
+        <IconButton
+          id={`table-pluginstatebtn__${pluginName}`}
+          color={disabled ? "dark" : "success"}
+          size="sm"
+          Icon={BsPeopleFill}
+          title={title}
+          onClick={onClick}
+          titlePlacement="top"
+        />
+      )}
     </div>
   );
 }
@@ -384,6 +392,78 @@ export function PlaybooksCollapse({ value, pluginType_ }) {
           ))}
         </ul>
       </Collapse>
+    </div>
+  );
+}
+
+export function PlaybooksDeletionButton({ playbookName }) {
+  const [showModal, setShowModal] = React.useState(false);
+
+  const { deletePlaybook, retrievePlaybooksConfiguration } =
+    usePluginConfigurationStore(
+      React.useCallback(
+        (state) => ({
+          deletePlaybook: state.deletePlaybook,
+          retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
+        }),
+        [],
+      ),
+    );
+
+  const onClick = async () => {
+    try {
+      await deletePlaybook(playbookName);
+      setShowModal(false);
+      await retrievePlaybooksConfiguration();
+    } catch {
+      // handle error in deletePlaybook
+    }
+  };
+
+  return (
+    <div>
+      <IconButton
+        id={`playbook-deletion-${playbookName}`}
+        color="danger"
+        size="sm"
+        Icon={MdDelete}
+        title="Delete playbook"
+        onClick={() => setShowModal(true)}
+        titlePlacement="top"
+      />
+      <Modal
+        id={`modal-playbook-deletion-${playbookName}`}
+        autoFocus
+        centered
+        zIndex="1050"
+        size="lg"
+        keyboard={false}
+        backdrop="static"
+        labelledBy="Playbook deletion modal"
+        isOpen={showModal}
+      >
+        <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
+          <small className="text-info">Delete playbook</small>
+        </ModalHeader>
+        <ModalBody className="d-flex justify-content-between my-2 mx-2">
+          <div>
+            Do you want to delete the playbook:{" "}
+            <span className="text-info">{playbookName}</span>?
+          </div>
+          <div className="d-flex justify-content-between">
+            <Button className="mx-2" color="danger" size="sm" onClick={onClick}>
+              Delete
+            </Button>
+            <Button
+              className="mx-2"
+              size="sm"
+              onClick={() => setShowModal(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 }
@@ -416,4 +496,8 @@ PluginHealthCheckButton.propTypes = {
 PlaybooksCollapse.propTypes = {
   value: PropTypes.array.isRequired,
   pluginType_: PropTypes.oneOf(["analyzers", "connectors"]).isRequired,
+};
+
+PlaybooksDeletionButton.propTypes = {
+  playbookName: PropTypes.string.isRequired,
 };

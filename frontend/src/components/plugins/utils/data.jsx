@@ -18,6 +18,7 @@ import {
   PluginInfoPopoverIcon,
   PluginVerificationIcon,
   PlaybooksCollapse,
+  PlaybooksDeletionButton,
 } from "./utils";
 
 /* This function is available in the certego-ui, but it doesn't works:
@@ -123,20 +124,6 @@ const analyzersTableColumns = [
     maxWidth: 100,
   },
   {
-    Header: "Enabled for organization",
-    id: "enabled_for_organization",
-    Cell: ({ row: { original } }) => (
-      <OrganizationPluginStateToggle
-        pluginName={original?.name}
-        disabled={original?.orgPluginDisabled}
-        refetch={original?.refetch}
-        type={original?.plugin_type}
-      />
-    ),
-    disableSortBy: true,
-    maxWidth: 100,
-  },
-  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -176,6 +163,7 @@ const analyzersTableColumns = [
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
+    minWidth: 200,
   },
   {
     Header: "Maximum TLP",
@@ -184,20 +172,30 @@ const analyzersTableColumns = [
     Cell: ({ value }) => <TLPTag value={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: TLP_CHOICES,
+    maxWidth: 120,
   },
   {
-    Header: "Health Check",
-    id: "health_check",
+    Header: "Actions",
+    id: "actions",
     accessor: (r) => r,
     disableSortBy: true,
-    Cell: ({ value }) =>
-      value?.docker_based && (
-        <PluginHealthCheckButton
-          pluginName={value.name}
-          pluginType_="analyzer"
+    Cell: ({ value }) => (
+      <div className="d-flex justify-content-center mx-2">
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={value?.orgPluginDisabled}
+          refetch={value?.refetch}
+          type={value?.plugin_type}
         />
-      ),
-    maxWidth: 115,
+        {value?.docker_based && (
+          <PluginHealthCheckButton
+            pluginName={value.name}
+            pluginType_="analyzer"
+          />
+        )}
+      </div>
+    ),
+    maxWidth: 125,
   },
 ];
 
@@ -220,20 +218,6 @@ const connectorTableColumns = [
     maxWidth: 100,
   },
   {
-    Header: "Enabled for organization",
-    id: "enabled_for_organization",
-    Cell: ({ row: { original } }) => (
-      <OrganizationPluginStateToggle
-        pluginName={original?.name}
-        disabled={original?.orgPluginDisabled}
-        refetch={original?.refetch}
-        type={original?.plugin_type}
-      />
-    ),
-    disableSortBy: true,
-    maxWidth: 100,
-  },
-  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -250,15 +234,23 @@ const connectorTableColumns = [
     selectOptions: TLP_CHOICES,
   },
   {
-    Header: "Health Check",
-    id: "health_check",
+    Header: "Actions",
+    id: "actions",
     accessor: (r) => r,
     disableSortBy: true,
     Cell: ({ value }) => (
-      <PluginHealthCheckButton
-        pluginName={value?.name}
-        pluginType_="connector"
-      />
+      <div className="d-flex justify-content-center mx-2">
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={value?.orgPluginDisabled}
+          refetch={value?.refetch}
+          type={value?.plugin_type}
+        />
+        <PluginHealthCheckButton
+          pluginName={value?.name}
+          pluginType_="connector"
+        />
+      </div>
     ),
     maxWidth: 125,
   },
@@ -282,20 +274,6 @@ const pivotTableColumns = [
     maxWidth: 100,
   },
   {
-    Header: "Enabled for organization",
-    id: "enabled_for_organization",
-    Cell: ({ row: { original } }) => (
-      <OrganizationPluginStateToggle
-        pluginName={original?.name}
-        disabled={original?.orgPluginDisabled}
-        refetch={original?.refetch}
-        type={original?.plugin_type}
-      />
-    ),
-    disableSortBy: true,
-    maxWidth: 100,
-  },
-  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -313,13 +291,28 @@ const pivotTableColumns = [
   },
   {
     Header: "Related config",
-    id: "related_configs",
-    accessor: (row) => row.related_configs,
-    Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_="configurations" />
-    ),
-    disableSortBy: true,
+    id: "related_config",
+    accessor: "related_config",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     Filter: SelectColumnFilter,
+    maxWidth: 145,
+  },
+  {
+    Header: "Actions",
+    id: "actions",
+    accessor: (r) => r,
+    disableSortBy: true,
+    Cell: ({ value }) => (
+      <div className="d-flex justify-content-center mx-2">
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={value?.orgPluginDisabled}
+          refetch={value?.refetch}
+          type={value?.plugin_type}
+        />
+      </div>
+    ),
+    maxWidth: 125,
   },
 ];
 // Playbooks columns: these columns are shown for the playbooks
@@ -389,6 +382,20 @@ const playbookTableColumns = [
     disableSortBy: true,
     Filter: SelectColumnFilter,
   },
+  {
+    Header: "Actions",
+    id: "actions",
+    accessor: (r) => r,
+    disableSortBy: true,
+    Cell: ({ value }) => (
+      <div className="d-flex justify-content-center mx-2">
+        {value.is_deletable && (
+          <PlaybooksDeletionButton playbookName={value?.name} />
+        )}
+      </div>
+    ),
+    maxWidth: 125,
+  },
 ];
 
 // Visualizers columns: these columns are shown for the visualizers
@@ -410,20 +417,6 @@ const visualizerTableColumns = [
     maxWidth: 100,
   },
   {
-    Header: "Enabled for organization",
-    id: "enabled_for_organization",
-    Cell: ({ row: { original } }) => (
-      <OrganizationPluginStateToggle
-        pluginName={original?.name}
-        disabled={original?.orgPluginDisabled}
-        refetch={original?.refetch}
-        type={original?.plugin_type}
-      />
-    ),
-    disableSortBy: true,
-    maxWidth: 100,
-  },
-  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -439,6 +432,23 @@ const visualizerTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     Filter: SelectColumnFilter,
     maxWidth: 145,
+  },
+  {
+    Header: "Actions",
+    id: "actions",
+    accessor: (r) => r,
+    disableSortBy: true,
+    Cell: ({ value }) => (
+      <div className="d-flex justify-content-center mx-2">
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={value?.orgPluginDisabled}
+          refetch={value?.refetch}
+          type={value?.plugin_type}
+        />
+      </div>
+    ),
+    maxWidth: 125,
   },
 ];
 // Visualizers columns: these columns are shown for the visualizers

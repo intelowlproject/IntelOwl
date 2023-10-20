@@ -228,17 +228,27 @@ export function MembersList() {
           {sortedMembers?.length && (
             <ol>
               {sortedMembers.map(
-                ({ username, full_name: fullName, joined }) => (
+                ({
+                  username,
+                  full_name: fullName,
+                  joined,
+                  is_admin: isAdmin,
+                }) => (
                   <li key={`memberlist-${username}`}>
                     <Row>
                       <Col sm={5} title="Name and Username">
                         {fullName}&nbsp;
-                        <span className="text-muted">(@{username})</span>
+                        <span
+                          id={`memberlist-username-${username}`}
+                          className="text-muted"
+                        >
+                          (@{username})
+                        </span>
                       </Col>
                       <Col sm={5} title="Joining Date">
                         <DateHoverable
-                          date={joined}
-                          format="PPP"
+                          value={joined}
+                          format="do MMMM yyyy"
                           className="text-secondary user-select-none"
                         />
                       </Col>
@@ -252,7 +262,20 @@ export function MembersList() {
                             />
                           )
                         ) : (
-                          <Badge color="info">admin</Badge>
+                          <Badge
+                            id={`memberlist-badge-owner-${username}`}
+                            color="info"
+                          >
+                            Owner
+                          </Badge>
+                        )}
+                        {owner?.username !== username && isAdmin && (
+                          <Badge
+                            id={`memberlist-badge-admin-${username}`}
+                            color="info"
+                          >
+                            Admin
+                          </Badge>
                         )}
                       </Col>
                     </Row>

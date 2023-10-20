@@ -116,7 +116,8 @@ In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.do
     <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width=160>
   </a>
 </p>
-In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://www.digitalocean.com/open-source).
+
+In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://www.digitalocean.com/open-source?utm_medium=opensource&utm_source=IntelOwl).
 
 
 ### Other collaborations

@@ -164,6 +164,11 @@ export default function JobOverview({
   const navigate = useNavigate();
   const location = useLocation();
   const [UIElements, setUIElements] = useState([]);
+  console.debug(
+    `location pathname: ${location.pathname}, state: ${JSON.stringify(
+      location?.state,
+    )}`,
+  );
 
   useEffect(() => {
     // this store the ui elements when the frontend download them
@@ -235,7 +240,7 @@ export default function JobOverview({
       console.debug("updated visualizers");
       if (!subSection) {
         console.debug(
-          `navigate to visualizer: ${
+          `[AUTO REDIRECT] navigate to visualizer: ${
             UIElements[0].id
           }, encoded: ${encodeURIComponent(UIElements[0].id)}`,
         );
@@ -244,22 +249,30 @@ export default function JobOverview({
           `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${encodeURIComponent(
             UIElements[0].id,
           )}`,
+          { replace: true },
         );
       } else if (
         subSection === LOADING_VISUALIZER_UI_ELEMENT_CODE &&
         UIElements[0].id !== LOADING_VISUALIZER_UI_ELEMENT_CODE
       ) {
+        console.debug(
+          `[AUTO REDIRECT] navigate to visualizer: ${
+            UIElements[0].id
+          }, encoded: ${encodeURIComponent(UIElements[0].id)}`,
+        );
         // in case we are in the loading page and we update the visualizer change page (if they are different from loading)
         navigate(
           `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${encodeURIComponent(
             UIElements[0].id,
           )}`,
+          { replace: true },
         );
       } else if (subSection === NO_VISUALIZER_UI_ELEMENT_CODE) {
-        console.debug("navigate to raw data - analyzer");
+        console.debug("[AUTO REDIRECT] navigate to raw data - analyzer");
         // in case there is no visualizer redirect to raw data
         navigate(
           `/jobs/${job.id}/${jobResultSection.RAW}/${rawElements[0].id}`,
+          { replace: true },
         );
       }
     }

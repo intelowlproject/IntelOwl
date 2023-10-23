@@ -1,12 +1,16 @@
 # Contribute
 
-Intel Owl was designed to ease the addition of new analyzers, connectors and playbooks. With a simple python script you can integrate your own engine or integrate an external service in a short time.
+There are a lot of different ways you could choose to contribute to the IntelOwl Project:
 
-- Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
+- main repository: [IntelOwl](https://github.com/intelowlproject/IntelOwl)
 
-- Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
+- official Python client:  [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
-- Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
+- official GO client: [go-intelowl](https://github.com/intelowlproject/go-intelowl).
+
+- official IntelOwl Site: [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
+
+- honeypots project: [Greedybear](https://github.com/intelowlproject/GreedyBear)
 
 ## Rules
 
@@ -158,7 +162,11 @@ cd certego-ui/example/
 npm i
 npm start
 ```
+
+
 ## How to add a new Plugin
+
+IntelOwl was designed to ease the addition of new plugins. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
 There are two possible cases:
 1. You are creating an entirely new Plugin, meaning that you actually wrote python code

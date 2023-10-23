@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
 import { JOB_BASE_URI } from "../../../constants/api";
-import { JobOverview } from "./utils";
+import { JobOverview } from "./JobOverview";
 
 import {
   generateJobNotification,

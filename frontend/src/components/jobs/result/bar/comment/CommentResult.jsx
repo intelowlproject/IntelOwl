@@ -4,9 +4,9 @@ import useTitle from "react-use/lib/useTitle";
 import { useParams } from "react-router-dom";
 import { Loader } from "@certego/certego-ui";
 
-import { JOB_BASE_URI } from "../../../constants/api";
+import { JOB_BASE_URI } from "../../../../../constants/api";
 
-import { CommentOverview } from "./utils";
+import CommentOverview from "./CommentOverview";
 
 export default function CommentResult() {
   console.debug("CommentResult rendered!");

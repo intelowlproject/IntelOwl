@@ -1,7 +1,6 @@
 // This module contains the column configurations to display the plugins
 
 /* eslint-disable react/prop-types */
-/* eslint-disable react/no-array-index-key */
 import React from "react";
 import { Input } from "reactstrap";
 import {

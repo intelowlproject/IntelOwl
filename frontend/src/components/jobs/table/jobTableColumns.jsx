@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 /* eslint-disable react/prop-types */
 import React from "react";
 import { Input } from "reactstrap";
@@ -19,12 +18,10 @@ import {
   OBSERVABLE_CLASSIFICATION,
 } from "../../../constants";
 import { jobStatuses, jobResultSection } from "../../../constants/constants";
-import { PlaybookInfoPopoverIcon } from "./utils";
+import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
+import { processTimeMMSS } from "../../../utils/time";
 
-const process_time_mmss = (value) =>
-  new Date(value * 1000).toISOString().substring(14, 19);
-
-const jobTableColumns = [
+export const jobTableColumns = [
   {
     Header: () => "ID", // No header
     id: "id",
@@ -129,18 +126,18 @@ const jobTableColumns = [
     }) => {
       const onChange = (dropdownSelector) => {
         /* in case the user selected a value from the dropodown ("file", "observable")
-                we need to convert it to a boolean value, because we will send the request to the backend
-                for the field is_sample that requires a bool.
-              */
+                  we need to convert it to a boolean value, because we will send the request to the backend
+                  for the field is_sample that requires a bool.
+                */
         if (dropdownSelector.target.value) {
           /* even if the backend requires a bool, we need to cast it to string or 
-                the library won't send the request for the false case (observable filter)
-              */
+                  the library won't send the request for the false case (observable filter)
+                */
           setFilter((dropdownSelector.target.value === "file").toString());
         } else {
           /* in case of no selection set to undefined, in this way the library will remove the param from the request
-                this is the "all" case (both samples and observables)
-              */
+                  this is the "all" case (both samples and observables)
+                */
           setFilter(undefined);
         }
       };
@@ -233,7 +230,7 @@ const jobTableColumns = [
     Header: "Process Time (mm:ss)",
     id: "process_time",
     accessor: "process_time",
-    Cell: ({ value }) => <span>{process_time_mmss(value)}</span>,
+    Cell: ({ value }) => <span>{processTimeMMSS(value)}</span>,
     maxWidth: 125,
   },
   {
@@ -246,5 +243,3 @@ const jobTableColumns = [
     selectOptions: Object.values(jobStatuses),
   },
 ];
-
-export { jobTableColumns };

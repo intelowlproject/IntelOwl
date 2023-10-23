@@ -5,9 +5,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import {
-  JobActionsBar,
   reportedVisualizerNumber,
-} from "../../../../../src/components/jobs/result/utils/sections";
+} from "../../../../../src/components/jobs/result/utils/reportedPlugins";
+import { JobActionsBar } from "../../../../../src/components/jobs/result/bar/JobActionBar";
 
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
@@ -25,22 +25,20 @@ describe("test JobActionsBar", () => {
   test("rescan observable playbook", async () => {
     axios.post.mockImplementation(() =>
       Promise.resolve({
-        data: { 
+        data: {
           results: [
             {
-              "job_id": 108,
-              "analyzers_running": [
-                  "Classic_DNS"
-              ],
-              "connectors_running": [],
-              "visualizers_running": [],
-              "playbook_running": "test",
-              "status": "accepted",
-              "already_exists": true
-            }
+              job_id: 108,
+              analyzers_running: ["Classic_DNS"],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: "test",
+              status: "accepted",
+              already_exists: true,
+            },
           ],
-          count: 0 
-        }
+          count: 0,
+        },
       }),
     );
 
@@ -268,20 +266,20 @@ describe("test JobActionsBar", () => {
   test("rescan file playbook", async () => {
     axios.post.mockImplementation(() =>
       Promise.resolve({
-        data: { 
+        data: {
           results: [
             {
-              "job_id": 108,
-              "analyzers_running": [],
-              "connectors_running": [],
-              "visualizers_running": [],
-              "playbook_running": "test",
-              "status": "accepted",
-              "already_exists": true
-            }
+              job_id: 108,
+              analyzers_running: [],
+              connectors_running: [],
+              visualizers_running: [],
+              playbook_running: "test",
+              status: "accepted",
+              already_exists: true,
+            },
           ],
-          count: 0 
-        }
+          count: 0,
+        },
       }),
     );
 
@@ -363,7 +361,7 @@ describe("test JobActionsBar", () => {
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        undefined
+        undefined,
       );
     });
     setTimeout(() => {
@@ -452,7 +450,7 @@ describe("test JobActionsBar", () => {
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        undefined
+        undefined,
       );
     });
     setTimeout(() => {

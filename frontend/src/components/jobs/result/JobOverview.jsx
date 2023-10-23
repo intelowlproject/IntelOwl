@@ -23,22 +23,23 @@ import {
   ConnectorsReportTable,
   PivotsReportTable,
   VisualizersReportTable,
-} from "./tables";
+} from "./pluginReportTables";
 import {
   reportedPluginNumber,
   reportedVisualizerNumber,
-  JobInfoCard,
-  JobIsRunningAlert,
-  JobActionsBar,
   ReportedPluginTooltip,
-} from "./sections";
-import { StatusIcon } from "../../../common";
-import VisualizerReport from "../visualizer/visualizer";
+} from "./utils/reportedPlugins";
+import { StatusIcon } from "../../common";
+import VisualizerReport from "./visualizer/visualizer";
 import {
   jobFinalStatuses,
   pluginStatuses,
   jobResultSection,
-} from "../../../../constants/constants";
+} from "../../../constants/constants";
+
+import { JobInfoCard } from "./JobInfoCard";
+import { JobIsRunningAlert } from "./JobIsRunningAlert";
+import { JobActionsBar } from "./bar/JobActionBar";
 
 /* THESE IDS CANNOT BE EMPTY!
 We perform a redirect in case the user landed in the visualzier page without a visualizer,
@@ -51,7 +52,7 @@ in case we use empty param for this page we fall in an infinite redirect loop.
 const LOADING_VISUALIZER_UI_ELEMENT_CODE = "loading";
 const NO_VISUALIZER_UI_ELEMENT_CODE = "no-visualizer";
 
-export default function JobOverview({
+export function JobOverview({
   isRunningJob,
   job,
   refetch,

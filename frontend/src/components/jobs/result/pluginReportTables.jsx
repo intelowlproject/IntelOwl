@@ -12,9 +12,9 @@ import {
   DateHoverable,
 } from "@certego/certego-ui";
 
-import { StatusTag } from "../../../common";
-import { killPlugin, retryPlugin } from "../api";
-import { pluginStatuses } from "../../../../constants/constants";
+import { StatusTag } from "../../common";
+import { killPlugin, retryPlugin } from "./api";
+import { pluginStatuses } from "../../../constants/constants";
 
 const tableProps = {
   columns: [

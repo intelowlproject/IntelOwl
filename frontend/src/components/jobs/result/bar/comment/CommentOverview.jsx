@@ -16,9 +16,9 @@ import { GoBackButton } from "@certego/certego-ui";
 
 import { Formik, Field } from "formik";
 
-import { createComment, deleteComment } from "../../../scan/api";
+import { createComment, deleteComment } from "./api";
 
-import { useAuthStore } from "../../../../stores";
+import { useAuthStore } from "../../../../../stores";
 
 function formatDate(dateString) {
   const date = new Date(dateString);

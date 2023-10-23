@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import React from "react";
 import axios from "axios";
 
@@ -7,64 +6,12 @@ import { ContentSection, addToast } from "@certego/certego-ui";
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   ANALYZE_MULTIPLE_FILES_URI,
-  COMMENT_BASE_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../constants/api";
+import { prettifyErrors } from "../../utils/api";
 
 import { scanMode } from "../../constants/constants";
-
-function prettifyErrors(errorResponse) {
-  // only validation errors returns an array of errors
-  /**
-    "errors":{
-			"detail":[
-				{"observable_name":["This field may not be blank.", "another error"]},
-				{"another_key": "another error"},
-			]
-		}
-   */
-  if (Array.isArray(errorResponse.response.data?.errors?.detail)) {
-    let prettyHTMLList = [];
-    errorResponse.response.data.errors.detail.forEach((objectDict) => {
-      Object.values(objectDict).forEach((errorItem) => {
-        if (Array.isArray(errorItem)) {
-          errorItem.forEach((error) => prettyHTMLList.push(error));
-        } else {
-          prettyHTMLList.push(errorItem);
-        }
-      });
-    });
-    prettyHTMLList = prettyHTMLList.map((e) => <li>{e}</li>);
-    return <ul>{prettyHTMLList}</ul>;
-  }
-
-  return JSON.stringify(errorResponse.response.data);
-}
-
-export async function createComment(formValues) {
-  try {
-    const resp = await axios.post(`${COMMENT_BASE_URI}`, formValues);
-
-    return Promise.resolve(resp);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
-  }
-}
-
-export async function deleteComment(commentId) {
-  try {
-    const resp = await axios.delete(`${COMMENT_BASE_URI}/${commentId}`);
-
-    return Promise.resolve(resp);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
-  }
-}
 
 function createJobPayload(
   analyzables,

@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { render, screen, within } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { JobOverview } from "../../../../../src/components/jobs/result/utils";
+import { JobOverview } from "../../../../../src/components/jobs/result/JobOverview";
 
 describe("test JobOverview (job report)", () => {
   test("test utility bar", () => {

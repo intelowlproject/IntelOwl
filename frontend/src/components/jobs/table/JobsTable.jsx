@@ -1,6 +1,6 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import { Container, Row, Col } from "reactstrap";
-import useTitle from "react-use/lib/useTitle";
 
 import {
   ElasticTimePicker,
@@ -10,8 +10,10 @@ import {
   useTimePickerStore,
 } from "@certego/certego-ui";
 
+import useTitle from "react-use/lib/useTitle";
+import { jobTableColumns } from "./jobTableColumns";
+
 import { JOB_BASE_URI } from "../../../constants/api";
-import { jobTableColumns } from "./data";
 import { useGuideContext } from "../../../contexts/GuideContext";
 
 // constants

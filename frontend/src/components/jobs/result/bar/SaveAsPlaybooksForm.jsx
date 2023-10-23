@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 
 import { addToast, PopupFormButton } from "@certego/certego-ui";
 
-import { saveJobAsPlaybook } from "../api";
+import { saveJobAsPlaybook } from "./api";
 
 // constants
 const initialValues = {

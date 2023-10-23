@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { PlaybookInfoPopoverIcon } from "../../../../src/components/jobs/table/utils";
+import { PlaybookInfoPopoverIcon } from "../../../../src/components/jobs/table/playbookJobInfo";
 
 describe("test PlaybookInfoPopoverIcon", () => {
   test("playbook", async () => {

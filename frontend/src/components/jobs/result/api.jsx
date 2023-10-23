@@ -1,11 +1,10 @@
-/* eslint-disable no-restricted-globals */
 import React from "react";
 import axios from "axios";
 import { IoMdWarning } from "react-icons/io";
 
 import { addToast, confirm } from "@certego/certego-ui";
 
-import { PLAYBOOKS_CONFIG_URI, JOB_BASE_URI } from "../../../constants/api";
+import { JOB_BASE_URI } from "../../../constants/api";
 
 // constants
 
@@ -79,43 +78,6 @@ export async function deleteJob(jobId) {
       <span>
         Failed. Operation: <em>delete job #{jobId}</em>
       </span>,
-      e.parsedMsg,
-      "warning",
-    );
-  }
-  return success;
-}
-
-export async function saveJobAsPlaybook(values) {
-  let success = false;
-  const data = {
-    name: values.name,
-    description: values.description,
-    analyzers: values.analyzers,
-    connectors: values.connectors,
-    pivots: values.pivots,
-    runtime_configuration: values.runtimeConfiguration,
-    tags: values.tags,
-    tlp: values.tlp,
-    scan_mode: values.scan_mode,
-    scan_check_time: values.scan_check_time,
-  };
-  try {
-    const response = await axios.post(PLAYBOOKS_CONFIG_URI, data);
-
-    success = response.status === 200;
-    if (success) {
-      addToast(
-        <span>
-          Playbook with name {response.data.name} created with success
-        </span>,
-        null,
-        "info",
-      );
-    }
-  } catch (e) {
-    addToast(
-      <span>Failed creation of playbook with name {values.name}</span>,
       e.parsedMsg,
       "warning",
     );

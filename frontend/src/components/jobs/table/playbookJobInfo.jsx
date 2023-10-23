@@ -3,7 +3,7 @@ import { UncontrolledPopover, Card, CardHeader, CardBody } from "reactstrap";
 import { MdInfo } from "react-icons/md";
 import PropTypes from "prop-types";
 
-export function PlaybookExecutedInfoCard({ job }) {
+function PlaybookExecutedInfoCard({ job }) {
   console.debug(job);
   return (
     <Card className="border-dark p-0">

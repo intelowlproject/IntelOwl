@@ -31,7 +31,6 @@ import {
   IconButton,
   Loader,
   MultiSelectDropdownInput,
-  addToast,
   selectStyles,
 } from "@certego/certego-ui";
 
@@ -54,7 +53,7 @@ import {
   RecentScans,
   TagSelectInput,
 } from "./utils";
-import { createJob, createPlaybookJob } from "./api";
+import { createJob } from "./api";
 import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../plugins/utils/utils";
 
@@ -126,11 +125,15 @@ export default function ScanForm() {
 
       const errors = {};
 
+      // error in plugins download
       if (analyzersError) {
         errors.analyzers = analyzersError;
       }
       if (connectorsError) {
         errors.connectors = connectorsError;
+      }
+      if (playbooksError) {
+        errors.playbook = playbooksError;
       }
 
       if (values.observableType === "file") {
@@ -150,10 +153,6 @@ export default function ScanForm() {
         errors.observable_names = "observable(s) are required";
       }
 
-      if (!TLP_CHOICES.includes(values.tlp)) {
-        errors.tlp = "Invalid choice";
-      }
-
       // check playbook or analyzer selections based on the user selection
       if (
         values.analysisOptionValues === scanTypes.playbooks &&
@@ -168,61 +167,42 @@ export default function ScanForm() {
         errors.analyzers = "analyzers required";
       }
 
+      if (!TLP_CHOICES.includes(values.tlp)) {
+        errors.tlp = "Invalid choice";
+      }
+
       console.debug("formik validation errors");
       console.debug(errors);
       return errors;
     },
     onSubmit: async (values) => {
-      if (values.analysisOptionValues === scanTypes.playbooks) {
-        startPlaybooks(values);
-        return;
+      const jobIds = await createJob(
+        values.observableType === "observable"
+          ? values.observable_names.map((observable) =>
+              sanitizeObservable(observable),
+            )
+          : values.files,
+        values.classification,
+        values.playbook.value,
+        values.analyzers.map((analyzer) => analyzer.value),
+        values.connectors.map((connector) => connector.value),
+        values.runtime_configuration,
+        values.tags.map((optTag) => optTag.value.label),
+        values.tlp,
+        values.scan_mode,
+        values.scan_check_time,
+      );
+
+      if (jobIds.length > 1) {
+        setTimeout(() => navigate(`/jobs/`), 1000);
+      } else {
+        setTimeout(
+          () => navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
+          1000,
+        );
       }
-
-      const formValues = {
-        ...values,
-        observable_names: values.observable_names.map((observable) =>
-          sanitizeObservable(observable),
-        ),
-        tags_labels: values.tags.map((optTag) => optTag.value.label),
-        analyzers: values.analyzers.map((x) => x.value),
-        connectors: values.connectors.map((x) => x.value),
-      };
-
-      if (values.analyzers.length === 0) {
-        addToast("Failed!", "Please select at least one analyzer", "danger");
-        return;
-      }
-
-      /* We have 2 cases:
-       1) use default config -> we need the runtime_configuration field has value {}
-       2) custom config -> we need to add visualizers because it's required from the backend
-
-      Note: we don't put visualizers in the editor because it could be very verbose
-      */
-      if (Object.keys(formValues.runtime_configuration).length) {
-        formik.values.runtime_configuration.visualizers = {};
-      }
-
-      console.debug("ScanFrom - onSubmit - formValues");
-      console.debug(formValues);
-
-      try {
-        const jobIds = await createJob(formValues);
-        if (jobIds.length > 1) {
-          setTimeout(() => navigate(`/jobs/`), 1000);
-        } else {
-          setTimeout(
-            () =>
-              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
-            1000,
-          );
-        }
-      } catch (e) {
-        // handled inside createJob
-      } finally {
-        refetchQuota();
-        formik.setSubmitting(false);
-      }
+      refetchQuota();
+      formik.setSubmitting(false);
     },
   });
 
@@ -389,70 +369,6 @@ export default function ScanForm() {
         a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
       );
 
-  const ValidatePlaybooks = React.useCallback(
-    (values) => {
-      const errors = {};
-      if (playbooksError) {
-        errors.playbook = playbooksError;
-      }
-      if (Object.keys(values.playbook).length === 0) {
-        return `Please select a playbook!`;
-      }
-      if (values.classification === "file") {
-        if (!values.files || values.files.length === 0) {
-          errors.files = "required";
-        }
-      } else if (values.observable_names && values.observable_names.length) {
-        if (!TLP_CHOICES.includes(values.tlp)) {
-          errors.tlp = "Invalid choice";
-        }
-      }
-      return errors;
-    },
-    [playbooksError],
-  );
-
-  const startPlaybooks = React.useCallback(
-    async (values) => {
-      const formValues = {
-        ...values,
-        observable_names: values.observable_names.map((observable) =>
-          sanitizeObservable(observable),
-        ),
-        tlp: values.tlp,
-        tags_labels: values.tags.map((optTag) => optTag.value.label),
-        playbook: values.playbook.value,
-        scan_mode: values.scan_mode,
-        scan_check_time: values.scan_check_time,
-      };
-
-      const errors = ValidatePlaybooks(values);
-      if (Object.keys(errors).length !== 0) {
-        addToast("Failed!", JSON.stringify(errors), "danger");
-        return;
-      }
-
-      try {
-        const jobIds = await createPlaybookJob(formValues);
-
-        if (jobIds.length > 1) {
-          setTimeout(() => navigate(`/jobs/`), 1000);
-        } else {
-          setTimeout(
-            () =>
-              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
-            1000,
-          );
-        }
-      } catch (e) {
-        // handled inside createPlaybookJob
-      } finally {
-        refetchQuota();
-      }
-    },
-    [navigate, refetchQuota, ValidatePlaybooks],
-  );
-
   const updateAdvancedConfig = (tags, tlp, _scanMode, scanCheckTime) => {
     formik.setFieldValue("tags", tags, false);
     formik.setFieldValue("tlp", tlp, false);
@@ -542,7 +458,7 @@ export default function ScanForm() {
         formik.initialValues.tags,
         formik.initialValues.tlp,
         formik.initialValues.scan_mode,
-        "1 00:00:00",
+        "01:00:00:00",
       );
     }
     if (
@@ -789,6 +705,7 @@ export default function ScanForm() {
                     className="input-dark"
                     multiple
                   />
+                  {DangerErrorMessage("files")}
                 </Col>
               </FormGroup>
             )}

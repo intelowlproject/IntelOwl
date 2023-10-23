@@ -22,11 +22,31 @@ describe("test JobActionsBar", () => {
     );
   });
 
-  test("rescan playbook", async () => {
+  test("rescan observable playbook", async () => {
+    axios.post.mockImplementation(() =>
+      Promise.resolve({
+        data: { 
+          results: [
+            {
+              "job_id": 108,
+              "analyzers_running": [
+                  "Classic_DNS"
+              ],
+              "connectors_running": [],
+              "visualizers_running": [],
+              "playbook_running": "test",
+              "status": "accepted",
+              "already_exists": true
+            }
+          ],
+          count: 0 
+        }
+      }),
+    );
+
     render(
       <BrowserRouter>
         <JobActionsBar
-          refetch={() => {}}
           job={{
             id: 108,
             user: {
@@ -100,8 +120,8 @@ describe("test JobActionsBar", () => {
             playbook_requested: "test",
             playbook_to_execute: "test",
             analyzers_requested: ["Classic_DNS"],
-            connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
             analyzers_to_execute: ["Classic_DNS"],
+            connectors_requested: [],
             connectors_to_execute: [],
             visualizers_to_execute: [],
           }}
@@ -131,11 +151,10 @@ describe("test JobActionsBar", () => {
     });
   });
 
-  test("rescan analyzer", async () => {
+  test("rescan observable analyzer", async () => {
     render(
       <BrowserRouter>
         <JobActionsBar
-          refetch={() => {}}
           job={{
             id: 108,
             user: {
@@ -244,6 +263,203 @@ describe("test JobActionsBar", () => {
         ],
       );
     });
+  });
+
+  test("rescan file playbook", async () => {
+    axios.post.mockImplementation(() =>
+      Promise.resolve({
+        data: { 
+          results: [
+            {
+              "job_id": 108,
+              "analyzers_running": [],
+              "connectors_running": [],
+              "visualizers_running": [],
+              "playbook_running": "test",
+              "status": "accepted",
+              "already_exists": true
+            }
+          ],
+          count: 0 
+        }
+      }),
+    );
+
+    render(
+      <BrowserRouter>
+        <JobActionsBar
+          job={{
+            id: 108,
+            user: {
+              username: "test",
+            },
+            tags: [],
+            analyzer_reports: [
+              {
+                id: 174,
+                name: "yara",
+                process_time: 0.07,
+                report: {},
+                status: "RUNNING",
+                errors: [],
+                start_time: "2023-05-31T08:19:03.380434Z",
+                end_time: "2023-05-31T08:19:03.455218Z",
+                runtime_configuration: {},
+                type: "analyzer",
+              },
+            ],
+            connector_reports: [],
+            visualizer_reports: [],
+            comments: [
+              {
+                id: 1,
+                content: "test comment",
+                created_at: "2023-05-31T09:00:14.352880Z",
+                user: {
+                  username: "test",
+                },
+              },
+            ],
+            permissions: {
+              kill: true,
+              delete: true,
+              plugin_actions: true,
+            },
+            is_sample: true,
+            md5: "914757470762e2177f8be4d87420254e",
+            observable_name: "",
+            observable_classification: "",
+            file_name: "test.sh",
+            file_mimetype: "text/x-shellscript",
+            status: "reported_without_fails",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
+            process_time: 0.23,
+            tlp: "AMBER",
+            errors: [],
+            playbook_requested: "test",
+            playbook_to_execute: "test",
+            analyzers_requested: ["yara"],
+            analyzers_to_execute: ["yara"],
+            connectors_requested: [],
+            connectors_to_execute: [],
+            visualizers_to_execute: [],
+          }}
+        />
+      </BrowserRouter>,
+    );
+
+    const scanBtn = screen.getByText("Rescan");
+    expect(scanBtn).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(scanBtn);
+
+    await waitFor(() => {
+      expect(axios.post.mock.calls[0]).toEqual(
+        // axios call
+        undefined
+      );
+    });
+    setTimeout(() => {
+      expect(
+        screen.getByText("It's not possible to repeat a sample analysis"),
+      ).toBeInTheDocument();
+    }, 15 * 1000);
+  });
+
+  test("rescan file analyzer", async () => {
+    render(
+      <BrowserRouter>
+        <JobActionsBar
+          job={{
+            id: 108,
+            user: {
+              username: "test",
+            },
+            tags: [],
+            analyzer_reports: [
+              {
+                id: 174,
+                name: "yara",
+                process_time: 0.07,
+                report: {},
+                status: "RUNNING",
+                errors: [],
+                start_time: "2023-05-31T08:19:03.380434Z",
+                end_time: "2023-05-31T08:19:03.455218Z",
+                runtime_configuration: {},
+                type: "analyzer",
+              },
+            ],
+            connector_reports: [],
+            visualizer_reports: [],
+            comments: [
+              {
+                id: 1,
+                content: "test comment",
+                created_at: "2023-05-31T09:00:14.352880Z",
+                user: {
+                  username: "test",
+                },
+              },
+            ],
+            permissions: {
+              kill: true,
+              delete: true,
+              plugin_actions: true,
+            },
+            is_sample: true,
+            md5: "914757470762e2177f8be4d87420254e",
+            observable_name: "",
+            observable_classification: "",
+            file_name: "test.sh",
+            file_mimetype: "text/x-shellscript",
+            status: "reported_without_fails",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
+            process_time: 0.23,
+            tlp: "AMBER",
+            errors: [],
+            playbook_requested: "",
+            playbook_to_execute: "",
+            analyzers_requested: ["yara"],
+            connectors_requested: [],
+            analyzers_to_execute: ["yara"],
+            connectors_to_execute: [],
+            visualizers_to_execute: [],
+          }}
+        />
+      </BrowserRouter>,
+    );
+
+    const scanBtn = screen.getByText("Rescan");
+    expect(scanBtn).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(scanBtn);
+
+    await waitFor(() => {
+      expect(axios.post.mock.calls[0]).toEqual(
+        // axios call
+        undefined
+      );
+    });
+    setTimeout(() => {
+      expect(
+        screen.getByText("It's not possible to repeat a sample analysis"),
+      ).toBeInTheDocument();
+    }, 15 * 1000);
   });
 
   test("reportedVisualizerNumber function - 2 visualizers (1 completed and 1 running)", async () => {

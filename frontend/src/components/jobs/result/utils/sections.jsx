@@ -39,7 +39,7 @@ import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
-import { createJob, createPlaybookJob } from "../../../scan/api";
+import { createJob } from "../../../scan/api";
 import {
   pluginFinalStatuses,
   jobStatuses,
@@ -73,7 +73,7 @@ function retryJobIcon() {
   );
 }
 
-export function JobActionsBar({ job, refetch }) {
+export function JobActionsBar({ job }) {
   // routers
   const navigate = useNavigate();
 
@@ -105,31 +105,28 @@ export function JobActionsBar({ job, refetch }) {
   }) on IntelOwl`;
 
   const handleRetry = async () => {
-    const formValues = {
-      ...job,
-      check: "force_new",
-      classification: job.observable_classification,
-      tlp: job.tlp,
-      observable_names: [job.observable_name],
-      analyzers: job.analyzers_requested,
-      connectors: job.connectors_requested,
-      runtime_configuration: job.runtime_configuration,
-      tags_labels: job.tags.map((optTag) => optTag.label),
-      playbook: job.playbook_requested,
-      scan_mode: scanMode.FORCE_NEW_ANALYSIS,
-    };
-
-    addToast("Retrying the same job...", null, "spinner", false, 2000);
-    if (job.playbook_to_execute) {
-      console.debug("retrying Playbook");
-      const jobId = await createPlaybookJob(formValues).then(refetch);
-      setTimeout(
-        () => navigate(`/jobs/${jobId[0]}/${jobResultSection.VISUALIZER}/`),
-        1000,
+    if (job.is_sample) {
+      addToast(
+        "Rescan File!",
+        "It's not possible to repeat a sample analysis",
+        "warning",
+        false,
+        2000,
       );
     } else {
-      console.debug("retrying Job");
-      const jobId = await createJob(formValues).then(refetch);
+      addToast("Retrying the same job...", null, "spinner", false, 2000);
+      const jobId = await createJob(
+        [job.observable_name],
+        job.observable_classification,
+        job.playbook_requested,
+        job.analyzers_requested,
+        job.connectors_requested,
+        job.runtime_configuration,
+        job.tags.map((optTag) => optTag.label),
+        job.tlp,
+        scanMode.FORCE_NEW_ANALYSIS,
+        0,
+      );
       setTimeout(
         () => navigate(`/jobs/${jobId[0]}/${jobResultSection.VISUALIZER}/`),
         1000,

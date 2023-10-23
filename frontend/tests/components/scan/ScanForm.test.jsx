@@ -120,7 +120,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 2,
-          scan_check_time: "2 00:00:00",
+          scan_check_time: "02:00:00:00",
           tags: [
             {
               id: 1,
@@ -143,7 +143,7 @@ jest.mock("../../../src/stores", () => ({
           analyzers: [],
           connectors: [],
           scan_mode: 2,
-          scan_check_time: "2 00:00:00",
+          scan_check_time: "02:00:00:00",
           tags: [],
           tlp: "CLEAR",
         },

@@ -11,6 +11,7 @@ import {
   PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
 } from "../../constants/api";
+
 import { scanMode } from "../../constants/constants";
 
 function prettifyErrors(errorResponse) {
@@ -39,6 +40,108 @@ function prettifyErrors(errorResponse) {
   }
 
   return JSON.stringify(errorResponse.response.data);
+}
+
+export async function createComment(formValues) {
+  try {
+    const resp = await axios.post(`${COMMENT_BASE_URI}`, formValues);
+
+    return Promise.resolve(resp);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", prettifyErrors(e), "danger");
+    return Promise.reject(e);
+  }
+}
+
+export async function deleteComment(commentId) {
+  try {
+    const resp = await axios.delete(`${COMMENT_BASE_URI}/${commentId}`);
+
+    return Promise.resolve(resp);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", prettifyErrors(e), "danger");
+    return Promise.reject(e);
+  }
+}
+
+function createJobPayload(
+  analyzables,
+  classification,
+  playbook,
+  analyzers,
+  connectors,
+  runtimeConfig,
+  tags,
+  tlp,
+  _scanMode,
+  scanCheckTime,
+) {
+  const isSample = classification === "file";
+  let payload = {};
+  /* we add a custom function to the object to reuse the code:
+  in this way append method is available for bot FormData and {}.
+  Remember to delete this before send the request to the backend!
+  */
+  // eslint-disable-next-line no-return-assign
+  payload.append = (key, value) => (payload[key] = value);
+  if (isSample) {
+    payload = new FormData();
+  }
+  // populate payload
+  // file
+  if (isSample) {
+    Array.from(analyzables).forEach((file) => {
+      payload.append("files", file, file.name);
+    });
+  } else {
+    const observables = [];
+    analyzables.forEach((observable) => {
+      observables.push([classification, observable]);
+    });
+    payload.append("observables", observables);
+  }
+  // playbook
+  if (playbook) {
+    payload.append("playbook_requested", playbook);
+  } else {
+    // analyzers
+    if (analyzers.length) {
+      payload.append("analyzers_requested", analyzers);
+    }
+    // connectors
+    if (connectors.length) {
+      payload.append("connectors_requested", connectors);
+    }
+    // runtime configuration
+    if (runtimeConfig != null && Object.keys(runtimeConfig).length) {
+      const runtimeConfigTosend = runtimeConfig;
+      /* visualized is required from the backend so we need to send it.
+       Also it's useless to edit it, so it's not present in the UI and added only in the request.
+      */
+      if ("visualizers" in runtimeConfigTosend)
+        runtimeConfigTosend.visualizers = {};
+      payload.append("runtime_configuration", runtimeConfigTosend);
+    }
+  }
+  // advanced configs
+  // tags
+  if (tags.length) {
+    payload.append("tags_labels", tags);
+  }
+  // tlp
+  payload.append("tlp", tlp);
+  // scan mode and scan time
+  payload.append("scan_mode", parseInt(_scanMode, 10));
+  if (_scanMode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+    payload.append("scan_check_time", `${scanCheckTime}:00:00`);
+  }
+  // remove custom method in order to avoid to send it to the backend
+  if (!isSample) delete payload.append;
+  console.debug("job request params:");
+  console.debug(payload);
+  return payload;
 }
 
 function playbookToastBody(respData, warnings) {
@@ -79,37 +182,90 @@ function customToastBody(analyzersRunning, connectorsRunning, warnings) {
   );
 }
 
-export async function createPlaybookJob(formValues) {
+export async function createJob(
+  analyzables,
+  classification,
+  playbook,
+  analyzers,
+  connectors,
+  runtimeConfig,
+  tags,
+  tlp,
+  _scanMode,
+  scanCheckTime,
+) {
   try {
-    // new scan
-    const resp =
-      formValues.classification === "file"
-        ? await _startPlaybookFile(formValues)
-        : await _startPlaybookObservable(formValues);
+    console.debug(
+      `create job with: analyzables: ${analyzables}, classification: ${classification}, playbook: ${playbook}, analyzers: ${analyzers}, connectors: ${connectors}, runtimeConfig: ${JSON.stringify(
+        runtimeConfig,
+      )}, tags: ${tags}, tlp: ${tlp}, scanMode: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
+    );
+    const isSample = classification === "file";
+    let apiUrl = "";
+    if (isSample) {
+      if (playbook) {
+        apiUrl = PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI;
+      } else {
+        apiUrl = ANALYZE_MULTIPLE_FILES_URI;
+      }
+    } else if (playbook) {
+      apiUrl = PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI;
+    } else {
+      apiUrl = ANALYZE_MULTIPLE_OBSERVABLE_URI;
+    }
 
-    const warnings = [];
+    const payload = createJobPayload(
+      analyzables,
+      classification,
+      playbook,
+      analyzers,
+      connectors,
+      runtimeConfig,
+      tags,
+      tlp,
+      _scanMode,
+      scanCheckTime,
+    );
+    const resp = await axios.post(apiUrl, payload);
     const respData = resp.data.results;
 
-    respData.forEach((x) => {
-      if (x.warnings) warnings.push(...x.warnings);
+    const warnings = [];
+    respData.forEach((job) => {
+      if (job.warnings) warnings.push(...job.warnings);
     });
+
+    let toastBody;
+    if (playbook) {
+      toastBody = playbookToastBody(respData, warnings);
+    } else {
+      const analyzersRunning = [];
+      const connectorsRunning = [];
+      respData.forEach((job) => {
+        analyzersRunning.push(...job.analyzers_running);
+        connectorsRunning.push(...job.connectors_running);
+      });
+      toastBody = customToastBody(
+        new Set(analyzersRunning),
+        new Set(connectorsRunning),
+        warnings,
+      );
+    }
 
     // handle response/error
     if (respData.every((element) => element.status === "accepted")) {
       const jobIdsAccepted = [];
       const jobIdsExists = [];
-      respData.forEach((x) => {
-        if (x.already_exists) {
-          jobIdsExists.push(parseInt(x.job_id, 10));
+      respData.forEach((job) => {
+        if (job.already_exists) {
+          jobIdsExists.push(parseInt(job.job_id, 10));
         } else {
-          jobIdsAccepted.push(parseInt(x.job_id, 10));
+          jobIdsAccepted.push(parseInt(job.job_id, 10));
         }
       });
-      // toast for accepted jobs
       if (jobIdsAccepted.length > 0) {
         addToast(
           `Created new Job with ID(s) #${jobIdsAccepted.join(", ")}!`,
-          playbookToastBody(respData, warnings),
+          toastBody,
           "success",
           true,
           10000,
@@ -119,7 +275,7 @@ export async function createPlaybookJob(formValues) {
       if (jobIdsExists.length > 0) {
         addToast(
           `Reported existing Job with ID(s) #${jobIdsExists.join(", ")}!`,
-          playbookToastBody(respData, warnings),
+          toastBody,
           "info",
           true,
           10000,
@@ -136,222 +292,4 @@ export async function createPlaybookJob(formValues) {
     addToast("Failed!", prettifyErrors(e), "danger");
     return Promise.reject(e);
   }
-}
-
-export async function createComment(formValues) {
-  try {
-    const resp = await axios.post(`${COMMENT_BASE_URI}`, formValues);
-
-    return Promise.resolve(resp);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
-  }
-}
-
-export async function deleteComment(commentId) {
-  try {
-    const resp = await axios.delete(`${COMMENT_BASE_URI}/${commentId}`);
-
-    return Promise.resolve(resp);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
-  }
-}
-
-export async function createJob(formValues) {
-  try {
-    // new scan
-    const resp =
-      formValues.classification === "file"
-        ? await _analyzeFile(formValues)
-        : await _analyzeObservable(formValues);
-
-    const warnings = [];
-    const respData = resp.data.results;
-
-    const analyzersRunning = new Set();
-    const connectorsRunning = new Set();
-    respData.forEach((x) => {
-      if (x.analyzers_running)
-        x.analyzers_running.forEach((analyzer) =>
-          analyzersRunning.add(analyzer),
-        );
-      if (x.connectors_running)
-        x.connectors_running.forEach((connector) =>
-          connectorsRunning.add(connector),
-        );
-      if (x.warnings) warnings.push(...x.warnings);
-    });
-    // handle response/error
-    if (respData.every((element) => element.status === "accepted")) {
-      const jobIdsAccepted = [];
-      const jobIdsExists = [];
-      respData.forEach((x) => {
-        if (x.already_exists) {
-          jobIdsExists.push(parseInt(x.job_id, 10));
-        } else {
-          jobIdsAccepted.push(parseInt(x.job_id, 10));
-        }
-      });
-      if (jobIdsAccepted.length > 0) {
-        addToast(
-          `Created new Job with ID(s) #${jobIdsAccepted.join(", ")}!`,
-          customToastBody(analyzersRunning, connectorsRunning, warnings),
-          "success",
-          true,
-          10000,
-        );
-      }
-      // toast for existing jobs
-      if (jobIdsExists.length > 0) {
-        addToast(
-          `Reported existing Job with ID(s) #${jobIdsExists.join(", ")}!`,
-          customToastBody(analyzersRunning, connectorsRunning, warnings),
-          "info",
-          true,
-          10000,
-        );
-      }
-      return Promise.resolve(jobIdsAccepted.concat(jobIdsExists));
-    }
-
-    // else
-    addToast("Failed!", respData?.message, "danger");
-    const error = new Error(`job status ${respData.status}`);
-    return Promise.reject(error);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
-  }
-}
-
-async function _analyzeObservable(formValues) {
-  const observables = [];
-  formValues.observable_names.forEach((ObservableName) => {
-    observables.push([formValues.classification, ObservableName]);
-  });
-  const body = {
-    observables,
-    tlp: formValues.tlp,
-    scan_mode: parseInt(formValues.scan_mode, 10),
-  };
-  // analyzers
-  if (formValues.analyzers.length) {
-    body.analyzers_requested = formValues.analyzers;
-  }
-  // connectors
-  if (formValues.connectors.length) {
-    body.connectors_requested = formValues.connectors;
-  }
-  // tags
-  if (formValues.tags_labels.length) {
-    body.tags_labels = formValues.tags_labels;
-  }
-  // runtime configuration
-  if (
-    formValues.runtime_configuration != null &&
-    Object.keys(formValues.runtime_configuration).length
-  ) {
-    body.runtime_configuration = formValues.runtime_configuration;
-  }
-  // scan mode
-  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.scan_check_time = `${formValues.scan_check_time}:00:00`;
-  }
-  return axios.post(ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
-}
-
-async function _analyzeFile(formValues) {
-  const body = new FormData();
-  // file
-  Array.from(formValues.files).forEach((file) => {
-    body.append("files", file, file.name);
-  });
-  // tags
-  if (formValues.tags_labels.length) {
-    formValues.tags_labels.forEach((tag) => body.append("tags_labels", tag));
-  }
-  // analyzers
-  if (formValues.analyzers.length) {
-    formValues.analyzers.forEach((analyzer) =>
-      body.append("analyzers_requested", analyzer),
-    );
-  }
-  // connectors
-  if (formValues.connectors.length) {
-    formValues.connectors.forEach((connector) =>
-      body.append("connectors_requested", connector),
-    );
-  }
-  // tlp
-  body.append("tlp", formValues.tlp);
-  // runtime configuration
-  if (
-    formValues.runtime_configuration != null &&
-    Object.keys(formValues.runtime_configuration).length
-  ) {
-    body.append(
-      "runtime_configuration",
-      JSON.stringify(formValues.runtime_configuration),
-    );
-  }
-  // scan mode
-  body.append("scan_mode", formValues.scan_mode);
-  // scan check time
-  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.append("scan_check_time", `${formValues.scan_check_time}:00:00`);
-  }
-  console.debug("_analyzeFile", body);
-  return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
-}
-
-async function _startPlaybookFile(formValues) {
-  const body = new FormData();
-  // file
-  Array.from(formValues.files).forEach((file) => {
-    body.append("files", file, file.name);
-  });
-  // tlp
-  body.append("tlp", formValues.tlp);
-  // tags
-  if (formValues.tags_labels.length) {
-    formValues.tags_labels.forEach((tag) => body.append("tags_labels", tag));
-  }
-  // playbook requested
-  body.append("playbook_requested", formValues.playbook);
-  // scan mode
-  body.append("scan_mode", formValues.scan_mode);
-  // scan check time
-  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.append("scan_check_time", `${formValues.scan_check_time}:00:00`);
-  }
-  console.debug("_analyzeFile", body);
-  return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI, body);
-}
-
-async function _startPlaybookObservable(formValues) {
-  const observables = [];
-  formValues.observable_names.forEach((ObservableName) => {
-    observables.push([formValues.classification, ObservableName]);
-  });
-
-  const body = {
-    observables,
-    playbook_requested: formValues.playbook,
-    tlp: formValues.tlp,
-    scan_mode: parseInt(formValues.scan_mode, 10),
-  };
-  if (formValues.tags_labels.length) {
-    body.tags_labels = formValues.tags_labels;
-  }
-  if (formValues.scan_mode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
-    body.scan_check_time = `${formValues.scan_check_time}:00:00`;
-  }
-  console.debug("_analyzeObservable", body);
-  return axios.post(PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }

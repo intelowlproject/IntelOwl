@@ -45,8 +45,8 @@ class BGPRanking(classes.ObservableAnalyzer):
                     "asn_rank": r.json(),
                     "asn_history": r_hist.json(),
                 }
-
-            results = {"asn": response.json(), "asn_rank": r.json()}
+            else:
+                results = {"asn": response.json(), "asn_rank": r.json()}
 
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

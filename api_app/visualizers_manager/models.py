@@ -3,7 +3,8 @@
 
 from django.db import models
 
-from api_app.models import AbstractReport, PythonConfig
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import AbstractReport, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
 from api_app.visualizers_manager.validators import validate_report
@@ -21,10 +22,19 @@ class VisualizerReport(AbstractReport):
 
 
 class VisualizerConfig(PythonConfig):
-    playbook = models.ForeignKey(
+    playbooks = models.ManyToManyField(
         PlaybookConfig,
         related_name="visualizers",
-        on_delete=models.CASCADE,
+    )
+    python_module = models.ForeignKey(
+        PythonModule,
+        on_delete=models.PROTECT,
+        related_name="%(class)ss",
+        limit_choices_to={
+            "base_path__in": [
+                PythonModuleBasePaths.Visualizer.value,
+            ]
+        },
     )
 
     @classmethod

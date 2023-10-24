@@ -223,7 +223,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     ) -> Generator[VisualizerConfig, None, None]:
         if playbook_to_execute:
             yield from VisualizerConfig.objects.filter(
-                playbook=playbook_to_execute
+                playbooks__in=[playbook_to_execute]
             ).annotate_runnable(self.context["request"].user).filter(runnable=True)
 
     def set_connectors_to_execute(

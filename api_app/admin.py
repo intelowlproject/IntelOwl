@@ -155,7 +155,9 @@ class AbstractConfigAdminView(JsonViewerAdminView):
 
     @admin.display(description="Disabled in orgs")
     def disabled_in_orgs(self, instance: AbstractConfig):
-        return [org.name for org in instance.disabled_in_organizations.all()]
+        return list(
+            instance.disabled_in_organizations.all().values_list("name", flat=True)
+        )
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):

@@ -306,7 +306,6 @@ class VisualizerTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             description="test",
-            playbook=pc,
         )
         ar = AnalyzerReport.objects.create(
             config=pc.analyzers.first(), job=job, task_id=uuid()

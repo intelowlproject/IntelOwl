@@ -1,7 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse, HttpResponseRedirect
 
 from api_app.admin import AbstractConfigAdminView, ModelWithOwnershipAdminView
 from api_app.choices import ScanMode
@@ -48,3 +50,10 @@ class PlaybookConfigAdminView(AbstractConfigAdminView, ModelWithOwnershipAdminVi
     @staticmethod
     def scan_mode(obj: PlaybookConfig) -> str:
         return ScanMode(obj.scan_mode).name
+
+    def change_view(self, request, *args, **kwargs) -> HttpResponse:
+        try:
+            return super().change_view(request, *args, **kwargs)
+        except ValidationError as e:
+            self.message_user(request, str(e), level=messages.ERROR)
+            return HttpResponseRedirect(request.path)

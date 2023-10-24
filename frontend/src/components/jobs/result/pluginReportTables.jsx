@@ -12,8 +12,8 @@ import {
   DateHoverable,
 } from "@certego/certego-ui";
 
-import { StatusTag } from "../../common";
-import { killPlugin, retryPlugin } from "./api";
+import { StatusTag } from "../../common/StatusTag";
+import { killPlugin, retryPlugin } from "./jobApi";
 import { pluginStatuses } from "../../../constants/constants";
 
 const tableProps = {

@@ -8,7 +8,7 @@ import { ContentSection } from "@certego/certego-ui";
 
 import { UUID_REGEX } from "../../constants/index";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
-import { resetPassword } from "./api";
+import { resetPassword } from "./authApi";
 import { RECAPTCHA_SITEKEY } from "../../constants/environment";
 import {
   PasswordValidator,

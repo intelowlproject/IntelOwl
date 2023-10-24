@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import classnames from "classnames";
 import { STATUS_COLORMAP } from "../../constants";
 
-export default function StatusTag(props) {
+export function StatusTag(props) {
   const { status, className, ...rest } = props;
 
   const statusLower = status.toLowerCase();

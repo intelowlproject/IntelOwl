@@ -29,7 +29,7 @@ import {
   reportedVisualizerNumber,
   ReportedPluginTooltip,
 } from "./utils/reportedPlugins";
-import { StatusIcon } from "../../common";
+import { StatusIcon } from "../../common/StatusIcon";
 import VisualizerReport from "./visualizer/visualizer";
 import {
   jobFinalStatuses,

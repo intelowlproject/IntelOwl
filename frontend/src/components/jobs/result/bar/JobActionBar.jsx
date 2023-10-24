@@ -13,8 +13,8 @@ import {
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
-import { downloadJobSample, deleteJob } from "../api";
-import { createJob } from "../../../scan/api";
+import { downloadJobSample, deleteJob } from "../jobApi";
+import { createJob } from "../../../scan/scanApi";
 import { scanMode, jobResultSection } from "../../../../constants/constants";
 import { DeleteIcon, CommentIcon, retryJobIcon } from "../utils/icons";
 

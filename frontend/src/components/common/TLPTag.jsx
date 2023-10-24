@@ -7,7 +7,7 @@ import {
   TLP_DESCRIPTION_MAP,
 } from "../../constants";
 
-export default function TLPTag(props) {
+export function TLPTag(props) {
   const { value, ...rest } = props;
   const badgeId = `tlptag-badge__${value}`;
   const color = TLP_COLOR_MAP?.[value] || "#dfe1e2";

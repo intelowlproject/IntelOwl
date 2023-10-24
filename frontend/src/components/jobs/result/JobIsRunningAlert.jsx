@@ -5,7 +5,7 @@ import { MdPauseCircleOutline } from "react-icons/md";
 
 import { IconAlert, IconButton } from "@certego/certego-ui";
 
-import { killJob } from "./api";
+import { killJob } from "./jobApi";
 import { jobStatuses } from "../../../constants/constants";
 
 import {

@@ -11,7 +11,9 @@ import {
   CopyToClipboardButton,
 } from "@certego/certego-ui";
 
-import { JobTag, StatusTag, TLPTag } from "../../common";
+import { JobTag } from "../../common/JobTag";
+import { StatusTag } from "../../common/StatusTag";
+import { TLPTag } from "../../common/TLPTag";
 import {
   TLP_CHOICES,
   FILE_MIME_TYPES,

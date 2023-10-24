@@ -23,7 +23,7 @@ import {
   InviteOnlyAlert,
   ConfigurationModalAlert,
 } from "./utils/registration-alert";
-import { registerUser, checkConfiguration } from "./api";
+import { registerUser, checkConfiguration } from "./authApi";
 import {
   EmailValidator,
   PasswordValidator,

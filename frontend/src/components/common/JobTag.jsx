@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Badge } from "reactstrap";
 
-export default function JobTag(props) {
+export function JobTag(props) {
   const { tag, ...rest } = props;
 
   return (

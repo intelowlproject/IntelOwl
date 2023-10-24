@@ -20,7 +20,10 @@ import {
 } from "@certego/certego-ui";
 import { processTimeMMSS } from "../../../utils/time";
 
-import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../common";
+import { JobTag } from "../../common/JobTag";
+import { PlaybookTag } from "../../common/PlaybookTag";
+import { StatusTag } from "../../common/StatusTag";
+import { TLPTag } from "../../common/TLPTag";
 
 export function JobInfoCard({ job }) {
   // local state

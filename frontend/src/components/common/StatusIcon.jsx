@@ -33,7 +33,7 @@ const STATUS_ICON_MAP = {
   failed: IoMdCloseCircleOutline,
 };
 
-export default function StatusIcon(props) {
+export function StatusIcon(props) {
   const { status, className, ...rest } = props;
 
   const statusLower = status.toLowerCase();

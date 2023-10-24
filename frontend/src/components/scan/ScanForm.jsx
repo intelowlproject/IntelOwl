@@ -47,15 +47,15 @@ import {
   scanTypes,
 } from "../../constants";
 import { scanMode, jobResultSection } from "../../constants/constants";
-import { TLPTag, markdownToHtml, JobTag } from "../common";
-import {
-  RuntimeConfigurationModal,
-  RecentScans,
-  TagSelectInput,
-} from "./utils";
-import { createJob } from "./api";
+import { TLPTag } from "../common/TLPTag";
+import { markdownToHtml } from "../common/markdownToHtml";
+import { JobTag } from "../common/JobTag";
+import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
+import RecentScans from "./utils/RecentScans";
+import { TagSelectInput } from "./utils/TagSelectInput";
+import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
-import { parseScanCheckTime } from "../plugins/utils/utils";
+import { parseScanCheckTime } from "../plugins/types/utils";
 
 function DangerErrorMessage(fieldName) {
   return (

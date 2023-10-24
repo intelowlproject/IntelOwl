@@ -6,13 +6,13 @@ import { Modal, ModalHeader, ModalBody, Button } from "reactstrap";
 import { ContentSection, CustomJsonInput } from "@certego/certego-ui";
 
 import usePluginConfigurationStore from "../../../stores/usePluginConfigurationStore";
-import markdownToHtml from "../../common/markdownToHtml";
+import { markdownToHtml } from "../../common/markdownToHtml";
 
 // constants
 const stateSelector = (state) => [state.analyzers, state.connectors];
 
 // components
-export default function RuntimeConfigurationModal(props) {
+export function RuntimeConfigurationModal(props) {
   const { isOpen, toggle, formik, ...rest } = props;
 
   const [jsonInput, setJsonInput] = React.useState({});

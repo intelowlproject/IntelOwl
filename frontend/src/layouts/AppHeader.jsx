@@ -27,7 +27,7 @@ import { INTELOWL_DOCS_URL, PUBLIC_URL } from "../constants/environment";
 
 // local
 import UserMenu from "./widgets/UserMenu";
-import NotificationPopoverButton from "../components/misc/notification/NotificationPopoverButton";
+import NotificationPopoverButton from "../components/jobs/notification/NotificationPopoverButton";
 import { useAuthStore } from "../stores";
 import { useGuideContext } from "../contexts/GuideContext";
 

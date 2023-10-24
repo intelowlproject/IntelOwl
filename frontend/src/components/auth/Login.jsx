@@ -23,7 +23,7 @@ import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { RecaptchaValidator } from "./utils/validator";
 import { ConfigurationModalAlert } from "./utils/registration-alert";
 import { useAuthStore } from "../../stores";
-import { checkConfiguration } from "./api";
+import { checkConfiguration } from "./authApi";
 
 import {
   ResendVerificationEmailButton,

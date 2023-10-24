@@ -16,7 +16,7 @@ import { GoBackButton } from "@certego/certego-ui";
 
 import { Formik, Field } from "formik";
 
-import { createComment, deleteComment } from "./api";
+import { createComment, deleteComment } from "./commentApi";
 
 import { useAuthStore } from "../../../../../stores";
 

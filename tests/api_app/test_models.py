@@ -57,7 +57,6 @@ class AbstractConfigTestCase(CustomTestCase):
             ),
             disabled=False,
             routing_key="wrong_key",
-            playbook=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
             muc.full_clean()
@@ -70,7 +69,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         result = muc._is_configured(self.user)
         self.assertTrue(result)
@@ -106,7 +104,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -377,7 +374,6 @@ class PluginConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             name="test",

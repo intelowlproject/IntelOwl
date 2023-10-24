@@ -208,20 +208,46 @@ class CAPEsandbox(FileAnalyzer):
         task_id,
     ) -> dict:
         logger.info(
-            f"Job: {self.job_id} ->"
-            f"Sleeping for the entire duration of the analysis: {self.timeout}s"
+            f" Job: {self.job_id} -> "
+            f"The analysis starts in 30 seconds on average, sleeping..."
         )
-        time.sleep(self.timeout)
+        time.sleep(30)  # empirical value
 
+        # decreasing timeout:
+        #   real analysis duration with poll distance of 1 minute + the remaining module
+        #   empirical value of processing duration time
+        #   real polling with max tries
+        #   final attempts in case there is a bottleneck
+        timeout_attempts = (
+            [60] * (self.timeout // 60)
+            + [self.timeout % 60]
+            + [50]
+            + [self.poll_distance] * self.max_tries
+            + [60] * 3
+        )
+
+        tot_time = sum(timeout_attempts)
+        if tot_time > 600:
+            logger.warning(
+                f" Job: {self.job_id} -> "
+                f"Broken soft time limit!! "
+                f"The analysis in the worst case will last {tot_time} seconds"
+            )
+
+        initial_guesses = len(timeout_attempts) - self.max_tries
         results = None
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
-        for try_ in range(self.max_tries):
+
+        for try_ in range(len(timeout_attempts)):
             attempt = try_ + 1
             try:
+                guess = " guess in case of failing " if try_ < initial_guesses else " "
+
                 logger.info(
                     f" Job: {self.job_id} -> "
-                    f"Starting poll number #{attempt}/{self.max_tries}"
+                    f"Starting{guess}poll number #{attempt}/{len(timeout_attempts)}"
                 )
+
                 try:
                     request = self.__session.get(
                         status_api, timeout=self.requests_timeout
@@ -273,7 +299,7 @@ class CAPEsandbox(FileAnalyzer):
 
                     logger.info(
                         f" Job: {self.job_id} ->"
-                        f"Poll number #{attempt}/{self.max_tries} fetched"
+                        f"Poll{guess}number #{attempt}/{len(timeout_attempts)} fetched"
                         " the results of the analysis."
                         " stopping polling.."
                     )
@@ -289,12 +315,11 @@ class CAPEsandbox(FileAnalyzer):
                 logger.info(
                     f"Job: {self.job_id} -> "
                     "Continuing the poll at attempt number: "
-                    f"#{attempt}/{self.max_tries}. {e}. "
-                    f"Sleeping for {self.poll_distance} seconds."
+                    f"#{attempt}/{len(timeout_attempts)}. {e}. "
+                    f"Sleeping for {timeout_attempts[try_]} seconds."
                 )
-                last_try = self.max_tries - 1
-                if try_ != last_try:  # avoiding useless last sleep
-                    time.sleep(self.poll_distance)
+                if try_ != self.max_tries - 1:  # avoiding useless last sleep
+                    time.sleep(timeout_attempts[try_])
 
         if not results:
             raise AnalyzerRunException(f"{self.job_id} poll ended without results")

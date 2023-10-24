@@ -29,7 +29,7 @@ class Slack(Connector):
         return (
             "Analysis executed "
             f"{f'by <@{self.slack_username}> ' if self.slack_username else ''}"
-            f"for <{self._job.url}|{self._job.analyzed_object_name}>"
+            f"for <{self._job.url}/raw|{self._job.analyzed_object_name}>"
         )
 
     def run(self) -> dict:

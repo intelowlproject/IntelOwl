@@ -470,10 +470,12 @@ class Job(models.Model):
         from api_app.pivots_manager.models import PivotConfig
 
         if self.playbook_to_execute:
-            return self.playbook_to_execute.pivots.all()
-        return PivotConfig.objects.valid(
-            self.analyzers_to_execute.all(), self.connectors_to_execute.all()
-        )
+            pivots = self.playbook_to_execute.pivots.all()
+        else:
+            pivots = PivotConfig.objects.valid(
+                self.analyzers_to_execute.all(), self.connectors_to_execute.all()
+            )
+        return pivots.annotate_runnable(self.user).filter(runnable=True)
 
     @property
     def _final_status_signature(self) -> Signature:

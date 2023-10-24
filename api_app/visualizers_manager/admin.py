@@ -14,4 +14,9 @@ class VisualizerReportAdminView(AbstractReportAdminView):
 
 @admin.register(VisualizerConfig)
 class VisualizerConfigAdminView(PythonConfigAdminView):
-    list_display = PythonConfigAdminView.list_display + ("playbook",)
+    list_display = PythonConfigAdminView.list_display + ("get_playbooks",)
+    filter_horizontal = ["playbooks"]
+
+    @admin.display(description="Playbooks")
+    def get_playbooks(self, instance: VisualizerConfig):
+        return list(instance.playbooks.values_list("name", flat=True))

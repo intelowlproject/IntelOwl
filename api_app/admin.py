@@ -62,8 +62,22 @@ class TagAdminView(admin.ModelAdmin):
     search_fields = ("label", "color")
 
 
+class ModelWithOwnershipAdminView:
+    list_display = (
+        "for_organization",
+        "get_owner",
+    )
+    list_filter = ("for_organization", "owner")
+
+    @admin.display(description="Owner")
+    def get_owner(self, instance: PluginConfig):
+        if instance.owner:
+            return instance.owner.username
+        return "-"
+
+
 @admin.register(PluginConfig)
-class PluginConfigAdminView(admin.ModelAdmin):
+class PluginConfigAdminView(ModelWithOwnershipAdminView, admin.ModelAdmin):
     list_display = (
         "pk",
         "get_config",
@@ -72,19 +86,13 @@ class PluginConfigAdminView(admin.ModelAdmin):
         "get_owner",
         "get_type",
         "value",
-    )
+    ) + ModelWithOwnershipAdminView.list_display
+
     search_fields = ["parameter__name", "value"]
-    list_filter = ("for_organization",)
 
     @admin.display(description="Config")
     def get_config(self, instance: PluginConfig):
         return instance.config.name
-
-    @admin.display(description="Owner")
-    def get_owner(self, instance: PluginConfig):
-        if instance.owner:
-            return instance.owner.username
-        return "default"
 
     @admin.display(description="Type")
     def get_type(self, instance: PluginConfig):

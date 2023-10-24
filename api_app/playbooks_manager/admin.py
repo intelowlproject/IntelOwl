@@ -3,13 +3,13 @@
 
 from django.contrib import admin
 
-from api_app.admin import AbstractConfigAdminView
+from api_app.admin import AbstractConfigAdminView, ModelWithOwnershipAdminView
 from api_app.choices import ScanMode
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
 @admin.register(PlaybookConfig)
-class PlaybookConfigAdminView(AbstractConfigAdminView):
+class PlaybookConfigAdminView(AbstractConfigAdminView, ModelWithOwnershipAdminView):
     list_display = (
         "name",
         "type",
@@ -18,10 +18,12 @@ class PlaybookConfigAdminView(AbstractConfigAdminView):
         "get_connectors",
         "get_pivots",
         "get_visualizers",
-        "runtime_configuration",
         "scan_mode",
-    )
+    ) + ModelWithOwnershipAdminView.list_display
     filter_horizontal = ["analyzers", "connectors", "pivots", "tags"]
+    list_filter = (
+        AbstractConfigAdminView.list_filter + ModelWithOwnershipAdminView.list_filter
+    )
 
     @staticmethod
     def _get_plugins(qs):

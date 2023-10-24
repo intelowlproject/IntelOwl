@@ -25,7 +25,8 @@ class Pivot(Visualizer):
                                 disable=False,
                             ),
                             value=self.Base(
-                                value=f"Job #{self._job.parent_job.pk} with playbook {self._job.parent_job.playbook_to_execute} "
+                                value=f"Job #{self._job.parent_job.pk} with "
+                                      f"playbook {self._job.parent_job.playbook_to_execute} "
                                 if self._job.parent_job
                                 else "",
                                 link=Job.objects.get(self._job.parent_job)

@@ -50,5 +50,5 @@ def m2m_changed_pivots_playbook_config(
         if wrong_pks:
             raise ValidationError(
                 f"You can't set pivots {wrong_pks} because"
-                f" the playbook does not have all the required plugins"
+                " the playbook does not have all the required plugins"
             )

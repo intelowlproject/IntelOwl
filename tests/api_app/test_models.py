@@ -82,7 +82,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,

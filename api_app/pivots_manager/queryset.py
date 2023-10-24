@@ -26,4 +26,4 @@ class PivotConfigQuerySet(PythonConfigQuerySet):
                 )
                 | Q(related_connector_configs=None)
             )
-        return qs
+        return qs.distinct()

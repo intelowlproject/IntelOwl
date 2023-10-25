@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { UncontrolledTooltip } from "reactstrap";
-import { pluginFinalStatuses } from "../../../../constants/constants";
+import { pluginFinalStatuses } from "../../../../constants/pluginConst";
 
 export function reportedVisualizerNumber(
   visualizersReportedList,

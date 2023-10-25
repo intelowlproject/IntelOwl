@@ -34,18 +34,12 @@ import {
   CONNECTORS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
 } from "../../../constants/apiURLs";
-import { pluginType, scanMode } from "../../../constants/constants";
-
-export function parseScanCheckTime(time) {
-  // scan_check_time is in format days:hours:minutes:seconds, we need to convert them to hours
-  const [daysAgo, hoursAgo] = time
-    .split(":")
-    .map((token) => parseInt(token, 10));
-  return daysAgo * 24 + hoursAgo;
-}
+import { pluginType } from "../../../constants/pluginConst";
+import { scanMode } from "../../../constants/advancedSettingsConst";
+import { parseScanCheckTime } from "../../../utils/time";
 
 export function PluginInfoCard({ pluginInfo }) {
-  console.debug(pluginInfo);
+  console.debug(`pluginInfo: ${JSON.stringify(pluginInfo)}`);
   return (
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
@@ -195,7 +189,8 @@ export function PluginInfoCard({ pluginInfo }) {
               {pluginInfo?.scan_mode && (
                 <li>
                   <strong>Scan mode:</strong>{" "}
-                  {pluginInfo.scan_mode === scanMode[0]
+                  {pluginInfo.scan_mode.toString() ===
+                  scanMode.FORCE_NEW_ANALYSIS
                     ? "force new analysis"
                     : `a new scan is not performed if there is a similar one finished in the last 
                 ${parseScanCheckTime(pluginInfo?.scan_check_time)} hours`}

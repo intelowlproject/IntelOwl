@@ -14,12 +14,13 @@ import {
 import { JobTag } from "../../common/JobTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
+import { TLP_CHOICES } from "../../../constants/advancedSettingsConst";
 import {
-  TLP_CHOICES,
+  jobStatuses,
   FILE_MIME_TYPES,
   OBSERVABLE_CLASSIFICATION,
-} from "../../../constants";
-import { jobStatuses, jobResultSection } from "../../../constants/constants";
+} from "../../../constants/jobConst";
+import { jobResultSection } from "../../../constants/miscConst";
 import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
 import { processTimeMMSS } from "../../../utils/time";
 

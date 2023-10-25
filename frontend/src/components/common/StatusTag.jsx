@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import classnames from "classnames";
-import { STATUS_COLORMAP } from "../../constants";
+import { STATUS_COLORMAP } from "../../constants/colorConst";
 
 export function StatusTag(props) {
   const { status, className, ...rest } = props;

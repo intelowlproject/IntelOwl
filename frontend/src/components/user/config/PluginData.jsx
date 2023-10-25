@@ -11,7 +11,7 @@ import {
 import { MdCancel } from "react-icons/md";
 import { Button, Col, FormGroup, Input, Row } from "reactstrap";
 import { usePluginConfigurationStore } from "../../../stores";
-import { pluginType, configType } from "../../../constants/constants";
+import { pluginType, pluginConfigType } from "../../../constants/pluginConst";
 
 import {
   createCustomConfig,
@@ -293,7 +293,8 @@ export function PluginData({
                                     placeholder={placeholder}
                                     value={
                                       additionalEntryData.config_type ===
-                                        configType.SECRET && !configuration.edit
+                                        pluginConfigType.SECRET &&
+                                      !configuration.edit
                                         ? "**********"
                                         : configuration.value
                                     }

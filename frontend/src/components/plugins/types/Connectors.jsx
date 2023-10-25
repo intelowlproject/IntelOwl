@@ -2,7 +2,7 @@ import React from "react";
 
 import { connectorTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
-import { pluginType } from "../../../constants/constants";
+import { pluginType } from "../../../constants/pluginConst";
 
 export default function Connectors() {
   console.debug("Connectors rendered!");

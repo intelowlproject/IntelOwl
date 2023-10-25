@@ -6,7 +6,7 @@ import useTitle from "react-use/lib/useTitle";
 
 import { ContentSection } from "@certego/certego-ui";
 
-import { UUID_REGEX } from "../../constants/index";
+import { UUID_REGEX } from "../../constants/regexConst";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { resetPassword } from "./authApi";
 import { RECAPTCHA_SITEKEY } from "../../constants/environment";

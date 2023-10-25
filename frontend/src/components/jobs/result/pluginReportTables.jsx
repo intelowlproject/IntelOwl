@@ -14,7 +14,7 @@ import {
 
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
-import { pluginStatuses } from "../../../constants/constants";
+import { pluginStatuses } from "../../../constants/pluginConst";
 
 const tableProps = {
   columns: [

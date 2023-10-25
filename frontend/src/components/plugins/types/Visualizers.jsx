@@ -2,7 +2,7 @@ import React from "react";
 
 import { visualizerTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
-import { pluginType } from "../../../constants/constants";
+import { pluginType } from "../../../constants/pluginConst";
 
 export default function Visualizers() {
   console.debug("Visualizers rendered!");

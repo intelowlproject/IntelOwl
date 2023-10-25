@@ -1,5 +1,5 @@
 import { PUBLIC_URL } from "../../constants/environment";
-import { jobResultSection } from "../../constants/constants";
+import { jobResultSection } from "../../constants/miscConst";
 
 // This function is used to generate a notification when a Job is terminated
 export function generateJobNotification(observableName, jobId) {

@@ -9,7 +9,7 @@ import {
   BooleanIcon,
 } from "@certego/certego-ui";
 
-import { TLP_CHOICES } from "../../../constants";
+import { TLP_CHOICES } from "../../../constants/advancedSettingsConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { TLPTag } from "../../common/TLPTag";
 import {

@@ -40,13 +40,13 @@ import {
 } from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
 import { usePluginConfigurationStore } from "../../stores";
+import { TLP_COLOR_MAP, TLP_DESCRIPTION_MAP } from "../../constants/colorConst";
 import {
   TLP_CHOICES,
-  TLP_COLOR_MAP,
-  TLP_DESCRIPTION_MAP,
   scanTypes,
-} from "../../constants";
-import { scanMode, jobResultSection } from "../../constants/constants";
+  scanMode,
+} from "../../constants/advancedSettingsConst";
+import { jobResultSection } from "../../constants/miscConst";
 import { TLPTag } from "../common/TLPTag";
 import { markdownToHtml } from "../common/markdownToHtml";
 import { JobTag } from "../common/JobTag";
@@ -55,7 +55,7 @@ import RecentScans from "./utils/RecentScans";
 import { TagSelectInput } from "./utils/TagSelectInput";
 import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
-import { parseScanCheckTime } from "../plugins/types/utils";
+import { parseScanCheckTime } from "../../utils/time";
 
 function DangerErrorMessage(fieldName) {
   return (

@@ -11,7 +11,7 @@ import {
 } from "../../constants/apiURLs";
 import { prettifyErrors } from "../../utils/api";
 
-import { scanMode } from "../../constants/constants";
+import { scanMode } from "../../constants/advancedSettingsConst";
 
 function createJobPayload(
   analyzables,

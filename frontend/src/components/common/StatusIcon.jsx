@@ -12,8 +12,8 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 import { RiLoader2Fill } from "react-icons/ri";
 
 import { UncontrolledTooltip } from "reactstrap";
-import { STATUS_COLORMAP } from "../../constants";
-import { jobFinalStatuses } from "../../constants/constants";
+import { STATUS_COLORMAP } from "../../constants/colorConst";
+import { jobFinalStatuses } from "../../constants/jobConst";
 
 const STATUS_ICON_MAP = {
   pending: MdOutlinePending,

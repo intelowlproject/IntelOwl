@@ -2,7 +2,7 @@ import React from "react";
 
 import { pivotTableColumns } from "./pluginTableColumns";
 import PluginWrapper from "./PluginWrapper";
-import { pluginType } from "../../../constants/constants";
+import { pluginType } from "../../../constants/pluginConst";
 
 export default function Pivots() {
   console.debug("Pivots rendered!");

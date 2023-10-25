@@ -31,11 +31,9 @@ import {
 } from "./utils/reportedPlugins";
 import { StatusIcon } from "../../common/StatusIcon";
 import VisualizerReport from "./visualizer/visualizer";
-import {
-  jobFinalStatuses,
-  pluginStatuses,
-  jobResultSection,
-} from "../../../constants/constants";
+import { jobFinalStatuses } from "../../../constants/jobConst";
+import { pluginStatuses } from "../../../constants/pluginConst";
+import { jobResultSection } from "../../../constants/miscConst";
 
 import { JobInfoCard } from "./JobInfoCard";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";

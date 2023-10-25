@@ -15,7 +15,8 @@ import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { downloadJobSample, deleteJob } from "../jobApi";
 import { createJob } from "../../../scan/scanApi";
-import { scanMode, jobResultSection } from "../../../../constants/constants";
+import { scanMode } from "../../../../constants/advancedSettingsConst";
+import { jobResultSection } from "../../../../constants/miscConst";
 import { DeleteIcon, CommentIcon, retryJobIcon } from "../utils/icons";
 
 export function JobActionsBar({ job }) {

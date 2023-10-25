@@ -1,11 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Badge, UncontrolledTooltip } from "reactstrap";
-import {
-  TLP_CHOICES,
-  TLP_COLOR_MAP,
-  TLP_DESCRIPTION_MAP,
-} from "../../constants";
+import { TLP_COLOR_MAP, TLP_DESCRIPTION_MAP } from "../../constants/colorConst";
+import { TLP_CHOICES } from "../../constants/advancedSettingsConst";
 
 export function TLPTag(props) {
   const { value, ...rest } = props;

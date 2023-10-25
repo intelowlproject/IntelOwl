@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import useTitle from "react-use/lib/useTitle";
 import { Container } from "reactstrap";
 import Config from "./Config";
-import { configType } from "../../../constants/constants";
+import { pluginConfigType } from "../../../constants/pluginConst";
 
 export default function Secrets({
   additionalConfigData,
@@ -20,12 +20,13 @@ export default function Secrets({
         configFilter={(resp) =>
           resp.filter(
             (item) =>
-              filterFunction(item) && item.config_type === configType.SECRET,
+              filterFunction(item) &&
+              item.config_type === pluginConfigType.SECRET,
           )
         }
         additionalConfigData={{
           ...additionalConfigData,
-          config_type: configType.SECRET,
+          config_type: pluginConfigType.SECRET,
         }}
         dataName="secrets"
         editable={editable}

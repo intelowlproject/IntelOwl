@@ -9,24 +9,11 @@ import {
   PLAYBOOKS_CONFIG_URI,
 } from "../../../../src/constants/apiURLs";
 import {
-  parseScanCheckTime,
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
 } from "../../../../src/components/plugins/types/utils";
 
 jest.mock("axios");
-
-describe("parseScanCheckTime test", () => {
-  test("correct time: days:hours:minutes:seconds", () => {
-    const time = parseScanCheckTime("01:02:00:00");
-    expect(time).toBe(26);
-  });
-
-  test("not correct time: days-hours-minutes-seconds", () => {
-    const time = parseScanCheckTime("01-02-00-00");
-    expect(time).toBe(NaN);
-  });
-});
 
 describe("PluginHealthCheckButton test", () => {
   test("Health check - status true", async () => {

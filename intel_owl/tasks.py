@@ -20,7 +20,7 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.choices import Status
 from intel_owl import secrets
-from intel_owl.celery import app
+from intel_owl.celery import app, get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -236,6 +236,9 @@ def run_plugin(
     from api_app.classes import Plugin
     from api_app.models import PythonModule
 
+    logger.info(
+        f"Configuring plugin {plugin_config_pk} for job {job_id} with task {task_id}"
+    )
     plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
         pk=python_module_pk
     ).python_class
@@ -245,6 +248,9 @@ def run_plugin(
         job_id=job_id,
         runtime_configuration=runtime_configuration,
         task_id=task_id,
+    )
+    logger.info(
+        f"Starting plugin {plugin_config_pk} for job {job_id} with task {task_id}"
     )
     try:
         plugin.start()
@@ -311,7 +317,7 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
         python_module_pk = json.loads(task.kwargs)["python_module_pk"]
         logger.info(f"Updating {python_module_pk}")
         update.apply_async(
-            routing_key=settings.DEFAULT_QUEUE,
+            queue=get_queue_name(settings.DEFAULT_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
             args=[python_module_pk],
         )
@@ -320,7 +326,7 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
     for user in User.objects.exclude(email=""):
         logger.info(f"Creating cache for user {user.username}")
         create_caches.apply_async(
-            routing_key=settings.DEFAULT_QUEUE,
+            queue=get_queue_name(settings.DEFAULT_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )

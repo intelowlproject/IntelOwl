@@ -25,6 +25,7 @@ from rest_framework.fields import SerializerMethodField
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.apps.user.models import User
+from intel_owl.celery import get_queue_name
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.models import AnalyzerConfig, MimeTypes
@@ -34,6 +35,7 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
+from .interfaces import ModelWithOwnership
 from .models import (
     AbstractReport,
     Comment,
@@ -162,6 +164,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     @staticmethod
     def set_default_value_from_playbook(attrs: Dict) -> None:
+        playbook = attrs["playbook_requested"]
         # we are changing attrs in place
         for attribute in [
             "scan_mode",
@@ -170,11 +173,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "runtime_configuration",
         ]:
             if attribute not in attrs:
-                if playbook := attrs.get("playbook_requested"):
-                    attrs[attribute] = getattr(playbook, attribute)
+                attrs[attribute] = getattr(playbook, attribute)
 
     def validate(self, attrs: dict) -> dict:
-        self.set_default_value_from_playbook(attrs)
+        if attrs.get("playbook_requested"):
+            self.set_default_value_from_playbook(attrs)
         if "tlp" not in attrs:
             attrs["tlp"] = TLP.CLEAR.value
         if "scan_mode" not in attrs:
@@ -185,7 +188,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "scan_check_time"
         ):
             attrs["scan_check_time"] = datetime.timedelta(hours=24)
-        elif attrs.get("scan_mode") == ScanMode.FORCE_NEW_ANALYSIS:
+        elif attrs.get("scan_mode") == ScanMode.FORCE_NEW_ANALYSIS.value:
             attrs["scan_check_time"] = None
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
@@ -220,7 +223,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     ) -> Generator[VisualizerConfig, None, None]:
         if playbook_to_execute:
             yield from VisualizerConfig.objects.filter(
-                playbook=playbook_to_execute
+                playbooks__in=[playbook_to_execute]
             ).annotate_runnable(self.context["request"].user).filter(runnable=True)
 
     def set_connectors_to_execute(
@@ -315,7 +318,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             logger.info(f"Sending task for job {job.pk}")
             job_pipeline.apply_async(
                 args=[job.pk],
-                routing_key=settings.DEFAULT_QUEUE,
+                queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
             )
 
@@ -878,7 +881,41 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
         fields = rfs.ALL_FIELDS
 
 
-class PluginConfigSerializer(rfs.ModelSerializer):
+class ModelWithOwnershipSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = ModelWithOwnership
+        fields = ("for_organization", "owner")
+        abstract = True
+
+    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
+    organization = rfs.SlugRelatedField(
+        queryset=Organization.objects.all(),
+        required=False,
+        allow_null=True,
+        slug_field="name",
+        write_only=True,
+        default=None,
+    )
+
+    def validate(self, attrs):
+        org = attrs.pop("organization", None)
+        if org:
+            # 1 - we are owner  OR
+            # 2 - we are admin of the same org
+            if org.owner == attrs["owner"] or (
+                self.context["request"].user.has_membership()
+                and self.context["request"].user.membership.organization.pk == org.pk
+                and self.context["request"].user.membership.is_admin
+            ):
+                attrs["for_organization"] = True
+            else:
+                raise ValidationError(
+                    {"detail": "You are not owner or admin of the organization"}
+                )
+        return super().validate(attrs)
+
+
+class PluginConfigSerializer(ModelWithOwnershipSerializer):
     class Meta:
         model = PluginConfig
         fields = (
@@ -941,14 +978,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
-    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-    organization = rfs.SlugRelatedField(
-        queryset=Organization.objects.all(),
-        required=False,
-        allow_null=True,
-        slug_field="name",
-        write_only=True,
-    )
     value = CustomValueField()
 
     def validate_value_type(self, value: Any, parameter: Parameter):
@@ -964,27 +993,6 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         if self.partial:
             # we are in an update
             return attrs
-        if "organization" in attrs and attrs["organization"]:
-            org = attrs.pop("organization")
-            # we raise ValidationError() when
-            # (NOR OPERATOR)
-            # 1 - we are not owner  OR
-            # 2 - we are not admin of the same org
-            if not (
-                org.owner == attrs["owner"]
-                or (
-                    self.context["request"].user.has_membership()
-                    and self.context["request"].user.membership.organization.pk
-                    == org.pk
-                    and self.context["request"].user.membership.is_admin
-                )
-            ):
-                raise ValidationError(
-                    {"detail": "You are not owner or admin of the organization"}
-                )
-            else:
-                attrs["for_organization"] = True
-
         _value = attrs["value"]
         # retro compatibility
         _type = attrs.pop("type")
@@ -1010,7 +1018,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
         attrs["parameter"] = parameter
         attrs[class_.snake_case_name] = config
-        return attrs
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         self.validate_value_type(validated_data["value"], instance.parameter)
@@ -1050,7 +1058,7 @@ class ParameterSerializer(rfs.ModelSerializer):
         list_serializer_class = ParamListSerializer
 
     def get_value(self, param: Parameter):
-        if hasattr(param, "value"):
+        if hasattr(param, "value") and hasattr(param, "is_from_org"):
             if param.is_secret and param.is_from_org:
                 return "redacted"
             return param.value
@@ -1152,6 +1160,9 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
 
     class Meta:
         exclude = ["disabled_in_organizations"]
+
+    def to_representation(self, instance):
+        return super(PythonConfigSerializer, self).to_representation(instance)
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):

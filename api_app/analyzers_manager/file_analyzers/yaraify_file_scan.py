@@ -42,13 +42,14 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
     def run(self):
         name_to_send = self.filename if self.filename else self.md5
         file = self.read_file_bytes()
+        logger.info(f"checking hash: {self.md5}")
 
         hash_scan = YARAify.run(self)
         query_status = hash_scan.get("query_status")
+        logger.info(f"{query_status=} for hash {self.md5}")
 
         if query_status == "ok":
             logger.info(f"found YARAify hash scan and returning it. {self.md5}")
-            hash_scan["hash_check_found"] = True
             return hash_scan
 
         result = hash_scan

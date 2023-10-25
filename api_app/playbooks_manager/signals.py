@@ -1,7 +1,10 @@
+from typing import Type
+
 from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
+from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
@@ -31,16 +34,21 @@ def m2m_changed_pivots_playbook_config(
     instance: PlaybookConfig,
     action: str,
     reverse,
-    model,
+    model: Type[PivotConfig],
     pk_set,
     using,
     *args,
     **kwargs,
 ):
     if action == "pre_add":
-        valid_objects = model.objects.filter(pk__in=pk_set).valid(
+        objects = model.objects.filter(pk__in=pk_set)
+        valid_pks = objects.valid(
             instance.analyzers.all(), instance.connectors.all()
-        )
-        wrong_pks = ", ".join([pk for pk in pk_set if pk not in valid_objects])
-        if wrong_pks:
-            raise ValidationError(f"You can't set pivots {wrong_pks}")
+        ).values_list("pk", flat=True)
+        wrong_pivots = objects.exclude(pk__in=valid_pks)
+        if wrong_pivots.exists():
+            raise ValidationError(
+                f"You can't set pivot{'s' if wrong_pivots.size()> 0 else ''}"
+                f" {','.join(wrong_pivots.values_list('name', flat=True))} because"
+                " the playbook does not have all the required plugins"
+            )

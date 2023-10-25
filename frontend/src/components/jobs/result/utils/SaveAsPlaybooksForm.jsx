@@ -27,6 +27,9 @@ const onValidate = (values) => {
   } else if (values.name.length < minLength) {
     errors.name = `This field must be at least ${minLength} characters long`;
   }
+  if (!values.description) {
+    errors.description = "This field is required.";
+  }
   return errors;
 };
 
@@ -60,7 +63,7 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
           <FormGroup row className="d-flex flex-wrap">
             <Col>
               <div className="p-3">
-                <Label className="required" for="forminput-username" md={12}>
+                <Label className="required" for="forminput-name" md={12}>
                   Playbook name
                 </Label>
                 <Input
@@ -68,12 +71,16 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
                   id="forminput-name"
                   type="text"
                   name="name"
+                  onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                 />
+                {formik.touched.name && (
+                  <small className="text-danger">{formik.errors.name}</small>
+                )}
               </div>
 
               <div className="p-3">
-                <Label className="required" for="forminput-name" md={12}>
+                <Label className="required" for="forminput-description" md={12}>
                   Playbook description
                 </Label>
                 <textarea
@@ -81,8 +88,14 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
                   type="text"
                   name="description"
                   style={{ width: "-webkit-fill-available" }}
+                  onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                 />
+                {formik.touched.description && (
+                  <small className="text-danger">
+                    {formik.errors.description}
+                  </small>
+                )}
               </div>
               <div className="p-3 d-flex justify-content-center">
                 <Button
@@ -113,11 +126,11 @@ function SaveAsPlaybookIcon() {
 }
 
 export function SaveAsPlaybookButton({ job }) {
-  initialValues.analyzers = job.analyzers;
-  initialValues.connectors = job.connectors;
-  initialValues.pivots = job.pivots;
-  initialValues.runtimeConfiguration = job.runtimeConfiguration;
-  initialValues.tags = job.tags;
+  initialValues.analyzers = job.analyzers_to_execute;
+  initialValues.connectors = job.connectors_to_execute;
+  initialValues.pivots = job.pivots_to_execute;
+  initialValues.runtimeConfiguration = job.runtime_configuration;
+  if (job.tags.length) initialValues.tags = job.tags;
   initialValues.tlp = job.tlp;
   initialValues.scan_mode = job.scan_mode;
   initialValues.scan_check_time = job.scan_check_time;

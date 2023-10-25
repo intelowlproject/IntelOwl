@@ -58,7 +58,9 @@ class Yara(Visualizer):
         page1 = self.Page(name="Yara first page")
         h1 = self.HList(value=[self._yara_analyzer()])
         logger.debug(h1.to_dict())
-        page1.add_level(level=1, horizontal_list=h1)
+        page1.add_level(
+            self.Level(position=1, size=self.LevelSize.S_3, horizontal_list=h1)
+        )
         h2 = self.HList(
             value=[
                 self._yara_match_number(yara_num_matches),
@@ -67,8 +69,12 @@ class Yara(Visualizer):
         )
         logger.debug(h2.to_dict())
         page2 = self.Page(name="Yara second page")
-        page2.add_level(level=1, horizontal_list=h1)
-        page2.add_level(level=2, horizontal_list=h2)
+        page2.add_level(
+            self.Level(position=1, size=self.LevelSize.S_3, horizontal_list=h1)
+        )
+        page2.add_level(
+            self.Level(position=2, size=self.LevelSize.S_5, horizontal_list=h2)
+        )
         logger.debug(page1)
         logger.debug(page2)
         return [page1.to_dict(), page2.to_dict()]

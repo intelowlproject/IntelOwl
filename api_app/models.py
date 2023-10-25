@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 from django.utils.timezone import now
 
+from api_app.interfaces import ModelWithOwnership
+
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
 
@@ -20,7 +22,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import Q, QuerySet, UniqueConstraint
+from django.db.models import BaseConstraint, Q, QuerySet, UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -307,56 +309,40 @@ class Job(models.Model):
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)
-        failed_analyzers_reports = self.analyzerreports.filter(
+        failed_analyzers = self.analyzerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-        failed_connector_reports = self.connectorreports.filter(
+        ).values_list("config__pk", flat=True)
+        failed_connector = self.connectorreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-        failed_pivot_reports = self.pivotreports.filter(
+        ).values_list("config__pk", flat=True)
+        failed_pivot = self.pivotreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
+        ).values_list("config__pk", flat=True)
 
-        failed_visualizer_reports = self.visualizerreports.filter(
+        failed_visualizer = self.visualizerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-
-        runner = (
-            self._get_signatures(
-                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
-            )
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_analyzer_configs__isnull=False
-                )
-            )
-            | self._get_signatures(
-                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
-            )
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_connector_configs__isnull=False
-                )
-            )
-            | self._get_signatures(
-                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
-            )
-            | self._final_status_signature
+        ).values_list("config__pk", flat=True)
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.filter(pk__in=failed_analyzers),
+            self.pivots_to_execute.filter(pk__in=failed_pivot),
+            self.connectors_to_execute.filter(pk__in=failed_connector),
+            self.visualizers_to_execute.filter(pk__in=failed_visualizer),
         )
+
         runner.apply_async(
-            routing_key=settings.CONFIG_QUEUE,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
         )
 
@@ -464,7 +450,7 @@ class Job(models.Model):
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def _get_signatures(self, queryset: JobQuerySet) -> Signature:
+    def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
         signatures = list(
             queryset.annotate_runnable(self.user)
@@ -484,43 +470,57 @@ class Job(models.Model):
         from api_app.pivots_manager.models import PivotConfig
 
         if self.playbook_to_execute:
-            return self.playbook_to_execute.pivots.all()
-        return PivotConfig.objects.valid(
-            self.analyzers_to_execute.all(), self.connectors_to_execute.all()
-        )
+            pivots = self.playbook_to_execute.pivots.all()
+        else:
+            pivots = PivotConfig.objects.valid(
+                self.analyzers_to_execute.all(), self.connectors_to_execute.all()
+            )
+        return pivots.annotate_runnable(self.user).filter(runnable=True)
 
     @property
     def _final_status_signature(self) -> Signature:
         return tasks.job_set_final_status.signature(
             args=[self.pk],
             kwargs={},
-            routing_key=settings.CONFIG_QUEUE,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
 
+    def _get_pipeline(
+        self,
+        analyzers: PythonConfigQuerySet,
+        pivots: PythonConfigQuerySet,
+        connectors: PythonConfigQuerySet,
+        visualizers: PythonConfigQuerySet,
+    ) -> Signature:
+        runner = self._get_signatures(analyzers.distinct())
+        pivots_analyzers = pivots.filter(
+            related_analyzer_configs__isnull=False
+        ).distinct()
+        if pivots_analyzers.exists():
+            runner |= self._get_signatures(pivots_analyzers)
+        if connectors.exists():
+            runner |= self._get_signatures(connectors)
+            pivots_connectors = pivots.filter(
+                related_connector_configs__isnull=False
+            ).distinct()
+            if pivots_connectors.exists():
+                runner |= self._get_signatures(pivots_connectors)
+        if visualizers.exists():
+            runner |= self._get_signatures(visualizers)
+        runner |= self._final_status_signature
+        return runner
+
     def execute(self):
         self.update_status(Job.Status.RUNNING)
-        runner = (
-            self._get_signatures(self.analyzers_to_execute.all())
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    related_analyzer_configs__isnull=False
-                ).distinct()
-            )
-            | self._get_signatures(self.connectors_to_execute.all())
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    related_connector_configs__isnull=False
-                ).distinct()
-            )
-            | self._get_signatures(self.visualizers_to_execute.all())
-            | self._final_status_signature
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.all(),
+            self.pivots_to_execute.all(),
+            self.connectors_to_execute.all(),
+            self.visualizers_to_execute.all(),
         )
-        runner.apply_async(
-            routing_key=settings.CONFIG_QUEUE,
-            MessageGroupId=str(uuid.uuid4()),
-        )
+        runner()
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -624,18 +624,10 @@ class Parameter(models.Model):
         return self.python_module.python_class.config_model
 
 
-class PluginConfig(models.Model):
+class PluginConfig(ModelWithOwnership):
     objects = PluginConfigQuerySet.as_manager()
-
     value = models.JSONField(blank=True, null=True)
-    for_organization = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="custom_configs",
-        null=True,
-        blank=True,
-    )
+
     parameter = models.ForeignKey(
         Parameter, on_delete=models.CASCADE, null=False, related_name="values"
     )
@@ -677,7 +669,7 @@ class PluginConfig(models.Model):
     )
 
     class Meta:
-        constraints = [
+        constraints: typing.List[BaseConstraint] = [
             models.CheckConstraint(
                 check=Q(analyzer_config__isnull=True)
                 | Q(connector_config__isnull=True)
@@ -710,18 +702,7 @@ class PluginConfig(models.Model):
         ]
         indexes = [
             models.Index(fields=["owner", "for_organization", "parameter"]),
-            models.Index(
-                fields=[
-                    "owner",
-                    "for_organization",
-                ]
-            ),
-            models.Index(
-                fields=[
-                    "owner",
-                ]
-            ),
-        ]
+        ] + ModelWithOwnership.Meta.indexes
 
     @cached_property
     def config(self) -> "PythonConfig":
@@ -729,8 +710,7 @@ class PluginConfig(models.Model):
 
     def refresh_cache_keys(self):
         try:
-            self.config
-            self.owner
+            _ = self.config and self.owner
         except ObjectDoesNotExist:
             # this happens if the configuration/user was deleted before this instance
             return
@@ -758,17 +738,6 @@ class PluginConfig(models.Model):
             self.ingestor_config,
             self.pivot_config,
         ]
-
-    def clean_for_organization(self):
-        if self.for_organization and not self.owner:
-            raise ValidationError(
-                "You can't set `for_organization` and not have an owner"
-            )
-        if self.for_organization and not self.owner.has_membership():
-            raise ValidationError(
-                f"You can't create `for_organization` {self.__class__.__name__}"
-                " if you do not have an organization"
-            )
 
     def clean_config(self) -> None:
         if len(list(filter(None, self._possible_configs()))) != 1:
@@ -819,12 +788,6 @@ class PluginConfig(models.Model):
     def type(self):
         # TODO retrocompatibility
         return self.config.plugin_type
-
-    @cached_property
-    def organization(self) -> Optional[Organization]:
-        if self.for_organization:
-            return self.owner.membership.organization
-        return None
 
     @property
     def config_type(self):
@@ -1039,7 +1002,7 @@ class PythonConfig(AbstractConfig):
         return tasks.job_set_pipeline_status.signature(
             args=[job.pk, status],
             kwargs={},
-            routing_key=settings.CONFIG_QUEUE,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )

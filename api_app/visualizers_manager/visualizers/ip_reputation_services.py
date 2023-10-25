@@ -412,16 +412,25 @@ class IPReputationServices(Visualizer):
 
         page = self.Page(name="Reputation")
         page.add_level(
-            level=1,
-            horizontal_list=self.HList(value=first_level_elements),
+            self.Level(
+                position=1,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=first_level_elements),
+            )
         )
         page.add_level(
-            level=2,
-            horizontal_list=self.HList(value=second_level_elements),
+            self.Level(
+                position=2,
+                size=self.LevelSize.S_5,
+                horizontal_list=self.HList(value=second_level_elements),
+            )
         )
         page.add_level(
-            level=3,
-            horizontal_list=self.HList(value=third_level_elements),
+            self.Level(
+                position=3,
+                size=self.LevelSize.S_6,
+                horizontal_list=self.HList(value=third_level_elements),
+            )
         )
         logger.debug(f"levels: {page.to_dict()}")
         return [page.to_dict()]

@@ -53,6 +53,7 @@ if settings.AWS_SQS:
         "predefined_queues": PREDEFINED_QUEUES,
         "max_retries": 0,
         "polling_interval": 2,
+        "wait_time_seconds": 0,
         # this is the highest possible value
         # https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/sqs.html#caveats
         # this must be longer than the longest possible task we execute

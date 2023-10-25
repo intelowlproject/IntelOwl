@@ -754,8 +754,12 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         )
 
         # an admin can enable plugin config at org level
+        m, _ = Membership.objects.get_or_create(
+            user=self.superuser, organization=org, is_owner=False
+        )
         m.is_admin = True
         m.save()
+        self.client.force_authenticate(m.user)
         plugin = self.model_class.objects.get(pk=plugin_pk)
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()

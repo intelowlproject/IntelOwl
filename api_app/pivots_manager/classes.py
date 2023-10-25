@@ -25,6 +25,7 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
 
     @property
     def related_configs(self) -> PythonConfigQuerySet:
+        self._config: PivotConfig
         return self._config.related_configs
 
     @property

@@ -57,7 +57,6 @@ class AbstractConfigTestCase(CustomTestCase):
             ),
             disabled=False,
             routing_key="wrong_key",
-            playbook=PlaybookConfig.objects.first(),
         )
         with self.assertRaises(ValidationError):
             muc.full_clean()
@@ -70,7 +69,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         result = muc._is_configured(self.user)
         self.assertTrue(result)
@@ -84,7 +82,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -106,7 +103,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -129,7 +125,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -160,7 +155,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -190,7 +184,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         self.assertTrue(muc.is_runnable(self.user))
         muc.delete()
@@ -203,7 +196,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=True,
-            playbook=PlaybookConfig.objects.first(),
         )
         self.assertFalse(muc.is_runnable(self.user))
         muc.delete()
@@ -216,7 +208,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         org = Organization.objects.create(name="test_org")
 
@@ -243,7 +234,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=True,
-            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
@@ -264,7 +254,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=True,
-            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
@@ -289,7 +278,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
@@ -385,7 +373,6 @@ class PluginConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             name="test",
@@ -439,9 +426,10 @@ class JobTestCase(CustomTestCase):
             status=Job.Status.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.get(
+                base_path="api_app.pivots_manager.pivots",
+                module="self_analyzable.SelfAnalyzable",
+            ),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
 

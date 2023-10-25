@@ -5,13 +5,13 @@ from django.db.models import F, Func, OuterRef, QuerySet, Subquery, Value
 from django.utils.timezone import now
 
 from api_app.models import Job
-from api_app.queryset import AbstractConfigQuerySet
+from api_app.queryset import AbstractConfigQuerySet, ModelWithOwnershipQuerySet
 from certego_saas.apps.user.models import User
 
 
-class PlaybookConfigQuerySet(AbstractConfigQuerySet):
+class PlaybookConfigQuerySet(AbstractConfigQuerySet, ModelWithOwnershipQuerySet):
     @staticmethod
-    def _subquery_user(user: User) -> Subquery:
+    def _subquery_weight_user(user: User) -> Subquery:
         return Subquery(
             Job.objects.prefetch_related("user")
             .filter(
@@ -24,7 +24,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
         )
 
     @staticmethod
-    def _subquery_org(user: User) -> Union[Subquery, Value]:
+    def _subquery_weight_org(user: User) -> Union[Subquery, Value]:
         if user.has_membership():
             return Subquery(
                 Job.objects.prefetch_related("user")
@@ -40,7 +40,7 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
         return Value(0)
 
     @staticmethod
-    def _subquery_other(user: User) -> Subquery:
+    def _subquery_weight_other(user: User) -> Subquery:
         if user.has_membership():
             return Subquery(
                 Job.objects.filter(
@@ -69,9 +69,9 @@ class PlaybookConfigQuerySet(AbstractConfigQuerySet):
         return (
             self.prefetch_related("executed_in_jobs")
             .annotate(
-                user_weight=self._subquery_user(user),
-                org_weight=self._subquery_org(user),
-                other_weight=self._subquery_other(user),
+                user_weight=self._subquery_weight_user(user),
+                org_weight=self._subquery_weight_org(user),
+                other_weight=self._subquery_weight_other(user),
             )
             .annotate(
                 weight=(F("user_weight") * USER_WEIGHT_MULTIPLICATIVE)

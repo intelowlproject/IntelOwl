@@ -22,7 +22,6 @@ class PlaybookConfigAdminView(AbstractConfigAdminView, ModelWithOwnershipAdminVi
         "get_visualizers",
         "scan_mode",
     ) + ModelWithOwnershipAdminView.list_display
-    filter_horizontal = ["analyzers", "connectors", "pivots", "tags"]
     list_filter = (
         AbstractConfigAdminView.list_filter + ModelWithOwnershipAdminView.list_filter
     )

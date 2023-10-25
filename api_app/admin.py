@@ -1,8 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Any
 
 from django.contrib import admin
-from django.db.models import JSONField
+from django.contrib.admin import widgets
+from django.db.models import JSONField, ManyToManyField
+from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm
@@ -14,8 +17,23 @@ from .tabulars import (
 )
 
 
+class CustomAdminView(admin.ModelAdmin):
+    formfield_overrides = {
+        JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})},
+    }
+
+    def formfield_for_manytomany(
+        self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
+    ):
+        vertical = False
+        kwargs["widget"] = widgets.FilteredSelectMultiple(
+            verbose_name=db_field.verbose_name, is_stacked=vertical
+        )
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
 @admin.register(Job)
-class JobAdminView(admin.ModelAdmin):
+class JobAdminView(CustomAdminView):
     list_display = (
         "id",
         "status",
@@ -57,7 +75,7 @@ class JobAdminView(admin.ModelAdmin):
 
 
 @admin.register(Tag)
-class TagAdminView(admin.ModelAdmin):
+class TagAdminView(CustomAdminView):
     list_display = ("id", "label", "color")
     search_fields = ("label", "color")
 
@@ -77,7 +95,7 @@ class ModelWithOwnershipAdminView:
 
 
 @admin.register(PluginConfig)
-class PluginConfigAdminView(ModelWithOwnershipAdminView, admin.ModelAdmin):
+class PluginConfigAdminView(ModelWithOwnershipAdminView, CustomAdminView):
     list_display = (
         "pk",
         "get_config",
@@ -99,7 +117,7 @@ class PluginConfigAdminView(ModelWithOwnershipAdminView, admin.ModelAdmin):
         return instance.parameter.type
 
 
-class AbstractReportAdminView(admin.ModelAdmin):
+class AbstractReportAdminView(CustomAdminView):
     list_display = (
         "id",
         "config",
@@ -116,14 +134,8 @@ class AbstractReportAdminView(admin.ModelAdmin):
         return False
 
 
-class JsonViewerAdminView(admin.ModelAdmin):
-    formfield_overrides = {
-        JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})}
-    }
-
-
 @admin.register(Parameter)
-class ParameterAdminView(admin.ModelAdmin):
+class ParameterAdminView(CustomAdminView):
     inlines = [PluginConfigInlineForParameter]
     search_fields = ["name"]
     list_filter = ["is_secret"]
@@ -132,7 +144,7 @@ class ParameterAdminView(admin.ModelAdmin):
 
 
 @admin.register(PythonModule)
-class PythonModuleAdminView(admin.ModelAdmin):
+class PythonModuleAdminView(CustomAdminView):
     list_display = ["module", "base_path", "get_parameters", "get_secrets"]
     search_fields = ["module", "base_path"]
     list_filter = ["base_path"]
@@ -147,7 +159,7 @@ class PythonModuleAdminView(admin.ModelAdmin):
         return list(obj.parameters.filter(is_secret=True).order_by("-name"))
 
 
-class AbstractConfigAdminView(JsonViewerAdminView):
+class AbstractConfigAdminView(CustomAdminView):
     list_display = ("name", "description", "disabled", "disabled_in_orgs")
     search_fields = ("name",)
     # allow to clone the object

@@ -23,7 +23,7 @@ class PivotConfigAdminView(PythonConfigAdminView):
 
     @admin.display(description="Related Configs")
     def get_related_configs(self, instance: PivotConfig):
-        return instance.related_configs.values_list("name", flat=True)
+        return list(instance.related_configs.values_list("name", flat=True))
 
 
 @admin.register(PivotMap)

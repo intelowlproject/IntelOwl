@@ -234,7 +234,7 @@ class CAPEsandbox(FileAnalyzer):
         results = None
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
 
-        for try_ in range(len(timeout_attempts)):
+        for try_, curr_timeout in enumerate(timeout_attempts):
             attempt = try_ + 1
             try:
                 guess = " guess in case of failing " if try_ < initial_guesses else " "
@@ -312,10 +312,10 @@ class CAPEsandbox(FileAnalyzer):
                     f"Job: {self.job_id} -> "
                     "Continuing the poll at attempt number: "
                     f"#{attempt}/{len(timeout_attempts)}. {e}. "
-                    f"Sleeping for {timeout_attempts[try_]} seconds."
+                    f"Sleeping for {curr_timeout} seconds."
                 )
                 if try_ != self.max_tries - 1:  # avoiding useless last sleep
-                    time.sleep(timeout_attempts[try_])
+                    time.sleep(curr_timeout)
 
         if not results:
             raise AnalyzerRunException(f"{self.job_id} poll ended without results")

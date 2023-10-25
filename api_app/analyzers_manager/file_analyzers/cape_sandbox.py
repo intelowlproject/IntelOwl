@@ -203,6 +203,18 @@ class CAPEsandbox(FileAnalyzer):
         status_id = str(status_id_int)
         return status_id
 
+    def __single_poll(self, url, polling=True):
+        try:
+            response = self.__session.get(url, timeout=self.requests_timeout)
+            # 429 Rate Limit is caught by the raise_for_status
+            response.raise_for_status()
+        except requests.RequestException as e:
+            if polling:
+                raise self.ContinuePolling(f"RequestException {e}")
+            else:
+                raise AnalyzerRunException(e)
+        return response
+
     def __poll_for_result(
         self,
         task_id,
@@ -230,7 +242,6 @@ class CAPEsandbox(FileAnalyzer):
                 f"The analysis in the worst case will last {tot_time} seconds"
             )
 
-        initial_guesses = len(timeout_attempts) - self.max_tries
         results = None
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
         is_pending = True
@@ -239,23 +250,12 @@ class CAPEsandbox(FileAnalyzer):
             for try_, curr_timeout in enumerate(timeout_attempts):
                 attempt = try_ + 1
                 try:
-                    guess = (
-                        " guess in case of failing " if try_ < initial_guesses else " "
-                    )
-
                     logger.info(
                         f" Job: {self.job_id} -> "
-                        f"Starting{guess}poll number #{attempt}/{len(timeout_attempts)}"
+                        f"Starting poll number #{attempt}/{len(timeout_attempts)}"
                     )
 
-                    try:
-                        request = self.__session.get(
-                            status_api, timeout=self.requests_timeout
-                        )
-                        # 429 Rate Limit is caught by the raise_for_status
-                        request.raise_for_status()
-                    except requests.RequestException as e:
-                        raise self.ContinuePolling(f"RequestException {e}")
+                    request = self.__single_poll(status_api)
 
                     # in case the request was ok
                     responded_json = request.json()
@@ -279,8 +279,7 @@ class CAPEsandbox(FileAnalyzer):
                         )
                         time.sleep(15)
                         break
-                    else:
-                        # ends the timeouts loop but only this time
+                    else:  # ends the timeouts loop but only this time
                         is_pending = False
 
                     if data in ("running", "processing"):
@@ -293,15 +292,8 @@ class CAPEsandbox(FileAnalyzer):
                             + str(task_id)
                             + "/litereport"
                         )
-                        try:
-                            final_request = self.__session.get(
-                                report_url, timeout=self.requests_timeout
-                            )
-                            final_request.raise_for_status()
-                        except requests.RequestException as e:
-                            raise AnalyzerRunException(e)
 
-                        results = final_request.json()
+                        results = self.__single_poll(report_url, polling=False).json()
 
                         # the task was being processed
                         if (
@@ -313,8 +305,7 @@ class CAPEsandbox(FileAnalyzer):
 
                         logger.info(
                             f" Job: {self.job_id} ->"
-                            f"Poll{guess}number "
-                            f"#{attempt}/{len(timeout_attempts)} fetched"
+                            f"Poll number #{attempt}/{len(timeout_attempts)} fetched"
                             " the results of the analysis."
                             " stopping polling.."
                         )

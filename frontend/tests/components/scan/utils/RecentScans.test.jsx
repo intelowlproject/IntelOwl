@@ -9,7 +9,7 @@ import RecentScans from "../../../../src/components/scan/utils/RecentScans";
 import {
   JOB_RECENT_SCANS,
   JOB_RECENT_SCANS_USER,
-} from "../../../../src/constants/api";
+} from "../../../../src/constants/apiURLs";
 
 jest.mock("axios");
 

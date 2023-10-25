@@ -9,7 +9,7 @@ import { JobActionsBar } from "../../../../../src/components/jobs/result/bar/Job
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-} from "../../../../../src/constants/api";
+} from "../../../../../src/constants/apiURLs";
 
 jest.mock("axios");
 describe("test JobActionsBar", () => {

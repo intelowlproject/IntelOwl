@@ -8,7 +8,7 @@ import {
   ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-} from "../../constants/api";
+} from "../../constants/apiURLs";
 import { prettifyErrors } from "../../utils/api";
 
 import { scanMode } from "../../constants/constants";

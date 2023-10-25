@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
 import userEvent from "@testing-library/user-event";
 import Login from "../../../src/components/auth/Login";
-import { AUTH_BASE_URI } from "../../../src/constants/api";
+import { AUTH_BASE_URI } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
 jest.mock("../../../src/constants/environment", () => ({

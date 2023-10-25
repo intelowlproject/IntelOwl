@@ -13,7 +13,7 @@ import {
 import useTitle from "react-use/lib/useTitle";
 import { jobTableColumns } from "./jobTableColumns";
 
-import { JOB_BASE_URI } from "../../../constants/api";
+import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { useGuideContext } from "../../../contexts/GuideContext";
 
 // constants

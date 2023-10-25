@@ -11,7 +11,7 @@ import {
   VISUALIZERS_CONFIG_URI,
   PLAYBOOKS_CONFIG_URI,
   INGESTORS_CONFIG_URI,
-} from "../constants/api";
+} from "../constants/apiURLs";
 
 async function downloadAllPlugin(pluginUrl) {
   const pageSize = 70;

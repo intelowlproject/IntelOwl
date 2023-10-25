@@ -7,7 +7,7 @@ import userEvent from "@testing-library/user-event";
 import {
   API_BASE_URI,
   PLAYBOOKS_CONFIG_URI,
-} from "../../../../src/constants/api";
+} from "../../../../src/constants/apiURLs";
 import {
   parseScanCheckTime,
   PluginHealthCheckButton,

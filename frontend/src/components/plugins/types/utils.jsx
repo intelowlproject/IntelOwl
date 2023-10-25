@@ -33,7 +33,7 @@ import {
   ANALYZERS_CONFIG_URI,
   CONNECTORS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
-} from "../../../constants/api";
+} from "../../../constants/apiURLs";
 import { pluginType, scanMode } from "../../../constants/constants";
 
 export function parseScanCheckTime(time) {

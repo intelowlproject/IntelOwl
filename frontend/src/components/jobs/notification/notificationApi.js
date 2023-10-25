@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { NOTIFICATION_BASE_URI } from "../../../constants/api";
+import { NOTIFICATION_BASE_URI } from "../../../constants/apiURLs";
 
 export async function notificationMarkAsRead(notifId) {
   try {

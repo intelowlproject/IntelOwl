@@ -8,17 +8,23 @@ import ScanForm from "../../../../../src/components/scan/ScanForm";
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-} from "../../../../../src/constants/api";
+} from "../../../../../src/constants/apiURLs";
 import RecentScans from "../../../../../src/components/scan/utils/RecentScans";
 
-import { mockedUseAuthStore, mockedUseTagsStore, mockedUsePluginConfigurationStore } from "../mock";
+import {
+  mockedUseAuthStore,
+  mockedUseTagsStore,
+  mockedUsePluginConfigurationStore,
+} from "../mock";
 
 jest.mock("axios");
 // IMPORTANT: this mocks work with several storages because all of them are imported from index!
 jest.mock("../../../../../src/stores", () => ({
   useAuthStore: jest.fn((state) => state(mockedUseAuthStore)),
   useTagsStore: jest.fn((state) => state(mockedUseTagsStore)),
-  usePluginConfigurationStore: jest.fn((state) => state(mockedUsePluginConfigurationStore))
+  usePluginConfigurationStore: jest.fn((state) =>
+    state(mockedUsePluginConfigurationStore),
+  ),
 }));
 // mock RecentScans component
 jest.mock("../../../../../src/components/scan/utils/RecentScans", () =>
@@ -26,7 +32,6 @@ jest.mock("../../../../../src/components/scan/utils/RecentScans", () =>
 );
 
 describe("test ScanForm component with domains", () => {
-
   beforeAll(() => {
     axios.post.mockImplementation(() =>
       Promise.resolve({

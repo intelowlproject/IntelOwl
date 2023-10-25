@@ -20,7 +20,7 @@ import {
   JOB_AGG_FILE_MIMETYPE_URI,
   JOB_AGG_OBS_NAME_URI,
   JOB_AGG_FILE_MD5_URI,
-} from "../../../constants/api";
+} from "../../../constants/apiURLs";
 
 // constants
 const colors = getRandomColorsArray(10, true);

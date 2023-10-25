@@ -2,7 +2,7 @@ import React from "react";
 import { addToast } from "@certego/certego-ui";
 import axios from "axios";
 
-import { PLAYBOOKS_CONFIG_URI } from "../../../../constants/api";
+import { PLAYBOOKS_CONFIG_URI } from "../../../../constants/apiURLs";
 
 export async function saveJobAsPlaybook(values) {
   let success = false;

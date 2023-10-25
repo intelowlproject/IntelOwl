@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-import { JOB_RECENT_SCANS, JOB_RECENT_SCANS_USER } from "../constants/api";
+import { JOB_RECENT_SCANS, JOB_RECENT_SCANS_USER } from "../constants/apiURLs";
 
 const useRecentScansStore = create((set, _get) => ({
   loadingScansUser: true,

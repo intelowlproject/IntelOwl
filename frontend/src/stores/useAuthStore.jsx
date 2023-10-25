@@ -3,7 +3,7 @@ import { create } from "zustand";
 
 import { addToast } from "@certego/certego-ui";
 
-import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/api";
+import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/apiURLs";
 
 // constants
 const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";

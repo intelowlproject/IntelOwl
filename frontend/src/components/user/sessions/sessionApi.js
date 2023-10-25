@@ -2,7 +2,10 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { APIACCESS_BASE_URI, SESSIONS_BASE_URI } from "../../../constants/api";
+import {
+  APIACCESS_BASE_URI,
+  SESSIONS_BASE_URI,
+} from "../../../constants/apiURLs";
 
 // API Access
 

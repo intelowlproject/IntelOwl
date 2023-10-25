@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { AUTH_BASE_URI } from "../../constants/api";
+import { AUTH_BASE_URI } from "../../constants/apiURLs";
 
 export async function registerUser(body) {
   try {

@@ -4,7 +4,7 @@ import { IoMdNotifications } from "react-icons/io";
 
 import { IconButton, Tabs, useAxiosComponentLoader } from "@certego/certego-ui";
 
-import { NOTIFICATION_BASE_URI } from "../../../constants/api";
+import { NOTIFICATION_BASE_URI } from "../../../constants/apiURLs";
 import NotificationsList from "./NotificationsList";
 
 export default function NotificationPopoverButton() {

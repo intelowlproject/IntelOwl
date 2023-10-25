@@ -16,7 +16,7 @@ import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
 import { addToast, ContentSection } from "@certego/certego-ui";
-import { AUTH_BASE_URI } from "../../constants/api";
+import { AUTH_BASE_URI } from "../../constants/apiURLs";
 
 import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";

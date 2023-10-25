@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { BASE_URI_INVITATION, BASE_URI_ORG } from "../../constants/api";
+import { BASE_URI_INVITATION, BASE_URI_ORG } from "../../constants/apiURLs";
 
 // ORGANIZATION
 

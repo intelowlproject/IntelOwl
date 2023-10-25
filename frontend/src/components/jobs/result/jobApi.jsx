@@ -4,7 +4,7 @@ import { IoMdWarning } from "react-icons/io";
 
 import { addToast, confirm } from "@certego/certego-ui";
 
-import { JOB_BASE_URI } from "../../../constants/api";
+import { JOB_BASE_URI } from "../../../constants/apiURLs";
 
 // constants
 

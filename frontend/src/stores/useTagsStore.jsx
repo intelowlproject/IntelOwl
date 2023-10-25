@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-import { TAG_BASE_URI } from "../constants/api";
+import { TAG_BASE_URI } from "../constants/apiURLs";
 
 const useTagsStore = create((set, _get) => ({
   loading: true,

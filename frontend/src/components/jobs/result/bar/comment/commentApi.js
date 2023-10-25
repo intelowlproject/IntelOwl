@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
-import { COMMENT_BASE_URI } from "../../../../../constants/api";
+import { COMMENT_BASE_URI } from "../../../../../constants/apiURLs";
 import { prettifyErrors } from "../../../../../utils/api";
 
 export async function createComment(formValues) {

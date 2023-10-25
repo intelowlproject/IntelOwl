@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { PLUGIN_CONFIG_URI } from "../../../constants/api";
+import { PLUGIN_CONFIG_URI } from "../../../constants/apiURLs";
 
 async function createCustomConfig(data) {
   console.debug("createCustomConfig - data:");

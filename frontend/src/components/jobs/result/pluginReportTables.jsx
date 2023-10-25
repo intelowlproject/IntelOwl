@@ -14,7 +14,7 @@ import {
 
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
-import { pluginStatuses } from "../../../constants/pluginConst";
+import { PluginStatuses } from "../../../constants/pluginConst";
 
 const tableProps = {
   columns: [
@@ -61,7 +61,7 @@ const tableProps = {
       accessor: "status",
       Cell: ({ value }) => <StatusTag status={value} />,
       Filter: SelectOptionsFilter,
-      selectOptions: Object.values(pluginStatuses),
+      selectOptions: Object.values(PluginStatuses),
       maxWidth: 50,
     },
     {

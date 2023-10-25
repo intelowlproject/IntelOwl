@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { UncontrolledTooltip } from "reactstrap";
-import { pluginFinalStatuses } from "../../../../constants/pluginConst";
+import { PluginFinalStatuses } from "../../../../constants/pluginConst";
 
 export function reportedVisualizerNumber(
   visualizersReportedList,
@@ -18,7 +18,7 @@ export function reportedVisualizerNumber(
     visualizersReportedList.forEach((report) => {
       if (report.config === visualizer) {
         visualizerPages += 1;
-        if (Object.values(pluginFinalStatuses).includes(report.status))
+        if (Object.values(PluginFinalStatuses).includes(report.status))
           visualizersInFinalStatus += 1;
       }
     });
@@ -34,7 +34,7 @@ export function reportedPluginNumber(pluginList) {
    */
   return pluginList
     .map((report) => report.status)
-    .filter((status) => Object.values(pluginFinalStatuses).includes(status))
+    .filter((status) => Object.values(PluginFinalStatuses).includes(status))
     .length;
 }
 

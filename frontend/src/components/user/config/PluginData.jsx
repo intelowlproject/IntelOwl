@@ -11,7 +11,7 @@ import {
 import { MdCancel } from "react-icons/md";
 import { Button, Col, FormGroup, Input, Row } from "reactstrap";
 import { usePluginConfigurationStore } from "../../../stores";
-import { pluginType, pluginConfigType } from "../../../constants/pluginConst";
+import { PluginTypes, PluginConfigTypes } from "../../../constants/pluginConst";
 
 import {
   createCustomConfig,
@@ -115,13 +115,13 @@ export function PluginData({
         pluginConfigs = pluginConfigs.map((pluginConfig) => {
           const res = pluginConfig;
           let plugins;
-          if (res.type === pluginType.ANALYZER) {
+          if (res.type === PluginTypes.ANALYZER) {
             plugins = analyzers;
-          } else if (res.type === pluginType.CONNECTOR) {
+          } else if (res.type === PluginTypes.CONNECTOR) {
             plugins = connectors;
-          } else if (res.type === pluginType.VISUALIZER) {
+          } else if (res.type === PluginTypes.VISUALIZER) {
             plugins = visualizers;
-          } else if (res.type === pluginType.PIVOT) {
+          } else if (res.type === PluginTypes.PIVOT) {
             plugins = pivots;
           } else {
             console.error(`Invalid type: ${res.type}`);
@@ -161,18 +161,18 @@ export function PluginData({
                             let plugins = {};
                             let attributeList = [];
                             let placeholder = "";
-                            if (configuration.type === pluginType.ANALYZER) {
+                            if (configuration.type === PluginTypes.ANALYZER) {
                               plugins = analyzers;
                             } else if (
-                              configuration.type === pluginType.CONNECTOR
+                              configuration.type === PluginTypes.CONNECTOR
                             ) {
                               plugins = connectors;
                             } else if (
-                              configuration.type === pluginType.VISUALIZER
+                              configuration.type === PluginTypes.VISUALIZER
                             ) {
                               plugins = visualizers;
                             } else if (
-                              configuration.type === pluginType.PIVOT
+                              configuration.type === PluginTypes.PIVOT
                             ) {
                               plugins = pivots;
                             }
@@ -224,19 +224,19 @@ export function PluginData({
                                     name={`entry[${index}].type`}
                                   >
                                     <option value="">---Select Type---</option>
-                                    <option value={pluginType.ANALYZER}>
+                                    <option value={PluginTypes.ANALYZER}>
                                       Analyzer
                                     </option>
-                                    <option value={pluginType.CONNECTOR}>
+                                    <option value={PluginTypes.CONNECTOR}>
                                       Connector
                                     </option>
-                                    <option value={pluginType.PIVOT}>
+                                    <option value={PluginTypes.PIVOT}>
                                       Pivot
                                     </option>
-                                    <option value={pluginType.VISUALIZER}>
+                                    <option value={PluginTypes.VISUALIZER}>
                                       Visualizer
                                     </option>
-                                    <option value={pluginType.INGESTOR}>
+                                    <option value={PluginTypes.INGESTOR}>
                                       Ingestor
                                     </option>
                                   </Field>
@@ -293,7 +293,7 @@ export function PluginData({
                                     placeholder={placeholder}
                                     value={
                                       additionalEntryData.config_type ===
-                                        pluginConfigType.SECRET &&
+                                        PluginConfigTypes.SECRET &&
                                       !configuration.edit
                                         ? "**********"
                                         : configuration.value

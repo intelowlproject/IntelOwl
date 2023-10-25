@@ -15,8 +15,8 @@ import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { downloadJobSample, deleteJob } from "../jobApi";
 import { createJob } from "../../../scan/scanApi";
-import { scanMode } from "../../../../constants/advancedSettingsConst";
-import { jobResultSection } from "../../../../constants/miscConst";
+import { ScanModes } from "../../../../constants/advancedSettingsConst";
+import { JobResultSections } from "../../../../constants/miscConst";
 import { DeleteIcon, CommentIcon, retryJobIcon } from "../utils/icons";
 
 export function JobActionsBar({ job }) {
@@ -70,11 +70,11 @@ export function JobActionsBar({ job }) {
         job.runtime_configuration,
         job.tags.map((optTag) => optTag.label),
         job.tlp,
-        scanMode.FORCE_NEW_ANALYSIS,
+        ScanModes.FORCE_NEW_ANALYSIS,
         0,
       );
       setTimeout(
-        () => navigate(`/jobs/${jobId[0]}/${jobResultSection.VISUALIZER}/`),
+        () => navigate(`/jobs/${jobId[0]}/${JobResultSections.VISUALIZER}/`),
         1000,
       );
     }

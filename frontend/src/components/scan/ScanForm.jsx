@@ -40,13 +40,14 @@ import {
 } from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
 import { usePluginConfigurationStore } from "../../stores";
-import { TLP_COLOR_MAP, TLP_DESCRIPTION_MAP } from "../../constants/colorConst";
+import { TLPColors, TLPDescriptions } from "../../constants/colorConst";
 import {
-  TLP_CHOICES,
-  scanTypes,
-  scanMode,
+  TLPs,
+  TlpChoices,
+  ScanTypes,
+  ScanModes,
 } from "../../constants/advancedSettingsConst";
-import { jobResultSection } from "../../constants/miscConst";
+import { JobResultSections } from "../../constants/miscConst";
 import { TLPTag } from "../common/TLPTag";
 import { markdownToHtml } from "../common/markdownToHtml";
 import { JobTag } from "../common/JobTag";
@@ -56,6 +57,7 @@ import { TagSelectInput } from "./utils/TagSelectInput";
 import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../../utils/time";
+import { JobTypes, ObservableClassifications } from "../../constants/jobConst";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -80,7 +82,7 @@ const sanitizeObservable = (observable) =>
 // Component
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
-  const observableParam = searchParams.get("observable");
+  const observableParam = searchParams.get(JobTypes.OBSERVABLE);
   const { guideState, setGuideState } = useGuideContext();
 
   /* Recent Scans states - inputValue is used to save the user typing (this state changes for each character that is typed), 
@@ -104,19 +106,19 @@ export default function ScanForm() {
 
   const formik = useFormik({
     initialValues: {
-      observableType: "observable",
-      classification: "generic",
+      observableType: JobTypes.OBSERVABLE,
+      classification: ObservableClassifications.GENERIC,
       observable_names: [""],
       files: [],
       analyzers: [],
       connectors: [],
       // playbook is an object, but if we use {} as default the UI component to select playbooks doesn's show the placeholder
       playbook: "",
-      tlp: "AMBER",
+      tlp: TLPs.AMBER,
       runtime_configuration: {},
       tags: [],
-      scan_mode: scanMode.CHECK_PREVIOUS_ANALYSIS,
-      analysisOptionValues: scanTypes.playbooks,
+      scan_mode: ScanModes.CHECK_PREVIOUS_ANALYSIS,
+      analysisOptionValues: ScanTypes.playbooks,
       scan_check_time: 24,
     },
     validate: (values) => {
@@ -136,7 +138,7 @@ export default function ScanForm() {
         errors.playbook = playbooksError;
       }
 
-      if (values.observableType === "file") {
+      if (values.observableType === JobTypes.FILE) {
         // this is an edge case
         if (
           !values.files ||
@@ -155,19 +157,19 @@ export default function ScanForm() {
 
       // check playbook or analyzer selections based on the user selection
       if (
-        values.analysisOptionValues === scanTypes.playbooks &&
+        values.analysisOptionValues === ScanTypes.playbooks &&
         Object.keys(values.playbook).length === 0
       ) {
         errors.playbook = "playbook required";
       }
       if (
-        values.analysisOptionValues === scanTypes.analyzers_and_connectors &&
+        values.analysisOptionValues === ScanTypes.analyzers_and_connectors &&
         values.analyzers.length === 0
       ) {
         errors.analyzers = "analyzers required";
       }
 
-      if (!TLP_CHOICES.includes(values.tlp)) {
+      if (!TlpChoices.includes(values.tlp)) {
         errors.tlp = "Invalid choice";
       }
 
@@ -177,7 +179,7 @@ export default function ScanForm() {
     },
     onSubmit: async (values) => {
       const jobIds = await createJob(
-        values.observableType === "observable"
+        values.observableType === JobTypes.OBSERVABLE
           ? values.observable_names.map((observable) =>
               sanitizeObservable(observable),
             )
@@ -197,7 +199,7 @@ export default function ScanForm() {
         setTimeout(() => navigate(`/jobs/`), 1000);
       } else {
         setTimeout(
-          () => navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
+          () => navigate(`/jobs/${jobIds[0]}/${JobResultSections.VISUALIZER}/`),
           1000,
         );
       }
@@ -252,7 +254,7 @@ export default function ScanForm() {
       file: [],
     };
     analyzers.forEach((obj) => {
-      if (obj.type === "file") {
+      if (obj.type === JobTypes.FILE) {
         grouped.file.push(obj);
       } else {
         obj.observable_supported.forEach((clsfn) => grouped[clsfn].push(obj));
@@ -396,7 +398,7 @@ export default function ScanForm() {
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
-      let newClassification = "generic";
+      let newClassification = ObservableClassifications.GENERIC;
       Object.entries(observableType2RegExMap).forEach(
         ([typeName, typeRegEx]) => {
           if (new RegExp(typeRegEx).test(sanitizeObservable(observableValue))) {
@@ -410,7 +412,7 @@ export default function ScanForm() {
         playbookOptions(newClassification).length > 0 &&
         (oldClassification !== newClassification ||
           Object.keys(formik.values.playbook).length === 0) &&
-        formik.values.analysisOptionValues === scanTypes.playbooks
+        formik.values.analysisOptionValues === ScanTypes.playbooks
       ) {
         formik.setFieldValue(
           "playbook",
@@ -447,8 +449,8 @@ export default function ScanForm() {
 
   const updateAnalysisOptionValues = (newAnalysisType) => {
     if (
-      scanType === scanTypes.playbooks &&
-      newAnalysisType === scanTypes.analyzers_and_connectors
+      scanType === ScanTypes.playbooks &&
+      newAnalysisType === ScanTypes.analyzers_and_connectors
     ) {
       setScanType(newAnalysisType);
       // reset playbook
@@ -462,8 +464,8 @@ export default function ScanForm() {
       );
     }
     if (
-      scanType === scanTypes.analyzers_and_connectors &&
-      newAnalysisType === scanTypes.playbooks
+      scanType === ScanTypes.analyzers_and_connectors &&
+      newAnalysisType === ScanTypes.playbooks
     ) {
       setScanType(newAnalysisType);
       // if an observable or file is loaded set a default playbook
@@ -489,7 +491,7 @@ export default function ScanForm() {
       (formik.values.files.length &&
         formik.values.files[0] !== "" &&
         Object.keys(formik.values.playbook).length === 0 &&
-        formik.values.analysisOptionValues === scanTypes.playbooks)
+        formik.values.analysisOptionValues === ScanTypes.playbooks)
     ) {
       updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
     }
@@ -534,7 +536,9 @@ export default function ScanForm() {
         <div className="mt-4 d-flex justify-content-between">
           <h3 id="scanpage" className="fw-bold">
             Scan&nbsp;
-            {formik.values.classification === "file" ? "Files" : "Observables"}
+            {formik.values.classification === JobTypes.FILE
+              ? "Files"
+              : "Observables"}
           </h3>
           <div className="mt-1">
             {/* Quota badges */}
@@ -549,7 +553,7 @@ export default function ScanForm() {
             <Row>
               <div className="col-sm-3 col-form-label" />
               <FormGroup className="mb-0 mt-2 d-flex col-sm-9">
-                {["observable", "file"].map((ch) => (
+                {[JobTypes.OBSERVABLE, JobTypes.FILE].map((ch) => (
                   <FormGroup check inline key={`observableType__${ch}`}>
                     <Col>
                       <Field
@@ -566,25 +570,25 @@ export default function ScanForm() {
                           );
                           formik.setFieldValue(
                             "classification",
-                            event.target.value === "observable"
-                              ? "generic"
-                              : "file",
+                            event.target.value === JobTypes.OBSERVABLE
+                              ? ObservableClassifications.GENERIC
+                              : JobTypes.FILE,
                           );
                           formik.setFieldValue("observable_names", [""], false);
                           formik.setFieldValue("files", [""], false);
                           formik.setFieldValue(
                             "analysisOptionValues",
-                            scanTypes.playbooks,
+                            ScanTypes.playbooks,
                             false,
                           );
-                          setScanType(scanTypes.playbooks);
+                          setScanType(ScanTypes.playbooks);
                           formik.setFieldValue("playbook", "", false); // reset
                           formik.setFieldValue("analyzers", [], false); // reset
                           formik.setFieldValue("connectors", [], false); // reset
                         }}
                       />
                       <Label check>
-                        {ch === "observable"
+                        {ch === JobTypes.OBSERVABLE
                           ? "observable (domain, IP, URL, HASH, etc...)"
                           : "file"}
                       </Label>
@@ -593,7 +597,7 @@ export default function ScanForm() {
                 ))}
               </FormGroup>
             </Row>
-            {formik.values.observableType === "observable" ? (
+            {formik.values.observableType === JobTypes.OBSERVABLE ? (
               <FieldArray
                 name="observable_names"
                 render={(arrayHelpers) => (
@@ -687,7 +691,7 @@ export default function ScanForm() {
                         Object.keys(formik.values.playbook).length === 0 &&
                         playbookOptions("file").length > 0 &&
                         formik.values.analysisOptionValues ===
-                          scanTypes.playbooks
+                          ScanTypes.playbooks
                       ) {
                         formik.setFieldValue(
                           "playbook",
@@ -716,7 +720,7 @@ export default function ScanForm() {
                 className="d-flex col-sm-9"
                 style={{ marginTop: "10px" }}
               >
-                {Object.values(scanTypes).map((type_) => (
+                {Object.values(ScanTypes).map((type_) => (
                   <FormGroup check inline key={`analysistype__${type_}`}>
                     <Col>
                       <Field
@@ -733,7 +737,7 @@ export default function ScanForm() {
                 ))}
               </FormGroup>
             </Row>
-            {scanType === scanTypes.analyzers_and_connectors && (
+            {scanType === ScanTypes.analyzers_and_connectors && (
               <>
                 <FormGroup row>
                   <Label sm={3} for="analyzers">
@@ -803,7 +807,7 @@ export default function ScanForm() {
                 </FormGroup>
               </>
             )}
-            {scanType === scanTypes.playbooks && (
+            {scanType === ScanTypes.playbooks && (
               <FormGroup row className="mb-4">
                 <Label id="selectplugins" sm={3} htmlFor="playbook">
                   Select Playbook
@@ -860,7 +864,7 @@ export default function ScanForm() {
                 <Label sm={3}>TLP</Label>
                 <Col sm={9}>
                   <div>
-                    {TLP_CHOICES.map((ch) => (
+                    {TlpChoices.map((ch) => (
                       <FormGroup inline check key={`tlpchoice__${ch}`}>
                         <Label check for={`tlpchoice__${ch}`}>
                           <TLPTag value={ch} />
@@ -878,13 +882,8 @@ export default function ScanForm() {
                     ))}
                   </div>
                   <FormText>
-                    <span
-                      style={{ color: `${TLP_COLOR_MAP[formik.values.tlp]}` }}
-                    >
-                      {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
-                        "TLP: ",
-                        "",
-                      )}
+                    <span style={{ color: `${TLPColors[formik.values.tlp]}` }}>
+                      {TLPDescriptions[formik.values.tlp].replace("TLP: ", "")}
                     </span>
                   </FormText>
                 </Col>
@@ -898,7 +897,7 @@ export default function ScanForm() {
                       id="checkchoice__check_all"
                       type="radio"
                       name="scan_mode"
-                      value={scanMode.CHECK_PREVIOUS_ANALYSIS}
+                      value={ScanModes.CHECK_PREVIOUS_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <div className="d-flex align-items-center">
@@ -947,7 +946,7 @@ export default function ScanForm() {
                       id="checkchoice__force_new"
                       type="radio"
                       name="scan_mode"
-                      value={scanMode.FORCE_NEW_ANALYSIS}
+                      value={ScanModes.FORCE_NEW_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <Label check for="checkchoice__force_new">

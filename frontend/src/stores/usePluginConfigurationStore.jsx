@@ -224,10 +224,10 @@ const usePluginConfigurationStore = create((set, get) => ({
       set({ playbooksError: e, playbooksLoading: false });
     }
   },
-  checkPluginHealth: async (pluginType, PluginName) => {
+  checkPluginHealth: async (PluginTypes, PluginName) => {
     try {
       const resp = await axios.get(
-        `${API_BASE_URI}/${pluginType}/${PluginName}/health_check`,
+        `${API_BASE_URI}/${PluginTypes}/${PluginName}/health_check`,
       );
       console.debug("usePluginConfigurationStore - checkPluginHealth: ");
       console.debug(resp);

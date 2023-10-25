@@ -1,14 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 import classnames from "classnames";
-import { STATUS_COLORMAP } from "../../constants/colorConst";
+import { StatusColors } from "../../constants/colorConst";
 
 export function StatusTag(props) {
   const { status, className, ...rest } = props;
 
   const statusLower = status.toLowerCase();
 
-  const color = STATUS_COLORMAP?.[statusLower] || "light";
+  const color = StatusColors?.[statusLower] || "light";
   const divClass = classnames(`bg-${color}`, className);
 
   return (

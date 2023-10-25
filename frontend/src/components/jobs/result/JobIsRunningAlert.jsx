@@ -6,7 +6,7 @@ import { MdPauseCircleOutline } from "react-icons/md";
 import { IconAlert, IconButton } from "@certego/certego-ui";
 
 import { killJob } from "./jobApi";
-import { jobStatuses } from "../../../constants/jobConst";
+import { JobStatuses } from "../../../constants/jobConst";
 
 import {
   reportedPluginNumber,
@@ -28,16 +28,16 @@ export function JobIsRunningAlert({ job }) {
       The connectors are completed from the "connectors_completed" status (index=5) to the last status 
       The visualizers are completed from the "visualizers_completed" status (index=7) to the last status 
     */
-  const analyzersCompleted = Object.values(jobStatuses)
+  const analyzersCompleted = Object.values(JobStatuses)
     .slice(3)
     .includes(job.status);
-  const connectorsCompleted = Object.values(jobStatuses)
+  const connectorsCompleted = Object.values(JobStatuses)
     .slice(5)
     .includes(job.status);
-  const pivotsCompleted = Object.values(jobStatuses)
+  const pivotsCompleted = Object.values(JobStatuses)
     .slice(7)
     .includes(job.status);
-  const visualizersCompleted = Object.values(jobStatuses)
+  const visualizersCompleted = Object.values(JobStatuses)
     .slice(9)
     .includes(job.status);
 

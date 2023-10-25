@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody } from "reactstrap";
 import { DateHoverable, Loader } from "@certego/certego-ui";
 import useRecentScansStore from "../../../stores/useRecentScansStore";
-import { jobResultSection } from "../../../constants/miscConst";
+import { JobResultSections } from "../../../constants/miscConst";
+import { JobTypes } from "../../../constants/jobConst";
 
 function RecentScansCard({
   pk,
@@ -19,7 +20,7 @@ function RecentScansCard({
   const navigate = useNavigate();
   const onClick = React.useCallback(
     (jobId) => {
-      navigate(`/jobs/${jobId}/${jobResultSection.VISUALIZER}/`);
+      navigate(`/jobs/${jobId}/${JobResultSections.VISUALIZER}/`);
     },
     [navigate],
   );
@@ -122,7 +123,7 @@ export default function RecentScans({ classification, param }) {
 
   // file md5
   const [fileMd5, setFileMd5] = React.useState("");
-  if (classification === "file" && param) {
+  if (classification === JobTypes.FILE && param) {
     param.text().then((x) => setFileMd5(md5(x)));
   }
 

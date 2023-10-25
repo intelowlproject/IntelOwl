@@ -31,9 +31,9 @@ import {
 } from "./utils/reportedPlugins";
 import { StatusIcon } from "../../common/StatusIcon";
 import VisualizerReport from "./visualizer/visualizer";
-import { jobFinalStatuses } from "../../../constants/jobConst";
-import { pluginStatuses } from "../../../constants/pluginConst";
-import { jobResultSection } from "../../../constants/miscConst";
+import { JobFinalStatuses } from "../../../constants/jobConst";
+import { PluginStatuses } from "../../../constants/pluginConst";
+import { JobResultSections } from "../../../constants/miscConst";
 
 import { JobInfoCard } from "./JobInfoCard";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
@@ -60,7 +60,7 @@ export function JobOverview({
   console.debug("JobOverview rendered");
   console.debug(`section: ${section}, subSection: ${subSection}`);
 
-  const isSelectedUI = section === jobResultSection.VISUALIZER;
+  const isSelectedUI = section === JobResultSections.VISUALIZER;
 
   const rawElements = React.useMemo(
     () => [
@@ -177,7 +177,7 @@ export function JobOverview({
 
     // 1) generate UI elements in case all visualizers are completed
     if (
-      Object.values(jobFinalStatuses).includes(job.status) &&
+      Object.values(JobFinalStatuses).includes(job.status) &&
       job.visualizers_to_execute.length > 0
     ) {
       newUIElements = job.visualizer_reports.map((visualizerReport) => ({
@@ -185,7 +185,7 @@ export function JobOverview({
         nav: (
           <div className="d-flex-center">
             <strong>{visualizerReport.name}</strong>
-            {visualizerReport.status !== pluginStatuses.SUCCESS && (
+            {visualizerReport.status !== PluginStatuses.SUCCESS && (
               <StatusIcon className="ms-2" status={visualizerReport.status} />
             )}
           </div>
@@ -196,7 +196,7 @@ export function JobOverview({
 
     // 2) in case visualizers are running put a loader
     if (
-      !Object.values(jobFinalStatuses).includes(job.status) &&
+      !Object.values(JobFinalStatuses).includes(job.status) &&
       job.visualizers_to_execute.length > 0
     ) {
       newUIElements.push({
@@ -245,7 +245,7 @@ export function JobOverview({
         );
         // in case no section is selected (ex: from start scan) redirect to a visualizer
         navigate(
-          `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${encodeURIComponent(
+          `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
             UIElements[0].id,
           )}`,
           { replace: true },
@@ -261,7 +261,7 @@ export function JobOverview({
         );
         // in case we are in the loading page and we update the visualizer change page (if they are different from loading)
         navigate(
-          `/jobs/${job.id}/${jobResultSection.VISUALIZER}/${encodeURIComponent(
+          `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
             UIElements[0].id,
           )}`,
           { replace: true },
@@ -270,7 +270,7 @@ export function JobOverview({
         console.debug("[AUTO REDIRECT] navigate to raw data - analyzer");
         // in case there is no visualizer redirect to raw data
         navigate(
-          `/jobs/${job.id}/${jobResultSection.RAW}/${rawElements[0].id}`,
+          `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].id}`,
           { replace: true },
         );
       }
@@ -318,27 +318,27 @@ export function JobOverview({
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${
-                        jobResultSection.VISUALIZER
+                        JobResultSections.VISUALIZER
                       }/${encodeURIComponent(UIElements[0].id)}`,
                       { state: { userChanged: true } },
                     )
                   }
                 >
-                  {jobResultSection.VISUALIZER.charAt(0).toUpperCase() +
-                    jobResultSection.VISUALIZER.slice(1)}
+                  {JobResultSections.VISUALIZER.charAt(0).toUpperCase() +
+                    JobResultSections.VISUALIZER.slice(1)}
                 </Button>
                 <Button
                   outline={isSelectedUI}
                   color={!isSelectedUI ? "primary" : "tertiary"}
                   onClick={() =>
                     navigate(
-                      `/jobs/${job.id}/${jobResultSection.RAW}/${rawElements[0].id}`,
+                      `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].id}`,
                       { state: { userChanged: true } },
                     )
                   }
                 >
-                  {jobResultSection.RAW.charAt(0).toUpperCase() +
-                    jobResultSection.RAW.slice(1)}
+                  {JobResultSections.RAW.charAt(0).toUpperCase() +
+                    JobResultSections.RAW.slice(1)}
                 </Button>
               </ButtonGroup>
               <div className="flex-fill horizontal-scrollable">

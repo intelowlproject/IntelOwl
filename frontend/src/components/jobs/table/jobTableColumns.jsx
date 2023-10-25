@@ -14,13 +14,14 @@ import {
 import { JobTag } from "../../common/JobTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
-import { TLP_CHOICES } from "../../../constants/advancedSettingsConst";
+import { TlpChoices } from "../../../constants/advancedSettingsConst";
 import {
-  jobStatuses,
-  FILE_MIME_TYPES,
-  OBSERVABLE_CLASSIFICATION,
+  JobStatuses,
+  FileMimeTypes,
+  ObservableClassifications,
+  JobTypes,
 } from "../../../constants/jobConst";
-import { jobResultSection } from "../../../constants/miscConst";
+import { JobResultSections } from "../../../constants/miscConst";
 import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
 import { processTimeMMSS } from "../../../utils/time";
 
@@ -36,7 +37,7 @@ export const jobTableColumns = [
         <p>#{id}</p>
         <LinkOpenViewIcon
           id={id}
-          href={`/jobs/${id}/${jobResultSection.VISUALIZER}`}
+          href={`/jobs/${id}/${JobResultSections.VISUALIZER}`}
           tooltip="View Job Report"
         />
       </div>
@@ -121,7 +122,7 @@ export const jobTableColumns = [
     Header: "Type",
     id: "is_sample",
     accessor: (r) => r.is_sample,
-    Cell: ({ value }) => (value ? "file" : "observable"),
+    Cell: ({ value }) => (value ? JobTypes.FILE : JobTypes.OBSERVABLE),
     disableSortBy: true,
     maxWidth: 100,
     Filter: ({
@@ -136,7 +137,9 @@ export const jobTableColumns = [
           /* even if the backend requires a bool, we need to cast it to string or 
                   the library won't send the request for the false case (observable filter)
                 */
-          setFilter((dropdownSelector.target.value === "file").toString());
+          setFilter(
+            (dropdownSelector.target.value === JobTypes.FILE).toString(),
+          );
         } else {
           /* in case of no selection set to undefined, in this way the library will remove the param from the request
                   this is the "all" case (both samples and observables)
@@ -149,7 +152,7 @@ export const jobTableColumns = [
       let SelectedDropdownElementlabel = "All";
       if (isSampleStr !== undefined) {
         SelectedDropdownElementlabel =
-          isSampleStr === "true" ? "file" : "observable";
+          isSampleStr === "true" ? JobTypes.FILE : JobTypes.OBSERVABLE;
       }
 
       return (
@@ -177,7 +180,7 @@ export const jobTableColumns = [
         </Input>
       );
     },
-    selectOptions: ["file", "observable"],
+    selectOptions: [JobTypes.FILE, JobTypes.OBSERVABLE],
   },
   {
     Header: "SubType",
@@ -186,9 +189,9 @@ export const jobTableColumns = [
     disableSortBy: true,
     maxWidth: 100,
     Filter: SelectOptionsFilter,
-    selectOptions: Object.values(OBSERVABLE_CLASSIFICATION)
+    selectOptions: Object.values(ObservableClassifications)
       .sort()
-      .concat(Object.values(FILE_MIME_TYPES).sort()),
+      .concat(Object.values(FileMimeTypes).sort()),
   },
   {
     Header: "TLP",
@@ -197,7 +200,7 @@ export const jobTableColumns = [
     Cell: ({ value }) => <TLPTag value={value} />,
     disableSortBy: true,
     Filter: SelectOptionsFilter,
-    selectOptions: TLP_CHOICES,
+    selectOptions: TlpChoices,
     maxWidth: 90,
   },
   {
@@ -243,6 +246,6 @@ export const jobTableColumns = [
     Cell: ({ value }) => <StatusTag status={value} />,
     disableSortBy: true,
     Filter: SelectOptionsFilter,
-    selectOptions: Object.values(jobStatuses),
+    selectOptions: Object.values(JobStatuses),
   },
 ];

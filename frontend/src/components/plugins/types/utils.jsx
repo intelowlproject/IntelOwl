@@ -34,8 +34,8 @@ import {
   CONNECTORS_CONFIG_URI,
   VISUALIZERS_CONFIG_URI,
 } from "../../../constants/apiURLs";
-import { pluginType } from "../../../constants/pluginConst";
-import { scanMode } from "../../../constants/advancedSettingsConst";
+import { PluginTypes } from "../../../constants/pluginConst";
+import { ScanModes } from "../../../constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../utils/time";
 
 export function PluginInfoCard({ pluginInfo }) {
@@ -190,7 +190,7 @@ export function PluginInfoCard({ pluginInfo }) {
                 <li>
                   <strong>Scan mode:</strong>{" "}
                   {pluginInfo.scan_mode.toString() ===
-                  scanMode.FORCE_NEW_ANALYSIS
+                  ScanModes.FORCE_NEW_ANALYSIS
                     ? "force new analysis"
                     : `a new scan is not performed if there is a similar one finished in the last 
                 ${parseScanCheckTime(pluginInfo?.scan_check_time)} hours`}
@@ -334,11 +334,11 @@ export function OrganizationPluginStateToggle({
     title = `You're not an owner of your organization - ${organization.name}`;
   }
   let baseUrl = "";
-  if (type === pluginType.ANALYZER) {
+  if (type === PluginTypes.ANALYZER) {
     baseUrl = ANALYZERS_CONFIG_URI;
-  } else if (type === pluginType.CONNECTOR) {
+  } else if (type === PluginTypes.CONNECTOR) {
     baseUrl = CONNECTORS_CONFIG_URI;
-  } else if (type === pluginType.VISUALIZER) {
+  } else if (type === PluginTypes.VISUALIZER) {
     baseUrl = VISUALIZERS_CONFIG_URI;
   }
 

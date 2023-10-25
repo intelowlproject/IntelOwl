@@ -1,4 +1,4 @@
-export const jobResultSection = Object.freeze({
+export const JobResultSections = Object.freeze({
   RAW: "raw",
   VISUALIZER: "visualizer",
 });

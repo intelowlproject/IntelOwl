@@ -1,5 +1,5 @@
 // IMPORTANT - do not change the order of status
-export const jobStatuses = Object.freeze({
+export const JobStatuses = Object.freeze({
   PENDING: "pending",
   RUNNING: "running",
   ANALYZERS_RUNNING: "analyzers_running",
@@ -16,19 +16,19 @@ export const jobStatuses = Object.freeze({
   FAILED: "failed",
 });
 
-export const jobFinalStatuses = Object.freeze({
-  REPORTED_WITH_FAILS: jobStatuses.REPORTED_WITH_FAILS,
-  REPORTED_WITHOUT_FAILS: jobStatuses.REPORTED_WITHOUT_FAILS,
-  KILLED: jobStatuses.KILLED,
-  FAILED: jobStatuses.FAILED,
+export const JobFinalStatuses = Object.freeze({
+  REPORTED_WITH_FAILS: JobStatuses.REPORTED_WITH_FAILS,
+  REPORTED_WITHOUT_FAILS: JobStatuses.REPORTED_WITHOUT_FAILS,
+  KILLED: JobStatuses.KILLED,
+  FAILED: JobStatuses.FAILED,
 });
 
-export const JOB_TYPE = Object.freeze({
+export const JobTypes = Object.freeze({
   FILE: "file",
   OBSERVABLE: "observable",
 });
 
-export const FILE_MIME_TYPES = Object.freeze({
+export const FileMimeTypes = Object.freeze({
   // IMPORTANT! in case you update this Object remember to update also the blackend
   WSCRIPT: "application/w-script-file",
   JAVASCRIPT1: "application/javascript",
@@ -83,7 +83,7 @@ export const FILE_MIME_TYPES = Object.freeze({
   X_SHELLSCRIPT: "text/x-shellscript",
 });
 
-export const OBSERVABLE_CLASSIFICATION = Object.freeze({
+export const ObservableClassifications = Object.freeze({
   IP: "ip",
   URL: "url",
   DOMAIN: "domain",

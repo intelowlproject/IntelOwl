@@ -11,7 +11,8 @@ import {
 } from "../../constants/apiURLs";
 import { prettifyErrors } from "../../utils/api";
 
-import { scanMode } from "../../constants/advancedSettingsConst";
+import { ScanModes } from "../../constants/advancedSettingsConst";
+import { JobTypes } from "../../constants/jobConst";
 
 function createJobPayload(
   analyzables,
@@ -25,7 +26,7 @@ function createJobPayload(
   _scanMode,
   scanCheckTime,
 ) {
-  const isSample = classification === "file";
+  const isSample = classification === JobTypes.FILE;
   let payload = {};
   /* we add a custom function to the object to reuse the code:
   in this way append method is available for bot FormData and {}.
@@ -81,7 +82,7 @@ function createJobPayload(
   payload.append("tlp", tlp);
   // scan mode and scan time
   payload.append("scan_mode", parseInt(_scanMode, 10));
-  if (_scanMode === scanMode.CHECK_PREVIOUS_ANALYSIS) {
+  if (_scanMode === ScanModes.CHECK_PREVIOUS_ANALYSIS) {
     payload.append("scan_check_time", `${scanCheckTime}:00:00`);
   }
   // remove custom method in order to avoid to send it to the backend
@@ -147,9 +148,9 @@ export async function createJob(
       analyzers: ${analyzers}, connectors: ${connectors}, runtimeConfig: ${JSON.stringify(
         runtimeConfig,
       )}, 
-      tags: ${tags}, tlp: ${tlp}, scanMode: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
+      tags: ${tags}, tlp: ${tlp}, ScanModes: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
     );
-    const isSample = classification === "file";
+    const isSample = classification === JobTypes.FILE;
     let apiUrl = "";
     if (isSample) {
       if (playbook) {

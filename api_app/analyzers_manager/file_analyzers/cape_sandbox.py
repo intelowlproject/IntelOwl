@@ -207,19 +207,15 @@ class CAPEsandbox(FileAnalyzer):
         self,
         task_id,
     ) -> dict:
-        logger.info(
-            f" Job: {self.job_id} -> "
-            f"The analysis starts in 30 seconds on average, sleeping..."
-        )
-        time.sleep(30)  # empirical value
-
         # decreasing timeout:
+        #   average analysis starting time -> the request is still made in case of mock
         #   real analysis duration with poll distance of 1 minute + the remaining module
         #   empirical value of processing duration time
         #   real polling with max tries
         #   final attempts in case there is a bottleneck
         timeout_attempts = (
-            [60] * (self.timeout // 60)
+            [30]
+            + [60] * (self.timeout // 60)
             + [self.timeout % 60]
             + [50]
             + [self.poll_distance] * self.max_tries

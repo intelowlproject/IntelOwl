@@ -22,10 +22,6 @@ jest.mock("../../../../src/components/scan/utils/RecentScans", () =>
 );
 
 describe("test ScanForm component form validation", () => {
-  /* those tests could require lots of time, jest.setTimeout doesn't work on async function.
-    use the second param of async instead.
-  */
-
   beforeAll(() => {
     axios.post.mockImplementation(() =>
       Promise.resolve({

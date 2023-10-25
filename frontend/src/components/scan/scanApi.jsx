@@ -143,9 +143,11 @@ export async function createJob(
 ) {
   try {
     console.debug(
-      `create job with: analyzables: ${analyzables}, classification: ${classification}, playbook: ${playbook}, analyzers: ${analyzers}, connectors: ${connectors}, runtimeConfig: ${JSON.stringify(
+      `create job with: analyzables: ${analyzables}, classification: ${classification}, playbook: ${playbook},
+      analyzers: ${analyzers}, connectors: ${connectors}, runtimeConfig: ${JSON.stringify(
         runtimeConfig,
-      )}, tags: ${tags}, tlp: ${tlp}, scanMode: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
+      )}, 
+      tags: ${tags}, tlp: ${tlp}, scanMode: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
     );
     const isSample = classification === "file";
     let apiUrl = "";

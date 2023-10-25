@@ -44,6 +44,8 @@ class CAPEsandbox(FileAnalyzer):
     max_tries: int
     # Seconds to wait before moving on to the next poll attempt.
     poll_distance: int
+    # Python requests HTTP GET/POST timeout
+    requests_timeout: int
     # Token for Token Auth.
     _api_key_name: str
     # URL for the CapeSandbox instance.
@@ -103,6 +105,7 @@ class CAPEsandbox(FileAnalyzer):
                     "file": (self.filename, self.read_file_bytes()),
                 },
                 data=data,
+                timeout=self.requests_timeout,
             )
             response.raise_for_status()
         except requests.RequestException as e:
@@ -171,7 +174,7 @@ class CAPEsandbox(FileAnalyzer):
 
                     try:
                         final_request = self.__session.get(
-                            report_url,
+                            report_url, timeout=self.requests_timeout
                         )
                     except requests.RequestException as e:
                         raise AnalyzerRunException(e)
@@ -184,7 +187,7 @@ class CAPEsandbox(FileAnalyzer):
         db_search_url = self._url_key_name + "/apiv2/tasks/search/md5/" + self.md5
 
         try:
-            q = self.__session.get(db_search_url)
+            q = self.__session.get(db_search_url, timeout=self.requests_timeout)
             q.raise_for_status()
 
         except requests.RequestException as e:
@@ -200,90 +203,129 @@ class CAPEsandbox(FileAnalyzer):
         status_id = str(status_id_int)
         return status_id
 
+    def __single_poll(self, url, polling=True):
+        try:
+            response = self.__session.get(url, timeout=self.requests_timeout)
+            # 429 Rate Limit is caught by the raise_for_status
+            response.raise_for_status()
+        except requests.RequestException as e:
+            if polling:
+                raise self.ContinuePolling(f"RequestException {e}")
+            else:
+                raise AnalyzerRunException(e)
+        return response
+
     def __poll_for_result(
         self,
         task_id,
     ) -> dict:
+        # decreasing timeout:
+        #   average analysis starting time -> the request is still made in case of mock
+        #   real analysis duration with poll distance of 1 minute + the remaining module
+        #   empirical value of processing duration time
+        #   real polling with max tries
+        #   final attempts in case there is a bottleneck
+        timeout_attempts = (
+            [30]
+            + [60] * (self.timeout // 60)
+            + [self.timeout % 60]
+            + [50]
+            + [self.poll_distance] * self.max_tries
+            + [60] * 3
+        )
+
+        tot_time = sum(timeout_attempts)
+        if tot_time > 600:
+            logger.warning(
+                f" Job: {self.job_id} -> "
+                f"Broken soft time limit!! "
+                f"The analysis in the worst case will last {tot_time} seconds"
+            )
+
         results = None
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
-        for try_ in range(self.max_tries):
-            attempt = try_ + 1
-            try:
-                logger.info(
-                    f" Job: {self.job_id} -> "
-                    f"Starting poll number #{attempt}/{self.max_tries}"
-                )
+        is_pending = True
+
+        while is_pending:  # starts the for loop when we are not in pending state
+            for try_, curr_timeout in enumerate(timeout_attempts):
+                attempt = try_ + 1
                 try:
-                    request = self.__session.get(status_api)
-                    # 429 Rate Limit is caught by the raise_for_status
-                    request.raise_for_status()
-                except requests.RequestException as e:
-                    raise self.ContinuePolling(f"RequestException {e}")
-
-                # in case the request was ok
-                responded_json = request.json()
-                error = responded_json.get("error")
-                data = responded_json.get("data")
-
-                logger.info(
-                    f"Job: {self.job_id} -> " f"Status of the CAPESandbox task: {data}"
-                )
-
-                if error:
-                    raise AnalyzerRunException(error)
-
-                if data in ("pending", "running", "processing"):
-                    raise self.ContinuePolling(f"Task still {data}")
-
-                if data in ("reported", "completed"):
-                    report_url = (
-                        self._url_key_name
-                        + "/apiv2/tasks/get/report/"
-                        + str(task_id)
-                        + "/litereport"
+                    logger.info(
+                        f" Job: {self.job_id} -> "
+                        f"Starting poll number #{attempt}/{len(timeout_attempts)}"
                     )
-                    try:
-                        final_request = self.__session.get(
-                            report_url,
-                        )
-                        final_request.raise_for_status()
-                    except requests.RequestException as e:
-                        raise AnalyzerRunException(e)
 
-                    results = final_request.json()
+                    request = self.__single_poll(status_api)
 
-                    # the task was being processed
-                    if (
-                        "error" in results
-                        and results["error"]
-                        and results["error_value"] == "Task is still being analyzed"
-                    ):
-                        raise self.ContinuePolling("Task still processing")
+                    # in case the request was ok
+                    responded_json = request.json()
+                    error = responded_json.get("error")
+                    data = responded_json.get("data")
 
                     logger.info(
-                        f" Job: {self.job_id} ->"
-                        f"Poll number #{attempt}/{self.max_tries} fetched"
-                        " the results of the analysis."
-                        " stopping polling.."
+                        f"Job: {self.job_id} -> "
+                        f"Status of the CAPESandbox task: {data}"
                     )
 
-                    break
+                    if error:
+                        raise AnalyzerRunException(error)
 
-                else:
-                    raise AnalyzerRunException(
-                        f"status {data} was unexpected. Check the code"
+                    if data == "pending":
+                        is_pending = True
+                        logger.info(
+                            f" Job: {self.job_id} -> "
+                            "Waiting for the pending status to end, "
+                            "sleeping for 15 seconds..."
+                        )
+                        time.sleep(15)
+                        break
+                    else:  # ends the timeouts loop but only this time
+                        is_pending = False
+
+                    if data in ("running", "processing"):
+                        raise self.ContinuePolling(f"Task still {data}")
+
+                    if data in ("reported", "completed"):
+                        report_url = (
+                            self._url_key_name
+                            + "/apiv2/tasks/get/report/"
+                            + str(task_id)
+                            + "/litereport"
+                        )
+
+                        results = self.__single_poll(report_url, polling=False).json()
+
+                        # the task was being processed
+                        if (
+                            "error" in results
+                            and results["error"]
+                            and results["error_value"] == "Task is still being analyzed"
+                        ):
+                            raise self.ContinuePolling("Task still processing")
+
+                        logger.info(
+                            f" Job: {self.job_id} ->"
+                            f"Poll number #{attempt}/{len(timeout_attempts)} fetched"
+                            " the results of the analysis."
+                            " stopping polling.."
+                        )
+
+                        break
+
+                    else:
+                        raise AnalyzerRunException(
+                            f"status {data} was unexpected. Check the code"
+                        )
+
+                except self.ContinuePolling as e:
+                    logger.info(
+                        f"Job: {self.job_id} -> "
+                        "Continuing the poll at attempt number: "
+                        f"#{attempt}/{len(timeout_attempts)}. {e}. "
+                        f"Sleeping for {curr_timeout} seconds."
                     )
-
-            except self.ContinuePolling as e:
-                logger.info(
-                    f"Job: {self.job_id} -> "
-                    "Continuing the poll at attempt number: "
-                    f"#{attempt}/{self.max_tries}. {e}. "
-                    f"Sleeping for {self.poll_distance} seconds."
-                )
-                last_try = self.max_tries - 1
-                if try_ != last_try:  # avoiding useless last sleep
-                    time.sleep(self.poll_distance)
+                    if try_ != self.max_tries - 1:  # avoiding useless last sleep
+                        time.sleep(curr_timeout)
 
         if not results:
             raise AnalyzerRunException(f"{self.job_id} poll ended without results")

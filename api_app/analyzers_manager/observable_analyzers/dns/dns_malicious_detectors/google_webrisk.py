@@ -9,6 +9,7 @@ from google.cloud.webrisk_v1.types import ThreatType
 from google.oauth2 import service_account
 
 from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
@@ -41,6 +42,15 @@ class WebRisk(classes.ObservableAnalyzer):
     _service_account_json: dict
 
     def run(self):
+        if (
+            self.observable_classification == self.ObservableTypes.URL
+            and not self.observable_name.startswith("http")
+        ):
+            raise AnalyzerRunException(
+                f"{self.observable_name} not supported "
+                f"because it does not start with http"
+            )
+
         credentials = service_account.Credentials.from_service_account_info(
             self._service_account_json
         )

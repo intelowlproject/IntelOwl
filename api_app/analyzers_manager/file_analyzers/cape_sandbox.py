@@ -247,6 +247,7 @@ class CAPEsandbox(FileAnalyzer):
         is_pending = True
 
         while is_pending:  # starts the for loop when we are not in pending state
+            is_pending = False  # ends the timeouts loop but only this time
             for try_, curr_timeout in enumerate(timeout_attempts):
                 attempt = try_ + 1
                 try:
@@ -279,8 +280,6 @@ class CAPEsandbox(FileAnalyzer):
                         )
                         time.sleep(15)
                         break
-                    else:  # ends the timeouts loop but only this time
-                        is_pending = False
 
                     if data in ("running", "processing"):
                         raise self.ContinuePolling(f"Task still {data}")

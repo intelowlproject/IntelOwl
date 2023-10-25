@@ -1,4 +1,4 @@
-export const PluginTypes = Object.freeze({
+export const PluginTypesNumeric = Object.freeze({
   ANALYZER: "1",
   CONNECTOR: "2",
   VISUALIZER: "3",
@@ -20,7 +20,7 @@ export const PluginFinalStatuses = Object.freeze({
   FAILED: "FAILED",
 });
 
-export const PluginConfigTypes = Object.freeze({
+export const PluginConfigTypesNumeric = Object.freeze({
   PARAMETER: "1",
   SECRET: "2",
 });

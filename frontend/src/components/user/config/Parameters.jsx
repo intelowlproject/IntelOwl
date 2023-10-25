@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import useTitle from "react-use/lib/useTitle";
 import { Container } from "reactstrap";
 import Config from "./Config";
-import { PluginConfigTypes } from "../../../constants/pluginConst";
+import { PluginConfigTypesNumeric } from "../../../constants/pluginConst";
 
 export default function Parameters({
   additionalConfigData,
@@ -21,12 +21,12 @@ export default function Parameters({
           resp.filter(
             (item) =>
               filterFunction(item) &&
-              item.config_type === PluginConfigTypes.PARAMETER,
+              item.config_type === PluginConfigTypesNumeric.PARAMETER,
           )
         }
         additionalConfigData={{
           ...additionalConfigData,
-          config_type: PluginConfigTypes.PARAMETER,
+          config_type: PluginConfigTypesNumeric.PARAMETER,
         }}
         dataName="params"
         editable={editable}

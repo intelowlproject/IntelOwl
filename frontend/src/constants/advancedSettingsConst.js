@@ -3,7 +3,7 @@ export const ScanTypes = Object.freeze({
   analyzers_and_connectors: "Analyzers/Connectors",
 });
 
-export const ScanModes = Object.freeze({
+export const ScanModesNumeric = Object.freeze({
   FORCE_NEW_ANALYSIS: "1",
   CHECK_PREVIOUS_ANALYSIS: "2",
 });

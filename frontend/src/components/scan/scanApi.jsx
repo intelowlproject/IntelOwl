@@ -11,7 +11,7 @@ import {
 } from "../../constants/apiURLs";
 import { prettifyErrors } from "../../utils/api";
 
-import { ScanModes } from "../../constants/advancedSettingsConst";
+import { ScanModesNumeric } from "../../constants/advancedSettingsConst";
 import { JobTypes } from "../../constants/jobConst";
 
 function createJobPayload(
@@ -82,7 +82,7 @@ function createJobPayload(
   payload.append("tlp", tlp);
   // scan mode and scan time
   payload.append("scan_mode", parseInt(_scanMode, 10));
-  if (_scanMode === ScanModes.CHECK_PREVIOUS_ANALYSIS) {
+  if (_scanMode === ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS) {
     payload.append("scan_check_time", `${scanCheckTime}:00:00`);
   }
   // remove custom method in order to avoid to send it to the backend
@@ -148,7 +148,7 @@ export async function createJob(
       analyzers: ${analyzers}, connectors: ${connectors}, runtimeConfig: ${JSON.stringify(
         runtimeConfig,
       )}, 
-      tags: ${tags}, tlp: ${tlp}, ScanModes: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
+      tags: ${tags}, tlp: ${tlp}, ScanModesNumeric: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
     );
     const isSample = classification === JobTypes.FILE;
     let apiUrl = "";

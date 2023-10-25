@@ -1,8 +1,8 @@
-// colors
 export const JobTypeColors = Object.freeze({
   file: "#ed896f",
   observable: "#42796f",
 });
+
 export const TLPColors = Object.freeze({
   CLEAR: "#FFFFFF",
   GREEN: "#33FF00",
@@ -16,13 +16,6 @@ export const ObservableClassificationColors = Object.freeze({
   domain: "#8070ed",
   hash: "#ed896f",
   generic: "#733010",
-});
-export const TLPDescriptions = Object.freeze({
-  CLEAR: "TLP: use all analyzers",
-  GREEN: "TLP: disable analyzers that could impact privacy",
-  AMBER:
-    "TLP: disable analyzers that could impact privacy and limit access to my organization",
-  RED: "TLP: disable analyzers that could impact privacy, limit access to my organization and do not use any external service",
 });
 
 export const JobStatusColors = Object.freeze({
@@ -43,6 +36,7 @@ export const JobStatusColors = Object.freeze({
   reported_without_fails: "success",
   failed: "danger",
 });
+
 export const ReportStatusColors = Object.freeze({
   pending: "light",
   running: "secondary",
@@ -50,6 +44,7 @@ export const ReportStatusColors = Object.freeze({
   success: "success",
   failed: "danger",
 });
+
 export const StatusColors = Object.freeze({
   ...JobStatusColors,
   ...ReportStatusColors,

@@ -40,14 +40,14 @@ import {
 } from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
 import { usePluginConfigurationStore } from "../../stores";
-import { TLPColors, TLPDescriptions } from "../../constants/colorConst";
+import { TLPColors } from "../../constants/colorConst";
 import {
   TLPs,
   TlpChoices,
   ScanTypes,
-  ScanModes,
+  ScanModesNumeric,
 } from "../../constants/advancedSettingsConst";
-import { JobResultSections } from "../../constants/miscConst";
+import { JobResultSections, TLPDescriptions } from "../../constants/miscConst";
 import { TLPTag } from "../common/TLPTag";
 import { markdownToHtml } from "../common/markdownToHtml";
 import { JobTag } from "../common/JobTag";
@@ -117,7 +117,7 @@ export default function ScanForm() {
       tlp: TLPs.AMBER,
       runtime_configuration: {},
       tags: [],
-      scan_mode: ScanModes.CHECK_PREVIOUS_ANALYSIS,
+      scan_mode: ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS,
       analysisOptionValues: ScanTypes.playbooks,
       scan_check_time: 24,
     },
@@ -897,7 +897,7 @@ export default function ScanForm() {
                       id="checkchoice__check_all"
                       type="radio"
                       name="scan_mode"
-                      value={ScanModes.CHECK_PREVIOUS_ANALYSIS}
+                      value={ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <div className="d-flex align-items-center">
@@ -946,7 +946,7 @@ export default function ScanForm() {
                       id="checkchoice__force_new"
                       type="radio"
                       name="scan_mode"
-                      value={ScanModes.FORCE_NEW_ANALYSIS}
+                      value={ScanModesNumeric.FORCE_NEW_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <Label check for="checkchoice__force_new">

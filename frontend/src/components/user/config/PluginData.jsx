@@ -11,7 +11,10 @@ import {
 import { MdCancel } from "react-icons/md";
 import { Button, Col, FormGroup, Input, Row } from "reactstrap";
 import { usePluginConfigurationStore } from "../../../stores";
-import { PluginTypes, PluginConfigTypes } from "../../../constants/pluginConst";
+import {
+  PluginTypesNumeric,
+  PluginConfigTypesNumeric,
+} from "../../../constants/pluginConst";
 
 import {
   createCustomConfig,
@@ -115,13 +118,13 @@ export function PluginData({
         pluginConfigs = pluginConfigs.map((pluginConfig) => {
           const res = pluginConfig;
           let plugins;
-          if (res.type === PluginTypes.ANALYZER) {
+          if (res.type === PluginTypesNumeric.ANALYZER) {
             plugins = analyzers;
-          } else if (res.type === PluginTypes.CONNECTOR) {
+          } else if (res.type === PluginTypesNumeric.CONNECTOR) {
             plugins = connectors;
-          } else if (res.type === PluginTypes.VISUALIZER) {
+          } else if (res.type === PluginTypesNumeric.VISUALIZER) {
             plugins = visualizers;
-          } else if (res.type === PluginTypes.PIVOT) {
+          } else if (res.type === PluginTypesNumeric.PIVOT) {
             plugins = pivots;
           } else {
             console.error(`Invalid type: ${res.type}`);
@@ -161,18 +164,22 @@ export function PluginData({
                             let plugins = {};
                             let attributeList = [];
                             let placeholder = "";
-                            if (configuration.type === PluginTypes.ANALYZER) {
+                            if (
+                              configuration.type === PluginTypesNumeric.ANALYZER
+                            ) {
                               plugins = analyzers;
                             } else if (
-                              configuration.type === PluginTypes.CONNECTOR
+                              configuration.type ===
+                              PluginTypesNumeric.CONNECTOR
                             ) {
                               plugins = connectors;
                             } else if (
-                              configuration.type === PluginTypes.VISUALIZER
+                              configuration.type ===
+                              PluginTypesNumeric.VISUALIZER
                             ) {
                               plugins = visualizers;
                             } else if (
-                              configuration.type === PluginTypes.PIVOT
+                              configuration.type === PluginTypesNumeric.PIVOT
                             ) {
                               plugins = pivots;
                             }
@@ -224,19 +231,23 @@ export function PluginData({
                                     name={`entry[${index}].type`}
                                   >
                                     <option value="">---Select Type---</option>
-                                    <option value={PluginTypes.ANALYZER}>
+                                    <option value={PluginTypesNumeric.ANALYZER}>
                                       Analyzer
                                     </option>
-                                    <option value={PluginTypes.CONNECTOR}>
+                                    <option
+                                      value={PluginTypesNumeric.CONNECTOR}
+                                    >
                                       Connector
                                     </option>
-                                    <option value={PluginTypes.PIVOT}>
+                                    <option value={PluginTypesNumeric.PIVOT}>
                                       Pivot
                                     </option>
-                                    <option value={PluginTypes.VISUALIZER}>
+                                    <option
+                                      value={PluginTypesNumeric.VISUALIZER}
+                                    >
                                       Visualizer
                                     </option>
-                                    <option value={PluginTypes.INGESTOR}>
+                                    <option value={PluginTypesNumeric.INGESTOR}>
                                       Ingestor
                                     </option>
                                   </Field>
@@ -293,7 +304,7 @@ export function PluginData({
                                     placeholder={placeholder}
                                     value={
                                       additionalEntryData.config_type ===
-                                        PluginConfigTypes.SECRET &&
+                                        PluginConfigTypesNumeric.SECRET &&
                                       !configuration.edit
                                         ? "**********"
                                         : configuration.value

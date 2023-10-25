@@ -10,7 +10,7 @@ import {
   mockedUseAuthStore,
   mockedUseTagsStore,
   mockedUsePluginConfigurationStore,
-} from "./mock";
+} from "../../../mock";
 import RecentScans from "../../../../src/components/scan/utils/RecentScans";
 import {
   ANALYZE_MULTIPLE_FILES_URI,

@@ -15,7 +15,7 @@ import {
   mockedUseAuthStore,
   mockedUseTagsStore,
   mockedUsePluginConfigurationStore,
-} from "../mock";
+} from "../../../../mock";
 
 jest.mock("axios");
 // IMPORTANT: this mocks work with several storages because all of them are imported from index!

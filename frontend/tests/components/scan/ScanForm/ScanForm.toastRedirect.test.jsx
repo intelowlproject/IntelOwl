@@ -10,7 +10,7 @@ import {
   mockedUseAuthStore,
   mockedUseTagsStore,
   mockedUsePluginConfigurationStore,
-} from "./mock";
+} from "../../../mock";
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,

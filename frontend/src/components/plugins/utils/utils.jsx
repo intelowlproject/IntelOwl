@@ -1,4 +1,3 @@
-import axios from "axios";
 import React from "react";
 import PropTypes from "prop-types";
 import classnames from "classnames";
@@ -24,15 +23,11 @@ import { IconButton, BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
 
 import { markdownToHtml, TLPTag, JobTag } from "../../common";
 import {
+  useAuthStore,
   useOrganizationStore,
   usePluginConfigurationStore,
 } from "../../../stores";
-import {
-  ANALYZERS_CONFIG_URI,
-  CONNECTORS_CONFIG_URI,
-  VISUALIZERS_CONFIG_URI,
-} from "../../../constants/api";
-import { pluginType, scanMode } from "../../../constants/constants";
+import { pluginsTypes, scanMode } from "../../../constants/constants";
 
 export function parseScanCheckTime(time) {
   // scan_check_time is in format days:hours:minutes:seconds, we need to convert them to hours
@@ -180,7 +175,7 @@ export function PluginInfoCard({ pluginInfo }) {
             </ul>
           </div>
         )}
-        {!pluginInfo?.plugin_type && (
+        {pluginInfo?.plugin_type === pluginsTypes.PLAYBOOK && (
           <div>
             <h6 className="text-secondary">Advanced Settings &nbsp;</h6>
             <ul>
@@ -314,41 +309,46 @@ export function OrganizationPluginStateToggle({
   type,
   refetch,
 }) {
+  const user = useAuthStore(React.useCallback((s) => s.user, []));
   const {
     isUserOwner,
-    organization,
     noOrg,
     fetchAll: fetchAllOrganizations,
+    isUserAdmin,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         fetchAll: state.fetchAll,
         isUserOwner: state.isUserOwner,
-        organization: state.organization,
         noOrg: state.noOrg,
+        isUserAdmin: state.isUserAdmin,
       }),
       [],
     ),
   );
-  let title = disabled
-    ? `Enable ${pluginName} for organization`
-    : `Disable ${pluginName} for organization`;
-  if (!isUserOwner) {
-    title = `You're not an owner of your organization - ${organization.name}`;
-  }
-  let baseUrl = "";
-  if (type === pluginType.ANALYZER) {
-    baseUrl = ANALYZERS_CONFIG_URI;
-  } else if (type === pluginType.CONNECTOR) {
-    baseUrl = CONNECTORS_CONFIG_URI;
-  } else if (type === pluginType.VISUALIZER) {
-    baseUrl = VISUALIZERS_CONFIG_URI;
+  const { enablePluginInOrg, disabledPluginInOrg } =
+    usePluginConfigurationStore(
+      React.useCallback(
+        (state) => ({
+          enablePluginInOrg: state.enablePluginInOrg,
+          disabledPluginInOrg: state.disabledPluginInOrg,
+        }),
+        [],
+      ),
+    );
+  let title = `${
+    disabled ? "Enable" : "Disable"
+  } ${pluginName} for organization`;
+  if (!isUserOwner && !isUserAdmin(user.username)) {
+    title = `${pluginName} is ${
+      disabled ? "disabled" : "enabled"
+    } for the organization`;
   }
 
   const onClick = async () => {
-    if (isUserOwner) {
-      if (disabled) await axios.delete(`${baseUrl}/${pluginName}/organization`);
-      else await axios.post(`${baseUrl}/${pluginName}/organization`);
+    if (isUserOwner || isUserAdmin(user.username)) {
+      if (disabled) enablePluginInOrg(type, pluginName);
+      else disabledPluginInOrg(type, pluginName);
       fetchAllOrganizations();
       refetch();
     }
@@ -495,7 +495,7 @@ PluginHealthCheckButton.propTypes = {
 
 PlaybooksCollapse.propTypes = {
   value: PropTypes.array.isRequired,
-  pluginType_: PropTypes.oneOf(["analyzers", "connectors"]).isRequired,
+  pluginType_: PropTypes.oneOf(Object.values(pluginsTypes)).isRequired,
 };
 
 PlaybooksDeletionButton.propTypes = {

@@ -2,7 +2,7 @@ import React from "react";
 
 import { pivotTableColumns } from "./data";
 import PluginWrapper from "./PluginWrapper";
-import { pluginType } from "../../../constants/constants";
+import { pluginsTypes } from "../../../constants/constants";
 
 export default function Pivots() {
   console.debug("Pivots rendered!");
@@ -23,7 +23,7 @@ export default function Pivots() {
       description="Pivots are designed to create a job from another job"
       stateSelector={stateSelector}
       columns={pivotTableColumns}
-      type={pluginType.PIVOT}
+      type={pluginsTypes.PIVOT}
     />
   );
 }

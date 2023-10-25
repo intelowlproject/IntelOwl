@@ -124,6 +124,15 @@ const useOrganizationStore = create((set, _get) => ({
       set({ error: e });
     }
   },
+  isUserAdmin: (username) => {
+    let isAdmin = false;
+    _get().members.forEach((member) => {
+      if (member.username === username && member.is_admin) {
+        isAdmin = true;
+      }
+    });
+    return isAdmin;
+  },
 }));
 
 export default useOrganizationStore;

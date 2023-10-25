@@ -913,6 +913,11 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                 )
         return super().validate(attrs)
 
+    def to_representation(self, instance: ModelWithOwnership):
+        result = super().to_representation(instance)
+        result["owner"] = instance.owner.username if instance.owner else None
+        return result
+
 
 class PluginConfigSerializer(ModelWithOwnershipSerializer):
     class Meta:

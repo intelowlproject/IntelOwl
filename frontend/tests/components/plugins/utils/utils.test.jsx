@@ -12,9 +12,66 @@ import {
   parseScanCheckTime,
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
+  OrganizationPluginStateToggle,
 } from "../../../../src/components/plugins/utils/utils";
 
 jest.mock("axios");
+jest.mock("../../../../src/stores/useAuthStore", () =>
+  jest.fn((state) =>
+    state({
+      user: {
+        username: "user_owner",
+        full_name: "user owner",
+        first_name: "user",
+        last_name: "owner",
+        email: "test@user.com",
+      },
+      isAuthenticated: () => true,
+    }),
+  ),
+);
+jest.mock("../../../../src/stores/useOrganizationStore", () =>
+  jest.fn((state) =>
+    state({
+      loading: false,
+      error: null,
+      isUserOwner: true,
+      noOrg: false,
+      organization: {
+        owner: {
+          full_name: "user owner",
+          joined: "2023-10-19T14:34:38.263483Z",
+          username: "user_owner",
+          is_admin: true,
+        },
+        name: "org_test",
+      },
+      membersCount: 3,
+      members: [
+        {
+          full_name: "user owner",
+          joined: "2023-10-19T14:34:38.263483Z",
+          username: "user_owner",
+          is_admin: true,
+        },
+        {
+          full_name: "user admin",
+          joined: "2023-10-19T14:34:38.263483Z",
+          username: "user_admin",
+          is_admin: true,
+        },
+        {
+          full_name: "user user",
+          joined: "2023-10-19T14:34:38.263483Z",
+          username: "user_user",
+          is_admin: false,
+        },
+      ],
+      fetchAll: () => {},
+      isUserAdmin: () => true,
+    }),
+  ),
+);
 
 describe("parseScanCheckTime test", () => {
   test("correct time: days:hours:minutes:seconds", () => {
@@ -30,7 +87,7 @@ describe("parseScanCheckTime test", () => {
 
 describe("PluginHealthCheckButton test", () => {
   test("Health check - status true", async () => {
-    const user = userEvent.setup();
+    const userAction = userEvent.setup();
     axios.get.mockImplementation(() =>
       Promise.resolve({ data: { status: true } }),
     );
@@ -46,7 +103,7 @@ describe("PluginHealthCheckButton test", () => {
     );
     expect(healthCheckIcon).toBeInTheDocument();
 
-    await user.click(healthCheckIcon);
+    await userAction.click(healthCheckIcon);
 
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
@@ -57,7 +114,7 @@ describe("PluginHealthCheckButton test", () => {
   });
 
   test("Health check - status false", async () => {
-    const user = userEvent.setup();
+    const userAction = userEvent.setup();
     axios.get.mockImplementation(() =>
       Promise.resolve({ data: { status: false } }),
     );
@@ -73,7 +130,7 @@ describe("PluginHealthCheckButton test", () => {
     );
     expect(healthCheckIcon).toBeInTheDocument();
 
-    await user.click(healthCheckIcon);
+    await userAction.click(healthCheckIcon);
 
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
@@ -86,7 +143,7 @@ describe("PluginHealthCheckButton test", () => {
 
 describe("PlaybooksDeletionButton test", () => {
   test("playbook deletion", async () => {
-    const user = userEvent.setup();
+    const userAction = userEvent.setup();
     axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
 
     const { container } = render(
@@ -100,7 +157,7 @@ describe("PlaybooksDeletionButton test", () => {
     );
     expect(playbookDeletionIcon).toBeInTheDocument();
 
-    await user.click(playbookDeletionIcon);
+    await userAction.click(playbookDeletionIcon);
     await expect(screen.getByRole("document", {})).toBeInTheDocument();
     const deleteButton = screen.getByRole("button", {
       name: "Delete",
@@ -111,7 +168,7 @@ describe("PlaybooksDeletionButton test", () => {
     });
     expect(cancelButton).toBeInTheDocument();
 
-    await user.click(deleteButton);
+    await userAction.click(deleteButton);
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith(`${PLAYBOOKS_CONFIG_URI}/test`);
     });
@@ -119,5 +176,63 @@ describe("PlaybooksDeletionButton test", () => {
     setTimeout(() => {
       expect(screen.getByText("test deleted")).toBeInTheDocument();
     }, 15 * 1000);
+  });
+});
+
+describe("OrganizationPluginStateToggle test", () => {
+  test("Enable playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin`,
+        { for_organization: true },
+      );
+    });
+  });
+
+  test("Disable playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled={false}
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin`,
+        { for_organization: false },
+      );
+    });
   });
 });

@@ -53,7 +53,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0044_analyzerconfig_routing_key_and_more"),
+        ("analyzers_manager", "0045_yaraify_fix"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

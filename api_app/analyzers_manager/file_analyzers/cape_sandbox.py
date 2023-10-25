@@ -238,7 +238,7 @@ class CAPEsandbox(FileAnalyzer):
         if tot_time > 600:
             logger.warning(
                 f" Job: {self.job_id} -> "
-                f"Broken soft time limit!! "
+                "Broken soft time limit!! "
                 f"The analysis in the worst case will last {tot_time} seconds"
             )
 

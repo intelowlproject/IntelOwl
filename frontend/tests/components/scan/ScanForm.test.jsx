@@ -225,6 +225,10 @@ jest.mock("../../../src/stores", () => ({
       checkPluginHealth: () => {},
     }),
   ),
+  useOrganizationStore: jest.fn((state) =>
+  state({
+    pluginsState: {},
+  }))
 }));
 // mock RecentScans component
 jest.mock("../../../src/components/scan/utils/RecentScans", () =>

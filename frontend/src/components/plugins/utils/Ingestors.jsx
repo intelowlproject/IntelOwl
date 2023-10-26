@@ -2,7 +2,7 @@ import React from "react";
 
 import { ingestorTableColumns } from "./data";
 import PluginWrapper from "./PluginWrapper";
-import { pluginType } from "../../../constants/constants";
+import { pluginsTypes } from "../../../constants/constants";
 
 export default function Ingestors() {
   console.debug("Ingestors rendered!");
@@ -23,7 +23,7 @@ export default function Ingestors() {
       description="Ingestors are designed to create jobs from an external source."
       stateSelector={stateSelector}
       columns={ingestorTableColumns}
-      type={pluginType.INGESTOR}
+      type={pluginsTypes.INGESTOR}
     />
   );
 }

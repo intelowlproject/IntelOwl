@@ -796,8 +796,8 @@ class JobResponseSerializer(rfs.ModelSerializer):
     def to_representation(self, instance: Job):
         result = super().to_representation(instance)
         result["status"] = self.STATUS_ACCEPTED
-        result["already_exists"] = (
-            True if instance.status in instance.Status.final_statuses() else False
+        result["already_exists"] = bool(
+            instance.status in instance.Status.final_statuses()
         )
         return result
 
@@ -913,6 +913,11 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                     {"detail": "You are not owner or admin of the organization"}
                 )
         return super().validate(attrs)
+
+    def to_representation(self, instance: ModelWithOwnership):
+        result = super().to_representation(instance)
+        result["owner"] = instance.owner.username if instance.owner else None
+        return result
 
 
 class PluginConfigSerializer(ModelWithOwnershipSerializer):

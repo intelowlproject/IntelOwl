@@ -6,6 +6,15 @@ export const pluginType = Object.freeze({
   PIVOT: "5",
 });
 
+export const pluginsTypes = Object.freeze({
+  ANALYZER: "analyzer",
+  CONNECTOR: "connector",
+  VISUALIZER: "visualizer",
+  INGESTOR: "ingestor",
+  PIVOT: "pivot",
+  PLAYBOOK: "playbook",
+});
+
 export const pluginStatuses = Object.freeze({
   PENDING: "PENDING",
   RUNNING: "RUNNING",

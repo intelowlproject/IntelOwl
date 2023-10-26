@@ -58,6 +58,12 @@ import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../../utils/time";
 import { JobTypes, ObservableClassifications } from "../../constants/jobConst";
+import {
+  DOMAIN_REGEX,
+  IP_REGEX,
+  HASH_REGEX,
+  URL_REGEX,
+} from "../../constants/regexConst";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -70,10 +76,10 @@ function DangerErrorMessage(fieldName) {
 
 // constants
 const observableType2RegExMap = {
-  domain: "^(?:[\\w-]{1,63}\\.)+[\\w-]{2,63}$",
-  ip: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-  url: "^.{2,20}://.+$",
-  hash: "^[a-zA-Z0-9]{32,}$",
+  domain: DOMAIN_REGEX,
+  ip: IP_REGEX,
+  url: URL_REGEX,
+  hash: HASH_REGEX,
 };
 
 const sanitizeObservable = (observable) =>
@@ -401,7 +407,7 @@ export default function ScanForm() {
       let newClassification = ObservableClassifications.GENERIC;
       Object.entries(observableType2RegExMap).forEach(
         ([typeName, typeRegEx]) => {
-          if (new RegExp(typeRegEx).test(sanitizeObservable(observableValue))) {
+          if (typeRegEx.test(sanitizeObservable(observableValue))) {
             newClassification = typeName;
           }
         },

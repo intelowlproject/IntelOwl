@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "analyzers_manager",
-            "0045_yaraify_fix",
+            "0046_analyzerconfig_add_requests_timeout_field",
         ),
     ]
 

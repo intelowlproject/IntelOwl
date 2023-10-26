@@ -312,14 +312,12 @@ export function OrganizationPluginStateToggle({
 }) {
   const user = useAuthStore(React.useCallback((s) => s.user, []));
   const {
-    isUserOwner,
     noOrg,
     fetchAll: fetchAllOrganizations,
     isUserAdmin,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
-        isUserOwner: state.isUserOwner,
         fetchAll: state.fetchAll,
         noOrg: state.noOrg,
         isUserAdmin: state.isUserAdmin,
@@ -340,7 +338,7 @@ export function OrganizationPluginStateToggle({
   let title = `${
     disabled ? "Enable" : "Disable"
   } ${pluginName} for organization`;
-  if (!isUserOwner && !isUserAdmin(user.username)) {
+  if (!isUserAdmin(user.username)) {
     title = `${pluginName} is ${
       disabled ? "disabled" : "enabled"
     } for the organization`;
@@ -361,7 +359,7 @@ export function OrganizationPluginStateToggle({
           size="sm"
           Icon={BsPeopleFill}
           title={title}
-          onClick={(isUserOwner || isUserAdmin(user.username)) && onClick}
+          onClick={isUserAdmin(user.username) && onClick}
           titlePlacement="top"
         />
       )}

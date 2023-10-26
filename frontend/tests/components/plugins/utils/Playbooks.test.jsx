@@ -7,31 +7,31 @@ import Playbooks from "../../../../src/components/plugins/utils/Playbooks";
 jest.mock("axios");
 jest.mock("../../../../src/stores", () => ({
   useAuthStore: jest.fn((state) =>
-  state({
-    loading: false,
-    token: null,
-    user: {
-      username: "test",
-      full_name: "test user",
-      first_name: "test",
-      last_name: "user",
-      email: "test@google.com",
-    },
-    access: {
-      total_submissions: 10,
-      month_submissions: 2,
-    },
-    isAuthenticated: () => false,
-    updateToken: () => {},
-    deleteToken: () => {},
-    service: {
-      fetchUserAccess: () => {},
-      loginUser: () => {},
-      logoutUser: () => {},
-      forceLogout: () => {},
-    },
-  }),
-),
+    state({
+      loading: false,
+      token: null,
+      user: {
+        username: "test",
+        full_name: "test user",
+        first_name: "test",
+        last_name: "user",
+        email: "test@google.com",
+      },
+      access: {
+        total_submissions: 10,
+        month_submissions: 2,
+      },
+      isAuthenticated: () => false,
+      updateToken: () => {},
+      deleteToken: () => {},
+      service: {
+        fetchUserAccess: () => {},
+        loginUser: () => {},
+        logoutUser: () => {},
+        forceLogout: () => {},
+      },
+    }),
+  ),
   useOrganizationStore: jest.fn((state) =>
     state({
       loading: false,

@@ -795,8 +795,8 @@ class JobResponseSerializer(rfs.ModelSerializer):
     def to_representation(self, instance: Job):
         result = super().to_representation(instance)
         result["status"] = self.STATUS_ACCEPTED
-        result["already_exists"] = (
-            True if instance.status in instance.Status.final_statuses() else False
+        result["already_exists"] = bool(
+            instance.status in instance.Status.final_statuses()
         )
         return result
 

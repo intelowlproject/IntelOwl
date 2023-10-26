@@ -23,7 +23,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     rescan_poll_distance: int
     include_behaviour_summary: bool
     include_sigma_analyses: bool
-    force_active_scan: bool = False
     force_active_scan_if_old: bool
     days_to_say_that_a_scan_is_old: int
     relationships_to_request: list
@@ -42,6 +41,10 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
         if relationship == "resolutions":
             limit = 40
         return limit
+
+    def config(self):
+        super().config()
+        self.force_active_scan = self._job.tlp = self._job.TLP.CLEAR.value
 
     def _vt_get_relationships(
         self,

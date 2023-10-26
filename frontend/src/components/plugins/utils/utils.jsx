@@ -308,10 +308,10 @@ export function OrganizationPluginStateToggle({
   pluginName,
   type,
   refetch,
+  pluginOwner,
 }) {
   const user = useAuthStore(React.useCallback((s) => s.user, []));
   const {
-    isUserOwner,
     noOrg,
     fetchAll: fetchAllOrganizations,
     isUserAdmin,
@@ -319,7 +319,6 @@ export function OrganizationPluginStateToggle({
     React.useCallback(
       (state) => ({
         fetchAll: state.fetchAll,
-        isUserOwner: state.isUserOwner,
         noOrg: state.noOrg,
         isUserAdmin: state.isUserAdmin,
       }),
@@ -339,19 +338,17 @@ export function OrganizationPluginStateToggle({
   let title = `${
     disabled ? "Enable" : "Disable"
   } ${pluginName} for organization`;
-  if (!isUserOwner && !isUserAdmin(user.username)) {
+  if (!isUserAdmin(user.username)) {
     title = `${pluginName} is ${
       disabled ? "disabled" : "enabled"
     } for the organization`;
   }
 
   const onClick = async () => {
-    if (isUserOwner || isUserAdmin(user.username)) {
-      if (disabled) enablePluginInOrg(type, pluginName);
-      else disabledPluginInOrg(type, pluginName);
-      fetchAllOrganizations();
-      refetch();
-    }
+    if (disabled) enablePluginInOrg(type, pluginName, pluginOwner);
+    else disabledPluginInOrg(type, pluginName, pluginOwner);
+    fetchAllOrganizations();
+    refetch();
   };
   return (
     <div className={`d-flex align-items-center ${noOrg ? "" : "px-2"}`}>
@@ -362,7 +359,7 @@ export function OrganizationPluginStateToggle({
           size="sm"
           Icon={BsPeopleFill}
           title={title}
-          onClick={onClick}
+          onClick={isUserAdmin(user.username) && onClick}
           titlePlacement="top"
         />
       )}
@@ -473,6 +470,11 @@ OrganizationPluginStateToggle.propTypes = {
   pluginName: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
   refetch: PropTypes.func.isRequired,
+  pluginOwner: PropTypes.string,
+};
+
+OrganizationPluginStateToggle.defaultProps = {
+  pluginOwner: null,
 };
 
 PluginInfoCard.propTypes = {

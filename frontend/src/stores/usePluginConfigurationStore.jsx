@@ -250,8 +250,8 @@ const usePluginConfigurationStore = create((set, get) => ({
       return null;
     }
   },
-  enablePluginInOrg: async (type, pluginName) => {
-    if (type === pluginsTypes.PLAYBOOK) {
+  enablePluginInOrg: async (type, pluginName, pluginOwner) => {
+    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
       try {
         const response = await axios.patch(
           `${API_BASE_URI}/${type}/${pluginName}`,
@@ -286,8 +286,8 @@ const usePluginConfigurationStore = create((set, get) => ({
       return null;
     }
   },
-  disabledPluginInOrg: async (type, pluginName) => {
-    if (type === pluginsTypes.PLAYBOOK) {
+  disabledPluginInOrg: async (type, pluginName, pluginOwner) => {
+    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
       try {
         const response = await axios.patch(
           `${API_BASE_URI}/${type}/${pluginName}`,

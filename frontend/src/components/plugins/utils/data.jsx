@@ -97,7 +97,7 @@ const pluginTableColumns = [
   {
     Header: "Active",
     id: "active",
-    accessor: (r) => !r.disabled,
+    accessor: (r) => !(r.disabled || r.orgPluginDisabled),
     Cell: ({ value }) => <BooleanIcon withColors truthy={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
@@ -390,14 +390,15 @@ const playbookTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
-        {value?.owner && (
-          <OrganizationPluginStateToggle
-            pluginName={value?.name}
-            disabled={!value?.for_organization}
-            refetch={value?.refetch}
-            type={pluginsTypes.PLAYBOOK}
-          />
-        )}
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={
+            value?.owner ? !value?.for_organization : value?.orgPluginDisabled
+          }
+          refetch={value?.refetch}
+          type={pluginsTypes.PLAYBOOK}
+          pluginOwner={value?.owner}
+        />
         {value.is_deletable && (
           <PlaybooksDeletionButton playbookName={value?.name} />
         )}

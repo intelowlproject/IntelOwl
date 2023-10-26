@@ -180,9 +180,69 @@ describe("PlaybooksDeletionButton test", () => {
 });
 
 describe("OrganizationPluginStateToggle test", () => {
-  test("Enable playbook for org", async () => {
+  test("Enable custom playbook for org", async () => {
     const userAction = userEvent.setup();
     axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+          pluginOwner="user_owner"
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin`,
+        { for_organization: true },
+      );
+    });
+  });
+
+  test("Disable custom playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled={false}
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+          pluginOwner="user_owner"
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin`,
+        { for_organization: false },
+      );
+    });
+  });
+
+  test("Enable default playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.post.mockImplementation(() => Promise.resolve({ data: {} }));
 
     const { container } = render(
       <BrowserRouter>
@@ -201,16 +261,17 @@ describe("OrganizationPluginStateToggle test", () => {
     await userAction.click(iconButton);
 
     await waitFor(() => {
-      expect(axios.patch).toHaveBeenCalledWith(
-        `${API_BASE_URI}/playbook/plugin`,
-        { for_organization: true },
+      expect(axios.delete).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin/organization`,
       );
     });
   });
 
-  test("Disable playbook for org", async () => {
+  test("Disable default playbook for org", async () => {
     const userAction = userEvent.setup();
     axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.post.mockImplementation(() => Promise.resolve({ data: {} }));
 
     const { container } = render(
       <BrowserRouter>
@@ -229,9 +290,8 @@ describe("OrganizationPluginStateToggle test", () => {
     await userAction.click(iconButton);
 
     await waitFor(() => {
-      expect(axios.patch).toHaveBeenCalledWith(
-        `${API_BASE_URI}/playbook/plugin`,
-        { for_organization: false },
+      expect(axios.post).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin/organization`,
       );
     });
   });

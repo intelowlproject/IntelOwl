@@ -44,7 +44,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
 
     def config(self):
         super().config()
-        self.force_active_scan = self._job.tlp = self._job.TLP.CLEAR.value
+        self.force_active_scan = self._job.tlp == self._job.TLP.CLEAR.value
 
     def _vt_get_relationships(
         self,

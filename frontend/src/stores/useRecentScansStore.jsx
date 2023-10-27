@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { JOB_RECENT_SCANS, JOB_RECENT_SCANS_USER } from "../constants/apiURLs";
 
-const useRecentScansStore = create((set, _get) => ({
+export const useRecentScansStore = create((set, _get) => ({
   loadingScansUser: true,
   loadingScansInsertedAnalyzable: true,
   recentScansUserError: null,
@@ -35,5 +35,3 @@ const useRecentScansStore = create((set, _get) => ({
     }
   },
 }));
-
-export default useRecentScansStore;

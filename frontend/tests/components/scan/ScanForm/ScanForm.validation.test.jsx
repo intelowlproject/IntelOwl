@@ -15,12 +15,14 @@ import {
 
 jest.mock("axios");
 // IMPORTANT: this mocks work with several storages because all of them are imported from index!
-jest.mock("../../../../src/stores", () => ({
+jest.mock("../../../../src/stores/useAuthStore", () => ({
   useAuthStore: jest.fn((state) => state(mockedUseAuthStore)),
+}));
+jest.mock("../../../../src/stores/useTagsStore", () => ({
   useTagsStore: jest.fn((state) => state(mockedUseTagsStore)),
-  usePluginConfigurationStore: jest.fn((state) =>
-    state(mockedUsePluginConfigurationStore),
-  ),
+}));
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
+  usePluginConfigurationStore: jest.fn((state) => state(mockedUsePluginConfigurationStore)),
 }));
 // mock RecentScans component
 jest.mock("../../../../src/components/scan/utils/RecentScans", () =>

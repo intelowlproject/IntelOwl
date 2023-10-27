@@ -4,7 +4,7 @@ import useTitle from "react-use/lib/useTitle";
 
 import { LoadingBoundary, ErrorAlert } from "@certego/certego-ui";
 
-import { useOrganizationStore } from "../../stores";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
 import { OrgInfoCard } from "./utils/OrgInfoCard";
 import { MembersList } from "./utils/MembersList";

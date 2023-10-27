@@ -164,6 +164,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     @staticmethod
     def set_default_value_from_playbook(attrs: Dict) -> None:
+        playbook = attrs["playbook_requested"]
         # we are changing attrs in place
         for attribute in [
             "scan_mode",
@@ -172,11 +173,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "runtime_configuration",
         ]:
             if attribute not in attrs:
-                if playbook := attrs.get("playbook_requested"):
-                    attrs[attribute] = getattr(playbook, attribute)
+                attrs[attribute] = getattr(playbook, attribute)
 
     def validate(self, attrs: dict) -> dict:
-        self.set_default_value_from_playbook(attrs)
+        if attrs.get("playbook_requested"):
+            self.set_default_value_from_playbook(attrs)
         if "tlp" not in attrs:
             attrs["tlp"] = TLP.CLEAR.value
         if "scan_mode" not in attrs:
@@ -187,7 +188,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "scan_check_time"
         ):
             attrs["scan_check_time"] = datetime.timedelta(hours=24)
-        elif attrs.get("scan_mode") == ScanMode.FORCE_NEW_ANALYSIS:
+        elif attrs.get("scan_mode") == ScanMode.FORCE_NEW_ANALYSIS.value:
             attrs["scan_check_time"] = None
         attrs = super().validate(attrs)
         if playbook := attrs.get("playbook_requested", None):
@@ -222,7 +223,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     ) -> Generator[VisualizerConfig, None, None]:
         if playbook_to_execute:
             yield from VisualizerConfig.objects.filter(
-                playbook=playbook_to_execute
+                playbooks__in=[playbook_to_execute]
             ).annotate_runnable(self.context["request"].user).filter(runnable=True)
 
     def set_connectors_to_execute(
@@ -795,8 +796,8 @@ class JobResponseSerializer(rfs.ModelSerializer):
     def to_representation(self, instance: Job):
         result = super().to_representation(instance)
         result["status"] = self.STATUS_ACCEPTED
-        result["already_exists"] = (
-            True if instance.status in instance.Status.final_statuses() else False
+        result["already_exists"] = bool(
+            instance.status in instance.Status.final_statuses()
         )
         return result
 
@@ -912,6 +913,11 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                     {"detail": "You are not owner or admin of the organization"}
                 )
         return super().validate(attrs)
+
+    def to_representation(self, instance: ModelWithOwnership):
+        result = super().to_representation(instance)
+        result["owner"] = instance.owner.username if instance.owner else None
+        return result
 
 
 class PluginConfigSerializer(ModelWithOwnershipSerializer):
@@ -1159,6 +1165,9 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
 
     class Meta:
         exclude = ["disabled_in_organizations"]
+
+    def to_representation(self, instance):
+        return super(PythonConfigSerializer, self).to_representation(instance)
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):

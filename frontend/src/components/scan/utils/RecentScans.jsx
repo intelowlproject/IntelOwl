@@ -4,7 +4,7 @@ import md5 from "md5";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody } from "reactstrap";
 import { DateHoverable, Loader } from "@certego/certego-ui";
-import useRecentScansStore from "../../../stores/useRecentScansStore";
+import { useRecentScansStore } from "../../../stores/useRecentScansStore";
 import { JobResultSections } from "../../../constants/miscConst";
 import { JobTypes } from "../../../constants/jobConst";
 

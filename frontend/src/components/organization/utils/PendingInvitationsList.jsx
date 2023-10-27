@@ -5,7 +5,7 @@ import { MdEdit, MdDelete } from "react-icons/md";
 
 import { ContentSection, DateHoverable, IconButton } from "@certego/certego-ui";
 
-import { useOrganizationStore } from "../../../stores";
+import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { deleteInvitation } from "../orgApi";
 import { InviteButton } from "./InviteButton";
 

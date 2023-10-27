@@ -39,8 +39,9 @@ import {
   IoIosArrowDropupCircle,
 } from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
-import { usePluginConfigurationStore } from "../../stores";
 import { TLPColors } from "../../constants/colorConst";
+import { usePluginConfigurationStore } from "../../stores/usePluginConfigurationStore";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 import {
   TLPs,
   TlpChoices,
@@ -90,6 +91,15 @@ export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
   const { guideState, setGuideState } = useGuideContext();
+
+  const { pluginsState: organizationPluginsState } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        pluginsState: state.pluginsState,
+      }),
+      [],
+    ),
+  );
 
   /* Recent Scans states - inputValue is used to save the user typing (this state changes for each character that is typed), 
   recentScansInput is used for rendering RecentScans component only once per second
@@ -279,12 +289,14 @@ export default function ScanForm() {
       file: [],
     };
     playbooks.forEach((obj) => {
-      // filter on basis of type
-      obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
+      // filter on basis of type if the playbook is not disabled in org
+      if (organizationPluginsState[obj.name] === undefined) {
+        obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
+      }
     });
     console.debug("Playbooks", grouped);
     return grouped;
-  }, [playbooks]);
+  }, [playbooks, organizationPluginsState]);
 
   const analyzersOptions = React.useMemo(
     () =>
@@ -372,10 +384,7 @@ export default function ScanForm() {
         scan_mode: `${v.scan_mode}`,
         scan_check_time: v.scan_check_time,
       }))
-      .sort((a, b) =>
-        // eslint-disable-next-line no-nested-ternary
-        a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
-      );
+      .filter((item) => !item.isDisabled);
 
   const updateAdvancedConfig = (tags, tlp, _scanMode, scanCheckTime) => {
     formik.setFieldValue("tags", tags, false);

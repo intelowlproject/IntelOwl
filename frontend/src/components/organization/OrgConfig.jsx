@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Alert, Row, Container } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 import { LoadingBoundary, ErrorAlert } from "@certego/certego-ui";
-import { useOrganizationStore } from "../../stores";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
 import ConfigContainer from "../user/config/ConfigContainer";
 import { OrgCreateButton } from "./utils/OrgCreateButton";

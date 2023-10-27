@@ -4,123 +4,20 @@ import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Connectors from "../../../../src/components/plugins/types/Connectors";
 
+import {
+  mockedUseOrganizationStoreNoOrg,
+  mockedUsePluginConfigurationStore,
+} from "../../../mock";
+
 jest.mock("axios");
-jest.mock("../../../../src/stores", () => ({
+jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
-    state({
-      loading: false,
-      error: null,
-      isUserOwner: false,
-      noOrg: true,
-      organization: {},
-      membersCount: undefined,
-      members: [],
-      pendingInvitations: [],
-      pluginsState: {},
-      fetchAll: () => {},
-    }),
+    state(mockedUseOrganizationStoreNoOrg),
   ),
+}));
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
-    state({
-      analyzersLoading: false,
-      connectorsLoading: false,
-      visualizersLoading: false,
-      playbooksLoading: false,
-      analyzersError: null,
-      connectorsError: null,
-      playbooksError: null,
-      visualizersError: null,
-      analyzers: [
-        {
-          name: "TEST_ANALYZER",
-          config: {
-            queue: "default",
-            soft_time_limit: 30,
-          },
-          python_module: "test.Test",
-          description: "Test analyzer",
-          disabled: false,
-          type: "observable",
-          docker_based: false,
-          maximum_tlp: "AMBER",
-          observable_supported: [
-            "domain",
-            "generic",
-            "hash",
-            "ip",
-            "url",
-            "file",
-          ],
-          supported_filetypes: [],
-          run_hash: false,
-          run_hash_type: "",
-          not_supported_filetypes: [],
-          params: {},
-          secrets: {},
-          verification: {
-            configured: true,
-            details: "Ready to use!",
-            missing_secrets: [],
-          },
-          orgPluginDisabled: false,
-          plugin_type: "1",
-        },
-      ],
-      connectors: [],
-      visualizers: [],
-      playbooks: [
-        {
-          name: "TEST_PLAYBOOK_IP",
-          type: ["ip"],
-          description: "Test playbook for the IP addresses",
-          disabled: false,
-          runtime_configuration: {
-            analyzers: {},
-            connectors: {},
-            visualizers: {},
-          },
-          analyzers: [],
-          connectors: [],
-          scan_mode: 2,
-          scan_check_time: "02:00:00:00",
-          tags: [
-            {
-              id: 1,
-              label: "test tag",
-              color: "#1655D3",
-            },
-          ],
-          tlp: "CLEAR",
-          is_deletable: false,
-        },
-        {
-          name: "TEST_PLAYBOOK_DOMAIN",
-          type: ["domain"],
-          description: "Test playbook for the domains",
-          disabled: false,
-          runtime_configuration: {
-            analyzers: {},
-            connectors: {},
-            visualizers: {},
-          },
-          analyzers: [],
-          connectors: [],
-          scan_mode: 2,
-          scan_check_time: "02:00:00:00",
-          tags: [],
-          tlp: "CLEAR",
-          is_deletable: true,
-        },
-      ],
-      hydrate: () => {},
-      retrieveAnalyzersConfiguration: () => {},
-      retrieveConnectorsConfiguration: () => {},
-      retrieveVisualizersConfiguration: () => {},
-      retrieveIngestorsConfiguration: () => {},
-      retrievePlaybooksConfiguration: () => {},
-      checkPluginHealth: () => {},
-      deletePlaybook: () => {},
-    }),
+    state(mockedUsePluginConfigurationStore),
   ),
 }));
 

@@ -4,7 +4,11 @@ from rest_framework.exceptions import ValidationError
 from api_app.models import Job
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import AbstractReportSerializer, PythonConfigSerializer
+from api_app.serializers import (
+    AbstractReportSerializer,
+    PythonConfigSerializer,
+    PythonConfigSerializerForMigration,
+)
 
 
 class PivotReportSerializer(AbstractReportSerializer):
@@ -48,3 +52,9 @@ class PivotConfigSerializer(PythonConfigSerializer):
         model = PivotConfig
         exclude = ["related_analyzer_configs", "related_connector_configs"]
         list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
+
+
+class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):
+    class Meta:
+        model = PivotConfig
+        exclude = PythonConfigSerializerForMigration.Meta.exclude

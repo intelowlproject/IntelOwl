@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
+import { pluginsTypes } from "../constants/constants";
 import {
   API_BASE_URI,
   ANALYZERS_CONFIG_URI,
@@ -44,7 +45,7 @@ async function downloadAllPlugin(pluginUrl) {
   return pluginList;
 }
 
-const usePluginConfigurationStore = create((set, get) => ({
+export const usePluginConfigurationStore = create((set, get) => ({
   // loading: true,
   analyzersLoading: true,
   connectorsLoading: true,
@@ -224,10 +225,10 @@ const usePluginConfigurationStore = create((set, get) => ({
       set({ playbooksError: e, playbooksLoading: false });
     }
   },
-  checkPluginHealth: async (PluginTypesNumeric, PluginName) => {
+  checkPluginHealth: async (type, PluginName) => {
     try {
       const resp = await axios.get(
-        `${API_BASE_URI}/${PluginTypesNumeric}/${PluginName}/health_check`,
+        `${API_BASE_URI}/${type}/${PluginName}/health_check`,
       );
       console.debug("usePluginConfigurationStore - checkPluginHealth: ");
       console.debug(resp);
@@ -249,6 +250,76 @@ const usePluginConfigurationStore = create((set, get) => ({
       return null;
     }
   },
+  enablePluginInOrg: async (type, pluginName, pluginOwner) => {
+    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
+      try {
+        const response = await axios.patch(
+          `${API_BASE_URI}/${type}/${pluginName}`,
+          { for_organization: true },
+        );
+        addToast(`${pluginName} enabled for the organization`, null, "success");
+        get().retrievePlaybooksConfiguration();
+        return Promise.resolve(response);
+      } catch (error) {
+        addToast(
+          `Failed to enabled ${pluginName} for the organization`,
+          error.parsedMsg,
+          "danger",
+          true,
+        );
+        return null;
+      }
+    }
+    try {
+      const response = await axios.delete(
+        `${API_BASE_URI}/${type}/${pluginName}/organization`,
+      );
+      addToast(`${pluginName} enabled for the organization`, null, "success");
+      return Promise.resolve(response);
+    } catch (error) {
+      addToast(
+        `Failed to enabled ${pluginName} for the organization`,
+        error.parsedMsg,
+        "danger",
+        true,
+      );
+      return null;
+    }
+  },
+  disabledPluginInOrg: async (type, pluginName, pluginOwner) => {
+    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
+      try {
+        const response = await axios.patch(
+          `${API_BASE_URI}/${type}/${pluginName}`,
+          { for_organization: false },
+        );
+        addToast(`${pluginName} disabled for the organization`, null, "info");
+        get().retrievePlaybooksConfiguration();
+        return Promise.resolve(response);
+      } catch (error) {
+        addToast(
+          `Failed to disabled ${pluginName} for the organization`,
+          error.parsedMsg,
+          "danger",
+          true,
+        );
+        return null;
+      }
+    }
+    try {
+      const response = await axios.post(
+        `${API_BASE_URI}/${type}/${pluginName}/organization`,
+      );
+      addToast(`${pluginName} disabled for the organization`, null, "info");
+      return Promise.resolve(response);
+    } catch (error) {
+      addToast(
+        `Failed to disabled ${pluginName} for the organization`,
+        error.parsedMsg,
+        "danger",
+        true,
+      );
+      return null;
+    }
+  },
 }));
-
-export default usePluginConfigurationStore;

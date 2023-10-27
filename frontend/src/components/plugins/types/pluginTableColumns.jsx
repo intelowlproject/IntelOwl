@@ -9,6 +9,7 @@ import {
   BooleanIcon,
 } from "@certego/certego-ui";
 
+import { pluginsTypes } from "../../../constants/constants";
 import { TlpChoices } from "../../../constants/advancedSettingsConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { TLPTag } from "../../common/TLPTag";
@@ -97,7 +98,7 @@ const pluginTableColumns = [
   {
     Header: "Active",
     id: "active",
-    accessor: (r) => !r.disabled,
+    accessor: (r) => !(r.disabled || r.orgPluginDisabled),
     Cell: ({ value }) => <BooleanIcon withColors truthy={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
@@ -186,12 +187,12 @@ export const analyzersTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={value?.plugin_type}
+          type={pluginsTypes.ANALYZER}
         />
         {value?.docker_based && (
           <PluginHealthCheckButton
             pluginName={value.name}
-            pluginType_="analyzer"
+            pluginType_={pluginsTypes.ANALYZER}
           />
         )}
       </div>
@@ -245,11 +246,11 @@ export const connectorTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={value?.plugin_type}
+          type={pluginsTypes.CONNECTOR}
         />
         <PluginHealthCheckButton
           pluginName={value?.name}
-          pluginType_="connector"
+          pluginType_={pluginsTypes.CONNECTOR}
         />
       </div>
     ),
@@ -309,7 +310,7 @@ export const pivotTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={value?.plugin_type}
+          type={pluginsTypes.PIVOT}
         />
       </div>
     ),
@@ -348,7 +349,7 @@ export const playbookTableColumns = [
     accessor: (row) => Object.keys(row.analyzers),
 
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_="analyzers" />
+      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.ANALYZER} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -358,7 +359,7 @@ export const playbookTableColumns = [
     id: "connectors",
     accessor: (row) => Object.keys(row.connectors),
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_="connectors" />
+      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.CONNECTOR} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -368,7 +369,7 @@ export const playbookTableColumns = [
     id: "pivots",
     accessor: (row) => row.pivots,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_="pivots" />
+      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.PIVOT} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -378,7 +379,7 @@ export const playbookTableColumns = [
     id: "visualizers",
     accessor: (row) => row.visualizers,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_="visualizers" />
+      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.VISUALIZER} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -390,6 +391,15 @@ export const playbookTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
+        <OrganizationPluginStateToggle
+          pluginName={value?.name}
+          disabled={
+            value?.owner ? !value?.for_organization : value?.orgPluginDisabled
+          }
+          refetch={value?.refetch}
+          type={pluginsTypes.PLAYBOOK}
+          pluginOwner={value?.owner}
+        />
         {value.is_deletable && (
           <PlaybooksDeletionButton playbookName={value?.name} />
         )}
@@ -445,7 +455,7 @@ export const visualizerTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={value?.plugin_type}
+          type={pluginsTypes.VISUALIZER}
         />
       </div>
     ),

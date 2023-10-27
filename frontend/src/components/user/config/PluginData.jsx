@@ -10,7 +10,7 @@ import {
 } from "react-icons/bs";
 import { MdCancel } from "react-icons/md";
 import { Button, Col, FormGroup, Input, Row } from "reactstrap";
-import { usePluginConfigurationStore } from "../../../stores";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import {
   PluginTypesNumeric,
   PluginConfigTypesNumeric,

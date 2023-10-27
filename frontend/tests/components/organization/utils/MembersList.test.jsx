@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { MembersList } from "../../../../src/components/organization/utils/MembersList";
 
-jest.mock("../../../../src/stores", () => ({
+jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
     state({
       loading: false,

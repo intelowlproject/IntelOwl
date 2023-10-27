@@ -12,7 +12,7 @@ import useTitle from "react-use/lib/useTitle";
 
 import { addToast, ContentSection } from "@certego/certego-ui";
 
-import { useAuthStore } from "../../stores";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 const initialValues = {
   old_password: "",

@@ -3,7 +3,7 @@ import { Alert } from "reactstrap";
 
 import { DateHoverable } from "@certego/certego-ui";
 
-import { useOrganizationStore } from "../../../stores";
+import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 
 export function OrgInfoCard() {
   // consume store

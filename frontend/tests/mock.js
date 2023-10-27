@@ -23,6 +23,59 @@ export const mockedUseAuthStore = {
       },
     }
 
+export const mockedUseOrganizationStoreNoOrg = {
+  loading: false,
+  error: null,
+  isUserOwner: false,
+  noOrg: true,
+  organization: {},
+  membersCount: undefined,
+  members: [],
+  pendingInvitations: [],
+  pluginsState: {},
+  fetchAll: () => {},
+  isUserAdmin: () => true,
+}
+
+export const mockedUseOrganizationStoreOwner = {
+  loading: false,
+  error: null,
+  isUserOwner: true,
+  noOrg: false,
+  organization: {
+    owner: {
+      full_name: "user owner",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_owner",
+      is_admin: true,
+    },
+    name: "org_test",
+  },
+  membersCount: 3,
+  members: [
+    {
+      full_name: "user owner",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_owner",
+      is_admin: true,
+    },
+    {
+      full_name: "user admin",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_admin",
+      is_admin: true,
+    },
+    {
+      full_name: "user user",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_user",
+      is_admin: false,
+    },
+  ],
+  fetchAll: () => {},
+  isUserAdmin: () => true,
+}
+
 export const mockedUseTagsStore = {
       loading: false,
       error: null,
@@ -85,6 +138,7 @@ export const mockedUsePluginConfigurationStore = {
       ],
       connectors: [],
       visualizers: [],
+      ingestors: [],
       playbooks: [
         {
           name: "TEST_PLAYBOOK_IP",

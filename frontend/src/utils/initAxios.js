@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { isObject, objToString } from "@certego/certego-ui";
-import useAuthStore from "../stores/useAuthStore";
+import { useAuthStore } from "../stores/useAuthStore";
 
 const shouldInjectToken = (url) => {
   if (url === "/api/auth/login" || url === "/api/auth/register") {

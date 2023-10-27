@@ -10,7 +10,7 @@ import {
   confirm,
 } from "@certego/certego-ui";
 
-import { useOrganizationStore } from "../../../stores";
+import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import {
   deleteOrganization,
   removeMemberFromOrg,

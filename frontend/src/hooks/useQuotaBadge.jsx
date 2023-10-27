@@ -3,7 +3,7 @@ import classnames from "classnames";
 import { Badge, UncontrolledTooltip } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
-import { useAuthStore } from "../stores";
+import { useAuthStore } from "../stores/useAuthStore";
 
 export default function useQuotaBadge() {
   // auth store

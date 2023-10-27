@@ -8,16 +8,28 @@ import {
   API_BASE_URI,
   PLAYBOOKS_CONFIG_URI,
 } from "../../../../src/constants/apiURLs";
+
 import {
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
+  OrganizationPluginStateToggle,
 } from "../../../../src/components/plugins/types/utils";
+import {
+  mockedUseAuthStore,
+  mockedUseOrganizationStoreOwner,
+} from "../../../mock";
 
 jest.mock("axios");
+jest.mock("../../../../src/stores/useAuthStore", () => ({
+  useAuthStore: jest.fn((state) => state(mockedUseAuthStore)),
+}));
+jest.mock("../../../../src/stores/useOrganizationStore", () => ({
+  useOrganizationStore: jest.fn((state) => state(mockedUseOrganizationStoreOwner)),
+}));
 
 describe("PluginHealthCheckButton test", () => {
   test("Health check - status true", async () => {
-    const user = userEvent.setup();
+    const userAction = userEvent.setup();
     axios.get.mockImplementation(() =>
       Promise.resolve({ data: { status: true } }),
     );
@@ -33,7 +45,7 @@ describe("PluginHealthCheckButton test", () => {
     );
     expect(healthCheckIcon).toBeInTheDocument();
 
-    await user.click(healthCheckIcon);
+    await userAction.click(healthCheckIcon);
 
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
@@ -44,7 +56,7 @@ describe("PluginHealthCheckButton test", () => {
   });
 
   test("Health check - status false", async () => {
-    const user = userEvent.setup();
+    const userAction = userEvent.setup();
     axios.get.mockImplementation(() =>
       Promise.resolve({ data: { status: false } }),
     );
@@ -60,7 +72,7 @@ describe("PluginHealthCheckButton test", () => {
     );
     expect(healthCheckIcon).toBeInTheDocument();
 
-    await user.click(healthCheckIcon);
+    await userAction.click(healthCheckIcon);
 
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
@@ -73,7 +85,7 @@ describe("PluginHealthCheckButton test", () => {
 
 describe("PlaybooksDeletionButton test", () => {
   test("playbook deletion", async () => {
-    const user = userEvent.setup();
+    const userAction = userEvent.setup();
     axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
 
     const { container } = render(
@@ -87,7 +99,7 @@ describe("PlaybooksDeletionButton test", () => {
     );
     expect(playbookDeletionIcon).toBeInTheDocument();
 
-    await user.click(playbookDeletionIcon);
+    await userAction.click(playbookDeletionIcon);
     await expect(screen.getByRole("document", {})).toBeInTheDocument();
     const deleteButton = screen.getByRole("button", {
       name: "Delete",
@@ -98,7 +110,7 @@ describe("PlaybooksDeletionButton test", () => {
     });
     expect(cancelButton).toBeInTheDocument();
 
-    await user.click(deleteButton);
+    await userAction.click(deleteButton);
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith(`${PLAYBOOKS_CONFIG_URI}/test`);
     });
@@ -106,5 +118,123 @@ describe("PlaybooksDeletionButton test", () => {
     setTimeout(() => {
       expect(screen.getByText("test deleted")).toBeInTheDocument();
     }, 15 * 1000);
+  });
+});
+
+describe("OrganizationPluginStateToggle test", () => {
+  test("Enable custom playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+          pluginOwner="user_owner"
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin`,
+        { for_organization: true },
+      );
+    });
+  });
+
+  test("Disable custom playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled={false}
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+          pluginOwner="user_owner"
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin`,
+        { for_organization: false },
+      );
+    });
+  });
+
+  test("Enable default playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.post.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.delete).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin/organization`,
+      );
+    });
+  });
+
+  test("Disable default playbook for org", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.post.mockImplementation(() => Promise.resolve({ data: {} }));
+
+    const { container } = render(
+      <BrowserRouter>
+        <OrganizationPluginStateToggle
+          disabled={false}
+          pluginName="plugin"
+          type="playbook"
+          refetch={jest.fn()}
+        />
+      </BrowserRouter>,
+    );
+
+    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    expect(iconButton).toBeInTheDocument();
+
+    await userAction.click(iconButton);
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(
+        `${API_BASE_URI}/playbook/plugin/organization`,
+      );
+    });
   });
 });

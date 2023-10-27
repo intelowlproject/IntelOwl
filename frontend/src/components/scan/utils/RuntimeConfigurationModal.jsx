@@ -5,7 +5,7 @@ import { Modal, ModalHeader, ModalBody, Button } from "reactstrap";
 
 import { ContentSection, CustomJsonInput } from "@certego/certego-ui";
 
-import usePluginConfigurationStore from "../../../stores/usePluginConfigurationStore";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { markdownToHtml } from "../../common/markdownToHtml";
 
 // constants

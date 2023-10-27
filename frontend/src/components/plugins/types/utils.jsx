@@ -1,4 +1,3 @@
-import axios from "axios";
 import React from "react";
 import PropTypes from "prop-types";
 import classnames from "classnames";
@@ -25,16 +24,10 @@ import { IconButton, BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { JobTag } from "../../common/JobTag";
 import { TLPTag } from "../../common/TLPTag";
-import {
-  useOrganizationStore,
-  usePluginConfigurationStore,
-} from "../../../stores";
-import {
-  ANALYZERS_CONFIG_URI,
-  CONNECTORS_CONFIG_URI,
-  VISUALIZERS_CONFIG_URI,
-} from "../../../constants/apiURLs";
-import { PluginTypesNumeric } from "../../../constants/pluginConst";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import { useOrganizationStore } from "../../../stores/useOrganizationStore";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
+import { pluginsTypes } from "../../../constants/constants";
 import { ScanModesNumeric } from "../../../constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../utils/time";
 
@@ -176,7 +169,7 @@ export function PluginInfoCard({ pluginInfo }) {
             </ul>
           </div>
         )}
-        {!pluginInfo?.plugin_type && (
+        {pluginInfo?.plugin_type === pluginsTypes.PLAYBOOK && (
           <div>
             <h6 className="text-secondary">Advanced Settings &nbsp;</h6>
             <ul>
@@ -310,45 +303,47 @@ export function OrganizationPluginStateToggle({
   pluginName,
   type,
   refetch,
+  pluginOwner,
 }) {
+  const user = useAuthStore(React.useCallback((s) => s.user, []));
   const {
-    isUserOwner,
-    organization,
     noOrg,
     fetchAll: fetchAllOrganizations,
+    isUserAdmin,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         fetchAll: state.fetchAll,
-        isUserOwner: state.isUserOwner,
-        organization: state.organization,
         noOrg: state.noOrg,
+        isUserAdmin: state.isUserAdmin,
       }),
       [],
     ),
   );
-  let title = disabled
-    ? `Enable ${pluginName} for organization`
-    : `Disable ${pluginName} for organization`;
-  if (!isUserOwner) {
-    title = `You're not an owner of your organization - ${organization.name}`;
-  }
-  let baseUrl = "";
-  if (type === PluginTypesNumeric.ANALYZER) {
-    baseUrl = ANALYZERS_CONFIG_URI;
-  } else if (type === PluginTypesNumeric.CONNECTOR) {
-    baseUrl = CONNECTORS_CONFIG_URI;
-  } else if (type === PluginTypesNumeric.VISUALIZER) {
-    baseUrl = VISUALIZERS_CONFIG_URI;
+  const { enablePluginInOrg, disabledPluginInOrg } =
+    usePluginConfigurationStore(
+      React.useCallback(
+        (state) => ({
+          enablePluginInOrg: state.enablePluginInOrg,
+          disabledPluginInOrg: state.disabledPluginInOrg,
+        }),
+        [],
+      ),
+    );
+  let title = `${
+    disabled ? "Enable" : "Disable"
+  } ${pluginName} for organization`;
+  if (!isUserAdmin(user.username)) {
+    title = `${pluginName} is ${
+      disabled ? "disabled" : "enabled"
+    } for the organization`;
   }
 
   const onClick = async () => {
-    if (isUserOwner) {
-      if (disabled) await axios.delete(`${baseUrl}/${pluginName}/organization`);
-      else await axios.post(`${baseUrl}/${pluginName}/organization`);
-      fetchAllOrganizations();
-      refetch();
-    }
+    if (disabled) enablePluginInOrg(type, pluginName, pluginOwner);
+    else disabledPluginInOrg(type, pluginName, pluginOwner);
+    fetchAllOrganizations();
+    refetch();
   };
   return (
     <div className={`d-flex align-items-center ${noOrg ? "" : "px-2"}`}>
@@ -359,7 +354,7 @@ export function OrganizationPluginStateToggle({
           size="sm"
           Icon={BsPeopleFill}
           title={title}
-          onClick={onClick}
+          onClick={isUserAdmin(user.username) && onClick}
           titlePlacement="top"
         />
       )}
@@ -470,6 +465,11 @@ OrganizationPluginStateToggle.propTypes = {
   pluginName: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
   refetch: PropTypes.func.isRequired,
+  pluginOwner: PropTypes.string,
+};
+
+OrganizationPluginStateToggle.defaultProps = {
+  pluginOwner: null,
 };
 
 PluginInfoCard.propTypes = {
@@ -492,7 +492,7 @@ PluginHealthCheckButton.propTypes = {
 
 PlaybooksCollapse.propTypes = {
   value: PropTypes.array.isRequired,
-  pluginType_: PropTypes.oneOf(["analyzers", "connectors"]).isRequired,
+  pluginType_: PropTypes.oneOf(Object.values(pluginsTypes)).isRequired,
 };
 
 PlaybooksDeletionButton.propTypes = {

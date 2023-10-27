@@ -18,7 +18,7 @@ import { Formik, Field } from "formik";
 
 import { createComment, deleteComment } from "./commentApi";
 
-import { useAuthStore } from "../../../../../stores";
+import { useAuthStore } from "../../../../../stores/useAuthStore";
 
 function formatDate(dateString) {
   const date = new Date(dateString);

@@ -13,7 +13,7 @@ import {
 } from "@certego/certego-ui";
 import { Link } from "react-router-dom";
 import { Button, Col } from "reactstrap";
-import { useOrganizationStore } from "../../stores";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 import { useGuideContext } from "../../contexts/GuideContext";
 
 const Analyzers = React.lazy(() => import("./types/Analyzers"));

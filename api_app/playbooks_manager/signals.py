@@ -41,11 +41,14 @@ def m2m_changed_pivots_playbook_config(
     **kwargs,
 ):
     if action == "pre_add":
-        valid_pks = (
-            model.objects.filter(pk__in=pk_set)
-            .valid(instance.analyzers.all(), instance.connectors.all())
-            .values_list("pk", flat=True)
-        )
-        wrong_pks = ", ".join([str(pk) for pk in pk_set if pk not in valid_pks])
-        if wrong_pks:
-            raise ValidationError(f"You can't set pivots {wrong_pks}")
+        objects = model.objects.filter(pk__in=pk_set)
+        valid_pks = objects.valid(
+            instance.analyzers.all(), instance.connectors.all()
+        ).values_list("pk", flat=True)
+        wrong_pivots = objects.exclude(pk__in=valid_pks)
+        if wrong_pivots.exists():
+            raise ValidationError(
+                f"You can't set pivot{'s' if wrong_pivots.size()> 0 else ''}"
+                f" {','.join(wrong_pivots.values_list('name', flat=True))} because"
+                " the playbook does not have all the required plugins"
+            )

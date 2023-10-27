@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { TAG_BASE_URI } from "../constants/apiURLs";
 
-const useTagsStore = create((set, _get) => ({
+export const useTagsStore = create((set, _get) => ({
   loading: true,
   error: null,
   tags: [],
@@ -44,5 +44,3 @@ const useTagsStore = create((set, _get) => ({
     }
   },
 }));
-
-export default useTagsStore;

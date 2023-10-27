@@ -14,10 +14,9 @@ import {
 } from "@certego/certego-ui";
 
 import { PluginInfoCard } from "./utils";
-import {
-  useOrganizationStore,
-  usePluginConfigurationStore,
-} from "../../../stores";
+import { useOrganizationStore } from "../../../stores/useOrganizationStore";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
+import { pluginsTypes } from "../../../constants/constants";
 
 // table config
 const tableConfig = {};
@@ -147,5 +146,5 @@ PluginWrapper.propTypes = {
   description: PropTypes.string.isRequired,
   stateSelector: PropTypes.func.isRequired,
   columns: PropTypes.array.isRequired,
-  type: PropTypes.number.isRequired,
+  type: PropTypes.oneOf(Object.values(pluginsTypes)).isRequired,
 };

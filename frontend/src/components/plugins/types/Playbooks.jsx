@@ -1,6 +1,7 @@
 import React from "react";
 
 import { playbookTableColumns } from "./pluginTableColumns";
+import { pluginsTypes } from "../../../constants/constants";
 import PluginWrapper from "./PluginWrapper";
 
 export default function Playbooks() {
@@ -22,6 +23,7 @@ export default function Playbooks() {
       description="Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable."
       stateSelector={stateSelector}
       columns={playbookTableColumns}
+      type={pluginsTypes.PLAYBOOK}
     />
   );
 }

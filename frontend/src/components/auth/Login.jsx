@@ -22,7 +22,7 @@ import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { RecaptchaValidator } from "./utils/validator";
 import { ConfigurationModalAlert } from "./utils/registration-alert";
-import { useAuthStore } from "../../stores";
+import { useAuthStore } from "../../stores/useAuthStore";
 import { checkConfiguration } from "./authApi";
 
 import {

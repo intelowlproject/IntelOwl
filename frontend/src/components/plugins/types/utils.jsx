@@ -27,7 +27,7 @@ import { TLPTag } from "../../common/TLPTag";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-import { pluginsTypes } from "../../../constants/constants";
+import { PluginsTypes } from "../../../constants/pluginConst";
 import { ScanModesNumeric } from "../../../constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../utils/time";
 
@@ -169,7 +169,7 @@ export function PluginInfoCard({ pluginInfo }) {
             </ul>
           </div>
         )}
-        {pluginInfo?.plugin_type === pluginsTypes.PLAYBOOK && (
+        {pluginInfo?.plugin_type === PluginsTypes.PLAYBOOK && (
           <div>
             <h6 className="text-secondary">Advanced Settings &nbsp;</h6>
             <ul>
@@ -492,7 +492,7 @@ PluginHealthCheckButton.propTypes = {
 
 PlaybooksCollapse.propTypes = {
   value: PropTypes.array.isRequired,
-  pluginType_: PropTypes.oneOf(Object.values(pluginsTypes)).isRequired,
+  pluginType_: PropTypes.oneOf(Object.values(PluginsTypes)).isRequired,
 };
 
 PlaybooksDeletionButton.propTypes = {

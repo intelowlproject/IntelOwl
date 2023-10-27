@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { pluginsTypes } from "../constants/constants";
+import { PluginsTypes } from "../constants/pluginConst";
 import {
   API_BASE_URI,
   ANALYZERS_CONFIG_URI,
@@ -251,7 +251,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
     }
   },
   enablePluginInOrg: async (type, pluginName, pluginOwner) => {
-    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
+    if (type === PluginsTypes.PLAYBOOK && pluginOwner !== null) {
       try {
         const response = await axios.patch(
           `${API_BASE_URI}/${type}/${pluginName}`,
@@ -287,7 +287,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
     }
   },
   disabledPluginInOrg: async (type, pluginName, pluginOwner) => {
-    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
+    if (type === PluginsTypes.PLAYBOOK && pluginOwner !== null) {
       try {
         const response = await axios.patch(
           `${API_BASE_URI}/${type}/${pluginName}`,

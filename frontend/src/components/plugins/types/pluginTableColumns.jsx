@@ -9,7 +9,7 @@ import {
   BooleanIcon,
 } from "@certego/certego-ui";
 
-import { pluginsTypes } from "../../../constants/constants";
+import { PluginsTypes } from "../../../constants/pluginConst";
 import { TlpChoices } from "../../../constants/advancedSettingsConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { TLPTag } from "../../common/TLPTag";
@@ -187,12 +187,12 @@ export const analyzersTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={pluginsTypes.ANALYZER}
+          type={PluginsTypes.ANALYZER}
         />
         {value?.docker_based && (
           <PluginHealthCheckButton
             pluginName={value.name}
-            pluginType_={pluginsTypes.ANALYZER}
+            pluginType_={PluginsTypes.ANALYZER}
           />
         )}
       </div>
@@ -246,11 +246,11 @@ export const connectorTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={pluginsTypes.CONNECTOR}
+          type={PluginsTypes.CONNECTOR}
         />
         <PluginHealthCheckButton
           pluginName={value?.name}
-          pluginType_={pluginsTypes.CONNECTOR}
+          pluginType_={PluginsTypes.CONNECTOR}
         />
       </div>
     ),
@@ -310,7 +310,7 @@ export const pivotTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={pluginsTypes.PIVOT}
+          type={PluginsTypes.PIVOT}
         />
       </div>
     ),
@@ -349,7 +349,7 @@ export const playbookTableColumns = [
     accessor: (row) => Object.keys(row.analyzers),
 
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.ANALYZER} />
+      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.ANALYZER} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -359,7 +359,7 @@ export const playbookTableColumns = [
     id: "connectors",
     accessor: (row) => Object.keys(row.connectors),
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.CONNECTOR} />
+      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.CONNECTOR} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -369,7 +369,7 @@ export const playbookTableColumns = [
     id: "pivots",
     accessor: (row) => row.pivots,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.PIVOT} />
+      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.PIVOT} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -379,7 +379,7 @@ export const playbookTableColumns = [
     id: "visualizers",
     accessor: (row) => row.visualizers,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={pluginsTypes.VISUALIZER} />
+      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.VISUALIZER} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -397,7 +397,7 @@ export const playbookTableColumns = [
             value?.owner ? !value?.for_organization : value?.orgPluginDisabled
           }
           refetch={value?.refetch}
-          type={pluginsTypes.PLAYBOOK}
+          type={PluginsTypes.PLAYBOOK}
           pluginOwner={value?.owner}
         />
         {value.is_deletable && (
@@ -455,7 +455,7 @@ export const visualizerTableColumns = [
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
-          type={pluginsTypes.VISUALIZER}
+          type={PluginsTypes.VISUALIZER}
         />
       </div>
     ),

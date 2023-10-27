@@ -24,7 +24,9 @@ jest.mock("../../../../src/stores/useAuthStore", () => ({
   useAuthStore: jest.fn((state) => state(mockedUseAuthStore)),
 }));
 jest.mock("../../../../src/stores/useOrganizationStore", () => ({
-  useOrganizationStore: jest.fn((state) => state(mockedUseOrganizationStoreOwner)),
+  useOrganizationStore: jest.fn((state) =>
+    state(mockedUseOrganizationStoreOwner),
+  ),
 }));
 
 describe("PluginHealthCheckButton test", () => {

@@ -22,7 +22,9 @@ jest.mock("../../../../src/stores/useTagsStore", () => ({
   useTagsStore: jest.fn((state) => state(mockedUseTagsStore)),
 }));
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
-  usePluginConfigurationStore: jest.fn((state) => state(mockedUsePluginConfigurationStore)),
+  usePluginConfigurationStore: jest.fn((state) =>
+    state(mockedUsePluginConfigurationStore),
+  ),
 }));
 // mock RecentScans component
 jest.mock("../../../../src/components/scan/utils/RecentScans", () =>

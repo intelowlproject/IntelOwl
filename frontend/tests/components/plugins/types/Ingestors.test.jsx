@@ -24,7 +24,9 @@ jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   ),
 }));
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
-  usePluginConfigurationStore: jest.fn((state) => state(mockedUsePluginConfigurationStore)),
+  usePluginConfigurationStore: jest.fn((state) =>
+    state(mockedUsePluginConfigurationStore),
+  ),
 }));
 describe("test Ingestors component", () => {
   test("Table columns", async () => {

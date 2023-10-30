@@ -17,6 +17,7 @@ If you are interested in helping us setting up a public instance of IntelOwl, **
 
 **General improvements**
 * Added First Visit Guide
+* Improved the documentation with the goal to help the users to understand better how all the available Plugins work.
 * For OpenCTI users having problems in integrating IntelOwl, now you can use a workaround: [doc](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#opencti)
 * A new organization role is available to better manage the org: `admin`. [Doc](https://intelowl.readthedocs.io/en/latest/Usage.html#organizations-and-user-management)
 * Improvements in the "Jobs History" table: now it shows executed Playbooks and file/observables types correctly.
@@ -607,7 +608,7 @@ This is a minor patch release.
 **Features:**
 
 - Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables.
-- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#special-plugins-operations).
 - Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much more easier to use than before.
 
 **New class of plugins called _Connectors_:**

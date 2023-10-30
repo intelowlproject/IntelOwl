@@ -29,6 +29,7 @@ def migrate(apps, schema_editor):
     virushee_analyzer.maximum_tlp = TLP.AMBER.value
     virushee_analyzer.full_clean()
     virushee_analyzer.save()
+    AnalyzerConfig.objects.get(name="Virushee_Upload_File").delete()
 
     intezer_analyzer = AnalyzerConfig.objects.get(name="Intezer_Scan")
     intezer_analyzer.description = "Scan a file hash on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl). With TLP `CLEAR`, in case the hash is not found, you would send the file to the service."

@@ -38,6 +38,8 @@ export default function UserMenu(props) {
     ),
   );
 
+  console.debug(`UserMenu - user: ${JSON.stringify(user)}`);
+
   React.useEffect(() => {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,9 +56,11 @@ export default function UserMenu(props) {
         </DropdownItem>
         <DropdownItem divider />
         {/* Django Admin Interface */}
-        <DropdownNavLink to="/admin/" target="_blank">
-          <IoMdSettings className="me-2" /> Django Admin Interface
-        </DropdownNavLink>
+        {user?.is_staff && (
+          <DropdownNavLink to="/admin/" target="_blank">
+            <IoMdSettings className="me-2" /> Django Admin Interface
+          </DropdownNavLink>
+        )}
         {/* Invitations */}
         <DropdownNavLink to="/me/organization">
           <BsPeopleFill className="me-2" /> Organization

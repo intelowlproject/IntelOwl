@@ -9,12 +9,14 @@ This page includes the most important things to know and understand when using I
 - [Plugins](#plugins)
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
-  - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
-  - [Playbooks](#playbooks)
+  - [Pivots](#pivots)
   - [Visualizers](#visualizers)
   - [Ingestors](#ingestors)
+  - [Playbooks](#playbooks)
+  - [Generic Plugin Creation, Configuration and Customization](#generic-plugin-creation-configuration-and-customization)
   - [Enabling or Disabling Plugins](#enabling-or-disabling-plugins)
-- [TLP Support](#tlp-support)
+  - [Special Plugins operations](#special-plugins-operations)
+  - [TLP Support](#tlp-support)
 
 ## Client
 
@@ -108,11 +110,13 @@ In that case, you would need to [re-build](/Installation.md#update-and-rebuild) 
 ## Plugins
 
 Plugins are the core modular components of IntelOwl that can be easily added, changed and customized.
-There are 3 types of plugins:
+There are several types of plugins:
 
 - [Analyzers](#analyzers)
 - [Connectors](#connectors)
+- [Pivots](#pivots)
 - [Visualizers](#visualizers)
+- [Ingestors](#ingestors)
 - [Playbooks](#playbooks)
 
 ### Analyzers
@@ -325,31 +329,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 
 [Some analyzers are optional](Advanced-Usage.html#optional-analyzers) and need to be enabled explicitly.
 
-#### Analyzers Customization
-
-You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerconfig/`.
-
-The following are all the keys that you can change without touching the source code:
-- `name`: Name of the analyzer
-- `description`: Description of the analyzer
-- `python_module`: Python path of the class that will be executed 
-- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
-- `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
-- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
-- `config`:
-  - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-  - `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
-Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
-A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
-
-<div class="admonition hint">
-<p class="admonition-title">Hint: Advanced Configuration</p>
-You can also modify analyzer specific parameters directly from the GUI. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
-</div>
 
 ### Connectors
 
@@ -367,61 +346,57 @@ The following is the list of the available connectors. You can also navigate the
 - `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 - `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 - `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
-
-#### Connectors customization
-
-Connectors being optional are `enabled` by default.
-You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorconfig/`.
+- `Slack`: Send the analysis link to a Slack channel (useful for external notifications)
 
 
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
+### Pivots
 
-- `maximum_tlp` (default `CLEAR`, choices `CLEAR`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
-- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails` 
+With Intel v5.2.0 we introduced the `Pivot` Plugin.
 
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-Changing other keys can break a connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
-</div>
+Pivots are designed to create a job from another job. This plugin allows the user to set certain conditions that trigger the execution of one or more subsequent jobs, strictly connected to the first one.
 
-### Managing Analyzers and Connectors
+This is a "SOAR" feature that allows the users to connect multiple analysis together.
 
-All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not.
+Right now the support for this kind of plugin in the GUI is very limited, while the backend is fully operative. We are working on the frontend.
 
-- **kill:**
+#### List of pre-build Pivots
+None
 
-  To stop a plugin whose status is `running`/`pending`:
+### Visualizers
 
-  - GUI: Buttons on reports table on job result page.
-  - PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
-  - CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
-  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
+You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
 
-- **retry:**
+Visualizers are designed to run after the analyzers and the connectors.
+The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
 
-  To retry a plugin whose status is `failed`/`killed`:
+Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
 
-  - GUI: Buttons on reports table on job result page.
-  - PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
-  - CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
-  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
+To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
 
-- **healthcheck:**
+##### List of pre-built Visualizers
 
-  To check if docker container or external platform associated with an analyzer or connector respectively are up or not:
+- `DNS`: displays the aggregation of every DNS analyzer report
+- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
+- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
+- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
+- `Pivot`: Visualizer that can be used in a Playbook to show the Pivot execution result. See [Pivots](#pivots) for more info.
 
-  - GUI: Buttons on analyzers table and connectors table.
-  - PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
-  - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
-  - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+### Ingestors
+
+With Intel v5.1.0 we introduced the `Ingestor` Plugin.
+
+Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
+Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
+
+Ingestors are system-wide and **disabled** by default, meaning that only the administrator are able to configure them and enable them. 
+Ingestors can be _spammy_ so be careful about enabling them.
+
+A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
+
+#### List of pre-build Ingestors
+- `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
 
 ### Playbooks
 
@@ -462,71 +437,66 @@ The created Playbook would be available to yourself only. If you want either to 
 ![img.png](../static/playbooks_cr.png)
 
 
-### Visualizers
+### Generic Plugin Creation, Configuration and Customization
 
-With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
-You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
+If you want to create completely new Plugins (not based on already existing python modules), please refer to the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-plugin) section. This is usually the case when you want to integrate IntelOwl with either a new tool or a new service.
 
-Visualizers are designed to run after the analyzers and the connectors.
-The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
+On the contrary, if you would like to just customize the already existing plugins, this is the place.
 
-Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
+If you are an IntelOwl superuser, you can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at:
+- for analyzers: `/admin/analyzers_manager/analyzerconfig/`.
+- for connectors: `/admin/connectors_manager/connectorconfig/`.
+- ...and so on for all the Plugin types.
 
-This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
-To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
+The following are the most important fields that you can change without touching the source code:
+- `name`: Name of the analyzer
+- `description`: Description of the analyzer
+- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+- `disabled_in_organization`: you can choose to disable analyzers in some organizations only.
+- `python_module`: Python path of the class that will be executed 
+- `maximum_tlp`: see [TLP Support](#tlp-support)
+- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+- `routing_key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
+Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
+A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
-##### List of pre-built Visualizers
 
-- `DNS`: displays the aggregation of every DNS analyzer report
-- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
-- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
-- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
+For analyzers only:
+- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+
+For connectors only:
+- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
+
+For visualizers only:
+- `playbooks`: list of playbooks that trigger the specified visualizer execution.
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+Changing other keys can break a plugin. In that case, you should think about duplicating the configuration entry or python module with your changes.
+</div>
+
+#### Parameters
+Each Plugin could have one or more parameters available to be configured. These parameters allow the users to customize the Plugin behavior.
+
+There are 2 types of Parameters:
+* classic Parameters
+* `Secrets`: these parameters usually manage sensitive data, like API keys.
 
 
-#### Visualizers customization
-You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerconfig/`.
+To see the list of these parameters:
 
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
-- `analyzers`: List of analyzers that must be executed
-- `connectors`: List of connectors that must be executed
+- You can view the "Plugin" Section in IntelOwl to have a complete and updated view of all the options available
+- You can view the parameters by exploring the Django Admin Interface.
 
-### Ingestors
+You can change the Plugin Parameters at 4 different levels:
+* if you are an IntelOwl superuser, you can go in the Django Admin Interface and change the default values of the parameters for every plugin you like. This option would change the default behavior for every user in the platform.
+* if you are either Owner or Admin of an org, you can customize the default values of the parameters for every member of the organization by leveraging the GUI in the "Organization Config" section. This overrides the previous option. 
+* if you are a normal user, you can customize the default values of the parameters for your analysis only by leveraging the GUI in the "Plugin config" section. This overrides the previous option. 
+* You can choose to provide runtime configuration when requesting an analysis that will override the previous options. This override is done only for the specific analysis. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
 
-With Intel v5.1.0 we introduced the `Ingestor` class.
-
-Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
-Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
-
-Ingestors are system-wide and disabled by default, meaning that only the administrator are able to configure them and enable them. 
-Ingestors can be _spammy_ so be careful about enabling them.
-
-A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
-
-#### List of pre-build Ingestors
-- `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
-
-#### Ingestors customization
-You can either enable or create new ingestors based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/ingestors_manager/ingestorconfig/`.
-
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
-- `playbook_to_execute`: Playbook that will be used for every IOC retrieved from the ingestor
-- `schedule`: Crontab schedule of its execution
 
 ### Enabling or Disabling Plugins
 By default, each available plugin is configured as either disabled or not. The majority of them are enabled by default, while others may be disabled to avoid potential problems in the application usability for first time users.
@@ -539,7 +509,38 @@ Considering the impact that this change could have in the application, the GUI d
 
 ![img.png](../static/save.png)
 
-## TLP Support
+### Special Plugins operations
+
+All plugins, i.e. analyzers and connectors, have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not.
+
+- **kill:**
+
+  To stop a plugin whose status is `running`/`pending`:
+
+  - GUI: Buttons on reports table on job result page.
+  - PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
+  - CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
+  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+
+- **retry:**
+
+  To retry a plugin whose status is `failed`/`killed`:
+
+  - GUI: Buttons on reports table on job result page.
+  - PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
+  - CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
+  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+
+- **healthcheck:**
+
+  To check if docker container or external platform associated with an analyzer or connector respectively are up or not:
+
+  - GUI: Buttons on analyzers table and connectors table.
+  - PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
+  - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
+  - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+
+### TLP Support
 The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 
 
 IntelOwl is not a threat intel sharing platform, like the [MISP platform](https://www.misp-project.org/). However, IntelOwl is able to share analysis results to external platforms (via [Connectors](#connectors)) and to send possible privacy related information to external services (via [Analyzers](#analyzers)).

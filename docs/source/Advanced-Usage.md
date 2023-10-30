@@ -122,7 +122,7 @@ You can click on "**CUSTOMIZE ANALYZERS PARAMETERS**" button and add the runtime
 Example:
 
 ```javascript
-"VirusTotal_v3_Get_File": {
+"VirusTotal_v3_File": {
     "force_active_scan_if_old": true
 }
 ```

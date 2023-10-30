@@ -13,7 +13,8 @@ If you are interested in helping us setting up a public instance of IntelOwl, **
 **Important usability changes**
 * We added a new section in the "Scan" page called "Recent Scans" which allows the users to better interact with its own and other users' already made analysis, improving the efficiency of the users and their communication.
 * By default jobs are executed with `TLP:AMBER` which means that they are shared with the other members of your organization **only**. (previously the default was `TLP:CLEAR`). This is to avoid possible users errors.
-* From now on, VT file analyzers send files to VT only when TLP is `CLEAR` and not anymore based on a specific parameter. As a consequence, `VirusTotal_v3_Get_File_And_Scan` and `VirusTotal_v3_Get_File` are not available anymore. Please use the new `VirusTotal_v3_File` instead and set the analysis to the correct TLP.
+* From now on, VT file analyzers send files to VT only when TLP is `CLEAR` and not anymore based on a specific parameter. As a consequence, `VirusTotal_v3_Get_File_And_Scan` is not available anymore. Please use the new `VirusTotal_v3_Get_File` instead and set the analysis to the correct TLP.
+  * Same behavior has been extended to other analyzers: `Intezer_Scan`, `MWDB_Scan`, `Virushee_Upload_File` (renamed to `Virushee_Scan`), `YARAify_File_Scan`.
 
 **General improvements**
 * Added First Visit Guide
@@ -30,6 +31,7 @@ If you are interested in helping us setting up a public instance of IntelOwl, **
 * removed CryptoScam analyzer because the service has been dismissed.
 * added `timeout` to InQuest analyzers to avoid long time running jobs.
 * fixed XLMMacroDeobfuscator always saying it decrypted the analyzed file even when the file was not encrypted.
+* `Malpedia_Scan` has been deprecated and disabled because the service seems no more active.
 * added more analyzers in the default `Sample_Static_Analysis` playbook.
 * adjusted few analyzers: CAPESandbox, Dehashed, YARAify, GoogleWebRisk
 

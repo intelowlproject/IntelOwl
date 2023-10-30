@@ -60,9 +60,9 @@ Right now it works very simply: only users in the same organization can see anal
 
 You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
 
-Once you create an organization, you are the unique "Owner" of that organization. So you are the only one who can delete the organization.
+Once you create an organization, you are the unique "Owner" of that organization. So you are the only one who can delete the organization and promote/demote/kick users.
 Another role, which is called "Admin", can be set to a user (via the Django Admin interface only for now).
-Both owners and admins have powers like: they can remove users, invite them to the org, promote them.
+Owners and admins share the following powers: they can manage invitations and the organization's plugin configuration.
 
 #### Accept Invites
 
@@ -189,21 +189,18 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).
 - `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 - `HybridAnalysis_Get_File`: check file hash on [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
-- `Intezer_Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl)
+- `Intezer_Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl). With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `Malpedia_Scan`: scan a binary or a zip file (pwd:infected) against all the yara rules available in [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/)
 - `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
-- `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
+- `MISPFIRST_Check_Hash`: check a file hash on the [FIRST MISP](https://misp.first.org/) instance
 - `MISP_Check_Hash`: check a file hash on a MISP instance
-- `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
+- `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 - `SublimeSecurity`: Analyze an Email with [Sublime Security](https://docs.sublimesecurity.com/docs) live flow
 - `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
 - `UnpacMe`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
-- `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
-- `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
-- `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-- `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-- `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
+- `Virushee_Scan`: Check file hash on [Virushee API](https://api.virushee.com/). With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
+- `VirusTotal_v3_File`: check the file hash on VirusTotal. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
 - `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
 

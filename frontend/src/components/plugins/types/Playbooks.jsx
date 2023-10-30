@@ -20,7 +20,7 @@ export default function Playbooks() {
   return (
     <PluginWrapper
       heading="Playbooks"
-      description="Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable."
+      description="Playbooks are designed to be easy to share sequence of running Plugins (Analyzers, Connectors, ...) on a particular kind of observable."
       stateSelector={stateSelector}
       columns={playbookTableColumns}
       type={PluginsTypes.PLAYBOOK}

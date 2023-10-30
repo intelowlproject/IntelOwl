@@ -60,21 +60,28 @@ Right now it works very simply: only users in the same organization can see anal
 
 You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
 
-Once you create an organization, you are the unique Administrator of that organization. So you are the only one who can delete the organization, remove users and send invitations to other users.
+Once you create an organization, you are the unique "Owner" of that organization. So you are the only one who can delete the organization.
+Another role, which is called "Admin", can be set to a user (via the Django Admin interface only for now).
+Both owners and admins have powers like: they can remove users, invite them to the org, promote them.
 
 #### Accept Invites
 
 Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
 
+![img.png](../static/accept_invite.png)
+
 #### Plugins Params and Secrets
 
 From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
 This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
+Only Owners and Admins of the organization can set, change and delete them.
 
-#### Disable Analyzers at Org level
+#### Disable Plugins at Org level
 
-From IntelOwl v4.1.0, the org admin can disable specific analyzers for all the users in a specific org.
-To do that, org admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the analyzer that they want to disable.
+The org admin can disable a specific plugin for all the users in a specific org.
+To do that, Org Admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the plugin that they want to disable.
+
+![img.png](../static/disable_org.png)
 
 ### Registration
 Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
@@ -418,7 +425,7 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
 
 ### Playbooks
 
-Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
+Playbooks are designed to be easy to share sequence of running Plugins (Analyzers, Connectors, ...) on a particular kind of observable.
 
 If you want to avoid to re-select/re-configure a particular combination of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
 
@@ -439,23 +446,21 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
 - `Dns`: A playbook containing all dns providers
 
-#### Playbooks customization
+#### Playbooks creation and customization
 
-You can create new playbooks via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`
+You can create new playbooks in different ways, based on the users you want to share them with:
 
-The following are all the keys that you can leverage/change without touching the source code:
+If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`-
 
-- `analyzers`: list of analyzers to execute
-- `connectors`: list of connectors to execute
-- `disabled`: _similar to analyzers_
-- `description`: _similar to analyzers_
-- `type`: list of observable types or files supported
-- `runtime_configuration`: runtime configuration for each type of plugin
+If you want share them to yourself or your organization only, you need to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
+In this way, after you have done an analysis, you can save the configuration of the Plugins you executed for re-use with a single click.
 
-Another chance to create a new playbook is to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
-In this way, after you have done an analysis, you can save the configuration of analyzers/connectors for re-use with a single click.
+![img.png](../static/playbook_creation.png)
 
-Those are the only ways to do that for now. We are planning to provide more easier ways to add new playbooks in the future.
+The created Playbook would be available to yourself only. If you want either to share it with your organization or to delete it, you need to go to the "Plugins" section and enable it manually by clicking the dedicated button.
+
+![img.png](../static/playbooks_cr.png)
+
 
 ### Visualizers
 

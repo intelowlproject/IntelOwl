@@ -86,7 +86,8 @@ export default function GuideWrapper() {
           <p>
             Select a Playbook.
             <br /> Playbooks are designed to be easy to share sequence of
-            running Analyzers/Connectors on a particular kind of observable.
+            running Plugins (Analyzers/, Connectors, ...) on a particular kind
+            of observable.
           </p>
         </div>
       ),

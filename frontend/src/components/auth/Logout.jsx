@@ -2,7 +2,7 @@ import React from "react";
 
 import { FallBackLoading } from "@certego/certego-ui";
 
-import { useAuthStore } from "../../stores";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 export default function Logout() {
   // auth store

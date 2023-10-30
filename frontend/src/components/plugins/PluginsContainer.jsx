@@ -13,15 +13,15 @@ import {
 } from "@certego/certego-ui";
 import { Link } from "react-router-dom";
 import { Button, Col } from "reactstrap";
-import { useOrganizationStore } from "../../stores";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 import { useGuideContext } from "../../contexts/GuideContext";
 
-const Analyzers = React.lazy(() => import("./utils/Analyzers"));
-const Connectors = React.lazy(() => import("./utils/Connectors"));
-const Pivots = React.lazy(() => import("./utils/Pivots"));
-const Visualizers = React.lazy(() => import("./utils/Visualizers"));
-const Ingestors = React.lazy(() => import("./utils/Ingestors"));
-const Playbooks = React.lazy(() => import("./utils/Playbooks"));
+const Analyzers = React.lazy(() => import("./types/Analyzers"));
+const Connectors = React.lazy(() => import("./types/Connectors"));
+const Pivots = React.lazy(() => import("./types/Pivots"));
+const Visualizers = React.lazy(() => import("./types/Visualizers"));
+const Ingestors = React.lazy(() => import("./types/Ingestors"));
+const Playbooks = React.lazy(() => import("./types/Playbooks"));
 
 const routes = [
   {

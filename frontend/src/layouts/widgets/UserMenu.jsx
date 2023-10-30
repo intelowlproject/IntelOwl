@@ -13,7 +13,8 @@ import { RiLockPasswordFill } from "react-icons/ri";
 
 import { UserBubble, DropdownNavLink } from "@certego/certego-ui";
 
-import { useAuthStore, useOrganizationStore } from "../../stores";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
 /**
  * @type {component}

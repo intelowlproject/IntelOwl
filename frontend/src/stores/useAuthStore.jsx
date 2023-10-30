@@ -3,13 +3,13 @@ import { create } from "zustand";
 
 import { addToast } from "@certego/certego-ui";
 
-import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/api";
+import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/apiURLs";
 
 // constants
 const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";
 
 // hook/ store see: https://github.com/pmndrs/zustand
-const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set, get) => ({
   loading: false,
   token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,
   user: {
@@ -108,5 +108,3 @@ const useAuthStore = create((set, get) => ({
     },
   },
 }));
-
-export default useAuthStore;

@@ -5,46 +5,20 @@ import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import PluginsContainer from "../../../src/components/plugins/PluginsContainer";
 
+import {
+  mockedUseOrganizationStoreNoOrg,
+  mockedUsePluginConfigurationStore,
+} from "../../mock";
+
 jest.mock("axios");
-jest.mock("../../../src/stores", () => ({
+jest.mock("../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
-    state({
-      loading: false,
-      error: null,
-      isUserOwner: false,
-      noOrg: true,
-      organization: {},
-      membersCount: undefined,
-      members: [],
-      pendingInvitations: [],
-      pluginsState: {},
-      fetchAll: () => {},
-    }),
+    state(mockedUseOrganizationStoreNoOrg),
   ),
+}));
+jest.mock("../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
-    state({
-      analyzersLoading: false,
-      connectorsLoading: false,
-      visualizersLoading: false,
-      playbooksLoading: false,
-      analyzersError: null,
-      connectorsError: null,
-      playbooksError: null,
-      visualizersError: null,
-      analyzers: [],
-      connectors: [],
-      visualizers: [],
-      ingestors: [],
-      playbooks: [],
-      hydrate: () => {},
-      retrieveAnalyzersConfiguration: () => {},
-      retrieveConnectorsConfiguration: () => {},
-      retrieveVisualizersConfiguration: () => {},
-      retrieveIngestorsConfiguration: () => {},
-      retrievePlaybooksConfiguration: () => {},
-      checkPluginHealth: () => {},
-      deletePlaybook: () => {},
-    }),
+    state(mockedUsePluginConfigurationStore),
   ),
 }));
 

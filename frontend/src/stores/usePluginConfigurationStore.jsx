@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { pluginsTypes } from "../constants/constants";
+import { PluginsTypes } from "../constants/pluginConst";
 import {
   API_BASE_URI,
   ANALYZERS_CONFIG_URI,
@@ -12,7 +12,7 @@ import {
   VISUALIZERS_CONFIG_URI,
   PLAYBOOKS_CONFIG_URI,
   INGESTORS_CONFIG_URI,
-} from "../constants/api";
+} from "../constants/apiURLs";
 
 async function downloadAllPlugin(pluginUrl) {
   const pageSize = 70;
@@ -45,7 +45,7 @@ async function downloadAllPlugin(pluginUrl) {
   return pluginList;
 }
 
-const usePluginConfigurationStore = create((set, get) => ({
+export const usePluginConfigurationStore = create((set, get) => ({
   // loading: true,
   analyzersLoading: true,
   connectorsLoading: true,
@@ -251,7 +251,7 @@ const usePluginConfigurationStore = create((set, get) => ({
     }
   },
   enablePluginInOrg: async (type, pluginName, pluginOwner) => {
-    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
+    if (type === PluginsTypes.PLAYBOOK && pluginOwner !== null) {
       try {
         const response = await axios.patch(
           `${API_BASE_URI}/${type}/${pluginName}`,
@@ -287,7 +287,7 @@ const usePluginConfigurationStore = create((set, get) => ({
     }
   },
   disabledPluginInOrg: async (type, pluginName, pluginOwner) => {
-    if (type === pluginsTypes.PLAYBOOK && pluginOwner !== null) {
+    if (type === PluginsTypes.PLAYBOOK && pluginOwner !== null) {
       try {
         const response = await axios.patch(
           `${API_BASE_URI}/${type}/${pluginName}`,
@@ -323,5 +323,3 @@ const usePluginConfigurationStore = create((set, get) => ({
     }
   },
 }));
-
-export default usePluginConfigurationStore;

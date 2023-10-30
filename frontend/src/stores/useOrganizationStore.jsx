@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import axios from "axios";
 
-import { BASE_URI_ORG, ORG_PLUGIN_DISABLE_URI } from "../constants/api";
+import { BASE_URI_ORG, ORG_PLUGIN_DISABLE_URI } from "../constants/apiURLs";
 
-const useOrganizationStore = create((set, _get) => ({
+export const useOrganizationStore = create((set, _get) => ({
   loading: false,
   error: null,
   isUserOwner: false,
@@ -134,5 +134,3 @@ const useOrganizationStore = create((set, _get) => ({
     return isAdmin;
   },
 }));
-
-export default useOrganizationStore;

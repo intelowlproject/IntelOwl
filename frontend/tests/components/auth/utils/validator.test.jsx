@@ -7,7 +7,7 @@ import {
   EmailValidator,
   RecaptchaValidator,
 } from "../../../../src/components/auth/utils/validator";
-import { HACKER_MEME_STRING } from "../../../../src/constants";
+import { HACKER_MEME_STRING } from "../../../../src/constants/miscConst";
 
 jest.mock("../../../../src/constants/environment", () => ({
   RECAPTCHA_SITEKEY: "key",

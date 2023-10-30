@@ -12,8 +12,8 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 import { RiLoader2Fill } from "react-icons/ri";
 
 import { UncontrolledTooltip } from "reactstrap";
-import { STATUS_COLORMAP } from "../../constants";
-import { jobFinalStatuses } from "../../constants/constants";
+import { StatusColors } from "../../constants/colorConst";
+import { JobFinalStatuses } from "../../constants/jobConst";
 
 const STATUS_ICON_MAP = {
   pending: MdOutlinePending,
@@ -33,12 +33,12 @@ const STATUS_ICON_MAP = {
   failed: IoMdCloseCircleOutline,
 };
 
-export default function StatusIcon(props) {
+export function StatusIcon(props) {
   const { status, className, ...rest } = props;
 
   const statusLower = status.toLowerCase();
 
-  const color = STATUS_COLORMAP?.[statusLower] || "light";
+  const color = StatusColors?.[statusLower] || "light";
   const Icon = STATUS_ICON_MAP?.[statusLower] || MdCircle;
   const iconClassName = classnames(`text-${color}`, className);
 
@@ -49,7 +49,7 @@ export default function StatusIcon(props) {
         className={iconClassName}
         {...rest}
       />
-      {Object.values(jobFinalStatuses).includes(statusLower) && (
+      {Object.values(JobFinalStatuses).includes(statusLower) && (
         <UncontrolledTooltip
           target={`statusicon-${statusLower}`}
           trigger="hover"

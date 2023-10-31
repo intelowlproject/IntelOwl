@@ -208,13 +208,16 @@ export function MembersList() {
                         />
                       </Col>
                       <Col sm={2} className="text-end">
-                        {!isUserAdmin(username) && showActions && (
-                          <FaUserMinus
-                            className="text-danger pointer small"
-                            title="remove member"
-                            onClick={() => removeMemberCb(username)}
-                          />
-                        )}
+                        {showActions &&
+                          owner.username !== username &&
+                          (!isUserAdmin(username) ||
+                            (isUserAdmin(username) && isUserOwner)) && (
+                            <FaUserMinus
+                              className="text-danger pointer small"
+                              title="remove member"
+                              onClick={() => removeMemberCb(username)}
+                            />
+                          )}
                         {owner?.username === username && (
                           <Badge
                             id={`memberlist-badge-owner-${username}`}

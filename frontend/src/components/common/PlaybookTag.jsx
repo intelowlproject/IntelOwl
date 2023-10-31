@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Badge } from "reactstrap";
 
-export default function PlaybookTag(props) {
+export function PlaybookTag(props) {
   const { playbook, ...rest } = props;
 
   return (

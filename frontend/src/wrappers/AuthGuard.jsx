@@ -4,7 +4,7 @@ import { Navigate, useLocation } from "react-router-dom";
 
 import { FallBackLoading, addToast } from "@certego/certego-ui";
 
-import { useAuthStore } from "../stores";
+import { useAuthStore } from "../stores/useAuthStore";
 
 /*
 Wrapper for Routes which should be accessible only to a authenticated user

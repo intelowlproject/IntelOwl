@@ -1,6 +1,7 @@
 import React from "react";
 
-import { useAuthStore, usePluginConfigurationStore } from "../stores";
+import { useAuthStore } from "../stores/useAuthStore";
+import { usePluginConfigurationStore } from "../stores/usePluginConfigurationStore";
 import initAxios from "../utils/initAxios";
 
 /**

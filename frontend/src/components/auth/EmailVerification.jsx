@@ -3,7 +3,7 @@ import { Navigate, useSearchParams } from "react-router-dom";
 import { Spinner } from "reactstrap";
 import { ContentSection } from "@certego/certego-ui";
 
-import { verifyEmail } from "./api";
+import { verifyEmail } from "./authApi";
 
 // Component
 export default function EmailVerification() {

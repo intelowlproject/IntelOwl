@@ -10,7 +10,7 @@ we need to move the user selection preference outside the component (here).
 
 import { create } from "zustand";
 
-const useJobOverviewStore = create((set) => ({
+export const useJobOverviewStore = create((set) => ({
   isSelectedUI: true,
   activeElement: undefined,
   setIsSelectedUI: (isSelectedUI) => set(() => ({ isSelectedUI })),
@@ -18,5 +18,3 @@ const useJobOverviewStore = create((set) => ({
   resetJobOverview: () =>
     set(() => ({ isSelectedUI: true, activeElement: undefined })),
 }));
-
-export default useJobOverviewStore;

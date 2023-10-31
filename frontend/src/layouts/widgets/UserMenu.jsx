@@ -13,7 +13,8 @@ import { RiLockPasswordFill } from "react-icons/ri";
 
 import { UserBubble, DropdownNavLink } from "@certego/certego-ui";
 
-import { useAuthStore, useOrganizationStore } from "../../stores";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
 /**
  * @type {component}
@@ -24,14 +25,14 @@ export default function UserMenu(props) {
   const user = useAuthStore(React.useCallback((s) => s.user, []));
   const {
     organization: { owner },
-    members,
+    isUserAdmin,
     fetchAll,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         organization: state.organization,
-        members: state.members,
         fetchAll: state.fetchAll,
+        isUserAdmin: state.isUserAdmin,
       }),
       [],
     ),
@@ -41,16 +42,6 @@ export default function UserMenu(props) {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  function isAdminUser(username) {
-    let isAdmin = false;
-    members.forEach((member) => {
-      if (member.username === username && member.is_admin) {
-        isAdmin = true;
-      }
-    });
-    return isAdmin;
-  }
 
   return (
     <UncontrolledDropdown nav inNavbar {...props}>
@@ -74,7 +65,7 @@ export default function UserMenu(props) {
               Owner
             </Badge>
           )}
-          {owner?.username !== user.username && isAdminUser(user.username) && (
+          {owner?.username !== user.username && isUserAdmin(user.username) && (
             <Badge className="mx-3" color="info">
               Admin
             </Badge>

@@ -63,7 +63,7 @@ class Pivot(Visualizer):
         for report in reports:
             children_content = []
             content = report.report
-            if content["create_job"]:
+            if content.get("create_job", False):
                 for job in Job.objects.filter(pk__in=content["jobs_id"]):
                     children_content.append(
                         self.Base(
@@ -73,9 +73,12 @@ class Pivot(Visualizer):
                         )
                     )
             else:
+                motivation = content.get(
+                    "motivation", f"Pivot {report.config.name} failed"
+                )
                 children_content.append(
                     self.Base(
-                        value=f"Job was not created: {content['motivation']}",
+                        value=f"Job was not created: {motivation}",
                         disable=False,
                     )
                 )

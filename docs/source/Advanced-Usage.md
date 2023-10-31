@@ -5,7 +5,6 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Advanced Usage](#advanced-usage)
   - [Optional Analyzers](#optional-analyzers)
   - [Customize analyzer execution](#customize-analyzer-execution)
-    - [View and understand different parameters](#view-and-understand-different-parameters)
     - [from the GUI](#from-the-gui)
     - [from Pyintelowl](#from-pyintelowl)
     - [CyberChef](#cyberchef)
@@ -99,26 +98,11 @@ python3 start.py prod --tor_analyzers up
 
 ## Customize analyzer execution
 
-Some analyzers and connectors provide the chance to customize the performed analysis based on parameters (`params` attr in the configuration file) that are different for each analyzer.
-
-- You can set a custom default values by changing their `value` attribute directly from the configuration files. Since IntelOwl v4, it is possible to change these values directly from the GUI in the section "Your plugin configuration".
-- You can choose to provide runtime configuration when requesting an analysis that will be merged with the default overriding it. This override is done only for the specific analysis.
-
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-Connectors parameters can only be changed from either their configuration file or the "Your plugin configuration" section, not at the time of analysis request.
-</div>
-
-##### View and understand different parameters
-
-To see the list of these parameters:
-
-- You can view the "Plugin" Section in IntelOwl to have a complete and updated view of all the options available
-- You can view the raw JSON configuration file, [here](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
+Some analyzers provide the chance to customize the performed analysis based on parameters that are different for each analyzer.
 
 ##### from the GUI
 
-You can click on "**CUSTOMIZE ANALYZERS PARAMETERS**" button and add the runtime configuration in the form of a dictionary.
+You can click on "**Runtime Configuration**" button in the "Scan" page and add the runtime configuration in the form of a dictionary.
 Example:
 
 ```javascript
@@ -182,11 +166,13 @@ Some analyzers could require a special configuration:
 
 Organizations are a great way to share data and analysis only with the members of your team. Invite the people you work with in your organization!
 
-By default, analysis (jobs) are executed with a level of TLP that is CLEAR. This means that these jobs are public and every IntelOwl user can see them.
 Thanks to the "Organization" feature, you can restrict the people who can see the analysis that you made.
+By default, analysis (jobs) are executed with a level of TLP that is `AMBER`. This means that these jobs are shared with the other members of your community only.
+
+If you want to share a job with everyone and make it public (every IntelOwl user can see them), you should set the TLP as `CLEAR`.
 
 How you can do that?
-Jobs with either AMBER or RED TLP value will be accessible to only members within the same organization. You can select the TLP for the analysis at the time of request.
+You can select the TLP for the analysis at the time of request.
 
 ## Notifications
 

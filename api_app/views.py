@@ -614,6 +614,7 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
 def plugin_state_viewer(request):
     from api_app.analyzers_manager.models import AnalyzerConfig
     from api_app.connectors_manager.models import ConnectorConfig
+    from api_app.playbooks_manager.models import PlaybookConfig
     from api_app.visualizers_manager.models import VisualizerConfig
 
     if not request.user.has_membership():
@@ -621,7 +622,7 @@ def plugin_state_viewer(request):
 
     result = {"data": {}}
 
-    classes = [AnalyzerConfig, ConnectorConfig, VisualizerConfig]
+    classes = [AnalyzerConfig, ConnectorConfig, VisualizerConfig, PlaybookConfig]
     for Class_ in classes:
         for plugin in Class_.objects.all():
             plugin: AbstractConfig
@@ -630,7 +631,6 @@ def plugin_state_viewer(request):
             ).exists():
                 result["data"][plugin.name] = {
                     "disabled": True,
-                    "plugin_type": plugin.plugin_type,
                 }
     return Response(result)
 

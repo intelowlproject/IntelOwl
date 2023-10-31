@@ -4,7 +4,7 @@ import { Alert, PopoverBody } from "reactstrap";
 import { IoMail } from "react-icons/io5";
 import { PopupFormButton } from "@certego/certego-ui";
 import EmailForm from "./EmailForm";
-import { resendVerificationMail, requestPasswordReset } from "../api";
+import { resendVerificationMail, requestPasswordReset } from "../authApi";
 
 function Icon(text) {
   return (

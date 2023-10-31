@@ -5,8 +5,8 @@ import useInterval from "react-use/lib/useInterval";
 import { useParams } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
-import { JOB_BASE_URI } from "../../../constants/api";
-import { JobOverview } from "./utils";
+import { JOB_BASE_URI } from "../../../constants/apiURLs";
+import { JobOverview } from "./JobOverview";
 
 import {
   generateJobNotification,

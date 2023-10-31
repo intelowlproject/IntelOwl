@@ -48,7 +48,7 @@ class WebRisk(classes.ObservableAnalyzer):
         ):
             raise AnalyzerRunException(
                 f"{self.observable_name} not supported "
-                f"because it does not start with http"
+                "because it does not start with http"
             )
 
         credentials = service_account.Credentials.from_service_account_info(

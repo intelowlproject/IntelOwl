@@ -31,7 +31,6 @@ import {
   IconButton,
   Loader,
   MultiSelectDropdownInput,
-  addToast,
   selectStyles,
 } from "@certego/certego-ui";
 
@@ -40,23 +39,32 @@ import {
   IoIosArrowDropupCircle,
 } from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
-import { usePluginConfigurationStore } from "../../stores";
+import { TLPColors } from "../../constants/colorConst";
+import { usePluginConfigurationStore } from "../../stores/usePluginConfigurationStore";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 import {
-  TLP_CHOICES,
-  TLP_COLOR_MAP,
-  TLP_DESCRIPTION_MAP,
-  scanTypes,
-} from "../../constants";
-import { scanMode, jobResultSection } from "../../constants/constants";
-import { TLPTag, markdownToHtml, JobTag } from "../common";
-import {
-  RuntimeConfigurationModal,
-  RecentScans,
-  TagSelectInput,
-} from "./utils";
-import { createJob, createPlaybookJob } from "./api";
+  TLPs,
+  TlpChoices,
+  ScanTypes,
+  ScanModesNumeric,
+} from "../../constants/advancedSettingsConst";
+import { JobResultSections, TLPDescriptions } from "../../constants/miscConst";
+import { TLPTag } from "../common/TLPTag";
+import { markdownToHtml } from "../common/markdownToHtml";
+import { JobTag } from "../common/JobTag";
+import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
+import RecentScans from "./utils/RecentScans";
+import { TagSelectInput } from "./utils/TagSelectInput";
+import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
-import { parseScanCheckTime } from "../plugins/utils/utils";
+import { parseScanCheckTime } from "../../utils/time";
+import { JobTypes, ObservableClassifications } from "../../constants/jobConst";
+import {
+  DOMAIN_REGEX,
+  IP_REGEX,
+  HASH_REGEX,
+  URL_REGEX,
+} from "../../constants/regexConst";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -69,12 +77,10 @@ function DangerErrorMessage(fieldName) {
 
 // constants
 const observableType2RegExMap = {
-  domain: "^(?:[\\w-]{1,63}\\.)+[\\w-]{2,63}$",
-  /* eslint-disable */
-  ip: "^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}::|(?:(?:[0-9a-fA-F]{1,4}:){1,6}:)(?::[0-9a-fA-F]{1,4}){1,2}))$",
-  /* eslint-enable */
-  url: "^.{2,20}://.+$",
-  hash: "^[a-zA-Z0-9]{32,}$",
+  domain: DOMAIN_REGEX,
+  ip: IP_REGEX,
+  url: URL_REGEX,
+  hash: HASH_REGEX,
 };
 
 const sanitizeObservable = (observable) =>
@@ -83,8 +89,17 @@ const sanitizeObservable = (observable) =>
 // Component
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
-  const observableParam = searchParams.get("observable");
+  const observableParam = searchParams.get(JobTypes.OBSERVABLE);
   const { guideState, setGuideState } = useGuideContext();
+
+  const { pluginsState: organizationPluginsState } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        pluginsState: state.pluginsState,
+      }),
+      [],
+    ),
+  );
 
   /* Recent Scans states - inputValue is used to save the user typing (this state changes for each character that is typed), 
   recentScansInput is used for rendering RecentScans component only once per second
@@ -107,19 +122,19 @@ export default function ScanForm() {
 
   const formik = useFormik({
     initialValues: {
-      observableType: "observable",
-      classification: "generic",
+      observableType: JobTypes.OBSERVABLE,
+      classification: ObservableClassifications.GENERIC,
       observable_names: [""],
       files: [],
       analyzers: [],
       connectors: [],
       // playbook is an object, but if we use {} as default the UI component to select playbooks doesn's show the placeholder
       playbook: "",
-      tlp: "AMBER",
+      tlp: TLPs.AMBER,
       runtime_configuration: {},
       tags: [],
-      scan_mode: scanMode.CHECK_PREVIOUS_ANALYSIS,
-      analysisOptionValues: scanTypes.playbooks,
+      scan_mode: ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS,
+      analysisOptionValues: ScanTypes.playbooks,
       scan_check_time: 24,
     },
     validate: (values) => {
@@ -128,14 +143,18 @@ export default function ScanForm() {
 
       const errors = {};
 
+      // error in plugins download
       if (analyzersError) {
         errors.analyzers = analyzersError;
       }
       if (connectorsError) {
         errors.connectors = connectorsError;
       }
+      if (playbooksError) {
+        errors.playbook = playbooksError;
+      }
 
-      if (values.observableType === "file") {
+      if (values.observableType === JobTypes.FILE) {
         // this is an edge case
         if (
           !values.files ||
@@ -152,22 +171,22 @@ export default function ScanForm() {
         errors.observable_names = "observable(s) are required";
       }
 
-      if (!TLP_CHOICES.includes(values.tlp)) {
-        errors.tlp = "Invalid choice";
-      }
-
       // check playbook or analyzer selections based on the user selection
       if (
-        values.analysisOptionValues === scanTypes.playbooks &&
+        values.analysisOptionValues === ScanTypes.playbooks &&
         Object.keys(values.playbook).length === 0
       ) {
         errors.playbook = "playbook required";
       }
       if (
-        values.analysisOptionValues === scanTypes.analyzers_and_connectors &&
+        values.analysisOptionValues === ScanTypes.analyzers_and_connectors &&
         values.analyzers.length === 0
       ) {
         errors.analyzers = "analyzers required";
+      }
+
+      if (!TlpChoices.includes(values.tlp)) {
+        errors.tlp = "Invalid choice";
       }
 
       console.debug("formik validation errors");
@@ -175,56 +194,33 @@ export default function ScanForm() {
       return errors;
     },
     onSubmit: async (values) => {
-      if (values.analysisOptionValues === scanTypes.playbooks) {
-        startPlaybooks(values);
-        return;
+      const jobIds = await createJob(
+        values.observableType === JobTypes.OBSERVABLE
+          ? values.observable_names.map((observable) =>
+              sanitizeObservable(observable),
+            )
+          : values.files,
+        values.classification,
+        values.playbook.value,
+        values.analyzers.map((analyzer) => analyzer.value),
+        values.connectors.map((connector) => connector.value),
+        values.runtime_configuration,
+        values.tags.map((optTag) => optTag.value.label),
+        values.tlp,
+        values.scan_mode,
+        values.scan_check_time,
+      );
+
+      if (jobIds.length > 1) {
+        setTimeout(() => navigate(`/jobs/`), 1000);
+      } else {
+        setTimeout(
+          () => navigate(`/jobs/${jobIds[0]}/${JobResultSections.VISUALIZER}/`),
+          1000,
+        );
       }
-
-      const formValues = {
-        ...values,
-        observable_names: values.observable_names.map((observable) =>
-          sanitizeObservable(observable),
-        ),
-        tags_labels: values.tags.map((optTag) => optTag.value.label),
-        analyzers: values.analyzers.map((x) => x.value),
-        connectors: values.connectors.map((x) => x.value),
-      };
-
-      if (values.analyzers.length === 0) {
-        addToast("Failed!", "Please select at least one analyzer", "danger");
-        return;
-      }
-
-      /* We have 2 cases:
-       1) use default config -> we need the runtime_configuration field has value {}
-       2) custom config -> we need to add visualizers because it's required from the backend
-
-      Note: we don't put visualizers in the editor because it could be very verbose
-      */
-      if (Object.keys(formValues.runtime_configuration).length) {
-        formik.values.runtime_configuration.visualizers = {};
-      }
-
-      console.debug("ScanFrom - onSubmit - formValues");
-      console.debug(formValues);
-
-      try {
-        const jobIds = await createJob(formValues);
-        if (jobIds.length > 1) {
-          setTimeout(() => navigate(`/jobs/`), 1000);
-        } else {
-          setTimeout(
-            () =>
-              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
-            1000,
-          );
-        }
-      } catch (e) {
-        // handled inside createJob
-      } finally {
-        refetchQuota();
-        formik.setSubmitting(false);
-      }
+      refetchQuota();
+      formik.setSubmitting(false);
     },
   });
 
@@ -274,7 +270,7 @@ export default function ScanForm() {
       file: [],
     };
     analyzers.forEach((obj) => {
-      if (obj.type === "file") {
+      if (obj.type === JobTypes.FILE) {
         grouped.file.push(obj);
       } else {
         obj.observable_supported.forEach((clsfn) => grouped[clsfn].push(obj));
@@ -293,12 +289,14 @@ export default function ScanForm() {
       file: [],
     };
     playbooks.forEach((obj) => {
-      // filter on basis of type
-      obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
+      // filter on basis of type if the playbook is not disabled in org
+      if (organizationPluginsState[obj.name] === undefined) {
+        obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
+      }
     });
     console.debug("Playbooks", grouped);
     return grouped;
-  }, [playbooks]);
+  }, [playbooks, organizationPluginsState]);
 
   const analyzersOptions = React.useMemo(
     () =>
@@ -386,74 +384,7 @@ export default function ScanForm() {
         scan_mode: `${v.scan_mode}`,
         scan_check_time: v.scan_check_time,
       }))
-      .sort((a, b) =>
-        // eslint-disable-next-line no-nested-ternary
-        a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
-      );
-
-  const ValidatePlaybooks = React.useCallback(
-    (values) => {
-      const errors = {};
-      if (playbooksError) {
-        errors.playbook = playbooksError;
-      }
-      if (Object.keys(values.playbook).length === 0) {
-        return `Please select a playbook!`;
-      }
-      if (values.classification === "file") {
-        if (!values.files || values.files.length === 0) {
-          errors.files = "required";
-        }
-      } else if (values.observable_names && values.observable_names.length) {
-        if (!TLP_CHOICES.includes(values.tlp)) {
-          errors.tlp = "Invalid choice";
-        }
-      }
-      return errors;
-    },
-    [playbooksError],
-  );
-
-  const startPlaybooks = React.useCallback(
-    async (values) => {
-      const formValues = {
-        ...values,
-        observable_names: values.observable_names.map((observable) =>
-          sanitizeObservable(observable),
-        ),
-        tlp: values.tlp,
-        tags_labels: values.tags.map((optTag) => optTag.value.label),
-        playbook: values.playbook.value,
-        scan_mode: values.scan_mode,
-        scan_check_time: values.scan_check_time,
-      };
-
-      const errors = ValidatePlaybooks(values);
-      if (Object.keys(errors).length !== 0) {
-        addToast("Failed!", JSON.stringify(errors), "danger");
-        return;
-      }
-
-      try {
-        const jobIds = await createPlaybookJob(formValues);
-
-        if (jobIds.length > 1) {
-          setTimeout(() => navigate(`/jobs/`), 1000);
-        } else {
-          setTimeout(
-            () =>
-              navigate(`/jobs/${jobIds[0]}/${jobResultSection.VISUALIZER}/`),
-            1000,
-          );
-        }
-      } catch (e) {
-        // handled inside createPlaybookJob
-      } finally {
-        refetchQuota();
-      }
-    },
-    [navigate, refetchQuota, ValidatePlaybooks],
-  );
+      .filter((item) => !item.isDisabled);
 
   const updateAdvancedConfig = (tags, tlp, _scanMode, scanCheckTime) => {
     formik.setFieldValue("tags", tags, false);
@@ -482,10 +413,10 @@ export default function ScanForm() {
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
-      let newClassification = "generic";
+      let newClassification = ObservableClassifications.GENERIC;
       Object.entries(observableType2RegExMap).forEach(
         ([typeName, typeRegEx]) => {
-          if (new RegExp(typeRegEx).test(sanitizeObservable(observableValue))) {
+          if (typeRegEx.test(sanitizeObservable(observableValue))) {
             newClassification = typeName;
           }
         },
@@ -496,7 +427,7 @@ export default function ScanForm() {
         playbookOptions(newClassification).length > 0 &&
         (oldClassification !== newClassification ||
           Object.keys(formik.values.playbook).length === 0) &&
-        formik.values.analysisOptionValues === scanTypes.playbooks
+        formik.values.analysisOptionValues === ScanTypes.playbooks
       ) {
         formik.setFieldValue(
           "playbook",
@@ -533,8 +464,8 @@ export default function ScanForm() {
 
   const updateAnalysisOptionValues = (newAnalysisType) => {
     if (
-      scanType === scanTypes.playbooks &&
-      newAnalysisType === scanTypes.analyzers_and_connectors
+      scanType === ScanTypes.playbooks &&
+      newAnalysisType === ScanTypes.analyzers_and_connectors
     ) {
       setScanType(newAnalysisType);
       // reset playbook
@@ -544,12 +475,12 @@ export default function ScanForm() {
         formik.initialValues.tags,
         formik.initialValues.tlp,
         formik.initialValues.scan_mode,
-        "1 00:00:00",
+        "01:00:00:00",
       );
     }
     if (
-      scanType === scanTypes.analyzers_and_connectors &&
-      newAnalysisType === scanTypes.playbooks
+      scanType === ScanTypes.analyzers_and_connectors &&
+      newAnalysisType === ScanTypes.playbooks
     ) {
       setScanType(newAnalysisType);
       // if an observable or file is loaded set a default playbook
@@ -575,7 +506,7 @@ export default function ScanForm() {
       (formik.values.files.length &&
         formik.values.files[0] !== "" &&
         Object.keys(formik.values.playbook).length === 0 &&
-        formik.values.analysisOptionValues === scanTypes.playbooks)
+        formik.values.analysisOptionValues === ScanTypes.playbooks)
     ) {
       updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
     }
@@ -620,7 +551,9 @@ export default function ScanForm() {
         <div className="mt-4 d-flex justify-content-between">
           <h3 id="scanpage" className="fw-bold">
             Scan&nbsp;
-            {formik.values.classification === "file" ? "Files" : "Observables"}
+            {formik.values.classification === JobTypes.FILE
+              ? "Files"
+              : "Observables"}
           </h3>
           <div className="mt-1">
             {/* Quota badges */}
@@ -635,7 +568,7 @@ export default function ScanForm() {
             <Row>
               <div className="col-sm-3 col-form-label" />
               <FormGroup className="mb-0 mt-2 d-flex col-sm-9">
-                {["observable", "file"].map((ch) => (
+                {[JobTypes.OBSERVABLE, JobTypes.FILE].map((ch) => (
                   <FormGroup check inline key={`observableType__${ch}`}>
                     <Col>
                       <Field
@@ -652,25 +585,25 @@ export default function ScanForm() {
                           );
                           formik.setFieldValue(
                             "classification",
-                            event.target.value === "observable"
-                              ? "generic"
-                              : "file",
+                            event.target.value === JobTypes.OBSERVABLE
+                              ? ObservableClassifications.GENERIC
+                              : JobTypes.FILE,
                           );
                           formik.setFieldValue("observable_names", [""], false);
                           formik.setFieldValue("files", [""], false);
                           formik.setFieldValue(
                             "analysisOptionValues",
-                            scanTypes.playbooks,
+                            ScanTypes.playbooks,
                             false,
                           );
-                          setScanType(scanTypes.playbooks);
+                          setScanType(ScanTypes.playbooks);
                           formik.setFieldValue("playbook", "", false); // reset
                           formik.setFieldValue("analyzers", [], false); // reset
                           formik.setFieldValue("connectors", [], false); // reset
                         }}
                       />
                       <Label check>
-                        {ch === "observable"
+                        {ch === JobTypes.OBSERVABLE
                           ? "observable (domain, IP, URL, HASH, etc...)"
                           : "file"}
                       </Label>
@@ -679,7 +612,7 @@ export default function ScanForm() {
                 ))}
               </FormGroup>
             </Row>
-            {formik.values.observableType === "observable" ? (
+            {formik.values.observableType === JobTypes.OBSERVABLE ? (
               <FieldArray
                 name="observable_names"
                 render={(arrayHelpers) => (
@@ -773,7 +706,7 @@ export default function ScanForm() {
                         Object.keys(formik.values.playbook).length === 0 &&
                         playbookOptions("file").length > 0 &&
                         formik.values.analysisOptionValues ===
-                          scanTypes.playbooks
+                          ScanTypes.playbooks
                       ) {
                         formik.setFieldValue(
                           "playbook",
@@ -791,6 +724,7 @@ export default function ScanForm() {
                     className="input-dark"
                     multiple
                   />
+                  {DangerErrorMessage("files")}
                 </Col>
               </FormGroup>
             )}
@@ -801,7 +735,7 @@ export default function ScanForm() {
                 className="d-flex col-sm-9"
                 style={{ marginTop: "10px" }}
               >
-                {Object.values(scanTypes).map((type_) => (
+                {Object.values(ScanTypes).map((type_) => (
                   <FormGroup check inline key={`analysistype__${type_}`}>
                     <Col>
                       <Field
@@ -818,7 +752,7 @@ export default function ScanForm() {
                 ))}
               </FormGroup>
             </Row>
-            {scanType === scanTypes.analyzers_and_connectors && (
+            {scanType === ScanTypes.analyzers_and_connectors && (
               <>
                 <FormGroup row>
                   <Label sm={3} for="analyzers">
@@ -888,7 +822,7 @@ export default function ScanForm() {
                 </FormGroup>
               </>
             )}
-            {scanType === scanTypes.playbooks && (
+            {scanType === ScanTypes.playbooks && (
               <FormGroup row className="mb-4">
                 <Label id="selectplugins" sm={3} htmlFor="playbook">
                   Select Playbook
@@ -945,7 +879,7 @@ export default function ScanForm() {
                 <Label sm={3}>TLP</Label>
                 <Col sm={9}>
                   <div>
-                    {TLP_CHOICES.map((ch) => (
+                    {TlpChoices.map((ch) => (
                       <FormGroup inline check key={`tlpchoice__${ch}`}>
                         <Label check for={`tlpchoice__${ch}`}>
                           <TLPTag value={ch} />
@@ -963,13 +897,8 @@ export default function ScanForm() {
                     ))}
                   </div>
                   <FormText>
-                    <span
-                      style={{ color: `${TLP_COLOR_MAP[formik.values.tlp]}` }}
-                    >
-                      {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
-                        "TLP: ",
-                        "",
-                      )}
+                    <span style={{ color: `${TLPColors[formik.values.tlp]}` }}>
+                      {TLPDescriptions[formik.values.tlp].replace("TLP: ", "")}
                     </span>
                   </FormText>
                 </Col>
@@ -983,7 +912,7 @@ export default function ScanForm() {
                       id="checkchoice__check_all"
                       type="radio"
                       name="scan_mode"
-                      value={scanMode.CHECK_PREVIOUS_ANALYSIS}
+                      value={ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <div className="d-flex align-items-center">
@@ -1032,7 +961,7 @@ export default function ScanForm() {
                       id="checkchoice__force_new"
                       type="radio"
                       name="scan_mode"
-                      value={scanMode.FORCE_NEW_ANALYSIS}
+                      value={ScanModesNumeric.FORCE_NEW_ANALYSIS}
                       onChange={formik.handleChange}
                     />
                     <Label check for="checkchoice__force_new">

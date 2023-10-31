@@ -1,0 +1,92 @@
+// IMPORTANT - do not change the order of status
+export const JobStatuses = Object.freeze({
+  PENDING: "pending",
+  RUNNING: "running",
+  ANALYZERS_RUNNING: "analyzers_running",
+  ANALYZERS_COMPLETED: "analyzers_completed",
+  CONNECTORS_RUNNING: "connectors_running",
+  CONNECTORS_COMPLETED: "connectors_completed",
+  PIVOTS_RUNNING: "pivots_running",
+  PIVOTS_COMPLETED: "pivots_completed",
+  VISUALIZERS_RUNNING: "visualizers_running",
+  VISUALIZERS_COMPLETED: "visualizers_completed",
+  REPORTED_WITH_FAILS: "reported_with_fails",
+  REPORTED_WITHOUT_FAILS: "reported_without_fails",
+  KILLED: "killed",
+  FAILED: "failed",
+});
+
+export const JobFinalStatuses = Object.freeze({
+  REPORTED_WITH_FAILS: JobStatuses.REPORTED_WITH_FAILS,
+  REPORTED_WITHOUT_FAILS: JobStatuses.REPORTED_WITHOUT_FAILS,
+  KILLED: JobStatuses.KILLED,
+  FAILED: JobStatuses.FAILED,
+});
+
+export const JobTypes = Object.freeze({
+  FILE: "file",
+  OBSERVABLE: "observable",
+});
+
+export const FileMimeTypes = Object.freeze({
+  // IMPORTANT! in case you update this Object remember to update also the blackend
+  WSCRIPT: "application/w-script-file",
+  JAVASCRIPT1: "application/javascript",
+  JAVASCRIPT2: "application/x-javascript",
+  JAVASCRIPT3: "text/javascript",
+  VB_SCRIPT: "application/x-vbscript",
+  IQY: "text/x-ms-iqy",
+  APK: "application/vnd.android.package-archive",
+  DEX: "application/x-dex",
+  ONE_NOTE: "application/onenote",
+  ZIP1: "application/zip",
+  ZIP2: "multipart/x-zip",
+  JAVA: "application/java-archive",
+  RTF1: "text/rtf",
+  RTF2: "application/rtf",
+  DOS: "application/x-dosexec",
+  SHARED_LIB: "application/x-sharedlib",
+  EXE: "application/x-executable",
+  ELF: "application/x-elf",
+  OCTET: "application/octet-stream",
+  PCAP: "application/vnd.tcpdump.pcap",
+  PDF: "application/pdf",
+  HTML: "text/html",
+  PUB: "application/x-mspublisher",
+  EXCEL_MACRO1: "application/vnd.ms-excel.addin.macroEnabled",
+  EXCEL_MACRO2: "application/vnd.ms-excel.sheet.macroEnabled.12",
+  EXCEL1: "application/vnd.ms-excel",
+  EXCEL2: "application/excel",
+  DOC: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  XML1: "application/xml",
+  XML2: "text/xml",
+  ENCRYPTED: "application/encrypted",
+  PLAIN: "text/plain",
+  CSV: "text/csv",
+  PPTX: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  WORD1: "application/msword",
+  WORD2:
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  POWERPOINT: "application/vnd.ms-powerpoint",
+  OFFICE: "application/vnd.ms-office",
+  BINARY: "application/x-binary",
+  MAC1: "application/x-macbinary",
+  MAC2: "application/mac-binary",
+  MAC3: "application/x-mach-binary",
+  COMPRESS1: "application/x-zip-compressed",
+  COMPRESS2: "application/x-compressed",
+  OUTLOOK: "application/vnd.ms-outlook",
+  EML: "message/rfc822",
+  PKCS7: "application/pkcs7-signature",
+  XPKCS7: "application/x-pkcs7-signature",
+  MIXED: "multipart/mixed",
+  X_SHELLSCRIPT: "text/x-shellscript",
+});
+
+export const ObservableClassifications = Object.freeze({
+  IP: "ip",
+  URL: "url",
+  DOMAIN: "domain",
+  HASH: "hash",
+  GENERIC: "generic",
+});

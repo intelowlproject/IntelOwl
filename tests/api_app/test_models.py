@@ -58,8 +58,7 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             routing_key="wrong_key",
         )
-        with self.assertRaises(ValidationError):
-            muc.full_clean()
+        self.assertEqual(muc.get_routing_key(), "default")
 
     def test_is_configured_no_secrets(self):
         muc, _ = VisualizerConfig.objects.get_or_create(

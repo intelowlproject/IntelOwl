@@ -25,6 +25,55 @@ import { JobResultSections } from "../../../constants/miscConst";
 import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
 import { processTimeMMSS } from "../../../utils/time";
 
+function DebounceDefaultColumnFilter({
+  column: { filterValue, setFilter, id },
+}) {
+  const [inputValue, setInputValue] = React.useState("" || filterValue);
+  const [debouncedInputValue, setDebouncedInputValue] = React.useState(
+    "" || filterValue,
+  );
+
+  console.debug("inputValue ->", inputValue);
+  console.debug("debouncedInputValue ->", debouncedInputValue);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedInputValue(inputValue);
+      console.debug("inputValue useEffect->", inputValue);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
+  React.useEffect(() => {
+    console.debug("debouncedInputValue useEffect->", debouncedInputValue);
+    setFilter(debouncedInputValue);
+  }, [debouncedInputValue]);
+
+  // Set undefined to remove the filter entirely
+  // const onChange = (e) => setFilter(e.target.value || undefined);
+
+  console.debug("filterValue ->", filterValue);
+
+  return (
+    <Input
+      id={`datatable-select-${id}`}
+      type="search"
+      bsSize="sm"
+      className={classnames(
+        {
+          "bg-body border-secondary": filterValue,
+        },
+        "input-dark",
+      )}
+      value={inputValue}
+      onChange={(e) => {
+        setInputValue(e.target.value);
+      }}
+      placeholder="Search keyword.."
+    />
+  );
+}
+
 export const jobTableColumns = [
   {
     Header: () => "ID", // No header
@@ -229,7 +278,7 @@ export const jobTableColumns = [
       </div>
     ),
     disableSortBy: true,
-    Filter: DefaultColumnFilter,
+    Filter: DebounceDefaultColumnFilter,
     maxWidth: 180,
   },
   {

@@ -52,7 +52,7 @@ jest.mock("../../../../src/stores/useOrganizationStore", () => ({
           return true;
         }
         return false;
-      }
+      },
     }),
   ),
 }));

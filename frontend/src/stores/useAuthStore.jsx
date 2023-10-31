@@ -18,6 +18,7 @@ export const useAuthStore = create((set, get) => ({
     first_name: "",
     last_name: "",
     email: "",
+    is_staff: false,
   },
   access: null,
   isAuthenticated: () => !!get().token,

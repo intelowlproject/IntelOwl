@@ -4,6 +4,7 @@ import { Alert, Row, Container } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 import { LoadingBoundary, ErrorAlert } from "@certego/certego-ui";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 import ConfigContainer from "../user/config/ConfigContainer";
 import { OrgCreateButton } from "./utils/OrgCreateButton";
@@ -12,12 +13,14 @@ export default function OrgConfig() {
   console.debug("OrgConfigPage rendered!");
 
   // consume store
+  const [user] = useAuthStore((state) => [state.user]);
+
   const {
     loading,
     error: respErr,
     organization,
     fetchAll,
-    isUserOwner,
+    isUserAdmin,
     noOrg,
   } = useOrganizationStore(
     React.useCallback(
@@ -26,7 +29,7 @@ export default function OrgConfig() {
         error: state.error,
         organization: state.organization,
         fetchAll: state.fetchAll,
-        isUserOwner: state.isUserOwner,
+        isUserAdmin: state.isUserAdmin,
         noOrg: state.noOrg,
       }),
       [],
@@ -59,7 +62,7 @@ export default function OrgConfig() {
               <Alert color="secondary" className="mt-3 mx-auto">
                 <section>
                   <h5 className="text-warning text-center">
-                    You are not owner of any organization.
+                    You are neither the owner not the admin of any organization.
                   </h5>
                   <p className="text-center">
                     You can choose to create a new organization.
@@ -83,7 +86,7 @@ export default function OrgConfig() {
               additionalConfigData={{
                 organization: organization.name,
               }}
-              editable={isUserOwner}
+              editable={isUserAdmin(user.username)}
             />
           </Container>
         );

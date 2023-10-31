@@ -11,6 +11,7 @@ import {
 } from "@certego/certego-ui";
 
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
+import { useAuthStore } from "../../../stores/useAuthStore";
 import {
   deleteOrganization,
   removeMemberFromOrg,
@@ -19,6 +20,7 @@ import {
 
 export function MembersList() {
   // consume store
+  const [user] = useAuthStore((state) => [state.user]);
   const {
     organization: { owner, name: orgName },
     members,
@@ -26,6 +28,7 @@ export function MembersList() {
     fetchAll,
     refetchMembers,
     isUserOwner,
+    isUserAdmin,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
@@ -35,6 +38,7 @@ export function MembersList() {
         fetchAll: state.fetchAll,
         refetchMembers: state.refetchMembers,
         isUserOwner: state.isUserOwner,
+        isUserAdmin: state.isUserAdmin,
       }),
       [],
     ),
@@ -134,8 +138,8 @@ export function MembersList() {
             <small className="text-muted">{membersCount} total</small>
           </div>
           <div>
-            {isUserOwner ? (
-              <ButtonGroup>
+            <ButtonGroup>
+              {isUserOwner ? (
                 <IconButton
                   id="deleteorg-btn"
                   size="sm"
@@ -146,6 +150,19 @@ export function MembersList() {
                   Icon={MdDelete}
                   onClick={deleteOrganizationCb}
                 />
+              ) : (
+                <IconButton
+                  id="memberslist-leaveorg-btn"
+                  size="sm"
+                  outline
+                  color="danger"
+                  className="border border-tertiary"
+                  title="Leave Organization"
+                  Icon={FaUserMinus}
+                  onClick={leaveOrganizationCb}
+                />
+              )}
+              {isUserAdmin(user.username) && (
                 <IconButton
                   id="memberslist-showactions-btn"
                   size="sm"
@@ -156,18 +173,8 @@ export function MembersList() {
                   // active state
                   outline={!showActions}
                 />
-              </ButtonGroup>
-            ) : (
-              <IconButton
-                id="memberslist-leaveorg-btn"
-                size="sm"
-                outline
-                color="danger"
-                title="Leave Organization"
-                Icon={FaUserMinus}
-                onClick={leaveOrganizationCb}
-              />
-            )}
+              )}
+            </ButtonGroup>
           </div>
         </section>
         <hr />
@@ -201,15 +208,14 @@ export function MembersList() {
                         />
                       </Col>
                       <Col sm={2} className="text-end">
-                        {owner?.username !== username ? (
-                          showActions && (
-                            <FaUserMinus
-                              className="text-danger pointer small"
-                              title="remove member"
-                              onClick={() => removeMemberCb(username)}
-                            />
-                          )
-                        ) : (
+                        {!isUserAdmin(username) && showActions && (
+                          <FaUserMinus
+                            className="text-danger pointer small"
+                            title="remove member"
+                            onClick={() => removeMemberCb(username)}
+                          />
+                        )}
+                        {owner?.username === username && (
                           <Badge
                             id={`memberlist-badge-owner-${username}`}
                             color="info"

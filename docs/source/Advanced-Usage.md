@@ -106,7 +106,7 @@ You can click on "**Runtime Configuration**" button in the "Scan" page and add t
 Example:
 
 ```javascript
-"VirusTotal_v3_Get_File": {
+"VirusTotal_v3_File": {
     "force_active_scan_if_old": true
 }
 ```

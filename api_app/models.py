@@ -907,7 +907,8 @@ class PythonConfig(AbstractConfig):
     def get_routing_key(self) -> str:
         if self.routing_key not in settings.CELERY_QUEUES:
             logger.warning(
-                f"{self.name}: you have no worker for {self.routing_key}. Using {settings.DEFAULT_QUEUE} queue."
+                f"{self.name}: you have no worker for {self.routing_key}."
+                f" Using {settings.DEFAULT_QUEUE} queue."
             )
             return settings.DEFAULT_QUEUE
         return self.routing_key

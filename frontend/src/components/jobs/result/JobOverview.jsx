@@ -15,7 +15,8 @@ import {
   Spinner,
 } from "reactstrap";
 
-import { GoBackButton, Loader, NewJsonRenderer } from "@certego/certego-ui";
+import { GoBackButton, Loader } from "@certego/certego-ui";
+import { JSONTree } from "react-json-tree";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -144,15 +145,16 @@ export function JobOverview({
           </div>
         ),
         report: (
-          <NewJsonRenderer
-            collapsed={1}
-            onEdit={() => null}
-            key={job.id}
-            id={`jobreport-jsoninput-${job.id}`}
-            jsonData={job}
-            // style={{ height: "50vh", width: "90vw", overflow: "scroll" }}
+          <div
+            id={`jobfullreport-jsoninput-${job.id}`}
             style={{ height: "60vh", overflow: "scroll" }}
-          />
+          >
+            <JSONTree
+              data={job}
+              keyPath={["job"]}
+              shouldExpandNodeInitially={() => true}
+            />
+          </div>
         ),
       },
     ],

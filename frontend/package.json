@@ -19,6 +19,7 @@
     "react-google-recaptcha": "^2.1.0",
     "react-icons": "^4.10.1",
     "react-joyride": "^2.5.5",
+    "react-json-tree": "^0.18.0",
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.17.0",
     "react-scripts": "^5.0.1",

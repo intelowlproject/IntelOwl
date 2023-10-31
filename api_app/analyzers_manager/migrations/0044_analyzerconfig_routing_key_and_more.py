@@ -37,7 +37,6 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 default="default",
                 max_length=50,
-                validators=[api_app.validators.validate_routing_key],
             ),
         ),
         migrations.AddField(

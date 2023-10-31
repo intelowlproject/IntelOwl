@@ -2,9 +2,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { MdOutlineRefresh, MdPauseCircleOutline } from "react-icons/md";
+import { JSONTree } from "react-json-tree";
 
 import {
-  NewJsonRenderer,
   DataTable,
   DefaultColumnFilter,
   IconButton,
@@ -103,18 +103,19 @@ const tableProps = {
     ],
   },
   SubComponent: ({ row }) => (
-    <NewJsonRenderer
-      collapsed={1}
-      onEdit={() => null}
-      key={row.id}
+    <div
       id={`jobreport-jsoninput-${row.id}`}
-      jsonData={{
-        report: row.original?.report,
-        errors: row.original?.errors,
-        runtime_configuration: row.original?.runtime_configuration,
-      }}
-      style={{ height: "50vh", width: "90vw", overflow: "scroll" }}
-    />
+      style={{ maxHeight: "50vh", overflow: "scroll" }}
+    >
+      <JSONTree
+        data={{
+          report: row.original?.report,
+          errors: row.original?.errors,
+          runtime_configuration: row.original?.runtime_configuration,
+        }}
+        shouldExpandNodeInitially={() => true}
+      />
+    </div>
   ),
 };
 

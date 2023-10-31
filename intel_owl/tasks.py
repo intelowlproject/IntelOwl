@@ -306,7 +306,6 @@ def create_caches(user_pk: int):
 
 @signals.beat_init.connect
 def beat_init_connect(*args, sender: Consumer = None, **kwargs):
-    from api_app.models import PythonConfig
     from certego_saas.models import User
 
     logger.info("Starting beat_init signal")
@@ -330,17 +329,6 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )
-    # fixing routing_keys
-    for class_ in PythonConfig.get_subclasses():
-        updated = class_.objects.exclude(routing_key__in=settings.CELERY_QUEUES).update(
-            routing_key=settings.DEFAULT_QUEUE
-        )
-        if updated:
-            logger.warning(
-                f"There were {updated} {class_.__name__} configurations"
-                " with a queue not configured."
-                f" It was automatically changed to {settings.DEFAULT_QUEUE}"
-            )
 
 
 # set logger

@@ -1151,10 +1151,10 @@ class PythonConfigSerializer(AbstractConfigSerializer):
     def to_internal_value(self, data):
         raise NotImplementedError()
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: PythonConfig):
         result = super().to_representation(instance)
         result["config"] = {
-            "queue": instance.routing_key,
+            "queue": instance.get_routing_key(),
             "soft_time_limit": instance.soft_time_limit,
         }
         return result

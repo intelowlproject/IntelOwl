@@ -113,7 +113,6 @@ const tableProps = {
           errors: row.original?.errors,
           runtime_configuration: row.original?.runtime_configuration,
         }}
-        shouldExpandNodeInitially={() => true}
       />
     </div>
   ),

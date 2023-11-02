@@ -64,13 +64,16 @@ class JobAdminView(CustomAdminView):
     def get_tags(self, instance: Job):
         return [tag.label for tag in instance.tags.all()]
 
-    def analyzers_executed(self, instance: Job):  # noqa
+    @staticmethod
+    def analyzers_executed(instance: Job):  # noqa
         return [analyzer.name for analyzer in instance.analyzers_to_execute.all()]
 
-    def connectors_executed(self, instance: Job):  # noqa
+    @staticmethod
+    def connectors_executed(instance: Job):  # noqa
         return [connector.name for connector in instance.connectors_to_execute.all()]
 
-    def visualizers_executed(self, instance: Job):  # noqa
+    @staticmethod
+    def visualizers_executed(instance: Job):  # noqa
         return [visualizer.name for visualizer in instance.visualizers_to_execute.all()]
 
 

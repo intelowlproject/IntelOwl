@@ -24,10 +24,12 @@ class PluginConfigInlineForPythonConfig(admin.TabularInline):
     def get_type(self, instance: PluginConfig):
         return instance.parameter.type
 
-    def has_delete_permission(self, request, obj=None):
+    @staticmethod
+    def has_delete_permission(request, obj=None):
         return False
 
-    def get_parent_pk(self, request) -> Optional[str]:
+    @staticmethod
+    def get_parent_pk(request) -> Optional[str]:
         parent_pk = request.resolver_match.kwargs.get("object_id")
         if parent_pk:
             # django encode the url this way when it finds a `_`
@@ -92,5 +94,6 @@ class ParameterInline(admin.TabularInline):
     fields = list_display
     show_change_link = True
 
-    def get_extra(self, request, obj: Parameter = None, **kwargs):
+    @staticmethod
+    def get_extra(request, obj: Parameter = None, **kwargs):
         return 0

@@ -4,7 +4,6 @@ import django.core.validators
 from django.db import migrations, models
 
 import api_app.fields
-import api_app.validators
 
 
 def migrate(apps, schema_editor):

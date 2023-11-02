@@ -8,16 +8,20 @@ from django.core.management import BaseCommand
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializerForMigration
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+from api_app.connectors_manager.serializers import ConnectorConfigSerializerForMigration
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.ingestors_manager.serializers import IngestorConfigSerializerForMigration
 from api_app.models import PluginConfig
+from api_app.pivots_manager.models import PivotConfig
+from api_app.pivots_manager.serializers import PivotConfigSerializerForMigration
 from api_app.serializers import (
     ParameterCompleteSerializer,
     PluginConfigCompleteSerializer,
 )
 from api_app.visualizers_manager.models import VisualizerConfig
-from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
+from api_app.visualizers_manager.serializers import (
+    VisualizerConfigSerializerForMigration,
+)
 
 
 class Command(BaseCommand):
@@ -34,6 +38,7 @@ class Command(BaseCommand):
                 ConnectorConfig.__name__,
                 VisualizerConfig.__name__,
                 IngestorConfig.__name__,
+                PivotConfig.__name__,
             ],
         )
         parser.add_argument(
@@ -53,7 +58,10 @@ class Command(BaseCommand):
             try:
                 # default value
                 value = PluginConfig.objects.get(
-                    owner=None, for_organization=False, parameter=parameter
+                    owner=None,
+                    for_organization=False,
+                    parameter=parameter,
+                    parameter__is_secret=False,
                 )
             except PluginConfig.DoesNotExist:
                 ...
@@ -75,7 +83,7 @@ from django.db.models.fields.related_descriptors import (
     def _migrate_template():
         return """
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]:
+    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -88,44 +96,35 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get(pk=value)
     return value
 
-
-def migrate(apps, schema_editor):
-    Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
-    python_path = plugin.pop("model")
-    Model = apps.get_model(*python_path.split("."))
+def _create_object(Model, data):
     mtm, no_mtm = {}, {}
-    for field, value in plugin.items():
+    for field, value in data.items():
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
             value = _get_real_obj(Model, field ,value)
             no_mtm[field] = value
-    o = Model(**no_mtm)
-    o.full_clean()
-    o.save()
-    for field, value in mtm.items():
-        attribute = getattr(o, field)
-        attribute.set(value)
-    param_maps = {
-    }
+    try:
+        o = Model.objects.get(**no_mtm)
+    except Model.DoesNotExist:
+        o = Model(**no_mtm)
+        o.full_clean()
+        o.save()
+        for field, value in mtm.items():
+            attribute = getattr(o, field)
+            attribute.set(value)
+    
+def migrate(apps, schema_editor):
+    Parameter = apps.get_model("api_app", "Parameter")
+    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    python_path = plugin.pop("model")
+    Model = apps.get_model(*python_path.split("."))
+    _create_object(Model, plugin)
     for param in params:
-        param_id = param.pop("id")
-        for key in ["analyzer_config", "connector_config", "visualizer_config", "ingestor_config"]:
-            if param[key]:
-                param[key] = o
-                break    
-        par = Parameter(**param)
-        par.full_clean()
-        par.save()
-        param_maps[param_id] = par
+        _create_object(Parameter, param)
     for value in values:
-        value.pop("id")
-        parameter = param_maps[value["parameter"]]
-        value["parameter"] = parameter
-        value = PluginConfig(**value)
-        value.full_clean()
-        value.save()
+        _create_object(PluginConfig, value)
+
 """  # noqa
 
     @staticmethod
@@ -194,7 +193,7 @@ values = {3}
         )
         return (
             f"{str(int(last_migration_number) + 1).rjust(4, '0')}"
-            f"_{obj.snake_case_name}.py"
+            f"_{obj.snake_case_name}_{obj.name.lower()}.py"
         )
 
     @staticmethod
@@ -209,18 +208,19 @@ values = {3}
             f.write(content)
 
     def handle(self, *args, **options):
-
         config_name = options["plugin_name"]
         config_class = options["plugin_class"]
 
         class_, serializer_class = (
             (AnalyzerConfig, AnalyzerConfigSerializerForMigration)
             if config_class == AnalyzerConfig.__name__
-            else (ConnectorConfig, ConnectorConfigSerializer)
+            else (ConnectorConfig, ConnectorConfigSerializerForMigration)
             if config_class == ConnectorConfig.__name__
-            else (VisualizerConfig, VisualizerConfigSerializer)
+            else (VisualizerConfig, VisualizerConfigSerializerForMigration)
             if config_class == VisualizerConfig.__name__
             else (IngestorConfig, IngestorConfigSerializerForMigration)
+            if config_class == IngestorConfig.__name__
+            else (PivotConfig, PivotConfigSerializerForMigration)
         )
         obj = class_.objects.get(name=config_name)
         app = obj._meta.app_label

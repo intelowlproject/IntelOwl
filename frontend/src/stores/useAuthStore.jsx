@@ -3,15 +3,13 @@ import { create } from "zustand";
 
 import { addToast } from "@certego/certego-ui";
 
-import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/api";
-import useRecentScansStore from "./useRecentScansStore";
+import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/apiURLs";
 
 // constants
-const onLogout = useRecentScansStore.getState().clear;
 const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";
 
 // hook/ store see: https://github.com/pmndrs/zustand
-const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set, get) => ({
   loading: false,
   token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,
   user: {
@@ -20,6 +18,7 @@ const useAuthStore = create((set, get) => ({
     first_name: "",
     last_name: "",
     email: "",
+    is_staff: false,
   },
   access: null,
   isAuthenticated: () => !!get().token,
@@ -72,7 +71,6 @@ const useAuthStore = create((set, get) => ({
       const onLogoutCb = () => {
         get().deleteToken();
         set({ loading: false });
-        onLogout();
         addToast("Logged out!", null, "info");
       };
       return axios
@@ -111,5 +109,3 @@ const useAuthStore = create((set, get) => ({
     },
   },
 }));
-
-export default useAuthStore;

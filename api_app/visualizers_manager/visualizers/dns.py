@@ -76,7 +76,7 @@ class DNS(Visualizer):
                 for dns_resolution in analyzer_report.report["resolutions"]
             ],
             disable=disable_element,
-            open=True,
+            start_open=True,
         )
 
     @visualizable_error_handler_with_params()
@@ -89,14 +89,11 @@ class DNS(Visualizer):
         )
 
     def run(self) -> List[Dict]:
-
         first_level_elements = []
         second_level_elements = []
 
         for analyzer_report in self.analyzer_reports():
-            logger.debug(f"{analyzer_report.config.python_complete_path=}")
-            logger.debug(f"{analyzer_report.report=}")
-            if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
+            if "dns.dns_resolvers" in analyzer_report.config.python_module:
                 first_level_elements.append(
                     self._dns_resolution(analyzer_report=analyzer_report)
                 )
@@ -107,12 +104,18 @@ class DNS(Visualizer):
 
         page = self.Page(name="DNS")
         page.add_level(
-            level=1,
-            horizontal_list=self.HList(value=first_level_elements),
+            self.Level(
+                position=1,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=first_level_elements),
+            )
         )
         page.add_level(
-            level=2,
-            horizontal_list=self.HList(value=second_level_elements),
+            self.Level(
+                position=2,
+                size=self.LevelSize.S_5,
+                horizontal_list=self.HList(value=second_level_elements),
+            )
         )
         logger.debug(f"levels: {page.to_dict()}")
         return [page.to_dict()]
@@ -124,43 +127,56 @@ class DNS(Visualizer):
         # malicious detector services (1st level)
 
         for python_module in cls.first_level_analyzers:
-            report = AnalyzerReport(
-                config=AnalyzerConfig.objects.get(python_module=python_module),
-                job=Job.objects.first(),
-                status=AnalyzerReport.Status.SUCCESS,
-                report={
-                    "observable": "dns.google.com",
-                    "resolutions": [
-                        {
-                            "TTL": 456,
-                            "data": "8.8.8.8",
-                            "name": "dns.google.com",
-                            "type": 1,
-                        },
-                        {
-                            "TTL": 456,
-                            "data": "8.8.4.4",
-                            "name": "dns.google.com",
-                            "type": 1,
-                        },
-                    ],
-                },
-                task_id=uuid(),
-            )
-            report.full_clean()
-            report.save()
+            try:
+                AnalyzerReport.objects.get(
+                    config=AnalyzerConfig.objects.get(python_module=python_module),
+                    job=Job.objects.first(),
+                    status=AnalyzerReport.Status.SUCCESS,
+                )
+            except AnalyzerReport.DoesNotExist:
+                report = AnalyzerReport(
+                    config=AnalyzerConfig.objects.get(python_module=python_module),
+                    job=Job.objects.first(),
+                    status=AnalyzerReport.Status.SUCCESS,
+                    report={
+                        "observable": "dns.google.com",
+                        "resolutions": [
+                            {
+                                "TTL": 456,
+                                "data": "8.8.8.8",
+                                "name": "dns.google.com",
+                                "type": 1,
+                            },
+                            {
+                                "TTL": 456,
+                                "data": "8.8.4.4",
+                                "name": "dns.google.com",
+                                "type": 1,
+                            },
+                        ],
+                    },
+                    task_id=uuid(),
+                )
+                report.full_clean()
+                report.save()
 
         # classic DNS resolution (2nd level)
         for python_module in cls.second_level_analyzers:
-            report = AnalyzerReport(
-                config=AnalyzerConfig.objects.get(python_module=python_module),
-                job=Job.objects.first(),
-                status=AnalyzerReport.Status.SUCCESS,
-                report={"observable": "dns.google.com", "malicious": False},
-                task_id=uuid(),
-            )
-            report.full_clean()
-            report.save()
+            try:
+                AnalyzerReport.objects.get(
+                    config=AnalyzerConfig.objects.get(python_module=python_module),
+                    job=Job.objects.first(),
+                )
+            except AnalyzerReport.DoesNotExist:
+                report = AnalyzerReport(
+                    config=AnalyzerConfig.objects.get(python_module=python_module),
+                    job=Job.objects.first(),
+                    status=AnalyzerReport.Status.SUCCESS,
+                    report={"observable": "dns.google.com", "malicious": False},
+                    task_id=uuid(),
+                )
+                report.full_clean()
+                report.save()
 
         patches = []
         return super()._monkeypatch(patches=patches)

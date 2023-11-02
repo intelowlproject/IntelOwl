@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 
-export default function markdownToHtml(text) {
+export function markdownToHtml(text) {
   return (
     <ReactMarkdown
       // eslint-disable-next-line react/no-children-prop

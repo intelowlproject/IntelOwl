@@ -4,7 +4,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import axios from "axios";
 import userEvent from "@testing-library/user-event";
-import { AUTH_BASE_URI } from "../../../src/constants/api";
+import { AUTH_BASE_URI } from "../../../src/constants/apiURLs";
 import ResetPassword from "../../../src/components/auth/ResetPassword";
 
 jest.mock("axios");

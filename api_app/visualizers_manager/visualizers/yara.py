@@ -58,7 +58,9 @@ class Yara(Visualizer):
         page1 = self.Page(name="Yara first page")
         h1 = self.HList(value=[self._yara_analyzer()])
         logger.debug(h1.to_dict())
-        page1.add_level(level=1, horizontal_list=h1)
+        page1.add_level(
+            self.Level(position=1, size=self.LevelSize.S_3, horizontal_list=h1)
+        )
         h2 = self.HList(
             value=[
                 self._yara_match_number(yara_num_matches),
@@ -67,8 +69,12 @@ class Yara(Visualizer):
         )
         logger.debug(h2.to_dict())
         page2 = self.Page(name="Yara second page")
-        page2.add_level(level=1, horizontal_list=h1)
-        page2.add_level(level=2, horizontal_list=h2)
+        page2.add_level(
+            self.Level(position=1, size=self.LevelSize.S_3, horizontal_list=h1)
+        )
+        page2.add_level(
+            self.Level(position=2, size=self.LevelSize.S_5, horizontal_list=h2)
+        )
         logger.debug(page1)
         logger.debug(page2)
         return [page1.to_dict(), page2.to_dict()]
@@ -77,34 +83,37 @@ class Yara(Visualizer):
     def _monkeypatch(cls):
         from kombu import uuid
 
-        report = AnalyzerReport(
-            config=AnalyzerConfig.objects.get(name="Yara"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={
-                "inquest_yara-rules": [
-                    {
-                        "url": "https://github.com/InQuest/yara-rules",
-                        "meta": {
-                            "URL": "https://github.com/InQuest/yara-rules",
-                            "Author": "InQuest Labs",
-                            "Description": "Discover embedded PE files,"
-                            " without relying on easily stripped/modified "
-                            "header strings.",
-                        },
-                        "path": "/opt/deploy/files_required/"
-                        "yara/inquest_yara-rules/PE.rule",
-                        "tags": [],
-                        "match": "PE_File",
-                        "strings": "[(0, '$mz', b'MZ')]",
-                        "rule_url": "https://github.com/InQuest/"
-                        "yara-rules/blob/master/PE.rule",
-                    }
-                ]
-            },
-            task_id=uuid(),
-        )
-        report.full_clean()
-        report.save()
+        if not AnalyzerReport.objects.filter(
+            config=AnalyzerConfig.objects.get(name="Yara")
+        ).exists():
+            report = AnalyzerReport(
+                config=AnalyzerConfig.objects.get(name="Yara"),
+                job=Job.objects.first(),
+                status=AnalyzerReport.Status.SUCCESS,
+                report={
+                    "inquest_yara-rules": [
+                        {
+                            "url": "https://github.com/InQuest/yara-rules",
+                            "meta": {
+                                "URL": "https://github.com/InQuest/yara-rules",
+                                "Author": "InQuest Labs",
+                                "Description": "Discover embedded PE files,"
+                                " without relying on easily stripped/modified "
+                                "header strings.",
+                            },
+                            "path": "/opt/deploy/files_required/"
+                            "yara/inquest_yara-rules/PE.rule",
+                            "tags": [],
+                            "match": "PE_File",
+                            "strings": "[(0, '$mz', b'MZ')]",
+                            "rule_url": "https://github.com/InQuest/"
+                            "yara-rules/blob/master/PE.rule",
+                        }
+                    ]
+                },
+                task_id=uuid(),
+            )
+            report.full_clean()
+            report.save()
         patches = []
         return super()._monkeypatch(patches=patches)

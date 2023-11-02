@@ -6,10 +6,9 @@ import typing
 from collections import deque
 from typing import Any, Type
 
-from django.conf import settings
 from django.utils.functional import cached_property
 
-from ..choices import TLP
+from ..choices import TLP, PythonModuleBasePaths
 from ..classes import Plugin
 from .exceptions import IngestorConfigurationException, IngestorRunException
 from .models import IngestorConfig, IngestorReport
@@ -18,9 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 class Ingestor(Plugin, metaclass=abc.ABCMeta):
-
-    maximum_jobs: int = None
-
     def __init__(self, config: IngestorConfig, runtime_configuration: dict, **kwargs):
         super().__init__(
             config,
@@ -33,7 +29,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_INGESTOR_PYTHON_PATH
+        return PythonModuleBasePaths.Ingestor.value
 
     @abc.abstractmethod
     def run(self) -> typing.Iterator[Any]:
@@ -65,9 +61,9 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
         self._config: IngestorConfig
         # exhaust generator
         deque(
-            self._config._create_jobs(
+            self._config.create_jobs(
                 # every job created from an ingestor
-                self.report,
+                content,
                 TLP.CLEAR.value,
                 self._user,
             ),
@@ -81,19 +77,3 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
     @cached_property
     def _job(self) -> None:
         return None
-
-    def init_report_object(self) -> IngestorReport:
-        """
-        Returns report object set in *__init__* fn
-        """
-        # every time we execute the ingestor we have to create a new report
-        # instead of using the update/create
-        # because we do not have the same unique constraints
-        _report = self.report_model.objects.create(
-            job_id=self.job_id,
-            config=self._config,
-            status=IngestorReport.Status.PENDING.value,
-            task_id=self.task_id,
-            max_size_report=self.maximum_jobs,
-        )
-        return _report

@@ -16,10 +16,10 @@ jobs:
     outputs:
       frontend: ${{steps.diff_check.outputs.frontend}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.0
         with:
           ref: ${{ github.base_ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.0
         with:
           clean: false
       - name: Generate diffs
@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout IntelOwl
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.0
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
@@ -64,12 +64,12 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
+        uses: styfle/cancel-workflow-action@0.12.0
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout IntelOwl
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.0
 
       - name: Prepare Launch
         run: |
@@ -133,9 +133,9 @@ jobs:
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.0
       - name: Set up NodeJS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 15
       - name: Cache node modules

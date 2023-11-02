@@ -1,17 +1,39 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Any
 
 from django.contrib import admin
-from django.db.models import JSONField
+from django.contrib.admin import widgets
+from django.db.models import JSONField, ManyToManyField
+from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm
-from .models import AbstractConfig, Job, Parameter, PluginConfig, Tag
-from .tabulars import PluginConfigInline
+from .models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule, Tag
+from .tabulars import (
+    ParameterInline,
+    PluginConfigInlineForParameter,
+    PluginConfigInlineForPythonConfig,
+)
+
+
+class CustomAdminView(admin.ModelAdmin):
+    formfield_overrides = {
+        JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})},
+    }
+
+    def formfield_for_manytomany(
+        self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
+    ):
+        vertical = False
+        kwargs["widget"] = widgets.FilteredSelectMultiple(
+            verbose_name=db_field.verbose_name, is_stacked=vertical
+        )
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(Job)
-class JobAdminView(admin.ModelAdmin):
+class JobAdminView(CustomAdminView):
     list_display = (
         "id",
         "status",
@@ -24,6 +46,7 @@ class JobAdminView(admin.ModelAdmin):
         "analyzers_executed",
         "connectors_executed",
         "visualizers_executed",
+        "get_tags",
     )
     list_display_link = (
         "id",
@@ -35,62 +58,69 @@ class JobAdminView(admin.ModelAdmin):
         "observable_name",
         "file_name",
     )
-    list_filter = (
-        "status",
-        "user",
-    )
+    list_filter = ("status", "user", "tags")
 
-    def analyzers_executed(self, instance: Job):  # noqa
+    @admin.display(description="Tags")
+    def get_tags(self, instance: Job):
+        return [tag.label for tag in instance.tags.all()]
+
+    @staticmethod
+    def analyzers_executed(instance: Job):  # noqa
         return [analyzer.name for analyzer in instance.analyzers_to_execute.all()]
 
-    def connectors_executed(self, instance: Job):  # noqa
+    @staticmethod
+    def connectors_executed(instance: Job):  # noqa
         return [connector.name for connector in instance.connectors_to_execute.all()]
 
-    def visualizers_executed(self, instance: Job):  # noqa
+    @staticmethod
+    def visualizers_executed(instance: Job):  # noqa
         return [visualizer.name for visualizer in instance.visualizers_to_execute.all()]
 
 
 @admin.register(Tag)
-class TagAdminView(admin.ModelAdmin):
+class TagAdminView(CustomAdminView):
     list_display = ("id", "label", "color")
     search_fields = ("label", "color")
 
 
-@admin.register(PluginConfig)
-class PluginConfigAdminView(admin.ModelAdmin):
+class ModelWithOwnershipAdminView:
     list_display = (
-        "id",
-        "value",
-        "parameter_name",
         "for_organization",
-        "owner_name",
-        "plugin",
+        "get_owner",
     )
-    search_fields = ["parameter__name", "value"]
-    list_filter = (
-        "for_organization",
-        "owner",
-        "parameter__analyzer_config__name",
-        "parameter__connector_config__name",
-        "parameter__visualizer_config__name",
-    )
+    list_filter = ("for_organization", "owner")
 
-    @staticmethod
-    def plugin(instance: PluginConfig):
-        return instance.parameter.config.name
-
-    @staticmethod
-    def parameter_name(instance: PluginConfig):
-        return instance.parameter.name
-
-    @staticmethod
-    def owner_name(instance: PluginConfig):
+    @admin.display(description="Owner")
+    def get_owner(self, instance: PluginConfig):
         if instance.owner:
             return instance.owner.username
-        return None
+        return "-"
 
 
-class AbstractReportAdminView(admin.ModelAdmin):
+@admin.register(PluginConfig)
+class PluginConfigAdminView(ModelWithOwnershipAdminView, CustomAdminView):
+    list_display = (
+        "pk",
+        "get_config",
+        "parameter",
+        "for_organization",
+        "get_owner",
+        "get_type",
+        "value",
+    ) + ModelWithOwnershipAdminView.list_display
+
+    search_fields = ["parameter__name", "value"]
+
+    @admin.display(description="Config")
+    def get_config(self, instance: PluginConfig):
+        return instance.config.name
+
+    @admin.display(description="Type")
+    def get_type(self, instance: PluginConfig):
+        return instance.parameter.type
+
+
+class AbstractReportAdminView(CustomAdminView):
     list_display = (
         "id",
         "config",
@@ -107,72 +137,51 @@ class AbstractReportAdminView(admin.ModelAdmin):
         return False
 
 
-class JsonViewerAdminView(admin.ModelAdmin):
-    formfield_overrides = {
-        JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})}
-    }
-
-
 @admin.register(Parameter)
-class ParameterAdminView(admin.ModelAdmin):
-    inlines = [PluginConfigInline]
+class ParameterAdminView(CustomAdminView):
+    inlines = [PluginConfigInlineForParameter]
     search_fields = ["name"]
     list_filter = ["is_secret"]
-    list_display = ParameterInlineForm.Meta.fields + ["plugin"]
+    list_display = ParameterInlineForm.Meta.fields
     fields = list_display
 
-    @staticmethod
-    def plugin(obj: Parameter):
-        config = (
-            obj.analyzer_config
-            or obj.connector_config
-            or obj.visualizer_config
-            or obj.ingestor_config
-        )
-        return config.name
+
+@admin.register(PythonModule)
+class PythonModuleAdminView(CustomAdminView):
+    list_display = ["module", "base_path", "get_parameters", "get_secrets"]
+    search_fields = ["module", "base_path"]
+    list_filter = ["base_path"]
+    inlines = [ParameterInline]
+
+    @admin.display(description="Parameters")
+    def get_parameters(self, obj: PythonModule):
+        return list(obj.parameters.filter(is_secret=False).order_by("-name"))
+
+    @admin.display(description="Secrets")
+    def get_secrets(self, obj: PythonModule):
+        return list(obj.parameters.filter(is_secret=True).order_by("-name"))
 
 
-class ParameterInline(admin.TabularInline):
-    model = Parameter
-    list_display = ParameterInlineForm.Meta.fields
-    fields = list_display + [
-        "default",
-    ]
-    extra = 0
-    show_change_link = True
-    form = ParameterInlineForm
-
-
-class AbstractConfigAdminView(JsonViewerAdminView):
+class AbstractConfigAdminView(CustomAdminView):
     list_display = ("name", "description", "disabled", "disabled_in_orgs")
     search_fields = ("name",)
     # allow to clone the object
     save_as = True
 
-    @staticmethod
-    def disabled_in_orgs(instance: AbstractConfig):
-        return [org.name for org in instance.disabled_in_organizations.all()]
+    @admin.display(description="Disabled in orgs")
+    def disabled_in_orgs(self, instance: AbstractConfig):
+        return list(
+            instance.disabled_in_organizations.all().values_list("name", flat=True)
+        )
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-    inlines = [ParameterInline]
     list_display = (
         "name",
         "python_module",
-        "params",
-        "secrets",
         "disabled",
         "disabled_in_orgs",
+        "routing_key",
     )
-
-    @staticmethod
-    def params(instance: AbstractConfig):
-        return list(
-            instance.parameters.filter(is_secret=False).values_list("name", flat=True)
-        )
-
-    @staticmethod
-    def secrets(instance: AbstractConfig):
-        return list(
-            instance.parameters.filter(is_secret=True).values_list("name", flat=True)
-        )
+    inlines = [PluginConfigInlineForPythonConfig]
+    list_filter = ["routing_key"]

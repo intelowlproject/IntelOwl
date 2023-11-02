@@ -6,7 +6,6 @@ import api_app.visualizers_manager.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("visualizers_manager", "0013_params"),
     ]

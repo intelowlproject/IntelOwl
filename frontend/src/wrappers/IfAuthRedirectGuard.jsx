@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Navigate } from "react-router-dom";
 import useSearchParam from "react-use/lib/useSearchParam";
 
-import { useAuthStore } from "../stores";
+import { useAuthStore } from "../stores/useAuthStore";
 
 /*
 Wrapper for Routes which should be accessible only to a non-authenticated user

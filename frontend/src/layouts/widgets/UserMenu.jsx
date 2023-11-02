@@ -4,6 +4,7 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Badge,
 } from "reactstrap";
 import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
@@ -12,7 +13,8 @@ import { RiLockPasswordFill } from "react-icons/ri";
 
 import { UserBubble, DropdownNavLink } from "@certego/certego-ui";
 
-import { useAuthStore } from "../../stores";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
 /**
  * @type {component}
@@ -21,6 +23,27 @@ import { useAuthStore } from "../../stores";
 export default function UserMenu(props) {
   // auth store
   const user = useAuthStore(React.useCallback((s) => s.user, []));
+  const {
+    organization: { owner },
+    isUserAdmin,
+    fetchAll,
+  } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        organization: state.organization,
+        fetchAll: state.fetchAll,
+        isUserAdmin: state.isUserAdmin,
+      }),
+      [],
+    ),
+  );
+
+  console.debug(`UserMenu - user: ${JSON.stringify(user)}`);
+
+  React.useEffect(() => {
+    fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <UncontrolledDropdown nav inNavbar {...props}>
@@ -33,12 +56,24 @@ export default function UserMenu(props) {
         </DropdownItem>
         <DropdownItem divider />
         {/* Django Admin Interface */}
-        <DropdownNavLink to="/admin/" target="_blank">
-          <IoMdSettings className="me-2" /> Django Admin Interface
-        </DropdownNavLink>
+        {user?.is_staff && (
+          <DropdownNavLink to="/admin/" target="_blank">
+            <IoMdSettings className="me-2" /> Django Admin Interface
+          </DropdownNavLink>
+        )}
         {/* Invitations */}
         <DropdownNavLink to="/me/organization">
           <BsPeopleFill className="me-2" /> Organization
+          {owner?.username === user.username && (
+            <Badge className="mx-3" color="info">
+              Owner
+            </Badge>
+          )}
+          {owner?.username !== user.username && isUserAdmin(user.username) && (
+            <Badge className="mx-3" color="info">
+              Admin
+            </Badge>
+          )}
         </DropdownNavLink>
         {/* API Access/Sessions */}
         <DropdownNavLink to="/me/sessions">

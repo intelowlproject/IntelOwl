@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from api_app import models
+from api_app.analyzers_manager.models import AnalyzerConfig
 
 from .. import CustomViewSetTestCase
 
@@ -103,7 +104,9 @@ class ApiViewTests(CustomViewSetTestCase):
 
     def test_analyze_file__pcap(self):
         # with noone, only the PCAP analyzers should be executed
-        analyzers_requested = []
+        analyzers_requested = AnalyzerConfig.objects.all().values_list(
+            "name", flat=True
+        )
         file_name = "example.pcap"
         uploaded_file, md5 = self.__get_test_file(file_name)
         file_mimetype = "application/vnd.tcpdump.pcap"
@@ -126,7 +129,7 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(md5, job.md5)
 
         self.assertCountEqual(
-            ["Suricata", "CapeSandbox"],
+            ["Suricata", "CapeSandbox", "YARAify_File_Scan"],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
 

@@ -1,38 +1,38 @@
-import abc
 import io
 import logging
-from typing import Any, Generator
+from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils.functional import cached_property
+
+from certego_saas.apps.organization.organization import Organization
+
+if TYPE_CHECKING:
+    from api_app.playbooks_manager.models import PlaybookConfig
+    from api_app.models import Job
 
 from django.core.files import File
 from django.http import QueryDict
 
-from api_app.models import AbstractReport, Job
-from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.user.models import User
 
 logger = logging.getLogger(__name__)
 
 
 class CreateJobsFromPlaybookInterface:
-
-    playbook_to_execute: PlaybookConfig
+    playbook_to_execute: "PlaybookConfig"
     name: str
 
-    @abc.abstractmethod
-    def get_values(self, report: AbstractReport) -> Generator[Any, None, None]:
-        raise NotImplementedError()
-
-    def _get_serializer(self, report: AbstractReport, tlp: str, user: User):
-
-        values = self.get_values(report)
+    def _get_serializer(self, value: Any, tlp: str, user: User):
+        values = value if isinstance(value, (list, Generator)) else [value]
         if self.playbook_to_execute.is_sample():
             return self._get_file_serializer(values, tlp, user)
         else:
             return self._get_observable_serializer(values, tlp, user)
 
-    def _get_observable_serializer(
-        self, values: Generator[Any, None, None], tlp: str, user: User
-    ):
+    def _get_observable_serializer(self, values: Iterable[Any], tlp: str, user: User):
         from api_app.serializers import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
@@ -40,7 +40,6 @@ class CreateJobsFromPlaybookInterface:
             data={
                 "playbooks_requested": [self.playbook_to_execute.pk],
                 "observables": [(None, value) for value in values],
-                "send_task": True,
                 "tlp": tlp,
             },
             context={"request": MockUpRequest(user=user)},
@@ -48,19 +47,20 @@ class CreateJobsFromPlaybookInterface:
         )
 
     def _get_file_serializer(
-        self, values: Generator[bytes, None, None], tlp: str, user: User
+        self, values: Iterable[Union[bytes, File]], tlp: str, user: User
     ):
         from api_app.serializers import FileAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
         files = [
-            File(io.BytesIO(data), name=f"{self.name}.{i}")
+            data
+            if isinstance(data, File)
+            else File(io.BytesIO(data), name=f"{self.name}.{i}")
             for i, data in enumerate(values)
         ]
         query_dict = QueryDict(mutable=True)
         data = {
             "playbooks_requested": self.playbook_to_execute.pk,
-            "send_task": True,
             "tlp": tlp,
         }
         query_dict.update(data)
@@ -71,15 +71,53 @@ class CreateJobsFromPlaybookInterface:
             many=True,
         )
 
-    def _create_jobs(
-        self, report: AbstractReport, tlp: str, user: User, send_task: bool = True
-    ) -> Generator[Job, None, None]:
-
+    def create_jobs(
+        self, value: Any, tlp: str, user: User, send_task: bool = True
+    ) -> Generator["Job", None, None]:
         try:
-            serializer = self._get_serializer(report, tlp, user)
+            serializer = self._get_serializer(value, tlp, user)
         except ValueError as e:
             logger.exception(e)
             raise
         else:
             serializer.is_valid(raise_exception=True)
             yield from serializer.save(send_task=send_task)
+
+
+class ModelWithOwnership(models.Model):
+    for_organization = models.BooleanField(default=False)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=[
+                    "owner",
+                    "for_organization",
+                ]
+            )
+        ]
+        abstract = True
+
+    def clean_for_organization(self):
+        if self.for_organization and not self.owner:
+            raise ValidationError(
+                "You can't set `for_organization` and not have an owner"
+            )
+        if self.for_organization and not self.owner.has_membership():
+            raise ValidationError(
+                f"You can't create `for_organization` {self.__class__.__name__}"
+                " if you do not have an organization"
+            )
+
+    @cached_property
+    def organization(self) -> Optional[Organization]:
+        if self.for_organization:
+            return self.owner.membership.organization
+        return None

@@ -58,7 +58,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api_app", "0030_pluginconfig_repositories"),
         ("analyzers_manager", "0026_anomali_threatstream"),

@@ -4,7 +4,6 @@
 from logging import getLogger
 from typing import Optional
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
@@ -15,9 +14,9 @@ from api_app.analyzers_manager.constants import (
     TypeChoices,
 )
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
-from api_app.choices import TLP
+from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.fields import ChoiceArrayField
-from api_app.models import AbstractReport, PythonConfig
+from api_app.models import AbstractReport, PythonConfig, PythonModule
 
 logger = getLogger(__name__)
 
@@ -32,7 +31,7 @@ class AnalyzerReport(AbstractReport):
 
 
 class MimeTypes(models.TextChoices):
-
+    # IMPORTANT! in case you update this Enum remember to update also the frontend
     WSCRIPT = "application/w-script-file"
     JAVASCRIPT1 = "application/javascript"
     JAVASCRIPT2 = "application/x-javascript"
@@ -82,6 +81,7 @@ class MimeTypes(models.TextChoices):
     PKCS7 = "application/pkcs7-signature"
     XPKCS7 = "application/x-pkcs7-signature"
     MIXED = "multipart/mixed"
+    X_SHELLSCRIPT = "text/x-shellscript"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:
@@ -133,6 +133,17 @@ class AnalyzerConfig(PythonConfig):
     maximum_tlp = models.CharField(
         null=False, default=TLP.RED, choices=TLP.choices, max_length=50
     )
+    python_module = models.ForeignKey(
+        PythonModule,
+        on_delete=models.PROTECT,
+        related_name="%(class)ss",
+        limit_choices_to={
+            "base_path__in": [
+                PythonModuleBasePaths.FileAnalyzer.value,
+                PythonModuleBasePaths.ObservableAnalyzer.value,
+            ]
+        },
+    )
     # obs
     observable_supported = ChoiceArrayField(
         models.CharField(null=False, choices=ObservableTypes.choices, max_length=30),
@@ -170,6 +181,13 @@ class AnalyzerConfig(PythonConfig):
         related_name="analyzer",
     )
 
+    @classmethod
+    @property
+    def serializer_class(cls):
+        from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+
+        return AnalyzerConfigSerializer
+
     def clean_observable_supported(self):
         if self.type == TypeChoices.OBSERVABLE and not self.observable_supported:
             raise ValidationError(
@@ -200,8 +218,8 @@ class AnalyzerConfig(PythonConfig):
 
     def clean_update_schedule(self):
         if (
-            not hasattr(self.python_class, "_update")
-            or not callable(self.python_class._update)
+            not hasattr(self.python_module.python_class, "_update")
+            or not callable(self.python_module.python_class._update)
         ) and (self.update_schedule or self.update_task):
             raise ValidationError(
                 "You can't configure an update schedule if"
@@ -224,12 +242,3 @@ class AnalyzerConfig(PythonConfig):
     @property
     def config_exception(cls):
         return AnalyzerConfigurationException
-
-    @property
-    def python_base_path(self) -> str:
-        if self.type == TypeChoices.FILE:
-            if self.run_hash:
-                return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
-            return settings.BASE_ANALYZER_FILE_PYTHON_PATH
-        else:
-            return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH

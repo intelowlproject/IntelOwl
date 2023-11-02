@@ -28,7 +28,6 @@ def reverse_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "00010_tlp"),
     ]

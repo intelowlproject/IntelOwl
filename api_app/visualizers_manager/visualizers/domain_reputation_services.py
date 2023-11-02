@@ -177,8 +177,9 @@ class DomainReputationServices(Visualizer):
                     )
                     for p in pulses
                 ],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
+                report=analyzer_report,
                 disable=disabled,
             )
             return otx_report
@@ -192,11 +193,7 @@ class DomainReputationServices(Visualizer):
             Q(config__name__endswith="Malicious_Detector")
             | Q(config__name="GoogleSafebrowsing")
         ):
-
             printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-            logger.debug(f"{printable_analyzer_name=}")
-            logger.debug(f"{analyzer_report.config.python_complete_path=}")
-            logger.debug(f"{analyzer_report=}")
             third_level_elements.append(
                 self.Bool(
                     value=printable_analyzer_name,
@@ -220,16 +217,25 @@ class DomainReputationServices(Visualizer):
 
         page = self.Page(name="Reputation")
         page.add_level(
-            level=1,
-            horizontal_list=self.HList(value=first_level_elements),
+            self.Level(
+                position=1,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=first_level_elements),
+            )
         )
         page.add_level(
-            level=2,
-            horizontal_list=self.HList(value=second_level_elements),
+            self.Level(
+                position=2,
+                size=self.LevelSize.S_5,
+                horizontal_list=self.HList(value=second_level_elements),
+            )
         )
         page.add_level(
-            level=3,
-            horizontal_list=self.HList(value=third_level_elements),
+            self.Level(
+                position=3,
+                size=self.LevelSize.S_6,
+                horizontal_list=self.HList(value=third_level_elements),
+            )
         )
         logger.debug(f"levels: {page.to_dict()}")
         return [page.to_dict()]

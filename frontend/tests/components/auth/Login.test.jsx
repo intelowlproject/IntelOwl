@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
 import userEvent from "@testing-library/user-event";
 import Login from "../../../src/components/auth/Login";
-import { AUTH_BASE_URI } from "../../../src/constants/api";
+import { AUTH_BASE_URI } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
 jest.mock("../../../src/constants/environment", () => ({
@@ -44,8 +44,8 @@ describe("Login component", () => {
     expect(passwordInputElement).toBeInTheDocument();
     const submitButtonElement = screen.getByRole("button", { name: /Login/i });
     expect(submitButtonElement).toBeInTheDocument();
-    const forgotPassowrdElement = screen.getByText("Forgot Password?");
-    expect(forgotPassowrdElement).toBeInTheDocument();
+    const forgotPasswordElement = screen.getByText("Forgot Password?");
+    expect(forgotPasswordElement).toBeInTheDocument();
     const verificationEmailElement = screen.getByText(
       "Need Verification Email?",
     );
@@ -63,6 +63,8 @@ describe("Login component", () => {
         { password: "dummyPwd1", username: "test_user", recaptcha: "noKey" },
         { certegoUIenableProgressBar: false },
       );
+      // check redirect to home page
+      expect(global.location.pathname).toEqual("/");
     });
   });
 });

@@ -5,8 +5,8 @@ import useInterval from "react-use/lib/useInterval";
 import { useParams } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
-import { JOB_BASE_URI } from "../../../constants/api";
-import { JobOverview } from "./utils";
+import { JOB_BASE_URI } from "../../../constants/apiURLs";
+import { JobOverview } from "./JobOverview";
 
 import {
   generateJobNotification,
@@ -27,6 +27,8 @@ export default function JobResult() {
   // from props
   const params = useParams();
   const jobId = params.id;
+  const { section } = params;
+  const { subSection } = params;
 
   // API to download the job data
   const [{ data: job, loading, error }, refetch] = useAxios({
@@ -57,9 +59,11 @@ export default function JobResult() {
             "running",
             "analyzers_running",
             "connectors_running",
+            "pivots_running",
             "visualizers_running",
             "analyzers_completed",
             "connectors_completed",
+            "pivots_completed",
             "visualizers_completed",
           ].includes(job.status),
       ),
@@ -111,7 +115,13 @@ export default function JobResult() {
       loading={initialLoading}
       error={error}
       render={() => (
-        <JobOverview isRunningJob={isRunning} job={job} refetch={refetch} />
+        <JobOverview
+          isRunningJob={isRunning}
+          job={job}
+          refetch={refetch}
+          section={section}
+          subSection={subSection}
+        />
       )}
     />
   );

@@ -1,6 +1,11 @@
 import datetime
 import uuid
-from typing import Generator
+from typing import TYPE_CHECKING, Generator
+
+from django.contrib.postgres.expressions import ArraySubquery
+
+if TYPE_CHECKING:
+    from api_app.models import PythonConfig
 
 from celery.canvas import Signature
 from django.db import models
@@ -18,7 +23,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, Coalesce
 from django.db.models.lookups import Exact
 from django.utils.timezone import now
 
@@ -38,6 +43,18 @@ class CleanOnCreateQuerySet(models.QuerySet):
         self._for_write = True
         obj.save(force_insert=True, using=self.db)
         return obj
+
+    def many_to_many_to_array(self, field: str, field_to_save: str = None):
+        if not field_to_save:
+            field_to_save = f"{field}_array"
+        return self.annotate(
+            **{
+                field_to_save: ArraySubquery(
+                    self.model.objects.filter(pk=OuterRef("pk")).values(f"{field}__pk"),
+                    default=Value([]),
+                )
+            }
+        )
 
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
@@ -112,7 +129,6 @@ class JobQuerySet(CleanOnCreateQuerySet):
         return self.annotate(user_weight=user_case)
 
     def annotate_importance(self, user: User) -> QuerySet:
-
         return (
             self._annotate_importance_date()
             ._annotate_importance_user(user)
@@ -121,7 +137,9 @@ class JobQuerySet(CleanOnCreateQuerySet):
 
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
-    def annotate_configured(self, user: User = None) -> "ParameterQuerySet":
+    def annotate_configured(
+        self, config: "PythonConfig", user: User = None
+    ) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
         # A parameter it is configured for a user if
@@ -129,56 +147,65 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         # If the user is None, we only retrieve default parameters
         return self.annotate(
             configured=Exists(
-                PluginConfig.objects.filter(parameter=OuterRef("pk")).visible_for_user(
-                    user
-                )
+                PluginConfig.objects.filter(
+                    parameter=OuterRef("pk"), **{config.snake_case_name: config.pk}
+                ).visible_for_user(user)
             )
         )
 
-    def _alias_owner_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+    def _alias_owner_value_for_user(
+        self, config: "PythonConfig", user: User = None
+    ) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
         return self.alias(
             owner_value=Subquery(
-                PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
-                .visible_for_user(user)
-                .filter(owner=user)
+                PluginConfig.objects.filter(
+                    parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
+                )
+                .visible_for_user_owned(user)
                 .values("value")[:1]
             )
         )
 
-    def _alias_org_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+    def _alias_org_value_for_user(
+        self, config: "PythonConfig", user: User = None
+    ) -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
         return self.alias(
             org_value=Subquery(
-                PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
-                .visible_for_user(user)
-                .filter(for_organization=True, owner=user.membership.organization.owner)
+                PluginConfig.objects.filter(
+                    parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
+                )
+                .visible_for_user_by_org(user)
                 .values("value")[:1]
             )
             if user and user.has_membership()
             else Value(None, output_field=JSONField()),
         )
 
-    def _alias_default_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+    def _alias_default_value(self, config: "PythonConfig") -> "ParameterQuerySet":
         from api_app.models import PluginConfig
 
         return self.alias(
             default_value=Subquery(
-                PluginConfig.objects.filter(parameter__pk=OuterRef("pk"))
-                .visible_for_user(user)
-                .filter(owner__isnull=True)
+                PluginConfig.objects.filter(
+                    parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
+                )
+                .default_values()
                 .values("value")[:1]
             )
         )
 
-    def annotate_value_for_user(self, user: User = None) -> "ParameterQuerySet":
+    def annotate_value_for_user(
+        self, config: "PythonConfig", user: User = None
+    ) -> "ParameterQuerySet":
         return (
             self.prefetch_related("values")
-            ._alias_owner_value_for_user(user)
-            ._alias_org_value_for_user(user)
-            ._alias_default_value_for_user(user)
+            ._alias_owner_value_for_user(config, user)
+            ._alias_org_value_for_user(config, user)
+            ._alias_default_value(config)
             # importance order
             .annotate(
                 value=Case(
@@ -198,7 +225,25 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
 
-class PluginConfigQuerySet(CleanOnCreateQuerySet):
+class ModelWithOwnershipQuerySet:
+    def default_values(self):
+        return self.filter(owner__isnull=True)
+
+    def visible_for_user_by_org(self, user: User):
+        try:
+            membership = Membership.objects.get(user=user)
+        except Membership.DoesNotExist:
+            return self.none()
+        else:
+            # If you are member of an organization you should see the configs.
+            return self.filter(
+                for_organization=True,
+                owner__membership__organization=membership.organization,
+            )
+
+    def visible_for_user_owned(self, user: User):
+        return self.filter(owner=user)
+
     def visible_for_user(self, user: User = None) -> "PluginConfigQuerySet":
         if user:
             # User-level custom configs should override organization-level configs,
@@ -210,43 +255,72 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
                 # we don't need to do anything.
                 return self.filter(Q(owner=user) | Q(owner__isnull=True))
             else:
+                # If you are member of an organization you should see the configs.
                 return self.filter(
-                    (Q(for_organization=True) & Q(owner=membership.organization.owner))
+                    Q(
+                        for_organization=True,
+                        owner__membership__organization=membership.organization,
+                    )
                     | Q(owner=user)
                     | Q(owner__isnull=True)
                 )
         else:
-            return self.filter(owner__isnull=True)
+            return self.default_values()
+
+
+class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet):
+    ...
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
     def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
-        from api_app.models import Parameter
-
         # a Python plugin is configured only if every required parameter is configured
+        from api_app.models import Parameter, PluginConfig
+
         return (
             # we retrieve the number or required parameters
             self.alias(
-                required_params=Subquery(
-                    Parameter.objects.filter(
-                        **{self.model.snake_case_name: OuterRef("pk")}, required=True
-                    )
-                    # count them
-                    .annotate(count=Func(F("pk"), function="Count")).values("count")
+                required_params=Coalesce(
+                    Subquery(
+                        Parameter.objects.filter(
+                            python_module=OuterRef("python_module"), required=True
+                        )
+                        # count them
+                        .annotate(count=Func(F("pk"), function="Count")).values(
+                            "count"
+                        ),
+                        output_field=IntegerField(),
+                    ),
+                    0,
                 )
             )
             # how many of them are configured
             .alias(
-                required_configured_params=Subquery(
-                    Parameter.objects.filter(
-                        **{self.model.snake_case_name: OuterRef("pk")}, required=True
-                    )
-                    # set the configured param
-                    .annotate_configured(user)
-                    .filter(configured=True)
-                    # count them
-                    .annotate(count=Func(F("pk"), function="Count"))
-                    .values("count")
+                # just to be sure that if the query fails, we return an integered
+                required_configured_params=Coalesce(
+                    Subquery(
+                        # we count how many parameters have a valid value
+                        # considering the values that the user has access to
+                        Parameter.objects.filter(
+                            pk__in=Subquery(
+                                # we get all values that the user can see
+                                PluginConfig.objects.filter(
+                                    **{
+                                        self.model.snake_case_name: OuterRef(
+                                            OuterRef("pk")
+                                        )
+                                    },
+                                    parameter__required=True,
+                                )
+                                .visible_for_user(user)
+                                .values("parameter__pk")
+                            )
+                        )
+                        .annotate(count=Func(F("pk"), function="Count"))
+                        .values("count"),
+                        output_field=IntegerField(),
+                    ),
+                    0,
                 )
             )
             # and we save the difference
@@ -279,12 +353,11 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def get_signatures(self, job) -> Generator[Signature, None, None]:
-        from api_app.models import Job, PythonConfig
+        from api_app.models import AbstractReport, Job, PythonConfig
         from intel_owl import tasks
 
         job: Job
         for config in self:
-
             config: PythonConfig
             if not hasattr(config, "runnable"):
                 raise RuntimeError(
@@ -298,9 +371,12 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 )
 
             task_id = str(uuid.uuid4())
+            config.generate_empty_report(
+                job, task_id, AbstractReport.Status.PENDING.value
+            )
             args = [
                 job.pk,
-                config.python_complete_path,
+                config.python_module.pk,
                 config.pk,
                 job.get_config_runtime_configuration(config),
                 task_id,

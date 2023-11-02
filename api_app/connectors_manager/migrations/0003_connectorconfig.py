@@ -10,7 +10,6 @@ import api_app.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("connectors_manager", "0002_connectorreport_parent_playbook"),
         ("api_app", "0010_custom_config_playbooks"),
@@ -33,7 +32,6 @@ class Migration(migrations.Migration):
                     "config",
                     models.JSONField(
                         default=api_app.defaults.config_default,
-                        validators=[api_app.validators.validate_config],
                     ),
                 ),
                 (

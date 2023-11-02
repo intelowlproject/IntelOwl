@@ -1,9 +1,6 @@
-import {
-  PASSWORD_REGEX,
-  EMAIL_REGEX,
-  HACKER_MEME_STRING,
-} from "../../../constants";
+import { PASSWORD_REGEX, EMAIL_REGEX } from "../../../constants/regexConst";
 import { RECAPTCHA_SITEKEY } from "../../../constants/environment";
+import { HACKER_MEME_STRING } from "../../../constants/miscConst";
 
 export function ComparePassword(password, confirmPassword) {
   const errors = {};

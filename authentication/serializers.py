@@ -62,7 +62,13 @@ class UserAccessSerializer(CertegoUserAccessSerializer):
             "access",
         )
 
+    user = rfs.SerializerMethodField()
     access = rfs.SerializerMethodField()
+
+    def get_user(self, obj: User) -> dict:
+        data = super().get_user(obj)
+        data["is_staff"] = obj.is_staff
+        return data
 
     @staticmethod
     def get_access(obj: User) -> dict:
@@ -106,7 +112,6 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
     is_active = rfs.BooleanField(default=False, read_only=True)
 
     def validate_profile(self, profile):
-
         logger.info(f"{profile}")
 
         self._profile_serializer = UserProfileSerializer(data=profile)

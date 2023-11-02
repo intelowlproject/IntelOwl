@@ -12,7 +12,7 @@ def _create_periodic_task(PeriodicTask, analyzer, crontab):
         crontab=crontab,
         queue=get_queue_name(analyzer.config["queue"]),
         enabled=not analyzer.disabled,
-        kwargs=json.dumps({"config_pk": analyzer.pk}),
+        kwargs=json.dumps({"python_module_pk": analyzer.python_module}),
     )
     analyzer.update_schedule = crontab
     analyzer.update_task = pt
@@ -99,7 +99,6 @@ def migrate_generic_tasks(apps, schema_editor):
         crontab=c3,
         enabled=True,
         queue=get_queue_name("default"),
-        kwargs=json.dumps({"check_pending": True}),
     )
 
 
@@ -111,7 +110,6 @@ def reverse_migrate_generic_tasks(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("django_celery_beat", "0018_improve_crontab_helptext"),
         ("analyzers_manager", "0033_analyzerconfig_update_schedule_and_more"),

@@ -2,7 +2,9 @@ import json
 
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
+from api_app.choices import PythonModuleBasePaths
 from api_app.ingestors_manager.models import IngestorConfig
+from api_app.models import PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.user.models import User
 from tests import CustomTestCase
@@ -13,9 +15,11 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
         crontab, created = CrontabSchedule.objects.get_or_create(minute=22)
         ic = IngestorConfig.objects.create(
             name="test",
-            python_module="threatfox.ThreatFox",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Ingestor.value,
+                module="threatfox.ThreatFox",
+            ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=True,
             schedule=crontab,
             playbook_to_execute=PlaybookConfig.objects.first(),
@@ -37,9 +41,11 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
         crontab, created = CrontabSchedule.objects.get_or_create(minute=22)
         ic = IngestorConfig.objects.create(
             name="test",
-            python_module="threatfox.ThreatFox",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.Ingestor.value,
+                module="threatfox.ThreatFox",
+            ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=True,
             schedule=crontab,
             playbook_to_execute=PlaybookConfig.objects.first(),

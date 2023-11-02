@@ -1,16 +1,16 @@
+from django.conf import settings
 from django.utils import timezone
-
-from intel_owl.celery import DEFAULT_QUEUE
 
 
 def config_default():
-    return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
+    return dict(queue=settings.DEFAULT_QUEUE, soft_time_limit=60)
 
 
 def default_runtime():
     return {
         "analyzers": {},
         "connectors": {},
+        "pivots": {},
         "visualizers": {},
     }
 

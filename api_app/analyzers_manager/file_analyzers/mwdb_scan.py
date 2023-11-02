@@ -57,7 +57,6 @@ class MockUpMWDB:
 
 class MWDB_Scan(FileAnalyzer):
     _api_key_name: str
-    upload_file: bool
     private: bool
     max_tries: int
 
@@ -65,6 +64,7 @@ class MWDB_Scan(FileAnalyzer):
         super().config()
         self.public = not self.private
         self.poll_distance = 5
+        self.upload_file = self._job.tlp == self._job.TLP.CLEAR.value
 
     def adjust_relations(self, base, key, recursive=True):
         new_relation = []
@@ -78,7 +78,6 @@ class MWDB_Scan(FileAnalyzer):
         if recursive:
             for new_base in base[key]:
                 if base["type"] == "file":
-
                     # otherwise we have an infinite loop
                     if key == "parents":
                         self.adjust_relations(new_base, key="parents", recursive=True)

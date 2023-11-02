@@ -32,7 +32,6 @@ def backwards_migrate(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("analyzers_manager", "0009_parent_playbook_foreign_key"),
     ]

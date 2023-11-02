@@ -30,10 +30,24 @@ class CustomTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         try:
-            cls.user = User.objects.get(is_superuser=False)
+            cls.guest = User.objects.get(is_superuser=False, username="guest")
+        except User.DoesNotExist:
+            cls.guest = User.objects.create(
+                username="guest", email="guest@intelowl.com", password="test"
+            )
+
+        try:
+            cls.user = User.objects.get(is_superuser=False, username="user")
         except User.DoesNotExist:
             cls.user = User.objects.create(
-                username="user", email="test2@intelowl.com", password="test"
+                username="user", email="user@intelowl.com", password="test"
+            )
+
+        try:
+            cls.admin = User.objects.get(is_superuser=False, username="admin")
+        except User.DoesNotExist:
+            cls.admin = User.objects.create(
+                username="admin", email="admin@intelowl.com", password="test"
             )
 
         try:
@@ -128,7 +142,11 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
                 value = "test"
             pcs.append(
                 PluginConfig.objects.create(
-                    value=value, parameter=param, for_organization=False, owner=None
+                    value=value,
+                    parameter=param,
+                    for_organization=False,
+                    owner=None,
+                    **{_report.config.snake_case_name: _report.config},
                 )
             )
         response = self.client.patch(

@@ -5,16 +5,24 @@ import datetime
 import logging
 import typing
 import uuid
-from typing import Any, Dict, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type
+
+from django.utils.timezone import now
+
+from api_app.interfaces import ModelWithOwnership
+
+if TYPE_CHECKING:
+    from api_app.serializers import PythonConfigSerializer
 
 from celery import group
 from celery.canvas import Signature
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
-from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator, RegexValidator
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import Manager, QuerySet
+from django.db.models import BaseConstraint, Q, QuerySet, UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -24,11 +32,16 @@ from api_app.choices import (
     TLP,
     ObservableClassification,
     ParamTypes,
+    PythonModuleBasePaths,
     ReportStatus,
     ScanMode,
     Status,
 )
-from api_app.defaults import config_default, default_runtime, file_directory_path
+
+if typing.TYPE_CHECKING:
+    from api_app.classes import Plugin
+
+from api_app.defaults import default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
@@ -37,17 +50,61 @@ from api_app.queryset import (
     PluginConfigQuerySet,
     PythonConfigQuerySet,
 )
-from api_app.validators import (
-    plugin_name_validator,
-    validate_config,
-    validate_runtime_configuration,
-)
+from api_app.validators import plugin_name_validator, validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
-from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
+from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
+
+
+class PythonModule(models.Model):
+    module = models.CharField(max_length=120, db_index=True)
+    base_path = models.CharField(
+        max_length=120, db_index=True, choices=PythonModuleBasePaths.choices
+    )
+
+    class Meta:
+        unique_together = [["module", "base_path"]]
+        ordering = ["base_path", "module"]
+
+    def __str__(self):
+        return self.module
+
+    @cached_property
+    def python_complete_path(self) -> str:
+        return f"{self.base_path}.{self.module}"
+
+    def __contains__(self, item: str):
+        if not isinstance(item, str):
+            raise TypeError(f"{self.__class__.__name__} needs a string")
+        return item in self.python_complete_path
+
+    @cached_property
+    def python_class(self) -> Type["Plugin"]:
+        return import_string(self.python_complete_path)
+
+    @property
+    def configs(self) -> PythonConfigQuerySet:
+        return self.config_class.objects.filter(python_module__pk=self.pk)
+
+    @cached_property
+    def config_class(self) -> Type["PythonConfig"]:
+        return self.python_class.config_model
+
+    def clean_python_module(self):
+        try:
+            _ = self.python_class
+        except ImportError as exc:
+            raise ValidationError(
+                "`python_module` incorrect, "
+                f"{self.python_complete_path} couldn't be imported"
+            ) from exc
+
+    def clean(self) -> None:
+        super().clean()
+        self.clean_python_module()
 
 
 class Tag(models.Model):
@@ -66,7 +123,7 @@ class Tag(models.Model):
     )
 
     def __str__(self):
-        return f'Tag(label="{self.label}")'
+        return self.label
 
 
 class Comment(models.Model):
@@ -93,7 +150,6 @@ class Comment(models.Model):
 
 
 class Job(models.Model):
-
     objects = JobQuerySet.as_manager()
 
     class Meta:
@@ -180,6 +236,9 @@ class Job(models.Model):
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
+    warnings = pg_fields.ArrayField(
+        models.TextField(), blank=True, default=list, null=True
+    )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
@@ -200,11 +259,26 @@ class Job(models.Model):
     def analyzed_object_name(self):
         return self.file_name if self.is_sample else self.observable_name
 
+    @property
+    def analyzed_object(self):
+        return self.file if self.is_sample else self.observable_name
+
     @cached_property
     def sha256(self) -> str:
         return calculate_sha256(
             self.file.read() if self.is_sample else self.observable_name.encode("utf-8")
         )
+
+    @cached_property
+    def parent_job(self) -> Optional["Job"]:
+        from api_app.pivots_manager.models import PivotMap
+
+        try:
+            pm = PivotMap.objects.get(ending_job=self)
+        except PivotMap.DoesNotExist:
+            return None
+        else:
+            return pm.starting_job
 
     @cached_property
     def sha1(self) -> str:
@@ -219,37 +293,54 @@ class Job(models.Model):
         ).decode("utf-8")
 
     def get_absolute_url(self):
-        return reverse("jobs-detail", args=[self.pk])
+        return self.get_absolute_url_by_pk(self.pk)
+
+    @classmethod
+    def get_absolute_url_by_pk(cls, pk: int):
+        return reverse("jobs-detail", args=[pk]).removeprefix("/api")
 
     @property
     def url(self):
         return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
     def retry(self):
-
         self.update_status(Job.Status.RUNNING)
-        failed_analyzers_reports = self.analyzerreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("pk", flat=True)
-        failed_connector_reports = self.connectorreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("pk", flat=True)
-        failed_visualizer_reports = self.visualizerreports.filter(
-            status=AbstractReport.Status.FAILED.value
-        ).values_list("pk", flat=True)
+        failed_analyzers = self.analyzerreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("config__pk", flat=True)
+        failed_connector = self.connectorreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("config__pk", flat=True)
+        failed_pivot = self.pivotreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("config__pk", flat=True)
 
-        runner = (
-            self._get_signatures(
-                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
-            )
-            | self._get_signatures(
-                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
-            )
-            | self._get_signatures(
-                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
-            )
+        failed_visualizer = self.visualizerreports.filter(
+            status__in=[
+                AbstractReport.Status.FAILED.value,
+                AbstractReport.Status.PENDING.value,
+            ]
+        ).values_list("config__pk", flat=True)
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.filter(pk__in=failed_analyzers),
+            self.pivots_to_execute.filter(pk__in=failed_pivot),
+            self.connectors_to_execute.filter(pk__in=failed_connector),
+            self.visualizers_to_execute.filter(pk__in=failed_visualizer),
         )
-        return runner()
+
+        runner.apply_async(
+            queue=get_queue_name(settings.CONFIG_QUEUE),
+            MessageGroupId=str(uuid.uuid4()),
+        )
 
     def set_final_status(self) -> None:
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
@@ -289,11 +380,6 @@ class Job(models.Model):
             return None
         td = self.finished_analysis_time - self.received_request_time
         return round(td.total_seconds(), 2)
-
-    def append_error(self, err_msg: str, save=True) -> None:
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
 
     def update_status(self, status: str, save=True) -> None:
         self.status = status
@@ -343,7 +429,6 @@ class Job(models.Model):
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
-
             reports = self._get_config_reports(config).filter(
                 status__in=[
                     AbstractReport.Status.PENDING,
@@ -361,7 +446,7 @@ class Job(models.Model):
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def _get_signatures(self, queryset: QuerySet) -> Signature:
+    def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
         signatures = list(
             queryset.annotate_runnable(self.user)
@@ -376,20 +461,60 @@ class Job(models.Model):
             | config_class.signature_pipeline_completed(self)
         )
 
+    @cached_property
+    def pivots_to_execute(self) -> PythonConfigQuerySet:
+        from api_app.pivots_manager.models import PivotConfig
+
+        if self.playbook_to_execute:
+            pivots = self.playbook_to_execute.pivots.all()
+        else:
+            pivots = PivotConfig.objects.valid(
+                self.analyzers_to_execute.all(), self.connectors_to_execute.all()
+            )
+        return pivots.annotate_runnable(self.user).filter(runnable=True)
+
+    @property
+    def _final_status_signature(self) -> Signature:
+        return tasks.job_set_final_status.signature(
+            args=[self.pk],
+            kwargs={},
+            queue=get_queue_name(settings.CONFIG_QUEUE),
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+        )
+
+    def _get_pipeline(
+        self,
+        analyzers: PythonConfigQuerySet,
+        pivots: PythonConfigQuerySet,
+        connectors: PythonConfigQuerySet,
+        visualizers: PythonConfigQuerySet,
+    ) -> Signature:
+        runner = self._get_signatures(analyzers.distinct())
+        pivots_analyzers = pivots.filter(
+            related_analyzer_configs__isnull=False
+        ).distinct()
+        if pivots_analyzers.exists():
+            runner |= self._get_signatures(pivots_analyzers)
+        if connectors.exists():
+            runner |= self._get_signatures(connectors)
+            pivots_connectors = pivots.filter(
+                related_connector_configs__isnull=False
+            ).distinct()
+            if pivots_connectors.exists():
+                runner |= self._get_signatures(pivots_connectors)
+        if visualizers.exists():
+            runner |= self._get_signatures(visualizers)
+        runner |= self._final_status_signature
+        return runner
+
     def execute(self):
         self.update_status(Job.Status.RUNNING)
-        runner = (
-            self._get_signatures(self.analyzers_to_execute.all())
-            | self._get_signatures(self.connectors_to_execute.all())
-            | self._get_signatures(self.visualizers_to_execute.all())
-            | tasks.job_set_final_status.signature(
-                args=[self.pk],
-                kwargs={},
-                queue=get_queue_name(DEFAULT_QUEUE),
-                soft_time_limit=10,
-                immutable=True,
-                MessageGroupId=str(uuid.uuid4()),
-            )
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.all(),
+            self.pivots_to_execute.all(),
+            self.connectors_to_execute.all(),
+            self.visualizers_to_execute.all(),
         )
         runner()
 
@@ -401,7 +526,7 @@ class Job(models.Model):
                 f"{config.__class__.__name__} {config.name} "
                 f"is not configured inside job {self.pk}"
             )
-        return self.runtime_configuration[config.runtime_configuration_key].get(
+        return self.runtime_configuration.get(config.runtime_configuration_key, {}).get(
             config.name, {}
         )
 
@@ -449,7 +574,6 @@ class Job(models.Model):
 
 
 class Parameter(models.Model):
-
     objects = ParameterQuerySet.as_manager()
 
     name = models.CharField(null=False, blank=False, max_length=50)
@@ -457,83 +581,25 @@ class Parameter(models.Model):
         choices=ParamTypes.choices, max_length=10, null=False, blank=False
     )
     description = models.TextField(blank=True, default="")
-    is_secret = models.BooleanField(null=False)
+    is_secret = models.BooleanField(db_index=True)
     required = models.BooleanField(null=False)
-    analyzer_config = models.ForeignKey(
-        "analyzers_manager.AnalyzerConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    connector_config = models.ForeignKey(
-        "connectors_manager.ConnectorConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    visualizer_config = models.ForeignKey(
-        "visualizers_manager.VisualizerConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    ingestor_config = models.ForeignKey(
-        "ingestors_manager.IngestorConfig",
-        related_name="parameters",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
+    python_module = models.ForeignKey(
+        PythonModule, related_name="parameters", on_delete=models.PROTECT
     )
 
     class Meta:
-        unique_together = [
-            ("name", "analyzer_config"),
-            ("name", "connector_config"),
-            ("name", "visualizer_config"),
-            ("name", "ingestor_config"),
-        ]
-        indexes = [
-            models.Index(fields=["analyzer_config", "is_secret"]),
-            models.Index(fields=["connector_config", "is_secret"]),
-            models.Index(fields=["visualizer_config", "is_secret"]),
-            models.Index(fields=["ingestor_config", "is_secret"]),
-        ]
+        unique_together = [["name", "python_module"]]
 
-    def clean_config(self):
-        count_configs = (
-            bool(self.analyzer_config)
-            + bool(self.connector_config)
-            + bool(self.visualizer_config)
-            + bool(self.ingestor_config)
-        )
+    def __str__(self):
+        return self.name
 
-        if count_configs > 1:
-            msg = (
-                "You can't have the same parameter on more than one"
-                " configuration at the time"
-            )
-            logger.error(msg)
-            raise ValidationError(msg)
-        elif count_configs == 0:
-            msg = "The parameter must be set to at least a configuration"
-            logger.error(msg)
-            raise ValidationError(msg)
-
-    def clean(self) -> None:
-        super().clean()
-        self.clean_config()
-
-    @cached_property
-    def config(self):
-        return (
-            self.analyzer_config
-            or self.connector_config
-            or self.visualizer_config
-            or self.ingestor_config
-        )
+    def refresh_cache_keys(self):
+        self.config_class.delete_class_cache_keys()
+        for config in self.config_class.objects.filter(
+            python_module=self.python_module
+        ):
+            config: PythonConfig
+            config.refresh_cache_keys()
 
     def get_valid_value_for_test(self):
         if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
@@ -544,62 +610,139 @@ class Parameter(models.Model):
             return "user|pwd"
         elif "test" in self.name:
             raise PluginConfig.DoesNotExist
+        elif self.type == ParamTypes.INT.value:
+            return 10
         else:
             return "test"
 
+    @cached_property
+    def config_class(self) -> Type["PythonConfig"]:
+        return self.python_module.python_class.config_model
 
-class PluginConfig(models.Model):
 
+class PluginConfig(ModelWithOwnership):
     objects = PluginConfigQuerySet.as_manager()
-
     value = models.JSONField(blank=True, null=True)
-    for_organization = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="custom_configs",
-        null=True,
-        blank=True,
-    )
+
     parameter = models.ForeignKey(
         Parameter, on_delete=models.CASCADE, null=False, related_name="values"
     )
     updated_at = models.DateTimeField(auto_now=True)
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="values",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="values",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="values",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    ingestor_config = models.ForeignKey(
+        "ingestors_manager.IngestorConfig",
+        on_delete=models.CASCADE,
+        related_name="values",
+        null=True,
+        blank=True,
+    )
+    pivot_config = models.ForeignKey(
+        "pivots_manager.PivotConfig",
+        on_delete=models.CASCADE,
+        related_name="values",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
-        unique_together = ["owner", "for_organization", "parameter"]
+        constraints: typing.List[BaseConstraint] = [
+            models.CheckConstraint(
+                check=Q(analyzer_config__isnull=True)
+                | Q(connector_config__isnull=True)
+                | Q(visualizer_config__isnull=True)
+                | Q(ingestor_config__isnull=True)
+                | Q(pivot_config__isnull=True),
+                name="plugin_config_no_config_all_null",
+            )
+        ] + [
+            item
+            for config in [
+                "analyzer_config",
+                "connector_config",
+                "visualizer_config",
+                "ingestor_config",
+                "pivot_config",
+            ]
+            for item in [
+                UniqueConstraint(
+                    fields=["owner", "for_organization", "parameter", config],
+                    name=f"plugin_config_unique_with_{config}_owner",
+                    condition=Q(owner__isnull=False),
+                ),
+                UniqueConstraint(
+                    fields=["for_organization", "parameter", config],
+                    name=f"plugin_config_unique_with_{config}",
+                    condition=Q(owner__isnull=True),
+                ),
+            ]
+        ]
         indexes = [
             models.Index(fields=["owner", "for_organization", "parameter"]),
-            models.Index(
-                fields=[
-                    "owner",
-                    "for_organization",
-                ]
-            ),
-            models.Index(
-                fields=[
-                    "owner",
-                ]
-            ),
+        ] + ModelWithOwnership.Meta.indexes
+
+    @cached_property
+    def config(self) -> "PythonConfig":
+        return list(filter(None, self._possible_configs()))[0]
+
+    def refresh_cache_keys(self):
+        try:
+            _ = self.config and self.owner
+        except ObjectDoesNotExist:
+            # this happens if the configuration/user was deleted before this instance
+            return
+        if self.owner:
+            if self.owner.has_membership() and self.owner.membership.is_admin:
+                for user in User.objects.filter(
+                    membership__organization=self.owner.membership.organization
+                ):
+                    self.config.delete_class_cache_keys(user)
+                    self.config.refresh_cache_keys(user)
+            else:
+                self.owner: User
+                self.config.delete_class_cache_keys(self.owner)
+                self.config.refresh_cache_keys(self.owner)
+
+        else:
+            self.config.delete_class_cache_keys()
+            self.config.refresh_cache_keys()
+
+    def _possible_configs(self) -> typing.List["PythonConfig"]:
+        return [
+            self.analyzer_config,
+            self.connector_config,
+            self.visualizer_config,
+            self.ingestor_config,
+            self.pivot_config,
         ]
 
-    def clean_for_organization(self):
-        if self.for_organization and not self.owner:
-            raise ValidationError(
-                "You can't set `for_organization` and not have an owner"
+    def clean_config(self) -> None:
+        if len(list(filter(None, self._possible_configs()))) != 1:
+            configs = ", ".join(
+                [config.name for config in self._possible_configs() if config]
             )
-        if self.for_organization and not self.owner.has_membership():
-            raise ValidationError(
-                f"You can't create `for_organization` {self.__class__.__name__}"
-                " if you do not have an organization"
-            )
-        if self.for_organization and (
-            self.owner.has_membership()
-            and self.owner.membership.organization.owner != self.owner
-        ):
-            raise ValidationError(
-                "Only organization owner can create configuration at the org level"
-            )
+            if not configs:
+                raise ValidationError("You must select a plugin configuration")
+            raise ValidationError(f"You must have exactly one between {configs}")
 
     def clean_value(self):
         from django.forms.fields import JSONString
@@ -612,10 +755,19 @@ class PluginConfig(models.Model):
                 f" should be {self.parameter.type}"
             )
 
+    def clean_parameter(self):
+        if self.config.python_module != self.parameter.python_module:
+            raise ValidationError(
+                f"Missmatch between config python module {self.config.python_module}"
+                f" and parameter python module {self.parameter.python_module}"
+            )
+
     def clean(self):
         super().clean()
         self.clean_value()
         self.clean_for_organization()
+        self.clean_config()
+        self.clean_parameter()
 
     @property
     def attribute(self):
@@ -629,19 +781,9 @@ class PluginConfig(models.Model):
         return self.config.name
 
     @property
-    def config(self):
-        return self.parameter.config
-
-    @property
     def type(self):
         # TODO retrocompatibility
         return self.config.plugin_type
-
-    @cached_property
-    def organization(self):
-        if self.for_organization:
-            return self.owner.membership.organization.name
-        return None
 
     @property
     def config_type(self):
@@ -669,6 +811,9 @@ class AbstractConfig(models.Model):
         indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
         abstract = True
 
+    def __str__(self):
+        return self.name
+
     @classmethod
     @property
     def runtime_configuration_key(cls) -> str:
@@ -689,6 +834,15 @@ class AbstractConfig(models.Model):
             .first()
             .runnable
         )
+
+    def enabled_for_user(self, user: User) -> bool:
+        if user.has_membership():
+            return (
+                not self.disabled
+                and user.membership.organization
+                not in self.disabled_in_organizations.all()
+            )
+        return not self.disabled
 
 
 class AbstractReport(models.Model):
@@ -734,22 +888,13 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
-    def append_error(self, err_msg: str, save=True):
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
-
 
 class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
-    parameters: Manager
-
-    python_module = models.CharField(null=False, max_length=120, db_index=True)
-
-    config = models.JSONField(
-        blank=False,
-        default=config_default,
-        validators=[validate_config],
+    soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
+    routing_key = models.CharField(max_length=50, default="default")
+    python_module = models.ForeignKey(
+        PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
     )
 
     class Meta:
@@ -759,11 +904,83 @@ class PythonConfig(AbstractConfig):
         ]
         ordering = ["name", "disabled"]
 
+    def get_routing_key(self) -> str:
+        if self.routing_key not in settings.CELERY_QUEUES:
+            logger.warning(
+                f"{self.name}: you have no worker for {self.routing_key}."
+                f" Using {settings.DEFAULT_QUEUE} queue."
+            )
+            return settings.DEFAULT_QUEUE
+        return self.routing_key
+
+    @property
+    def parameters(self) -> ParameterQuerySet:
+        return Parameter.objects.filter(python_module=self.python_module)
+
+    @classmethod
+    @property
+    def report_class(cls) -> Type[AbstractReport]:
+        return cls.reports.rel.related_model
+
+    @classmethod
+    def get_subclasses(cls) -> typing.List["PythonConfig"]:
+        from django.contrib.contenttypes.models import ContentType
+
+        child_models = [ct.model_class() for ct in ContentType.objects.all()]
+        return [
+            model
+            for model in child_models
+            if (model is not None and issubclass(model, cls) and model is not cls)
+        ]
+
     @classmethod
     @property
     def plugin_type(cls) -> str:
         # retro compatibility
 
+        raise NotImplementedError()
+
+    def generate_empty_report(self, job: Job, task_id: str, status: str):
+        return self.python_module.python_class.report_model.objects.update_or_create(
+            job=job,
+            config=self,
+            defaults={
+                "status": status,
+                "task_id": task_id,
+                "start_time": now(),
+                "end_time": now(),
+            },
+        )[0]
+
+    @classmethod
+    def delete_class_cache_keys(cls, user: User = None):
+        base_key = f"{cls.__name__}_{user.username if user else ''}"
+        for key in cache.get_where(f"list_{base_key}").keys():
+            logger.debug(f"Deleting cache key {key}")
+            cache.delete(key)
+
+    def refresh_cache_keys(self, user: User = None):
+        from api_app.serializers import PythonListConfigSerializer
+
+        base_key = (
+            f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
+        )
+        for key in cache.get_where(f"serializer_{base_key}").keys():
+            logger.debug(f"Deleting cache key {key}")
+            cache.delete(key)
+        if user:
+            PythonListConfigSerializer(
+                child=self.serializer_class()
+            ).to_representation_single_plugin(self, user)
+        else:
+            for generic_user in User.objects.exclude(email=""):
+                PythonListConfigSerializer(
+                    child=self.serializer_class()
+                ).to_representation_single_plugin(self, generic_user)
+
+    @classmethod
+    @property
+    def serializer_class(cls) -> Type["PythonConfigSerializer"]:
         raise NotImplementedError()
 
     @classmethod
@@ -788,38 +1005,14 @@ class PythonConfig(AbstractConfig):
         return tasks.job_set_pipeline_status.signature(
             args=[job.pk, status],
             kwargs={},
-            queue=get_queue_name(DEFAULT_QUEUE),
-            soft_time_limit=10,
+            queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
         )
 
     @property
-    def python_base_path(self) -> str:
-        raise NotImplementedError()
-
-    def clean_python_module(self):
-        try:
-            _ = self.python_class
-        except ImportError as exc:
-            raise ValidationError(
-                "`python_module` incorrect, "
-                f"{self.python_complete_path} couldn't be imported"
-            ) from exc
-
-    def clean_config_queue(self):
-        queue = self.config["queue"]
-        if queue not in settings.CELERY_QUEUES:
-            logger.warning(
-                f"Analyzer {self.name} has a wrong queue."
-                f" Setting to `{DEFAULT_QUEUE}`"
-            )
-            self.config["queue"] = DEFAULT_QUEUE
-
-    def clean(self):
-        super().clean()
-        self.clean_python_module()
-        self.clean_config_queue()
+    def queue(self):
+        return get_queue_name(self.get_routing_key())
 
     @property
     def options(self) -> QuerySet:
@@ -838,29 +1031,6 @@ class PythonConfig(AbstractConfig):
         pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
         return pc.configured
 
-    @cached_property
-    def queue(self):
-        queue = self.config["queue"]
-        if queue not in settings.CELERY_QUEUES:
-            queue = DEFAULT_QUEUE
-        return get_queue_name(queue)
-
-    @cached_property
-    def routing_key(self):
-        return self.config["queue"]
-
-    @cached_property
-    def soft_time_limit(self):
-        return self.config["soft_time_limit"]
-
-    @cached_property
-    def python_complete_path(self) -> str:
-        return f"{self.python_base_path}.{self.python_module}"
-
-    @cached_property
-    def python_class(self) -> Type:
-        return import_string(self.python_complete_path)
-
     @classmethod
     @property
     def config_exception(cls):
@@ -873,9 +1043,9 @@ class PythonConfig(AbstractConfig):
         # 1 - Runtime config
         # 2 - Value inside the db
         result = {}
-        for param in self.parameters.annotate_configured(user).annotate_value_for_user(
-            user
-        ):
+        for param in self.parameters.annotate_configured(
+            self, user
+        ).annotate_value_for_user(self, user):
             param: Parameter
             if param.name in config_runtime:
                 result[param] = config_runtime[param.name]
@@ -888,7 +1058,8 @@ class PythonConfig(AbstractConfig):
                         continue
                     if param.required:
                         raise TypeError(
-                            f"Required param {param.name} of plugin {param.config.name}"
+                            f"Required param {param.name} "
+                            f"of plugin {param.python_module.module}"
                             " does not have a valid value"
                         )
         return result

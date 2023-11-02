@@ -41,7 +41,6 @@ class Koodous(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-
         patches = [
             if_mock_connections(
                 patch(

@@ -19,26 +19,6 @@ def validate_schema(value, schema):
         raise ValidationError(e.message)
 
 
-def validate_config(value):
-    schema = {
-        "type": "object",
-        "title": "Config",
-        "properties": {
-            "soft_time_limit": {
-                "title": "Execution soft time limit",
-                "type": "integer",
-            },
-            "queue": {
-                "title": "Celery queue",
-                "type": "string",
-            },
-        },
-        "required": ["soft_time_limit", "queue"],
-        "additionalProperties": False,
-    }
-    return validate_schema(value, schema)
-
-
 def validate_secrets(value):
     schema = {
         "type": "object",
@@ -96,6 +76,12 @@ def validate_runtime_configuration(value):
                 },
             },
             "connectors": {
+                "type": "object",
+                "patternProperties": {
+                    "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},
+                },
+            },
+            "pivots": {
                 "type": "object",
                 "patternProperties": {
                     "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},

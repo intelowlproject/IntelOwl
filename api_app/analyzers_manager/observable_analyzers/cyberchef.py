@@ -48,7 +48,6 @@ class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
             self.recipe = self.recipe_code
 
     def run(self):
-
         try:
             request_payload = {"input": self.observable_name, "recipe": self.recipe}
             if self.output_type:

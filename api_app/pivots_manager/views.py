@@ -1,19 +1,25 @@
-from rest_framework import mixins, viewsets
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from api_app.pivots_manager.models import Pivot, PivotConfig
+from api_app.pivots_manager.models import PivotMap, PivotReport
 from api_app.pivots_manager.permissions import PivotOwnerPermission
-from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotSerializer
-from api_app.views import AbstractConfigViewSet
+from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotMapSerializer
+from api_app.views import PluginActionViewSet, PythonConfigViewSet
 
 
-class PivotConfigViewSet(AbstractConfigViewSet, mixins.CreateModelMixin):
+class PivotConfigViewSet(PythonConfigViewSet):
     serializer_class = PivotConfigSerializer
-    queryset = PivotConfig.objects.all()
 
 
-class PivotViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin):
+class PivotActionViewSet(PluginActionViewSet):
+    @classmethod
+    @property
+    def report_model(cls):
+        return PivotReport
+
+
+class PivotMapViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated, PivotOwnerPermission]
-    serializer_class = PivotSerializer
+    serializer_class = PivotMapSerializer
     lookup_field = "pk"
-    queryset = Pivot.objects.all()
+    queryset = PivotMap.objects.all()

@@ -9,11 +9,14 @@ This page includes the most important things to know and understand when using I
 - [Plugins](#plugins)
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
-  - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
-  - [Playbooks](#playbooks)
+  - [Pivots](#pivots)
   - [Visualizers](#visualizers)
   - [Ingestors](#ingestors)
-- [TLP Support](#tlp-support)
+  - [Playbooks](#playbooks)
+  - [Generic Plugin Creation, Configuration and Customization](#generic-plugin-creation-configuration-and-customization)
+  - [Enabling or Disabling Plugins](#enabling-or-disabling-plugins)
+  - [Special Plugins operations](#special-plugins-operations)
+  - [TLP Support](#tlp-support)
 
 ## Client
 
@@ -59,21 +62,28 @@ Right now it works very simply: only users in the same organization can see anal
 
 You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
 
-Once you create an organization, you are the unique Administrator of that organization. So you are the only one who can delete the organization, remove users and send invitations to other users.
+Once you create an organization, you are the unique "Owner" of that organization. So you are the only one who can delete the organization and promote/demote/kick users.
+Another role, which is called "Admin", can be set to a user (via the Django Admin interface only for now).
+Owners and admins share the following powers: they can manage invitations and the organization's plugin configuration.
 
 #### Accept Invites
 
 Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
 
+![img.png](../static/accept_invite.png)
+
 #### Plugins Params and Secrets
 
 From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
 This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
+Only Owners and Admins of the organization can set, change and delete them.
 
-#### Disable Analyzers at Org level
+#### Disable Plugins at Org level
 
-From IntelOwl v4.1.0, the org admin can disable specific analyzers for all the users in a specific org.
-To do that, org admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the analyzer that they want to disable.
+The org admin can disable a specific plugin for all the users in a specific org.
+To do that, Org Admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the plugin that they want to disable.
+
+![img.png](../static/disable_org.png)
 
 ### Registration
 Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
@@ -100,11 +110,13 @@ In that case, you would need to [re-build](/Installation.md#update-and-rebuild) 
 ## Plugins
 
 Plugins are the core modular components of IntelOwl that can be easily added, changed and customized.
-There are 3 types of plugins:
+There are several types of plugins:
 
 - [Analyzers](#analyzers)
 - [Connectors](#connectors)
+- [Pivots](#pivots)
 - [Visualizers](#visualizers)
+- [Ingestors](#ingestors)
 - [Playbooks](#playbooks)
 
 ### Analyzers
@@ -181,21 +193,18 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).
 - `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 - `HybridAnalysis_Get_File`: check file hash on [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
-- `Intezer_Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl)
+- `Intezer_Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl). With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `Malpedia_Scan`: scan a binary or a zip file (pwd:infected) against all the yara rules available in [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/)
 - `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
-- `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
+- `MISPFIRST_Check_Hash`: check a file hash on the [FIRST MISP](https://misp.first.org/) instance
 - `MISP_Check_Hash`: check a file hash on a MISP instance
-- `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
+- `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 - `SublimeSecurity`: Analyze an Email with [Sublime Security](https://docs.sublimesecurity.com/docs) live flow
 - `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
 - `UnpacMe`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
-- `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
-- `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
-- `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-- `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-- `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
+- `Virushee_Scan`: Check file hash on [Virushee API](https://api.virushee.com/). With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
+- `VirusTotal_v3_File`: check the file hash on VirusTotal. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
 - `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
 
@@ -255,6 +264,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
 * `Mnemonic_PassiveDNS` : Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
+* `Netlas`: search an IP against [Netlas](https://netlas.io/api)
 * `ONYPHE`: search an observable in [ONYPHE](https://www.onyphe.io/)
 * `OpenCTI`: scan an observable on an [OpenCTI](https://github.com/OpenCTI-Platform/opencti) instance
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
@@ -302,7 +312,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Confidence`: Give max, average and minimum confidence of maliciousness for an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Confidence API.
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
 * `CRXcavator`: scans a chrome extension against crxcavator.io
-* `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 * `EmailRep`: search an email address on [emailrep.io](https://emailrep.io)
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
@@ -317,31 +326,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 
 [Some analyzers are optional](Advanced-Usage.html#optional-analyzers) and need to be enabled explicitly.
 
-#### Analyzers Customization
-
-You can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/analyzerconfig/`.
-
-The following are all the keys that you can change without touching the source code:
-- `name`: Name of the analyzer
-- `description`: Description of the analyzer
-- `python_module`: Python path of the class that will be executed 
-- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
-- `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
-- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
-- `config`:
-  - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-  - `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
-Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
-A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
-
-<div class="admonition hint">
-<p class="admonition-title">Hint: Advanced Configuration</p>
-You can also modify analyzer specific parameters directly from the GUI. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
-</div>
 
 ### Connectors
 
@@ -359,34 +343,172 @@ The following is the list of the available connectors. You can also navigate the
 - `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 - `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 - `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
-
-#### Connectors customization
-
-Connectors being optional are `enabled` by default.
-You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorconfig/`.
+- `Slack`: Send the analysis link to a Slack channel (useful for external notifications)
 
 
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
+### Pivots
 
-- `maximum_tlp` (default `CLEAR`, choices `CLEAR`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
-- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails` 
+With Intel v5.2.0 we introduced the `Pivot` Plugin.
+
+Pivots are designed to create a job from another job. This plugin allows the user to set certain conditions that trigger the execution of one or more subsequent jobs, strictly connected to the first one.
+
+This is a "SOAR" feature that allows the users to connect multiple analysis together.
+
+Right now the support for this kind of plugin in the GUI is very limited, while the backend is fully operative. We are working on the frontend.
+
+#### List of pre-build Pivots
+None
+
+### Visualizers
+
+With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
+You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
+
+Visualizers are designed to run after the analyzers and the connectors.
+The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
+
+Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
+
+This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
+To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
+
+##### List of pre-built Visualizers
+
+- `DNS`: displays the aggregation of every DNS analyzer report
+- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
+- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
+- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
+- `Pivot`: Visualizer that can be used in a Playbook to show the Pivot execution result. See [Pivots](#pivots) for more info.
+
+### Ingestors
+
+With Intel v5.1.0 we introduced the `Ingestor` Plugin.
+
+Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
+Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
+
+Ingestors are system-wide and **disabled** by default, meaning that only the administrator are able to configure them and enable them. 
+Ingestors can be _spammy_ so be careful about enabling them.
+
+A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
+
+#### List of pre-build Ingestors
+- `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
+
+### Playbooks
+
+Playbooks are designed to be easy to share sequence of running Plugins (Analyzers, Connectors, ...) on a particular kind of observable.
+
+If you want to avoid to re-select/re-configure a particular combination of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
+
+This is a feature introduced since IntelOwl v4.1.0! Please provide feedback about it!
+
+#### Playbooks List
+
+The following is the list of the available pre-built playbooks. You can also navigate the same list via the
+
+- Graphical Interface: once your application is up and running, go to the "Plugins" section
+- [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-playbook-config`
+
+##### List of pre-built playbooks
+
+- `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
+- `Sample_Static_Analysis`: A playbook containing all analyzers that perform static analysis on files.
+- `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
+- `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
+- `Dns`: A playbook containing all dns providers
+
+#### Playbooks creation and customization
+
+You can create new playbooks in different ways, based on the users you want to share them with:
+
+If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`-
+
+If you want share them to yourself or your organization only, you need to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
+In this way, after you have done an analysis, you can save the configuration of the Plugins you executed for re-use with a single click.
+
+![img.png](../static/playbook_creation.png)
+
+The created Playbook would be available to yourself only. If you want either to share it with your organization or to delete it, you need to go to the "Plugins" section and enable it manually by clicking the dedicated button.
+
+![img.png](../static/playbooks_cr.png)
+
+
+### Generic Plugin Creation, Configuration and Customization
+
+If you want to create completely new Plugins (not based on already existing python modules), please refer to the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-plugin) section. This is usually the case when you want to integrate IntelOwl with either a new tool or a new service.
+
+On the contrary, if you would like to just customize the already existing plugins, this is the place.
+
+If you are an IntelOwl superuser, you can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at:
+- for analyzers: `/admin/analyzers_manager/analyzerconfig/`.
+- for connectors: `/admin/connectors_manager/connectorconfig/`.
+- ...and so on for all the Plugin types.
+
+The following are the most important fields that you can change without touching the source code:
+- `name`: Name of the analyzer
+- `description`: Description of the analyzer
+- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+- `disabled_in_organization`: you can choose to disable analyzers in some organizations only.
+- `python_module`: Python path of the class that will be executed 
+- `maximum_tlp`: see [TLP Support](#tlp-support)
+- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+- `routing_key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
+Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
+A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
+
+
+For analyzers only:
+- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+
+For connectors only:
+- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
+
+For visualizers only:
+- `playbooks`: list of playbooks that trigger the specified visualizer execution.
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-Changing other keys can break a connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
+Changing other keys can break a plugin. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
 
-### Managing Analyzers and Connectors
+#### Parameters
+Each Plugin could have one or more parameters available to be configured. These parameters allow the users to customize the Plugin behavior.
 
-All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not.
+There are 2 types of Parameters:
+* classic Parameters
+* `Secrets`: these parameters usually manage sensitive data, like API keys.
+
+
+To see the list of these parameters:
+
+- You can view the "Plugin" Section in IntelOwl to have a complete and updated view of all the options available
+- You can view the parameters by exploring the Django Admin Interface.
+
+You can change the Plugin Parameters at 4 different levels:
+* if you are an IntelOwl superuser, you can go in the Django Admin Interface and change the default values of the parameters for every plugin you like. This option would change the default behavior for every user in the platform.
+* if you are either Owner or Admin of an org, you can customize the default values of the parameters for every member of the organization by leveraging the GUI in the "Organization Config" section. This overrides the previous option. 
+* if you are a normal user, you can customize the default values of the parameters for your analysis only by leveraging the GUI in the "Plugin config" section. This overrides the previous option. 
+* You can choose to provide runtime configuration when requesting an analysis that will override the previous options. This override is done only for the specific analysis. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
+
+
+### Enabling or Disabling Plugins
+By default, each available plugin is configured as either disabled or not. The majority of them are enabled by default, while others may be disabled to avoid potential problems in the application usability for first time users.
+
+Considering the impact that this change could have in the application, the GUI does not allow a normal user to enable/disable any plugin. On the contrary, users with specific privileges may change this configuration:
+* Org Administrators may leverage the feature documented [here](#disable-analyzers-at-org-level) to enable/disable plugins for their org. This can be helpful to control users' behavior.
+* IntelOwl Superusers (full admin) can go to the Django Admin Interface and enable/disable them from there. This operation does overwrite the Org administrators configuration. To find the plugin to change, they'll need to first choose the section of its type ("ANALYZERS_MANAGER", "CONNECTORS_MANAGER", etc), then select the chosen plugin, change the flag on that option and save the plugin by pressing the right button.
+
+![img.png](../static/disabled.png)
+
+![img.png](../static/save.png)
+
+### Special Plugins operations
+
+All plugins, i.e. analyzers and connectors, have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not.
 
 - **kill:**
 
@@ -415,115 +537,7 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
   - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
   - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
-### Playbooks
-
-Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
-
-If you want to avoid to re-select/re-configure a particular combination of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
-
-This is a feature introduced since IntelOwl v4.1.0! Please provide feedback about it!
-
-#### Playbooks List
-
-The following is the list of the available pre-built playbooks. You can also navigate the same list via the
-
-- Graphical Interface: once your application is up and running, go to the "Plugins" section
-- [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-playbook-config`
-
-##### List of pre-built playbooks
-
-- `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
-- `Sample_Static_Analysis`: A playbook containing all analyzers that perform static analysis on files.
-- `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
-- `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
-- `Dns`: A playbook containing all dns providers
-
-#### Playbooks customization
-
-You can create new playbooks via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`
-
-The following are all the keys that you can leverage/change without touching the source code:
-
-- `analyzers`: list of analyzers to execute
-- `connectors`: list of connectors to execute
-- `disabled`: _similar to analyzers_
-- `description`: _similar to analyzers_
-- `type`: list of observable types or files supported
-- `runtime_configuration`: runtime configuration for each type of plugin
-
-Another chance to create a new playbook is to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
-In this way, after you have done an analysis, you can save the configuration of analyzers/connectors for re-use with a single click.
-
-Those are the only ways to do that for now. We are planning to provide more easier ways to add new playbooks in the future.
-
-### Visualizers
-
-With IntelOwl v5 we introduced a new plugin type called **Visualizers**.
-You can leverage it as a framework to create _custom aggregated and simplified visualization of analyzer results_.
-
-Visualizers are designed to run after the analyzers and the connectors.
-The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
-
-Visualizers can be executed only during `Scans` through the playbook that has been configured on the visualizer itself.
-
-This framework is extremely powerful and allows every user to customize the GUI as they wish. But you know...with great power comes great responsability. To fully leverage this framework, you would need to put some effort in place. You would need to understand which data is useful for you and then write few code lines that would create your own GUI.
-To simplify the process, take example from the pre-built visualizers listed below and follow the dedicated [documentation](Contribute.html#how-to-add-a-new-visualizer).
-
-##### List of pre-built Visualizers
-
-- `DNS`: displays the aggregation of every DNS analyzer report
-- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
-- `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
-- `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
-
-
-#### Visualizers customization
-You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerconfig/`.
-
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
-- `analyzers`: List of analyzers that must be executed
-- `connectors`: List of connectors that must be executed
-
-### Ingestors
-
-With Intel v5.1.0 we introduced the `Ingestor` class.
-
-Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
-Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
-
-Ingestors are system-wide and disabled by default, meaning that only the administrator are able to configure them and enable them. 
-Ingestors can be _spammy_ so be careful about enabling them.
-
-A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
-
-#### List of pre-build Ingestors
-- `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
-
-#### Ingestors customization
-You can either enable or create new ingestors based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/ingestors_manager/ingestorconfig/`.
-
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
-- `playbook_to_execute`: Playbook that will be used for every IOC retrieved from the ingestor
-- `schedule`: Crontab schedule of its execution
-
-
-## TLP Support
+### TLP Support
 The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 
 
 IntelOwl is not a threat intel sharing platform, like the [MISP platform](https://www.misp-project.org/). However, IntelOwl is able to share analysis results to external platforms (via [Connectors](#connectors)) and to send possible privacy related information to external services (via [Analyzers](#analyzers)).

@@ -5,14 +5,16 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Type, Union
 
-from django.conf import settings
 from django.db.models import QuerySet
 
+from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
+from api_app.models import AbstractReport
 from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,
     VisualizableIcon,
+    VisualizableLevelSize,
     VisualizableSize,
 )
 from api_app.visualizers_manager.exceptions import (
@@ -184,13 +186,14 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         self,
         name: VisualizableBase,
         value: List[VisualizableObject],
-        open: bool = False,  # noqa
-        max_elements_number: int = -1,
+        start_open: bool = False,  # noqa
         add_count_in_title: bool = True,
         fill_empty: bool = True,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,
+        max_elements_number: int = -1,
+        report: AbstractReport = None,
     ):
         super().__init__(
             size=size,
@@ -207,21 +210,38 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         if fill_empty and not value:
             value = [VisualizableBase(value="no data available", disable=False)]
         self.value = value
-        self.max_elements_number = max_elements_number
         self.name = name
         self.add_count_in_title = add_count_in_title
-        self.open = open
+        self.start_open = start_open
+        self.max_elements_number = max_elements_number
+        self.report = report
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["name", "open", "value"]
+        return super().attributes + ["name", "start_open", "value"]
 
     def __bool__(self):
         return True
 
     @property
     def more_elements_object(self) -> VisualizableBase:
-        return VisualizableBase(value="...", bold=True)
+        link = ""
+        description = ""
+        disable = True
+        if self.report:
+            link = f"{self.report.job.url}/raw/{self.report.config.plugin_name.lower()}"
+            description = (
+                f"Inspect {self.report.config.name} "
+                f"{self.report.config.plugin_name.lower()} to view all the results."
+            )
+            disable = False
+        return VisualizableBase(
+            value="...",
+            bold=True,
+            link=link,
+            description=description,
+            disable=disable,
+        )
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
@@ -264,24 +284,37 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
         return result
 
 
+class VisualizableLevel:
+    def __init__(
+        self,
+        position: int,
+        size: VisualizableLevelSize = VisualizableLevelSize.S_6,
+        horizontal_list: VisualizableHorizontalList = VisualizableHorizontalList(
+            value=[]
+        ),
+    ):
+        self._position = position
+        self._size = size
+        self._horizontal_list = horizontal_list
+
+    def to_dict(self):
+        return {
+            "level_position": self._position,
+            "level_size": self._size.value,
+            "elements": self._horizontal_list.to_dict(),
+        }
+
+
 class VisualizablePage:
     def __init__(self, name: str = None):
-        self._levels = {}
+        self._levels = []
         self.name = name
 
-    def add_level(self, level: int, horizontal_list: VisualizableHorizontalList):
-        self._levels[level] = horizontal_list
+    def add_level(self, level: VisualizableLevel):
+        self._levels.append(level)
 
     def to_dict(self) -> Tuple[str, List[Dict]]:
-        return self.name, [
-            {"level": level, "elements": hl.to_dict()}
-            for level, hl in self._levels.items()
-        ]
-
-    def update_level(self, level: int, *elements):
-        if level not in self._levels:
-            raise KeyError(f"Level {level} was not defined")
-        self._levels[level].value.extend(list(elements))
+        return self.name, [level.to_dict() for level in self._levels]
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
@@ -296,12 +329,14 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
 
+    LevelSize = VisualizableLevelSize
     Page = VisualizablePage
+    Level = VisualizableLevel
 
     @classmethod
     @property
     def python_base_path(cls):
-        return settings.BASE_VISUALIZER_PYTHON_PATH
+        return PythonModuleBasePaths.Visualizer.value
 
     @classmethod
     @property
@@ -324,7 +359,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
     def after_run_success(self, content):
-
         if not isinstance(content, list):
             raise VisualizerRunException(
                 f"Report has not correct type: {type(self.report.report)}"
@@ -364,3 +398,8 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         from api_app.connectors_manager.models import ConnectorReport
 
         return ConnectorReport.objects.filter(job=self._job)
+
+    def pivots_reports(self) -> QuerySet:
+        from api_app.pivots_manager.models import PivotReport
+
+        return PivotReport.objects.filter(job=self._job)

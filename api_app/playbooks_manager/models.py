@@ -9,17 +9,17 @@ from api_app.analyzers_manager.constants import AllTypes
 from api_app.choices import TLP, ScanMode
 from api_app.defaults import default_runtime
 from api_app.fields import ChoiceArrayField
+from api_app.interfaces import ModelWithOwnership
 from api_app.models import AbstractConfig, Tag
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 
 
-class PlaybookConfig(AbstractConfig):
+class PlaybookConfig(AbstractConfig, ModelWithOwnership):
     objects = PlaybookConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,
-        unique=True,
         primary_key=True,
         validators=[plugin_name_validator],
     )
@@ -36,6 +36,7 @@ class PlaybookConfig(AbstractConfig):
     pivots = models.ManyToManyField(
         "pivots_manager.PivotConfig", related_name="used_by_playbooks", blank=True
     )
+
     runtime_configuration = models.JSONField(
         blank=True,
         default=default_runtime,
@@ -58,6 +59,22 @@ class PlaybookConfig(AbstractConfig):
 
     class Meta:
         ordering = ["name", "disabled"]
+        indexes = ModelWithOwnership.Meta.indexes
+        unique_together = [["name", "owner"]]
+
+    def _generate_tlp(self) -> str:
+        tlps = [
+            TLP[x]
+            for x in list(self.analyzers.values_list("maximum_tlp", flat=True))
+            + list(self.connectors.values_list("maximum_tlp", flat=True))
+        ]
+        # analyzer -> amber
+        # playbook -> green  => analyzer it is executed
+        # --------------
+        # analyzer -> amber
+        # playbook -> red => analyzer it is not executed
+        # ========> the playbook tlp is the minimum of all tlp of all plugins
+        return min(tlps, default=TLP.CLEAR).value
 
     def clean_scan(self):
         if (

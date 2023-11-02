@@ -28,31 +28,17 @@ import { processTimeMMSS } from "../../../utils/time";
 function DebounceDefaultColumnFilter({
   column: { filterValue, setFilter, id },
 }) {
-  const [inputValue, setInputValue] = React.useState("" || filterValue);
-  const [debouncedInputValue, setDebouncedInputValue] = React.useState(
-    "" || filterValue,
+  const [inputValue, setInputValue] = React.useState(
+    filterValue !== undefined ? filterValue : "",
   );
-
-  console.debug("inputValue ->", inputValue);
-  console.debug("debouncedInputValue ->", debouncedInputValue);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedInputValue(inputValue);
-      console.debug("inputValue useEffect->", inputValue);
-    }, 1500);
+      setFilter(inputValue);
+    }, 2000);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputValue]);
-
-  React.useEffect(() => {
-    console.debug("debouncedInputValue useEffect->", debouncedInputValue);
-    setFilter(debouncedInputValue);
-  }, [debouncedInputValue]);
-
-  // Set undefined to remove the filter entirely
-  // const onChange = (e) => setFilter(e.target.value || undefined);
-
-  console.debug("filterValue ->", filterValue);
 
   return (
     <Input
@@ -68,6 +54,14 @@ function DebounceDefaultColumnFilter({
       value={inputValue}
       onChange={(e) => {
         setInputValue(e.target.value);
+      }}
+      onKeyPress={(e) => {
+        if (e.key === "Enter") {
+          setFilter(e.target.value || undefined);
+        }
+      }}
+      onPaste={(e) => {
+        setFilter(e.clipboardData.getData("text/plain") || undefined);
       }}
       placeholder="Search keyword.."
     />
@@ -128,7 +122,7 @@ export const jobTableColumns = [
       </CopyToClipboardButton>
     ),
     disableSortBy: true,
-    Filter: DefaultColumnFilter,
+    Filter: DebounceDefaultColumnFilter,
     maxWidth: 120,
   },
   {
@@ -147,7 +141,7 @@ export const jobTableColumns = [
       </CopyToClipboardButton>
     ),
     disableSortBy: true,
-    Filter: DefaultColumnFilter,
+    Filter: DebounceDefaultColumnFilter,
   },
   {
     Header: "MD5",
@@ -165,7 +159,7 @@ export const jobTableColumns = [
       </CopyToClipboardButton>
     ),
     disableSortBy: true,
-    Filter: DefaultColumnFilter,
+    Filter: DebounceDefaultColumnFilter,
   },
   {
     Header: "Type",

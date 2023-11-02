@@ -159,7 +159,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
-            "open": False,
+            "start_open": False,
             "disable": True,
             "size": "auto",
             "values": [value.to_dict()],
@@ -179,7 +179,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,
-            "open": False,
+            "start_open": False,
             "size": "auto",
             "values": [],
         }
@@ -193,7 +193,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,
-            "open": False,
+            "start_open": False,
             "size": "auto",
             "values": [
                 {

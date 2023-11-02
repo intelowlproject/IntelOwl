@@ -191,7 +191,7 @@ class IPReputationServices(Visualizer):
                     disable=disabled,
                 ),
                 value=[self.Base(c, disable=disabled) for c in categories_extracted],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
                 disable=disabled,
@@ -225,7 +225,7 @@ class IPReputationServices(Visualizer):
                     disable=disabled,
                 ),
                 value=[self.Base(h, disable=disabled) for h in honeypots],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
                 disable=disabled,
@@ -258,7 +258,7 @@ class IPReputationServices(Visualizer):
                 value=[
                     self.Base(c.get("label", ""), disable=disabled) for c in all_class
                 ],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
                 disable=disabled,
@@ -277,7 +277,7 @@ class IPReputationServices(Visualizer):
                 value=[
                     self.Base(b.get("label", ""), disable=disabled) for b in behaviors
                 ],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
                 disable=disabled,
@@ -309,7 +309,7 @@ class IPReputationServices(Visualizer):
                     )
                     for p in pulses
                 ],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
                 disable=disabled,
@@ -336,7 +336,7 @@ class IPReputationServices(Visualizer):
                     value="FireHol", icon=VisualizableIcon.FIRE, disable=disabled
                 ),
                 value=[self.Base(f, disable=disabled) for f in found_in_lists],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
                 disable=disabled,

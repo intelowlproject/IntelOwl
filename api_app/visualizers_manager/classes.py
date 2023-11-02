@@ -186,7 +186,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         self,
         name: VisualizableBase,
         value: List[VisualizableObject],
-        open: bool = False,  # noqa
+        start_open: bool = False,  # noqa
         add_count_in_title: bool = True,
         fill_empty: bool = True,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
@@ -212,13 +212,13 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         self.value = value
         self.name = name
         self.add_count_in_title = add_count_in_title
-        self.open = open
+        self.start_open = start_open
         self.max_elements_number = max_elements_number
         self.report = report
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["name", "open", "value"]
+        return super().attributes + ["name", "start_open", "value"]
 
     def __bool__(self):
         return True

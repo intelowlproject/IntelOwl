@@ -25,6 +25,17 @@ import { JobResultSections } from "../../../constants/miscConst";
 import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
 import { processTimeMMSS } from "../../../utils/time";
 
+export function useDebounce(inputValue, delay, debounceFunction) {
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      console.debug("DEBOUNCE");
+      debounceFunction(inputValue);
+    }, delay);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputValue]);
+}
+
 function DebounceDefaultColumnFilter({
   column: { filterValue, setFilter, id },
 }) {
@@ -32,13 +43,15 @@ function DebounceDefaultColumnFilter({
     filterValue !== undefined ? filterValue : "",
   );
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilter(inputValue);
-    }, 2000);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputValue]);
+  useDebounce(inputValue, 2000, setFilter);
+
+  // React.useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setFilter(inputValue);
+  //   }, 2000);
+  //   return () => clearTimeout(timer);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [inputValue]);
 
   return (
     <Input

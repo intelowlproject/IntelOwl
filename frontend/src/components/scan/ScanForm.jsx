@@ -32,6 +32,7 @@ import {
   Loader,
   MultiSelectDropdownInput,
   selectStyles,
+  useDebounceInput,
 } from "@certego/certego-ui";
 
 import {
@@ -65,7 +66,6 @@ import {
   HASH_REGEX,
   URL_REGEX,
 } from "../../constants/regexConst";
-import { useDebounce } from "../jobs/table/jobTableColumns";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -403,15 +403,7 @@ export default function ScanForm() {
   };
 
   // wait the user terminated to typing and then perform the request to recent scans
-  // React.useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setRecentScansInput(sanitizeObservable(inputValue));
-  //     console.debug(inputValue);
-  //   }, 1000);
-  //   return () => clearTimeout(timer);
-  // }, [inputValue]);
-
-  useDebounce(inputValue, 1000, setRecentScansInput);
+  useDebounceInput(inputValue, 1000, setRecentScansInput);
 
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {

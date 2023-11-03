@@ -365,6 +365,8 @@ export default function ScanForm() {
       .map((v) => ({
         isDisabled: v.disabled,
         value: v.name,
+        analyzers: v.analyzers,
+        connectors: v.connectors,
         label: (
           <div className="d-flex justify-content-start align-items-start flex-column">
             <div className="d-flex justify-content-start align-items-baseline flex-column">

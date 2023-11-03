@@ -7,6 +7,7 @@ import { ContentSection, CustomJsonInput } from "@certego/certego-ui";
 
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { markdownToHtml } from "../../common/markdownToHtml";
+import { ScanTypes } from "../../../constants/advancedSettingsConst";
 
 // constants
 const stateSelector = (state) => [state.analyzers, state.connectors];
@@ -21,6 +22,17 @@ export function RuntimeConfigurationModal(props) {
 
   console.debug("RuntimeConfigurationModal - formik:");
   console.debug(formik);
+
+  const analyzersToExecute =
+    formik.values.analysisOptionValues === ScanTypes.analyzers_and_connectors
+      ? formik.values.analyzers
+      : formik.values.playbook.analyzers;
+  console.debug("analyzersToExecute:", analyzersToExecute);
+  const connectorsToExecute =
+    formik.values.analysisOptionValues === ScanTypes.analyzers_and_connectors
+      ? formik.values.connectors
+      : formik.values.playbook.connectors;
+  console.debug("connectorsToExecute:", connectorsToExecute);
 
   // Extract selected plugin params (with description and type used by the side section)
   const combinedParamsMap = React.useMemo(

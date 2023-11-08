@@ -430,9 +430,18 @@ export const visualizerTableColumns = [
   },
   {
     Header: "Playbook connected to",
-    id: "playbook",
-    accessor: "playbook",
-    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    id: "playbooks",
+    accessor: (row) => row.playbooks,
+    Cell: ({ value }) => (
+      <ul
+        key={`visualizers-playbooks__${value}`}
+        className="d-flex flex-column align-items-start"
+      >
+        {value?.sort().map((v) => (
+          <li key={v}>{v}</li>
+        ))}
+      </ul>
+    ),
     Filter: SelectColumnFilter,
     maxWidth: 145,
   },

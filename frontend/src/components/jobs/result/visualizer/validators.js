@@ -119,7 +119,7 @@ function parseElementFields(rawElement) {
     case VisualizerComponentType.VLIST: {
       validatedFields.name = parseElementFields(rawElement.name);
       validatedFields.values = parseElementList(rawElement.values);
-      validatedFields.startOpen = parseBool(rawElement.open);
+      validatedFields.startOpen = parseBool(rawElement.start_open);
       break;
     }
     case VisualizerComponentType.TITLE: {

@@ -14,5 +14,6 @@ def duration_string(duration):
 
 
 class DayDurationField(DurationField):
-    def to_representation(self, value):
+    @staticmethod
+    def to_representation(value):
         return duration_string(value)

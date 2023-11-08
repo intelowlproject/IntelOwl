@@ -24,6 +24,7 @@ If you are interested in helping us setting up a public instance of IntelOwl, **
 * Improvements in the "Jobs History" table: now it shows executed Playbooks and file/observables types correctly.
 * We added a new "Pivot" section in the "Plugin" GUI for the new Plugin type introduced in the [v5.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.1.0) release. We added a new dedicated visualizer which allows the user to see when a Pivot has been executed in the "Job Result" page. We are still working on it and planning to add more documentation and GUI usability soon.
 * Improvements in the "Jobs Result" page: now playbooks are more relevant, warnings are shown next to errors, Raw JSON data has been moved next to the other raw data.
+* Changed JSON viewer library because the old one was deprecated
 
 **New/Improved Plugins:**
 * deprecated `VirusTotal_v2_*` analyzers have been removed.

@@ -76,7 +76,7 @@ class DNS(Visualizer):
                 for dns_resolution in analyzer_report.report["resolutions"]
             ],
             disable=disable_element,
-            open=True,
+            start_open=True,
         )
 
     @visualizable_error_handler_with_params()

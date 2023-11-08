@@ -133,6 +133,11 @@ describe("ScanForm adavanced use", () => {
             tlp: "CLEAR",
             scan_mode: 2,
             scan_check_time: "10:00:00",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
         ],
       );
@@ -287,6 +292,11 @@ describe("ScanForm adavanced use", () => {
             tags_labels: ["test tag"],
             tlp: "GREEN",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
         ],
       ]);
@@ -369,6 +379,11 @@ describe("ScanForm adavanced use", () => {
         tags_labels: "test tag",
         tlp: "GREEN",
         scan_mode: "1",
+        runtime_configuration: {
+          analyzers: {},
+          connectors: {},
+          visualizers: {},
+        },
       });
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");

@@ -49,7 +49,7 @@ export function PluginInfoCard({ pluginInfo }) {
       <CardBody className="bg-darker border-top border-tertiary">
         <div>
           <h6 className="text-secondary">Description</h6>
-          <p>{markdownToHtml(pluginInfo?.description)}</p>
+          <span>{markdownToHtml(pluginInfo?.description)}</span>
         </div>
         <div>
           <div>
@@ -128,47 +128,74 @@ export function PluginInfoCard({ pluginInfo }) {
             </div>
           )}
         </div>
-        {pluginInfo?.analyzers != null && (
-          <div>
-            <h6 className="text-secondary">Analyzers &nbsp;</h6>
-            <ul>
-              {Object.entries(pluginInfo?.analyzers).map(([key, value]) => (
-                <li key={`plugininfocard-analyzer__${pluginInfo.name}-${key}`}>
-                  <span>{key}</span>
-                  {Object.keys(pluginInfo?.analyzers[key]).length !== 0 && (
-                    <ul>
-                      <b>Parameters:</b>
-                      <li style={{ listStyleType: "square" }}>
-                        <code>{JSON.stringify(value, null, 2)}</code>
-                      </li>
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {pluginInfo?.connectors != null && (
-          <div>
-            <h6 className="text-secondary">Connectors &nbsp;</h6>
-            <ul>
-              {Object.entries(pluginInfo?.connectors).map(([key, value]) => (
-                <li
-                  key={`plugininfocard-connector__${pluginInfo?.name}-${key}`}
-                >
-                  <span>{key}</span>
-                  {Object.keys(pluginInfo?.connectors[key]).length !== 0 && (
-                    <ul>
-                      <li>
-                        <code>{JSON.stringify(value, null, 2)}</code>
-                      </li>
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {pluginInfo?.plugin_type === PluginsTypes.PLAYBOOK &&
+          pluginInfo?.analyzers.length !== 0 && (
+            <div>
+              <h6 className="text-secondary">Analyzers &nbsp;</h6>
+              <ul>
+                {pluginInfo?.analyzers.map((analyzer) => (
+                  <li
+                    key={`plugininfocard-analyzer__${pluginInfo.name}-${analyzer}`}
+                  >
+                    <span>{analyzer}</span>
+                    {pluginInfo?.runtime_configuration.analyzers[analyzer] !==
+                      undefined &&
+                      Object.keys(
+                        pluginInfo?.runtime_configuration.analyzers[analyzer],
+                      ).length !== 0 && (
+                        <ul>
+                          <b>Parameters: </b>
+                          <code>
+                            {JSON.stringify(
+                              pluginInfo?.runtime_configuration.analyzers[
+                                analyzer
+                              ],
+                              null,
+                              2,
+                            )}
+                          </code>
+                        </ul>
+                      )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        {pluginInfo?.plugin_type === PluginsTypes.PLAYBOOK &&
+          pluginInfo?.connectors.length !== 0 && (
+            <div>
+              <h6 className="text-secondary">Connectors &nbsp;</h6>
+              <ul>
+                {pluginInfo?.connectors.map((connector) => (
+                  <li
+                    key={`plugininfocard-connector__${pluginInfo.name}-${connector}`}
+                  >
+                    <span>{connector}</span>
+                    {pluginInfo?.runtime_configuration.connectors[connector] !==
+                      undefined &&
+                      Object.keys(
+                        pluginInfo?.runtime_configuration.connectors[connector],
+                      ).length !== 0 && (
+                        <ul>
+                          <b>Parameters:</b>
+                          <li style={{ listStyleType: "square" }}>
+                            <code>
+                              {JSON.stringify(
+                                pluginInfo?.runtime_configuration.connectors[
+                                  connector
+                                ],
+                                null,
+                                2,
+                              )}
+                            </code>
+                          </li>
+                        </ul>
+                      )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         {pluginInfo?.plugin_type === PluginsTypes.PLAYBOOK && (
           <div>
             <h6 className="text-secondary">Advanced Settings &nbsp;</h6>

@@ -385,10 +385,17 @@ export default function ScanForm() {
         tlp: v.tlp,
         scan_mode: `${v.scan_mode}`,
         scan_check_time: v.scan_check_time,
+        runtime_configuration: v.runtime_configuration,
       }))
       .filter((item) => !item.isDisabled);
 
-  const updateAdvancedConfig = (tags, tlp, _scanMode, scanCheckTime) => {
+  const updateAdvancedConfig = (
+    tags,
+    tlp,
+    _scanMode,
+    scanCheckTime,
+    runtimeConfiguration,
+  ) => {
     formik.setFieldValue("tags", tags, false);
     formik.setFieldValue("tlp", tlp, false);
     formik.setFieldValue("scan_mode", _scanMode, false);
@@ -401,6 +408,7 @@ export default function ScanForm() {
         false,
       );
     }
+    formik.setFieldValue("runtime_configuration", runtimeConfiguration, false);
   };
 
   const updateSelectedPlaybook = (playbook) => {
@@ -410,6 +418,7 @@ export default function ScanForm() {
       playbook.tlp,
       playbook.scan_mode,
       playbook.scan_check_time,
+      playbook.runtime_configuration,
     );
   };
 
@@ -468,6 +477,7 @@ export default function ScanForm() {
         formik.initialValues.tlp,
         formik.initialValues.scan_mode,
         "01:00:00:00",
+        formik.initialValues.runtime_configuration,
       );
     }
     if (
@@ -486,6 +496,8 @@ export default function ScanForm() {
         updateSelectedPlaybook(
           playbookOptions(formik.values.classification)[0],
         );
+        formik.setFieldValue("analyzers", [], false); // reset
+        formik.setFieldValue("connectors", [], false); // reset
       }
     }
   };

@@ -346,8 +346,7 @@ export const playbookTableColumns = [
   {
     Header: "Analyzers",
     id: "analyzers",
-    accessor: (row) => Object.keys(row.analyzers),
-
+    accessor: (row) => row.analyzers,
     Cell: ({ value }) => (
       <PlaybooksCollapse value={value} pluginType_={PluginsTypes.ANALYZER} />
     ),
@@ -357,7 +356,7 @@ export const playbookTableColumns = [
   {
     Header: "Connectors",
     id: "connectors",
-    accessor: (row) => Object.keys(row.connectors),
+    accessor: (row) => row.connectors,
     Cell: ({ value }) => (
       <PlaybooksCollapse value={value} pluginType_={PluginsTypes.CONNECTOR} />
     ),

@@ -62,17 +62,23 @@ function createJobPayload(
     if (connectors.length) {
       payload.append("connectors_requested", connectors);
     }
-    // runtime configuration
-    if (runtimeConfig != null && Object.keys(runtimeConfig).length) {
-      const runtimeConfigTosend = runtimeConfig;
-      /* visualized is required from the backend so we need to send it.
-       Also it's useless to edit it, so it's not present in the UI and added only in the request.
-      */
-      if ("visualizers" in runtimeConfigTosend)
-        runtimeConfigTosend.visualizers = {};
-      payload.append("runtime_configuration", runtimeConfigTosend);
-    }
   }
+  // runtime configuration
+  if (runtimeConfig != null && Object.keys(runtimeConfig).length) {
+    const runtimeConfigTosend = runtimeConfig;
+    /* visualized is required from the backend so we need to send it.
+      Also it's useless to edit it, so it's not present in the UI and added only in the request.
+    */
+    if (!Object.keys(runtimeConfigTosend).includes("visualizers"))
+      runtimeConfigTosend.visualizers = {};
+    if (isSample)
+      payload.append(
+        "runtime_configuration",
+        JSON.stringify(runtimeConfigTosend),
+      );
+    else payload.append("runtime_configuration", runtimeConfigTosend);
+  }
+
   // advanced configs
   // tags
   if (tags.length) {

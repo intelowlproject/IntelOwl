@@ -151,7 +151,7 @@ export default function RecentScans({ classification, param }) {
       error={recentScansUserError}
       render={() => (
         <div>
-          <div className="d-flex justify-content-between my-3 align-items-end">
+          <div className="d-flex justify-content-between my-4 align-items-end">
             <h5 className="fw-bold mb-0">Recent Scans</h5>
             <small className="mx-2 text-gray">
               {allRecentScans?.length} total

@@ -113,13 +113,13 @@ describe("test ScanForm component with files", () => {
       expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
         files: new File([], ""),
         playbook_requested: "TEST_PLAYBOOK_FILE",
-        tlp: "AMBER",
-        scan_mode: "1",
-        runtime_configuration: {
+        runtime_configuration: JSON.stringify({
           analyzers: {},
           connectors: {},
           visualizers: {},
-        },
+        }),
+        tlp: "AMBER",
+        scan_mode: "1",
       });
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");

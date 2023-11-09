@@ -71,12 +71,10 @@ function createJobPayload(
     */
     if (!Object.keys(runtimeConfigTosend).includes("visualizers"))
       runtimeConfigTosend.visualizers = {};
-    if (isSample)
-      payload.append(
-        "runtime_configuration",
-        JSON.stringify(runtimeConfigTosend),
-      );
-    else payload.append("runtime_configuration", runtimeConfigTosend);
+    payload.append(
+      "runtime_configuration",
+      isSample ? JSON.stringify(runtimeConfigTosend) : runtimeConfigTosend,
+    );
   }
 
   // advanced configs

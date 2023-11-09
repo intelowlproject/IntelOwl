@@ -118,7 +118,15 @@ export const mockedUsePluginConfigurationStore = {
       run_hash: false,
       run_hash_type: "",
       not_supported_filetypes: [],
-      params: {},
+      params: {
+        query_type: {
+          type: "str",
+          description: "Test analyzer param description.",
+          required: false,
+          value: "AAAA",
+          is_secret: false,
+        },
+      },
       secrets: {},
       verification: {
         configured: true,

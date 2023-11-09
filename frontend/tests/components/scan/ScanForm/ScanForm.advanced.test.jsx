@@ -379,11 +379,11 @@ describe("ScanForm adavanced use", () => {
         tags_labels: "test tag",
         tlp: "GREEN",
         scan_mode: "1",
-        runtime_configuration: {
+        runtime_configuration: JSON.stringify({
           analyzers: {},
           connectors: {},
           visualizers: {},
-        },
+        }),
       });
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");

@@ -144,9 +144,13 @@ export function RuntimeConfigurationModal(props) {
       <ModalHeader className="bg-tertiary" toggle={toggle}>
         Edit Runtime Configuration
       </ModalHeader>
-      <ModalBody className="d-flex-start-start bg-body">
+      <ModalBody
+        className="d-flex-start-start bg-body"
+        id="edit_runtime_configuration-ModalBody"
+      >
         <ContentSection
           className="bg-darker"
+          id="edit_runtime_configuration-section"
           style={{ width: "45%", maxHeight: "590px", overflowY: "auto" }}
         >
           <small className="text-muted">

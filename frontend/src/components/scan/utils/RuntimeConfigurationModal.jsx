@@ -10,7 +10,12 @@ import { markdownToHtml } from "../../common/markdownToHtml";
 import { ScanTypes } from "../../../constants/advancedSettingsConst";
 
 // constants
-const stateSelector = (state) => [state.analyzers, state.connectors];
+const stateSelector = (state) => [
+  state.analyzers,
+  state.connectors,
+  state.visualizers,
+  state.pivots,
+];
 
 // components
 export function RuntimeConfigurationModal(props) {
@@ -18,64 +23,83 @@ export function RuntimeConfigurationModal(props) {
 
   const [jsonInput, setJsonInput] = React.useState({});
 
-  const [analyzers, connectors] = usePluginConfigurationStore(stateSelector);
+  const [analyzers, connectors, visualizers, pivots] =
+    usePluginConfigurationStore(stateSelector);
+
+  function calculateStore(pluginType) {
+    switch (pluginType) {
+      case "analyzers":
+        return analyzers;
+      case "connectors":
+        return connectors;
+      case "visualizers":
+        return visualizers;
+      case "pivots":
+        return pivots;
+      default:
+        return [];
+    }
+  }
 
   console.debug("RuntimeConfigurationModal - formik:");
   console.debug(formik);
 
-  const selectedAnalyzers =
-    formik.values.analysisOptionValues === ScanTypes.analyzers_and_connectors
-      ? formik.values.analyzers.map((x) => x.value)
-      : formik.values.playbook.analyzers;
-  const selectedConnectors =
-    formik.values.analysisOptionValues === ScanTypes.analyzers_and_connectors
-      ? formik.values.connectors.map((x) => x.value)
-      : formik.values.playbook.connectors;
-
-  // Extract selected plugin params (with description and type used by the side section)
   // IMPORTANT: We want to group the plugins in the categories (analyzers, connectors, etc...)
-  const combinedParamsMap = {};
+  const selectedPluginsInFormik = { analyzers: {}, connectors: {} };
+  const selectedPluginsParams = { analyzers: {}, connectors: {} };
+  const editableConfig = { analyzers: {}, connectors: {} };
+
+  // case 1: analysis with analyzers/connectors
   if (
-    formik.values.analysisOptionValues === ScanTypes.playbooks &&
-    Object.keys(formik.values.runtime_configuration)
+    formik.values.analysisOptionValues === ScanTypes.analyzers_and_connectors
   ) {
-    Object.keys(formik.values.runtime_configuration).forEach((key) => {
-      combinedParamsMap[key] = {};
+    selectedPluginsInFormik.analyzers = formik.values.analyzers.map(
+      (analyzer) => analyzer.value,
+    );
+    selectedPluginsInFormik.connectors = formik.values.connectors.map(
+      (connector) => connector.value,
+    );
+  }
+
+  // case 2: analysis with playbooks
+  if (formik.values.analysisOptionValues === ScanTypes.playbooks) {
+    Object.keys(formik.values.runtime_configuration).forEach((pluginType) => {
+      selectedPluginsInFormik[pluginType] = formik.values.playbook[pluginType];
     });
   }
-  combinedParamsMap.analyzers = {
-    // for each selected analyzer we extract the config and append it to the other configs
-    ...selectedAnalyzers.reduce(
-      (configurationsToDisplay, analyzerName) => ({
-        // in this way we add to the new object the previous object
-        ...configurationsToDisplay,
-        // find the params of the selected analyzer and add it
-        [analyzerName]: analyzers.find(
-          (analyzer) => analyzer.name === analyzerName,
-        )?.params,
-      }),
-      {},
-    ),
-  };
-  // same for the connectors
-  combinedParamsMap.connectors = {
-    ...selectedConnectors.reduce(
-      (configurationsToDisplay, connectorName) => ({
-        ...configurationsToDisplay,
-        [connectorName]: connectors.find(
-          (connector) => connector.name === connectorName,
-        )?.params,
-      }),
-      {},
-    ),
-  };
-  console.debug("RuntimeConfigurationModal - combinedParamsMap:");
-  console.debug(combinedParamsMap);
 
-  // Iterate each plugin and for each param extract the value
-  const defaultNameParamsMap = {};
-  Object.keys(combinedParamsMap).forEach((key) => {
-    defaultNameParamsMap[key] = Object.entries(combinedParamsMap[key]).reduce(
+  console.debug("RuntimeConfigurationModal - selectedPluginsInFormik:");
+  console.debug(selectedPluginsInFormik);
+
+  // Extract plugin default params from the store.
+  // Description and type are used in the side section.
+  Object.keys(selectedPluginsInFormik).forEach((pluginType) => {
+    selectedPluginsParams[pluginType] = {
+      // for each selected plugin we extract the config and append it to the other configs
+      ...selectedPluginsInFormik[pluginType].reduce(
+        (configurationsToDisplay, pluginName) => ({
+          // in this way we add to the new object the previous object
+          ...configurationsToDisplay,
+          // find the params in the store of the selected plugin and add it
+          [pluginName]: calculateStore(pluginType).find(
+            (plugin) => plugin.name === pluginName,
+          )?.params,
+        }),
+        {},
+      ),
+    };
+  });
+
+  console.debug("RuntimeConfigurationModal - selectedPluginsParams:");
+  console.debug(selectedPluginsParams);
+
+  /* this is the dict shown when the modal is open: load the default params and the previous saved config
+    (in case the user update the config, save and close and reopen the modal)
+  */
+  Object.keys(selectedPluginsInFormik).forEach((pluginType) => {
+    editableConfig[pluginType] = Object.entries(
+      selectedPluginsParams[pluginType],
+    ).reduce(
       (generalConfig, [pluginName, pluginParams]) => ({
         ...generalConfig,
         // For each param (dict) extract the value of the "value" key
@@ -86,23 +110,12 @@ export function RuntimeConfigurationModal(props) {
           }),
           {},
         ),
+        ...(formik.values.runtime_configuration[pluginType] || {}),
       }),
       {},
     );
   });
-  console.debug("RuntimeConfigurationModal - defaultNameParamsMap:");
-  console.debug(defaultNameParamsMap);
 
-  /* this is the dict shown when the modal is open: load the default params and the previous saved config
-    (in case the user update the config, save and close and reopen the modal)
-  */
-  const editableConfig = {};
-  Object.keys(combinedParamsMap).forEach((key) => {
-    editableConfig[key] = {
-      ...defaultNameParamsMap[key],
-      ...(formik.values.runtime_configuration[key] || {}),
-    };
-  });
   console.debug("RuntimeConfigurationModal - editableConfig:");
   console.debug(editableConfig);
 
@@ -110,12 +123,13 @@ export function RuntimeConfigurationModal(props) {
     // we only want to save configuration against plugins whose params dict is not empty or was modified
     if (jsonInput?.jsObject) {
       const runtimeCfg = {};
-      Object.keys(combinedParamsMap).forEach((key) => {
-        runtimeCfg[key] = Object.entries(jsonInput.jsObject[key]).reduce(
+      Object.keys(selectedPluginsParams).forEach((pluginType) => {
+        runtimeCfg[pluginType] = Object.entries(
+          jsonInput.jsObject[pluginType],
+        ).reduce(
           (acc, [name, params]) =>
             // we cannot exclude empty dict or it could erase "connectors: {}" and generate an error
-            JSON.stringify(defaultNameParamsMap[name]) !==
-            JSON.stringify(params)
+            JSON.stringify(editableConfig[name]) !== JSON.stringify(params)
               ? { ...acc, [name]: params }
               : acc,
           {},
@@ -188,11 +202,11 @@ export function RuntimeConfigurationModal(props) {
           className="ms-2 bg-darker"
           style={{ width: "60%", maxHeight: "590px", overflowY: "auto" }}
         >
-          {Object.keys(combinedParamsMap)
+          {Object.keys(selectedPluginsParams)
             .sort()
             .map((key) => (
               <div>
-                {Object.keys(combinedParamsMap[key]).length > 0 ? (
+                {Object.keys(selectedPluginsParams[key]).length > 0 ? (
                   <h5 className="text-accent">{key.toUpperCase()}:</h5>
                 ) : (
                   <h5 className="text-accent">
@@ -200,7 +214,7 @@ export function RuntimeConfigurationModal(props) {
                     <small className="text-muted fst-italic"> null</small>
                   </h5>
                 )}
-                {Object.entries(combinedParamsMap[key]).map(
+                {Object.entries(selectedPluginsParams[key]).map(
                   ([name, params]) => (
                     <div key={`editruntimeconf__${name}`}>
                       <h6 className="text-secondary px-3">{name}</h6>

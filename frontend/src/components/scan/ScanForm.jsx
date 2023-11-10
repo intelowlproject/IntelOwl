@@ -368,6 +368,8 @@ export default function ScanForm() {
         value: v.name,
         analyzers: v.analyzers,
         connectors: v.connectors,
+        visualizers: v.visualizers,
+        pivots: v.pivots,
         label: (
           <div className="d-flex justify-content-start align-items-start flex-column">
             <div className="d-flex justify-content-start align-items-baseline flex-column">

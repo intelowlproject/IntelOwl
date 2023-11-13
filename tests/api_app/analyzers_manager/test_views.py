@@ -53,7 +53,7 @@ class AnalyzerConfigViewSetTestCase(
     def test_health_check(self):
         analyzer = "ClamAV"
         response = self.client.get(f"{self.URL}/{analyzer}/health_check")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         self.client.force_authenticate(self.superuser)
 

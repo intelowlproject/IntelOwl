@@ -64,7 +64,7 @@ class CronTests(CustomTestCase):
 
     @if_mock_connections(skip("not working without connection"))
     def test_maxmind_updater(self):
-        maxmind.Maxmind._update()
+        maxmind.Maxmind.update()
         for db in maxmind.db_names:
             self.assertTrue(os.path.exists(db))
 
@@ -74,7 +74,7 @@ class CronTests(CustomTestCase):
         )
     )
     def test_talos_updater(self, mock_get=None):
-        db_file_path = talos.Talos._update()
+        db_file_path = talos.Talos.update()
         self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
@@ -83,7 +83,7 @@ class CronTests(CustomTestCase):
         )
     )
     def test_phishing_army_updater(self, mock_get=None):
-        db_file_path = phishing_army.PhishingArmy._update()
+        db_file_path = phishing_army.PhishingArmy.update()
         self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
@@ -92,15 +92,15 @@ class CronTests(CustomTestCase):
         )
     )
     def test_tor_updater(self, mock_get=None):
-        db_file_path = tor.Tor._update()
+        db_file_path = tor.Tor.update()
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_quark_updater(self):
         from quark.config import DIR_PATH
 
-        quark_engine.QuarkEngine._update()
+        quark_engine.QuarkEngine.update()
         self.assertTrue(os.path.exists(DIR_PATH))
 
     def test_yara_updater(self):
-        yara_scan.YaraScan._update()
+        yara_scan.YaraScan.update()
         self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))

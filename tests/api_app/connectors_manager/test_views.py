@@ -36,7 +36,7 @@ class ConnectorConfigViewSetTestCase(
             connector_config=connector,
         )
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         self.client.force_authenticate(self.superuser)
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")

@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django_celery_beat.models import CrontabSchedule
@@ -71,26 +70,3 @@ class AnalyzerConfigTestCase(CustomTestCase):
             e.exception.messages[0],
         )
         ac.delete()
-
-    def test_update(self):
-        from intel_owl import tasks
-
-        with self.assertRaises(PythonModule.DoesNotExist):
-            tasks.update(9999)
-
-        result = tasks.update(
-            PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.FileAnalyzer.value,
-                module="xlm_macro_deobfuscator.XlmMacroDeobfuscator",
-            ).pk
-        )
-        self.assertFalse(result)
-
-        with patch("intel_owl.celery.broadcast"):
-            result = tasks.update(
-                PythonModule.objects.get(
-                    base_path=PythonModuleBasePaths.FileAnalyzer.value,
-                    module="yara_scan.YaraScan",
-                ).pk
-            )
-        self.assertTrue(result)

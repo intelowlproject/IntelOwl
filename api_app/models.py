@@ -9,7 +9,11 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 from django.utils.timezone import now
 
-from api_app.interfaces import ModelWithOwnership
+from api_app.interfaces import (
+    HealthCheckAbstractModel,
+    OwnershipAbstractModel,
+    UpdateAbstractModel,
+)
 
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
@@ -624,7 +628,7 @@ class Parameter(models.Model):
         return self.python_module.python_class.config_model
 
 
-class PluginConfig(ModelWithOwnership):
+class PluginConfig(OwnershipAbstractModel):
     objects = PluginConfigQuerySet.as_manager()
     value = models.JSONField(blank=True, null=True)
 
@@ -702,7 +706,7 @@ class PluginConfig(ModelWithOwnership):
         ]
         indexes = [
             models.Index(fields=["owner", "for_organization", "parameter"]),
-        ] + ModelWithOwnership.Meta.indexes
+        ] + OwnershipAbstractModel.Meta.indexes
 
     @cached_property
     def config(self) -> "PythonConfig":
@@ -893,7 +897,7 @@ class AbstractReport(models.Model):
         return round(secs, 2)
 
 
-class PythonConfig(AbstractConfig):
+class PythonConfig(AbstractConfig, HealthCheckAbstractModel, UpdateAbstractModel):
     objects = PythonConfigQuerySet.as_manager()
     soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
     routing_key = models.CharField(

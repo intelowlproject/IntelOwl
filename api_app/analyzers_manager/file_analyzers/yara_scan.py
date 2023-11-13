@@ -399,7 +399,7 @@ class YaraScan(FileAnalyzer):
         return storage
 
     @classmethod
-    def _update(cls):
+    def update(cls):
         logger.info("Starting updating yara rules")
         storage = cls._create_storage()
         logger.info(f"Urls are {storage}")
@@ -409,3 +409,4 @@ class YaraScan(FileAnalyzer):
             repo.compile()
         logger.info("Finished updating yara rules")
         set_permissions(settings.YARA_RULES_PATH)
+        return True

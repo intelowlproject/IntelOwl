@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Dict
 
 import pypssl
 
@@ -11,8 +12,8 @@ from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 class CIRCL_PSSL(classes.ObservableAnalyzer):
     _pdns_credentials: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.__split_credentials = self._pdns_credentials.split("|")
         if len(self.__split_credentials) != 2:
             raise AnalyzerConfigurationException(

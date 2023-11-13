@@ -3,7 +3,7 @@
 
 import logging
 import time
-from typing import Optional
+from typing import Dict, Optional
 
 import requests
 
@@ -24,8 +24,8 @@ class VirusheeFileUpload(FileAnalyzer):
     force_scan: bool
     _api_key_name: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.__session = requests.Session()
         if not hasattr(self, "_api_key_name"):
             logger.info(f"{self.__repr__()} -> Continuing w/o API key..")

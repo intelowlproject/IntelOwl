@@ -35,7 +35,7 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
-from .interfaces import ModelWithOwnership
+from .interfaces import OwnershipAbstractModel
 from .models import (
     AbstractReport,
     Comment,
@@ -883,7 +883,7 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
 
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     class Meta:
-        model = ModelWithOwnership
+        model = OwnershipAbstractModel
         fields = ("for_organization", "owner")
         abstract = True
 
@@ -914,7 +914,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                 )
         return super().validate(attrs)
 
-    def to_representation(self, instance: ModelWithOwnership):
+    def to_representation(self, instance: OwnershipAbstractModel):
         result = super().to_representation(instance)
         result["owner"] = instance.owner.username if instance.owner else None
         return result

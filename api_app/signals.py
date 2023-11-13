@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+from typing import Type
 
 import django_celery_beat.apps
 from django import dispatch
@@ -9,7 +10,7 @@ from django.db import models
 from django.dispatch import receiver
 
 from api_app.helpers import calculate_md5
-from api_app.models import Job, Parameter, PluginConfig
+from api_app.models import Job, Parameter, PluginConfig, PythonConfig
 
 migrate_finished = dispatch.Signal()
 
@@ -67,3 +68,38 @@ def post_save_parameter(sender, instance: Parameter, *args, **kwargs):
 def post_delete_parameter(sender, instance: Parameter, *args, **kwargs):
     # delete list view cache
     instance.refresh_cache_keys()
+
+
+@receiver(models.signals.pre_save)
+def pre_save_python_config_periodic_tasks(
+    sender: Type[PythonConfig], instance: PythonConfig, *args, **kwargs
+):
+    if issubclass(sender, PythonConfig):
+        instance.generate_health_check_periodic_task()
+        instance.generate_update_periodic_task()
+
+
+@receiver(models.signals.post_delete)
+def post_delete_python_config_periodic_tasks(
+    sender: Type[PythonConfig], instance: PythonConfig, using, origin, *args, **kwargs
+):
+    if issubclass(sender, PythonConfig):
+        if hasattr(instance, "health_check_task") and instance.health_check_task:
+            instance.health_check_task.delete()
+
+        if hasattr(instance, "update_task") and instance.update_task:
+            instance.update_task.delete()
+
+
+@receiver(models.signals.post_save)
+def post_save_python_config_cache(sender, instance: PythonConfig, *args, **kwargs):
+    if issubclass(sender, PythonConfig):
+        instance.delete_class_cache_keys()
+
+
+@receiver(models.signals.post_delete)
+def post_delete_python_config_cache(
+    sender, instance: PythonConfig, using, origin, *args, **kwargs
+):
+    if issubclass(sender, PythonConfig):
+        instance.delete_class_cache_keys()

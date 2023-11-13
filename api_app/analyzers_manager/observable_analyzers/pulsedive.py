@@ -3,6 +3,7 @@
 
 import logging
 import time
+from typing import Dict
 
 import requests
 
@@ -24,8 +25,8 @@ class Pulsedive(ObservableAnalyzer):
     scan_mode: str
     _api_key_name: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         supported_scan_values = ["basic", "passive", "active"]
         if self.scan_mode not in supported_scan_values:
             raise AnalyzerConfigurationException(

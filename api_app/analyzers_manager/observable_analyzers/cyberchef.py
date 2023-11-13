@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import json
+from typing import Dict
 
 import requests
 from django.conf import settings
@@ -18,8 +19,8 @@ class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
     recipe_code: list
     output_type: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         if self.recipe_name:
             try:
                 try:

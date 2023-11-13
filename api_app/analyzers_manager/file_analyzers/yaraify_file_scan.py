@@ -4,6 +4,7 @@
 import json
 import logging
 import time
+from typing import Dict
 
 import requests
 
@@ -27,9 +28,9 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
     skip_noisy: bool
     skip_known: bool
 
-    def config(self):
+    def config(self, runtime_configuration: Dict):
         self.query = "lookup_hash"
-        YARAify.config(self)
+        YARAify.config(self, runtime_configuration)
         self.search_term = self.md5
 
         self.max_tries = 200

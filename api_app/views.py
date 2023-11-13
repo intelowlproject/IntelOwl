@@ -17,7 +17,7 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -868,21 +868,36 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         methods=["get"],
         detail=True,
         url_path="health_check",
-        permission_classes=[IsAdminUser],
     )
     def health_check(self, request, pk=None):
         logger.info(f"get healthcheck from user {request.user}, name {pk}")
-        obj: PythonConfig = self.get_object()
-        class_ = obj.python_module.python_class
+        config: PythonConfig = self.get_object()
+        python_obj = config.python_module.python_class(config)
         try:
-            if not hasattr(class_, "health_check") or not callable(class_.health_check):
-                raise NotImplementedError()
-            try:
-                health_status = class_.health_check(obj.name, request.user)
-            except Exception as e:
-                logger.info(e, stack_info=True)
-                raise ValidationError({"detail": "Unexpected exception raised"})
-        except NotImplementedError:
-            raise ValidationError({"detail": "No healthcheck implemented"})
+            health_status = python_obj.health_check(request.user)
+        except NotImplementedError as e:
+            raise ValidationError({"detail": str(e)})
+        except Exception as e:
+            logger.exception(e)
+            raise ValidationError({"detail": "Unexpected exception raised. Check the code."})
         else:
             return Response(data={"status": health_status}, status=status.HTTP_200_OK)
+
+    @action(
+        methods=["get"],
+        detail=True,
+        url_path="upgrade",
+    )
+    def upgrade(self, request, pk=None):
+        logger.info(f"get upgrade from user {request.user}, name {pk}")
+        obj: PythonConfig = self.get_object()
+        python_obj = obj.python_module.python_class(obj)
+        try:
+            update_status = python_obj.update()
+        except NotImplementedError as e:
+            raise ValidationError({"detail": str(e)})
+        except Exception as e:
+            logger.exception(e)
+            raise ValidationError({"detail": "Unexpected exception raised. Check the code."})
+        else:
+            return Response(data={"status": update_status}, status=status.HTTP_200_OK)

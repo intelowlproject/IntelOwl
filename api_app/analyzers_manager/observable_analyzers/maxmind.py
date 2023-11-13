@@ -35,7 +35,9 @@ class Maxmind(classes.ObservableAnalyzer):
             try:
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
-                    self._update_db(db, self._api_key_name)
+                    if not self._update_db(db, self._api_key_name):
+                        raise AnalyzerRunException(f"failed extraction of maxmind db {db},"
+                    f" reached max number of attempts")
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(
                         "database location does not exist"
@@ -67,7 +69,7 @@ class Maxmind(classes.ObservableAnalyzer):
         return None
 
     @classmethod
-    def _update_db(cls, db: str, api_key: str):
+    def _update_db(cls, db: str, api_key: str) -> bool:
         if not api_key:
             raise AnalyzerConfigurationException(
                 f"Unable to find api key for {cls.__name__}"
@@ -125,22 +127,22 @@ class Maxmind(classes.ObservableAnalyzer):
             if directory_found:
                 logger.info(f"maxmind directory found {downloaded_db_path}")
             else:
-                raise AnalyzerRunException(
-                    f"failed extraction of maxmind db {db_name_wo_ext},"
-                    f" reached max number of attempts"
-                )
+                return False
 
             logger.info(f"ended download of db {db_name_wo_ext} from maxmind")
+            return True
 
         except Exception as e:
-            traceback.print_exc()
-            logger.exception(str(e))
+            logger.exception(e)
+        return False
 
     @classmethod
-    def _update(cls):
+    def update(cls) -> bool:
         api_key = cls._get_api_key()
-        for db in db_names:
-            cls._update_db(db, api_key)
+        return all(
+            cls._update_db(db, api_key) for db in db_names
+        )
+
 
     @classmethod
     def _monkeypatch(cls):

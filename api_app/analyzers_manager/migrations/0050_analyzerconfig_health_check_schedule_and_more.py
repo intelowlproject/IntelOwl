@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("django_celery_beat", "0018_improve_crontab_helptext"),
-        ("analyzers_manager", "0048_rename_update_task"),
+        ("analyzers_manager", "0049_rename_update_task"),
     ]
 
     operations = [

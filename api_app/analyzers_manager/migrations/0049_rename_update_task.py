@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "analyzers_manager",
-            "0047_vt_removed_force_active_scan",
+            "0048_scan_analyzers",
         ),
     ]
 

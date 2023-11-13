@@ -886,12 +886,12 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             return Response(data={"status": health_status}, status=status.HTTP_200_OK)
 
     @action(
-        methods=["get"],
+        methods=["post"],
         detail=True,
         url_path="upgrade",
     )
-    def upgrade(self, request, pk=None):
-        logger.info(f"get upgrade from user {request.user}, name {pk}")
+    def pull(self, request, pk=None):
+        logger.info(f"post pull from user {request.user}, name {pk}")
         obj: PythonConfig = self.get_object()
         python_obj = obj.python_module.python_class(obj)
         try:

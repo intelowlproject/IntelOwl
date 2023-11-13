@@ -310,7 +310,8 @@ class VisualizerTestCase(CustomTestCase):
         ar = AnalyzerReport.objects.create(
             config=pc.analyzers.first(), job=job, task_id=uuid()
         )
-        v = MockUpVisualizer(vc, job.pk, {}, uuid())
+        v = MockUpVisualizer(vc)
+        v.job_id = job.pk
         self.assertEqual(list(v.analyzer_reports()), [ar])
         ar.delete()
         job.delete()

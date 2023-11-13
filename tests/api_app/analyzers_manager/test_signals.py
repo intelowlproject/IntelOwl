@@ -24,7 +24,7 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
             update_schedule=crontab,
         )
         self.assertIsNotNone(ac.update_task)
-        self.assertEqual(ac.update_task.name, "TestAnalyzer")
+        self.assertEqual(ac.update_task.name, "TestUpdateAnalyzerConfig")
         self.assertEqual(ac.update_task.task, "intel_owl.tasks.update")
         # this is false because in the tests we have
         # REPO_DOWNLOADER_ENABLED set to False

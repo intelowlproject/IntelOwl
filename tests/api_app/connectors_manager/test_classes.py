@@ -20,12 +20,6 @@ class ConnectorTestCase(CustomTestCase):
     ]
 
     def test_health_check(self):
-        class MockUpConnector(Connector):
-            def run(self) -> dict:
-                return {}
-
-        with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test", self.user)
         pm = PythonModule.objects.get(
             base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
         )
@@ -36,12 +30,20 @@ class ConnectorTestCase(CustomTestCase):
             disabled=True,
             maximum_tlp="CLEAR",
         )
+
+        class MockUpConnector(Connector):
+            def run(self) -> dict:
+                return {}
+
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test", self.user)
+            MockUpConnector(cc).health_check(self.user)
+
+        with self.assertRaises(ConnectorRunException):
+            MockUpConnector(cc).health_check(self.user)
         cc.disabled = False
         cc.save()
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test", self.user)
+            MockUpConnector(cc).health_check(self.user)
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
@@ -49,7 +51,7 @@ class ConnectorTestCase(CustomTestCase):
             connector_config=cc,
         )
         with patch("requests.head"):
-            result = MockUpConnector.health_check("test", self.user)
+            result = MockUpConnector(cc).health_check(self.user)
         self.assertTrue(result)
         cc.delete()
         pc.delete()
@@ -81,11 +83,12 @@ class ConnectorTestCase(CustomTestCase):
             maximum_tlp="CLEAR",
             run_on_failure=False,
         )
+
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector(cc, job.pk, {}, uuid()).before_run()
+            MockUpConnector(cc).before_run()
         cc.run_on_failure = True
         cc.save()
-        MockUpConnector(cc, job.pk, {}, uuid()).before_run()
+        MockUpConnector(cc).before_run()
         cc.delete()
         job.delete()
 

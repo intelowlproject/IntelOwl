@@ -121,11 +121,11 @@ class FileAnalyzerTestCase(CustomTestCase):
                         )
                         _uuid = uuid()
                         sub = subclass(
-                            config, job.pk, runtime_configuration={}, task_id=_uuid
+                            config,
                         )
                         signal.alarm(timeout_seconds)
                         try:
-                            sub.start()
+                            sub.start(job.pk, runtime_configuration={}, task_id=_uuid)
                         except Exception as e:
                             self.fail(
                                 f"Analyzer {subclass.__name__} "
@@ -150,14 +150,14 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         "api_app/fixtures/0001_user.json",
     ]
 
-    def test_post_init(self):
+    def test_config(self):
         config = AnalyzerConfig.objects.first()
         job = Job.objects.create(
             observable_name="test.com", observable_classification="domain"
         )
-        oa = MockUpObservableAnalyzer(
-            config, job.pk, runtime_configuration={}, task_id=uuid()
-        )
+        oa = MockUpObservableAnalyzer(config)
+        oa.job_id = job.pk
+        oa.config({})
         self.assertEqual(oa.observable_name, "test.com")
         self.assertEqual(oa.observable_classification, "domain")
         job.delete()
@@ -222,11 +222,11 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                     )
                     job.analyzers_to_execute.set([config])
                     sub = subclass(
-                        config, job.pk, runtime_configuration={}, task_id=uuid()
+                        config,
                     )
                     signal.alarm(timeout_seconds)
                     try:
-                        sub.start()
+                        sub.start(job.pk, runtime_configuration={}, task_id=uuid())
                     except TimeoutError:
                         self.fail(
                             f"Analyzer {subclass.__name__}"

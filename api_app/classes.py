@@ -267,4 +267,4 @@ class Plugin(metaclass=ABCMeta):
                     return False
                 else:
                     return True
-        raise NotImplementedError(f"Plugin {self.name} has no url parameter.")
+        raise NotImplementedError(f"No healthcheck implemented")

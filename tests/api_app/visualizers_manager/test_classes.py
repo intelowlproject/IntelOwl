@@ -351,10 +351,10 @@ class VisualizerTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
-                sub = subclass(config, job.pk, {}, uuid())
+                sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start()
+                    sub.start(job.pk, {}, uuid())
                 except Exception as e:
                     self.fail(
                         f"Visualizer {subclass.__name__}"

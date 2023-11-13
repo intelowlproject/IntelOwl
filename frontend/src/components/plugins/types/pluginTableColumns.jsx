@@ -284,17 +284,9 @@ export const pivotTableColumns = [
     Filter: DefaultColumnFilter,
   },
   {
-    Header: "Playbook executed",
+    Header: "Playbook to execute",
     id: "playbook",
     accessor: "playbook_to_execute",
-    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
-    Filter: SelectColumnFilter,
-    maxWidth: 145,
-  },
-  {
-    Header: "Related config",
-    id: "related_config",
-    accessor: "related_config",
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     Filter: SelectColumnFilter,
     maxWidth: 145,
@@ -490,7 +482,7 @@ export const ingestorTableColumns = [
     minWidth: 300,
   },
   {
-    Header: "Playbook executed",
+    Header: "Playbook to execute",
     id: "playbook",
     accessor: "playbook_to_execute",
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,

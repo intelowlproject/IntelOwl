@@ -1080,7 +1080,7 @@ describe("test JobOverview (job report)", () => {
   });
 
   test("move from raw-analyzer to raw-full", async () => {
-    render(
+    const { container } = render(
       <BrowserRouter>
         <JobOverview
           isRunningJob={false}
@@ -1174,6 +1174,10 @@ describe("test JobOverview (job report)", () => {
 
     await user.click(fullReport);
     expect(global.location.pathname).toEqual("/jobs/10/raw/full");
+    const fullReportSection = container.querySelector(
+      `#jobfullreport-jsoninput-10`,
+    );
+    expect(fullReportSection).toBeInTheDocument();
   });
 
   test("move from raw-visualizer to raw-analyzer", async () => {

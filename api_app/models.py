@@ -54,11 +54,7 @@ from api_app.queryset import (
     PluginConfigQuerySet,
     PythonConfigQuerySet,
 )
-from api_app.validators import (
-    plugin_name_validator,
-    validate_routing_key,
-    validate_runtime_configuration,
-)
+from api_app.validators import plugin_name_validator, validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
@@ -900,9 +896,7 @@ class AbstractReport(models.Model):
 class PythonConfig(AbstractConfig, HealthCheckAbstractModel, UpdateAbstractModel):
     objects = PythonConfigQuerySet.as_manager()
     soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
-    routing_key = models.CharField(
-        max_length=50, validators=[validate_routing_key], default="default"
-    )
+    routing_key = models.CharField(max_length=50, default="default")
     python_module = models.ForeignKey(
         PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
     )
@@ -913,6 +907,15 @@ class PythonConfig(AbstractConfig, HealthCheckAbstractModel, UpdateAbstractModel
             models.Index(fields=("python_module", "disabled")),
         ]
         ordering = ["name", "disabled"]
+
+    def get_routing_key(self) -> str:
+        if self.routing_key not in settings.CELERY_QUEUES:
+            logger.warning(
+                f"{self.name}: you have no worker for {self.routing_key}."
+                f" Using {settings.DEFAULT_QUEUE} queue."
+            )
+            return settings.DEFAULT_QUEUE
+        return self.routing_key
 
     @property
     def parameters(self) -> ParameterQuerySet:
@@ -1013,7 +1016,7 @@ class PythonConfig(AbstractConfig, HealthCheckAbstractModel, UpdateAbstractModel
 
     @property
     def queue(self):
-        return get_queue_name(self.routing_key)
+        return get_queue_name(self.get_routing_key())
 
     @property
     def options(self) -> QuerySet:

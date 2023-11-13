@@ -47,6 +47,12 @@ jest.mock("../../../../src/stores/useOrganizationStore", () => ({
       fetchOnlyBasicInfo: () => {},
       refetchMembers: () => {},
       refetchInvs: () => {},
+      isUserAdmin: (username) => {
+        if (["user_owner", "user_admin"].includes(username)) {
+          return true;
+        }
+        return false;
+      },
     }),
   ),
 }));

@@ -6,17 +6,20 @@ import { MdEdit, MdDelete } from "react-icons/md";
 import { ContentSection, DateHoverable, IconButton } from "@certego/certego-ui";
 
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
+import { useAuthStore } from "../../../stores/useAuthStore";
 import { deleteInvitation } from "../orgApi";
 import { InviteButton } from "./InviteButton";
 
 export function PendingInvitationsList() {
   // consume store
-  const { pendingInvitations, refetchInvs, isUserOwner } = useOrganizationStore(
+  const [user] = useAuthStore((state) => [state.user]);
+
+  const { pendingInvitations, refetchInvs, isUserAdmin } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         pendingInvitations: state.pendingInvitations,
         refetchInvs: state.refetchInvs,
-        isUserOwner: state.isUserOwner,
+        isUserAdmin: state.isUserAdmin,
       }),
       [],
     ),
@@ -44,7 +47,7 @@ export function PendingInvitationsList() {
             </small>
           </div>
           <div>
-            {isUserOwner && (
+            {isUserAdmin(user.username) && (
               <ButtonGroup>
                 <InviteButton onCreate={refetchInvs} />
                 <IconButton
@@ -66,30 +69,34 @@ export function PendingInvitationsList() {
         <section>
           {pendingInvitations?.length ? (
             <ol>
-              {pendingInvitations.map(({ id, user, created_at: invitedAt }) => (
-                <li key={`pendinvinvlist-${id}`}>
-                  <div className="d-flex flex-wrap">
-                    <Col sm={6}>{user?.username}</Col>
-                    <Col sm={5}>
-                      <DateHoverable
-                        date={invitedAt}
-                        format="PPP"
-                        className="text-secondary user-select-none"
-                        title="Invite sent date"
-                      />
-                    </Col>
-                    <Col sm={1}>
-                      {showActions && (
-                        <MdDelete
-                          className="text-danger pointer small"
-                          title="delete invitation"
-                          onClick={() => deleteInvitationCb(id, user?.username)}
+              {pendingInvitations.map(
+                ({ id, user: invitedUser, created_at: invitedAt }) => (
+                  <li key={`pendinvinvlist-${id}`}>
+                    <div className="d-flex flex-wrap">
+                      <Col sm={6}>{invitedUser?.username}</Col>
+                      <Col sm={5}>
+                        <DateHoverable
+                          value={invitedAt}
+                          format="do MMMM yyyy"
+                          className="text-secondary user-select-none"
+                          title="Invite sent date"
                         />
-                      )}
-                    </Col>
-                  </div>
-                </li>
-              ))}
+                      </Col>
+                      <Col sm={1}>
+                        {showActions && (
+                          <MdDelete
+                            className="text-danger pointer small"
+                            title="delete invitation"
+                            onClick={() =>
+                              deleteInvitationCb(id, invitedUser?.username)
+                            }
+                          />
+                        )}
+                      </Col>
+                    </div>
+                  </li>
+                ),
+              )}
             </ol>
           ) : null}
         </section>

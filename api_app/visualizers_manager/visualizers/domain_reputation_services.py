@@ -177,7 +177,7 @@ class DomainReputationServices(Visualizer):
                     )
                     for p in pulses
                 ],
-                open=True,
+                start_open=True,
                 max_elements_number=5,
                 report=analyzer_report,
                 disable=disabled,

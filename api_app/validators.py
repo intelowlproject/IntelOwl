@@ -12,14 +12,6 @@ plugin_name_validator = RegexValidator(
 )
 
 
-def validate_routing_key(value):
-    from django.conf import settings
-
-    if value not in settings.CELERY_QUEUES:
-        raise ValidationError(f"Routing key {value} is not supported")
-    return True
-
-
 def validate_schema(value, schema):
     try:
         return jsonschema.validate(value, schema=schema)

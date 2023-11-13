@@ -21,7 +21,6 @@ class VirusheeFileUpload(FileAnalyzer):
     poll_distance = 10
     base_url = "https://api.virushee.com"
 
-    force_scan: bool
     _api_key_name: str
 
     def config(self, runtime_configuration: Dict):
@@ -31,6 +30,7 @@ class VirusheeFileUpload(FileAnalyzer):
             logger.info(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
             self.__session.headers["X-API-Key"] = self._api_key_name
+        self.force_scan = self._job.tlp == self._job.TLP.CLEAR.value
 
     def run(self):
         binary = self.read_file_bytes()

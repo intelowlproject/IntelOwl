@@ -3,8 +3,6 @@
 import django.core.validators
 from django.db import migrations, models
 
-import api_app.validators
-
 
 def migrate(apps, schema_editor):
     Config = apps.get_model("connectors_manager", "ConnectorConfig")
@@ -36,7 +34,6 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 default="default",
                 max_length=50,
-                validators=[api_app.validators.validate_routing_key],
             ),
         ),
         migrations.AddField(

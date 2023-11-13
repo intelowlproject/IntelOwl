@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 class YARAifyFileScan(FileAnalyzer, YARAify):
     _api_key_identifier: str
-    send_file: bool
     clamav_scan: bool
     unpack: bool
     share_file: bool
@@ -35,6 +34,8 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
 
         self.max_tries = 200
         self.poll_distance = 3
+
+        self.send_file = self._job.tlp == self._job.TLP.CLEAR.value
         if self.send_file and not hasattr(self, "_api_key_identifier"):
             raise AnalyzerConfigurationException(
                 "Unable to send file without having api_key_identifier set"

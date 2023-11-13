@@ -32,6 +32,7 @@ import {
   Loader,
   MultiSelectDropdownInput,
   selectStyles,
+  useDebounceInput,
 } from "@certego/certego-ui";
 
 import {
@@ -402,13 +403,7 @@ export default function ScanForm() {
   };
 
   // wait the user terminated to typing and then perform the request to recent scans
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setRecentScansInput(sanitizeObservable(inputValue));
-      console.debug(inputValue);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [inputValue]);
+  useDebounceInput(inputValue, 1000, setRecentScansInput);
 
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
@@ -1003,7 +998,7 @@ export default function ScanForm() {
           param={
             formik.values.files.length
               ? formik.values.files[0]
-              : recentScansInput
+              : sanitizeObservable(recentScansInput)
           }
         />
       </ContentSection>

@@ -18,7 +18,6 @@ class IntezerScan(FileAnalyzer):
     soft_time_limit: int
     disable_dynamic_unpacking: bool
     disable_static_unpacking: bool
-    upload_file: bool
     _api_key_name: str
 
     def config(self, runtime_configuration: Dict):
@@ -27,6 +26,8 @@ class IntezerScan(FileAnalyzer):
         self.timeout = self.soft_time_limit - 5
         # interval
         self.poll_interval = 3
+
+        self.upload_file = self._job.tlp == self._job.TLP.CLEAR.value
 
         intezer_api.set_global_api(api_key=self._api_key_name)
 

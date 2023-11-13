@@ -91,7 +91,7 @@ class Pivot(Visualizer):
                     ),
                     value=[self.HList(value=children_content)],
                     disable=False,
-                    open=True,
+                    start_open=True,
                 )
             )
         page.add_level(

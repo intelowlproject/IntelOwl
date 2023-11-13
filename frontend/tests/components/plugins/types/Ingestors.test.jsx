@@ -58,7 +58,7 @@ describe("test Ingestors component", () => {
     });
     expect(descriptionColumnHeader).toBeInTheDocument();
     const playbookExecutedColumnHeader = screen.getByRole("columnheader", {
-      name: "Playbook executed All",
+      name: "Playbook to execute All",
     });
     expect(playbookExecutedColumnHeader).toBeInTheDocument();
     const scheduleColumnHeader = screen.getByRole("columnheader", {

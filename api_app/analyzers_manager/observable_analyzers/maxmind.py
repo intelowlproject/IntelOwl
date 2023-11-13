@@ -37,7 +37,7 @@ class Maxmind(classes.ObservableAnalyzer):
                     if not self._update_db(db, self._api_key_name):
                         raise AnalyzerRunException(
                             f"failed extraction of maxmind db {db},"
-                            f" reached max number of attempts"
+                            " reached max number of attempts"
                         )
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(

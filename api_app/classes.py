@@ -231,7 +231,7 @@ class Plugin(metaclass=ABCMeta):
 
     @classmethod
     def update(cls) -> bool:
-        raise NotImplementedError(f"No update implemented")
+        raise NotImplementedError("No update implemented")
 
     def health_check(self, user: User = None) -> bool:
         for param in (

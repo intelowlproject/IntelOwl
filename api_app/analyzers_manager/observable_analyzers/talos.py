@@ -24,7 +24,6 @@ class Talos(classes.ObservableAnalyzer):
             if not self.update():
                 raise AnalyzerRunException("Failed extraction of talos db")
 
-
         if not os.path.exists(database_location):
             raise AnalyzerRunException(
                 f"database location {database_location} does not exist"

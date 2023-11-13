@@ -879,7 +879,9 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             raise ValidationError({"detail": str(e)})
         except Exception as e:
             logger.exception(e)
-            raise ValidationError({"detail": "Unexpected exception raised. Check the code."})
+            raise ValidationError(
+                {"detail": "Unexpected exception raised. Check the code."}
+            )
         else:
             return Response(data={"status": health_status}, status=status.HTTP_200_OK)
 
@@ -898,6 +900,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             raise ValidationError({"detail": str(e)})
         except Exception as e:
             logger.exception(e)
-            raise ValidationError({"detail": "Unexpected exception raised. Check the code."})
+            raise ValidationError(
+                {"detail": "Unexpected exception raised. Check the code."}
+            )
         else:
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)

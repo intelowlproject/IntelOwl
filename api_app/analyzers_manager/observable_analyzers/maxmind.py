@@ -6,7 +6,6 @@ import logging
 import os
 import shutil
 import tarfile
-import traceback
 from typing import Optional
 
 import maxminddb
@@ -36,8 +35,10 @@ class Maxmind(classes.ObservableAnalyzer):
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
                     if not self._update_db(db, self._api_key_name):
-                        raise AnalyzerRunException(f"failed extraction of maxmind db {db},"
-                    f" reached max number of attempts")
+                        raise AnalyzerRunException(
+                            f"failed extraction of maxmind db {db},"
+                            f" reached max number of attempts"
+                        )
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(
                         "database location does not exist"
@@ -139,10 +140,7 @@ class Maxmind(classes.ObservableAnalyzer):
     @classmethod
     def update(cls) -> bool:
         api_key = cls._get_api_key()
-        return all(
-            cls._update_db(db, api_key) for db in db_names
-        )
-
+        return all(cls._update_db(db, api_key) for db in db_names)
 
     @classmethod
     def _monkeypatch(cls):

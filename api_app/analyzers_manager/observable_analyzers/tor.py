@@ -4,7 +4,6 @@
 import logging
 import os
 import re
-import traceback
 
 import requests
 from django.conf import settings

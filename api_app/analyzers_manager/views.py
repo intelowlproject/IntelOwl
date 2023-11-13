@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-
 from ..views import PluginActionViewSet, PythonConfigViewSet
 from .filters import AnalyzerConfigFilter
 from .models import AnalyzerReport

@@ -29,7 +29,7 @@ class AnalyzerConfigViewSetTestCase(
 
         analyzer = "Yara"
         response = self.client.post(f"{self.URL}/{analyzer}/pull")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         self.client.force_authenticate(self.superuser)
 

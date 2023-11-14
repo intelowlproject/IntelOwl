@@ -28,6 +28,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
     skip_known: bool
 
     def config(self, runtime_configuration: Dict):
+        FileAnalyzer.config(self, runtime_configuration)
         self.query = "lookup_hash"
         YARAify.config(self, runtime_configuration)
         self.search_term = self.md5

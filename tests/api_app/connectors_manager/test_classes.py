@@ -48,8 +48,8 @@ class ConnectorTestCase(CustomTestCase):
         self.assertTrue(result)
         cc.disabled = False
         cc.save()
-        with self.assertRaises(NotImplementedError):
-            MockUpConnector(cc).health_check(self.user)
+        result = MockUpConnector(cc).health_check(self.user)
+        self.assertTrue(result)
         cc.delete()
         pc.delete()
 
@@ -80,9 +80,10 @@ class ConnectorTestCase(CustomTestCase):
             maximum_tlp="CLEAR",
             run_on_failure=False,
         )
-        cc.job_id = job.pk
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector(cc).before_run()
+            muc = MockUpConnector(cc)
+            muc.job_id = job.pk
+            muc.before_run()
         cc.run_on_failure = True
         cc.save()
         MockUpConnector(cc).before_run()

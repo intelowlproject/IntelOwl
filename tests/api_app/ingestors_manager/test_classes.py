@@ -38,7 +38,7 @@ class IngestorTestCase(CustomTestCase):
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start(None, runtime_configuration={}, task_id=None)
+                    sub.start(None, {}, None)
                 except Exception as e:
                     self.fail(
                         f"Ingestor {subclass.__name__}"

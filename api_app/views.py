@@ -888,7 +888,7 @@ class PythonConfigViewSet(AbstractConfigViewSet):
     @action(
         methods=["post"],
         detail=True,
-        url_path="upgrade",
+        url_path="pull",
     )
     def pull(self, request, pk=None):
         logger.info(f"post pull from user {request.user}, name {pk}")

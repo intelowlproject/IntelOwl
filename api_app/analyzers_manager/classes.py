@@ -459,8 +459,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 ),
             )
         )
-        for mock_fn in patches:
-            self.start = mock_fn(self.start)
+        return super()._monkeypatch(patches)
 
     def health_check(self, user: User) -> bool:
         """

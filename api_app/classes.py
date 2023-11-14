@@ -172,7 +172,9 @@ class Plugin(metaclass=ABCMeta):
             f" '{err}'"
         )
 
-    def start(self, job_id: int, runtime_configuration: dict, task_id: str, **kwargs):
+    def start(
+        self, job_id: int, runtime_configuration: dict, task_id: str, *args, **kwargs
+    ):
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`

@@ -35,14 +35,7 @@ class ConnectorTestCase(CustomTestCase):
             def run(self) -> dict:
                 return {}
 
-        with self.assertRaises(ConnectorRunException):
-            MockUpConnector(cc).health_check(self.user)
-
-        with self.assertRaises(ConnectorRunException):
-            MockUpConnector(cc).health_check(self.user)
-        cc.disabled = False
-        cc.save()
-        with self.assertRaises(ConnectorRunException):
+        with self.assertRaises(NotImplementedError):
             MockUpConnector(cc).health_check(self.user)
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
@@ -53,6 +46,10 @@ class ConnectorTestCase(CustomTestCase):
         with patch("requests.head"):
             result = MockUpConnector(cc).health_check(self.user)
         self.assertTrue(result)
+        cc.disabled = False
+        cc.save()
+        with self.assertRaises(NotImplementedError):
+            MockUpConnector(cc).health_check(self.user)
         cc.delete()
         pc.delete()
 
@@ -83,7 +80,7 @@ class ConnectorTestCase(CustomTestCase):
             maximum_tlp="CLEAR",
             run_on_failure=False,
         )
-
+        cc.job_id = job.pk
         with self.assertRaises(ConnectorRunException):
             MockUpConnector(cc).before_run()
         cc.run_on_failure = True

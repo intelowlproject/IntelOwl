@@ -125,7 +125,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                         )
                         signal.alarm(timeout_seconds)
                         try:
-                            sub.start(job.pk, runtime_configuration={}, task_id=_uuid)
+                            sub.start(job.pk, {}, _uuid)
                         except Exception as e:
                             self.fail(
                                 f"Analyzer {subclass.__name__} "
@@ -226,7 +226,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                     )
                     signal.alarm(timeout_seconds)
                     try:
-                        sub.start(job.pk, runtime_configuration={}, task_id=uuid())
+                        sub.start(job.pk, {}, _uuid)
                     except TimeoutError:
                         self.fail(
                             f"Analyzer {subclass.__name__}"

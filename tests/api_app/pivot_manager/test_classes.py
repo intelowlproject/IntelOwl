@@ -31,7 +31,7 @@ class PivotTestCase(CustomTestCase):
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start(job_id=None, runtime_configuration={}, task_id=None)
+                    sub.start(None, {}, None)
                 except Exception as e:
                     self.fail(
                         f"Pivot {subclass.__name__}"

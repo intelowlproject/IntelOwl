@@ -127,10 +127,11 @@ export function RuntimeConfigurationModal(props) {
         runtimeCfg[pluginType] = Object.entries(
           jsonInput.jsObject[pluginType],
         ).reduce(
-          (acc, [name, params]) =>
+          (acc, [pluginName, pluginParams]) =>
             // we cannot exclude empty dict or it could erase "connectors: {}" and generate an error
-            JSON.stringify(editableConfig[name]) !== JSON.stringify(params)
-              ? { ...acc, [name]: params }
+            JSON.stringify(editableConfig[pluginType][pluginName]) !==
+            JSON.stringify(pluginParams)
+              ? { ...acc, [pluginName]: pluginParams }
               : acc,
           {},
         );

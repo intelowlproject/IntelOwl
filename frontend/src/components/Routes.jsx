@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import { FallBackLoading } from "@certego/certego-ui";
+import { Navigate, useParams } from "react-router-dom";
 
 import AuthGuard from "../wrappers/AuthGuard";
 import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
@@ -25,6 +26,12 @@ const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
 /*
 lazy imports to enable code splitting
 */
+
+function JobRedirect() {
+  const params = useParams();
+  const { id } = params;
+  return <Navigate to={`/jobs/${id}/visualizer`} replace />;
+}
 
 // public components
 const publicRoutesLazy = [
@@ -121,6 +128,15 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <JobsTable />
+      </Suspense>
+    ),
+  },
+  // this is needed for retrocompatibility
+  {
+    path: `/jobs/:id`,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <JobRedirect />
       </Suspense>
     ),
   },

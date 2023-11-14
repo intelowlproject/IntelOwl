@@ -7,6 +7,7 @@ import {
   DefaultColumnFilter,
   SelectOptionsFilter,
   BooleanIcon,
+  CopyToClipboardButton,
 } from "@certego/certego-ui";
 
 import { PluginsTypes } from "../../../constants/pluginConst";
@@ -87,13 +88,25 @@ const pluginTableColumns = [
     accessor: (r) => r,
     Cell: ({ value }) => <PluginInfoPopoverIcon pluginInfo={value} />,
     disableSortBy: true,
-    maxWidth: 80,
+    maxWidth: 50,
   },
   {
     Header: "Name",
     id: "name",
     accessor: "name",
+    Cell: ({ value }) => (
+      <CopyToClipboardButton
+        showOnHover
+        id={`table-user-${value}`}
+        key={`table-user-${value}`}
+        text={value}
+        className="d-block text-truncate"
+      >
+        {value}
+      </CopyToClipboardButton>
+    ),
     Filter: DefaultColumnFilter,
+    minWidth: 150,
   },
   {
     Header: "Active",
@@ -103,7 +116,7 @@ const pluginTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 100,
+    maxWidth: 60,
   },
 ];
 
@@ -123,7 +136,7 @@ export const analyzersTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 100,
+    maxWidth: 60,
   },
   {
     Header: "Description",
@@ -132,6 +145,7 @@ export const analyzersTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
+    minWidth: 180,
   },
   {
     Header: "Type",
@@ -140,6 +154,7 @@ export const analyzersTableColumns = [
     disableSortBy: true,
     Filter: SelectOptionsFilter,
     selectOptions: [JobTypes.FILE, JobTypes.OBSERVABLE],
+    maxWidth: 70,
   },
   {
     Header: "Supported types",
@@ -174,7 +189,7 @@ export const analyzersTableColumns = [
     Cell: ({ value }) => <TLPTag value={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: TlpChoices,
-    maxWidth: 120,
+    maxWidth: 80,
   },
   {
     Header: "Actions",
@@ -197,7 +212,7 @@ export const analyzersTableColumns = [
         )}
       </div>
     ),
-    maxWidth: 125,
+    maxWidth: 100,
   },
 ];
 
@@ -217,7 +232,7 @@ export const connectorTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 100,
+    maxWidth: 60,
   },
   {
     Header: "Description",
@@ -226,6 +241,7 @@ export const connectorTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
+    minWidth: 300,
   },
   {
     Header: "Maximum TLP",
@@ -234,6 +250,7 @@ export const connectorTableColumns = [
     Cell: ({ value }) => <TLPTag value={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: TlpChoices,
+    maxWidth: 80,
   },
   {
     Header: "Actions",
@@ -273,7 +290,7 @@ export const pivotTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 100,
+    maxWidth: 60,
   },
   {
     Header: "Description",
@@ -282,6 +299,7 @@ export const pivotTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
+    minWidth: 200,
   },
   {
     Header: "Playbook to execute",
@@ -319,7 +337,7 @@ export const playbookTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 200,
+    minWidth: 180,
   },
   {
     Header: "Supported types",
@@ -334,6 +352,7 @@ export const playbookTableColumns = [
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
+    maxWidth: 120,
   },
   {
     Header: "Analyzers",
@@ -344,6 +363,7 @@ export const playbookTableColumns = [
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
+    maxWidth: 145,
   },
   {
     Header: "Connectors",
@@ -396,7 +416,7 @@ export const playbookTableColumns = [
         )}
       </div>
     ),
-    maxWidth: 125,
+    maxWidth: 100,
   },
 ];
 
@@ -416,7 +436,7 @@ export const visualizerTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 100,
+    maxWidth: 60,
   },
   {
     Header: "Description",
@@ -425,15 +445,34 @@ export const visualizerTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 300,
+    minWidth: 280,
   },
   {
     Header: "Playbook connected to",
-    id: "playbook",
-    accessor: "playbook",
-    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    id: "playbooks",
+    accessor: (row) => row.playbooks,
+    Cell: ({ value }) => (
+      <ul
+        key={`visualizers-playbooks__${value}`}
+        className="d-flex flex-column align-items-start"
+      >
+        {value?.sort().map((v) => (
+          <li key={v}>
+            <CopyToClipboardButton
+              showOnHover
+              id={`table-user-${v}`}
+              key={`table-user-${v}`}
+              text={v}
+              className="d-block text-truncate"
+            >
+              {v}
+            </CopyToClipboardButton>
+          </li>
+        ))}
+      </ul>
+    ),
     Filter: SelectColumnFilter,
-    maxWidth: 145,
+    minWidth: 170,
   },
   {
     Header: "Actions",
@@ -450,7 +489,7 @@ export const visualizerTableColumns = [
         />
       </div>
     ),
-    maxWidth: 125,
+    maxWidth: 90,
   },
 ];
 // Visualizers columns: these columns are shown for the visualizers
@@ -469,7 +508,7 @@ export const ingestorTableColumns = [
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
-    maxWidth: 100,
+    maxWidth: 60,
   },
   {
     Header: "Description",
@@ -486,7 +525,7 @@ export const ingestorTableColumns = [
     accessor: "playbook_to_execute",
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     Filter: SelectColumnFilter,
-    maxWidth: 145,
+    maxWidth: 200,
   },
   {
     Header: "Schedule",

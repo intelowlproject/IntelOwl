@@ -86,7 +86,9 @@ class ConnectorTestCase(CustomTestCase):
             muc.before_run()
         cc.run_on_failure = True
         cc.save()
-        MockUpConnector(cc).before_run()
+        muc = MockUpConnector(cc)
+        muc.job_id = job.pk
+        muc.before_run()
         cc.delete()
         job.delete()
 

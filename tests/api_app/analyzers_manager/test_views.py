@@ -33,9 +33,7 @@ class AnalyzerConfigViewSetTestCase(
 
         self.client.force_authenticate(self.superuser)
 
-        with patch.object(
-            YaraScan, "update", return_value=lambda *args, **kwargs: None
-        ):
+        with patch.object(YaraScan, "update", return_value=True):
             response = self.client.post(f"{self.URL}/{analyzer}/pull")
         self.assertEqual(response.status_code, 200, response.json())
         result = response.json()

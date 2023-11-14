@@ -26,7 +26,6 @@ class PluginTestCase(CustomTestCase):
             ),
             description="test",
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
             run_on_failure=False,
         )
         self.job.connectors_to_execute.set([self.cc])
@@ -37,7 +36,7 @@ class PluginTestCase(CustomTestCase):
 
     def test_abstract(self):
         with self.assertRaises(TypeError):
-            Plugin(self.cc, self.job.pk, {})  # noqa
+            Plugin(self.cc, self.job.pk, {}, str(uuid()))  # noqa
 
     def test_start_no_errors(self):
         # I can't implement the Plugin class directly because of django installed_apps

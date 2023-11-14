@@ -10,7 +10,7 @@ logger = getLogger(__name__)
 class ApiAppConfig(AppConfig):
     name = "api_app"
 
-    def ready(self):
+    def ready(self):  # skipcq: PYL-R0201
         from authentication.views import DurinAuthenticationScheme  # noqa
 
         from . import signals  # noqa

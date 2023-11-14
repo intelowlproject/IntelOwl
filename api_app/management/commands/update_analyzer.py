@@ -7,7 +7,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 
 
 class Command(BaseCommand):
-    help = "Execute celery task"
+    help = "Execute celery update task"
 
     @staticmethod
     def add_arguments(parser):

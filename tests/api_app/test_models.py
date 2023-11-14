@@ -56,11 +56,9 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "wrongQueue"},
-            playbook=PlaybookConfig.objects.first(),
+            routing_key="wrong_key",
         )
-        muc.full_clean()
-        self.assertEqual(muc.queue, "default")
+        self.assertEqual(muc.get_routing_key(), "default")
 
     def test_is_configured_no_secrets(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
@@ -70,8 +68,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         result = muc._is_configured(self.user)
         self.assertTrue(result)
@@ -85,8 +81,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -108,8 +102,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -132,8 +124,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -164,8 +154,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             python_module=muc.python_module,
@@ -195,8 +183,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         self.assertTrue(muc.is_runnable(self.user))
         muc.delete()
@@ -209,8 +195,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=True,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         self.assertFalse(muc.is_runnable(self.user))
         muc.delete()
@@ -223,8 +207,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         org = Organization.objects.create(name="test_org")
 
@@ -251,8 +233,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=True,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = VisualizerConfig.objects.filter(pk=muc.pk).get_signatures(job)
@@ -273,8 +253,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=True,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
@@ -299,8 +277,6 @@ class AbstractConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         job.visualizers_to_execute.set([muc])
         gen_signature = (
@@ -328,7 +304,6 @@ class PluginConfigTestCase(CustomTestCase):
             ),
             disabled=False,
             type="file",
-            config={"soft_time_limit": 100, "queue": "default"},
         )
         ac2, created2 = AnalyzerConfig.objects.get_or_create(
             name="test2",
@@ -339,7 +314,6 @@ class PluginConfigTestCase(CustomTestCase):
             ),
             disabled=False,
             type="file",
-            config={"soft_time_limit": 100, "queue": "default"},
         )
         param = Parameter.objects.create(
             name="test",
@@ -382,7 +356,6 @@ class PluginConfigTestCase(CustomTestCase):
             ),
             disabled=False,
             type="file",
-            config={"soft_time_limit": 100, "queue": "default"},
         )
         cc, created2 = ConnectorConfig.objects.get_or_create(
             name="test",
@@ -391,7 +364,6 @@ class PluginConfigTestCase(CustomTestCase):
                 module="misp.MISP", base_path=PythonModuleBasePaths.Connector.value
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
         )
         vc, created3 = VisualizerConfig.objects.get_or_create(
             name="test",
@@ -400,8 +372,6 @@ class PluginConfigTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-            playbook=PlaybookConfig.objects.first(),
         )
         param = Parameter.objects.create(
             name="test",
@@ -455,9 +425,10 @@ class JobTestCase(CustomTestCase):
             status=Job.Status.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
+            python_module=PythonModule.objects.get(
+                base_path="api_app.pivots_manager.pivots",
+                module="self_analyzable.SelfAnalyzable",
+            ),
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
 

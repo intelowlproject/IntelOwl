@@ -2,6 +2,50 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.0)
+
+This is mostly a stability and maintainance release.
+
+We are happy to announce that we received support from Digital Ocean to host infrastructure for the community. :)
+If you are interested in helping us setting up a public instance of IntelOwl, **free** for the community, with all the privacy policy and related required stuff, please contact us :)
+
+
+**Important usability changes**
+* We added a new section in the "Scan" page called "Recent Scans" which allows the users to better interact with its own and other users' already made analysis, improving the efficiency of the users and their communication.
+* By default jobs are executed with `TLP:AMBER` which means that they are shared with the other members of your organization **only**. (previously the default was `TLP:CLEAR`). This is to avoid possible users errors.
+* From now on, VT file analyzers send files to VT only when TLP is `CLEAR` and not anymore based on a specific parameter. As a consequence, `VirusTotal_v3_Get_File_And_Scan` is not available anymore. Please use the new `VirusTotal_v3_Get_File` instead and set the analysis to the correct TLP.
+  * Same behavior has been extended to other analyzers: `Intezer_Scan`, `MWDB_Scan`, `Virushee_Upload_File` (renamed to `Virushee_Scan`), `YARAify_File_Scan`.
+
+**General improvements**
+* Added First Visit Guide
+* Improved the documentation with the goal to help the users to understand better how all the available Plugins work.
+* For OpenCTI users having problems in integrating IntelOwl, now you can use a workaround: [doc](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#opencti)
+* A new organization role is available to better manage the org: `admin`. [Doc](https://intelowl.readthedocs.io/en/latest/Usage.html#organizations-and-user-management)
+* Improvements in the "Jobs History" table: now it shows executed Playbooks and file/observables types correctly.
+* We added a new "Pivot" section in the "Plugin" GUI for the new Plugin type introduced in the [v5.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.1.0) release. We added a new dedicated visualizer which allows the user to see when a Pivot has been executed in the "Job Result" page. We are still working on it and planning to add more documentation and GUI usability soon.
+* Improvements in the "Jobs Result" page: now playbooks are more relevant, warnings are shown next to errors, Raw JSON data has been moved next to the other raw data.
+* Changed JSON viewer library because the old one was deprecated
+
+**New/Improved Plugins:**
+* deprecated `VirusTotal_v2_*` analyzers have been removed.
+* added LOLDrivers Rules to ClamAV default signatures.
+* added [Netlas.io](https://netlas.io/api) analyzer.
+* removed CryptoScam analyzer because the service has been dismissed.
+* added `timeout` to InQuest analyzers to avoid long time running jobs.
+* fixed XLMMacroDeobfuscator always saying it decrypted the analyzed file even when the file was not encrypted.
+* `Malpedia_Scan` has been deprecated and disabled because the service seems no more active.
+* added more analyzers in the default `Sample_Static_Analysis` playbook.
+* adjusted few analyzers: CAPESandbox, Dehashed, YARAify, GoogleWebRisk
+
+**Fixes / adjusts / minor changes**
+* Now "Restart" button in the Job Page does correctly work after having used a Playbook.
+* basic support for IPv6
+* big refactors both in the backend and the frontend
+* lot of fixes everywhere ;)
+* improved documentation
+* upgraded a lot of packages
+
+
 ## [v5.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.1.0)
 With this release we announce our new official site created by [Abheek Tripathy](https://twitter.com/abheekblahblah)!
 Feel free to check it out! Official [blog post here](https://intelowlproject.github.io/blogs/official_site_revamped)!
@@ -567,7 +611,7 @@ This is a minor patch release.
 **Features:**
 
 - Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables.
-- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#special-plugins-operations).
 - Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much more easier to use than before.
 
 **New class of plugins called _Connectors_:**

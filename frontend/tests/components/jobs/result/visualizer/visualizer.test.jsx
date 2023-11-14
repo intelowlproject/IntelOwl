@@ -42,7 +42,8 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
           process_time: 0.04,
           report: [
             {
-              level: 2,
+              level_position: 2,
+              level_size: "2",
               elements: {
                 type: "horizontal_list",
                 values: [
@@ -75,7 +76,8 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
               },
             },
             {
-              level: 1,
+              level_position: 1,
+              level_size: "1",
               elements: {
                 type: "horizontal_list",
                 values: [

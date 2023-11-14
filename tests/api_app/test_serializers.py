@@ -319,7 +319,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
             ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=True,
             maximum_tlp="CLEAR",
         )
@@ -364,7 +363,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
             ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
             maximum_tlp="CLEAR",
         )
@@ -401,8 +399,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_visualizers_all(self):
         v = VisualizerConfig.objects.get(name="Yara")
         pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
-        v.playbook = pc
-        v.save()
+        v.playbooks.set([pc])
         visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
             self.ajcs, pc
         )
@@ -412,7 +409,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_visualizers_is_runnable(self):
         v = VisualizerConfig.objects.get(name="Yara")
         pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
-        v.playbook = pc
+        v.playbooks.set([pc])
         v.save()
         self.assertTrue(v.is_runnable(self.user))
         visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
@@ -481,7 +478,6 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
                 module="yara_scan.YaraScan",
             ),
             description="test",
-            config={"soft_time_limit": 10, "queue": "default"},
             disabled=False,
             supported_filetypes=["text/rtf"],
             type="file",
@@ -629,7 +625,6 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             ),
             description="test",
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
         )
         acs = PythonListConfigSerializer(
@@ -656,7 +651,6 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             ),
             description="test",
             disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
             maximum_tlp="CLEAR",
         )
         param: Parameter = Parameter.objects.create(

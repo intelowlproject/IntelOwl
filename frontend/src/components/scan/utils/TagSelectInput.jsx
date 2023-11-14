@@ -17,8 +17,8 @@ import {
   addToast,
 } from "@certego/certego-ui";
 
-import JobTag from "../../common/JobTag";
-import { useTagsStore } from "../../../stores";
+import { JobTag } from "../../common/JobTag";
+import { useTagsStore } from "../../../stores/useTagsStore";
 
 // constants
 const onFormValidate = (values) => {
@@ -40,7 +40,7 @@ function TagNew(inputVal) {
     </span>
   );
 }
-export default function TagSelectInput(props) {
+export function TagSelectInput(props) {
   const { selectedTags, setSelectedTags } = props;
 
   // local state

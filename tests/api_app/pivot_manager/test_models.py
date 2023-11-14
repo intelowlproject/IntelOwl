@@ -23,9 +23,8 @@ class PivotConfigTestCase(CustomTestCase):
         ac = AnalyzerConfig.objects.first()
         pc.related_analyzer_configs.set([ac])
         self.assertIn(ac.name, pc.description)
-        with transaction.atomic():
-            with self.assertRaises(ValidationError):
-                pc.related_connector_configs.set([ConnectorConfig.objects.first()])
+        with transaction.atomic(), self.assertRaises(ValidationError):
+            pc.related_connector_configs.set([ConnectorConfig.objects.first()])
         self.assertFalse(pc.related_connector_configs.exists())
         pc.delete()
 

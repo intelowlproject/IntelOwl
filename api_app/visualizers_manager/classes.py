@@ -14,6 +14,7 @@ from api_app.visualizers_manager.enums import (
     VisualizableAlignment,
     VisualizableColor,
     VisualizableIcon,
+    VisualizableLevelSize,
     VisualizableSize,
 )
 from api_app.visualizers_manager.exceptions import (
@@ -185,7 +186,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         self,
         name: VisualizableBase,
         value: List[VisualizableObject],
-        open: bool = False,  # noqa
+        start_open: bool = False,  # noqa
         add_count_in_title: bool = True,
         fill_empty: bool = True,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
@@ -211,13 +212,13 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         self.value = value
         self.name = name
         self.add_count_in_title = add_count_in_title
-        self.open = open
+        self.start_open = start_open
         self.max_elements_number = max_elements_number
         self.report = report
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["name", "open", "value"]
+        return super().attributes + ["name", "start_open", "value"]
 
     def __bool__(self):
         return True
@@ -283,24 +284,37 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
         return result
 
 
+class VisualizableLevel:
+    def __init__(
+        self,
+        position: int,
+        size: VisualizableLevelSize = VisualizableLevelSize.S_6,
+        horizontal_list: VisualizableHorizontalList = VisualizableHorizontalList(
+            value=[]
+        ),
+    ):
+        self._position = position
+        self._size = size
+        self._horizontal_list = horizontal_list
+
+    def to_dict(self):
+        return {
+            "level_position": self._position,
+            "level_size": self._size.value,
+            "elements": self._horizontal_list.to_dict(),
+        }
+
+
 class VisualizablePage:
     def __init__(self, name: str = None):
-        self._levels = {}
+        self._levels = []
         self.name = name
 
-    def add_level(self, level: int, horizontal_list: VisualizableHorizontalList):
-        self._levels[level] = horizontal_list
+    def add_level(self, level: VisualizableLevel):
+        self._levels.append(level)
 
     def to_dict(self) -> Tuple[str, List[Dict]]:
-        return self.name, [
-            {"level": level, "elements": hl.to_dict()}
-            for level, hl in self._levels.items()
-        ]
-
-    def update_level(self, level: int, *elements):
-        if level not in self._levels:
-            raise KeyError(f"Level {level} was not defined")
-        self._levels[level].value.extend(list(elements))
+        return self.name, [level.to_dict() for level in self._levels]
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
@@ -315,7 +329,9 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
 
+    LevelSize = VisualizableLevelSize
     Page = VisualizablePage
+    Level = VisualizableLevel
 
     @classmethod
     @property
@@ -342,70 +358,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         super().before_run()
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
-    def create_pivot_page(self) -> VisualizablePage:
-        from api_app.pivots_manager.models import PivotMap
-
-        try:
-            parent_job = PivotMap.objects.get(ending_job_id=self.job_id).starting_job
-        except PivotMap.DoesNotExist:
-            parent_value = self.Base(value="", disable=True)
-            disable_parent = True
-        else:
-            parent_value = self.Base(
-                value=f"Job #{parent_job.id}: {parent_job.analyzed_object_name} "
-                f"- playbook: {parent_job.playbook_requested.name}",
-                link=parent_job.url,
-                color=self.Color.DARK,
-                disable=True,
-            )
-            disable_parent = False
-
-        pivot_page = self.Page(name="Job Pivots")
-        pivot_page.add_level(
-            level=1,
-            horizontal_list=self.HList(
-                value=[
-                    # parent job
-                    self.Title(
-                        title=self.Base(value="Parent job", disable=disable_parent),
-                        value=parent_value,
-                        disable=disable_parent,
-                    ),
-                    # children jobs
-                    self.VList(
-                        name=self.Base(value="children jobs", disable=False),
-                        value=[
-                            self.HList(
-                                value=[
-                                    self.Base(
-                                        value=f"Job #{pivot_map.ending_job_id}: "
-                                        f"{pivot_map.ending_job.analyzed_object_name} "
-                                        "- playbook: "
-                                        f"{pivot_map.ending_job.playbook_requested.name}",  # noqa e501
-                                        link=pivot_map.ending_job.url,
-                                        disable=False,
-                                    )
-                                ]
-                            )
-                            for pivot_map in PivotMap.objects.filter(
-                                starting_job_id=self.job_id
-                            )
-                        ],
-                        disable=False,
-                        open=True,
-                    ),
-                ]
-            ),
-        )
-        return pivot_page
-
     def after_run_success(self, content):
-        if self._job.pivotreports.filter(
-            status=VisualizerReport.Status.SUCCESS.value
-        ).exists():
-            pivot_page = self.create_pivot_page()
-            content.append(pivot_page.to_dict())
-
         if not isinstance(content, list):
             raise VisualizerRunException(
                 f"Report has not correct type: {type(self.report.report)}"

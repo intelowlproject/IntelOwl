@@ -1,17 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Badge, UncontrolledTooltip } from "reactstrap";
-import {
-  TLP_CHOICES,
-  TLP_COLOR_MAP,
-  TLP_DESCRIPTION_MAP,
-} from "../../constants";
+import { TLPColors } from "../../constants/colorConst";
+import { TLPDescriptions } from "../../constants/miscConst";
+import { TlpChoices } from "../../constants/advancedSettingsConst";
 
-export default function TLPTag(props) {
+export function TLPTag(props) {
   const { value, ...rest } = props;
   const badgeId = `tlptag-badge__${value}`;
-  const color = TLP_COLOR_MAP?.[value] || "#dfe1e2";
-  const tooltipText = TLP_DESCRIPTION_MAP?.[value] || "invalid";
+  const color = TLPColors?.[value] || "#dfe1e2";
+  const tooltipText = TLPDescriptions?.[value] || "invalid";
 
   return value ? (
     <Badge
@@ -34,5 +32,5 @@ export default function TLPTag(props) {
 }
 
 TLPTag.propTypes = {
-  value: PropTypes.oneOf(TLP_CHOICES).isRequired,
+  value: PropTypes.oneOf(TlpChoices).isRequired,
 };

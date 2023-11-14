@@ -3,44 +3,8 @@
 
 from django.core.exceptions import ValidationError
 
-from api_app.validators import validate_config, validate_params, validate_secrets
+from api_app.validators import validate_params, validate_secrets
 from tests import CustomTestCase
-
-
-class ValidateConfigTestCase(CustomTestCase):
-    def validate_config_good(self):
-        data = {"soft_time_limit": 123, "queue": "default"}
-        try:
-            validate_config(data)
-        except ValidationError as e:
-            self.fail(e)
-
-    def validate_config_wrong_type(self):
-        data = {"soft_time_limit": "123", "queue": "default"}
-        with self.assertRaises(ValidationError):
-            validate_config(data)
-
-        data = {"soft_time_limit": "default", "queue": 123}
-        with self.assertRaises(ValidationError):
-            validate_config(data)
-
-    def validate_config_missing_key(self):
-        data = {
-            "soft_time_limit": 123,
-        }
-        with self.assertRaises(ValidationError):
-            validate_config(data)
-
-        data = {
-            "queue": "default",
-        }
-        with self.assertRaises(ValidationError):
-            validate_config(data)
-
-    def validate_config_additional_key(self):
-        data = {"soft_time_limit": 123, "queue": "default", "another_key": "key"}
-        with self.assertRaises(ValidationError):
-            validate_config(data)
 
 
 class ValidateSecretsTestCase(CustomTestCase):

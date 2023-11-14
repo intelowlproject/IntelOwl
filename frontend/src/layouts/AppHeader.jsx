@@ -35,8 +35,8 @@ import {
 
 // local
 import UserMenu from "./widgets/UserMenu";
-import NotificationPopoverButton from "../components/misc/notification/NotificationPopoverButton";
-import { useAuthStore } from "../stores";
+import NotificationPopoverButton from "../components/jobs/notification/NotificationPopoverButton";
+import { useAuthStore } from "../stores/useAuthStore";
 import { useGuideContext } from "../contexts/GuideContext";
 
 const authLinks = (

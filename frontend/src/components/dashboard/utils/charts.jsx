@@ -8,10 +8,10 @@ import {
 } from "@certego/certego-ui";
 
 import {
-  JOB_STATUS_COLOR_MAP,
-  JOB_TYPE_COLOR_MAP,
-  OBSERVABLE_CLASSIFICATION_COLOR_MAP,
-} from "../../../constants";
+  JobStatusColors,
+  JobTypeColors,
+  ObservableClassificationColors,
+} from "../../../constants/colorConst";
 
 import {
   JOB_AGG_STATUS_URI,
@@ -20,7 +20,7 @@ import {
   JOB_AGG_FILE_MIMETYPE_URI,
   JOB_AGG_OBS_NAME_URI,
   JOB_AGG_FILE_MD5_URI,
-} from "../../../constants/api";
+} from "../../../constants/apiURLs";
 
 // constants
 const colors = getRandomColorsArray(10, true);
@@ -35,7 +35,7 @@ export const JobStatusBarChart = React.memo(() => {
       url: JOB_AGG_STATUS_URI,
       accessorFnAggregation: (d) => d,
       componentsFn: () =>
-        Object.entries(JOB_STATUS_COLOR_MAP).map(([dkey, color]) => (
+        Object.entries(JobStatusColors).map(([dkey, color]) => (
           <Bar
             stackId="jobstatus"
             key={dkey}
@@ -58,7 +58,7 @@ export const JobTypeBarChart = React.memo(() => {
       url: JOB_AGG_TYPE_URI,
       accessorFnAggregation: (d) => d,
       componentsFn: () =>
-        Object.entries(JOB_TYPE_COLOR_MAP).map(([dataKey, color]) => (
+        Object.entries(JobTypeColors).map(([dataKey, color]) => (
           <Bar stackId="jobtype" key={dataKey} dataKey={dataKey} fill={color} />
         )),
     }),
@@ -76,11 +76,9 @@ export const JobObsClassificationBarChart = React.memo(() => {
       url: JOB_AGG_OBS_CLASSIFICATION_URI,
       accessorFnAggregation: (d) => d,
       componentsFn: () =>
-        Object.entries(OBSERVABLE_CLASSIFICATION_COLOR_MAP).map(
-          ([dKey, color]) => (
-            <Bar stackId="joboc" key={dKey} dataKey={dKey} fill={color} />
-          ),
-        ),
+        Object.entries(ObservableClassificationColors).map(([dKey, color]) => (
+          <Bar stackId="joboc" key={dKey} dataKey={dKey} fill={color} />
+        )),
     }),
     [],
   );

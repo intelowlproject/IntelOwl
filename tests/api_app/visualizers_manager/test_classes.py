@@ -12,6 +12,8 @@ from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
     VisualizableHorizontalList,
+    VisualizableLevel,
+    VisualizableLevelSize,
     VisualizableObject,
     VisualizablePage,
     VisualizableTitle,
@@ -157,7 +159,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "alignment": "center",
             "type": "vertical_list",
             "name": name.to_dict(),
-            "open": False,
+            "start_open": False,
             "disable": True,
             "size": "auto",
             "values": [value.to_dict()],
@@ -177,7 +179,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,
-            "open": False,
+            "start_open": False,
             "size": "auto",
             "values": [],
         }
@@ -191,7 +193,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "type": "vertical_list",
             "name": name.to_dict(),
             "disable": True,
-            "open": False,
+            "start_open": False,
             "size": "auto",
             "values": [
                 {
@@ -245,6 +247,23 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         self.assertEqual(vvl.to_dict(), expected_result)
 
 
+class VisualizableLevelTestCase(CustomTestCase):
+    def test_to_dict(self):
+        value = VisualizableBase(
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
+        )
+        vvl = VisualizableHorizontalList(value=[value])
+        level = VisualizableLevel(
+            position=1, size=VisualizableLevelSize.S_2, horizontal_list=vvl
+        )
+        expected_result = {
+            "level_position": 1,
+            "level_size": "2",
+            "elements": vvl.to_dict(),
+        }
+        self.assertEqual(level.to_dict(), expected_result)
+
+
 class VisualizablePageTestCase(CustomTestCase):
     def test_to_dict(self):
         value = VisualizableBase(
@@ -252,9 +271,14 @@ class VisualizablePageTestCase(CustomTestCase):
         )
         vvl = VisualizableHorizontalList(value=[value])
         vl = VisualizablePage()
-        vl.add_level(level=0, horizontal_list=vvl)
+        vl.add_level(
+            VisualizableLevel(
+                position=1, size=VisualizableLevelSize.S_2, horizontal_list=vvl
+            )
+        )
         expected_result = {
-            "level": 0,
+            "level_position": 1,
+            "level_size": "2",
             "elements": vvl.to_dict(),
         }
         self.assertEqual(vl.to_dict()[1][0], expected_result)
@@ -282,7 +306,6 @@ class VisualizerTestCase(CustomTestCase):
                 base_path=PythonModuleBasePaths.Visualizer.value, module="yara.Yara"
             ),
             description="test",
-            playbook=pc,
         )
         ar = AnalyzerReport.objects.create(
             config=pc.analyzers.first(), job=job, task_id=uuid()

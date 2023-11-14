@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+/* eslint-disable react/prop-types */
+import React from "react";
 import { Container, Row, Col } from "reactstrap";
-import useTitle from "react-use/lib/useTitle";
 
 import {
   ElasticTimePicker,
@@ -10,8 +10,10 @@ import {
   useTimePickerStore,
 } from "@certego/certego-ui";
 
-import { JOB_BASE_URI } from "../../../constants/api";
-import { jobTableColumns } from "./data";
+import useTitle from "react-use/lib/useTitle";
+import { jobTableColumns } from "./jobTableColumns";
+
+import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { useGuideContext } from "../../../contexts/GuideContext";
 
 // constants
@@ -60,7 +62,13 @@ export default function JobsTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  /* This useEffect cause an error in local development (axios CanceledError) because it is called twice.
+    The first call is trying to update state asynchronously, 
+    but the update couldn't happen when the component is unmounted
+
+    Attention! we cannot remove it: this update the job list after the user start a new scan
+  */
+  React.useEffect(() => {
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

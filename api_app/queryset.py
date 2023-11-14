@@ -225,7 +225,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
 
-class PluginConfigQuerySet(CleanOnCreateQuerySet):
+class ModelWithOwnershipQuerySet:
     def default_values(self):
         return self.filter(owner__isnull=True)
 
@@ -266,6 +266,10 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet):
                 )
         else:
             return self.default_values()
+
+
+class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet):
+    ...
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):

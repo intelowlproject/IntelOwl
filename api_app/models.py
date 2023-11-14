@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 from django.utils.timezone import now
 
+from api_app.interfaces import ModelWithOwnership
+
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
 
@@ -18,9 +20,9 @@ from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MinLengthValidator, RegexValidator
+from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import Q, QuerySet, UniqueConstraint
+from django.db.models import BaseConstraint, Q, QuerySet, UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -39,7 +41,7 @@ from api_app.choices import (
 if typing.TYPE_CHECKING:
     from api_app.classes import Plugin
 
-from api_app.defaults import config_default, default_runtime, file_directory_path
+from api_app.defaults import default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
@@ -48,11 +50,7 @@ from api_app.queryset import (
     PluginConfigQuerySet,
     PythonConfigQuerySet,
 )
-from api_app.validators import (
-    plugin_name_validator,
-    validate_config,
-    validate_runtime_configuration,
-)
+from api_app.validators import plugin_name_validator, validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
@@ -238,6 +236,9 @@ class Job(models.Model):
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
+    warnings = pg_fields.ArrayField(
+        models.TextField(), blank=True, default=list, null=True
+    )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
@@ -304,54 +305,38 @@ class Job(models.Model):
 
     def retry(self):
         self.update_status(Job.Status.RUNNING)
-        failed_analyzers_reports = self.analyzerreports.filter(
+        failed_analyzers = self.analyzerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-        failed_connector_reports = self.connectorreports.filter(
+        ).values_list("config__pk", flat=True)
+        failed_connector = self.connectorreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-        failed_pivot_reports = self.pivotreports.filter(
+        ).values_list("config__pk", flat=True)
+        failed_pivot = self.pivotreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
+        ).values_list("config__pk", flat=True)
 
-        failed_visualizer_reports = self.visualizerreports.filter(
+        failed_visualizer = self.visualizerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
                 AbstractReport.Status.PENDING.value,
             ]
-        ).values_list("pk", flat=True)
-
-        runner = (
-            self._get_signatures(
-                self.analyzers_to_execute.filter(pk__in=failed_analyzers_reports)
-            )
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_analyzer_configs__isnull=False
-                )
-            )
-            | self._get_signatures(
-                self.connectors_to_execute.filter(pk__in=failed_connector_reports)
-            )
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    pk__in=failed_pivot_reports, related_connector_configs__isnull=False
-                )
-            )
-            | self._get_signatures(
-                self.visualizers_to_execute.filter(pk__in=failed_visualizer_reports)
-            )
-            | self._final_status_signature
+        ).values_list("config__pk", flat=True)
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.filter(pk__in=failed_analyzers),
+            self.pivots_to_execute.filter(pk__in=failed_pivot),
+            self.connectors_to_execute.filter(pk__in=failed_connector),
+            self.visualizers_to_execute.filter(pk__in=failed_visualizer),
         )
+
         runner.apply_async(
             queue=get_queue_name(settings.CONFIG_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
@@ -395,11 +380,6 @@ class Job(models.Model):
             return None
         td = self.finished_analysis_time - self.received_request_time
         return round(td.total_seconds(), 2)
-
-    def append_error(self, err_msg: str, save=True) -> None:
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
 
     def update_status(self, status: str, save=True) -> None:
         self.status = status
@@ -466,7 +446,7 @@ class Job(models.Model):
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def _get_signatures(self, queryset: JobQuerySet) -> Signature:
+    def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
         signatures = list(
             queryset.annotate_runnable(self.user)
@@ -486,10 +466,12 @@ class Job(models.Model):
         from api_app.pivots_manager.models import PivotConfig
 
         if self.playbook_to_execute:
-            return self.playbook_to_execute.pivots.all()
-        return PivotConfig.objects.valid(
-            self.analyzers_to_execute.all(), self.connectors_to_execute.all()
-        )
+            pivots = self.playbook_to_execute.pivots.all()
+        else:
+            pivots = PivotConfig.objects.valid(
+                self.analyzers_to_execute.all(), self.connectors_to_execute.all()
+            )
+        return pivots.annotate_runnable(self.user).filter(runnable=True)
 
     @property
     def _final_status_signature(self) -> Signature:
@@ -501,28 +483,40 @@ class Job(models.Model):
             MessageGroupId=str(uuid.uuid4()),
         )
 
+    def _get_pipeline(
+        self,
+        analyzers: PythonConfigQuerySet,
+        pivots: PythonConfigQuerySet,
+        connectors: PythonConfigQuerySet,
+        visualizers: PythonConfigQuerySet,
+    ) -> Signature:
+        runner = self._get_signatures(analyzers.distinct())
+        pivots_analyzers = pivots.filter(
+            related_analyzer_configs__isnull=False
+        ).distinct()
+        if pivots_analyzers.exists():
+            runner |= self._get_signatures(pivots_analyzers)
+        if connectors.exists():
+            runner |= self._get_signatures(connectors)
+            pivots_connectors = pivots.filter(
+                related_connector_configs__isnull=False
+            ).distinct()
+            if pivots_connectors.exists():
+                runner |= self._get_signatures(pivots_connectors)
+        if visualizers.exists():
+            runner |= self._get_signatures(visualizers)
+        runner |= self._final_status_signature
+        return runner
+
     def execute(self):
         self.update_status(Job.Status.RUNNING)
-        runner = (
-            self._get_signatures(self.analyzers_to_execute.all())
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    related_analyzer_configs__isnull=False
-                ).distinct()
-            )
-            | self._get_signatures(self.connectors_to_execute.all())
-            | self._get_signatures(
-                self.pivots_to_execute.filter(
-                    related_connector_configs__isnull=False
-                ).distinct()
-            )
-            | self._get_signatures(self.visualizers_to_execute.all())
-            | self._final_status_signature
+        runner = self._get_pipeline(
+            self.analyzers_to_execute.all(),
+            self.pivots_to_execute.all(),
+            self.connectors_to_execute.all(),
+            self.visualizers_to_execute.all(),
         )
-        runner.apply_async(
-            queue=get_queue_name(settings.CONFIG_QUEUE),
-            MessageGroupId=str(uuid.uuid4()),
-        )
+        runner()
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -626,18 +620,10 @@ class Parameter(models.Model):
         return self.python_module.python_class.config_model
 
 
-class PluginConfig(models.Model):
+class PluginConfig(ModelWithOwnership):
     objects = PluginConfigQuerySet.as_manager()
-
     value = models.JSONField(blank=True, null=True)
-    for_organization = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="custom_configs",
-        null=True,
-        blank=True,
-    )
+
     parameter = models.ForeignKey(
         Parameter, on_delete=models.CASCADE, null=False, related_name="values"
     )
@@ -679,7 +665,7 @@ class PluginConfig(models.Model):
     )
 
     class Meta:
-        constraints = [
+        constraints: typing.List[BaseConstraint] = [
             models.CheckConstraint(
                 check=Q(analyzer_config__isnull=True)
                 | Q(connector_config__isnull=True)
@@ -712,18 +698,7 @@ class PluginConfig(models.Model):
         ]
         indexes = [
             models.Index(fields=["owner", "for_organization", "parameter"]),
-            models.Index(
-                fields=[
-                    "owner",
-                    "for_organization",
-                ]
-            ),
-            models.Index(
-                fields=[
-                    "owner",
-                ]
-            ),
-        ]
+        ] + ModelWithOwnership.Meta.indexes
 
     @cached_property
     def config(self) -> "PythonConfig":
@@ -731,8 +706,7 @@ class PluginConfig(models.Model):
 
     def refresh_cache_keys(self):
         try:
-            self.config
-            self.owner
+            _ = self.config and self.owner
         except ObjectDoesNotExist:
             # this happens if the configuration/user was deleted before this instance
             return
@@ -760,17 +734,6 @@ class PluginConfig(models.Model):
             self.ingestor_config,
             self.pivot_config,
         ]
-
-    def clean_for_organization(self):
-        if self.for_organization and not self.owner:
-            raise ValidationError(
-                "You can't set `for_organization` and not have an owner"
-            )
-        if self.for_organization and not self.owner.has_membership():
-            raise ValidationError(
-                f"You can't create `for_organization` {self.__class__.__name__}"
-                " if you do not have an organization"
-            )
 
     def clean_config(self) -> None:
         if len(list(filter(None, self._possible_configs()))) != 1:
@@ -821,12 +784,6 @@ class PluginConfig(models.Model):
     def type(self):
         # TODO retrocompatibility
         return self.config.plugin_type
-
-    @cached_property
-    def organization(self) -> Optional[Organization]:
-        if self.for_organization:
-            return self.owner.membership.organization
-        return None
 
     @property
     def config_type(self):
@@ -931,19 +888,11 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
-    def append_error(self, err_msg: str, save=True):
-        self.errors.append(err_msg)
-        if save:
-            self.save(update_fields=["errors"])
-
 
 class PythonConfig(AbstractConfig):
     objects = PythonConfigQuerySet.as_manager()
-    config = models.JSONField(
-        blank=False,
-        default=config_default,
-        validators=[validate_config],
-    )
+    soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
+    routing_key = models.CharField(max_length=50, default="default")
     python_module = models.ForeignKey(
         PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
     )
@@ -955,6 +904,15 @@ class PythonConfig(AbstractConfig):
         ]
         ordering = ["name", "disabled"]
 
+    def get_routing_key(self) -> str:
+        if self.routing_key not in settings.CELERY_QUEUES:
+            logger.warning(
+                f"{self.name}: you have no worker for {self.routing_key}."
+                f" Using {settings.DEFAULT_QUEUE} queue."
+            )
+            return settings.DEFAULT_QUEUE
+        return self.routing_key
+
     @property
     def parameters(self) -> ParameterQuerySet:
         return Parameter.objects.filter(python_module=self.python_module)
@@ -963,6 +921,17 @@ class PythonConfig(AbstractConfig):
     @property
     def report_class(cls) -> Type[AbstractReport]:
         return cls.reports.rel.related_model
+
+    @classmethod
+    def get_subclasses(cls) -> typing.List["PythonConfig"]:
+        from django.contrib.contenttypes.models import ContentType
+
+        child_models = [ct.model_class() for ct in ContentType.objects.all()]
+        return [
+            model
+            for model in child_models
+            if (model is not None and issubclass(model, cls) and model is not cls)
+        ]
 
     @classmethod
     @property
@@ -1041,18 +1010,9 @@ class PythonConfig(AbstractConfig):
             MessageGroupId=str(uuid.uuid4()),
         )
 
-    def clean_config_queue(self):
-        queue = self.config["queue"]
-        if queue not in settings.CELERY_QUEUES:
-            logger.warning(
-                f"Analyzer {self.name} has a wrong queue."
-                f" Setting to `{settings.DEFAULT_QUEUE}`"
-            )
-            self.config["queue"] = settings.DEFAULT_QUEUE
-
-    def clean(self):
-        super().clean()
-        self.clean_config_queue()
+    @property
+    def queue(self):
+        return get_queue_name(self.get_routing_key())
 
     @property
     def options(self) -> QuerySet:
@@ -1070,21 +1030,6 @@ class PythonConfig(AbstractConfig):
     def _is_configured(self, user: User = None) -> bool:
         pc = self.__class__.objects.filter(pk=self.pk).annotate_configured(user).first()
         return pc.configured
-
-    @cached_property
-    def queue(self):
-        queue = self.config["queue"]
-        if queue not in settings.CELERY_QUEUES:
-            queue = settings.DEFAULT_QUEUE
-        return get_queue_name(queue)
-
-    @cached_property
-    def routing_key(self):
-        return self.config["queue"]
-
-    @cached_property
-    def soft_time_limit(self):
-        return self.config["soft_time_limit"]
 
     @classmethod
     @property

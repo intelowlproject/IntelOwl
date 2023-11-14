@@ -64,7 +64,8 @@ export function RuntimeConfigurationModal(props) {
   // case 2: analysis with playbooks
   if (formik.values.analysisOptionValues === ScanTypes.playbooks) {
     Object.keys(formik.values.runtime_configuration).forEach((pluginType) => {
-      selectedPluginsInFormik[pluginType] = formik.values.playbook[pluginType];
+      selectedPluginsInFormik[pluginType] =
+        formik.values.playbook[pluginType] || [];
     });
   }
 
@@ -74,6 +75,7 @@ export function RuntimeConfigurationModal(props) {
   // Extract plugin default params from the store.
   // Description and type are used in the side section.
   Object.keys(selectedPluginsInFormik).forEach((pluginType) => {
+    console.debug(pluginType);
     selectedPluginsParams[pluginType] = {
       // for each selected plugin we extract the config and append it to the other configs
       ...selectedPluginsInFormik[pluginType].reduce(

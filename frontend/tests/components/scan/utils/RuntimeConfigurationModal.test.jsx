@@ -84,7 +84,7 @@ describe("Runtime Configuration Modal test", () => {
     const editableText = screen.getAllByText("TEST_ANALYZER")[0];
     expect(editableText).toBeInTheDocument();
     expect(editableRuntimeConfig.textContent).toBe(
-      "{  pivots: {},  analyzers: {    TEST_ANALYZER: {      query_type: 'AAAA'    }  },  connectors: {},  visualizers: {}}",
+      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'AAAA'    }  },  connectors: {},  pivots: {},  visualizers: {}}",
     );
     // buttons
     const closeButton = screen.getByRole("button", {

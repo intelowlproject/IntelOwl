@@ -119,13 +119,12 @@ class FileAnalyzerTestCase(CustomTestCase):
                             f"Testing {job.file_name} with mimetype {mimetype}"
                             f" for {timeout_seconds} seconds"
                         )
-                        _uuid = uuid()
                         sub = subclass(
                             config,
                         )
                         signal.alarm(timeout_seconds)
                         try:
-                            sub.start(job.pk, {}, _uuid)
+                            sub.start(job.pk, {}, uuid())
                         except Exception as e:
                             self.fail(
                                 f"Analyzer {subclass.__name__} "
@@ -226,7 +225,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                     )
                     signal.alarm(timeout_seconds)
                     try:
-                        sub.start(job.pk, {}, _uuid)
+                        sub.start(job.pk, {}, uuid())
                     except TimeoutError:
                         self.fail(
                             f"Analyzer {subclass.__name__}"

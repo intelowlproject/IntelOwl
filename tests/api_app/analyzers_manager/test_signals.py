@@ -32,7 +32,7 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         self.assertEqual(ac.update_task.crontab, crontab)
         self.assertEqual(ac.update_task.queue, "default")
         self.assertEqual(
-            json.loads(ac.update_task.kwargs)["python_module_pk"], ac.python_module.pk
+            json.loads(ac.update_task.kwargs)["python_module_pk"], ac.python_module_id
         )
         ac.delete()
         if created:

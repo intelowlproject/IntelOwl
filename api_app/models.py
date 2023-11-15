@@ -1135,7 +1135,7 @@ class PythonConfig(AbstractConfig):
                     "enabled": not self.disabled,
                     "kwargs": json.dumps(
                         {
-                            "python_module_pk": self.python_module.pk,
+                            "python_module_pk": self.python_module_id,
                             "python_config_pk": self.pk,
                         }
                     ),

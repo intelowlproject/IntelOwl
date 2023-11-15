@@ -376,7 +376,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             )
             args = [
                 job.pk,
-                config.python_module.pk,
+                config.python_module_id,
                 config.pk,
                 job.get_config_runtime_configuration(config),
                 task_id,

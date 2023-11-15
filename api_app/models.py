@@ -98,7 +98,7 @@ class PythonModule(models.Model):
         return self.module
 
     def __contains__(self, item: str):
-        if not isinstance(item, str) or not isinstance(item, PythonConfig):
+        if not isinstance(item, str) and not isinstance(item, PythonConfig):
             raise TypeError(f"{self.__class__.__name__} needs a string or pythonConfig")
         if isinstance(item, str):
             return item in self.python_complete_path

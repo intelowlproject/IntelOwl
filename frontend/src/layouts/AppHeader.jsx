@@ -140,7 +140,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href={`https://twitter.com/${INTELOWL_TWITTER_ACCOUNT}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="ms-md-2 btn-social"
+              className="btn-social"
             >
               <RiTwitterXFill className="text-info" /> Follow @
               {INTELOWL_TWITTER_ACCOUNT}
@@ -151,7 +151,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href="https://github.com/intelowlproject"
               target="_blank"
               rel="noopener noreferrer"
-              className="ms-md-2 btn-social my-1"
+              className="btn-social my-1"
             >
               <FaGithub /> Connect on Github{" "}
             </a>
@@ -161,7 +161,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href="https://www.honeynet.org/gsoc/"
               target="_blank"
               rel="noopener noreferrer"
-              className="ms-md-2 btn-social my-1"
+              className="btn-social my-1"
             >
               <FaGoogle className="text-accent" /> Honeynet on GSOC{" "}
             </a>
@@ -171,7 +171,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href="https://gsoc-slack.honeynet.org/"
               target="_blank"
               rel="noopener noreferrer"
-              className="ms-md-2 btn-social my-1"
+              className="btn-social my-1"
             >
               <img
                 className="px-1"

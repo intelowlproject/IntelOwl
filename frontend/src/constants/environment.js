@@ -12,3 +12,5 @@ export const PUBLIC_URL = process.env.PUBLIC_URL;
 export const RECAPTCHA_SITEKEY = window.$env
   ? window.$env.RECAPTCHA_SITEKEY
   : "";
+
+export const STAGE = window.$env ? window.$env.STAGE : "";

@@ -60,6 +60,7 @@ cp docker/.env.start.test.template docker/.env.start.test
 
 # set STAGE env variable to "local"
 sed -i "s/STAGE=\"production\"/STAGE=\"local\"/g" docker/env_file_app
+sed -i "s/STAGE:\"prod\"/STAGE:\"local\"/g" frontend/public/env.js
 ```
 
 ### Backend

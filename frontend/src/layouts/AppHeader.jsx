@@ -19,8 +19,9 @@ import {
   RiPlugFill,
   RiBookReadFill,
   RiGuideLine,
+  RiTwitterXFill,
 } from "react-icons/ri";
-import { FaTwitter, FaGithub, FaGoogle } from "react-icons/fa";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 
 // lib
 import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
@@ -31,6 +32,7 @@ import {
   PUBLIC_URL,
   VERSION,
   INTELOWL_TWITTER_ACCOUNT,
+  STAGE,
 } from "../constants/environment";
 
 // local
@@ -138,9 +140,10 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href={`https://twitter.com/${INTELOWL_TWITTER_ACCOUNT}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="ms-md-2 twitter-follow-button"
+              className="ms-md-2 btn-social"
             >
-              <FaTwitter /> Follow @{INTELOWL_TWITTER_ACCOUNT}
+              <RiTwitterXFill className="text-info" /> Follow @
+              {INTELOWL_TWITTER_ACCOUNT}
             </a>
           </div>
           <div>
@@ -150,19 +153,36 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               rel="noopener noreferrer"
               className="ms-md-2 btn-social my-1"
             >
-              {" "}
               <FaGithub /> Connect on Github{" "}
             </a>
           </div>
           <div>
-            <Button
+            <a
               href="https://www.honeynet.org/gsoc/"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-xs ms-md-2 btn-social my-1"
+              className="ms-md-2 btn-social my-1"
             >
-              <FaGoogle /> Honeynet on GSOC
-            </Button>
+              <FaGoogle className="text-accent" /> Honeynet on GSOC{" "}
+            </a>
+          </div>
+          <div>
+            <a
+              href="https://gsoc-slack.honeynet.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ms-md-2 btn-social my-1"
+            >
+              <img
+                className="px-1"
+                title="Quokka"
+                src={`${PUBLIC_URL}/icons/honeynet.ico`}
+                alt="honeynet"
+                width="24px"
+                height="16px"
+              />
+              Honeynet Slack Chat{" "}
+            </a>
           </div>
         </div>
       </UncontrolledPopover>
@@ -199,7 +219,12 @@ function AppHeader() {
             width="128"
             alt="IntelOwl logo"
           />
-          <small className="text-accent">{VERSION}</small>
+          <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
+            {VERSION} -
+          </small>
+          <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
+            &nbsp;{STAGE}
+          </small>
         </NavbarBrand>
         <NavbarToggler onClick={() => setIsOpen(!isOpen)} />
         <Collapse navbar isOpen={isOpen}>

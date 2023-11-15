@@ -332,13 +332,15 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
-        # we save the `configured` attribute in the queryset
-        qs = self.annotate_configured(user)
+        # we are excluding the plugins that has failed the health_check
+        qs = (
+            self.exclude(health_check_status=False)
+            # we save the `configured` attribute in the queryset
+            .annotate_configured(user)
+        )
         return (
             # this super call parameters are required
             super(PythonConfigQuerySet, qs)
-            # we are excluding the plugins that has failed the health_check
-            .exclude(health_check_status=True)
             # we set the parent `runnable` attribute
             .annotate_runnable(user)
             # and we do the logic AND between the two fields

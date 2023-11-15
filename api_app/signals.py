@@ -10,7 +10,7 @@ from django.db import models
 from django.dispatch import receiver
 
 from api_app.helpers import calculate_md5
-from api_app.models import Job, Parameter, PluginConfig, PythonConfig
+from api_app.models import Job, Parameter, PluginConfig, PythonConfig, PythonModule
 
 migrate_finished = dispatch.Signal()
 
@@ -25,6 +25,9 @@ def pre_save_job(sender, instance: Job, **kwargs):
             if instance.is_sample
             else instance.observable_name.encode("utf-8")
         )
+    if instance.finished_analysis_time:
+        td = instance.finished_analysis_time - instance.received_request_time
+        instance.process_time = round(td.total_seconds(), 2)
 
 
 @receiver(models.signals.pre_delete, sender=Job)
@@ -70,13 +73,27 @@ def post_delete_parameter(sender, instance: Parameter, *args, **kwargs):
     instance.refresh_cache_keys()
 
 
+@receiver(models.signals.pre_save, sender=PythonModule)
+def pre_save_python_module_periodic_tasks(
+    sender: Type[PythonModule], instance: PythonModule, *args, **kwargs
+):
+    instance.generate_update_periodic_task()
+
+
+@receiver(models.signals.post_delete, sender=PythonModule)
+def post_delete_python_module_periodic_tasks(
+    sender: Type[PythonModule], instance: PythonModule, using, origin, *args, **kwargs
+):
+    if hasattr(instance, "update_task") and instance.update_task:
+        instance.update_task.delete()
+
+
 @receiver(models.signals.pre_save)
 def pre_save_python_config_periodic_tasks(
     sender: Type[PythonConfig], instance: PythonConfig, *args, **kwargs
 ):
     if issubclass(sender, PythonConfig):
         instance.generate_health_check_periodic_task()
-        instance.generate_update_periodic_task()
 
 
 @receiver(models.signals.post_delete)
@@ -86,9 +103,6 @@ def post_delete_python_config_periodic_tasks(
     if issubclass(sender, PythonConfig):
         if hasattr(instance, "health_check_task") and instance.health_check_task:
             instance.health_check_task.delete()
-
-        if hasattr(instance, "update_task") and instance.update_task:
-            instance.update_task.delete()
 
 
 @receiver(models.signals.post_save)

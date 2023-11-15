@@ -1,5 +1,4 @@
 import io
-import json
 import logging
 from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
 
@@ -7,7 +6,6 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from certego_saas.apps.organization.organization import Organization
 
@@ -123,90 +121,3 @@ class OwnershipAbstractModel(models.Model):
         if self.for_organization:
             return self.owner.membership.organization
         return None
-
-
-class UpdateAbstractModel(models.Model):
-    update_schedule = models.ForeignKey(
-        CrontabSchedule,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="update_for_%(class)s",
-    )
-    update_task = models.OneToOneField(
-        PeriodicTask,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="update_for_%(class)s",
-        editable=False,
-    )
-    name: str
-    queue: str
-    disabled: bool
-    python_module_id: str
-
-    class Meta:
-        abstract = True
-
-    def generate_update_periodic_task(self):
-        from intel_owl.tasks import update
-
-        if hasattr(self, "update_schedule") and self.update_schedule:
-            periodic_task = PeriodicTask.objects.update_or_create(
-                name=f"{self.name.title()}Update{self.__class__.__name__}",
-                task=f"{update.__module__}.{update.__name__}",
-                defaults={
-                    "crontab": self.update_schedule,
-                    "queue": self.queue,
-                    "enabled": not self.disabled and settings.REPO_DOWNLOADER_ENABLED,
-                    "kwargs": json.dumps({"python_module_pk": self.python_module_id}),
-                },
-            )[0]
-            self.update_task = periodic_task
-
-
-class HealthCheckAbstractModel(models.Model):
-    health_check_schedule = models.ForeignKey(
-        CrontabSchedule,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="healthcheck_for_%(class)s",
-    )
-    health_check_task = models.OneToOneField(
-        PeriodicTask,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="healthcheck_for_%(class)s",
-        editable=False,
-    )
-    name: str
-    queue: str
-    disabled: bool
-    python_module_id: str
-
-    class Meta:
-        abstract = True
-
-    def generate_health_check_periodic_task(self):
-        from intel_owl.tasks import update
-
-        if hasattr(self, "health_check_schedule") and self.health_check_schedule:
-            periodic_task = PeriodicTask.objects.update_or_create(
-                name=f"{self.name.title()}HealthCheck{self.__class__.__name__}",
-                task=f"{update.__module__}.{update.__name__}",
-                defaults={
-                    "crontab": self.health_check_schedule,
-                    "queue": self.queue,
-                    "enabled": not self.disabled and settings.REPO_DOWNLOADER_ENABLED,
-                    "kwargs": json.dumps(
-                        {
-                            "python_module_pk": self.python_module_id,
-                            "plugin_config_pk": self.pk,
-                        }
-                    ),
-                },
-            )[0]
-            self.health_check_task = periodic_task

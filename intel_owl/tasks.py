@@ -106,8 +106,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
         )
         job.status = Job.Status.FAILED.value
         job.finished_analysis_time = now()
-        job.process_time = job.calculate_process_time()
-        job.save(update_fields=["status", "finished_analysis_time", "process_time"])
+        job.save(update_fields=["status", "finished_analysis_time"])
 
     logger.info("started check_stuck_analysis")
     query = Q(status=Job.Status.RUNNING.value)

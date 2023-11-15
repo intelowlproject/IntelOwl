@@ -417,8 +417,7 @@ class Job(models.Model):
             elif stats["failed"] >= 1 or stats["killed"] >= 1:
                 self.status = self.Status.REPORTED_WITH_FAILS
 
-        if not self.finished_analysis_time:
-            self.finished_analysis_time = get_now()
+        self.finished_analysis_time = get_now()
         logger.info(f"{self.__repr__()} setting status to {self.status}")
         self.save(
             update_fields=[

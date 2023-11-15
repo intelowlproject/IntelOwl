@@ -50,5 +50,5 @@ class Migration(migrations.Migration):
                 to="django_celery_beat.periodictask",
             ),
         ),
-        migrations.RunPython(migrate),
+        migrations.RunPython(migrate, migrations.RunPython.noop),
     ]

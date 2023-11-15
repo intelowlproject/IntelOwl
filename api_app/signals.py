@@ -78,6 +78,8 @@ def pre_save_python_module_periodic_tasks(
     sender: Type[PythonModule], instance: PythonModule, *args, **kwargs
 ):
     instance.generate_update_periodic_task()
+    for config in instance.configs.all():
+        config.generate_health_check_periodic_task()
 
 
 @receiver(models.signals.post_delete, sender=PythonModule)
@@ -86,14 +88,6 @@ def post_delete_python_module_periodic_tasks(
 ):
     if hasattr(instance, "update_task") and instance.update_task:
         instance.update_task.delete()
-
-
-@receiver(models.signals.pre_save)
-def pre_save_python_config_periodic_tasks(
-    sender: Type[PythonConfig], instance: PythonConfig, *args, **kwargs
-):
-    if issubclass(sender, PythonConfig):
-        instance.generate_health_check_periodic_task()
 
 
 @receiver(models.signals.post_delete)

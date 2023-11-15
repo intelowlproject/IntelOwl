@@ -337,6 +337,8 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         return (
             # this super call parameters are required
             super(PythonConfigQuerySet, qs)
+            # we are excluding the plugins that has failed the health_check
+            .exclude(health_check_status=True)
             # we set the parent `runnable` attribute
             .annotate_runnable(user)
             # and we do the logic AND between the two fields

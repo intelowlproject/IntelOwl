@@ -167,22 +167,26 @@ def update(python_module_pk: int):
 @shared_task(base=FailureLoggedTask, soft_time_limit=30)
 def health_check(python_module_pk: int, plugin_config_pk: str):
     from api_app.classes import Plugin
-    from api_app.models import PythonModule
+    from api_app.models import PythonConfig, PythonModule
 
     plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
         pk=python_module_pk
     ).python_class
-    config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
+
+    config: PythonConfig = plugin_class.config_model.objects.get(pk=plugin_config_pk)
     plugin = plugin_class(
         config=config,
     )
-    try:
-        enabled = plugin.health_check(user=None)
-    except NotImplementedError:
-        logger.error(f"Unable to check healthcheck for {config.name}")
+    if not config.disabled:
+        try:
+            enabled = plugin.health_check(user=None)
+        except NotImplementedError:
+            logger.error(f"Unable to check healthcheck for {config.name}")
+        else:
+            config.health_check_status = enabled
+            config.save()
     else:
-        config.disabled = not enabled
-        config.save()
+        logger.info(f"Skipping health_check for configuration {config.name} because disabled")
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=100)

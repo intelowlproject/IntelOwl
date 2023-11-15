@@ -186,7 +186,9 @@ def health_check(python_module_pk: int, plugin_config_pk: str):
             config.health_check_status = enabled
             config.save()
     else:
-        logger.info(f"Skipping health_check for configuration {config.name} because disabled")
+        logger.info(
+            f"Skipping health_check for configuration {config.name} because disabled"
+        )
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=100)

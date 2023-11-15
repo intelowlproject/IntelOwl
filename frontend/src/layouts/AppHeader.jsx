@@ -175,7 +175,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
             >
               <img
                 className="px-1"
-                title="Quokka"
+                title="Honeynet"
                 src={`${PUBLIC_URL}/icons/honeynet.ico`}
                 alt="honeynet"
                 width="24px"

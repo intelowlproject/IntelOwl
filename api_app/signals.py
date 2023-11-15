@@ -25,7 +25,7 @@ def pre_save_job(sender, instance: Job, **kwargs):
             if instance.is_sample
             else instance.observable_name.encode("utf-8")
         )
-    if instance.finished_analysis_time:
+    if instance.finished_analysis_time and instance.received_request_time:
         td = instance.finished_analysis_time - instance.received_request_time
         instance.process_time = round(td.total_seconds(), 2)
 

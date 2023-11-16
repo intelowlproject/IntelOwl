@@ -22,7 +22,7 @@ class PythonModuleTestCase(CustomTestCase):
     def test_clean_python_module(self):
         pc = PythonModule(module="test.Test", base_path="teeest")
         with self.assertRaises(ValidationError):
-            pc.clean_python_module()
+            pc._clean_python_module()
 
     def test_python_complete_path(self):
         pc = PythonModule(module="test.Test", base_path="teeest")

@@ -130,7 +130,7 @@ class PythonModule(models.Model):
     def queue(self) -> str:
         return self.configs.order_by("?").first().queue
 
-    def __clean_python_module(self):
+    def _clean_python_module(self):
         try:
             _ = self.python_class
         except ImportError as exc:
@@ -141,7 +141,7 @@ class PythonModule(models.Model):
 
     def clean(self) -> None:
         super().clean()
-        self.__clean_python_module()
+        self._clean_python_module()
 
     def generate_update_periodic_task(self):
         from intel_owl.tasks import update

@@ -428,14 +428,7 @@ IntelOwl makes use of the django testing framework and the `unittest` library fo
 
 ### Configuration
 
-- In the encrypted folder `tests/test_files.zip` (password: "infected") there are some real malware samples that you can use for testing purposes.
-
-<div class="admonition danger">
-<p class="admonition-title">Danger</p>
-<strong>
-Please remember that these are dangerous malware! They come encrypted and locked for a reason! Do NOT run them unless you are absolutely sure of what you are doing! They are to be used only for launching tests for the file analyzers
-</strong>
-</div>
+- In the encrypted folder `tests/test_files.zip` (password: "intelowl") there are some files that you can use for testing purposes.
 
 - With the following environment variables you can customize your tests:
 
@@ -556,7 +549,7 @@ $ python3 start.py ci up
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:
 
 ```bash
-$ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip -d test_files
+$ docker exec -ti intelowl_uwsgi unzip -P intelowl tests/test_files.zip -d test_files
 $ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 

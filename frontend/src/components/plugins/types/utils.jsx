@@ -242,7 +242,7 @@ export function PlaybooksCollapse({ value, pluginType_ }) {
   );
 }
 
-export function PlaybookPluginList({ pluginInfo, pluginType_ }) {
+function PlaybookPluginList({ pluginInfo, pluginType_ }) {
   const plugin = `${pluginType_}s`;
   return (
     <div>

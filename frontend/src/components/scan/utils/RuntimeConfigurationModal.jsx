@@ -106,19 +106,16 @@ export function RuntimeConfigurationModal(props) {
     }
   */
   Object.keys(selectedPluginsInFormik).forEach((pluginType) => {
+    editableConfig[pluginType] = {};
     // for each plugin extract name and default params
     Object.entries(selectedPluginsParams[pluginType]).forEach(
       ([pluginName, pluginParams]) => {
         // add empty dict in editableConfig for plugin that have not params
-        editableConfig[pluginType] = {
-          ...editableConfig[pluginType],
-          [pluginName]: {},
-        };
+        editableConfig[pluginType][pluginName] = {};
         // for each param (dict) extract the value of the "value" key
         Object.entries(pluginParams).forEach(
           ([paramName, { value: paramValue }]) => {
             editableConfig[pluginType][pluginName] = {
-              ...editableConfig[pluginType][pluginName],
               [paramName]: paramValue,
             };
           },

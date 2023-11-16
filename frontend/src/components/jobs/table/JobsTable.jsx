@@ -97,8 +97,10 @@ export default function JobsTable() {
         <TableHintIcon />
         <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
       </div>
-      {/* Table */}
-      {tableNode}
+      <div style={{ height: "80vh", overflow: "scroll" }}>
+        {/* Table */}
+        {tableNode}
+      </div>
     </Container>
   );
 }

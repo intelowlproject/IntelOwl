@@ -15,13 +15,15 @@ import { TlpChoices } from "../../../constants/advancedSettingsConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { TLPTag } from "../../common/TLPTag";
 import {
-  OrganizationPluginStateToggle,
-  PluginHealthCheckButton,
   PluginInfoPopoverIcon,
   PluginVerificationIcon,
   PlaybooksCollapse,
-  PlaybooksDeletionButton,
 } from "./utils";
+import {
+  OrganizationPluginStateToggle,
+  PluginHealthCheckButton,
+  PlaybooksDeletionButton,
+} from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 
 /* This function is available in the certego-ui, but it doesn't works:

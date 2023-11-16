@@ -75,7 +75,6 @@ export function RuntimeConfigurationModal(props) {
   // Extract plugin default params from the store.
   // Description and type are used in the side section.
   Object.keys(selectedPluginsInFormik).forEach((pluginType) => {
-    console.debug(pluginType);
     selectedPluginsParams[pluginType] = {
       // for each selected plugin we extract the config and append it to the other configs
       ...selectedPluginsInFormik[pluginType].reduce(
@@ -97,25 +96,40 @@ export function RuntimeConfigurationModal(props) {
 
   /* this is the dict shown when the modal is open: load the default params and the previous saved config
     (in case the user update the config, save and close and reopen the modal)
+    We want to show data in this format:
+    {
+      pluginType: {
+        pluginName: {
+          paramName: paramValue,
+        },
+      },
+    }
   */
   Object.keys(selectedPluginsInFormik).forEach((pluginType) => {
-    editableConfig[pluginType] = Object.entries(
-      selectedPluginsParams[pluginType],
-    ).reduce(
-      (generalConfig, [pluginName, pluginParams]) => ({
-        ...generalConfig,
-        // For each param (dict) extract the value of the "value" key
-        [pluginName]: Object.entries(pluginParams).reduce(
-          (singlePluginConfig, [paramName, { value: paramValue }]) => ({
-            ...singlePluginConfig,
-            [paramName]: paramValue,
-          }),
-          {},
-        ),
-        ...(formik.values.runtime_configuration[pluginType] || {}),
-      }),
-      {},
+    // for each plugin extract name and default params
+    Object.entries(selectedPluginsParams[pluginType]).forEach(
+      ([pluginName, pluginParams]) => {
+        // add empty dict in editableConfig for plugin that have not params
+        editableConfig[pluginType] = {
+          ...editableConfig[pluginType],
+          [pluginName]: {},
+        };
+        // for each param (dict) extract the value of the "value" key
+        Object.entries(pluginParams).forEach(
+          ([paramName, { value: paramValue }]) => {
+            editableConfig[pluginType][pluginName] = {
+              ...editableConfig[pluginType][pluginName],
+              [paramName]: paramValue,
+            };
+          },
+        );
+      },
     );
+    // override config saved in formik
+    editableConfig[pluginType] = {
+      ...editableConfig[pluginType],
+      ...(formik.values.runtime_configuration[pluginType] || {}),
+    };
   });
 
   console.debug("RuntimeConfigurationModal - editableConfig:");

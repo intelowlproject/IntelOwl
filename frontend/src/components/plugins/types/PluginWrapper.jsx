@@ -116,7 +116,7 @@ export default function PluginWrapper({
         </div>
       </div>
       {/* Table/Card View */}
-      <div>
+      <div style={{ height: "70vh", overflow: "scroll" }}>
         <Loader
           loading={loading}
           error={error}

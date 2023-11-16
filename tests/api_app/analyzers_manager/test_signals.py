@@ -26,7 +26,5 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         # REPO_DOWNLOADER_ENABLED set to False
         self.assertFalse(pm.update_task.enabled)
         self.assertEqual(pm.update_task.queue, pm.configs.first().queue)
-        self.assertEqual(
-            json.loads(pm.update_task.kwargs)["python_module_pk"], pm.python_module_id
-        )
+        self.assertEqual(json.loads(pm.update_task.kwargs)["python_module_pk"], pm.pk)
         pm.delete()

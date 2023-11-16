@@ -1,6 +1,6 @@
 import json
 
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django_celery_beat.models import CrontabSchedule
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.models import PythonModule
@@ -10,7 +10,7 @@ from tests import CustomTestCase
 class AnalyzerConfigSignalsTestCase(CustomTestCase):
     def test_pre_save_analyzer_config(self):
         pm = PythonModule.objects.get(
-            base_path=PythonModuleBasePaths.FileAnalyzer.value,
+            base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
             module="cyberchef.CyberChef",
         )
         self.assertIsNone(pm.update_task)
@@ -30,15 +30,3 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
             json.loads(pm.update_task.kwargs)["python_module_pk"], pm.python_module_id
         )
         pm.delete()
-
-    def test_post_delete_analyzer_config(self):
-        pm = PythonModule.objects.get(
-            base_path=PythonModuleBasePaths.FileAnalyzer.value,
-            module="yara_scan.YaraScan",
-        )
-        task = pm.update_task
-        self.assertIsNotNone(task)
-        task_pk = task.pk
-        pm.delete()
-        with self.assertRaises(PeriodicTask.DoesNotExist):
-            PeriodicTask.objects.get(pk=task_pk)

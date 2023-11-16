@@ -33,12 +33,14 @@ class PythonModuleTestCase(CustomTestCase):
         self.assertEqual(str(pc), "test.Test")
 
     def test_unique_together(self):
-        pc = PythonModule.objects.create(module="test.Test", base_path="teeest")
         try:
             with transaction.atomic():
-                PythonModule.objects.create(module="test.Test", base_path="teeest")
+                PythonModule.objects.create(
+                    base_path=PythonModuleBasePaths.FileAnalyzer.value,
+                    module="yara_scan.YaraScan",
+                )
         except IntegrityError:
-            pc.delete()
+            pass
         else:
             self.fail("Duplicate module allowed")
 

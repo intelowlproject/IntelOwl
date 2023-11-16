@@ -140,6 +140,11 @@ describe("test JobActionsBar", () => {
             playbook_requested: "test",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
         ],
       );

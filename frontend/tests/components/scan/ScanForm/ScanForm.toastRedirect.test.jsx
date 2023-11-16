@@ -107,6 +107,11 @@ describe("ScanForm adavanced use", () => {
             playbook_requested: "TEST_PLAYBOOK_GENERIC",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
         ],
       ]);
@@ -175,6 +180,11 @@ describe("ScanForm adavanced use", () => {
             playbook_requested: "TEST_PLAYBOOK_GENERIC",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
         ],
       ]);
@@ -266,6 +276,11 @@ describe("ScanForm adavanced use", () => {
             playbook_requested: "TEST_PLAYBOOK_GENERIC",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
         ],
       ]);

@@ -13,7 +13,7 @@ import {
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
   OrganizationPluginStateToggle,
-} from "../../../../src/components/plugins/types/utils";
+} from "../../../../src/components/plugins/types/pluginActionsButtons";
 import {
   mockedUseAuthStore,
   mockedUseOrganizationStoreOwner,

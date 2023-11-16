@@ -17,7 +17,7 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
 
         pm: PythonModule
 
-        pm.update_schedule = CrontabSchedule(hour=2, minute=2)
+        pm.update_schedule = CrontabSchedule.objects.create(hour=2, minute=2)
         pm.save()
         self.assertIsNotNone(pm.update_task)
         self.assertEqual(pm.update_task.name, pm.python_complete_path + "Update")

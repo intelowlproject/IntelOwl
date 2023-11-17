@@ -206,7 +206,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             attrs["playbook_to_execute"] = playbook
             attrs["analyzers_requested"] = list(playbook.analyzers.all())
             attrs["connectors_requested"] = list(playbook.connectors.all())
-            attrs["tags_labels"] = list(playbook.tags.all())
+            attrs["tags_labels"] = list(attrs.get("tags_labels", [])) + list(
+                playbook.tags.all()
+            )
 
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)

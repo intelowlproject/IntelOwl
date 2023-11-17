@@ -27,4 +27,3 @@ class AnalyzerConfigSignalsTestCase(CustomTestCase):
         self.assertFalse(pm.update_task.enabled)
         self.assertEqual(pm.update_task.queue, pm.configs.first().queue)
         self.assertEqual(json.loads(pm.update_task.kwargs)["python_module_pk"], pm.pk)
-        pm.delete()

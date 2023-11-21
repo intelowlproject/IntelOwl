@@ -492,9 +492,12 @@ class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerial
 
     def to_internal_value(self, data):
         ret = []
+        files = data.pop("files")
         for playbook in data.pop("playbooks_requested", [None]):
             item = copy.deepcopy(data)
             item["playbook_requested"] = playbook
+            # maybe here we should make a seek on each file
+            item["files"] = files
             results = super().to_internal_value(item)
             ret.extend(results)
         return ret

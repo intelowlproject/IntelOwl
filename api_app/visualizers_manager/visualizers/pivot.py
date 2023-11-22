@@ -29,7 +29,7 @@ class Pivot(Visualizer):
                                 f"playbook {self._job.parent_job.playbook_to_execute} "
                                 if self._job.parent_job
                                 else "",
-                                link=Job.objects.get(self._job.parent_job)
+                                link=Job.objects.get(self._job.parent_job.pk).url
                                 if self._job.parent_job
                                 else "",
                             ),

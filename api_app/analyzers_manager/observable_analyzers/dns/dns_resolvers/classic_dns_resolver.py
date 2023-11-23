@@ -40,10 +40,14 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 )
                 resolutions = []
             except socket.timeout:
-                logger.warning(
+                message = (
                     f"request for {self.observable_name} for classic"
                     f" DNS triggered timeout"
                 )
+                logger.warning(message)
+                self.report.errors.append(message)
+                timeout = True
+
         elif self.observable_classification in [
             self.ObservableTypes.DOMAIN,
             self.ObservableTypes.URL,

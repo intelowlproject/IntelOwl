@@ -32,6 +32,10 @@ class Cymru(ObservableAnalyzer):
             domains = socket.gethostbyaddr(query_to_perform)
         except (socket.gaierror, socket.herror):
             logger.info(f"observable {self.observable_name} not found in HMR DB")
+        except socket.timeout:
+            logger.warning(
+                f"request for {self.observable_name} in HMR DB triggered timeout"
+            )
         if domains:
             results["found"] = True
             results["resolution_data"] = domains[2]

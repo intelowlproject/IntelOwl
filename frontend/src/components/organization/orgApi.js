@@ -73,6 +73,35 @@ async function leaveOrganization(orgName) {
   }
 }
 
+async function promoteUserAdmin(username) {
+  try {
+    const resp = await axios.post(`${BASE_URI_ORG}/promote_admin`, {
+      username,
+    });
+    addToast(`User @${username} is now an admin.`, null, "success", true);
+    return resp;
+  } catch (e) {
+    addToast("Failed!", e.parsedMsg, "danger", true);
+    return Promise.reject(e);
+  }
+}
+
+async function removeUserAdmin(username) {
+  try {
+    const resp = await axios.post(`${BASE_URI_ORG}/remove_admin`, { username });
+    addToast(
+      `User @${username} has been removed as admin.`,
+      null,
+      "info",
+      true,
+    );
+    return resp;
+  } catch (e) {
+    addToast("Failed!", e.parsedMsg, "danger", true);
+    return Promise.reject(e);
+  }
+}
+
 // INVITATION
 
 async function sendInvite(body) {
@@ -146,4 +175,6 @@ export {
   acceptInvitation,
   declineInvitation,
   deleteInvitation,
+  promoteUserAdmin,
+  removeUserAdmin,
 };

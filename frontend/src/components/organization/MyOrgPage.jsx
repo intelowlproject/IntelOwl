@@ -56,15 +56,15 @@ export default function MyOrgPage() {
       render={() => (
         <Row className="mt-5 d-flex justify-content-between">
           {/* Organization Info */}
-          <Col sm={12} md={8} xl={4} className="mx-sm-auto mx-xl-0">
+          <Col sm={12} md={8} xl={12} className="mx-sm-auto mx-xl-0">
             <OrgInfoCard />
           </Col>
           {/* Members List */}
-          <Col sm={12} md={12} xl={6}>
+          <Col sm={12} md={12} xl={7}>
             <MembersList />
           </Col>
           {/* Pending Invitations List */}
-          <Col sm={12} md={12} xl={6}>
+          <Col sm={12} md={12} xl={5}>
             <PendingInvitationsList />
           </Col>
         </Row>

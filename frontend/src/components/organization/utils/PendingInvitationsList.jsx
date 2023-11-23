@@ -1,9 +1,9 @@
 import React from "react";
-import { Col, Fade, ButtonGroup } from "reactstrap";
+import { Col, Fade } from "reactstrap";
 import { SiMinutemailer } from "react-icons/si";
-import { MdEdit, MdDelete } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 
-import { ContentSection, DateHoverable, IconButton } from "@certego/certego-ui";
+import { ContentSection, DateHoverable } from "@certego/certego-ui";
 
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { useAuthStore } from "../../../stores/useAuthStore";
@@ -25,9 +25,6 @@ export function PendingInvitationsList() {
     ),
   );
 
-  // state
-  const [showActions, setShowActions] = React.useState(false);
-
   // callbacks
   const deleteInvitationCb = async (invId, username) => {
     await deleteInvitation(invId, username);
@@ -37,7 +34,10 @@ export function PendingInvitationsList() {
   return (
     <Fade>
       <SiMinutemailer size="16px" className="float-start text-secondary" />
-      <ContentSection className="bg-body border border-dark">
+      <ContentSection
+        id="organization-pending-invitations"
+        className="bg-body border border-dark"
+      >
         {/* Header */}
         <section className="h3 d-flex justify-content-between align-items-end flex-column flex-sm-row">
           <div>
@@ -48,19 +48,7 @@ export function PendingInvitationsList() {
           </div>
           <div>
             {isUserAdmin(user.username) && (
-              <ButtonGroup>
-                <InviteButton onCreate={refetchInvs} />
-                <IconButton
-                  id="pendinginvitelist-showactions-btn"
-                  size="sm"
-                  color="tertiary"
-                  title="toggle actions visibility"
-                  Icon={MdEdit}
-                  onClick={() => setShowActions((s) => !s)}
-                  // active state
-                  outline={!showActions}
-                />
-              </ButtonGroup>
+              <InviteButton onCreate={refetchInvs} />
             )}
           </div>
         </section>
@@ -71,9 +59,12 @@ export function PendingInvitationsList() {
             <ol>
               {pendingInvitations.map(
                 ({ id, user: invitedUser, created_at: invitedAt }) => (
-                  <li key={`pendinvinvlist-${id}`}>
+                  <li
+                    key={`pendinvinvlist-${id}`}
+                    className="border-bottom border-dark py-1"
+                  >
                     <div className="d-flex flex-wrap">
-                      <Col sm={6}>{invitedUser?.username}</Col>
+                      <Col sm={5}>{invitedUser?.username}</Col>
                       <Col sm={5}>
                         <DateHoverable
                           value={invitedAt}
@@ -82,8 +73,8 @@ export function PendingInvitationsList() {
                           title="Invite sent date"
                         />
                       </Col>
-                      <Col sm={1}>
-                        {showActions && (
+                      <Col sm={2} className="text-end">
+                        {isUserAdmin(user.username) && (
                           <MdDelete
                             className="text-danger pointer small"
                             title="delete invitation"

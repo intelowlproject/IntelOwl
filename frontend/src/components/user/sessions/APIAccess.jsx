@@ -3,6 +3,7 @@ import { Alert, Row, Col, ButtonGroup } from "reactstrap";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import { IoMdAdd } from "react-icons/io";
+import useAxios from "axios-hooks";
 
 import {
   ContentSection,
@@ -10,7 +11,7 @@ import {
   IconButton,
   DateHoverable,
   CopyToClipboardButton,
-  useAxiosComponentLoader,
+  Loader,
   confirm,
 } from "@certego/certego-ui";
 
@@ -28,10 +29,12 @@ function GenerateIcon() {
 export default function APIAccess() {
   console.debug("APIAccess rendered!");
 
-  // API
-  const [respData, Loader, refetch] = useAxiosComponentLoader({
-    url: APIACCESS_BASE_URI,
-  });
+  const [{ data: respData, loading, error }, refetch] = useAxios(
+    {
+      url: APIACCESS_BASE_URI,
+    },
+    { useCache: false },
+  );
 
   // local state
   const [tokenVisible, setTokenVisible] = React.useState(false);
@@ -71,6 +74,8 @@ export default function APIAccess() {
 
   return (
     <Loader
+      loading={loading}
+      error={error}
       // Normal render
       render={() => (
         <>
@@ -139,7 +144,7 @@ export default function APIAccess() {
         </>
       )}
       // Error render (we catch 404 which means no API key exists)
-      renderError={({ error }) =>
+      renderError={() =>
         error?.response?.status === 404 ? (
           <Alert color="dark" className="col-md-6 col-lg-3 mx-auto text-center">
             <h5 className="text-warning">No active API key</h5>

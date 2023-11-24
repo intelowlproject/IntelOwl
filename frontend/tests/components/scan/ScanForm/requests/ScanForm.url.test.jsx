@@ -111,6 +111,11 @@ describe("test ScanForm component with URLs", () => {
             playbook_requested: "TEST_PLAYBOOK_URL",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
         ],
       ]);

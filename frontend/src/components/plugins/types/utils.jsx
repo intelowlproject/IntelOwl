@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import classnames from "classnames";
 import {
   UncontrolledTooltip,
-  Spinner,
   Card,
   CardHeader,
   CardBody,
@@ -11,22 +10,12 @@ import {
   UncontrolledPopover,
   Button,
   Collapse,
-  Modal,
-  ModalHeader,
-  ModalBody,
 } from "reactstrap";
-import { RiHeartPulseLine } from "react-icons/ri";
-import { MdInfo, MdDelete } from "react-icons/md";
-import { BsPeopleFill } from "react-icons/bs";
-
-import { IconButton, BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
-
+import { MdInfo } from "react-icons/md";
+import { BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { JobTag } from "../../common/JobTag";
 import { TLPTag } from "../../common/TLPTag";
-import { useAuthStore } from "../../../stores/useAuthStore";
-import { useOrganizationStore } from "../../../stores/useOrganizationStore";
-import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { ScanModesNumeric } from "../../../constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../utils/time";
@@ -49,7 +38,7 @@ export function PluginInfoCard({ pluginInfo }) {
       <CardBody className="bg-darker border-top border-tertiary">
         <div>
           <h6 className="text-secondary">Description</h6>
-          <p>{markdownToHtml(pluginInfo?.description)}</p>
+          <span>{markdownToHtml(pluginInfo?.description)}</span>
         </div>
         <div>
           <div>
@@ -128,47 +117,20 @@ export function PluginInfoCard({ pluginInfo }) {
             </div>
           )}
         </div>
-        {pluginInfo?.analyzers != null && (
-          <div>
-            <h6 className="text-secondary">Analyzers &nbsp;</h6>
-            <ul>
-              {Object.entries(pluginInfo?.analyzers).map(([key, value]) => (
-                <li key={`plugininfocard-analyzer__${pluginInfo.name}-${key}`}>
-                  <span>{key}</span>
-                  {Object.keys(pluginInfo?.analyzers[key]).length !== 0 && (
-                    <ul>
-                      <b>Parameters:</b>
-                      <li style={{ listStyleType: "square" }}>
-                        <code>{JSON.stringify(value, null, 2)}</code>
-                      </li>
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {pluginInfo?.connectors != null && (
-          <div>
-            <h6 className="text-secondary">Connectors &nbsp;</h6>
-            <ul>
-              {Object.entries(pluginInfo?.connectors).map(([key, value]) => (
-                <li
-                  key={`plugininfocard-connector__${pluginInfo?.name}-${key}`}
-                >
-                  <span>{key}</span>
-                  {Object.keys(pluginInfo?.connectors[key]).length !== 0 && (
-                    <ul>
-                      <li>
-                        <code>{JSON.stringify(value, null, 2)}</code>
-                      </li>
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {pluginInfo?.plugin_type === PluginsTypes.PLAYBOOK &&
+          pluginInfo?.analyzers.length !== 0 && (
+            <PlaybookPluginList
+              pluginInfo={pluginInfo}
+              pluginType_={PluginsTypes.ANALYZER}
+            />
+          )}
+        {pluginInfo?.plugin_type === PluginsTypes.PLAYBOOK &&
+          pluginInfo?.connectors.length !== 0 && (
+            <PlaybookPluginList
+              pluginInfo={pluginInfo}
+              pluginType_={PluginsTypes.CONNECTOR}
+            />
+          )}
         {pluginInfo?.plugin_type === PluginsTypes.PLAYBOOK && (
           <div>
             <h6 className="text-secondary">Advanced Settings &nbsp;</h6>
@@ -254,114 +216,6 @@ export function PluginVerificationIcon({ pluginName, verification }) {
   );
 }
 
-function PluginHealthSpinner() {
-  return <Spinner type="ripple" size="sm" className="text-darker" />;
-}
-
-export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
-  const { checkPluginHealth } = usePluginConfigurationStore(
-    React.useCallback(
-      (state) => ({
-        checkPluginHealth: state.checkPluginHealth,
-      }),
-      [],
-    ),
-  );
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isHealthy, setIsHealthy] = React.useState(undefined);
-
-  const onClick = async () => {
-    setIsLoading(true);
-    const status = await checkPluginHealth(pluginType_, pluginName);
-    setIsHealthy(status);
-    setIsLoading(false);
-  };
-
-  return (
-    <div className="d-flex flex-column align-items-center">
-      <IconButton
-        id={`table-pluginhealthcheckbtn__${pluginName}`}
-        color="info"
-        size="sm"
-        Icon={!isLoading ? RiHeartPulseLine : PluginHealthSpinner}
-        title={!isLoading ? "perform health check" : "please wait..."}
-        onClick={onClick}
-        titlePlacement="top"
-      />
-      {isHealthy !== undefined &&
-        (isHealthy ? (
-          <span className="mt-2 text-success">Up and running!</span>
-        ) : (
-          <span className="mt-2 text-warning">Failing!</span>
-        ))}
-    </div>
-  );
-}
-
-export function OrganizationPluginStateToggle({
-  disabled,
-  pluginName,
-  type,
-  refetch,
-  pluginOwner,
-}) {
-  const user = useAuthStore(React.useCallback((s) => s.user, []));
-  const {
-    noOrg,
-    fetchAll: fetchAllOrganizations,
-    isUserAdmin,
-  } = useOrganizationStore(
-    React.useCallback(
-      (state) => ({
-        fetchAll: state.fetchAll,
-        noOrg: state.noOrg,
-        isUserAdmin: state.isUserAdmin,
-      }),
-      [],
-    ),
-  );
-  const { enablePluginInOrg, disabledPluginInOrg } =
-    usePluginConfigurationStore(
-      React.useCallback(
-        (state) => ({
-          enablePluginInOrg: state.enablePluginInOrg,
-          disabledPluginInOrg: state.disabledPluginInOrg,
-        }),
-        [],
-      ),
-    );
-  let title = `${
-    disabled ? "Enable" : "Disable"
-  } ${pluginName} for organization`;
-  if (!isUserAdmin(user.username)) {
-    title = `${pluginName} is ${
-      disabled ? "disabled" : "enabled"
-    } for the organization`;
-  }
-
-  const onClick = async () => {
-    if (disabled) enablePluginInOrg(type, pluginName, pluginOwner);
-    else disabledPluginInOrg(type, pluginName, pluginOwner);
-    fetchAllOrganizations();
-    refetch();
-  };
-  return (
-    <div className={`d-flex align-items-center ${noOrg ? "" : "px-2"}`}>
-      {!noOrg && (
-        <IconButton
-          id={`table-pluginstatebtn__${pluginName}`}
-          color={disabled ? "dark" : "success"}
-          size="sm"
-          Icon={BsPeopleFill}
-          title={title}
-          onClick={isUserAdmin(user.username) && onClick}
-          titlePlacement="top"
-        />
-      )}
-    </div>
-  );
-}
-
 export function PlaybooksCollapse({ value, pluginType_ }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
@@ -388,89 +242,40 @@ export function PlaybooksCollapse({ value, pluginType_ }) {
   );
 }
 
-export function PlaybooksDeletionButton({ playbookName }) {
-  const [showModal, setShowModal] = React.useState(false);
-
-  const { deletePlaybook, retrievePlaybooksConfiguration } =
-    usePluginConfigurationStore(
-      React.useCallback(
-        (state) => ({
-          deletePlaybook: state.deletePlaybook,
-          retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
-        }),
-        [],
-      ),
-    );
-
-  const onClick = async () => {
-    try {
-      await deletePlaybook(playbookName);
-      setShowModal(false);
-      await retrievePlaybooksConfiguration();
-    } catch {
-      // handle error in deletePlaybook
-    }
-  };
-
+function PlaybookPluginList({ pluginInfo, pluginType_ }) {
+  const plugin = `${pluginType_}s`;
   return (
     <div>
-      <IconButton
-        id={`playbook-deletion-${playbookName}`}
-        color="danger"
-        size="sm"
-        Icon={MdDelete}
-        title="Delete playbook"
-        onClick={() => setShowModal(true)}
-        titlePlacement="top"
-      />
-      <Modal
-        id={`modal-playbook-deletion-${playbookName}`}
-        autoFocus
-        centered
-        zIndex="1050"
-        size="lg"
-        keyboard={false}
-        backdrop="static"
-        labelledBy="Playbook deletion modal"
-        isOpen={showModal}
-      >
-        <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
-          <small className="text-info">Delete playbook</small>
-        </ModalHeader>
-        <ModalBody className="d-flex justify-content-between my-2 mx-2">
-          <div>
-            Do you want to delete the playbook:{" "}
-            <span className="text-info">{playbookName}</span>?
-          </div>
-          <div className="d-flex justify-content-between">
-            <Button className="mx-2" color="danger" size="sm" onClick={onClick}>
-              Delete
-            </Button>
-            <Button
-              className="mx-2"
-              size="sm"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </Button>
-          </div>
-        </ModalBody>
-      </Modal>
+      <h6 className="text-secondary text-capitalize">{plugin} &nbsp;</h6>
+      <ul>
+        {pluginInfo[plugin].map((pluginName) => (
+          <li
+            key={`plugininfocard-${pluginType_}__${pluginInfo.name}-${pluginName}`}
+          >
+            <span>{pluginName}</span>
+            {pluginInfo?.runtime_configuration[plugin][pluginName] !==
+              undefined &&
+              Object.keys(pluginInfo?.runtime_configuration[plugin][pluginName])
+                .length !== 0 && (
+                <ul>
+                  <b>Parameters:</b>
+                  <li style={{ listStyleType: "square" }}>
+                    <code>
+                      {JSON.stringify(
+                        pluginInfo?.runtime_configuration[plugin][pluginName],
+                        null,
+                        2,
+                      )}
+                    </code>
+                  </li>
+                </ul>
+              )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
-
-OrganizationPluginStateToggle.propTypes = {
-  disabled: PropTypes.bool.isRequired,
-  pluginName: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-  refetch: PropTypes.func.isRequired,
-  pluginOwner: PropTypes.string,
-};
-
-OrganizationPluginStateToggle.defaultProps = {
-  pluginOwner: null,
-};
 
 PluginInfoCard.propTypes = {
   pluginInfo: PropTypes.object.isRequired,
@@ -485,16 +290,12 @@ PluginVerificationIcon.propTypes = {
   verification: PropTypes.object.isRequired,
 };
 
-PluginHealthCheckButton.propTypes = {
-  pluginName: PropTypes.string.isRequired,
-  pluginType_: PropTypes.oneOf(["analyzer", "connector"]).isRequired,
-};
-
 PlaybooksCollapse.propTypes = {
   value: PropTypes.array.isRequired,
   pluginType_: PropTypes.oneOf(Object.values(PluginsTypes)).isRequired,
 };
 
-PlaybooksDeletionButton.propTypes = {
-  playbookName: PropTypes.string.isRequired,
+PlaybookPluginList.propTypes = {
+  pluginInfo: PropTypes.object.isRequired,
+  pluginType_: PropTypes.oneOf(Object.values(PluginsTypes)).isRequired,
 };

@@ -4,7 +4,6 @@ import { GuideProvider } from "./contexts/GuideContext";
 
 // layout
 import AppMain from "./layouts/AppMain";
-import AppFooter from "./layouts/AppFooter";
 import GuideWrapper from "./components/GuideWrapper";
 
 function App() {
@@ -13,7 +12,6 @@ function App() {
       <BrowserRouter>
         <GuideWrapper />
         <AppMain />
-        <AppFooter />
       </BrowserRouter>
     </GuideProvider>
   );

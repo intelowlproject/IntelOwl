@@ -446,32 +446,28 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
     def to_internal_value(self, data: QueryDict):
         ret = []
         errors = []
-
-        if data.getlist("file_names", []) and len(data.getlist("file_names")) != len(
-            data.getlist("files")
-        ):
+        if not isinstance(data, QueryDict):
+            data_to_check = QueryDict(mutable=True)
+            data_to_check.update(data)
+        else:
+            data_to_check = data
+        if data_to_check.getlist("file_names", []) and len(
+            data_to_check.getlist("file_names")
+        ) != len(data_to_check.getlist("files")):
             raise ValidationError(
                 {"detail": "file_names and files must have the same length."}
             )
 
-        try:
-            base_data: QueryDict = data.copy()
-        except TypeError:  # https://code.djangoproject.com/ticket/29510
-            base_data: QueryDict = QueryDict(mutable=True)
-            for key, value_list in data.lists():
-                if key not in ["files", "file_names", "file_mimetypes"]:
-                    base_data.setlist(key, copy.deepcopy(value_list))
-
-        for index, file in enumerate(data.getlist("files")):
+        for index, file in enumerate(data_to_check.getlist("files")):
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
-            item = base_data.copy()
+            item = data_to_check.copy()
 
             item["file"] = file
-            if data.getlist("file_names", []):
-                item["file_name"] = data.getlist("file_names")[index]
-            if data.get("file_mimetypes", []):
-                item["file_mimetype"] = data["file_mimetypes"][index]
+            if data_to_check.getlist("file_names", []):
+                item["file_name"] = data_to_check.getlist("file_names")[index]
+            if data_to_check.get("file_mimetypes", []):
+                item["file_mimetype"] = data_to_check["file_mimetypes"][index]
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:

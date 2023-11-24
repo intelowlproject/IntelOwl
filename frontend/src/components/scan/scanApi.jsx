@@ -180,7 +180,11 @@ export async function createJob(
       _scanMode,
       scanCheckTime,
     );
-    const resp = await axios.post(apiUrl, payload);
+    const resp = await axios.post(apiUrl, payload, {
+      headers: {
+        "Content-Type": isSample ? "multipart/form-data" : "application/json",
+      },
+    });
     const respData = resp.data.results;
 
     const warnings = [];

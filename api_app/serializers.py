@@ -488,7 +488,6 @@ class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerial
 
     def to_internal_value(self, data):
         ret = []
-        files = data.pop("files")
         playbook_requested = data.pop("playbooks_requested", [None])
         # in case we have only one Playbook (multi-analysis Playbook is deprecated)
         # we do not need to do a deepcopy which is very costly in terms of RAM
@@ -496,19 +495,17 @@ class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerial
         # see: https://docs.djangoproject.com/en/4.2/ref/settings
         # /#std:setting-FILE_UPLOAD_MAX_MEMORY_SIZE
         if len(playbook_requested) == 1:
-            results = self._generate_result(data, playbook_requested[0], files)
+            results = self._generate_result(data, playbook_requested[0])
             ret.extend(results)
         else:
             for playbook in playbook_requested:
                 item = copy.deepcopy(data)
-                results = self._generate_result(item, playbook, files)
+                results = self._generate_result(item, playbook)
                 ret.extend(results)
         return ret
 
-    def _generate_result(self, data, playbook, files):
+    def _generate_result(self, data, playbook):
         data["playbook_requested"] = playbook
-        # maybe here we should make a seek on each file
-        data["files"] = files
         return super().to_internal_value(data)
 
 

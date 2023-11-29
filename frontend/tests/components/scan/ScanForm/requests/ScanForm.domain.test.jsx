@@ -118,7 +118,7 @@ describe("test ScanForm component with domains", () => {
               visualizers: {},
             },
           },
-          { headers: { "Content-Type": "application/json" } },
+          { "headers": { "Content-Type": "application/json"}},
         ],
       ]);
       // check redirect to job page
@@ -200,7 +200,7 @@ describe("test ScanForm component with domains", () => {
             scan_mode: 2,
             scan_check_time: "24:00:00",
           },
-          { headers: { "Content-Type": "application/json" } },
+          { "headers": { "Content-Type": "application/json"}},
         ],
       ]);
       // check redirect to job page

@@ -139,7 +139,7 @@ describe("ScanForm adavanced use", () => {
               visualizers: {},
             },
           },
-          { headers: { "Content-Type": "application/json" } },
+          { "headers": { "Content-Type": "application/json"}},
         ],
       );
       // check redirect to job page
@@ -222,7 +222,7 @@ describe("ScanForm adavanced use", () => {
             scan_mode: 2,
             scan_check_time: "10:00:00",
           },
-          { headers: { "Content-Type": "application/json" } },
+          { "headers": { "Content-Type": "application/json"}},
         ],
       );
       // check redirect to job page
@@ -300,7 +300,7 @@ describe("ScanForm adavanced use", () => {
               visualizers: {},
             },
           },
-          { headers: { "Content-Type": "application/json" } },
+          { "headers": { "Content-Type": "application/json"}},
         ],
       ]);
       // check redirect to job page
@@ -388,9 +388,7 @@ describe("ScanForm adavanced use", () => {
           visualizers: {},
         }),
       });
-      expect(axios.post.mock.calls[0][2]).toEqual({
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      expect(axios.post.mock.calls[0][2]).toEqual({ "headers": { "Content-Type": "multipart/form-data"}})
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
@@ -480,7 +478,7 @@ describe("ScanForm adavanced use", () => {
             tlp: "GREEN",
             scan_mode: 1,
           },
-          { headers: { "Content-Type": "application/json" } },
+          { "headers": { "Content-Type": "application/json"}}
         ],
       ]);
       // check redirect to job page
@@ -580,10 +578,8 @@ describe("ScanForm adavanced use", () => {
         tags_labels: "test tag",
         scan_mode: "1",
       });
-      expect(axios.post.mock.calls[0][2]).toEqual({
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
+      expect(axios.post.mock.calls[0][2]).toEqual({ "headers": { "Content-Type": "multipart/form-data"}});
+      
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
@@ -708,7 +704,7 @@ describe("ScanForm adavanced use", () => {
             //   visualizers: {},
             // }
           },
-          { headers: { "Content-Type": "application/json" } },
+          { "headers": { "Content-Type": "application/json"}}
         ],
       ]);
       // check redirect to job page

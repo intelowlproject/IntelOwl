@@ -25,8 +25,8 @@ jest.mock("../../../../src/stores/useOrganizationStore", () => ({
 
 // current user must be equal to org owner
 jest.mock("../../../../src/stores/useAuthStore", () => ({
-  useAuthStore: jest.fn((state) =>state(
-    {
+  useAuthStore: jest.fn((state) =>
+    state({
       user: {
         username: "user_owner",
         full_name: "user owner",
@@ -34,8 +34,8 @@ jest.mock("../../../../src/stores/useAuthStore", () => ({
         last_name: "owner",
         email: "test@google.com",
       },
-    }
-  )),
+    }),
+  ),
 }));
 
 describe("PluginHealthCheckButton test", () => {

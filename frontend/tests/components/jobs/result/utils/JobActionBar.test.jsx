@@ -146,7 +146,7 @@ describe("test JobActionsBar", () => {
               visualizers: {},
             },
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       );
     });
@@ -261,7 +261,7 @@ describe("test JobActionsBar", () => {
             tlp: "AMBER",
             scan_mode: 1,
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       );
     });

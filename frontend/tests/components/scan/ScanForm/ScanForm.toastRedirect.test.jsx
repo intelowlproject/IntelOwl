@@ -113,7 +113,7 @@ describe("ScanForm adavanced use", () => {
               visualizers: {},
             },
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -187,7 +187,7 @@ describe("ScanForm adavanced use", () => {
               visualizers: {},
             },
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -284,7 +284,7 @@ describe("ScanForm adavanced use", () => {
               visualizers: {},
             },
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -371,7 +371,7 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             scan_check_time: "24:00:00",
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -461,7 +461,7 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             scan_check_time: "24:00:00",
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -573,7 +573,7 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             scan_check_time: "24:00:00",
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page

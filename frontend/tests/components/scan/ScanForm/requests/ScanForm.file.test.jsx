@@ -121,7 +121,9 @@ describe("test ScanForm component with files", () => {
         tlp: "AMBER",
         scan_mode: "1",
       });
-      expect(axios.post.mock.calls[0][2]).toEqual({ "headers": { "Content-Type": "multipart/form-data"}});
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
@@ -205,7 +207,9 @@ describe("test ScanForm component with files", () => {
         scan_mode: "2",
         scan_check_time: "24:00:00",
       });
-      expect(axios.post.mock.calls[0][2]).toEqual({ "headers": { "Content-Type": "multipart/form-data"}});
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });

@@ -281,7 +281,7 @@ export function JobOverview({
   }, [UIElements]);
 
   const elementsToShow = (isSelectedUI ? UIElements : rawElements).sort(
-    (a, b) => (a.id > b.id ? 1 : -1),
+    (element, elementToCompare) => (element.id > elementToCompare.id ? 1 : -1),
   );
 
   return (

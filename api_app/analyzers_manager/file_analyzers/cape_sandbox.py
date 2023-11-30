@@ -243,6 +243,7 @@ class CAPEsandbox(FileAnalyzer):
             )
 
         results = None
+        success = False
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
         is_pending = True
 
@@ -308,6 +309,7 @@ class CAPEsandbox(FileAnalyzer):
                             " the results of the analysis."
                             " stopping polling.."
                         )
+                        success = True
 
                         break
 
@@ -326,7 +328,7 @@ class CAPEsandbox(FileAnalyzer):
                     if try_ != self.max_tries - 1:  # avoiding useless last sleep
                         time.sleep(curr_timeout)
 
-        if not results:
+        if not success:
             raise AnalyzerRunException(f"{self.job_id} poll ended without results")
         return results
 

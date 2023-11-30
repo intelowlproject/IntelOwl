@@ -280,7 +280,10 @@ export function JobOverview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [UIElements]);
 
-  const elementsToShow = isSelectedUI ? UIElements : rawElements;
+  const elementsToShow = (isSelectedUI ? UIElements : rawElements).sort(
+    (element, elementToCompare) => (element.id > elementToCompare.id ? 1 : -1),
+  );
+
   return (
     <Loader
       loading={UIElements.length === 0}
@@ -379,7 +382,7 @@ export function JobOverview({
             </div>
             {/* reports section */}
             <TabContent activeTab={subSection}>
-              {elementsToShow.map((componentsObject) => (
+              {elementsToShow.sort().map((componentsObject) => (
                 <TabPane
                   tabId={componentsObject.id}
                   id={`jobReportTab${componentsObject.id}`}

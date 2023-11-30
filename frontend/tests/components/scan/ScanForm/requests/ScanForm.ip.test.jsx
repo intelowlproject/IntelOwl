@@ -34,6 +34,12 @@ jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
+// mock navigate
+const mockedNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedNavigate,
+}));
 
 describe("test ScanForm component with IP addresses", () => {
   beforeAll(() => {
@@ -119,11 +125,12 @@ describe("test ScanForm component with IP addresses", () => {
               visualizers: {},
             },
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(mockedNavigate).toHaveBeenCalledTimes(1);
+      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -201,11 +208,12 @@ describe("test ScanForm component with IP addresses", () => {
             scan_mode: 2,
             scan_check_time: "24:00:00",
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(mockedNavigate).toHaveBeenCalledTimes(1);
+      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 });

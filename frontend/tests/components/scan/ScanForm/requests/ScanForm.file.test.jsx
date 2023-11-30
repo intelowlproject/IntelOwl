@@ -34,6 +34,12 @@ jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
+// mock navigate
+const mockedNavigateFile = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedNavigateFile,
+}));
 
 describe("test ScanForm component with files", () => {
   beforeAll(() => {
@@ -121,9 +127,12 @@ describe("test ScanForm component with files", () => {
         tlp: "AMBER",
         scan_mode: "1",
       });
-      expect(axios.post.mock.calls[0][2]).toEqual({ "headers": { "Content-Type": "multipart/form-data"}});
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(mockedNavigateFile).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateFile).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -205,9 +214,12 @@ describe("test ScanForm component with files", () => {
         scan_mode: "2",
         scan_check_time: "24:00:00",
       });
-      expect(axios.post.mock.calls[0][2]).toEqual({ "headers": { "Content-Type": "multipart/form-data"}});
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(mockedNavigateFile).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateFile).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 });

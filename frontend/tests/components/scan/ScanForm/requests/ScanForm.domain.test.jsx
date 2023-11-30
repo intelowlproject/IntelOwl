@@ -34,6 +34,12 @@ jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
+// mock navigate
+const mockedNavigateDomain = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedNavigateDomain,
+}));
 
 describe("test ScanForm component with domains", () => {
   beforeAll(() => {
@@ -118,11 +124,12 @@ describe("test ScanForm component with domains", () => {
               visualizers: {},
             },
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(mockedNavigateDomain).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateDomain).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -200,11 +207,12 @@ describe("test ScanForm component with domains", () => {
             scan_mode: 2,
             scan_check_time: "24:00:00",
           },
-          { "headers": { "Content-Type": "application/json"}},
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(mockedNavigateDomain).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateDomain).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 });

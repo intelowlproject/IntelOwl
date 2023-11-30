@@ -12,6 +12,12 @@ import {
 } from "../../../../src/constants/apiURLs";
 
 jest.mock("axios");
+// mock navigate
+const mockedNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedNavigate,
+}));
 
 describe("Recent Scans test", () => {
   const recentScansUser = [
@@ -229,7 +235,8 @@ describe("Recent Scans test", () => {
 
       // check redirect to job page
       user.click(firstCard);
-      expect(global.location.pathname).toEqual("/jobs/1/visualizer/");
+      expect(mockedNavigate).toHaveBeenCalledTimes(1);
+      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 });

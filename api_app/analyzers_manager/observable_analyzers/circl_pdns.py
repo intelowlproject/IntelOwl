@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import datetime
+from typing import Dict
 from urllib.parse import urlparse
 
 import pypdns
@@ -14,8 +15,8 @@ from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 class CIRCL_PDNS(classes.ObservableAnalyzer):
     _pdns_credentials: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.domain = self.observable_name
         if self.observable_classification == self.ObservableTypes.URL:
             self.domain = urlparse(self.observable_name).hostname

@@ -84,7 +84,7 @@ class CreateJobsFromPlaybookInterface:
             yield from serializer.save(send_task=send_task)
 
 
-class ModelWithOwnership(models.Model):
+class OwnershipAbstractModel(models.Model):
     for_organization = models.BooleanField(default=False)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

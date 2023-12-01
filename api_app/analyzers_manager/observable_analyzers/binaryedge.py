@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Dict
 
 import requests
 
@@ -13,8 +14,8 @@ class BinaryEdge(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.headers = {"X-Key": self._api_key_name}
 
     def run(self):

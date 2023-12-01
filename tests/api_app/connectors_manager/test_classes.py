@@ -20,12 +20,6 @@ class ConnectorTestCase(CustomTestCase):
     ]
 
     def test_health_check(self):
-        class MockUpConnector(Connector):
-            def run(self) -> dict:
-                return {}
-
-        with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test", self.user)
         pm = PythonModule.objects.get(
             base_path=PythonModuleBasePaths.Connector.value, module="misp.MISP"
         )
@@ -36,12 +30,13 @@ class ConnectorTestCase(CustomTestCase):
             disabled=True,
             maximum_tlp="CLEAR",
         )
-        with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test", self.user)
-        cc.disabled = False
-        cc.save()
-        with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test", self.user)
+
+        class MockUpConnector(Connector):
+            def run(self) -> dict:
+                return {}
+
+        with self.assertRaises(NotImplementedError):
+            MockUpConnector(cc).health_check(self.user)
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
@@ -49,7 +44,11 @@ class ConnectorTestCase(CustomTestCase):
             connector_config=cc,
         )
         with patch("requests.head"):
-            result = MockUpConnector.health_check("test", self.user)
+            result = MockUpConnector(cc).health_check(self.user)
+        self.assertTrue(result)
+        cc.disabled = False
+        cc.save()
+        result = MockUpConnector(cc).health_check(self.user)
         self.assertTrue(result)
         cc.delete()
         pc.delete()
@@ -82,10 +81,14 @@ class ConnectorTestCase(CustomTestCase):
             run_on_failure=False,
         )
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector(cc, job.pk, {}, uuid()).before_run()
+            muc = MockUpConnector(cc)
+            muc.job_id = job.pk
+            muc.before_run()
         cc.run_on_failure = True
         cc.save()
-        MockUpConnector(cc, job.pk, {}, uuid()).before_run()
+        muc = MockUpConnector(cc)
+        muc.job_id = job.pk
+        muc.before_run()
         cc.delete()
         job.delete()
 
@@ -124,10 +127,12 @@ class ConnectorTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
-                sub = subclass(config, job.pk, {}, uuid())
+                sub = subclass(
+                    config,
+                )
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start()
+                    sub.start(job.pk, {}, uuid())
                 except Exception as e:
                     self.fail(
                         f"Connector {subclass.__name__}"

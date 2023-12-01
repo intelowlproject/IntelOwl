@@ -17,14 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class Ingestor(Plugin, metaclass=abc.ABCMeta):
-    def __init__(self, config: IngestorConfig, runtime_configuration: dict, **kwargs):
-        super().__init__(
-            config,
-            job_id=None,
-            runtime_configuration=runtime_configuration,
-            task_id=None,
-            **kwargs
-        )
+    def __init__(self, config: IngestorConfig, **kwargs):
+        super().__init__(config, **kwargs)
 
     @classmethod
     @property

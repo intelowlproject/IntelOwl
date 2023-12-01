@@ -17,7 +17,6 @@ class AnalyzerConfigAdminView(PythonConfigAdminView):
         "type",
         "docker_based",
         "maximum_tlp",
-        "update_schedule",
     )
     list_filter = ["type", "maximum_tlp"] + PythonConfigAdminView.list_filter
     exclude = ["update_task"]

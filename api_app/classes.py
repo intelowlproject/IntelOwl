@@ -4,12 +4,15 @@ import typing
 from abc import ABCMeta, abstractmethod
 from pathlib import PosixPath
 
+import requests
 from billiard.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import cached_property
 
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
+from certego_saas.apps.user.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -23,24 +26,19 @@ class Plugin(metaclass=ABCMeta):
     def __init__(
         self,
         config: PythonConfig,
-        job_id: int,
-        runtime_configuration: dict,
-        task_id: str,
         **kwargs,
     ):
         self._config = config
-        self.job_id = job_id
-        self.runtime_configuration = runtime_configuration
-        self.task_id = task_id
-
         self.kwargs = kwargs
         # some post init processing
-        self.report: AbstractReport = self._config.generate_empty_report(
-            self._job, task_id, AbstractReport.Status.RUNNING.value
-        )
+
         # monkeypatch if in test suite
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
             self._monkeypatch()
+
+    @property
+    def name(self):
+        return self._config.name
 
     @classmethod
     @property
@@ -67,6 +65,14 @@ class Plugin(metaclass=ABCMeta):
     def _job(self) -> "Job":
         return Job.objects.get(pk=self.job_id)
 
+    @property
+    def job_id(self) -> int:
+        return self._job_id
+
+    @job_id.setter
+    def job_id(self, value):
+        self._job_id = value
+
     @cached_property
     def _user(self):
         return self._job.user
@@ -74,11 +80,11 @@ class Plugin(metaclass=ABCMeta):
     def __repr__(self):
         return f"({self.__class__.__name__}, job: #{self.job_id})"
 
-    def _get_params(self) -> typing.Dict:
-        return self._config.read_params(self._user, self.runtime_configuration)
+    def _get_params(self, runtime_configuration: typing.Dict) -> typing.Dict:
+        return self._config.read_params(self._user, runtime_configuration)
 
-    def config(self):
-        for param, value in self._get_params().items():
+    def config(self, runtime_configuration: typing.Dict):
+        for param, value in self._get_params(runtime_configuration).items():
             attribute_name = f"_{param.name}" if param.is_secret else param.name
             setattr(self, attribute_name, value)
             logger.debug(
@@ -166,15 +172,21 @@ class Plugin(metaclass=ABCMeta):
             f" '{err}'"
         )
 
-    def start(self, *args, **kwargs):
+    def start(
+        self, job_id: int, runtime_configuration: dict, task_id: str, *args, **kwargs
+    ):
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
+        self.job_id = job_id
+        self.report: AbstractReport = self._config.generate_empty_report(
+            self._job, task_id, AbstractReport.Status.RUNNING.value
+        )
         try:
+            self.config(runtime_configuration)
             self.before_run()
-            self.config()
             _result = self.run()
         except Exception as e:
             self.after_run_failed(e)
@@ -216,3 +228,43 @@ class Plugin(metaclass=ABCMeta):
         return PythonModule.objects.get(
             module=f"{valid_module}.{cls.__name__}", base_path=cls.python_base_path
         )
+
+    @classmethod
+    def update(cls) -> bool:
+        raise NotImplementedError("No update implemented")
+
+    def health_check(self, user: User = None) -> bool:
+        for param in (
+            self._config.parameters.filter(
+                Q(name__startswith="url") | Q(name__startswith="_url")
+            )
+            .annotate_configured(self._config, user)
+            .annotate_value_for_user(self._config, user)
+        ):
+            if not param.configured or not param.value:
+                continue
+            url = param.value
+            logger.info(
+                f"Url retrieved to verify is {param.name} for plugin {self.name}"
+            )
+
+            if url.startswith("http"):
+                logger.info(f"Checking url {url} for plugin {self.name}")
+                if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+                    return True
+                try:
+                    # momentarily set this to False to
+                    # avoid fails for https services
+                    requests.head(url, timeout=10, verify=False)
+                except (
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.Timeout,
+                ) as e:
+                    logger.info(
+                        f"Health check failed: url {url}"
+                        f" for plugin {self.name}. Error: {e}"
+                    )
+                    return False
+                else:
+                    return True
+        raise NotImplementedError("No healthcheck implemented")

@@ -1,11 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db.models.signals import (
-    m2m_changed,
-    post_delete,
-    post_migrate,
-    post_save,
-    pre_save,
-)
+from django.db.models.signals import m2m_changed, post_migrate, pre_save
 from django.dispatch import receiver
 
 from api_app.pivots_manager.apps import PivotsManagerConfig
@@ -28,18 +22,6 @@ def pre_save_pivot_config(
         # an integrity error will be raised because some fields are missing
         pass
     return instance
-
-
-@receiver(post_save, sender=PivotConfig)
-def post_save_pivot_config(sender, instance: PivotConfig, *args, **kwargs):
-    instance.delete_class_cache_keys()
-
-
-@receiver(post_delete, sender=PivotConfig)
-def post_delete_pivot_config(
-    sender, instance: PivotConfig, using, origin, *args, **kwargs
-):
-    instance.delete_class_cache_keys()
 
 
 @receiver(post_migrate, sender=PivotsManagerConfig)

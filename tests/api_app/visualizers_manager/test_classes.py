@@ -310,7 +310,8 @@ class VisualizerTestCase(CustomTestCase):
         ar = AnalyzerReport.objects.create(
             config=pc.analyzers.first(), job=job, task_id=uuid()
         )
-        v = MockUpVisualizer(vc, job.pk, {}, uuid())
+        v = MockUpVisualizer(vc)
+        v.job_id = job.pk
         self.assertEqual(list(v.analyzer_reports()), [ar])
         ar.delete()
         job.delete()
@@ -351,10 +352,10 @@ class VisualizerTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
-                sub = subclass(config, job.pk, {}, uuid())
+                sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start()
+                    sub.start(job.pk, {}, uuid())
                 except Exception as e:
                     self.fail(
                         f"Visualizer {subclass.__name__}"

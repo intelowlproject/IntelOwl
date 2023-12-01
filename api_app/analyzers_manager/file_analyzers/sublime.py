@@ -27,8 +27,8 @@ class Sublime(FileAnalyzer):
     api_port = 8000
     gui_port = 3000
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         if self._url.endswith("/"):
             self._url = self._url[:-1]
 

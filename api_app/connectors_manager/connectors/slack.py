@@ -1,3 +1,4 @@
+from typing import Dict
 from unittest.mock import patch
 
 import slack_sdk
@@ -16,8 +17,8 @@ class Slack(Connector):
         elems = super().get_exceptions_to_catch()
         return elems + [SlackApiError]
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.client = slack_sdk.WebClient(token=self._token)
 
     @property

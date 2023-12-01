@@ -512,30 +512,38 @@ All plugins, i.e. analyzers and connectors, have `kill` and `retry` actions. In 
 
 - **kill:**
 
-  To stop a plugin whose status is `running`/`pending`:
+  Stop a plugin whose status is `running`/`pending`:
 
   - GUI: Buttons on reports table on job result page.
   - PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
   - CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
-  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+  - API: `PATCH /api/job/{job_id}/{plugin_type/{plugin_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
 
 - **retry:**
 
-  To retry a plugin whose status is `failed`/`killed`:
+  Retry a plugin whose status is `failed`/`killed`:
 
   - GUI: Buttons on reports table on job result page.
   - PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
   - CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
-  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+  - API: `PATCH /api/job/{job_id}/{plugin_type}/{plugin_name}/retry`
 
 - **healthcheck:**
 
-  To check if docker container or external platform associated with an analyzer or connector respectively are up or not:
+  Check if a plugin is able to connect to its provider:
 
-  - GUI: Buttons on analyzers table and connectors table.
+  - GUI: Buttons on every plugin table.
   - PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
   - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
-  - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+  - API: `GET /api/{plugin_type}/{plugin_name}/healthcheck`
+  
+- **pull:**
+
+  Update a plugin with the newest rules/database:
+
+  - GUI: Buttons on every plugin table.
+  - API: `POST /api/{plugin_type}/{plugin_name}/pull`
+  
 
 ### TLP Support
 The **Traffic Light Protocol** ([TLP](https://www.first.org/tlp/)) is a standard that was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. 

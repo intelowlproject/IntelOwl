@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Dict
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
@@ -17,8 +18,8 @@ class Suricata(FileAnalyzer, DockerBasedAnalyzer):
     reload_rules: bool
     extended_logs: bool
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.signatures = {}
 
     def run(self):

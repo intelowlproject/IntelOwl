@@ -4,7 +4,6 @@
 import logging
 import os
 import re
-import traceback
 
 import requests
 from django.conf import settings
@@ -23,7 +22,8 @@ class Tor(classes.ObservableAnalyzer):
     def run(self):
         result = {"found": False}
         if not os.path.isfile(database_location):
-            self._update()
+            if not self.update():
+                raise AnalyzerRunException("Failed extraction of tor db")
 
         if not os.path.exists(database_location):
             raise AnalyzerRunException(
@@ -40,7 +40,7 @@ class Tor(classes.ObservableAnalyzer):
         return result
 
     @classmethod
-    def _update(cls):
+    def update(cls):
         try:
             logger.info("starting download of db from tor project")
             url = "https://check.torproject.org/exit-addresses"
@@ -56,15 +56,14 @@ class Tor(classes.ObservableAnalyzer):
                         f.write(f"{ip}\n")
 
             if not os.path.exists(database_location):
-                raise AnalyzerRunException("failed extraction of tor db")
+                return False
 
             logger.info("ended download of db from tor project")
-
+            return True
         except Exception as e:
-            traceback.print_exc()
             logger.exception(e)
 
-        return database_location
+        return False
 
     @classmethod
     def _monkeypatch(cls):

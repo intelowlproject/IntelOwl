@@ -4,6 +4,7 @@
 import logging
 import time
 from tempfile import NamedTemporaryFile
+from typing import Dict
 
 import requests
 
@@ -63,8 +64,8 @@ class CAPEsandbox(FileAnalyzer):
             .replace("-----END_CERTIFICATE-----", "-----END CERTIFICATE-----")
         )
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.__cert_file = NamedTemporaryFile(mode="w")
         self.__cert_file.write(self._clean_certificate(self._certificate))
         self.__cert_file.flush()

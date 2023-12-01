@@ -8,11 +8,12 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 class QuarkEngine(FileAnalyzer):
     @classmethod
-    def _update(cls):
+    def update(cls) -> bool:
         from quark import freshquark
 
         # the rules are installed in config.HOME_DIR by default
         freshquark.download()
+        return True
 
     def run(self):
         from quark.config import DIR_PATH

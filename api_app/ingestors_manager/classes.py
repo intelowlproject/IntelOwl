@@ -50,6 +50,10 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
         self._config: IngestorConfig
         return self._config.user
 
+    def before_run(self):
+        self._config: IngestorConfig
+        self._config.validate_playbook_to_execute(self._user)
+
     def after_run_success(self, content):
         super().after_run_success(content)
         self._config: IngestorConfig

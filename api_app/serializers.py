@@ -502,6 +502,7 @@ class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerial
                 item = copy.deepcopy(data)
                 results = self._generate_result(item, playbook)
                 ret.extend(results)
+        data["playbooks_requested"] = playbook_requested
         return ret
 
     def _generate_result(self, data, playbook):
@@ -616,7 +617,8 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
     def to_internal_value(self, data):
         ret = []
         errors = []
-        for classification, name in data.pop("observables", []):
+        observables = data.pop("observables", [])
+        for classification, name in observables:
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
@@ -630,6 +632,7 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
                 errors.append(exc.detail)
             else:
                 ret.append(validated)
+        data["observables"] = observables
         if any(errors):
             raise ValidationError({"detail": errors})
         return ret
@@ -644,11 +647,13 @@ class MultiplePlaybooksMultipleObservableAnalysisSerializer(
 
     def to_internal_value(self, data):
         ret = []
-        for playbook in data.pop("playbooks_requested", [None]):
+        playbooks = data.pop("playbooks_requested", [None])
+        for playbook in playbooks:
             item = copy.deepcopy(data)
             item["playbook_requested"] = playbook
             results = super().to_internal_value(item)
             ret.extend(results)
+        data["playbooks_requested"] = playbooks
         return ret
 
 

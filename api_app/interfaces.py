@@ -28,6 +28,7 @@ class CreateJobsFromPlaybookInterface:
 
     def validate_playbook_to_execute(self, user: User):
         from api_app.playbooks_manager.models import PlaybookConfig
+
         if (
             not PlaybookConfig.objects.filter(pk=self.playbook_to_execute_id)
             .visible_for_user(user)

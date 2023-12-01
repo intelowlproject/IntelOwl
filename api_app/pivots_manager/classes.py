@@ -59,7 +59,13 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
     def get_value_to_pivot_to(self) -> Any:
         raise NotImplementedError()
 
+    def before_run(self):
+        super().before_run()
+        self._config: PivotConfig
+        self._config.validate_playbook_to_execute(self._user)
+
     def run(self) -> Any:
+        self._config: PivotConfig
         to_run, motivation = self.should_run()
         report = {"create_job": to_run, "motivation": motivation, "jobs_id": []}
         if to_run:

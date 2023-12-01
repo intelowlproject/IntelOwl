@@ -107,7 +107,13 @@ describe("ScanForm adavanced use", () => {
             playbook_requested: "TEST_PLAYBOOK_GENERIC",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -175,7 +181,13 @@ describe("ScanForm adavanced use", () => {
             playbook_requested: "TEST_PLAYBOOK_GENERIC",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -266,7 +278,13 @@ describe("ScanForm adavanced use", () => {
             playbook_requested: "TEST_PLAYBOOK_GENERIC",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -353,6 +371,7 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             scan_check_time: "24:00:00",
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -442,6 +461,7 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             scan_check_time: "24:00:00",
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -553,6 +573,7 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             scan_check_time: "24:00:00",
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page

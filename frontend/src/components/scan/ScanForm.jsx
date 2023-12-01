@@ -366,6 +366,10 @@ export default function ScanForm() {
       .map((v) => ({
         isDisabled: v.disabled,
         value: v.name,
+        analyzers: v.analyzers,
+        connectors: v.connectors,
+        visualizers: v.visualizers,
+        pivots: v.pivots,
         label: (
           <div className="d-flex justify-content-start align-items-start flex-column">
             <div className="d-flex justify-content-start align-items-baseline flex-column">
@@ -384,10 +388,17 @@ export default function ScanForm() {
         tlp: v.tlp,
         scan_mode: `${v.scan_mode}`,
         scan_check_time: v.scan_check_time,
+        runtime_configuration: v.runtime_configuration,
       }))
       .filter((item) => !item.isDisabled);
 
-  const updateAdvancedConfig = (tags, tlp, _scanMode, scanCheckTime) => {
+  const updateAdvancedConfig = (
+    tags,
+    tlp,
+    _scanMode,
+    scanCheckTime,
+    runtimeConfiguration,
+  ) => {
     formik.setFieldValue("tags", tags, false);
     formik.setFieldValue("tlp", tlp, false);
     formik.setFieldValue("scan_mode", _scanMode, false);
@@ -400,6 +411,18 @@ export default function ScanForm() {
         false,
       );
     }
+    formik.setFieldValue("runtime_configuration", runtimeConfiguration, false);
+  };
+
+  const updateSelectedPlaybook = (playbook) => {
+    formik.setFieldValue("playbook", playbook, false);
+    updateAdvancedConfig(
+      playbook.tags,
+      playbook.tlp,
+      playbook.scan_mode,
+      playbook.scan_check_time,
+      playbook.runtime_configuration,
+    );
   };
 
   // wait the user terminated to typing and then perform the request to recent scans
@@ -424,33 +447,13 @@ export default function ScanForm() {
           Object.keys(formik.values.playbook).length === 0) &&
         formik.values.analysisOptionValues === ScanTypes.playbooks
       ) {
-        formik.setFieldValue(
-          "playbook",
-          playbookOptions(newClassification)[0],
-          false,
-        );
-        updateAdvancedConfig(
-          playbookOptions(newClassification)[0].tags,
-          playbookOptions(newClassification)[0].tlp,
-          playbookOptions(newClassification)[0].scan_mode,
-          playbookOptions(newClassification)[0].scan_check_time,
-        );
+        updateSelectedPlaybook(playbookOptions(newClassification)[0]);
       }
     }
     const observableNames = formik.values.observable_names;
     observableNames[index] = observableValue;
     formik.setFieldValue("observable_names", observableNames, false);
     setInputValue(observableValue);
-  };
-
-  const updateSelectedPlaybook = (playbook) => {
-    formik.setFieldValue("playbook", playbook, false);
-    updateAdvancedConfig(
-      playbook.tags,
-      playbook.tlp,
-      playbook.scan_mode,
-      playbook.scan_check_time,
-    );
   };
 
   const [scanType, setScanType] = React.useState(
@@ -471,6 +474,7 @@ export default function ScanForm() {
         formik.initialValues.tlp,
         formik.initialValues.scan_mode,
         "01:00:00:00",
+        formik.initialValues.runtime_configuration,
       );
     }
     if (
@@ -489,6 +493,8 @@ export default function ScanForm() {
         updateSelectedPlaybook(
           playbookOptions(formik.values.classification)[0],
         );
+        formik.setFieldValue("analyzers", [], false); // reset
+        formik.setFieldValue("connectors", [], false); // reset
       }
     }
   };
@@ -703,17 +709,7 @@ export default function ScanForm() {
                         formik.values.analysisOptionValues ===
                           ScanTypes.playbooks
                       ) {
-                        formik.setFieldValue(
-                          "playbook",
-                          playbookOptions("file")[0],
-                          false,
-                        );
-                        updateAdvancedConfig(
-                          playbookOptions("file")[0].tags,
-                          playbookOptions("file")[0].tlp,
-                          playbookOptions("file")[0].scan_mode,
-                          playbookOptions("file")[0].scan_check_time,
-                        );
+                        updateSelectedPlaybook(playbookOptions("file")[0]);
                       }
                     }}
                     className="input-dark"
@@ -725,11 +721,8 @@ export default function ScanForm() {
             )}
             <hr />
             <Row>
-              <div className="col-sm-3 col-form-label" />
-              <FormGroup
-                className="d-flex col-sm-9"
-                style={{ marginTop: "10px" }}
-              >
+              <div className="col-sm-3 col-form-label mb-3" />
+              <FormGroup className="d-flex col-sm-8 align-items-center">
                 {Object.values(ScanTypes).map((type_) => (
                   <FormGroup check inline key={`analysistype__${type_}`}>
                     <Col>
@@ -746,6 +739,31 @@ export default function ScanForm() {
                   </FormGroup>
                 ))}
               </FormGroup>
+              <Col sm={1} className="d-flex-center justify-content-end mb-3">
+                <IconButton
+                  id="scanform-runtimeconf-editbtn"
+                  Icon={MdEdit}
+                  title="Edit runtime configuration"
+                  titlePlacement="top"
+                  size="sm"
+                  color="tertiary"
+                  disabled={
+                    !(
+                      formik.values.analyzers.length > 0 ||
+                      formik.values.connectors.length > 0 ||
+                      Object.keys(formik.values.playbook).length > 0
+                    )
+                  }
+                  onClick={toggleModal}
+                />
+                {isModalOpen && (
+                  <RuntimeConfigurationModal
+                    isOpen={isModalOpen}
+                    toggle={toggleModal}
+                    formik={formik}
+                  />
+                )}
+              </Col>
             </Row>
             {scanType === ScanTypes.analyzers_and_connectors && (
               <>
@@ -786,35 +804,6 @@ export default function ScanForm() {
                     )}
                   </Col>
                 </FormGroup>
-                <FormGroup row>
-                  <Label sm={3} for="scanform-runtimeconf-editbtn">
-                    Runtime Configuration
-                  </Label>
-                  <Col sm={9}>
-                    <IconButton
-                      id="scanform-runtimeconf-editbtn"
-                      Icon={MdEdit}
-                      title="Edit runtime configuration"
-                      titlePlacement="top"
-                      size="sm"
-                      color="tertiary"
-                      disabled={
-                        !(
-                          formik.values.analyzers.length > 0 ||
-                          formik.values.connectors.length > 0
-                        )
-                      }
-                      onClick={toggleModal}
-                    />
-                    {isModalOpen && (
-                      <RuntimeConfigurationModal
-                        isOpen={isModalOpen}
-                        toggle={toggleModal}
-                        formik={formik}
-                      />
-                    )}
-                  </Col>
-                </FormGroup>
               </>
             )}
             {scanType === ScanTypes.playbooks && (
@@ -840,7 +829,34 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
             )}
-
+            <FormGroup row>
+              <Label sm={3}>TLP</Label>
+              <Col sm={9}>
+                <div>
+                  {TlpChoices.map((ch) => (
+                    <FormGroup inline check key={`tlpchoice__${ch}`}>
+                      <Label check for={`tlpchoice__${ch}`}>
+                        <TLPTag value={ch} />
+                      </Label>
+                      <Field
+                        as={Input}
+                        id={`tlpchoice__${ch}`}
+                        type="radio"
+                        name="tlp"
+                        value={ch}
+                        invalid={formik.errors.tlp && formik.touched.tlp}
+                        onChange={formik.handleChange}
+                      />
+                    </FormGroup>
+                  ))}
+                </div>
+                <FormText>
+                  <span style={{ color: `${TLPColors[formik.values.tlp]}` }}>
+                    {TLPDescriptions[formik.values.tlp].replace("TLP: ", "")}
+                  </span>
+                </FormText>
+              </Col>
+            </FormGroup>
             <hr />
             <Button
               size="sm"
@@ -868,34 +884,6 @@ export default function ScanForm() {
                       formik.setFieldValue("tags", v, false)
                     }
                   />
-                </Col>
-              </FormGroup>
-              <FormGroup row>
-                <Label sm={3}>TLP</Label>
-                <Col sm={9}>
-                  <div>
-                    {TlpChoices.map((ch) => (
-                      <FormGroup inline check key={`tlpchoice__${ch}`}>
-                        <Label check for={`tlpchoice__${ch}`}>
-                          <TLPTag value={ch} />
-                        </Label>
-                        <Field
-                          as={Input}
-                          id={`tlpchoice__${ch}`}
-                          type="radio"
-                          name="tlp"
-                          value={ch}
-                          invalid={formik.errors.tlp && formik.touched.tlp}
-                          onChange={formik.handleChange}
-                        />
-                      </FormGroup>
-                    ))}
-                  </div>
-                  <FormText>
-                    <span style={{ color: `${TLPColors[formik.values.tlp]}` }}>
-                      {TLPDescriptions[formik.values.tlp].replace("TLP: ", "")}
-                    </span>
-                  </FormText>
                 </Col>
               </FormGroup>
               <FormGroup row className="mt-2">

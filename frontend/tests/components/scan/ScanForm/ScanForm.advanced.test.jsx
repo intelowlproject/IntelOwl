@@ -133,7 +133,13 @@ describe("ScanForm adavanced use", () => {
             tlp: "CLEAR",
             scan_mode: 2,
             scan_check_time: "10:00:00",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       );
       // check redirect to job page
@@ -216,6 +222,7 @@ describe("ScanForm adavanced use", () => {
             scan_mode: 2,
             scan_check_time: "10:00:00",
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       );
       // check redirect to job page
@@ -287,7 +294,13 @@ describe("ScanForm adavanced use", () => {
             tags_labels: ["test tag"],
             tlp: "GREEN",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -369,6 +382,14 @@ describe("ScanForm adavanced use", () => {
         tags_labels: "test tag",
         tlp: "GREEN",
         scan_mode: "1",
+        runtime_configuration: JSON.stringify({
+          analyzers: {},
+          connectors: {},
+          visualizers: {},
+        }),
+      });
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
       });
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");
@@ -459,6 +480,7 @@ describe("ScanForm adavanced use", () => {
             tlp: "GREEN",
             scan_mode: 1,
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -558,6 +580,137 @@ describe("ScanForm adavanced use", () => {
         tags_labels: "test tag",
         scan_mode: "1",
       });
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      // check redirect to job page
+      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+    });
+  });
+
+  test("test edit runtime configuration", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    // select an observable
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
+    // recent scans
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
+
+    // select analyzer
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
+          we need this strange way to access instead of the id */
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await user.click(analyzerDropdownButton);
+    const testAnalyzerButton = container.querySelector(
+      `#${analyzerDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await user.click(testAnalyzerButton);
+
+    // advanced settings
+    /* the id change in case you run a single test or all of them.
+        we need this strange way to access instead of the id */
+    const advancedSettingsButton = screen.getByRole("button", {
+      name: "Advanced settings",
+    });
+    await user.click(advancedSettingsButton);
+    const forceAnalysisRadio = screen.getByRole("radio", {
+      name: "Force new analysis",
+    });
+    expect(forceAnalysisRadio).toBeInTheDocument();
+    await user.click(forceAnalysisRadio);
+
+    // runtime config
+    const runtimeConfigButton = container.querySelector(
+      `#scanform-runtimeconf-editbtn`,
+    );
+    expect(runtimeConfigButton).toBeInTheDocument();
+    await user.click(runtimeConfigButton);
+    const runtimeConfigModalWarning = screen.getByText(
+      "Note: Edit this only if you know what you are doing!",
+    );
+    expect(runtimeConfigModalWarning).toBeInTheDocument();
+    const editableRuntimeConfigSection =
+      runtimeConfigModalWarning.closest("div");
+    const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
+      "#edit_runtime_configuration-modal",
+    );
+    expect(editableRuntimeConfig).toBeInTheDocument();
+    // to test the contents of the json editor we need to use this format
+    expect(editableRuntimeConfig.textContent).toBe(
+      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'AAAA'    }  },  connectors: {}}",
+    );
+    // clear editor and type new runtime config
+    await user.clear(editableRuntimeConfig);
+    await user.type(
+      editableRuntimeConfig,
+      "{{  analyzers: {{    TEST_ANALYZER: {{      query_type: 'A'    }  },  connectors: {{}}",
+    );
+    expect(editableRuntimeConfig.textContent).toBe(
+      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'A'    }  },  connectors: {}}",
+    );
+    // save new config
+    const saveButton = screen.getByRole("button", {
+      name: "Save & Close",
+    });
+    expect(saveButton).toBeInTheDocument();
+    await user.click(saveButton);
+
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    await user.click(startScanButton);
+
+    /* IMPORTANT! Only in the test, editing and saving of the configuration 
+    were performed incorrectly so the "runtime_configuration" field is empty */
+
+    await waitFor(() => {
+      // no call to the API to check old analysis (one of the advanced settings)
+      expect(axios.post.mock.calls.length).toBe(1);
+      expect(axios.post.mock.calls).toEqual([
+        [
+          ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "google.com"]],
+            analyzers_requested: ["TEST_ANALYZER"],
+            tlp: "AMBER",
+            scan_mode: 1,
+            // runtime_configuration: {
+            //   analyzers: {
+            //     TEST_ANALYZER: {query_type: 'A'}
+            //   },
+            //   connectors: {},
+            //   visualizers: {},
+            // }
+          },
+          { headers: { "Content-Type": "application/json" } },
+        ],
+      ]);
       // check redirect to job page
       expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });

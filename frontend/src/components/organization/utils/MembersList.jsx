@@ -1,21 +1,17 @@
 import React from "react";
-import { Row, Col, Fade, ButtonGroup, Badge } from "reactstrap";
-import { MdDelete } from "react-icons/md";
-import { FaUserFriends, FaUserEdit, FaUserMinus } from "react-icons/fa";
+import { Row, Col, Fade, Badge } from "reactstrap";
+import { FaUserFriends, FaUserMinus } from "react-icons/fa";
+import { RiAdminFill } from "react-icons/ri";
 
-import {
-  ContentSection,
-  DateHoverable,
-  IconButton,
-  confirm,
-} from "@certego/certego-ui";
+import { ContentSection, DateHoverable, confirm } from "@certego/certego-ui";
 
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import {
-  deleteOrganization,
   removeMemberFromOrg,
   leaveOrganization,
+  promoteUserAdmin,
+  removeUserAdmin,
 } from "../orgApi";
 
 export function MembersList() {
@@ -43,9 +39,6 @@ export function MembersList() {
       [],
     ),
   );
-
-  // state
-  const [showActions, setShowActions] = React.useState(false);
 
   // memo
   const sortedMembers = React.useMemo(
@@ -103,78 +96,34 @@ export function MembersList() {
       setTimeout(fetchAll, 100);
     }
   }, [orgName, fetchAll]);
-  const deleteOrganizationCb = React.useCallback(async () => {
-    const answer = await confirm({
-      message: (
-        <p>
-          Organization &quot;<u>{orgName}</u>&quot; will be deleted along with
-          every membership (user memberships, not user accounts) and invitations
-          too.
-          <br />
-          <span className="text-warning">
-            Are you sure you wish to proceed?
-          </span>
-        </p>
-      ),
-      confirmText: "Yes",
-      confirmColor: "primary",
-      cancelColor: "link text-gray",
-    });
-    if (answer) {
-      await deleteOrganization(orgName);
+  const promoteUserAdminCb = React.useCallback(
+    async (username) => {
+      await promoteUserAdmin(username);
       setTimeout(fetchAll, 100);
-    }
-  }, [orgName, fetchAll]);
+    },
+    [fetchAll],
+  );
+  const removeUserAdminCb = React.useCallback(
+    async (username) => {
+      await removeUserAdmin(username);
+      setTimeout(fetchAll, 100);
+    },
+    [fetchAll],
+  );
 
   // UI
   return (
     <Fade>
       <FaUserFriends size="16px" className="float-start text-secondary" />
-      <ContentSection className="bg-body border border-dark">
+      <ContentSection
+        id="organization-members"
+        className="bg-body border border-dark"
+      >
         {/* Header */}
         <section className="h3 d-flex justify-content-between align-items-end flex-column flex-sm-row">
           <div>
             Members&nbsp;
             <small className="text-muted">{membersCount} total</small>
-          </div>
-          <div>
-            <ButtonGroup>
-              {isUserOwner ? (
-                <IconButton
-                  id="deleteorg-btn"
-                  size="sm"
-                  outline
-                  color="danger"
-                  className="border border-tertiary"
-                  title="Delete Organization"
-                  Icon={MdDelete}
-                  onClick={deleteOrganizationCb}
-                />
-              ) : (
-                <IconButton
-                  id="memberslist-leaveorg-btn"
-                  size="sm"
-                  outline
-                  color="danger"
-                  className="border border-tertiary"
-                  title="Leave Organization"
-                  Icon={FaUserMinus}
-                  onClick={leaveOrganizationCb}
-                />
-              )}
-              {isUserAdmin(user.username) && (
-                <IconButton
-                  id="memberslist-showactions-btn"
-                  size="sm"
-                  color="tertiary"
-                  title="toggle actions visibility"
-                  Icon={FaUserEdit}
-                  onClick={() => setShowActions((s) => !s)}
-                  // active state
-                  outline={!showActions}
-                />
-              )}
-            </ButtonGroup>
           </div>
         </section>
         <hr />
@@ -189,7 +138,10 @@ export function MembersList() {
                   joined,
                   is_admin: isAdmin,
                 }) => (
-                  <li key={`memberlist-${username}`}>
+                  <li
+                    key={`memberlist-${username}`}
+                    className="border-bottom border-dark py-1"
+                  >
                     <Row>
                       <Col sm={5} title="Name and Username">
                         {fullName}&nbsp;
@@ -200,7 +152,7 @@ export function MembersList() {
                           (@{username})
                         </span>
                       </Col>
-                      <Col sm={5} title="Joining Date">
+                      <Col sm={3} title="Joining Date">
                         <DateHoverable
                           value={joined}
                           format="do MMMM yyyy"
@@ -208,20 +160,10 @@ export function MembersList() {
                         />
                       </Col>
                       <Col sm={2} className="text-end">
-                        {showActions &&
-                          owner.username !== username &&
-                          (!isUserAdmin(username) ||
-                            (isUserAdmin(username) && isUserOwner)) && (
-                            <FaUserMinus
-                              className="text-danger pointer small"
-                              title="remove member"
-                              onClick={() => removeMemberCb(username)}
-                            />
-                          )}
                         {owner?.username === username && (
                           <Badge
                             id={`memberlist-badge-owner-${username}`}
-                            color="info"
+                            color="primary"
                           >
                             Owner
                           </Badge>
@@ -229,10 +171,55 @@ export function MembersList() {
                         {owner?.username !== username && isAdmin && (
                           <Badge
                             id={`memberlist-badge-admin-${username}`}
-                            color="info"
+                            color="secondary"
                           >
                             Admin
                           </Badge>
+                        )}
+                      </Col>
+                      <Col sm={2} className="d-flex justify-content-end">
+                        {owner.username !== username && (
+                          <div>
+                            {isUserOwner && (
+                              <RiAdminFill
+                                id={`memberslist-adminactions-btn-${username}`}
+                                className={
+                                  isUserAdmin(username)
+                                    ? "text-danger small mx-3"
+                                    : "text-info small mx-3"
+                                }
+                                style={{ cursor: "pointer" }}
+                                title={
+                                  isUserAdmin(username)
+                                    ? "Remove admin"
+                                    : "Promote admin"
+                                }
+                                onClick={() =>
+                                  isUserAdmin(username)
+                                    ? removeUserAdminCb(username)
+                                    : promoteUserAdminCb(username)
+                                }
+                              />
+                            )}
+                            {(!isUserAdmin(username) ||
+                              (isUserAdmin(username) && isUserOwner)) &&
+                              user.username !== username && (
+                                <FaUserMinus
+                                  id={`memberslist-removemember-btn-${username}`}
+                                  className="text-danger pointer small mx-3"
+                                  title="remove member"
+                                  onClick={() => removeMemberCb(username)}
+                                />
+                              )}
+                            {!isUserOwner && user.username === username && (
+                              <FaUserMinus
+                                id="memberslist-leaveorg-btn"
+                                className="text-danger pointer small mx-3"
+                                title="Leave organization"
+                                onClick={() => leaveOrganizationCb}
+                              />
+                            )}
+                          </div>
                         )}
                       </Col>
                     </Row>

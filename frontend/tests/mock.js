@@ -50,6 +50,7 @@ export const mockedUseOrganizationStoreOwner = {
       is_admin: true,
     },
     name: "org_test",
+    establishedAt: "2023-10-18T14:34:38.263483Z",
   },
   membersCount: 3,
   members: [
@@ -72,8 +73,18 @@ export const mockedUseOrganizationStoreOwner = {
       is_admin: false,
     },
   ],
+  pendingInvitations: [],
+  pluginsState: {},
   fetchAll: () => {},
-  isUserAdmin: () => true,
+  fetchOnlyBasicInfo: () => {},
+  refetchMembers: () => {},
+  refetchInvs: () => {},
+  isUserAdmin: (username) => {
+    if (["user_owner", "user_admin"].includes(username)) {
+      return true;
+    }
+    return false;
+  },
 };
 
 export const mockedUseTagsStore = {
@@ -118,7 +129,15 @@ export const mockedUsePluginConfigurationStore = {
       run_hash: false,
       run_hash_type: "",
       not_supported_filetypes: [],
-      params: {},
+      params: {
+        query_type: {
+          type: "str",
+          description: "Test analyzer param description.",
+          required: false,
+          value: "AAAA",
+          is_secret: false,
+        },
+      },
       secrets: {},
       verification: {
         configured: true,

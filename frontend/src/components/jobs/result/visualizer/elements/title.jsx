@@ -8,7 +8,7 @@ export function TitleVisualizer({ size, title, value, alignment, id }) {
       id={id}
     >
       <div className="mb-1 text-capitalize">{title}</div>
-      <div className="p-1">{value}</div>
+      {value}
     </div>
   );
 }

@@ -111,7 +111,13 @@ describe("test ScanForm component with URLs", () => {
             playbook_requested: "TEST_PLAYBOOK_URL",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page
@@ -193,6 +199,7 @@ describe("test ScanForm component with URLs", () => {
             scan_mode: 2,
             scan_check_time: "24:00:00",
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       ]);
       // check redirect to job page

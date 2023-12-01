@@ -140,7 +140,13 @@ describe("test JobActionsBar", () => {
             playbook_requested: "test",
             tlp: "AMBER",
             scan_mode: 1,
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       );
     });
@@ -255,6 +261,7 @@ describe("test JobActionsBar", () => {
             tlp: "AMBER",
             scan_mode: 1,
           },
+          { headers: { "Content-Type": "application/json" } },
         ],
       );
     });

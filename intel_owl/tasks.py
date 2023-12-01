@@ -83,7 +83,8 @@ def remove_old_jobs():
     old_jobs = Job.objects.filter(finished_analysis_time__lt=date_to_check)
     num_jobs_to_delete = old_jobs.count()
     logger.info(f"found {num_jobs_to_delete} old jobs to delete")
-    old_jobs.delete()
+    for old_job in old_jobs.iterator():
+        old_job.delete()
 
     logger.info("finished remove_old_jobs")
     return num_jobs_to_delete

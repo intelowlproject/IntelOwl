@@ -41,15 +41,13 @@ export function BooleanVisualizer({
       >
         {coreComponent}
       </Badge>
-      {!disable && (
-        <VisualizerTooltip
-          idElement={`${id}-tooltip`}
-          copyText={copyText}
-          link={link}
-          disable={disable}
-          description={description}
-        />
-      )}
+      <VisualizerTooltip
+        idElement={`${id}-tooltip`}
+        copyText={copyText}
+        link={link}
+        disable={disable}
+        description={description}
+      />
     </div>
   );
 }

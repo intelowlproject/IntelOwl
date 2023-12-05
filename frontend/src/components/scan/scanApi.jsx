@@ -14,6 +14,12 @@ import { prettifyErrors } from "../../utils/api";
 import { ScanModesNumeric } from "../../constants/advancedSettingsConst";
 import { JobTypes } from "../../constants/jobConst";
 
+function sampleArrayPayload(data, fieldName, payload) {
+  Array.from(data).forEach((value) => {
+    payload.append(fieldName, value);
+  });
+}
+
 function createJobPayload(
   analyzables,
   classification,
@@ -56,11 +62,15 @@ function createJobPayload(
   } else {
     // analyzers
     if (analyzers.length) {
-      payload.append("analyzers_requested", analyzers);
+      if (isSample)
+        sampleArrayPayload(analyzers, "analyzers_requested", payload);
+      else payload.append("analyzers_requested", analyzers);
     }
     // connectors
     if (connectors.length) {
-      payload.append("connectors_requested", connectors);
+      if (isSample)
+        sampleArrayPayload(connectors, "connectors_requested", payload);
+      else payload.append("connectors_requested", connectors);
     }
   }
   // runtime configuration
@@ -80,7 +90,8 @@ function createJobPayload(
   // advanced configs
   // tags
   if (tags.length) {
-    payload.append("tags_labels", tags);
+    if (isSample) sampleArrayPayload(tags, "tags_labels", payload);
+    else payload.append("tags_labels", tags);
   }
   // tlp
   payload.append("tlp", tlp);

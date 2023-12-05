@@ -3,6 +3,7 @@
 
 import logging
 import re
+from typing import Dict
 
 import requests
 
@@ -22,8 +23,8 @@ class InQuest(ObservableAnalyzer):
     _api_key_name: str
     inquest_analysis: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.generic_identifier_mode = "user-defined"  # Or auto
 
     @property

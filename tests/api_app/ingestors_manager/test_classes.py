@@ -35,10 +35,10 @@ class IngestorTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
-                sub = subclass(config, {})
+                sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start()
+                    sub.start(None, {}, None)
                 except Exception as e:
                     self.fail(
                         f"Ingestor {subclass.__name__}"

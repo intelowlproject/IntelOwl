@@ -27,8 +27,8 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
     connectors = rfs.PrimaryKeyRelatedField(
         many=True, queryset=ConnectorConfig.objects.all(), required=True
     )
-    pivots = rfs.PrimaryKeyRelatedField(
-        many=True, queryset=PivotConfig.objects.all(), required=True
+    pivots = rfs.SlugRelatedField(
+        many=True, queryset=PivotConfig.objects.all(), required=True, slug_field="name"
     )
     visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
 

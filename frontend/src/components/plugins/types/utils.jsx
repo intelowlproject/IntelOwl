@@ -16,6 +16,7 @@ import { BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { JobTag } from "../../common/JobTag";
 import { TLPTag } from "../../common/TLPTag";
+import { JobTypes } from "../../../constants/jobConst";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { ScanModesNumeric } from "../../../constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../utils/time";
@@ -41,6 +42,45 @@ export function PluginInfoCard({ pluginInfo }) {
           <span>{markdownToHtml(pluginInfo?.description)}</span>
         </div>
         <div>
+          <div>
+            {pluginInfo.type === JobTypes.OBSERVABLE && (
+              <h6 className="text-secondary">Supported types</h6>
+            )}
+            <ul>
+              {pluginInfo.observable_supported.sort().map((value) => (
+                <li
+                  key={`plugininfocard-supported_types__${pluginInfo?.name}-${value}`}
+                >
+                  {value}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            {pluginInfo.type === JobTypes.FILE && (
+              <h6 className="text-secondary">Supported types</h6>
+            )}
+            <ul>
+              {pluginInfo.supported_filetypes.sort().map((value) => (
+                <li
+                  key={`plugininfocard-supported_types__${pluginInfo?.name}-${value}`}
+                >
+                  {value}
+                </li>
+              ))}
+            </ul>
+            {pluginInfo.supported_filetypes[0] === "everything" &&
+              pluginInfo.not_supported_filetypes.length !== 0 && (
+                <div className="d-flex flex-column align-items-start">
+                  <strong>Except:</strong>
+                  <ul className="d-flex flex-column align-items-start">
+                    {pluginInfo.not_supported_filetypes.sort().map((v) => (
+                      <li key={v}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+          </div>
           <div>
             {pluginInfo.config && (
               <h6 className="text-secondary">Configuration</h6>

@@ -9,7 +9,7 @@ import logging
 import re
 import zipfile
 from re import sub
-from typing import List
+from typing import Dict, List
 
 from defusedxml.ElementTree import fromstring
 from oletools import mraptor
@@ -36,8 +36,8 @@ class DocInfo(FileAnalyzer):
     experimental: bool
     additional_passwords_to_check: list
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.olevba_results = {}
         self.vbaparser = None
         self.passwords_to_check = []

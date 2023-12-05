@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import base64
+from typing import Dict
 
 import requests
 
@@ -18,8 +19,8 @@ class Hunter_How(classes.ObservableAnalyzer):
     start_time: str
     end_time: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         if self.observable_classification == self.ObservableTypes.IP:
             self.query = f'ip="{self.observable_name}"'
         elif self.observable_classification == self.ObservableTypes.DOMAIN:

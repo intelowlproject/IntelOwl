@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from typing import Dict
 
 from pydragonfly import Dragonfly, DragonflyException
 
@@ -23,8 +24,8 @@ class DragonflyEmulation(FileAnalyzer):
     _url_key_name: str
     _api_key_name: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         # build analysis options
         self.analysis_options = {
             "profiles": self.profiles,

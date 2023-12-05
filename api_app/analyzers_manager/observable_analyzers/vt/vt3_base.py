@@ -5,6 +5,7 @@ import base64
 import logging
 import time
 from datetime import datetime, timedelta
+from typing import Dict
 
 import requests
 
@@ -42,8 +43,8 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             limit = 40
         return limit
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.force_active_scan = self._job.tlp == self._job.TLP.CLEAR.value
 
     def _vt_get_relationships(

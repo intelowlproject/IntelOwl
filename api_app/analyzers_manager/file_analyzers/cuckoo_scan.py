@@ -4,6 +4,7 @@
 import logging
 import re
 import time
+from typing import Dict
 
 import requests
 
@@ -20,8 +21,8 @@ class CuckooAnalysis(FileAnalyzer):
     max_post_tries: int
     max_poll_tries: int
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         # cuckoo installation can be with or without the api_token
         # it depends on version and configuration
         self.session = requests.Session()

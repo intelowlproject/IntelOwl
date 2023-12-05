@@ -3,6 +3,7 @@
 
 import logging
 import time
+from typing import Dict
 
 import mwdblib
 from requests import HTTPError
@@ -60,8 +61,8 @@ class MWDB_Scan(FileAnalyzer):
     private: bool
     max_tries: int
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.public = not self.private
         self.poll_distance = 5
         self.upload_file = self._job.tlp == self._job.TLP.CLEAR.value

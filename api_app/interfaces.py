@@ -23,7 +23,21 @@ logger = logging.getLogger(__name__)
 
 class CreateJobsFromPlaybookInterface:
     playbook_to_execute: "PlaybookConfig"
+    playbook_to_execute_id: str
     name: str
+
+    def validate_playbook_to_execute(self, user: User):
+        from api_app.playbooks_manager.models import PlaybookConfig
+
+        if (
+            not PlaybookConfig.objects.filter(pk=self.playbook_to_execute_id)
+            .visible_for_user(user)
+            .exists()
+        ):
+            raise RuntimeError(
+                f"User {user.username} do not have visibility to"
+                f" playbook {self.playbook_to_execute_id}"
+            )
 
     def _get_serializer(self, value: Any, tlp: str, user: User):
         values = value if isinstance(value, (list, Generator)) else [value]
@@ -84,7 +98,7 @@ class CreateJobsFromPlaybookInterface:
             yield from serializer.save(send_task=send_task)
 
 
-class ModelWithOwnership(models.Model):
+class OwnershipAbstractModel(models.Model):
     for_organization = models.BooleanField(default=False)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

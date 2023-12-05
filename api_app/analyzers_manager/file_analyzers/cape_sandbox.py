@@ -4,6 +4,7 @@
 import logging
 import time
 from tempfile import NamedTemporaryFile
+from typing import Dict
 
 import requests
 
@@ -63,8 +64,8 @@ class CAPEsandbox(FileAnalyzer):
             .replace("-----END_CERTIFICATE-----", "-----END CERTIFICATE-----")
         )
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.__cert_file = NamedTemporaryFile(mode="w")
         self.__cert_file.write(self._clean_certificate(self._certificate))
         self.__cert_file.flush()
@@ -243,6 +244,7 @@ class CAPEsandbox(FileAnalyzer):
             )
 
         results = None
+        success = False
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
         is_pending = True
 
@@ -308,6 +310,7 @@ class CAPEsandbox(FileAnalyzer):
                             " the results of the analysis."
                             " stopping polling.."
                         )
+                        success = True
 
                         break
 
@@ -326,7 +329,7 @@ class CAPEsandbox(FileAnalyzer):
                     if try_ != self.max_tries - 1:  # avoiding useless last sleep
                         time.sleep(curr_timeout)
 
-        if not results:
+        if not success:
             raise AnalyzerRunException(f"{self.job_id} poll ended without results")
         return results
 

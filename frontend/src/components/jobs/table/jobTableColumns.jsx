@@ -5,7 +5,6 @@ import classnames from "classnames";
 
 import {
   DefaultColumnFilter,
-  DebounceColumnFilter,
   SelectOptionsFilter,
   LinkOpenViewIcon,
   DateHoverable,
@@ -80,7 +79,7 @@ export const jobTableColumns = [
       </CopyToClipboardButton>
     ),
     disableSortBy: true,
-    Filter: DebounceColumnFilter,
+    Filter: DefaultColumnFilter,
     maxWidth: 120,
   },
   {
@@ -99,7 +98,7 @@ export const jobTableColumns = [
       </CopyToClipboardButton>
     ),
     disableSortBy: true,
-    Filter: DebounceColumnFilter,
+    Filter: DefaultColumnFilter,
   },
   {
     Header: "MD5",
@@ -117,7 +116,7 @@ export const jobTableColumns = [
       </CopyToClipboardButton>
     ),
     disableSortBy: true,
-    Filter: DebounceColumnFilter,
+    Filter: DefaultColumnFilter,
   },
   {
     Header: "Type",
@@ -230,7 +229,7 @@ export const jobTableColumns = [
       </div>
     ),
     disableSortBy: true,
-    Filter: DebounceColumnFilter,
+    Filter: DefaultColumnFilter,
     maxWidth: 180,
   },
   {

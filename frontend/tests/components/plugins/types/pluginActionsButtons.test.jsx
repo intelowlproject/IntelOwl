@@ -14,18 +14,27 @@ import {
   PlaybooksDeletionButton,
   OrganizationPluginStateToggle,
 } from "../../../../src/components/plugins/types/pluginActionsButtons";
-import {
-  mockedUseAuthStore,
-  mockedUseOrganizationStoreOwner,
-} from "../../../mock";
+import { mockedUseOrganizationStoreOwner } from "../../../mock";
 
 jest.mock("axios");
-jest.mock("../../../../src/stores/useAuthStore", () => ({
-  useAuthStore: jest.fn((state) => state(mockedUseAuthStore)),
-}));
 jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
     state(mockedUseOrganizationStoreOwner),
+  ),
+}));
+
+// current user must be equal to org owner
+jest.mock("../../../../src/stores/useAuthStore", () => ({
+  useAuthStore: jest.fn((state) =>
+    state({
+      user: {
+        username: "user_owner",
+        full_name: "user owner",
+        first_name: "user",
+        last_name: "owner",
+        email: "test@google.com",
+      },
+    }),
   ),
 }));
 

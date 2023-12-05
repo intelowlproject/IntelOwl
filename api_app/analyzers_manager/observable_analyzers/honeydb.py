@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from typing import Dict
 
 import requests
 
@@ -19,8 +20,8 @@ class HoneyDB(classes.ObservableAnalyzer):
     _api_id_name: str
     honeydb_analysis: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.headers = {
             "X-HoneyDb-ApiKey": self._api_key_name,
             "X-HoneyDb-ApiId": self._api_id_name,

@@ -35,7 +35,7 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
-from .interfaces import ModelWithOwnership
+from .interfaces import OwnershipAbstractModel
 from .models import (
     AbstractReport,
     Comment,
@@ -160,7 +160,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
-        self.log_runnable = True
 
     @staticmethod
     def set_default_value_from_playbook(attrs: Dict) -> None:
@@ -502,6 +501,7 @@ class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerial
                 item = copy.deepcopy(data)
                 results = self._generate_result(item, playbook)
                 ret.extend(results)
+        data["playbooks_requested"] = playbook_requested
         return ret
 
     def _generate_result(self, data, playbook):
@@ -616,7 +616,8 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
     def to_internal_value(self, data):
         ret = []
         errors = []
-        for classification, name in data.pop("observables", []):
+        observables = data.pop("observables", [])
+        for classification, name in observables:
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
@@ -630,6 +631,7 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
                 errors.append(exc.detail)
             else:
                 ret.append(validated)
+        data["observables"] = observables
         if any(errors):
             raise ValidationError({"detail": errors})
         return ret
@@ -644,11 +646,13 @@ class MultiplePlaybooksMultipleObservableAnalysisSerializer(
 
     def to_internal_value(self, data):
         ret = []
-        for playbook in data.pop("playbooks_requested", [None]):
+        playbooks = data.pop("playbooks_requested", [None])
+        for playbook in playbooks:
             item = copy.deepcopy(data)
             item["playbook_requested"] = playbook
             results = super().to_internal_value(item)
             ret.extend(results)
+        data["playbooks_requested"] = playbooks
         return ret
 
 
@@ -894,7 +898,7 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
 
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     class Meta:
-        model = ModelWithOwnership
+        model = OwnershipAbstractModel
         fields = ("for_organization", "owner")
         abstract = True
 
@@ -925,7 +929,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                 )
         return super().validate(attrs)
 
-    def to_representation(self, instance: ModelWithOwnership):
+    def to_representation(self, instance: OwnershipAbstractModel):
         result = super().to_representation(instance)
         result["owner"] = instance.owner.username if instance.owner else None
         return result
@@ -1156,6 +1160,8 @@ class PythonConfigSerializer(AbstractConfigSerializer):
             "python_module",
             "routing_key",
             "soft_time_limit",
+            "health_check_status",
+            "health_check_task",
         ]
         list_serializer_class = PythonListConfigSerializer
 
@@ -1164,6 +1170,7 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
     def to_representation(self, instance: PythonConfig):
         result = super().to_representation(instance)
+        result["disabled"] = result["disabled"] | instance.health_check_status
         result["config"] = {
             "queue": instance.get_routing_key(),
             "soft_time_limit": instance.soft_time_limit,

@@ -63,8 +63,8 @@ def execute_ingestor(config_pk: str):
         logger.info(f"Not executing ingestor {config.name} because disabled")
     else:
         class_ = config.python_class
-        obj: Ingestor = class_(config=config, runtime_configuration={})
-        obj.start()
+        obj: Ingestor = class_(config=config)
+        obj.start(runtime_configuration={}, job_id=None, task_id=None)
         logger.info(f"Executing ingestor {config.name}")
 
 
@@ -107,8 +107,7 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
         )
         job.status = Job.Status.FAILED.value
         job.finished_analysis_time = now()
-        job.process_time = job.calculate_process_time()
-        job.save(update_fields=["status", "finished_analysis_time", "process_time"])
+        job.save(update_fields=["status", "finished_analysis_time"])
 
     logger.info("started check_stuck_analysis")
     query = Q(status=Job.Status.RUNNING.value)
@@ -152,23 +151,45 @@ def update(python_module_pk: int):
     from intel_owl.celery import broadcast
 
     python_module: PythonModule = PythonModule.objects.get(pk=python_module_pk)
-    class_ = python_module.python_class
-    if hasattr(class_, "_update") and callable(class_._update):  # noqa
-        if settings.NFS:
-            update_plugin(None, python_module_pk)
-        else:
-            pass
+    if settings.NFS:
+        update_plugin(None, python_module_pk)
+    else:
+        pass
 
-            queues = {config.queue for config in python_module.configs}
-            for queue in queues:
-                broadcast(
-                    update_plugin,
-                    queue=queue,
-                    arguments={"python_module_pk": python_module_pk},
-                )
-        return True
-    logger.error(f"Unable to update {str(class_)}")
-    return False
+        queues = {config.queue for config in python_module.configs}
+        for queue in queues:
+            broadcast(
+                update_plugin,
+                queue=queue,
+                arguments={"python_module_pk": python_module_pk},
+            )
+
+
+@shared_task(base=FailureLoggedTask, soft_time_limit=30)
+def health_check(python_module_pk: int, plugin_config_pk: str):
+    from api_app.classes import Plugin
+    from api_app.models import PythonConfig, PythonModule
+
+    plugin_class: typing.Type[Plugin] = PythonModule.objects.get(
+        pk=python_module_pk
+    ).python_class
+
+    config: PythonConfig = plugin_class.config_model.objects.get(pk=plugin_config_pk)
+    plugin = plugin_class(
+        config=config,
+    )
+    if not config.disabled:
+        try:
+            enabled = plugin.health_check(user=None)
+        except NotImplementedError:
+            logger.error(f"Unable to check healthcheck for {config.name}")
+        else:
+            config.health_check_status = enabled
+            config.save()
+    else:
+        logger.info(
+            f"Skipping health_check for configuration {config.name} because disabled"
+        )
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=100)
@@ -246,18 +267,19 @@ def run_plugin(
     config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
     plugin = plugin_class(
         config=config,
-        job_id=job_id,
-        runtime_configuration=runtime_configuration,
-        task_id=task_id,
     )
     logger.info(
         f"Starting plugin {plugin_config_pk} for job {job_id} with task {task_id}"
     )
     try:
-        plugin.start()
+        plugin.start(
+            job_id=job_id,
+            runtime_configuration=runtime_configuration,
+            task_id=task_id,
+        )
     except Exception as e:
         logger.exception(e)
-        config.reports.get(job__pk=job_id).update(
+        config.reports.filter(job__pk=job_id).update(
             status=plugin.report_model.Status.FAILED.value
         )
 

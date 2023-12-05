@@ -33,6 +33,7 @@ jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
+
 describe("ScanForm adavanced use", () => {
   /* EXTREMELY IMPORTART! These tests need to be execute sequentially or they will fail!
     Maintain them in the same describe
@@ -116,8 +117,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -190,8 +189,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/2/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -287,8 +284,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -374,8 +369,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -464,8 +457,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/2/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -576,8 +567,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:

@@ -84,7 +84,7 @@ const observableType2RegExMap = {
   hash: HASH_REGEX,
 };
 
-const sanitizeObservable = (observable) =>
+export const sanitizeObservable = (observable) =>
   observable.replaceAll("[", "").replaceAll("]", "").trim();
 
 // Component

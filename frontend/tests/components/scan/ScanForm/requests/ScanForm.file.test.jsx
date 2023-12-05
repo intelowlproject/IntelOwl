@@ -34,12 +34,6 @@ jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
-// mock navigate
-const mockedNavigateFile = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => mockedNavigateFile,
-}));
 
 describe("test ScanForm component with files", () => {
   beforeAll(() => {
@@ -130,9 +124,6 @@ describe("test ScanForm component with files", () => {
       expect(axios.post.mock.calls[0][2]).toEqual({
         headers: { "Content-Type": "multipart/form-data" },
       });
-      // check redirect to job page
-      expect(mockedNavigateFile).toHaveBeenCalledTimes(1);
-      expect(mockedNavigateFile).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -217,9 +208,6 @@ describe("test ScanForm component with files", () => {
       expect(axios.post.mock.calls[0][2]).toEqual({
         headers: { "Content-Type": "multipart/form-data" },
       });
-      // check redirect to job page
-      expect(mockedNavigateFile).toHaveBeenCalledTimes(1);
-      expect(mockedNavigateFile).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 });

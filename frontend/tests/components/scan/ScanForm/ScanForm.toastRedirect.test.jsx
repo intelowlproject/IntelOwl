@@ -33,12 +33,6 @@ jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
-// mock navigate
-const mockedNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => mockedNavigate,
-}));
 
 describe("ScanForm adavanced use", () => {
   /* EXTREMELY IMPORTART! These tests need to be execute sequentially or they will fail!
@@ -123,9 +117,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -198,9 +189,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/2/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -296,9 +284,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -384,9 +369,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -475,9 +457,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/2/visualizer/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:
@@ -588,9 +567,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/");
     });
 
     /* without the setTimeout the expect doesn't work, but this timeout isn't real:

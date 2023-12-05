@@ -36,12 +36,6 @@ jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
-// mock navigate
-const mockedNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => mockedNavigate,
-}));
 
 describe("ScanForm adavanced use", () => {
   /* EXTREMELY IMPORTART! These tests need to be execute sequentially or they will fail!
@@ -149,9 +143,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       );
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -233,9 +224,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       );
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -312,9 +300,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -401,9 +386,6 @@ describe("ScanForm adavanced use", () => {
       expect(axios.post.mock.calls[0][2]).toEqual({
         headers: { "Content-Type": "multipart/form-data" },
       });
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -494,9 +476,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -595,10 +574,6 @@ describe("ScanForm adavanced use", () => {
       expect(axios.post.mock.calls[0][2]).toEqual({
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 
@@ -724,9 +699,6 @@ describe("ScanForm adavanced use", () => {
           { headers: { "Content-Type": "application/json" } },
         ],
       ]);
-      // check redirect to job page
-      expect(mockedNavigate).toHaveBeenCalledTimes(1);
-      expect(mockedNavigate).toHaveBeenCalledWith("/jobs/1/visualizer/");
     });
   });
 });

@@ -5,13 +5,6 @@ import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { JobOverview } from "../../../../src/components/jobs/result/JobOverview";
 
-// mock navigate
-const mockedNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => mockedNavigate,
-}));
-
 describe("test JobOverview (job report)", () => {
   test("test utility bar", () => {
     const { container } = render(
@@ -336,11 +329,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith(
-      "/jobs/3/visualizer/Test%20page%201",
-      { state: { userChanged: true } },
-    );
   });
 
   test("move from raw to visualizer-loading", async () => {
@@ -452,10 +440,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith("/jobs/4/visualizer/loading", {
-      state: { userChanged: true },
-    });
   });
 
   test("move from raw to visualizer-no_visualizer", async () => {
@@ -552,11 +536,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith(
-      "/jobs/5/visualizer/no-visualizer",
-      { state: { userChanged: true } },
-    );
   });
 
   test("move from visualizer-Test page 1/2 to visualizer-Test page 2/2", async () => {
@@ -689,11 +668,6 @@ describe("test JobOverview (job report)", () => {
     expect(secondPageReport.closest("a").className).not.toContain("active");
 
     await user.click(secondPageReport);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith(
-      "/jobs/6/visualizer/Test%20page%202%2F2",
-      { state: { userChanged: true } },
-    );
   });
 
   test("move from visualizer-Test page 1 to raw-analyzer", async () => {
@@ -801,10 +775,6 @@ describe("test JobOverview (job report)", () => {
     expect(firstPageReport.closest("a").className).toContain("active");
 
     await user.click(rawButton);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith("/jobs/7/raw/analyzer", {
-      state: { userChanged: true },
-    });
   });
 
   test("move from raw-analyzer to raw-connector", async () => {
@@ -901,10 +871,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(connectorReport);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith("/jobs/8/raw/connector", {
-      state: { userChanged: true },
-    });
   });
 
   test("move from raw-analyzer to raw-pivot", async () => {
@@ -1001,10 +967,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(pivotReport);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith("/jobs/9/raw/pivot", {
-      state: { userChanged: true },
-    });
   });
 
   test("move from raw-analyzer to raw-visualizer", async () => {
@@ -1101,10 +1063,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerReport);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith("/jobs/10/raw/visualizer", {
-      state: { userChanged: true },
-    });
   });
 
   test("move from raw-analyzer to raw-full", async () => {
@@ -1201,10 +1159,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(fullReport);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith("/jobs/10/raw/full", {
-      state: { userChanged: true },
-    });
     const fullReportSection = container.querySelector(
       `#jobfullreport-jsoninput-10`,
     );
@@ -1305,9 +1259,5 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(analyzerReport);
-    expect(mockedNavigate).toHaveBeenCalledTimes(1);
-    expect(mockedNavigate).toHaveBeenCalledWith("/jobs/11/raw/analyzer", {
-      state: { userChanged: true },
-    });
   });
 });

@@ -1205,7 +1205,6 @@ class AbstractReportSerializer(rfs.ModelSerializer):
             "errors",
             "start_time",
             "end_time",
-            "runtime_configuration",
             "parameters",
         )
         list_serializer_class = AbstractReportListSerializer

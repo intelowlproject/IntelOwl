@@ -200,7 +200,7 @@ export const mockedPlaybooks = {
     tags: [],
     tlp: "AMBER",
   },
-}
+};
 
 export const mockedUsePluginConfigurationStore = {
   analyzersLoading: false,

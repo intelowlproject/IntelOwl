@@ -998,14 +998,16 @@ class PythonConfig(AbstractConfig):
 
         raise NotImplementedError()
 
-    def generate_empty_report(self, job: Job, task_id: str, status: str):
-        parameters = {
+    def _get_params(self, job: Job) -> Dict[str, Any]:
+        return {
             parameter.name: value
             for parameter, value in self.read_params(
                 job.user, job.runtime_configuration
             ).items()
             if not parameter.is_secret
         }
+
+    def generate_empty_report(self, job: Job, task_id: str, status: str):
         return self.python_module.python_class.report_model.objects.update_or_create(
             job=job,
             config=self,
@@ -1014,7 +1016,7 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
-                "parameters": parameters,
+                "parameters": self._get_params(job),
             },
         )[0]
 

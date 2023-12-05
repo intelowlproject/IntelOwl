@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
-from typing import Any, Dict
 
 from django.conf import settings
 from django.db import models
@@ -95,9 +94,7 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
 
         return IngestorConfigSerializer
 
-    def generate_empty_report(
-        self, job: Job, task_id: str, status: str, parameters: Dict[str, Any]
-    ):
+    def generate_empty_report(self, job: Job, task_id: str, status: str):
         # every time we execute the ingestor we have to create a new report
         # instead of using the update/create
         # because we do not have the same unique constraints
@@ -107,5 +104,5 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
             status=status,
             task_id=task_id,
             max_size_report=self.maximum_jobs,
-            parameters=parameters,
+            parameters=self._get_params(job),
         )

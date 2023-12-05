@@ -1188,6 +1188,10 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
         return super(PythonConfigSerializer, self).to_representation(instance)
 
 
+class AbstractReportListSerializer(rfs.ListSerializer):
+    ...
+
+
 class AbstractReportSerializer(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
@@ -1202,7 +1206,9 @@ class AbstractReportSerializer(rfs.ModelSerializer):
             "start_time",
             "end_time",
             "runtime_configuration",
+            "parameters",
         )
+        list_serializer_class = AbstractReportListSerializer
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)

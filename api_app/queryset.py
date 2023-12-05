@@ -225,6 +225,10 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
 
+class AbstractReportQuerySet(QuerySet):
+    ...
+
+
 class ModelWithOwnershipQuerySet:
     def default_values(self):
         return self.filter(owner__isnull=True)

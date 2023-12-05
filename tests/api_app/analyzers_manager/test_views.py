@@ -93,6 +93,7 @@ class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestC
                 "status": status,
                 "config": config,
                 "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
+                "parameters": {},
             }
         )
         return _report

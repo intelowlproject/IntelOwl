@@ -998,11 +998,11 @@ class PythonConfig(AbstractConfig):
 
         raise NotImplementedError()
 
-    def _get_params(self, job: Job) -> Dict[str, Any]:
+    def _get_params(self, user: User, runtime_configuration: Dict) -> Dict[str, Any]:
         return {
             parameter.name: value
             for parameter, value in self.read_params(
-                job.user, job.runtime_configuration
+                user, runtime_configuration
             ).items()
             if not parameter.is_secret
         }
@@ -1016,7 +1016,7 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
-                "parameters": self._get_params(job),
+                "parameters": self._get_params(job.user, job.runtime_configuration),
             },
         )[0]
 

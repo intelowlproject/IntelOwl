@@ -195,10 +195,56 @@ export const usePluginConfigurationStore = create((set, get) => ({
       );
       console.debug("usePluginConfigurationStore - checkPluginHealth: ");
       console.debug(resp);
-      return Promise.resolve(resp.data?.status); // status is of type boolean
+      if (resp.data?.status)
+        addToast(
+          "Health check status: success",
+          `${PluginName} is up and running`,
+          "success",
+          true,
+        );
+      else
+        addToast(
+          "Health check status: warning",
+          `${PluginName} is NOT up`,
+          "warning",
+          true,
+        );
+      return Promise.resolve(resp.status);
     } catch (e) {
-      addToast("Failed!", e.parsedMsg.toString(), "danger");
-      return null;
+      addToast(
+        "Health check status: failed",
+        e.parsedMsg.toString(),
+        "danger",
+        true,
+      );
+      return e.response.status;
+    }
+  },
+  pluginPull: async (type, PluginName) => {
+    try {
+      const resp = await axios.post(
+        `${API_BASE_URI}/${type}/${PluginName}/pull`,
+      );
+      console.debug("usePluginConfigurationStore - pluginPull: ");
+      console.debug(resp);
+      if (resp.data?.status)
+        addToast(
+          "Plugin pull: success",
+          `${PluginName} updated`,
+          "success",
+          true,
+        );
+      else
+        addToast(
+          "Plugin pull: warning",
+          `${PluginName} pull failed`,
+          "warning",
+          true,
+        );
+      return Promise.resolve(resp.status);
+    } catch (e) {
+      addToast("Plugin pull: failed", e.parsedMsg.toString(), "danger", true);
+      return e.response.status;
     }
   },
   deletePlaybook: async (playbook) => {

@@ -112,6 +112,7 @@ class Yara(Visualizer):
                     ]
                 },
                 task_id=uuid(),
+                parameters={},
             )
             report.full_clean()
             report.save()

@@ -80,4 +80,4 @@ COPY --from=frontend-build /build /var/www/reactapp
 # so we have to set the home env variable to allow to reate its directory
 ENV HOME ${PYTHONPATH}
 
-HEALTHCHECK --interval=10s --timeout=2s --start-period=40s --retries=5 CMD nc -z localhost 8001 || exit 1
+HEALTHCHECK --interval=10s --timeout=2s --start-period=90s --retries=5 CMD nc -z localhost 8001 || exit 1

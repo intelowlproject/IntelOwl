@@ -33,12 +33,13 @@ class Maxmind(classes.ObservableAnalyzer):
         for db in db_names:
             try:
                 db_location = _get_db_location(db)
-                if not os.path.isfile(db_location):
-                    if not self._update_db(db, self._api_key_name):
-                        raise AnalyzerRunException(
-                            f"failed extraction of maxmind db {db},"
-                            " reached max number of attempts"
-                        )
+                if not os.path.isfile(db_location) and not self._update_db(
+                    db, self._api_key_name
+                ):
+                    raise AnalyzerRunException(
+                        f"failed extraction of maxmind db {db},"
+                        " reached max number of attempts"
+                    )
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(
                         "database location does not exist"

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from datetime import timedelta
+from typing import Dict
 
 import intezer_sdk.consts
 from intezer_sdk import api as intezer_api
@@ -19,8 +20,8 @@ class IntezerScan(FileAnalyzer):
     disable_static_unpacking: bool
     _api_key_name: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         # soft time limit
         self.timeout = self.soft_time_limit - 5
         # interval

@@ -3,6 +3,7 @@
 
 import logging
 from abc import ABCMeta
+from typing import Dict
 
 import requests
 
@@ -26,8 +27,8 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     report_type: str
     max_tries: int
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         if self.endpoint == "private":
             self.base_url = self.private_url
 

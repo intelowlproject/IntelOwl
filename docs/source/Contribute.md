@@ -60,6 +60,7 @@ cp docker/.env.start.test.template docker/.env.start.test
 
 # set STAGE env variable to "local"
 sed -i "s/STAGE=\"production\"/STAGE=\"local\"/g" docker/env_file_app
+sed -i "s/STAGE:\"prod\"/STAGE:\"local\"/g" frontend/public/env.js
 ```
 
 ### Backend
@@ -175,8 +176,20 @@ There are two possible cases:
 If you are doing the step number `2`, you can skip this paragraph.
 
 First, you need to create the python code that will be actually executed. You can easily take other plugins as example to write this.
-Then, you have to create a `Python Module` model. You can do this in the `django admin`: 
+Then, you have to create a `Python Module` model. You can do this in the `django admin`page : 
 You have to specify which type of Plugin you wrote, and its python module. Again, you can use as an example an already configured `Python Module`.
+Some `Python Module` requires to update some part of its code in a schedule way: for example `Yara` requires to update the rule repositories, `QuarkEngine` to update its database and so on.
+If the `Python Module` that you define need this type of behaviour, you have to configure two things:
+- In the model class, you have to add the `update_schedule` (crontab syntax) that define when the update should be executed.
+- In the python code, you have to override a method called `update` and put there the updating logic (see other plugins for examples)
+
+
+Some `Python Module` requires further check to see if the service provider is able to answer requests; for example if you have done too many requests, or the website is currently down for maintenance and so on.
+If the `Python Module` that you define need this type of behaviour, you have to configure two things:
+- In the model class, you have to add the `health_check_schedule` (crontab syntax) that define when the health check should be executed.
+- In the python code, you can override a method called `health_check` and put there the custom health check logic. As default, plugins will try to make a `head` request to the configured url.
+
+
 Press `Save and continue editing` to, at the moment, manually ad the `Parameters` that the python code requires (the class attributes that you needed): 
       1. *name: Name of the parameter that will be dynamically added to the python class (if is a secret, in the python code a `_` wil be prepended to the name)
       2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
@@ -276,7 +289,7 @@ After having written the new python module, you have to remember to:
 
 #### Python class
 
-The visualizers python code could be not immediate, so a small digression on _how_ it works is necessary.
+The visualizers' python code could be not immediate, so a small digression on _how_ it works is necessary.
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
 To do so, some utility classes have been made:
 
@@ -428,14 +441,7 @@ IntelOwl makes use of the django testing framework and the `unittest` library fo
 
 ### Configuration
 
-- In the encrypted folder `tests/test_files.zip` (password: "infected") there are some real malware samples that you can use for testing purposes.
-
-<div class="admonition danger">
-<p class="admonition-title">Danger</p>
-<strong>
-Please remember that these are dangerous malware! They come encrypted and locked for a reason! Do NOT run them unless you are absolutely sure of what you are doing! They are to be used only for launching tests for the file analyzers
-</strong>
-</div>
+- In the encrypted folder `tests/test_files.zip` (password: "intelowl") there are some files that you can use for testing purposes.
 
 - With the following environment variables you can customize your tests:
 
@@ -556,7 +562,7 @@ $ python3 start.py ci up
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:
 
 ```bash
-$ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip -d test_files
+$ docker exec -ti intelowl_uwsgi unzip -P intelowl tests/test_files.zip -d test_files
 $ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 

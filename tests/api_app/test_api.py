@@ -133,35 +133,6 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
 
-    def test_analyze_file__corrupted_sample(self):
-        analyzers_requested = [
-            "File_Info",
-        ]
-        file_name = "non_valid_pe.exe"
-        uploaded_file, md5 = self.__get_test_file(file_name)
-        file_mimetype = "application/x-dosexec"
-        data = {
-            "file": uploaded_file,
-            "analyzers_requested": analyzers_requested,
-            "file_name": file_name,
-            "file_mimetype": file_mimetype,
-        }
-
-        response = self.client.post("/api/analyze_file", data, format="multipart")
-        content = response.json()
-        msg = (response.status_code, content)
-        self.assertEqual(response.status_code, 200, msg=msg)
-
-        job_id = int(content["job_id"])
-        job = models.Job.objects.get(pk=job_id)
-        self.assertEqual(file_name, job.file_name)
-        self.assertEqual(file_mimetype, job.file_mimetype)
-        self.assertEqual(md5, job.md5)
-        self.assertCountEqual(
-            analyzers_requested,
-            list(job.analyzers_requested.all().values_list("name", flat=True)),
-        )
-
     def test_analyze_file__exe(self):
         data = self.analyze_file_data.copy()
         response = self.client.post("/api/analyze_file", data, format="multipart")

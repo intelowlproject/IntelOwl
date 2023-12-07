@@ -2,14 +2,16 @@
 # See the file 'LICENSE' for copying permission.
 import base64
 import datetime
+import json
 import logging
 import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 from django.utils.timezone import now
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
-from api_app.interfaces import ModelWithOwnership
+from api_app.interfaces import OwnershipAbstractModel
 
 if TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
@@ -45,6 +47,7 @@ from api_app.defaults import default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
+    AbstractReportQuerySet,
     JobQuerySet,
     ParameterQuerySet,
     PluginConfigQuerySet,
@@ -64,6 +67,29 @@ class PythonModule(models.Model):
     base_path = models.CharField(
         max_length=120, db_index=True, choices=PythonModuleBasePaths.choices
     )
+    update_schedule = models.ForeignKey(
+        CrontabSchedule,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="update_for_%(class)s",
+    )
+    update_task = models.OneToOneField(
+        PeriodicTask,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="update_for_%(class)s",
+        editable=False,
+    )
+
+    health_check_schedule = models.ForeignKey(
+        CrontabSchedule,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="healthcheck_for_%(class)s",
+    )
 
     class Meta:
         unique_together = [["module", "base_path"]]
@@ -72,14 +98,22 @@ class PythonModule(models.Model):
     def __str__(self):
         return self.module
 
+    def __contains__(self, item: str):
+        if not isinstance(item, str) and not isinstance(item, PythonConfig):
+            raise TypeError(f"{self.__class__.__name__} needs a string or pythonConfig")
+        if isinstance(item, str):
+            return item in self.python_complete_path
+        elif isinstance(item, PythonConfig):
+            return self.configs.filter(name=item.name).exists()
+
     @cached_property
     def python_complete_path(self) -> str:
         return f"{self.base_path}.{self.module}"
 
-    def __contains__(self, item: str):
-        if not isinstance(item, str):
-            raise TypeError(f"{self.__class__.__name__} needs a string")
-        return item in self.python_complete_path
+    @property
+    def disabled(self):
+        # it is disabled if it does not exist a configuration enabled
+        return not self.configs.filter(disabled=False).exists()
 
     @cached_property
     def python_class(self) -> Type["Plugin"]:
@@ -93,7 +127,11 @@ class PythonModule(models.Model):
     def config_class(self) -> Type["PythonConfig"]:
         return self.python_class.config_model
 
-    def clean_python_module(self):
+    @property
+    def queue(self) -> str:
+        return self.configs.order_by("?").first().queue
+
+    def _clean_python_module(self):
         try:
             _ = self.python_class
         except ImportError as exc:
@@ -104,7 +142,24 @@ class PythonModule(models.Model):
 
     def clean(self) -> None:
         super().clean()
-        self.clean_python_module()
+        self._clean_python_module()
+
+    def generate_update_periodic_task(self):
+        from intel_owl.tasks import update
+
+        if hasattr(self, "update_schedule") and self.update_schedule:
+            enabled = settings.REPO_DOWNLOADER_ENABLED and not self.disabled
+            periodic_task = PeriodicTask.objects.update_or_create(
+                name=f"{self.python_complete_path}Update",
+                task=f"{update.__module__}.{update.__name__}",
+                defaults={
+                    "crontab": self.update_schedule,
+                    "queue": self.queue,
+                    "enabled": enabled,
+                    "kwargs": json.dumps({"python_module_pk": self.pk}),
+                },
+            )[0]
+            self.update_task = periodic_task
 
 
 class Tag(models.Model):
@@ -304,7 +359,8 @@ class Job(models.Model):
         return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
     def retry(self):
-        self.update_status(Job.Status.RUNNING)
+        self.status = self.Status.RUNNING
+        self.save(update_fields=["status"])
         failed_analyzers = self.analyzerreports.filter(
             status__in=[
                 AbstractReport.Status.FAILED.value,
@@ -362,42 +418,30 @@ class Job(models.Model):
             elif stats["failed"] >= 1 or stats["killed"] >= 1:
                 self.status = self.Status.REPORTED_WITH_FAILS
 
-        if not self.finished_analysis_time:
-            self.finished_analysis_time = get_now()
-            self.process_time = self.calculate_process_time()
+        self.finished_analysis_time = get_now()
         logger.info(f"{self.__repr__()} setting status to {self.status}")
         self.save(
             update_fields=[
                 "status",
                 "errors",
                 "finished_analysis_time",
-                "process_time",
             ]
         )
 
-    def calculate_process_time(self) -> Optional[float]:
-        if not self.finished_analysis_time:
-            return None
-        td = self.finished_analysis_time - self.received_request_time
-        return round(td.total_seconds(), 2)
-
-    def update_status(self, status: str, save=True) -> None:
-        self.status = status
-        if save:
-            self.save(update_fields=["status"])
-
-    def _get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
+    def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
 
-    def _get_config_to_execute(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
+    def __get_config_to_execute(
+        self, config: typing.Type["AbstractConfig"]
+    ) -> QuerySet:
         return getattr(
             self, f"{config.__name__.split('Config')[0].lower()}s_to_execute"
         )
 
-    def _get_single_config_reports_stats(
+    def __get_single_config_reports_stats(
         self, config: typing.Type["AbstractConfig"]
     ) -> typing.Dict:
-        reports = self._get_config_reports(config)
+        reports = self.__get_config_reports(config)
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
             for s in AbstractReport.Status.values
@@ -414,7 +458,7 @@ class Job(models.Model):
 
         result = {}
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
-            partial_result = self._get_single_config_reports_stats(config)
+            partial_result = self.__get_single_config_reports_stats(config)
             # merge them
             result = {
                 k: result.get(k, 0) + partial_result.get(k, 0)
@@ -429,7 +473,7 @@ class Job(models.Model):
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
-            reports = self._get_config_reports(config).filter(
+            reports = self.__get_config_reports(config).filter(
                 status__in=[
                     AbstractReport.Status.PENDING,
                     AbstractReport.Status.RUNNING,
@@ -443,8 +487,8 @@ class Job(models.Model):
 
             reports.update(status=self.Status.KILLED)
 
-        # set job status
-        self.update_status(self.Status.KILLED)
+        self.status = self.Status.KILLED
+        self.save(update_fields=["status"])
 
     def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
@@ -509,7 +553,8 @@ class Job(models.Model):
         return runner
 
     def execute(self):
-        self.update_status(Job.Status.RUNNING)
+        self.status = self.Status.RUNNING
+        self.save(update_fields=["status"])
         runner = self._get_pipeline(
             self.analyzers_to_execute.all(),
             self.pivots_to_execute.all(),
@@ -520,7 +565,7 @@ class Job(models.Model):
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
-            self._get_config_to_execute(config.__class__).get(name=config.name)
+            self.__get_config_to_execute(config.__class__).get(name=config.name)
         except config.DoesNotExist:
             raise TypeError(
                 f"{config.__class__.__name__} {config.name} "
@@ -552,6 +597,7 @@ class Job(models.Model):
         )
 
     def clean(self) -> None:
+        super().clean()
         self.clean_scan()
 
     def clean_scan(self):
@@ -620,7 +666,7 @@ class Parameter(models.Model):
         return self.python_module.python_class.config_model
 
 
-class PluginConfig(ModelWithOwnership):
+class PluginConfig(OwnershipAbstractModel):
     objects = PluginConfigQuerySet.as_manager()
     value = models.JSONField(blank=True, null=True)
 
@@ -698,7 +744,7 @@ class PluginConfig(ModelWithOwnership):
         ]
         indexes = [
             models.Index(fields=["owner", "for_organization", "parameter"]),
-        ] + ModelWithOwnership.Meta.indexes
+        ] + OwnershipAbstractModel.Meta.indexes
 
     @cached_property
     def config(self) -> "PythonConfig":
@@ -862,6 +908,8 @@ class AbstractReport(models.Model):
     job = models.ForeignKey(
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
+    objects = AbstractReportQuerySet.as_manager()
+    parameters = models.JSONField(blank=False, null=False, editable=False)
 
     class Meta:
         abstract = True
@@ -874,7 +922,7 @@ class AbstractReport(models.Model):
     def config(cls) -> "AbstractConfig":
         raise NotImplementedError()
 
-    @property
+    @cached_property
     def runtime_configuration(self):
         return self.job.get_config_runtime_configuration(self.config)
 
@@ -896,6 +944,16 @@ class PythonConfig(AbstractConfig):
     python_module = models.ForeignKey(
         PythonModule, on_delete=models.PROTECT, related_name="%(class)ss"
     )
+
+    health_check_task = models.OneToOneField(
+        PeriodicTask,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="healthcheck_for_%(class)s",
+        editable=False,
+    )
+    health_check_status = models.BooleanField(default=True, editable=False)
 
     class Meta:
         abstract = True
@@ -940,6 +998,15 @@ class PythonConfig(AbstractConfig):
 
         raise NotImplementedError()
 
+    def _get_params(self, user: User, runtime_configuration: Dict) -> Dict[str, Any]:
+        return {
+            parameter.name: value
+            for parameter, value in self.read_params(
+                user, runtime_configuration
+            ).items()
+            if not parameter.is_secret
+        }
+
     def generate_empty_report(self, job: Job, task_id: str, status: str):
         return self.python_module.python_class.report_model.objects.update_or_create(
             job=job,
@@ -949,6 +1016,7 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
+                "parameters": self._get_params(job.user, job.runtime_configuration),
             },
         )[0]
 
@@ -1063,3 +1131,27 @@ class PythonConfig(AbstractConfig):
                             " does not have a valid value"
                         )
         return result
+
+    def generate_health_check_periodic_task(self):
+        from intel_owl.tasks import health_check
+
+        if (
+            hasattr(self.python_module, "health_check_schedule")
+            and self.python_module.health_check_schedule
+        ):
+            periodic_task = PeriodicTask.objects.update_or_create(
+                name=f"{self.name.title()}HealthCheck{self.__class__.__name__}",
+                task=f"{health_check.__module__}.{health_check.__name__}",
+                defaults={
+                    "crontab": self.python_module.health_check_schedule,
+                    "queue": self.queue,
+                    "enabled": not self.disabled,
+                    "kwargs": json.dumps(
+                        {
+                            "python_module_pk": self.python_module_id,
+                            "python_config_pk": self.pk,
+                        }
+                    ),
+                },
+            )[0]
+            self.health_check_task = periodic_task

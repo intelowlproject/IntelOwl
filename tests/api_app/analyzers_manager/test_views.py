@@ -29,13 +29,11 @@ class AnalyzerConfigViewSetTestCase(
 
         analyzer = "Yara"
         response = self.client.post(f"{self.URL}/{analyzer}/pull")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         self.client.force_authenticate(self.superuser)
 
-        with patch.object(
-            YaraScan, "_update", return_value=lambda *args, **kwargs: None
-        ):
+        with patch.object(YaraScan, "update", return_value=True):
             response = self.client.post(f"{self.URL}/{analyzer}/pull")
         self.assertEqual(response.status_code, 200, response.json())
         result = response.json()
@@ -53,7 +51,7 @@ class AnalyzerConfigViewSetTestCase(
     def test_health_check(self):
         analyzer = "ClamAV"
         response = self.client.get(f"{self.URL}/{analyzer}/health_check")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         self.client.force_authenticate(self.superuser)
 
@@ -68,7 +66,7 @@ class AnalyzerConfigViewSetTestCase(
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], "No healthcheck implemented")
+        self.assertEqual(result["errors"]["detail"], "Not implemented")
 
 
 class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestCase):
@@ -95,6 +93,7 @@ class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestC
                 "status": status,
                 "config": config,
                 "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
+                "parameters": {},
             }
         )
         return _report

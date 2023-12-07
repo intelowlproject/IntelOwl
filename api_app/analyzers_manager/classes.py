@@ -6,7 +6,7 @@ import logging
 import time
 from abc import ABCMeta
 from pathlib import PosixPath
-from typing import Tuple
+from typing import Dict, Tuple
 
 import requests
 from django.conf import settings
@@ -100,13 +100,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     def after_run_success(self, content):
         super().after_run_success(self._validate_result(content, max_recursion=15))
 
-    @classmethod
-    def update(cls) -> bool:
-        if hasattr(cls, "_update") and callable(cls._update):
-            cls._update()
-            return True
-        return False
-
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
@@ -122,13 +115,12 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     def __init__(
         self,
         config: PythonConfig,
-        job_id: int,
-        runtime_configuration: dict,
-        task_id: int,
         **kwargs,
     ):
-        super().__init__(config, job_id, runtime_configuration, task_id, **kwargs)
+        super().__init__(config, **kwargs)
 
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self._config: AnalyzerConfig
         if self._job.is_sample and self._config.run_hash:
             self.observable_classification = ObservableTypes.HASH
@@ -177,12 +169,12 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     def __init__(
         self,
         config: PythonConfig,
-        job_id: int,
-        runtime_configuration: dict,
-        task_id: int,
         **kwargs,
     ):
-        super().__init__(config, job_id, runtime_configuration, task_id, **kwargs)
+        super().__init__(config, **kwargs)
+
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.md5 = self._job.md5
         self.filename = self._job.file_name
         # this is updated in the filepath property, like a cache decorator.
@@ -467,16 +459,14 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 ),
             )
         )
-        for mock_fn in patches:
-            self.start = mock_fn(self.start)
+        return super()._monkeypatch(patches)
 
-    @classmethod
-    def health_check(cls, analyzer_name: str, user: User) -> bool:
+    def health_check(self, user: User = None) -> bool:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
         try:
-            requests.head(cls.url, timeout=10)
+            requests.head(self.url, timeout=10)
         except requests.exceptions.RequestException:
             health_status = False
         else:

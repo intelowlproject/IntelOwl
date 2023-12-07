@@ -14,6 +14,12 @@ import { prettifyErrors } from "../../utils/api";
 import { ScanModesNumeric } from "../../constants/advancedSettingsConst";
 import { JobTypes } from "../../constants/jobConst";
 
+function sampleArrayPayload(data, fieldName, payload) {
+  Array.from(data).forEach((value) => {
+    payload.append(fieldName, value);
+  });
+}
+
 function createJobPayload(
   analyzables,
   classification,
@@ -56,27 +62,36 @@ function createJobPayload(
   } else {
     // analyzers
     if (analyzers.length) {
-      payload.append("analyzers_requested", analyzers);
+      if (isSample)
+        sampleArrayPayload(analyzers, "analyzers_requested", payload);
+      else payload.append("analyzers_requested", analyzers);
     }
     // connectors
     if (connectors.length) {
-      payload.append("connectors_requested", connectors);
-    }
-    // runtime configuration
-    if (runtimeConfig != null && Object.keys(runtimeConfig).length) {
-      const runtimeConfigTosend = runtimeConfig;
-      /* visualized is required from the backend so we need to send it.
-       Also it's useless to edit it, so it's not present in the UI and added only in the request.
-      */
-      if ("visualizers" in runtimeConfigTosend)
-        runtimeConfigTosend.visualizers = {};
-      payload.append("runtime_configuration", runtimeConfigTosend);
+      if (isSample)
+        sampleArrayPayload(connectors, "connectors_requested", payload);
+      else payload.append("connectors_requested", connectors);
     }
   }
+  // runtime configuration
+  if (runtimeConfig != null && Object.keys(runtimeConfig).length) {
+    const runtimeConfigTosend = runtimeConfig;
+    /* visualized is required from the backend so we need to send it.
+      Also it's useless to edit it, so it's not present in the UI and added only in the request.
+    */
+    if (!Object.keys(runtimeConfigTosend).includes("visualizers"))
+      runtimeConfigTosend.visualizers = {};
+    payload.append(
+      "runtime_configuration",
+      isSample ? JSON.stringify(runtimeConfigTosend) : runtimeConfigTosend,
+    );
+  }
+
   // advanced configs
   // tags
   if (tags.length) {
-    payload.append("tags_labels", tags);
+    if (isSample) sampleArrayPayload(tags, "tags_labels", payload);
+    else payload.append("tags_labels", tags);
   }
   // tlp
   payload.append("tlp", tlp);
@@ -176,7 +191,11 @@ export async function createJob(
       _scanMode,
       scanCheckTime,
     );
-    const resp = await axios.post(apiUrl, payload);
+    const resp = await axios.post(apiUrl, payload, {
+      headers: {
+        "Content-Type": isSample ? "multipart/form-data" : "application/json",
+      },
+    });
     const respData = resp.data.results;
 
     const warnings = [];

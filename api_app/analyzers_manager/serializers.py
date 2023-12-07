@@ -15,6 +15,7 @@ class AnalyzerReportSerializer(AbstractReportSerializer):
     class Meta:
         model = AnalyzerReport
         fields = AbstractReportSerializer.Meta.fields
+        list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class
 
 
 class AnalyzerConfigSerializer(PythonConfigSerializer):

@@ -3,6 +3,7 @@
 
 import logging
 import time
+from typing import Dict
 
 import requests
 from django.utils.functional import cached_property
@@ -36,8 +37,8 @@ class IntelX(ObservableAnalyzer):
     datefrom: str
     dateto: str
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         if self.query_type not in ["phonebook", "intelligent"]:
             raise AnalyzerConfigurationException(f"{self.query_type} not supported")
         self.url = self.base_url + f"/{self.query_type}/search"

@@ -7,23 +7,33 @@ import {
   Collapse,
   NavbarBrand,
   NavbarToggler,
+  Button,
+  UncontrolledPopover,
 } from "reactstrap";
 import { NavLink as RRNavLink, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { SiHackaday } from "react-icons/si";
-import { MdHome } from "react-icons/md";
+import { MdHome, MdShare } from "react-icons/md";
 import {
   RiFileListFill,
   RiPlugFill,
   RiBookReadFill,
   RiGuideLine,
+  RiTwitterXFill,
 } from "react-icons/ri";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 
 // lib
 import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
 
 // constants
-import { INTELOWL_DOCS_URL, PUBLIC_URL } from "../constants/environment";
+import {
+  INTELOWL_DOCS_URL,
+  PUBLIC_URL,
+  VERSION,
+  INTELOWL_TWITTER_ACCOUNT,
+  STAGE,
+} from "../constants/environment";
 
 // local
 import UserMenu from "./widgets/UserMenu";
@@ -111,6 +121,71 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
           <span className="ms-1">Docs</span>
         </a>
       </NavItem>
+      <Button id="social-button" size="sm" className="mx-2 btn-info">
+        <>
+          <MdShare />
+          <span className="ms-1">Social</span>
+        </>
+      </Button>
+      <UncontrolledPopover
+        target="social-button"
+        placement="bottom"
+        trigger="hover"
+        delay={{ show: 0, hide: 500 }}
+        popperClassName="p-2 bg-dark"
+      >
+        <div className="d-flex-center flex-column">
+          <div className="d-flex my-1">
+            <a
+              href={`https://twitter.com/${INTELOWL_TWITTER_ACCOUNT}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-social"
+            >
+              <RiTwitterXFill className="text-info" /> Follow @
+              {INTELOWL_TWITTER_ACCOUNT}
+            </a>
+          </div>
+          <div>
+            <a
+              href="https://github.com/intelowlproject"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-social my-1"
+            >
+              <FaGithub /> Connect on Github{" "}
+            </a>
+          </div>
+          <div>
+            <a
+              href="https://www.honeynet.org/gsoc/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-social my-1"
+            >
+              <FaGoogle className="text-accent" /> Honeynet on GSOC{" "}
+            </a>
+          </div>
+          <div>
+            <a
+              href="https://gsoc-slack.honeynet.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-social my-1"
+            >
+              <img
+                className="px-1"
+                title="Honeynet"
+                src={`${PUBLIC_URL}/icons/honeynet.ico`}
+                alt="honeynet"
+                width="24px"
+                height="16px"
+              />
+              Honeynet Slack Chat{" "}
+            </a>
+          </div>
+        </div>
+      </UncontrolledPopover>
     </>
   );
 }
@@ -144,6 +219,12 @@ function AppHeader() {
             width="128"
             alt="IntelOwl logo"
           />
+          <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
+            {VERSION} -
+          </small>
+          <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
+            &nbsp;{STAGE}
+          </small>
         </NavbarBrand>
         <NavbarToggler onClick={() => setIsOpen(!isOpen)} />
         <Collapse navbar isOpen={isOpen}>
@@ -165,7 +246,7 @@ function AppHeader() {
             />
             {/* Notifications Popover */}
             {isAuthenticated && (
-              <NavItem className="me-lg-3">
+              <NavItem>
                 <NotificationPopoverButton />
               </NavItem>
             )}

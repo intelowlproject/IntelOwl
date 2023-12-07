@@ -44,9 +44,9 @@ class PluginTestCase(CustomTestCase):
             Connector, "run"
         ) as run:
             run.return_value = {}
-            plugin = Connector(self.cc, self.job.pk, {}, uuid())
+            plugin = Connector(self.cc)
             try:
-                plugin.start()
+                plugin.start(self.job.pk, {}, uuid())
             except Exception as e:
                 self.fail(e)
             else:
@@ -59,9 +59,9 @@ class PluginTestCase(CustomTestCase):
         with patch.multiple(Connector, __abstractmethods__=set()), patch.multiple(
             Connector, run=raise_error
         ):
-            plugin = Connector(self.cc, self.job.pk, {}, uuid())
+            plugin = Connector(self.cc)
             with self.assertRaises(TypeError):
-                plugin.start()
+                plugin.start(self.job.pk, {}, uuid())
             self.assertEqual(plugin.report.status, plugin.report.Status.FAILED)
             self.assertEqual(1, len(plugin.report.errors))
             self.assertEqual("Test", plugin.report.errors[0])

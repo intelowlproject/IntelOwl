@@ -35,7 +35,7 @@ from .connectors_manager.models import ConnectorConfig
 from .defaults import default_runtime
 from .helpers import calculate_md5, gen_random_colorhex
 from .ingestors_manager.models import IngestorConfig
-from .interfaces import ModelWithOwnership
+from .interfaces import OwnershipAbstractModel
 from .models import (
     AbstractReport,
     Comment,
@@ -160,7 +160,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
-        self.log_runnable = True
 
     @staticmethod
     def set_default_value_from_playbook(attrs: Dict) -> None:
@@ -206,7 +205,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             attrs["playbook_to_execute"] = playbook
             attrs["analyzers_requested"] = list(playbook.analyzers.all())
             attrs["connectors_requested"] = list(playbook.connectors.all())
-            attrs["tags_labels"] = list(playbook.tags.all())
+            attrs["tags_labels"] = list(attrs.get("tags_labels", [])) + list(
+                playbook.tags.all()
+            )
 
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
@@ -444,32 +445,28 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
     def to_internal_value(self, data: QueryDict):
         ret = []
         errors = []
-
-        if data.getlist("file_names", []) and len(data.getlist("file_names")) != len(
-            data.getlist("files")
-        ):
+        if not isinstance(data, QueryDict):
+            data_to_check = QueryDict(mutable=True)
+            data_to_check.update(data)
+        else:
+            data_to_check = data
+        if data_to_check.getlist("file_names", []) and len(
+            data_to_check.getlist("file_names")
+        ) != len(data_to_check.getlist("files")):
             raise ValidationError(
                 {"detail": "file_names and files must have the same length."}
             )
 
-        try:
-            base_data: QueryDict = data.copy()
-        except TypeError:  # https://code.djangoproject.com/ticket/29510
-            base_data: QueryDict = QueryDict(mutable=True)
-            for key, value_list in data.lists():
-                if key not in ["files", "file_names", "file_mimetypes"]:
-                    base_data.setlist(key, copy.deepcopy(value_list))
-
-        for index, file in enumerate(data.getlist("files")):
+        for index, file in enumerate(data_to_check.getlist("files")):
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
-            item = base_data.copy()
+            item = data_to_check.copy()
 
             item["file"] = file
-            if data.getlist("file_names", []):
-                item["file_name"] = data.getlist("file_names")[index]
-            if data.get("file_mimetypes", []):
-                item["file_mimetype"] = data["file_mimetypes"][index]
+            if data_to_check.getlist("file_names", []):
+                item["file_name"] = data_to_check.getlist("file_names")[index]
+            if data_to_check.get("file_mimetypes", []):
+                item["file_mimetype"] = data_to_check["file_mimetypes"][index]
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
@@ -490,12 +487,26 @@ class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerial
 
     def to_internal_value(self, data):
         ret = []
-        for playbook in data.pop("playbooks_requested", [None]):
-            item = copy.deepcopy(data)
-            item["playbook_requested"] = playbook
-            results = super().to_internal_value(item)
+        playbook_requested = data.pop("playbooks_requested", [None])
+        # in case we have only one Playbook (multi-analysis Playbook is deprecated)
+        # we do not need to do a deepcopy which is very costly in terms of RAM
+        # and could trigger 500 errors for files bigger than 2.5MB
+        # see: https://docs.djangoproject.com/en/4.2/ref/settings
+        # /#std:setting-FILE_UPLOAD_MAX_MEMORY_SIZE
+        if len(playbook_requested) == 1:
+            results = self._generate_result(data, playbook_requested[0])
             ret.extend(results)
+        else:
+            for playbook in playbook_requested:
+                item = copy.deepcopy(data)
+                results = self._generate_result(item, playbook)
+                ret.extend(results)
+        data["playbooks_requested"] = playbook_requested
         return ret
+
+    def _generate_result(self, data, playbook):
+        data["playbook_requested"] = playbook
+        return super().to_internal_value(data)
 
 
 class FileAnalysisSerializer(_AbstractJobCreateSerializer):
@@ -605,7 +616,8 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
     def to_internal_value(self, data):
         ret = []
         errors = []
-        for classification, name in data.pop("observables", []):
+        observables = data.pop("observables", [])
+        for classification, name in observables:
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
@@ -619,6 +631,7 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
                 errors.append(exc.detail)
             else:
                 ret.append(validated)
+        data["observables"] = observables
         if any(errors):
             raise ValidationError({"detail": errors})
         return ret
@@ -633,11 +646,13 @@ class MultiplePlaybooksMultipleObservableAnalysisSerializer(
 
     def to_internal_value(self, data):
         ret = []
-        for playbook in data.pop("playbooks_requested", [None]):
+        playbooks = data.pop("playbooks_requested", [None])
+        for playbook in playbooks:
             item = copy.deepcopy(data)
             item["playbook_requested"] = playbook
             results = super().to_internal_value(item)
             ret.extend(results)
+        data["playbooks_requested"] = playbooks
         return ret
 
 
@@ -883,7 +898,7 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
 
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     class Meta:
-        model = ModelWithOwnership
+        model = OwnershipAbstractModel
         fields = ("for_organization", "owner")
         abstract = True
 
@@ -914,7 +929,7 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
                 )
         return super().validate(attrs)
 
-    def to_representation(self, instance: ModelWithOwnership):
+    def to_representation(self, instance: OwnershipAbstractModel):
         result = super().to_representation(instance)
         result["owner"] = instance.owner.username if instance.owner else None
         return result
@@ -1145,6 +1160,8 @@ class PythonConfigSerializer(AbstractConfigSerializer):
             "python_module",
             "routing_key",
             "soft_time_limit",
+            "health_check_status",
+            "health_check_task",
         ]
         list_serializer_class = PythonListConfigSerializer
 
@@ -1153,6 +1170,7 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
     def to_representation(self, instance: PythonConfig):
         result = super().to_representation(instance)
+        result["disabled"] = result["disabled"] | instance.health_check_status
         result["config"] = {
             "queue": instance.get_routing_key(),
             "soft_time_limit": instance.soft_time_limit,
@@ -1170,6 +1188,10 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
         return super(PythonConfigSerializer, self).to_representation(instance)
 
 
+class AbstractReportListSerializer(rfs.ListSerializer):
+    ...
+
+
 class AbstractReportSerializer(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
@@ -1183,8 +1205,9 @@ class AbstractReportSerializer(rfs.ModelSerializer):
             "errors",
             "start_time",
             "end_time",
-            "runtime_configuration",
+            "parameters",
         )
+        list_serializer_class = AbstractReportListSerializer
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)

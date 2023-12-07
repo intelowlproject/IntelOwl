@@ -19,7 +19,7 @@ REST_FRAMEWORK = {
     # Permission
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     # Exception Handling
-    "EXCEPTION_HANDLER": "certego_saas.ext.exceptions.custom_exception_handler",
+    "EXCEPTION_HANDLER": "api_app.exceptions.logging_exception_handler",
     # Filter
     "DEFAULT_FILTER_BACKENDS": [
         "rest_framework_filters.backends.RestFrameworkFilterBackend",

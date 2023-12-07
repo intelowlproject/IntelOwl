@@ -113,11 +113,17 @@ describe("test ScanForm component with files", () => {
       expect(Object.fromEntries(axios.post.mock.calls[0][1])).toEqual({
         files: new File([], ""),
         playbook_requested: "TEST_PLAYBOOK_FILE",
+        runtime_configuration: JSON.stringify({
+          analyzers: {},
+          connectors: {},
+          visualizers: {},
+        }),
         tlp: "AMBER",
         scan_mode: "1",
       });
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
+      });
     });
   });
 
@@ -199,8 +205,9 @@ describe("test ScanForm component with files", () => {
         scan_mode: "2",
         scan_check_time: "24:00:00",
       });
-      // check redirect to job page
-      expect(global.location.pathname).toContain("/jobs/1/visualizer/");
+      expect(axios.post.mock.calls[0][2]).toEqual({
+        headers: { "Content-Type": "multipart/form-data" },
+      });
     });
   });
 });

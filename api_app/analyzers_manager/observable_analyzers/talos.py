@@ -21,7 +21,8 @@ class Talos(classes.ObservableAnalyzer):
     def run(self):
         result = {"found": False}
         if not os.path.isfile(database_location):
-            self._update()
+            if not self.update():
+                raise AnalyzerRunException("Failed extraction of talos db")
 
         if not os.path.exists(database_location):
             raise AnalyzerRunException(
@@ -38,7 +39,7 @@ class Talos(classes.ObservableAnalyzer):
         return result
 
     @classmethod
-    def _update(cls):
+    def update(cls) -> bool:
         try:
             logger.info("starting download of db from talos")
             url = "https://snort.org/downloads/ip-block-list"
@@ -49,14 +50,13 @@ class Talos(classes.ObservableAnalyzer):
                 f.write(r.content.decode())
 
             if not os.path.exists(database_location):
-                raise AnalyzerRunException("failed extraction of talos db")
-
+                return False
             logger.info("ended download of db from talos")
-
+            return True
         except Exception as e:
             logger.exception(e)
 
-        return database_location
+        return False
 
     @classmethod
     def _monkeypatch(cls):

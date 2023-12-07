@@ -26,3 +26,4 @@ class ConnectorReportSerializer(AbstractReportSerializer):
     class Meta:
         model = ConnectorReport
         fields = AbstractReportSerializer.Meta.fields
+        list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class

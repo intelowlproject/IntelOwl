@@ -148,7 +148,14 @@ class ParameterAdminView(CustomAdminView):
 
 @admin.register(PythonModule)
 class PythonModuleAdminView(CustomAdminView):
-    list_display = ["module", "base_path", "get_parameters", "get_secrets"]
+    list_display = [
+        "module",
+        "base_path",
+        "get_parameters",
+        "get_secrets",
+        "update_schedule",
+        "health_check_schedule",
+    ]
     search_fields = ["module", "base_path"]
     list_filter = ["base_path"]
     inlines = [ParameterInline]

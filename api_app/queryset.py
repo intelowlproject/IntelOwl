@@ -225,6 +225,10 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
 
+class AbstractReportQuerySet(QuerySet):
+    ...
+
+
 class ModelWithOwnershipQuerySet:
     def default_values(self):
         return self.filter(owner__isnull=True)
@@ -332,8 +336,12 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
-        # we save the `configured` attribute in the queryset
-        qs = self.annotate_configured(user)
+        # we are excluding the plugins that has failed the health_check
+        qs = (
+            self.exclude(health_check_status=False)
+            # we save the `configured` attribute in the queryset
+            .annotate_configured(user)
+        )
         return (
             # this super call parameters are required
             super(PythonConfigQuerySet, qs)
@@ -376,7 +384,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
             )
             args = [
                 job.pk,
-                config.python_module.pk,
+                config.python_module_id,
                 config.pk,
                 job.get_config_runtime_configuration(config),
                 task_id,

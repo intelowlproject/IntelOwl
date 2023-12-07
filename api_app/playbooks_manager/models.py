@@ -9,13 +9,13 @@ from api_app.analyzers_manager.constants import AllTypes
 from api_app.choices import TLP, ScanMode
 from api_app.defaults import default_runtime
 from api_app.fields import ChoiceArrayField
-from api_app.interfaces import ModelWithOwnership
+from api_app.interfaces import OwnershipAbstractModel
 from api_app.models import AbstractConfig, Tag
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 
 
-class PlaybookConfig(AbstractConfig, ModelWithOwnership):
+class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
     objects = PlaybookConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
@@ -59,7 +59,7 @@ class PlaybookConfig(AbstractConfig, ModelWithOwnership):
 
     class Meta:
         ordering = ["name", "disabled"]
-        indexes = ModelWithOwnership.Meta.indexes
+        indexes = OwnershipAbstractModel.Meta.indexes
         unique_together = [["name", "owner"]]
 
     def _generate_tlp(self) -> str:

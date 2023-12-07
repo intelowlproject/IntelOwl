@@ -22,8 +22,8 @@ class UnpacMe(FileAnalyzer):
     # max no. of tries when polling for result
     max_tries: int
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self.private: str = "private" if self.private else "public"
 
         self.headers = {"Authorization": f"Key {self._api_key_name}"}

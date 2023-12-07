@@ -36,7 +36,7 @@ class ConnectorConfigViewSetTestCase(
             connector_config=connector,
         )
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
         self.client.force_authenticate(self.superuser)
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")
@@ -78,6 +78,7 @@ class ConnectorActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTest
                 "status": status,
                 "config": self.config,
                 "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
+                "parameters": {},
             }
         )
         return _report

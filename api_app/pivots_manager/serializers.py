@@ -15,6 +15,7 @@ class PivotReportSerializer(AbstractReportSerializer):
     class Meta:
         model = PivotReport
         fields = AbstractReportSerializer.Meta.fields
+        list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class
 
 
 class PivotMapSerializer(rfs.ModelSerializer):

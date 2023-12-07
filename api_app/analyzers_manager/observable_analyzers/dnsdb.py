@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+from typing import Dict
 from urllib.parse import urlparse
 
 import requests
@@ -55,8 +56,8 @@ class DNSdb(classes.ObservableAnalyzer):
     limit: int
     time: dict
 
-    def config(self):
-        super().config()
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         # API settings
         self._time_first_before = self.time.get("first_before", "")
         self._time_first_after = self.time.get("first_after", "")

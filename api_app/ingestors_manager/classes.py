@@ -17,14 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class Ingestor(Plugin, metaclass=abc.ABCMeta):
-    def __init__(self, config: IngestorConfig, runtime_configuration: dict, **kwargs):
-        super().__init__(
-            config,
-            job_id=None,
-            runtime_configuration=runtime_configuration,
-            task_id=None,
-            **kwargs
-        )
+    def __init__(self, config: IngestorConfig, **kwargs):
+        super().__init__(config, **kwargs)
 
     @classmethod
     @property
@@ -55,6 +49,10 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
     def _user(self):
         self._config: IngestorConfig
         return self._config.user
+
+    def before_run(self):
+        self._config: IngestorConfig
+        self._config.validate_playbook_to_execute(self._user)
 
     def after_run_success(self, content):
         super().after_run_success(content)

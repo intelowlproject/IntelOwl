@@ -35,7 +35,7 @@ describe("BaseVisualizer component", () => {
     // check size and alignment
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
-      "col-1  d-flex align-items-center text-center justify-content-center  ",
+      "col-1  p-0 m-1 d-flex align-items-center text-center justify-content-center  ",
     );
     // check tooltip
     const user = userEvent.setup();
@@ -84,7 +84,7 @@ describe("BaseVisualizer component", () => {
     );
     // check optional elements (like bold, italic...)
     expect(idElement.className).toBe(
-      "col-2 small d-flex align-items-center text-start justify-content-start  success",
+      "col-2 small p-0 m-1 d-flex align-items-center text-start justify-content-start  success",
     );
     // check tooltip
     const user = userEvent.setup();
@@ -133,7 +133,7 @@ describe("BaseVisualizer component", () => {
     // check optional elements (like bold, italic...)
     const outerPartComponent = innerPartComponent.closest("div");
     expect(outerPartComponent.className).toBe(
-      "col-2  d-flex align-items-center text-start justify-content-start opacity-25 success",
+      "col-2  p-0 m-1 d-flex align-items-center text-start justify-content-start opacity-25 success",
     );
   });
 });

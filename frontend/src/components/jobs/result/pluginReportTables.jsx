@@ -111,7 +111,7 @@ const tableProps = {
         data={{
           report: row.original?.report,
           errors: row.original?.errors,
-          runtime_configuration: row.original?.runtime_configuration,
+          parameters: row.original?.parameters,
         }}
       />
     </div>
@@ -121,42 +121,50 @@ const tableProps = {
 export function AnalyzersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
   return (
-    <DataTable
-      data={job?.analyzer_reports}
-      customProps={{ job, refetch }}
-      {...tableProps}
-    />
+    <div style={{ height: "60vh", overflow: "scroll" }}>
+      <DataTable
+        data={job?.analyzer_reports}
+        customProps={{ job, refetch }}
+        {...tableProps}
+      />
+    </div>
   );
 }
 
 export function ConnectorsReportTable({ job, refetch }) {
   console.debug("ConnectorsReportTable rendered");
   return (
-    <DataTable
-      data={job?.connector_reports}
-      customProps={{ job, refetch }}
-      {...tableProps}
-    />
+    <div style={{ height: "60vh", overflow: "scroll" }}>
+      <DataTable
+        data={job?.connector_reports}
+        customProps={{ job, refetch }}
+        {...tableProps}
+      />
+    </div>
   );
 }
 export function PivotsReportTable({ job, refetch }) {
   console.debug("ConnectorsReportTable rendered");
   return (
-    <DataTable
-      data={job?.pivot_reports}
-      customProps={{ job, refetch }}
-      {...tableProps}
-    />
+    <div style={{ height: "60vh", overflow: "scroll" }}>
+      <DataTable
+        data={job?.pivot_reports}
+        customProps={{ job, refetch }}
+        {...tableProps}
+      />
+    </div>
   );
 }
 export function VisualizersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
   return (
-    <DataTable
-      data={job?.visualizer_reports}
-      customProps={{ job, refetch }}
-      {...tableProps}
-    />
+    <div style={{ height: "60vh", overflow: "scroll" }}>
+      <DataTable
+        data={job?.visualizer_reports}
+        customProps={{ job, refetch }}
+        {...tableProps}
+      />
+    </div>
   );
 }
 AnalyzersReportTable.propTypes = {

@@ -111,7 +111,7 @@ const tableProps = {
         data={{
           report: row.original?.report,
           errors: row.original?.errors,
-          runtime_configuration: row.original?.runtime_configuration,
+          parameters: row.original?.parameters,
         }}
       />
     </div>

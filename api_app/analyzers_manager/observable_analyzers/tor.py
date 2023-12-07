@@ -21,9 +21,8 @@ database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 class Tor(classes.ObservableAnalyzer):
     def run(self):
         result = {"found": False}
-        if not os.path.isfile(database_location):
-            if not self.update():
-                raise AnalyzerRunException("Failed extraction of tor db")
+        if not os.path.isfile(database_location) and not self.update():
+            raise AnalyzerRunException("Failed extraction of tor db")
 
         if not os.path.exists(database_location):
             raise AnalyzerRunException(

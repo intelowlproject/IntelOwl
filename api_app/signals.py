@@ -94,9 +94,12 @@ def post_delete_python_module_periodic_tasks(
 def post_delete_python_config_periodic_tasks(
     sender: Type[PythonConfig], instance: PythonConfig, using, origin, *args, **kwargs
 ):
-    if issubclass(sender, PythonConfig):
-        if hasattr(instance, "health_check_task") and instance.health_check_task:
-            instance.health_check_task.delete()
+    if (
+        issubclass(sender, PythonConfig)
+        and hasattr(instance, "health_check_task")
+        and instance.health_check_task
+    ):
+        instance.health_check_task.delete()
 
 
 @receiver(models.signals.post_save)

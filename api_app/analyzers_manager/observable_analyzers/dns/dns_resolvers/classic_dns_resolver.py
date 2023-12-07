@@ -42,7 +42,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
             except socket.timeout:
                 message = (
                     f"request for {self.observable_name} for classic"
-                    f" DNS triggered timeout"
+                    " DNS triggered timeout"
                 )
                 logger.warning(message)
                 self.report.errors.append(message)

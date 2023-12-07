@@ -83,7 +83,7 @@ RABBITMQ_DEFAULT_PASS=guest
 FLOWER_USER=flower
 FLOWER_PWD=flower
 
-USE_RECAPTCHA=True
+USE_RECAPTCHA=False
 # drf-recaptcha
 ## localhost, internal deployments
 RECAPTCHA_SECRET_KEY=""

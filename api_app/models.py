@@ -47,6 +47,7 @@ from api_app.defaults import default_runtime, file_directory_path
 from api_app.helpers import calculate_sha1, calculate_sha256, deprecated, get_now
 from api_app.queryset import (
     AbstractConfigQuerySet,
+    AbstractReportQuerySet,
     JobQuerySet,
     ParameterQuerySet,
     PluginConfigQuerySet,
@@ -907,6 +908,8 @@ class AbstractReport(models.Model):
     job = models.ForeignKey(
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
+    objects = AbstractReportQuerySet.as_manager()
+    parameters = models.JSONField(blank=False, null=False, editable=False)
 
     class Meta:
         abstract = True
@@ -919,7 +922,7 @@ class AbstractReport(models.Model):
     def config(cls) -> "AbstractConfig":
         raise NotImplementedError()
 
-    @property
+    @cached_property
     def runtime_configuration(self):
         return self.job.get_config_runtime_configuration(self.config)
 
@@ -995,6 +998,15 @@ class PythonConfig(AbstractConfig):
 
         raise NotImplementedError()
 
+    def _get_params(self, user: User, runtime_configuration: Dict) -> Dict[str, Any]:
+        return {
+            parameter.name: value
+            for parameter, value in self.read_params(
+                user, runtime_configuration
+            ).items()
+            if not parameter.is_secret
+        }
+
     def generate_empty_report(self, job: Job, task_id: str, status: str):
         return self.python_module.python_class.report_model.objects.update_or_create(
             job=job,
@@ -1004,6 +1016,7 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
+                "parameters": self._get_params(job.user, job.runtime_configuration),
             },
         )[0]
 

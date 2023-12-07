@@ -461,7 +461,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         )
         return super()._monkeypatch(patches)
 
-    def health_check(self, user: User) -> bool:
+    def health_check(self, user: User = None) -> bool:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """

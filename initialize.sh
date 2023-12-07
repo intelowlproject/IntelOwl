@@ -147,4 +147,4 @@ echo "Moving to root of the project"
 cd -
 
 echo "Looks like you're ready to go!"
-echo "Now you can start IntelOwl by activating the virtual env with \`source venv/bin/activate\` running the start.py file (eg: \`sudo python3 start.py prod up\` for production environment)"
+echo "Now you can start IntelOwl by activating the virtual env with \`source venv/bin/activate\` and running the start.py file (eg: \`sudo python3 start.py prod up\` for production environment)"

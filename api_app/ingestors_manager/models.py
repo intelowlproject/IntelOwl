@@ -104,4 +104,5 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
             status=status,
             task_id=task_id,
             max_size_report=self.maximum_jobs,
+            parameters=self._get_params(self.user, {}),
         )

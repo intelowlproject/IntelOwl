@@ -69,6 +69,7 @@ class ConnectorTestCase(CustomTestCase):
             config=AnalyzerConfig.objects.first(),
             status=AnalyzerReport.Status.FAILED.value,
             task_id=str(uuid()),
+            parameters={},
         )
         cc = ConnectorConfig.objects.create(
             name="test",

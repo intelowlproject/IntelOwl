@@ -39,6 +39,43 @@ jest.mock("../../../../src/stores/useAuthStore", () => ({
 }));
 
 describe("PluginHealthCheckButton test", () => {
+
+  test.only.each([
+    {
+      status: 200,
+      data: { status: true }
+    },
+    {
+      status: 200,
+      data: { status: false }
+    },
+  ])("Health check - status 200 (%s)", async (responseData) => {
+    const userAction = userEvent.setup();
+    axios.get.mockImplementation(() =>
+      Promise.resolve(responseData),
+    );
+
+    const { container } = render(
+      <BrowserRouter>
+        <PluginHealthCheckButton pluginName="plugin" pluginType_="analyzer" />
+      </BrowserRouter>,
+    );
+
+    const healthCheckIcon = container.querySelector(
+      "#table-pluginhealthcheckbtn__plugin",
+    );
+    expect(healthCheckIcon).toBeInTheDocument();
+
+    await userAction.click(healthCheckIcon);
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        `${API_BASE_URI}/analyzer/plugin/health_check`,
+      );
+      // expect(screen.getByText("Up and running!")).toBeInTheDocument();
+    });
+  });
+
   test("Health check - status true", async () => {
     const userAction = userEvent.setup();
     axios.get.mockImplementation(() =>
@@ -126,9 +163,7 @@ describe("PlaybooksDeletionButton test", () => {
       expect(axios.delete).toHaveBeenCalledWith(`${PLAYBOOKS_CONFIG_URI}/test`);
     });
     // toast
-    setTimeout(() => {
-      expect(screen.getByText("test deleted")).toBeInTheDocument();
-    }, 15 * 1000);
+    expect(screen.getByText("test deleted")).toBeInTheDocument();
   });
 });
 

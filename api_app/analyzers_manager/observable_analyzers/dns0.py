@@ -79,7 +79,7 @@ class DNS0(classes.ObservableAnalyzer):
                 "https://docs.dns0.eu/dns-api/names#fuzziness"
             )
 
-        if not self.sort not in _supported_sort_types:
+        if self.sort not in _supported_sort_types:
             raise AnalyzerConfigurationException(
                 f"Sort type {self.sort} not supported"
                 f"Available sort types are: {_supported_sort_types}"

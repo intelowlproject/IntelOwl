@@ -61,6 +61,7 @@ class VisualizableColor(enum.Enum):
 
 
 class VisualizableIcon(enum.Enum):
+    BOOK = "book"
     INFO = "info"
     LIKE = "like"
     DISLIKE = "dislike"

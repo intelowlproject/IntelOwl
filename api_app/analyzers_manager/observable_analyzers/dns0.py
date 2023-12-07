@@ -1,3 +1,4 @@
+from typing import Dict
 from urllib.parse import urlparse
 
 import requests
@@ -56,9 +57,11 @@ class DNS0(classes.ObservableAnalyzer):
     limit: int
     offset: int
 
-    def run(self):
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
         self._validate_params()
 
+    def run(self):
         params = self._create_params()
 
         response = requests.get(self.base_url, params=params)

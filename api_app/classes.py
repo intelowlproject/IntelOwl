@@ -267,4 +267,4 @@ class Plugin(metaclass=ABCMeta):
                     return False
                 else:
                     return True
-        raise NotImplementedError("No healthcheck implemented")
+        raise NotImplementedError()

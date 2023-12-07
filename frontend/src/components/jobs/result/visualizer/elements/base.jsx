@@ -41,7 +41,7 @@ export function BaseVisualizer({
     <div
       className={`${size} ${
         isChild ? "small" : ""
-      } p-1 d-flex align-items-center text-${alignment} justify-content-${alignment} ${
+      } p-0 m-1 d-flex align-items-center text-${alignment} justify-content-${alignment} ${
         disable ? "opacity-25" : ""
       } ${color}`}
       id={id}

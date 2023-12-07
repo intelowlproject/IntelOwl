@@ -877,7 +877,7 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             health_status = python_obj.health_check(request.user)
         except NotImplementedError as e:
             logger.info(f"NotImplementedError {e}, user {request.user}, name {pk}")
-            raise ValidationError({"detail": "Not implemented"})
+            raise ValidationError({"detail": str(e)})
         except Exception as e:
             logger.exception(e)
             raise ValidationError(

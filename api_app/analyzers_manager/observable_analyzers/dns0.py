@@ -1,3 +1,4 @@
+from logging import getLogger
 from typing import Dict
 from urllib.parse import urlparse
 
@@ -10,6 +11,8 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+
+logger = getLogger(__name__)
 
 _supported_fuzzy_params = [
     "swap",
@@ -45,7 +48,7 @@ _min_offset_value = 0
 class DNS0(classes.ObservableAnalyzer):
     base_url: str = "https://api.dns0.eu/names"
 
-    _api_key_name: str
+    _api_key: str
     query: str
     root: bool
     fuzzy: list[str]
@@ -59,12 +62,19 @@ class DNS0(classes.ObservableAnalyzer):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
+
+        if not hasattr(self, "_api_key") or self._api_key:
+            raise AnalyzerRunException("No API key specified")
+
         self._validate_params()
 
     def run(self):
         params = self._create_params()
+        headers = {
+            "Authorization": f"Bearer {self._api_key}",
+        }
 
-        response = requests.get(self.base_url, params=params)
+        response = requests.get(self.base_url, params=params, headers=headers)
         try:
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -77,29 +87,29 @@ class DNS0(classes.ObservableAnalyzer):
             fuzzy_params not in _supported_fuzzy_params for fuzzy_params in self.fuzzy
         ):
             raise AnalyzerConfigurationException(
-                "Fuzzy type not supported"
-                "The list of supported fuzzy is at"
+                "Fuzzy type not supported! "
+                "The list of supported fuzzy is at: "
                 "https://docs.dns0.eu/dns-api/names#fuzziness"
             )
 
         if not hasattr(self, "sort") or self.sort not in _supported_sort_types:
             raise AnalyzerConfigurationException(
-                f"Sort type {self.sort} not supported"
+                f"Sort type {self.sort} not supported! "
                 f"Available sort types are: {_supported_sort_types}"
             )
 
         if not hasattr(self, "format") or self.format not in _supported_format_types:
             raise AnalyzerConfigurationException(
-                f"Format type {self.format} not supported"
+                f"Format type {self.format} not supported! "
                 f"Available format types are: {_supported_format_types}"
             )
 
         if (
             not hasattr(self, "limit")
-            or not _min_limit_value > self.limit >= _max_limit_value
+            or not _min_limit_value < self.limit <= _max_limit_value
         ):
             raise AnalyzerConfigurationException(
-                f"{self.limit} is out of bound"
+                f"{self.limit} is out of bound! "
                 f"Max value is {_max_limit_value}, min value is {_min_limit_value}"
             )
 
@@ -108,9 +118,9 @@ class DNS0(classes.ObservableAnalyzer):
                 f"{self.offset} can't be below {_min_offset_value}"
             )
 
-    # TODO: add support for UNIX timestamp and relative dates
     @staticmethod
     def convert_date_type(date_string):
+        # TODO: add support for UNIX timestamp and relative dates
         if not date_string:
             return False
 
@@ -148,17 +158,14 @@ class DNS0(classes.ObservableAnalyzer):
             params["fuzzy"] = self.fuzzy
 
         # convert dates to correct format
-        from_date = self.convert_date_type(self.from_date)
-        if from_date:
-            params["from_date"] = from_date
+        if hasattr(self, "from_date") and self.from_date:
+            params["from"] = self.convert_date_type(self.from_date)
 
-        to_date = self.convert_date_type(self.to_date)
-        if to_date:
-            params["to_date"] = to_date
+        if hasattr(self, "to_date") and self.to_date:
+            params["to"] = self.convert_date_type(self.to_date)
 
-        not_before = self.convert_date_type(self.not_before)
-        if not_before:
-            params["not_before"] = not_before
+        if hasattr(self, "not_before") and self.not_before:
+            params["not_before"] = self.convert_date_type(self.not_before)
 
         if self.sort:
             params["sort"] = self.sort

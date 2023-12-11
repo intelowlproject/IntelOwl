@@ -145,7 +145,7 @@ class DNS0(classes.ObservableAnalyzer):
         target_observable = self.observable_name
         if self.observable_classification == self.ObservableTypes.IP:
             raise AnalyzerRunException("IP addresses are not supported")
-        if self.observable_classification == self.ObservableTypes.URL:
+        elif self.observable_classification == self.ObservableTypes.URL:
             target_observable = urlparse(self.observable_name).hostname
         params = {"q": target_observable}
 
@@ -178,6 +178,8 @@ class DNS0(classes.ObservableAnalyzer):
 
         if self.offset:
             params["offset"] = self.offset
+
+        return params
 
     @classmethod
     def _monkeypatch(cls):

@@ -143,9 +143,7 @@ class DNS0(classes.ObservableAnalyzer):
 
     def _create_params(self):
         target_observable = self.observable_name
-        if self.observable_classification == self.ObservableTypes.IP:
-            raise AnalyzerRunException("IP addresses are not supported")
-        elif self.observable_classification == self.ObservableTypes.URL:
+        if self.observable_classification == self.ObservableTypes.URL:
             target_observable = urlparse(self.observable_name).hostname
         params = {"q": target_observable}
 

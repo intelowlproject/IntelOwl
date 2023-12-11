@@ -1,3 +1,4 @@
+import re
 from logging import getLogger
 from typing import Dict
 from urllib.parse import urlparse
@@ -120,26 +121,42 @@ class DNS0(classes.ObservableAnalyzer):
 
     @staticmethod
     def convert_date_type(date_string):
-        # TODO: add support for UNIX timestamp and relative dates
         if not date_string:
             return False
 
-        try:
-            return dateutil_parser.parse(date_string).strftime("%Y-%m-%d")
-        except ValueError:
-            error_message = f"{date_string} cannot be converted to a valid datetime"
-        except TypeError:
-            error_message = (
-                f"{type(date_string)} is not a string and cannot be "
-                f"converted to a datetime "
-            )
-        except Exception:
-            error_message = (
-                f"{date_string} with type: {type(date_string)},"
-                f"something wrong happened during conversion to datetime"
-            )
+        return (
+            DNS0.convert_unix_timestamp(date_string)
+            or DNS0.convert_relative_date(date_string)
+            or DNS0.convert_date(date_string)
+        )
 
-        raise AnalyzerRunException(error_message)
+    @staticmethod
+    def convert_relative_date(date):
+        # accepts string matching the format:
+        # +/- at the beginning
+        # a number
+        # a character indicating Year, Month or Day
+
+        pattern = re.compile(r"([\+\-]\d+[YMD])+")
+        if match := pattern.match(date):
+            return match.group()
+        return False
+
+    @staticmethod
+    def convert_date(date):
+        try:
+            parsed = dateutil_parser.parse(date).strftime("%Y-%m-%d")
+            return parsed
+        except Exception:
+            return False
+
+    @staticmethod
+    def convert_unix_timestamp(timestamp):
+        try:
+            parsed = str(int(timestamp))
+            return parsed
+        except Exception:
+            return False
 
     def _create_params(self):
         target_observable = self.observable_name
@@ -157,13 +174,16 @@ class DNS0(classes.ObservableAnalyzer):
 
         # convert dates to correct format
         if hasattr(self, "from_date") and self.from_date:
-            params["from"] = self.convert_date_type(self.from_date)
+            if result := self.convert_date_type(self.from_date):
+                params["from"] = result
 
         if hasattr(self, "to_date") and self.to_date:
-            params["to"] = self.convert_date_type(self.to_date)
+            if result := self.convert_date_type(self.to_date):
+                params["to"] = result
 
         if hasattr(self, "not_before") and self.not_before:
-            params["not_before"] = self.convert_date_type(self.not_before)
+            if result := self.convert_date_type(self.not_before):
+                params["not_before"] = result
 
         if self.sort:
             params["sort"] = self.sort

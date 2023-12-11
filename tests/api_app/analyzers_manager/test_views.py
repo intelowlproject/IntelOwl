@@ -66,7 +66,7 @@ class AnalyzerConfigViewSetTestCase(
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], "Not implemented")
+        self.assertEqual(result["errors"]["detail"], "No healthcheck implemented")
 
 
 class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestCase):

@@ -63,7 +63,7 @@ class DNS0(classes.ObservableAnalyzer):
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
 
-        if not hasattr(self, "_api_key") or self._api_key:
+        if not hasattr(self, "_api_key") or not self._api_key:
             raise AnalyzerRunException("No API key specified")
 
         self._validate_params()

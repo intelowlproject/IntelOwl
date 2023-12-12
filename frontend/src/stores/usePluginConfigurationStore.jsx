@@ -13,6 +13,7 @@ import {
   PLAYBOOKS_CONFIG_URI,
   INGESTORS_CONFIG_URI,
 } from "../constants/apiURLs";
+import { prettifyErrors } from "../utils/api";
 
 async function downloadAllPlugin(pluginUrl) {
   const pageSize = 70;
@@ -211,9 +212,10 @@ export const usePluginConfigurationStore = create((set, get) => ({
         );
       return Promise.resolve(resp.status);
     } catch (e) {
+      console.error(e);
       addToast(
         "Health check status: failed",
-        e.parsedMsg.toString(),
+        prettifyErrors(e),
         "danger",
         true,
       );
@@ -243,7 +245,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
         );
       return Promise.resolve(resp.status);
     } catch (e) {
-      addToast("Plugin pull: failed", e.parsedMsg.toString(), "danger", true);
+      addToast("Plugin pull: failed", prettifyErrors(e), "danger", true);
       return e.response.status;
     }
   },
@@ -255,7 +257,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
       addToast(`${playbook} deleted`, null, "info");
       return Promise.resolve(response);
     } catch (e) {
-      addToast("Failed!", e.parsedMsg, "danger");
+      addToast("Failed!", prettifyErrors(e), "danger");
       return null;
     }
   },
@@ -272,7 +274,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
       } catch (error) {
         addToast(
           `Failed to enabled ${pluginName} for the organization`,
-          error.parsedMsg,
+          prettifyErrors(error),
           "danger",
           true,
         );
@@ -288,7 +290,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
     } catch (error) {
       addToast(
         `Failed to enabled ${pluginName} for the organization`,
-        error.parsedMsg,
+        prettifyErrors(error),
         "danger",
         true,
       );
@@ -308,7 +310,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
       } catch (error) {
         addToast(
           `Failed to disabled ${pluginName} for the organization`,
-          error.parsedMsg,
+          prettifyErrors(error),
           "danger",
           true,
         );
@@ -324,7 +326,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
     } catch (error) {
       addToast(
         `Failed to disabled ${pluginName} for the organization`,
-        error.parsedMsg,
+        prettifyErrors(error),
         "danger",
         true,
       );

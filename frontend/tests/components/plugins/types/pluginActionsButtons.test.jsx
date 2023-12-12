@@ -8,11 +8,12 @@ import {
   API_BASE_URI,
   PLAYBOOKS_CONFIG_URI,
 } from "../../../../src/constants/apiURLs";
-
+import Toast from "../../../../src/layouts/Toast";
 import {
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
   OrganizationPluginStateToggle,
+  PluginPullButton,
 } from "../../../../src/components/plugins/types/pluginActionsButtons";
 import { mockedUseOrganizationStoreOwner } from "../../../mock";
 
@@ -39,30 +40,39 @@ jest.mock("../../../../src/stores/useAuthStore", () => ({
 }));
 
 describe("PluginHealthCheckButton test", () => {
-
-  test.only.each([
+  test.each([
+    // healthcheck true
     {
-      status: 200,
-      data: { status: true }
+      pluginName: "Plugin1",
+      responseData: {
+        status: 200,
+        data: { status: true },
+      },
     },
+    // healthcheck false
     {
-      status: 200,
-      data: { status: false }
+      pluginName: "Plugin2",
+      responseData: {
+        status: 200,
+        data: { status: false },
+      },
     },
-  ])("Health check - status 200 (%s)", async (responseData) => {
+  ])("Health check - status 200 (%s)", async ({ pluginName, responseData }) => {
     const userAction = userEvent.setup();
-    axios.get.mockImplementation(() =>
-      Promise.resolve(responseData),
-    );
+    axios.get.mockImplementation(() => Promise.resolve(responseData));
 
     const { container } = render(
       <BrowserRouter>
-        <PluginHealthCheckButton pluginName="plugin" pluginType_="analyzer" />
+        <PluginHealthCheckButton
+          pluginName={pluginName}
+          pluginType_="analyzer"
+        />
+        <Toast />
       </BrowserRouter>,
     );
 
     const healthCheckIcon = container.querySelector(
-      "#table-pluginhealthcheckbtn__plugin",
+      `#table-pluginhealthcheckbtn__${pluginName}`,
     );
     expect(healthCheckIcon).toBeInTheDocument();
 
@@ -70,63 +80,16 @@ describe("PluginHealthCheckButton test", () => {
 
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
-        `${API_BASE_URI}/analyzer/plugin/health_check`,
+        `${API_BASE_URI}/analyzer/${pluginName}/health_check`,
       );
-      // expect(screen.getByText("Up and running!")).toBeInTheDocument();
-    });
-  });
-
-  test("Health check - status true", async () => {
-    const userAction = userEvent.setup();
-    axios.get.mockImplementation(() =>
-      Promise.resolve({ data: { status: true } }),
-    );
-
-    const { container } = render(
-      <BrowserRouter>
-        <PluginHealthCheckButton pluginName="plugin" pluginType_="analyzer" />
-      </BrowserRouter>,
-    );
-
-    const healthCheckIcon = container.querySelector(
-      "#table-pluginhealthcheckbtn__plugin",
-    );
-    expect(healthCheckIcon).toBeInTheDocument();
-
-    await userAction.click(healthCheckIcon);
-
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        `${API_BASE_URI}/analyzer/plugin/health_check`,
-      );
-      expect(screen.getByText("Up and running!")).toBeInTheDocument();
-    });
-  });
-
-  test("Health check - status false", async () => {
-    const userAction = userEvent.setup();
-    axios.get.mockImplementation(() =>
-      Promise.resolve({ data: { status: false } }),
-    );
-
-    const { container } = render(
-      <BrowserRouter>
-        <PluginHealthCheckButton pluginName="plugin" pluginType_="analyzer" />
-      </BrowserRouter>,
-    );
-
-    const healthCheckIcon = container.querySelector(
-      "#table-pluginhealthcheckbtn__plugin",
-    );
-    expect(healthCheckIcon).toBeInTheDocument();
-
-    await userAction.click(healthCheckIcon);
-
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        `${API_BASE_URI}/analyzer/plugin/health_check`,
-      );
-      expect(screen.getByText("Failing!")).toBeInTheDocument();
+      // toast
+      if (responseData.data.status) {
+        expect(
+          screen.getByText(`${pluginName} is up and running`),
+        ).toBeInTheDocument();
+      } else {
+        expect(screen.getByText(`${pluginName} is NOT up`)).toBeInTheDocument();
+      }
     });
   });
 });
@@ -139,6 +102,7 @@ describe("PlaybooksDeletionButton test", () => {
     const { container } = render(
       <BrowserRouter>
         <PlaybooksDeletionButton playbookName="test" />
+        <Toast />
       </BrowserRouter>,
     );
 
@@ -168,65 +132,76 @@ describe("PlaybooksDeletionButton test", () => {
 });
 
 describe("OrganizationPluginStateToggle test", () => {
-  test("Enable custom playbook for org", async () => {
+  test.each([
+    // enable playbook
+    {
+      pluginName: "Plugin3",
+      toEnable: true,
+    },
+    // disable playbook
+    {
+      pluginName: "Plugin4",
+      toEnable: false,
+    },
+  ])("Custom playbook for org (%s)", async ({ pluginName, toEnable }) => {
     const userAction = userEvent.setup();
     axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
 
     const { container } = render(
       <BrowserRouter>
         <OrganizationPluginStateToggle
-          disabled
-          pluginName="plugin"
+          disabled={toEnable}
+          pluginName={pluginName}
           type="playbook"
           refetch={jest.fn()}
           pluginOwner="user_owner"
         />
+        <Toast />
       </BrowserRouter>,
     );
 
-    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    const iconButton = container.querySelector(
+      `#table-pluginstatebtn__${pluginName}`,
+    );
     expect(iconButton).toBeInTheDocument();
 
     await userAction.click(iconButton);
 
     await waitFor(() => {
-      expect(axios.patch).toHaveBeenCalledWith(
-        `${API_BASE_URI}/playbook/plugin`,
-        { for_organization: true },
-      );
+      if (toEnable) {
+        expect(axios.patch).toHaveBeenCalledWith(
+          `${API_BASE_URI}/playbook/${pluginName}`,
+          { for_organization: true },
+        );
+        // toast
+        expect(
+          screen.getByText(`${pluginName} enabled for the organization`),
+        ).toBeInTheDocument();
+      } else {
+        expect(axios.patch).toHaveBeenCalledWith(
+          `${API_BASE_URI}/playbook/${pluginName}`,
+          { for_organization: false },
+        );
+        // toast
+        expect(
+          screen.getByText(`${pluginName} disabled for the organization`),
+        ).toBeInTheDocument();
+      }
     });
   });
 
-  test("Disable custom playbook for org", async () => {
-    const userAction = userEvent.setup();
-    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
-
-    const { container } = render(
-      <BrowserRouter>
-        <OrganizationPluginStateToggle
-          disabled={false}
-          pluginName="plugin"
-          type="playbook"
-          refetch={jest.fn()}
-          pluginOwner="user_owner"
-        />
-      </BrowserRouter>,
-    );
-
-    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
-    expect(iconButton).toBeInTheDocument();
-
-    await userAction.click(iconButton);
-
-    await waitFor(() => {
-      expect(axios.patch).toHaveBeenCalledWith(
-        `${API_BASE_URI}/playbook/plugin`,
-        { for_organization: false },
-      );
-    });
-  });
-
-  test("Enable default playbook for org", async () => {
+  test.each([
+    // enable playbook
+    {
+      pluginName: "Plugin5",
+      toEnable: true,
+    },
+    // disable playbook
+    {
+      pluginName: "Plugin6",
+      toEnable: false,
+    },
+  ])("Default playbook for org (%s)", async ({ pluginName, toEnable }) => {
     const userAction = userEvent.setup();
     axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
     axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
@@ -235,52 +210,92 @@ describe("OrganizationPluginStateToggle test", () => {
     const { container } = render(
       <BrowserRouter>
         <OrganizationPluginStateToggle
-          disabled
-          pluginName="plugin"
+          disabled={toEnable}
+          pluginName={pluginName}
           type="playbook"
           refetch={jest.fn()}
         />
+        <Toast />
       </BrowserRouter>,
     );
 
-    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
+    const iconButton = container.querySelector(
+      `#table-pluginstatebtn__${pluginName}`,
+    );
     expect(iconButton).toBeInTheDocument();
 
     await userAction.click(iconButton);
 
     await waitFor(() => {
-      expect(axios.delete).toHaveBeenCalledWith(
-        `${API_BASE_URI}/playbook/plugin/organization`,
-      );
+      if (toEnable) {
+        expect(axios.delete).toHaveBeenCalledWith(
+          `${API_BASE_URI}/playbook/${pluginName}/organization`,
+        );
+        // toast
+        expect(
+          screen.getByText(`${pluginName} enabled for the organization`),
+        ).toBeInTheDocument();
+      } else {
+        expect(axios.post).toHaveBeenCalledWith(
+          `${API_BASE_URI}/playbook/${pluginName}/organization`,
+        );
+        // toast
+        expect(
+          screen.getByText(`${pluginName} disabled for the organization`),
+        ).toBeInTheDocument();
+      }
     });
   });
+});
 
-  test("Disable default playbook for org", async () => {
+describe("PluginPullButton test", () => {
+  test.each([
+    // pull true
+    {
+      pluginName: "Plugin7",
+      responseData: {
+        status: 200,
+        data: { status: true },
+      },
+    },
+    // pull false
+    {
+      pluginName: "Plugin8",
+      responseData: {
+        status: 200,
+        data: { status: false },
+      },
+    },
+  ])("Pull - status 200 (%s)", async ({ pluginName, responseData }) => {
     const userAction = userEvent.setup();
-    axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
-    axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
-    axios.post.mockImplementation(() => Promise.resolve({ data: {} }));
+    axios.post.mockImplementation(() => Promise.resolve(responseData));
 
     const { container } = render(
       <BrowserRouter>
-        <OrganizationPluginStateToggle
-          disabled={false}
-          pluginName="plugin"
-          type="playbook"
-          refetch={jest.fn()}
-        />
+        <PluginPullButton pluginName={pluginName} pluginType_="analyzer" />
+        <Toast />
       </BrowserRouter>,
     );
 
-    const iconButton = container.querySelector("#table-pluginstatebtn__plugin");
-    expect(iconButton).toBeInTheDocument();
+    const healthCheckIcon = container.querySelector(
+      `#table-pluginpullbtn__${pluginName}`,
+    );
+    expect(healthCheckIcon).toBeInTheDocument();
 
-    await userAction.click(iconButton);
+    await userAction.click(healthCheckIcon);
 
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
-        `${API_BASE_URI}/playbook/plugin/organization`,
+        `${API_BASE_URI}/analyzer/${pluginName}/pull`,
       );
+      // toast
+      if (responseData.data.status) {
+        expect(screen.getByText(`${pluginName} updated`)).toBeInTheDocument();
+      } else {
+        expect(
+          screen.getByText(`${pluginName} pull failed`),
+        ).toBeInTheDocument();
+      }
     });
   });
 });

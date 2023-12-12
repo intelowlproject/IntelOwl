@@ -169,7 +169,7 @@ class DNS0Names(classes.ObservableAnalyzer):
             params["root"] = int(self.root)
 
         # pass list of fuzzy parameter
-        if self.fuzzy:
+        if hasattr(self, "fuzzy") and self.fuzzy:
             params["fuzzy"] = self.fuzzy
 
         # convert dates to correct format
@@ -185,16 +185,16 @@ class DNS0Names(classes.ObservableAnalyzer):
             if result := self.convert_date_type(self.not_before):
                 params["not_before"] = result
 
-        if self.sort:
+        if hasattr(self, "sort") and self.sort:
             params["sort"] = self.sort
 
-        if self.format:
+        if hasattr(self, "format") and self.format:
             params["format"] = self.format
 
-        if self.limit:
+        if hasattr(self, "limit") and self.limit:
             params["limit"] = self.limit
 
-        if self.offset:
+        if hasattr(self, "offset") and self.offset:
             params["offset"] = self.offset
 
         return params

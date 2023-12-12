@@ -84,7 +84,7 @@ class DNS0Names(classes.ObservableAnalyzer):
         return response.json()
 
     def _validate_params(self):
-        if not hasattr(self, "fuzzy") or any(
+        if hasattr(self, "fuzzy") and any(
             fuzzy_params not in _supported_fuzzy_params for fuzzy_params in self.fuzzy
         ):
             raise AnalyzerConfigurationException(
@@ -93,28 +93,28 @@ class DNS0Names(classes.ObservableAnalyzer):
                 "https://docs.dns0.eu/dns-api/names#fuzziness"
             )
 
-        if not hasattr(self, "sort") or self.sort not in _supported_sort_types:
+        if hasattr(self, "sort") and self.sort not in _supported_sort_types:
             raise AnalyzerConfigurationException(
                 f"Sort type {self.sort} not supported! "
                 f"Available sort types are: {_supported_sort_types}"
             )
 
-        if not hasattr(self, "format") or self.format not in _supported_format_types:
+        if hasattr(self, "format") and self.format not in _supported_format_types:
             raise AnalyzerConfigurationException(
                 f"Format type {self.format} not supported! "
                 f"Available format types are: {_supported_format_types}"
             )
 
         if (
-            not hasattr(self, "limit")
-            or not _min_limit_value < self.limit <= _max_limit_value
+            hasattr(self, "limit")
+            and not _min_limit_value < self.limit <= _max_limit_value
         ):
             raise AnalyzerConfigurationException(
                 f"{self.limit} is out of bound! "
                 f"Max value is {_max_limit_value}, min value is {_min_limit_value}"
             )
 
-        if not hasattr(self, "offset") or self.offset < _min_offset_value:
+        if hasattr(self, "offset") and self.offset < _min_offset_value:
             raise AnalyzerConfigurationException(
                 f"{self.offset} can't be below {_min_offset_value}"
             )
@@ -165,7 +165,7 @@ class DNS0Names(classes.ObservableAnalyzer):
         params = {"q": target_observable}
 
         # convert root parameter into 1 or 0
-        if self.root:
+        if hasattr(self, "root") and self.root:
             params["root"] = int(self.root)
 
         # pass list of fuzzy parameter

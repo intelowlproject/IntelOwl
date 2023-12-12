@@ -46,7 +46,7 @@ _max_limit_value = 50000
 _min_offset_value = 0
 
 
-class DNS0(classes.ObservableAnalyzer):
+class DNS0Names(classes.ObservableAnalyzer):
     base_url: str = "https://api.dns0.eu/names"
 
     _api_key: str
@@ -125,9 +125,9 @@ class DNS0(classes.ObservableAnalyzer):
             return False
 
         return (
-            DNS0.convert_unix_timestamp(date_string)
-            or DNS0.convert_relative_date(date_string)
-            or DNS0.convert_date(date_string)
+            DNS0Names.convert_unix_timestamp(date_string)
+            or DNS0Names.convert_relative_date(date_string)
+            or DNS0Names.convert_date(date_string)
         )
 
     @staticmethod

@@ -3,8 +3,8 @@ from logging import getLogger
 from typing import Dict
 from urllib.parse import urlparse
 
+import dateparser
 import requests
-from dateutil import parser as dateutil_parser
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
@@ -125,11 +125,14 @@ class DNS0Names(classes.ObservableAnalyzer):
         if not date_string:
             return False
 
-        return (
+        date_parsed = (
             DNS0Names.convert_unix_timestamp(date_string)
             or DNS0Names.convert_relative_date(date_string)
             or DNS0Names.convert_date(date_string)
         )
+        if not date_parsed:
+            raise AnalyzerRunException("Error in date format!")
+        return date_parsed
 
     @staticmethod
     def convert_relative_date(date):
@@ -144,17 +147,15 @@ class DNS0Names(classes.ObservableAnalyzer):
 
     @staticmethod
     def convert_date(date):
-        try:
-            parsed = dateutil_parser.parse(date).strftime("%Y-%m-%d")
-            return parsed
-        except Exception:
-            return False
+        pattern = re.compile(r"^(\d{4}-\d{2}-\d{2})$")
+        if match := pattern.match(date):
+            return dateparser.parse(match.group())
+        return False
 
     @staticmethod
     def convert_unix_timestamp(timestamp):
         try:
-            parsed = str(int(timestamp))
-            return parsed
+            return str(int(timestamp))
         except Exception:
             return False
 

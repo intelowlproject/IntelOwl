@@ -63,18 +63,11 @@ class DNS0Names(classes.ObservableAnalyzer):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
-
-        if not hasattr(self, "_api_key") or not self._api_key:
-            raise AnalyzerRunException("No API key specified")
-
         self._validate_params()
 
     def run(self):
         params = self._create_params()
-        headers = {
-            "Authorization": f"Bearer {self._api_key}",
-            "Accept": "application/json",
-        }
+        headers = self._create_headers()
 
         response = requests.get(self.base_url, params=params, headers=headers)
         try:
@@ -83,6 +76,14 @@ class DNS0Names(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         return response.json()
+
+    def _create_headers(self):
+        headers = {
+            "Accept": "application/json",
+        }
+        if hasattr(self, "_api_key") and not self._api_key:
+            headers["Authentication"] = f"Bearer {self._api_key}"
+        return headers
 
     def _validate_params(self):
         if hasattr(self, "fuzzy") and any(

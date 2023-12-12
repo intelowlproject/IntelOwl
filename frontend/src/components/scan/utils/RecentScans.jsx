@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import md5 from "md5";
 import { useNavigate } from "react-router-dom";
@@ -123,9 +123,14 @@ export default function RecentScans({ classification, param }) {
 
   // file md5
   const [fileMd5, setFileMd5] = React.useState("");
-  if (classification === JobTypes.FILE && param) {
-    param.text().then((x) => setFileMd5(md5(x)));
-  }
+  /* md5 computation takes lots of time for huge file:
+  this freezes the scan form ui (render this component), we need this caching.
+  */
+  useMemo(() => {
+    if (classification === JobTypes.FILE && param) {
+      param.text().then((x) => setFileMd5(md5(x)));
+    }
+  }, [classification, param]);
 
   React.useEffect(() => {
     fetchRecentScansUser();

@@ -48,7 +48,7 @@ Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit
 
 ```bash
 # From the project directory
-# You should already have a virtualenv from the installation phase. Otherwise you can create one with `python3 -m venv venv`
+python3 -m venv venv
 source venv/bin/activate
 # from the project base directory
 pip install pre-commit

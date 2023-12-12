@@ -134,11 +134,10 @@ class DNS0Names(classes.ObservableAnalyzer):
     @staticmethod
     def convert_relative_date(date):
         # accepts string matching the format:
-        # +/- at the beginning
+        # - at the beginning
         # a number
         # a character indicating Year, Month or Day
-
-        pattern = re.compile(r"([\+\-]\d+[YMD])+")
+        pattern = re.compile(r"-\d+[YMD]")
         if match := pattern.match(date):
             return match.group()
         return False

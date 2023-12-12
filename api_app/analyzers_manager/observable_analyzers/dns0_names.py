@@ -73,6 +73,7 @@ class DNS0Names(classes.ObservableAnalyzer):
         params = self._create_params()
         headers = {
             "Authorization": f"Bearer {self._api_key}",
+            "Accept": "application/json",
         }
 
         response = requests.get(self.base_url, params=params, headers=headers)

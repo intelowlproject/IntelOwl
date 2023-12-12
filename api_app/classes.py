@@ -44,7 +44,7 @@ class Plugin(metaclass=ABCMeta):
     @property
     @abstractmethod
     def python_base_path(cls) -> PosixPath:
-        ...
+        NotImplementedError()
 
     @classmethod
     def all_subclasses(cls):
@@ -267,4 +267,4 @@ class Plugin(metaclass=ABCMeta):
                     return False
                 else:
                     return True
-        raise NotImplementedError("No healthcheck implemented")
+        raise NotImplementedError()

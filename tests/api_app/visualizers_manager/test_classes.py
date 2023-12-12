@@ -308,7 +308,10 @@ class VisualizerTestCase(CustomTestCase):
             description="test",
         )
         ar = AnalyzerReport.objects.create(
-            config=pc.analyzers.first(), job=job, task_id=uuid()
+            config=pc.analyzers.first(),
+            job=job,
+            task_id=uuid(),
+            parameters={},
         )
         v = MockUpVisualizer(vc)
         v.job_id = job.pk

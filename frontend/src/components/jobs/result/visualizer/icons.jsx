@@ -33,9 +33,11 @@ import {
   MdSignalWifiStatusbarConnectedNoInternet2,
 } from "react-icons/md";
 import { TbFishHook, TbNetwork } from "react-icons/tb";
+import { FaBook } from "react-icons/fa6";
 import { PUBLIC_URL } from "../../../../constants/environment";
 
 const generalIcons = Object.freeze({
+  book: <FaBook />,
   info: <BsFillInfoSquareFill />,
   like: <AiFillLike />,
   dislike: <AiFillDislike />,

@@ -45,6 +45,7 @@ class IngestorReportSerializer(AbstractReportSerializer):
     class Meta:
         model = IngestorReport
         fields = AbstractReportSerializer.Meta.fields
+        list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class
 
     @classmethod
     def get_name(cls, instance: IngestorReport):

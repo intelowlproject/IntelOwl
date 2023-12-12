@@ -191,11 +191,11 @@ If the `Python Module` that you define need this type of behaviour, you have to 
 
 
 Press `Save and continue editing` to, at the moment, manually ad the `Parameters` that the python code requires (the class attributes that you needed): 
-      1. *name: Name of the parameter that will be dynamically added to the python class (if is a secret, in the python code a `_` wil be prepended to the name)
-      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-      3. *description
-      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
-      5. *is_secret: `true` or `false`
+  1. *name: Name of the parameter that will be dynamically added to the python class (if is a secret, in the python code a `_` wil be prepended to the name)
+  2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+  3. *description
+  4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+  5. *is_secret: `true` or `false`
 
 At this point, you can follow the specific guide for each plugin 
 

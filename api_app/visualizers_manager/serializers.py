@@ -36,3 +36,4 @@ class VisualizerReportSerializer(AbstractReportSerializer):
     class Meta:
         model = VisualizerReport
         fields = AbstractReportSerializer.Meta.fields + ("config",)
+        list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class

@@ -115,7 +115,7 @@ class VisualizableTitle(VisualizableObject):
     def __init__(
         self,
         title: VisualizableBase,
-        value: VisualizableBase,
+        value: VisualizableObject,
         alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
         size: VisualizableSize = VisualizableSize.S_AUTO,
         disable: bool = True,

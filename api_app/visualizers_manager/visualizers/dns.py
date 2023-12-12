@@ -156,6 +156,7 @@ class DNS(Visualizer):
                         ],
                     },
                     task_id=uuid(),
+                    parameters={},
                 )
                 report.full_clean()
                 report.save()
@@ -174,6 +175,7 @@ class DNS(Visualizer):
                     status=AnalyzerReport.Status.SUCCESS,
                     report={"observable": "dns.google.com", "malicious": False},
                     task_id=uuid(),
+                    parameters={},
                 )
                 report.full_clean()
                 report.save()

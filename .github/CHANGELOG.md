@@ -2,6 +2,25 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.1)
+
+**General improvements**
+* Incremented wait time of containers' healthchecks to avoid to break clean installations
+* Improvements to the "Scan page":
+  * Added the chance to customize the runtime configuration of a Playbook
+  * Moved TLP section from hidden in the "Advanced configuration" section to exposed by default
+* Now every plugin can be configured with:
+  * a "healthcheck": this can be useful to verify the status of the service. 
+  * a "pull": this can be useful to update a database that is used by the plugin, like a rules repository.
+
+
+**Fixes / adjusts / minor changes**
+* A lot of quality-of-life fixes in the frontend
+* Removed footer in favor of social button at the top of the page
+* minor adjustments in terms of performance and error handling
+* better management of upload of big files
+* dependencies upgrades
+
 ## [v5.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.0)
 
 This is mostly a stability and maintainance release.

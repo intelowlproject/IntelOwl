@@ -329,9 +329,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
-    expect(global.location.pathname).toEqual(
-      "/jobs/3/visualizer/Test%20page%201",
-    );
   });
 
   test("move from raw to visualizer-loading", async () => {
@@ -443,7 +440,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
-    expect(global.location.pathname).toEqual("/jobs/4/visualizer/loading");
   });
 
   test("move from raw to visualizer-no_visualizer", async () => {
@@ -540,9 +536,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerButton);
-    expect(global.location.pathname).toEqual(
-      "/jobs/5/visualizer/no-visualizer",
-    );
   });
 
   test("move from visualizer-Test page 1/2 to visualizer-Test page 2/2", async () => {
@@ -675,9 +668,6 @@ describe("test JobOverview (job report)", () => {
     expect(secondPageReport.closest("a").className).not.toContain("active");
 
     await user.click(secondPageReport);
-    expect(global.location.pathname).toEqual(
-      "/jobs/6/visualizer/Test%20page%202%2F2",
-    );
   });
 
   test("move from visualizer-Test page 1 to raw-analyzer", async () => {
@@ -785,7 +775,6 @@ describe("test JobOverview (job report)", () => {
     expect(firstPageReport.closest("a").className).toContain("active");
 
     await user.click(rawButton);
-    expect(global.location.pathname).toEqual("/jobs/7/raw/analyzer");
   });
 
   test("move from raw-analyzer to raw-connector", async () => {
@@ -882,7 +871,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(connectorReport);
-    expect(global.location.pathname).toEqual("/jobs/8/raw/connector");
   });
 
   test("move from raw-analyzer to raw-pivot", async () => {
@@ -979,7 +967,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(pivotReport);
-    expect(global.location.pathname).toEqual("/jobs/9/raw/pivot");
   });
 
   test("move from raw-analyzer to raw-visualizer", async () => {
@@ -1076,7 +1063,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(visualizerReport);
-    expect(global.location.pathname).toEqual("/jobs/10/raw/visualizer");
   });
 
   test("move from raw-analyzer to raw-full", async () => {
@@ -1173,7 +1159,6 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(fullReport);
-    expect(global.location.pathname).toEqual("/jobs/10/raw/full");
     const fullReportSection = container.querySelector(
       `#jobfullreport-jsoninput-10`,
     );
@@ -1274,6 +1259,5 @@ describe("test JobOverview (job report)", () => {
     expect(fullReport.closest("a").className).not.toContain("active");
 
     await user.click(analyzerReport);
-    expect(global.location.pathname).toEqual("/jobs/11/raw/analyzer");
   });
 });

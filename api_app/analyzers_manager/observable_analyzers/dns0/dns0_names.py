@@ -3,13 +3,13 @@ from typing import Dict
 from urllib.parse import urlparse
 
 import requests
-from dns0_base import DNS0Mixin
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
+from api_app.analyzers_manager.observable_analyzers.dns0.dns0_base import DNS0Mixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = getLogger(__name__)

@@ -81,8 +81,8 @@ class DNS0Names(classes.ObservableAnalyzer):
         headers = {
             "Accept": "application/json",
         }
-        if hasattr(self, "_api_key") and not self._api_key:
-            headers["Authentication"] = f"Bearer {self._api_key}"
+        if hasattr(self, "_api_key") and self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
         return headers
 
     def _validate_params(self):

@@ -21,9 +21,9 @@ Please delete options that are not relevant.
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
     - [ ] [Advanced-Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Advanced-Usage.md) was updated (in case the plugin provides additional optional configuration).
     - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.
-    - [ ] I have dumped the configuration from Django Admin using the `dumpplugin` command and added it in the project as a data migration. [Doc](["How to create a Plugin"](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-plugin))
+    - [ ] I have dumped the configuration from Django Admin using the `dumpplugin` command and added it in the project as a data migration. (["How to share a plugin with the community"](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-share-your-plugin-with-the-community))
     - [ ] If a File analyzer was added and it supports a mimetype which is not already supported, you added a sample of that type inside the archive `test_files.zip` and you added the default tests for that mimetype in [test_classes.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_classes.py).
-    - [ ] If you created a new analyzer and it is free (does not require API keys), please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`.
+    - [ ] If you created a new analyzer and it is free (does not require API keys), please add it in the `FREE_TO_USE_ANALYZERS` playbook by following [this guide](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-modify-a-plugin).
     - [ ] Check if it could make sense to add that analyzer/connector to other [freely available playbooks](https://intelowl.readthedocs.io/en/develop/Usage.html#list-of-pre-built-playbooks).
     - [ ] I have provided the resulting raw JSON of a finished analysis and a screenshot of the results.
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.

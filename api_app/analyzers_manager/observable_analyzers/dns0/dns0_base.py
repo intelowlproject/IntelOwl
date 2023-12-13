@@ -104,7 +104,7 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
             )
 
     def _create_params(self):
-        params = dict()
+        params = {}
         # convert dates to correct format
         if hasattr(self, "from_date") and self.from_date:
             if result := self.convert_date_type(self.from_date):

@@ -27,6 +27,9 @@ export function VerticalListVisualizer({
   const toggleList = () => setIsListOpen(!isListOpen);
   const color = name.props.color.replace("bg-", "");
 
+  const zzz = <BaseVisualizer />;
+  console.debug(zzz);
+
   return (
     <div className={size} id={id}>
       <Card className={`${disable ? "opacity-50" : ""} border-${color}`}>

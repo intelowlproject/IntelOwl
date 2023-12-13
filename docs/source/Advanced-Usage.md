@@ -160,7 +160,12 @@ Some analyzers could require a special configuration:
 - `Yara`: 
   - You can customize both the `repositories` parameter and `private_repositories` secret to download and use different rules from the default that IntelOwl currently support.
     - The `repositories` values is what will be used to actually run the analysis: if you have added private repositories, remember to add the url in `repositories` too! 
-  - You can add local rules inside the directory at `/opt/deploy/files_required/yara/YOUR_USERNAME/custom_rules/`. Please remember that these rules are not synced in a cluster deploy: for this reason is advised to upload them on GitHub and use the `repositories` or `private_repositories` attributes. 
+  - You can add local rules inside the directory at `/opt/deploy/files_required/yara/YOUR_USERNAME/custom_rules/`. Please remember that these rules are not synced in a cluster deploy: for this reason is advised to upload them on GitHub and use the `repositories` or `private_repositories` attributes.
+
+- `DNS0_rrsets_name` and `DNS0_rrsets_data`:
+  - Both these analyzers have a default parameter named `direction` that is used to dispatch the type of query to run.
+    - The value `right` for this parameter runs the query using `data` API parameter. Otherwise, if the parameter value is `left` it runs the query using the `name` API parameter. 
+  - This parameter should not be changed from default value.
 
 ## Organizations and data sharing
 

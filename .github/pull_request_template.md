@@ -19,7 +19,7 @@ Please delete options that are not relevant.
 - [ ] A new plugin (analyzer, connector, visualizer, playbook, pivot or ingestor) was added or changed, in which case:
     - [ ] I strictly followed the documentation ["How to create a Plugin"](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-plugin)
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
-    - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (in case the plugin provides additional optional configuration).
+    - [ ] [Advanced-Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Advanced-Usage.md) was updated (in case the plugin provides additional optional configuration).
     - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.
     - [ ] I have dumped the configuration from Django Admin using the `dumpplugin` command and added it in the project as a data migration. [Doc](["How to create a Plugin"](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-plugin))
     - [ ] If a File analyzer was added and it supports a mimetype which is not already supported, you added a sample of that type inside the archive `test_files.zip` and you added the default tests for that mimetype in [test_classes.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_classes.py).
@@ -29,7 +29,7 @@ Please delete options that are not relevant.
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
 - [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
 - [ ] I have added tests for the feature/bug I solved (see `tests` folder). All the tests (new and old ones) gave 0 errors.
-- [ ] If changes were made to an existing model/serializer/view, the docs were updated and regenerated (check [CONTRIBUTE.md](./Contribute.md)).
+- [ ] If changes were made to an existing model/serializer/view, the docs were updated and regenerated (check [CONTRIBUTE.md](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Contribute.md)).
 - [ ] If the GUI has been modified:
     - [ ] I have a provided a screenshot of the result in the PR.
     - [ ] I have created new frontend tests for the new component or updated existing ones.

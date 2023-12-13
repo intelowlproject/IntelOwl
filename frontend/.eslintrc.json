@@ -29,6 +29,7 @@
     "no-use-before-define": "off",
     "import/no-unresolved": "off",
     "id-length": ["error", { "min": 3, "exceptions": ["id"] }],
+    "no-warning-comments": "error",
     "no-console": [
       "error",
       {

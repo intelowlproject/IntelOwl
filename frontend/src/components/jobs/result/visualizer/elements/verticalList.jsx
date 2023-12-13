@@ -27,6 +27,7 @@ export function VerticalListVisualizer({
   const toggleList = () => setIsListOpen(!isListOpen);
   const color = name.props.color.replace("bg-", "");
 
+  // TODO: remove this
   const IP = <BaseVisualizer />;
   console.debug(IP);
 

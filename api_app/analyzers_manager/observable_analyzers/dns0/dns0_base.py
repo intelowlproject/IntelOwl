@@ -32,7 +32,7 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     not_before: str
     sort: str
     format: str
-    limit: int
+    limit: int = 100
     offset: int
 
     def _create_headers(self):

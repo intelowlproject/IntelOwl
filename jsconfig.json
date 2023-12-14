@@ -1,4 +1,7 @@
 // this is a config file for VSCode. It allows to suggest the imports in the frontend.
+
+/* Note: Add “javascript.validate.enable”: true in you vs Code config to allow Quick fix to suggest import in frontend
+*/
 {
   "compilerOptions": {
     "checkJs": true,

@@ -84,11 +84,15 @@ describe("PluginHealthCheckButton test", () => {
       );
       // toast
       if (responseData.data.status) {
+        // status: true
         expect(
-          screen.getByText(`${pluginName} is up and running`),
+          screen.getByText(`${pluginName} - health check: success`),
         ).toBeInTheDocument();
       } else {
-        expect(screen.getByText(`${pluginName} is NOT up`)).toBeInTheDocument();
+        // status: false
+        expect(
+          screen.getByText(`${pluginName} - health check: warning`),
+        ).toBeInTheDocument();
       }
     });
   });

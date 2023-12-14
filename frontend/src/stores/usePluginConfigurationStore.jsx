@@ -198,15 +198,15 @@ export const usePluginConfigurationStore = create((set, get) => ({
       console.debug(resp);
       if (resp.data?.status)
         addToast(
-          "Health check status: success",
-          `${PluginName} is up and running`,
+          `${PluginName} - health check: success`,
+          "It is up and running",
           "success",
           true,
         );
       else
         addToast(
-          "Health check status: warning",
-          `${PluginName} is NOT up`,
+          `${PluginName} - health check: warning`,
+          "It is NOT up",
           "warning",
           true,
         );
@@ -214,7 +214,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
     } catch (e) {
       console.error(e);
       addToast(
-        "Health check status: failed",
+        `${PluginName} - health check: failed`,
         prettifyErrors(e),
         "danger",
         true,

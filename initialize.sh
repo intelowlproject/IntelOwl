@@ -79,7 +79,7 @@ else
   fi
 fi
 
-if  [ "$(sudo docker --help | grep -q 'compose')" == 0 ] && ! [ -x "$(command -v docker-compose)" ]; then
+if  [ "$(docker --help | grep -q 'compose')" == 0 ] && ! [ -x "$(command -v docker-compose)" ]; then
   echo 'Error: docker-compose is not installed.' >&2
   # Ask if user wants to install docker-compose
   read -p "Do you want to install docker-compose? [y/n] " -n 1 -r

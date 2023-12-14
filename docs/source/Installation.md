@@ -37,7 +37,7 @@ cp docker/env_file_integrations_template docker/env_file_integrations
 cp frontend/public/env_template.js frontend/public/env.js
 
 # verify installed dependencies
-sudo ./initialize.sh
+./initialize.sh
 
 # start the app
 sudo python3 start.py prod up

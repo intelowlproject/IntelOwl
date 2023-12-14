@@ -62,7 +62,7 @@ class Command(BaseCommand):
                     for_organization=False,
                     parameter=parameter,
                     parameter__is_secret=False,
-                    **{f"{obj.snake_case_name}__pk":obj.pk }
+                    **{f"{obj.snake_case_name}__pk": obj.pk},
                 )
             except PluginConfig.DoesNotExist:
                 ...

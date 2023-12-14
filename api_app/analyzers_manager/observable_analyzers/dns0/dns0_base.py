@@ -41,9 +41,7 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
             setattr(self, "from", self.from_date)
 
     def _create_headers(self):
-        headers = {
-            "Accept": "application/json",
-        }
+        headers = {"Accept": "application/json", "User-Agent": "IntelOwl"}
         if hasattr(self, "_api_key") and self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
         return headers

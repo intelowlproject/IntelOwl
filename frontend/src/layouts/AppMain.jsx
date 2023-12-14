@@ -3,12 +3,7 @@ import { useRoutes, Outlet, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { ErrorBoundary } from "react-error-boundary";
 import { Row, Col } from "reactstrap";
-import {
-  FallBackLoading,
-  ErrorAlert,
-  useToastr,
-  Toaster,
-} from "@certego/certego-ui";
+import { FallBackLoading, ErrorAlert } from "@certego/certego-ui";
 
 // wrapper
 import withAuth from "../wrappers/withAuth";
@@ -20,6 +15,7 @@ import {
   authRoutesLazy,
 } from "../components/Routes";
 import AppHeader from "./AppHeader";
+import Toast from "./Toast";
 
 const NoMatch = React.lazy(() => import("./NoMatch"));
 
@@ -45,12 +41,7 @@ ErrorHandler.propTypes = {
   error: PropTypes.object.isRequired,
 };
 
-// constants
-const selector = (state) => state.toasts;
-
 function Layout() {
-  // consume store
-  const toasts = useToastr(selector);
   return (
     <>
       <AppHeader />
@@ -60,11 +51,7 @@ function Layout() {
         </ErrorBoundary>
       </main>
       {/* Toasts */}
-      <section className="fixed-bottom" id="app-toasts">
-        {toasts.map((tProps) => (
-          <Toaster key={tProps.id} {...tProps} />
-        ))}
-      </section>
+      <Toast />
     </>
   );
 }

@@ -130,6 +130,11 @@ if [ -d "venv" ]; then
   echo "Found virtual environment \`venv\`"
 else
   echo "Creating virtual environment \`venv\`"
+
+  if ! dpkg -s python3-venv ; then
+    echo "Installing python3-venv from apt"
+    sudo apt install python3-venv -y
+  fi
   python3 -m venv venv
 fi
 echo "Activating virtual environment \`venv\`"

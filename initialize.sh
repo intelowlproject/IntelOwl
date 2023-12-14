@@ -58,7 +58,7 @@ if ! [ -x "$(command -v docker)" ]; then
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Install docker
     curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
+    sudo sh get-docker.sh
     # Check if docker is installed
     if ! [ -x "$(command -v docker)" ]; then
       echo 'Error: Could not install docker.' >&2
@@ -69,7 +69,7 @@ if ! [ -x "$(command -v docker)" ]; then
     exit 1
   fi
 else
-  docker_version=$(docker version --format '{{.Server.Version}}')
+  docker_version=$(sudo docker version --format '{{.Server.Version}}')
 
   if [[ $(semantic_version_comp "$docker_version" "$MINIMUM_DOCKER_VERSION") == "lessThan" ]]; then
     echo "Error: Docker version is too old. Please upgrade to at least $MINIMUM_DOCKER_VERSION." >&2
@@ -79,7 +79,7 @@ else
   fi
 fi
 
-if  [ "$(docker --help | grep -q 'compose')" == 0 ] && ! [ -x "$(command -v docker-compose)" ]; then
+if  [ "$(sudo docker --help | grep -q 'compose')" == 0 ] && ! [ -x "$(command -v docker-compose)" ]; then
   echo 'Error: docker-compose is not installed.' >&2
   # Ask if user wants to install docker-compose
   read -p "Do you want to install docker-compose? [y/n] " -n 1 -r
@@ -98,7 +98,7 @@ if  [ "$(docker --help | grep -q 'compose')" == 0 ] && ! [ -x "$(command -v dock
     exit 1
   fi
 else
-  if  docker --help | grep -q 'compose'; then
+  if docker --help | grep -q 'compose'; then
     docker_compose_version="$(docker compose version | cut -d 'v' -f3)"
   else
     IFS=',' read -ra temp <<< "$(docker-compose --version)"

@@ -89,7 +89,21 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=MockUpResponse(
+                        {
+                            "data": [
+                                {
+                                    "first_seen": "2023-04-15T16:50:52.000Z",
+                                    "last_seen": "2023-12-14T00:23:52.000Z",
+                                    "name": "example.com.",
+                                    "type": "A",
+                                    "data": ["93.184.216.34"],
+                                }
+                            ],
+                            "meta": {"results": 6},
+                        },
+                        200,
+                    ),
                 ),
             )
         ]

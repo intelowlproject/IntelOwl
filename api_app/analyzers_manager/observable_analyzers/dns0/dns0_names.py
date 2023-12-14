@@ -102,7 +102,19 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=MockUpResponse(
+                        {
+                            "data": [
+                                {
+                                    "first_seen": "2023-12-14T16:37:44.000Z",
+                                    "last_seen": "2023-12-14T16:37:44.000Z",
+                                    "name": "gcfr2.example.opentlc.com.",
+                                }
+                            ],
+                            "meta": {"results": 834824},
+                        },
+                        200,
+                    ),
                 ),
             )
         ]

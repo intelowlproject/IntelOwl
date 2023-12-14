@@ -7,7 +7,7 @@ from django.db import migrations
 def migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.add(*["DNS0_names", "DNS0_rrsets_data", "DNS0_rrsets_name"])
+    pc.analyzers.add(*["DNS0_names", "DNS0_rrsets_name"])
     pc.full_clean()
     pc.save()
 
@@ -15,7 +15,7 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.remove(*["DNS0_names", "DNS0_rrsets_data", "DNS0_rrsets_name"])
+    pc.analyzers.remove(*["DNS0_names", "DNS0_rrsets_name"])
     pc.full_clean()
     pc.save()
 

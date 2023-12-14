@@ -38,7 +38,6 @@ _supported_format_types = [
 class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
     endpoint: str = "names"
 
-    query: str
     root: bool
     fuzzy: list[str]
 

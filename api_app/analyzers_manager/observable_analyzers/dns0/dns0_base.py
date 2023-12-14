@@ -1,4 +1,5 @@
 import re
+import typing
 from abc import ABCMeta
 from logging import getLogger
 
@@ -27,13 +28,17 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     base_url: str = "https://api.dns0.eu/"
 
     _api_key: str
-    from_date: str
-    to_date: str
-    not_before: str
+    from_date: str = "-1M"
     sort: str
     format: str
     limit: int = 100
     offset: int
+
+    def config(self, runtime_configuration: typing.Dict):
+        super().config(runtime_configuration)
+        # workaround to not being able to use "from" as variable name
+        if not hasattr(self, "from"):
+            setattr(self, "from", self.from_date)
 
     def _create_headers(self):
         headers = {
@@ -106,28 +111,16 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     def _create_params(self):
         params = {}
         # convert dates to correct format
-        if hasattr(self, "from_date") and self.from_date:
-            if result := self.convert_date_type(self.from_date):
-                params["from"] = result
+        dates = ["from", "to", "not_before"]
+        parameters = ["sort", "format", "limit", "offset"]
 
-        if hasattr(self, "to_date") and self.to_date:
-            if result := self.convert_date_type(self.to_date):
-                params["to"] = result
+        for date in dates:
+            if getattr(self, date, None):
+                if result := self.convert_date_type(getattr(self, date)):
+                    params[date] = result
 
-        if hasattr(self, "not_before") and self.not_before:
-            if result := self.convert_date_type(self.not_before):
-                params["not_before"] = result
-
-        if hasattr(self, "sort") and self.sort:
-            params["sort"] = self.sort
-
-        if hasattr(self, "format") and self.format:
-            params["format"] = self.format
-
-        if hasattr(self, "limit") and self.limit:
-            params["limit"] = self.limit
-
-        if hasattr(self, "offset") and self.offset:
-            params["offset"] = self.offset
+        for p in parameters:
+            if getattr(self, p, None):
+                params[p] = getattr(self, p)
 
         return params

@@ -59,6 +59,9 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
 
         return response.json()
 
+    def update(cls) -> bool:
+        pass
+
     def _validate_params(self):
         super()._validate_params()
         if hasattr(self, "fuzzy") and any(

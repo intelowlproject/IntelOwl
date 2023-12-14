@@ -51,6 +51,9 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
 
         return response.json()
 
+    def update(cls) -> bool:
+        pass
+
     def _validate_params(self):
         super()._validate_params()
         if hasattr(self, "direction") and self.direction not in _supported_directions:

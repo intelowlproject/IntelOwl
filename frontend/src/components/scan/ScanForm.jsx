@@ -55,8 +55,10 @@ import { TLPTag } from "../common/TLPTag";
 import { markdownToHtml } from "../common/markdownToHtml";
 import { JobTag } from "../common/JobTag";
 import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
+import { MultipleObservablesModal } from "./utils/MultipleObservablesModal";
 import RecentScans from "./utils/RecentScans";
 import { TagSelectInput } from "./utils/TagSelectInput";
+import { sanitizeObservable } from "./utils/utils";
 import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../../utils/time";
@@ -84,9 +86,6 @@ const observableType2RegExMap = {
   url: URL_REGEX,
   hash: HASH_REGEX,
 };
-
-export const sanitizeObservable = (observable) =>
-  observable.replaceAll("[", "").replaceAll("]", "").trim();
 
 // Component
 export default function ScanForm() {
@@ -500,7 +499,7 @@ export default function ScanForm() {
     }
   };
 
-  // useEffect for setting the default playbook if an observableor a file is loaded before playbooks are fetched
+  // useEffect for setting the default playbook if an observable or a file is loaded before playbooks are fetched
   useEffect(() => {
     if (
       (formik.values.observable_names.length &&
@@ -513,7 +512,7 @@ export default function ScanForm() {
       updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbooksLoading]);
+  }, [playbooksLoading, formik.values.observable_names]);
 
   useEffect(() => {
     if (observableParam) {
@@ -539,6 +538,12 @@ export default function ScanForm() {
   const toggleRuntimeConfigModal = React.useCallback(
     () => setRuntimeConfigModalOpen((o) => !o),
     [setRuntimeConfigModalOpen],
+  );
+  const [isMultipleObservablesModalOpen, setMultipleObservablesModalOpen] =
+    React.useState(false);
+  const toggleMultipleObservablesModal = React.useCallback(
+    () => setMultipleObservablesModalOpen((o) => !o),
+    [setMultipleObservablesModalOpen],
   );
 
   console.debug(`classification: ${formik.values.classification}`);
@@ -616,21 +621,21 @@ export default function ScanForm() {
               </FormGroup>
               <Col sm={1} className="d-flex-center justify-content-end mb-3">
                 <IconButton
-                  id="scanform-multipleioc-btn"
+                  id="scanform-multipleobservables-btn"
                   Icon={RiFileAddLine}
-                  title="Load multilple ioc"
+                  title="Load multilple observables"
                   titlePlacement="top"
                   size="sm"
                   color="tertiary"
-                  // onClick={toggleModal}
+                  onClick={toggleMultipleObservablesModal}
                 />
-                {/* {isModalOpen && (
-                  <RuntimeConfigurationModal
-                    isOpen={isModalOpen}
-                    toggle={toggleModal}
+                {isMultipleObservablesModalOpen && (
+                  <MultipleObservablesModal
+                    isOpen={isMultipleObservablesModalOpen}
+                    toggle={toggleMultipleObservablesModal}
                     formik={formik}
                   />
-                )} */}
+                )}
               </Col>
             </Row>
             {formik.values.observableType === JobTypes.OBSERVABLE ? (

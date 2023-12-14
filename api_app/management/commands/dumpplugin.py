@@ -11,7 +11,7 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializerForMigration
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.ingestors_manager.serializers import IngestorConfigSerializerForMigration
-from api_app.models import PluginConfig
+from api_app.models import PluginConfig, PythonConfig
 from api_app.pivots_manager.models import PivotConfig
 from api_app.pivots_manager.serializers import PivotConfigSerializerForMigration
 from api_app.serializers import (
@@ -48,7 +48,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def _get_serialization(obj, serializer_class):
+    def _get_serialization(obj: PythonConfig, serializer_class):
         obj_data = serializer_class(obj).data
         obj_data["model"] = f"{obj._meta.app_label}.{obj._meta.object_name}"
         params_data = []
@@ -62,6 +62,7 @@ class Command(BaseCommand):
                     for_organization=False,
                     parameter=parameter,
                     parameter__is_secret=False,
+                    **{f"{obj.snake_case_name}__pk":obj.pk }
                 )
             except PluginConfig.DoesNotExist:
                 ...
@@ -161,7 +162,7 @@ class Migration(migrations.Migration):
 
         return MigrationRecorder.Migration.objects.filter(app=app).latest("id").name
 
-    def _migration_file(self, obj, serializer_class, app):
+    def _migration_file(self, obj: PythonConfig, serializer_class, app):
         obj_data, param_data, values_data = self._get_serialization(
             obj, serializer_class
         )
@@ -222,7 +223,7 @@ values = {3}
             if config_class == IngestorConfig.__name__
             else (PivotConfig, PivotConfigSerializerForMigration)
         )
-        obj = class_.objects.get(name=config_name)
+        obj: PythonConfig = class_.objects.get(name=config_name)
         app = obj._meta.app_label
         content = self._migration_file(obj, serializer_class, app)
         name_file = self._name_file(obj, app)

@@ -51,7 +51,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
 
         return response.json()
 
-    def update(cls) -> bool:
+    def update(self) -> bool:
         pass
 
     def _validate_params(self):

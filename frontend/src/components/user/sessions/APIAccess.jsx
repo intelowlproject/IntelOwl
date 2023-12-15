@@ -66,7 +66,7 @@ export default function APIAccess() {
         await deleteToken();
         // reload after 500ms
         setTimeout(refetch, 500);
-      } catch (error) {
+      } catch (errorResponse) {
         // handled inside deleteToken
       }
     }
@@ -126,7 +126,9 @@ export default function APIAccess() {
                     title={tokenVisible ? "Hide API key" : "Show API Key"}
                     className="ms-2 border border-dark"
                     Icon={tokenVisible ? MdVisibility : MdVisibilityOff}
-                    onClick={() => setTokenVisible((s) => !s)}
+                    onClick={() =>
+                      setTokenVisible((isTokenVisible) => !isTokenVisible)
+                    }
                   />
                   <IconButton
                     id="delete-apikey-btn"

@@ -325,11 +325,11 @@ export default function ScanForm() {
           ),
           labelDisplay: analyzer.name,
         }))
-        .sort((firstAnalyzer, secondAnalyzer) =>
+        .sort((currentAnalyzer, nextAnalyzer) =>
           // eslint-disable-next-line no-nested-ternary
-          firstAnalyzer.isDisabled === secondAnalyzer.isDisabled
+          currentAnalyzer.isDisabled === nextAnalyzer.isDisabled
             ? 0
-            : firstAnalyzer.isDisabled
+            : currentAnalyzer.isDisabled
             ? 1
             : -1,
         ),
@@ -358,11 +358,11 @@ export default function ScanForm() {
           ),
           labelDisplay: connector.name,
         }))
-        .sort((firstConnector, secondConnector) =>
+        .sort((currentConnector, nextConnector) =>
           // eslint-disable-next-line no-nested-ternary
-          firstConnector.isDisabled === secondConnector.isDisabled
+          currentConnector.isDisabled === nextConnector.isDisabled
             ? 0
-            : firstConnector.isDisabled
+            : currentConnector.isDisabled
             ? 1
             : -1,
         ),

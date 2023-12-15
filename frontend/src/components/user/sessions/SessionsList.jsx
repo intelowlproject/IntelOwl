@@ -20,9 +20,9 @@ export default function SessionsList() {
     },
     (respData) =>
       respData.sort(
-        (firstSession, secondSession) =>
-          !firstSession.is_current ||
-          firstSession.created - secondSession.created,
+        (currentSession, nextSession) =>
+          !currentSession.is_current ||
+          currentSession.created - nextSession.created,
       ),
   );
 

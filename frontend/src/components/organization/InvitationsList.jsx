@@ -28,8 +28,8 @@ export default function InvitationsList() {
     },
     (respData) =>
       respData.sort(
-        (firstInvitation, secondInvitation) =>
-          firstInvitation.created_at - secondInvitation.created_at,
+        (currentInvitation, nextInvitation) =>
+          currentInvitation.created_at - nextInvitation.created_at,
       ),
   );
 

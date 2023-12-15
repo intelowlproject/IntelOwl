@@ -45,8 +45,8 @@ export function MembersList() {
     () =>
       members?.length
         ? [...members].sort(
-            (firstMember, secondMember) =>
-              firstMember.joined - secondMember.joined,
+            (currentMember, nextMember) =>
+              currentMember.joined - nextMember.joined,
           )
         : [],
     [members],

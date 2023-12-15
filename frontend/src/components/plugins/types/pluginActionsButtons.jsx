@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Spinner, Button, Modal, ModalHeader, ModalBody } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdFileDownload } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
 
 import { IconButton } from "@certego/certego-ui";
@@ -12,8 +12,8 @@ import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 // we can't delete this function because IconButton expects Icon as a function
-function PluginHealthSpinner() {
-  return <Spinner type="ripple" size="sm" className="text-darker" />;
+function PluginSpinner() {
+  return <Spinner type="border" size="sm" className="text-darker" />;
 }
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
@@ -26,39 +26,32 @@ export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
     ),
   );
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isHealthy, setIsHealthy] = React.useState(undefined);
 
   const onClick = async () => {
     setIsLoading(true);
-    const status = await checkPluginHealth(pluginType_, pluginName);
-    setIsHealthy(status);
+    await checkPluginHealth(pluginType_, pluginName);
     setIsLoading(false);
   };
 
   return (
-    <div className="d-flex flex-column align-items-center">
+    <div className="d-flex flex-column align-items-center px-2">
       <IconButton
         id={`table-pluginhealthcheckbtn__${pluginName}`}
         color="info"
         size="sm"
-        Icon={!isLoading ? RiHeartPulseLine : PluginHealthSpinner}
-        title={!isLoading ? "perform health check" : "please wait..."}
+        Icon={!isLoading ? RiHeartPulseLine : PluginSpinner}
+        title={!isLoading ? "Perform health check" : "Please wait..."}
         onClick={onClick}
         titlePlacement="top"
       />
-      {isHealthy !== undefined &&
-        (isHealthy ? (
-          <span className="mt-2 text-success">Up and running!</span>
-        ) : (
-          <span className="mt-2 text-warning">Failing!</span>
-        ))}
     </div>
   );
 }
 
 PluginHealthCheckButton.propTypes = {
   pluginName: PropTypes.string.isRequired,
-  pluginType_: PropTypes.oneOf(["analyzer", "connector"]).isRequired,
+  pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
+    .isRequired,
 };
 
 export function OrganizationPluginStateToggle({
@@ -211,4 +204,42 @@ export function PlaybooksDeletionButton({ playbookName }) {
 
 PlaybooksDeletionButton.propTypes = {
   playbookName: PropTypes.string.isRequired,
+};
+
+export function PluginPullButton({ pluginName, pluginType_ }) {
+  const { pluginPull } = usePluginConfigurationStore(
+    React.useCallback(
+      (state) => ({
+        pluginPull: state.pluginPull,
+      }),
+      [],
+    ),
+  );
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const onClick = async () => {
+    setIsLoading(true);
+    await pluginPull(pluginType_, pluginName);
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="d-flex flex-column align-items-center px-2">
+      <IconButton
+        id={`table-pluginpullbtn__${pluginName}`}
+        color="info"
+        size="sm"
+        Icon={!isLoading ? MdFileDownload : PluginSpinner}
+        title={!isLoading ? "Pull" : "Please wait..."}
+        onClick={onClick}
+        titlePlacement="top"
+      />
+    </div>
+  );
+}
+
+PluginPullButton.propTypes = {
+  pluginName: PropTypes.string.isRequired,
+  pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
+    .isRequired,
 };

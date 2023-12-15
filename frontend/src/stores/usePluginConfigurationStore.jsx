@@ -13,6 +13,7 @@ import {
   PLAYBOOKS_CONFIG_URI,
   INGESTORS_CONFIG_URI,
 } from "../constants/apiURLs";
+import { prettifyErrors } from "../utils/api";
 
 async function downloadAllPlugin(pluginUrl) {
   const pageSize = 70;
@@ -195,10 +196,57 @@ export const usePluginConfigurationStore = create((set, get) => ({
       );
       console.debug("usePluginConfigurationStore - checkPluginHealth: ");
       console.debug(resp);
-      return Promise.resolve(resp.data?.status); // status is of type boolean
+      if (resp.data?.status)
+        addToast(
+          `${PluginName} - health check: success`,
+          "It is up and running",
+          "success",
+          true,
+        );
+      else
+        addToast(
+          `${PluginName} - health check: warning`,
+          "It is NOT up",
+          "warning",
+          true,
+        );
+      return Promise.resolve(resp.status);
     } catch (error) {
-      addToast("Failed!", error.parsedMsg.toString(), "danger");
-      return null;
+      console.error(error);
+      addToast(
+        `${PluginName} - health check: failed`,
+        prettifyErrors(error),
+        "danger",
+        true,
+      );
+      return error.response.status;
+    }
+  },
+  pluginPull: async (type, PluginName) => {
+    try {
+      const resp = await axios.post(
+        `${API_BASE_URI}/${type}/${PluginName}/pull`,
+      );
+      console.debug("usePluginConfigurationStore - pluginPull: ");
+      console.debug(resp);
+      if (resp.data?.status)
+        addToast(
+          "Plugin pull: success",
+          `${PluginName} updated`,
+          "success",
+          true,
+        );
+      else
+        addToast(
+          "Plugin pull: warning",
+          `${PluginName} pull failed`,
+          "warning",
+          true,
+        );
+      return Promise.resolve(resp.status);
+    } catch (error) {
+      addToast("Plugin pull: failed", prettifyErrors(error), "danger", true);
+      return error.response.status;
     }
   },
   deletePlaybook: async (playbook) => {
@@ -209,7 +257,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
       addToast(`${playbook} deleted`, null, "info");
       return Promise.resolve(response);
     } catch (error) {
-      addToast("Failed!", error.parsedMsg, "danger");
+      addToast("Failed!", prettifyErrors(error), "danger");
       return null;
     }
   },
@@ -226,7 +274,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
       } catch (error) {
         addToast(
           `Failed to enabled ${pluginName} for the organization`,
-          error.parsedMsg,
+          prettifyErrors(error),
           "danger",
           true,
         );
@@ -242,7 +290,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
     } catch (error) {
       addToast(
         `Failed to enabled ${pluginName} for the organization`,
-        error.parsedMsg,
+        prettifyErrors(error),
         "danger",
         true,
       );
@@ -262,7 +310,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
       } catch (error) {
         addToast(
           `Failed to disabled ${pluginName} for the organization`,
-          error.parsedMsg,
+          prettifyErrors(error),
           "danger",
           true,
         );
@@ -278,7 +326,7 @@ export const usePluginConfigurationStore = create((set, get) => ({
     } catch (error) {
       addToast(
         `Failed to disabled ${pluginName} for the organization`,
-        error.parsedMsg,
+        prettifyErrors(error),
         "danger",
         true,
       );

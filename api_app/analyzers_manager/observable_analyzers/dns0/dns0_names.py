@@ -100,6 +100,8 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
+                patch.object(DNS0Names, "from", return_value={"from": "-1M"}),
+                patch.object(DNS0Names, "limit", return_value={"limit": 100}),
                 patch(
                     "requests.get",
                     return_value=MockUpResponse(

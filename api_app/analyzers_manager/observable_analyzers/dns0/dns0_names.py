@@ -101,7 +101,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
     def _monkeypatch(cls):
         PluginConfig.objects.get_or_create(
             parameter=Parameter.objects.get(
-                name="from", python_module__pk=cls.python_module.pk
+                name="from", analyzer_config__python_module__pk=cls.python_module.pk
             ),
             value="-1M",
             for_organization=False,

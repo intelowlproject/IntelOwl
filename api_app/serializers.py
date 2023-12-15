@@ -1140,7 +1140,7 @@ class ParameterCompleteSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Parameter
-        fields = rfs.ALL_FIELDS
+        exclude = ["id"]
 
 
 class PluginConfigCompleteSerializer(rfs.ModelSerializer):
@@ -1148,7 +1148,7 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = PluginConfig
-        fields = rfs.ALL_FIELDS
+        exclude = ["id"]
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):

@@ -36,7 +36,10 @@ params = [
         "description": "",
         "is_secret": True,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 510,
@@ -45,7 +48,10 @@ params = [
         "description": "The keyword to search for.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 511,
@@ -54,7 +60,10 @@ params = [
         "description": "Limit results to root domains.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 512,
@@ -63,7 +72,10 @@ params = [
         "description": "Apply fuzziness to q. Accepts a comma-separated list of fuzzy algorithms, or all to apply them all.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 513,
@@ -72,7 +84,10 @@ params = [
         "description": "Limit results to names seen after this date.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 514,
@@ -81,7 +96,10 @@ params = [
         "description": "Limit results to names seen before this date.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 515,
@@ -90,7 +108,10 @@ params = [
         "description": "Limit results to names not seen before this date.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 516,
@@ -99,7 +120,10 @@ params = [
         "description": "Available sorts are first_seen (the default) or last_seen. Both are descending sorts (most recent first).",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 517,
@@ -108,7 +132,10 @@ params = [
         "description": "Available formats are json and dig. Default format is based on the Accept HTTP header.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 518,
@@ -117,7 +144,10 @@ params = [
         "description": "Limit the number of results.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 519,
@@ -126,7 +156,10 @@ params = [
         "description": "Used for pagination.",
         "is_secret": False,
         "required": False,
-        "python_module": 204,
+        "python_module": {
+            "module": "dns0.dns0_names.DNS0Names",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
 ]
 

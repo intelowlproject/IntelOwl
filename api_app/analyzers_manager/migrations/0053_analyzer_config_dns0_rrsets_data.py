@@ -36,7 +36,10 @@ params = [
         "description": "Used to dispatch matching direction.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 498,
@@ -45,7 +48,10 @@ params = [
         "description": "",
         "is_secret": True,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 501,
@@ -54,7 +60,10 @@ params = [
         "description": "Limit results to certain record types (e.g. type=NS,A,AAAA). Accepts a comma-separated list of DNS record types, either in textual or numeric form.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 502,
@@ -63,7 +72,10 @@ params = [
         "description": "Limit results to records seen after this date.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 503,
@@ -72,7 +84,10 @@ params = [
         "description": "Limit results to records seen before this date.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 504,
@@ -81,7 +96,10 @@ params = [
         "description": "Limit results to records not seen before this date.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 505,
@@ -90,7 +108,10 @@ params = [
         "description": "Available sorts are first_seen (the default) or last_seen. Both are descending sorts (most recent first).",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 506,
@@ -99,7 +120,10 @@ params = [
         "description": "Available formats are json, cof or dig. Default format is based on the Accept HTTP header.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 507,
@@ -108,7 +132,10 @@ params = [
         "description": "Limit the number of results.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
     {
         "id": 508,
@@ -117,7 +144,10 @@ params = [
         "description": "Used for pagination.",
         "is_secret": False,
         "required": False,
-        "python_module": 171,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
 ]
 

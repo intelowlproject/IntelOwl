@@ -1063,12 +1063,6 @@ class ParamListSerializer(rfs.ListSerializer):
         return {elem.pop("name"): elem for elem in result}
 
 
-class ParameterCompleteSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = Parameter
-        fields = rfs.ALL_FIELDS
-
-
 class ParameterSerializer(rfs.ModelSerializer):
     value = SerializerMethodField()
 
@@ -1145,6 +1139,14 @@ class PythonModuleSerializer(rfs.ModelSerializer):
     class Meta:
         model = PythonModule
         fields = ["module", "base_path"]
+
+
+class ParameterCompleteSerializer(rfs.ModelSerializer):
+    python_module = PythonModuleSerializer(read_only=True)
+
+    class Meta:
+        model = Parameter
+        fields = rfs.ALL_FIELDS
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):

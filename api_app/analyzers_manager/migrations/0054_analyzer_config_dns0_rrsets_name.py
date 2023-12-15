@@ -30,7 +30,6 @@ plugin = {
 
 params = [
     {
-        "id": 497,
         "name": "direction",
         "type": "str",
         "description": "Used to dispatch matching direction.",
@@ -42,7 +41,6 @@ params = [
         },
     },
     {
-        "id": 498,
         "name": "api_key",
         "type": "str",
         "description": "",
@@ -54,7 +52,6 @@ params = [
         },
     },
     {
-        "id": 501,
         "name": "type",
         "type": "list",
         "description": "Limit results to certain record types (e.g. type=NS,A,AAAA). Accepts a comma-separated list of DNS record types, either in textual or numeric form.",
@@ -66,7 +63,6 @@ params = [
         },
     },
     {
-        "id": 502,
         "name": "from",
         "type": "str",
         "description": "Limit results to records seen after this date.",
@@ -78,7 +74,6 @@ params = [
         },
     },
     {
-        "id": 503,
         "name": "to",
         "type": "str",
         "description": "Limit results to records seen before this date.",
@@ -90,7 +85,6 @@ params = [
         },
     },
     {
-        "id": 504,
         "name": "not_before",
         "type": "str",
         "description": "Limit results to records not seen before this date.",
@@ -102,7 +96,6 @@ params = [
         },
     },
     {
-        "id": 505,
         "name": "sort",
         "type": "str",
         "description": "Available sorts are first_seen (the default) or last_seen. Both are descending sorts (most recent first).",
@@ -114,7 +107,6 @@ params = [
         },
     },
     {
-        "id": 506,
         "name": "format",
         "type": "str",
         "description": "Available formats are json, cof or dig. Default format is based on the Accept HTTP header.",
@@ -126,7 +118,6 @@ params = [
         },
     },
     {
-        "id": 507,
         "name": "limit",
         "type": "int",
         "description": "Limit the number of results.",
@@ -138,7 +129,6 @@ params = [
         },
     },
     {
-        "id": 508,
         "name": "offset",
         "type": "int",
         "description": "Used for pagination.",
@@ -153,13 +143,11 @@ params = [
 
 values = [
     {
-        "id": 588,
         "for_organization": False,
         "value": "left",
         "updated_at": "2023-12-13T15:28:50.359044Z",
         "owner": None,
         "parameter": {
-            "id": 497,
             "name": "direction",
             "type": "str",
             "description": "Used to dispatch matching direction.",

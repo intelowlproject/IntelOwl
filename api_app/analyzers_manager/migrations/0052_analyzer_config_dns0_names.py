@@ -11,7 +11,7 @@ plugin = {
         "module": "dns0.dns0_names.DNS0Names",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
-    "description": "Run advanced searches on billions of current and historical domain names.",
+    "description": "Run advanced searches on billions of current and historical domain names. [API](https://docs.dns0.eu/dns-api/names).",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

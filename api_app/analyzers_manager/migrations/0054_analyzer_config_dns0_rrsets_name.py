@@ -11,7 +11,7 @@ plugin = {
         "module": "dns0.dns0_rrsets.DNS0Rrsets",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
-    "description": "Query billions of current and historical DNS resource records sets",
+    "description": "Query billions of current and historical DNS resource records sets. [API](https://docs.dns0.eu/dns-api/rrsets).",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

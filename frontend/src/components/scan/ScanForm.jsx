@@ -58,17 +58,14 @@ import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
 import { MultipleObservablesModal } from "./utils/MultipleObservablesModal";
 import RecentScans from "./utils/RecentScans";
 import { TagSelectInput } from "./utils/TagSelectInput";
-import { sanitizeObservable } from "./utils/utils";
+import {
+  sanitizeObservable,
+  observableValidators,
+} from "./utils/observableValidators";
 import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../../utils/time";
 import { JobTypes, ObservableClassifications } from "../../constants/jobConst";
-import {
-  DOMAIN_REGEX,
-  IP_REGEX,
-  HASH_REGEX,
-  URL_REGEX,
-} from "../../constants/regexConst";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -78,14 +75,6 @@ function DangerErrorMessage(fieldName) {
     />
   );
 }
-
-// constants
-const observableType2RegExMap = {
-  domain: DOMAIN_REGEX,
-  ip: IP_REGEX,
-  url: URL_REGEX,
-  hash: HASH_REGEX,
-};
 
 // Component
 export default function ScanForm() {
@@ -432,13 +421,9 @@ export default function ScanForm() {
     if (index === 0) {
       const oldClassification = formik.values.classification;
       let newClassification = ObservableClassifications.GENERIC;
-      Object.entries(observableType2RegExMap).forEach(
-        ([typeName, typeRegEx]) => {
-          if (typeRegEx.test(sanitizeObservable(observableValue))) {
-            newClassification = typeName;
-          }
-        },
-      );
+      const validationValue = observableValidators(observableValue);
+      if (validationValue !== null)
+        newClassification = validationValue.classification;
       formik.setFieldValue("classification", newClassification, false);
       // in case a playbook is available and i changed classification or no playbook is selected i select a playbook
       if (
@@ -512,7 +497,7 @@ export default function ScanForm() {
       updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbooksLoading, formik.values.observable_names]);
+  }, [playbooksLoading]);
 
   useEffect(() => {
     if (observableParam) {
@@ -545,6 +530,19 @@ export default function ScanForm() {
     () => setMultipleObservablesModalOpen((o) => !o),
     [setMultipleObservablesModalOpen],
   );
+
+  // useEffect for setting the default playbook if multiple observables are loaded
+  useEffect(() => {
+    if (
+      formik.values.observable_names.length &&
+      formik.values.observable_names[0] !== ""
+    ) {
+      formik.values.observable_names.forEach((observable, index) =>
+        updateSelectedObservable(observable, index),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toggleMultipleObservablesModal, formik.values.observable_names]);
 
   console.debug(`classification: ${formik.values.classification}`);
   console.debug("formik");
@@ -620,15 +618,17 @@ export default function ScanForm() {
                 ))}
               </FormGroup>
               <Col sm={1} className="d-flex-center justify-content-end mb-3">
-                <IconButton
-                  id="scanform-multipleobservables-btn"
-                  Icon={RiFileAddLine}
-                  title="Load multilple observables"
-                  titlePlacement="top"
-                  size="sm"
-                  color="tertiary"
-                  onClick={toggleMultipleObservablesModal}
-                />
+                {formik.values.classification !== "file" && (
+                  <IconButton
+                    id="scanform-multipleobservables-btn"
+                    Icon={RiFileAddLine}
+                    title="Load multilple observables"
+                    titlePlacement="top"
+                    size="sm"
+                    color="tertiary"
+                    onClick={toggleMultipleObservablesModal}
+                  />
+                )}
                 {isMultipleObservablesModalOpen && (
                   <MultipleObservablesModal
                     isOpen={isMultipleObservablesModalOpen}

@@ -3,49 +3,39 @@ import PropTypes from "prop-types";
 import { Modal, ModalHeader, ModalBody, Button, Input } from "reactstrap";
 
 import { ContentSection } from "@certego/certego-ui";
-import { sanitizeObservable } from "./utils";
-import {
-  DOMAIN_REGEX,
-  IP_REGEX,
-  HASH_REGEX,
-  URL_REGEX,
-} from "../../../constants/regexConst";
+import { observableValidators } from "./observableValidators";
 
 // components
 export function MultipleObservablesModal(props) {
   const { isOpen, toggle, formik, ...rest } = props;
-  const [extractedObservables, setExtractedObservables] = React.useState({
-    domain: [],
-    ip: [],
-    url: [],
-    hash: [],
-  });
-  console.debug("MultipleObservablesModal - extractedObservables:");
-  console.debug(extractedObservables);
-
-  const observableType2RegExMap = {
-    domain: DOMAIN_REGEX,
-    ip: IP_REGEX,
-    url: URL_REGEX,
-    hash: HASH_REGEX,
-  };
+  const [extractedObservables, setExtractedObservables] = React.useState({});
 
   const extractObservables = (inputText) => {
-    const sanitizedText = sanitizeObservable(inputText);
-    console.debug(sanitizedText);
+    // split text where there are spaces, breakline or , and ;
+    const tokenizedText = inputText.split(/[,;\n\s]/);
+    console.debug("tokenizedText", tokenizedText);
+
     const observables = {
       domain: [],
       ip: [],
       url: [],
       hash: [],
     };
-    Object.entries(observableType2RegExMap).forEach(([typeName, typeRegEx]) => {
-      const match = sanitizedText.match(typeRegEx);
-      console.debug(match);
-      if (match) {
-        observables[typeName] = match;
-      }
+
+    tokenizedText.forEach((string) => {
+      const validationValue = observableValidators(string);
+      if (validationValue !== null)
+        observables[validationValue.classification].push(
+          validationValue.observable,
+        );
     });
+
+    // remove duplicates
+    Object.keys(observables).forEach((key) => {
+      observables[key] = [...new Set(observables[key])];
+    });
+
+    console.debug("MultipleObservablesModal - observables:");
     console.debug(observables);
     setExtractedObservables(observables);
   };
@@ -67,6 +57,7 @@ export function MultipleObservablesModal(props) {
       scrollable
       backdrop="static"
       labelledBy="Load Multiple Observables"
+      style={{ minWidth: "70%" }}
       {...rest}
     >
       <ModalHeader className="bg-tertiary" toggle={toggle}>
@@ -80,11 +71,10 @@ export function MultipleObservablesModal(props) {
           <ContentSection
             className="bg-darker"
             id="load_multiple_observables-section"
-            style={{ width: "50%", maxHeight: "560px" }}
+            style={{ width: "60%", maxHeight: "560px" }}
           >
             <small className="text-muted">
-              Any text can be pasted and the observables will be extracted for
-              further lookup.
+              Enter any text to extract observables for further lookup.
             </small>
             <Input
               id="load_multiple_observables-textArea"
@@ -98,7 +88,7 @@ export function MultipleObservablesModal(props) {
           {/* lateral menu with the extracted observables */}
           <ContentSection
             className="ms-2 bg-darker"
-            style={{ width: "50%", maxHeight: "560px", overflowY: "auto" }}
+            style={{ width: "40%", maxHeight: "560px", overflowY: "auto" }}
           >
             <div style={{ minHeight: "540px", overflowY: "auto" }}>
               <h5 className="text-accent">Extracted observables</h5>

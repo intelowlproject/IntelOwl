@@ -85,7 +85,7 @@ export const jobTableColumns = [
   {
     Header: "Name",
     id: "name",
-    accessor: (r) => r.observable_name || r.file_name,
+    accessor: (job) => job.observable_name || job.file_name,
     Cell: ({ value, row: { original: job } }) => (
       <CopyToClipboardButton
         showOnHover
@@ -121,7 +121,7 @@ export const jobTableColumns = [
   {
     Header: "Type",
     id: "is_sample",
-    accessor: (r) => r.is_sample,
+    accessor: (job) => job.is_sample,
     Cell: ({ value }) => (value ? JobTypes.FILE : JobTypes.OBSERVABLE),
     disableSortBy: true,
     maxWidth: 100,
@@ -185,7 +185,7 @@ export const jobTableColumns = [
   {
     Header: "SubType",
     id: "type",
-    accessor: (r) => r.observable_classification || r.file_mimetype,
+    accessor: (job) => job.observable_classification || job.file_mimetype,
     disableSortBy: true,
     maxWidth: 100,
     Filter: SelectOptionsFilter,
@@ -214,12 +214,12 @@ export const jobTableColumns = [
     disableSortBy: true,
     maxWidth: 100,
     Filter: DefaultColumnFilter,
-    filterValueAccessorFn: (tags) => tags.map((t) => t.label),
+    filterValueAccessorFn: (tags) => tags.map((tag) => tag.label),
   },
   {
     Header: "Playbook Executed",
     id: "playbook_to_execute",
-    accessor: (r) => r,
+    accessor: (job) => job,
     Cell: ({ value: job }) => (
       <div className="d-flex justify-content-between">
         <span className="d-block text-truncate">

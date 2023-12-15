@@ -203,7 +203,7 @@ function AppHeader() {
 
   // auth store
   const isAuthenticated = useAuthStore(
-    React.useCallback((s) => s.isAuthenticated(), []),
+    React.useCallback((state) => state.isAuthenticated(), []),
   );
 
   return (

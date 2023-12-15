@@ -302,93 +302,101 @@ export default function ScanForm() {
   const analyzersOptions = React.useMemo(
     () =>
       analyzersGrouped[formik.values.classification]
-        .map((v) => ({
-          isDisabled: !v.verification.configured || v.disabled,
-          value: v.name,
+        .map((analyzer) => ({
+          isDisabled: !analyzer.verification.configured || analyzer.disabled,
+          value: analyzer.name,
           label: (
             <div
-              id={`analyzer${v.name}`}
+              id={`analyzer${analyzer.name}`}
               className="d-flex justify-content-start align-items-start flex-column"
             >
               <div className="d-flex justify-content-start align-items-baseline flex-column">
-                <div>{v.name}&nbsp;</div>
+                <div>{analyzer.name}&nbsp;</div>
                 <div className="small text-start text-muted">
-                  {markdownToHtml(v.description)}
+                  {markdownToHtml(analyzer.description)}
                 </div>
               </div>
-              {!v.verification.configured && (
+              {!analyzer.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.details}
+                  ⚠ {analyzer.verification.details}
                 </div>
               )}
             </div>
           ),
-          labelDisplay: v.name,
+          labelDisplay: analyzer.name,
         }))
-        .sort((a, b) =>
+        .sort((firstAnalyzer, secondAnalyzer) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
+          firstAnalyzer.isDisabled === secondAnalyzer.isDisabled
+            ? 0
+            : firstAnalyzer.isDisabled
+            ? 1
+            : -1,
         ),
     [analyzersGrouped, formik.values.classification],
   );
   const connectorOptions = React.useMemo(
     () =>
       connectors
-        .map((v) => ({
-          isDisabled: !v.verification.configured || v.disabled,
-          value: v.name,
+        .map((connector) => ({
+          isDisabled: !connector.verification.configured || connector.disabled,
+          value: connector.name,
           label: (
             <div className="d-flex justify-content-start align-items-start flex-column">
               <div className="d-flex justify-content-start align-items-baseline flex-column">
-                <div>{v.name}&nbsp;</div>
+                <div>{connector.name}&nbsp;</div>
                 <div className="small text-start text-muted">
-                  {markdownToHtml(v.description)}
+                  {markdownToHtml(connector.description)}
                 </div>
               </div>
-              {!v.verification.configured && (
+              {!connector.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.details}
+                  ⚠ {connector.verification.details}
                 </div>
               )}
             </div>
           ),
-          labelDisplay: v.name,
+          labelDisplay: connector.name,
         }))
-        .sort((a, b) =>
+        .sort((firstConnector, secondConnector) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
+          firstConnector.isDisabled === secondConnector.isDisabled
+            ? 0
+            : firstConnector.isDisabled
+            ? 1
+            : -1,
         ),
     [connectors],
   );
 
   const playbookOptions = (classification) =>
     playbooksGrouped[classification]
-      .map((v) => ({
-        isDisabled: v.disabled,
-        value: v.name,
-        analyzers: v.analyzers,
-        connectors: v.connectors,
-        visualizers: v.visualizers,
-        pivots: v.pivots,
+      .map((playbook) => ({
+        isDisabled: playbook.disabled,
+        value: playbook.name,
+        analyzers: playbook.analyzers,
+        connectors: playbook.connectors,
+        visualizers: playbook.visualizers,
+        pivots: playbook.pivots,
         label: (
           <div className="d-flex justify-content-start align-items-start flex-column">
             <div className="d-flex justify-content-start align-items-baseline flex-column">
-              <div>{v.name}&nbsp;</div>
+              <div>{playbook.name}&nbsp;</div>
               <div className="small text-left text-muted">
-                {markdownToHtml(v.description)}
+                {markdownToHtml(playbook.description)}
               </div>
             </div>
           </div>
         ),
-        labelDisplay: v.name,
-        tags: v.tags.map((tag) => ({
+        labelDisplay: playbook.name,
+        tags: playbook.tags.map((tag) => ({
           value: tag,
           label: <JobTag tag={tag} />,
         })),
-        tlp: v.tlp,
-        scan_mode: `${v.scan_mode}`,
-        scan_check_time: v.scan_check_time,
-        runtime_configuration: v.runtime_configuration,
+        tlp: playbook.tlp,
+        scan_mode: `${playbook.scan_mode}`,
+        scan_check_time: playbook.scan_check_time,
+        runtime_configuration: playbook.runtime_configuration,
       }))
       .filter((item) => !item.isDisabled);
 
@@ -535,7 +543,7 @@ export default function ScanForm() {
 
   const [isModalOpen, setModalOpen] = React.useState(false);
   const toggleModal = React.useCallback(
-    () => setModalOpen((o) => !o),
+    () => setModalOpen((open) => !open),
     [setModalOpen],
   );
 
@@ -569,15 +577,15 @@ export default function ScanForm() {
             <Row>
               <div className="col-sm-3 col-form-label" />
               <FormGroup className="mb-0 mt-2 d-flex col-sm-9">
-                {[JobTypes.OBSERVABLE, JobTypes.FILE].map((ch) => (
-                  <FormGroup check inline key={`observableType__${ch}`}>
+                {[JobTypes.OBSERVABLE, JobTypes.FILE].map((jobType) => (
+                  <FormGroup check inline key={`observableType__${jobType}`}>
                     <Col>
                       <Field
                         as={Input}
-                        id={`observableType__${ch}`}
+                        id={`observableType__${jobType}`}
                         type="radio"
                         name="observableType"
-                        value={ch}
+                        value={jobType}
                         onClick={(event) => {
                           formik.setFieldValue(
                             "observableType",
@@ -604,7 +612,7 @@ export default function ScanForm() {
                         }}
                       />
                       <Label check>
-                        {ch === JobTypes.OBSERVABLE
+                        {jobType === JobTypes.OBSERVABLE
                           ? "observable (domain, IP, URL, HASH, etc...)"
                           : "file"}
                       </Label>
@@ -653,9 +661,9 @@ export default function ScanForm() {
                                     formik.touched.observable_names &&
                                     formik.touched.observable_names[index]
                                   }
-                                  onChange={(e) =>
+                                  onChange={(event) =>
                                     updateSelectedObservable(
-                                      e.target.value,
+                                      event.target.value,
                                       index,
                                     )
                                   }
@@ -779,8 +787,8 @@ export default function ScanForm() {
                         <MultiSelectDropdownInput
                           options={analyzersOptions}
                           value={formik.values.analyzers}
-                          onChange={(v) =>
-                            formik.setFieldValue("analyzers", v, false)
+                          onChange={(value) =>
+                            formik.setFieldValue("analyzers", value, false)
                           }
                         />
                       )}
@@ -797,8 +805,8 @@ export default function ScanForm() {
                       <MultiSelectDropdownInput
                         options={connectorOptions}
                         value={formik.values.connectors}
-                        onChange={(v) =>
-                          formik.setFieldValue("connectors", v, false)
+                        onChange={(value) =>
+                          formik.setFieldValue("connectors", value, false)
                         }
                       />
                     )}
@@ -821,7 +829,9 @@ export default function ScanForm() {
                         options={playbookOptions(formik.values.classification)}
                         styles={selectStyles}
                         value={formik.values.playbook}
-                        onChange={(v) => updateSelectedPlaybook(v)}
+                        onChange={(selectedPlaybook) =>
+                          updateSelectedPlaybook(selectedPlaybook)
+                        }
                       />
                     )}
                   />
@@ -833,17 +843,17 @@ export default function ScanForm() {
               <Label sm={3}>TLP</Label>
               <Col sm={9}>
                 <div>
-                  {TlpChoices.map((ch) => (
-                    <FormGroup inline check key={`tlpchoice__${ch}`}>
-                      <Label check for={`tlpchoice__${ch}`}>
-                        <TLPTag value={ch} />
+                  {TlpChoices.map((tlp) => (
+                    <FormGroup inline check key={`tlpchoice__${tlp}`}>
+                      <Label check for={`tlpchoice__${tlp}`}>
+                        <TLPTag value={tlp} />
                       </Label>
                       <Field
                         as={Input}
-                        id={`tlpchoice__${ch}`}
+                        id={`tlpchoice__${tlp}`}
                         type="radio"
                         name="tlp"
-                        value={ch}
+                        value={tlp}
                         invalid={formik.errors.tlp && formik.touched.tlp}
                         onChange={formik.handleChange}
                       />
@@ -880,8 +890,8 @@ export default function ScanForm() {
                   <TagSelectInput
                     id="scanform-tagselectinput"
                     selectedTags={formik.values.tags}
-                    setSelectedTags={(v) =>
-                      formik.setFieldValue("tags", v, false)
+                    setSelectedTags={(selectedTags) =>
+                      formik.setFieldValue("tags", selectedTags, false)
                     }
                   />
                 </Col>

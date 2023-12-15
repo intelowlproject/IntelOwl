@@ -51,7 +51,7 @@ function SelectColumnFilter({
           ? filterValueAccessorFn(value)
           : value;
         if (Array.isArray(optVal)) {
-          optVal.forEach((v) => optionsSet.add(v));
+          optVal.forEach((val) => optionsSet.add(val));
         } else {
           optionsSet.add(optVal);
         }
@@ -61,7 +61,7 @@ function SelectColumnFilter({
   }, [id, preFilteredRows, filterValueAccessorFn]);
 
   // Set undefined to remove the filter entirely
-  const onChange = (e) => setFilter(e.target.value || undefined);
+  const onChange = (event) => setFilter(event.target.value || undefined);
 
   // Render a multi-select box
   return (
@@ -87,7 +87,7 @@ const pluginTableColumns = [
   {
     Header: "Info",
     id: "info",
-    accessor: (r) => r,
+    accessor: (pluginConfig) => pluginConfig,
     Cell: ({ value }) => <PluginInfoPopoverIcon pluginInfo={value} />,
     disableSortBy: true,
     maxWidth: 50,
@@ -113,7 +113,8 @@ const pluginTableColumns = [
   {
     Header: "Active",
     id: "active",
-    accessor: (r) => !(r.disabled || r.orgPluginDisabled),
+    accessor: (pluginConfig) =>
+      !(pluginConfig.disabled || pluginConfig.orgPluginDisabled),
     Cell: ({ value }) => <BooleanIcon withColors truthy={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
@@ -161,12 +162,12 @@ export const analyzersTableColumns = [
   {
     Header: "Supported types",
     id: "supported_types",
-    accessor: (r) => {
+    accessor: (pluginConfig) => {
       let supported;
-      if (r.type === JobTypes.OBSERVABLE) {
-        supported = r.observable_supported;
+      if (pluginConfig.type === JobTypes.OBSERVABLE) {
+        supported = pluginConfig.observable_supported;
       } else {
-        supported = r.supported_filetypes;
+        supported = pluginConfig.supported_filetypes;
       }
       if (supported.length === 0) {
         supported.push("everything");
@@ -175,8 +176,8 @@ export const analyzersTableColumns = [
     },
     Cell: ({ value }) => (
       <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
+        {value?.sort().map((val) => (
+          <li key={val}>{val}</li>
         ))}
       </ul>
     ),
@@ -196,7 +197,7 @@ export const analyzersTableColumns = [
   {
     Header: "Actions",
     id: "actions",
-    accessor: (r) => r,
+    accessor: (analyzerConfig) => analyzerConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
@@ -257,7 +258,7 @@ export const connectorTableColumns = [
   {
     Header: "Actions",
     id: "actions",
-    accessor: (r) => r,
+    accessor: (connectorConfig) => connectorConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
@@ -314,7 +315,7 @@ export const pivotTableColumns = [
   {
     Header: "Actions",
     id: "actions",
-    accessor: (r) => r,
+    accessor: (pivotConfig) => pivotConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
@@ -347,8 +348,8 @@ export const playbookTableColumns = [
     accessor: "type",
     Cell: ({ value }) => (
       <ul className="d-flex flex-column align-items-start">
-        {value?.sort().map((v) => (
-          <li key={v}>{v}</li>
+        {value?.sort().map((val) => (
+          <li key={val}>{val}</li>
         ))}
       </ul>
     ),
@@ -400,7 +401,7 @@ export const playbookTableColumns = [
   {
     Header: "Actions",
     id: "actions",
-    accessor: (r) => r,
+    accessor: (playbookConfig) => playbookConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
@@ -458,16 +459,16 @@ export const visualizerTableColumns = [
         key={`visualizers-playbooks__${value}`}
         className="d-flex flex-column align-items-start"
       >
-        {value?.sort().map((v) => (
-          <li key={v}>
+        {value?.sort().map((val) => (
+          <li key={val}>
             <CopyToClipboardButton
               showOnHover
-              id={`table-user-${v}`}
-              key={`table-user-${v}`}
-              text={v}
+              id={`table-user-${val}`}
+              key={`table-user-${val}`}
+              text={val}
               className="d-block text-truncate"
             >
-              {v}
+              {val}
             </CopyToClipboardButton>
           </li>
         ))}
@@ -479,7 +480,7 @@ export const visualizerTableColumns = [
   {
     Header: "Actions",
     id: "actions",
-    accessor: (r) => r,
+    accessor: (visualizerConfig) => visualizerConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">

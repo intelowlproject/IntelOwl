@@ -16,9 +16,9 @@ async function createOrganization(body) {
       true,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -33,9 +33,9 @@ async function deleteOrganization(orgName) {
       6000,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -51,9 +51,9 @@ async function removeMemberFromOrg(username) {
       true,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -67,9 +67,9 @@ async function leaveOrganization(orgName) {
       true,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -80,9 +80,9 @@ async function promoteUserAdmin(username) {
     });
     addToast(`User @${username} is now an admin.`, null, "success", true);
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -96,9 +96,9 @@ async function removeUserAdmin(username) {
       true,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -109,9 +109,9 @@ async function sendInvite(body) {
     const resp = await axios.post(`${BASE_URI_ORG}/invite`, body);
     addToast("Invite Sent!", null, "success", true);
     return resp;
-  } catch (e) {
-    addToast("Invite Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Invite Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -126,9 +126,9 @@ async function acceptInvitation(invId, orgName) {
       6000,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -142,9 +142,9 @@ async function declineInvitation(invId, orgName) {
       true,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -158,9 +158,9 @@ async function deleteInvitation(invId, username) {
       true,
     );
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }
 

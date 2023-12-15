@@ -37,7 +37,7 @@ export default function EmailForm({ onFormSubmit, apiCallback, ...restProps }) {
       try {
         await apiCallback(values);
         onFormSubmit();
-      } catch (e) {
+      } catch (error) {
         // error will be handled by apiCallback
       }
     },

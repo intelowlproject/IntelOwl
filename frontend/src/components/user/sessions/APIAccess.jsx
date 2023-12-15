@@ -66,7 +66,7 @@ export default function APIAccess() {
         await deleteToken();
         // reload after 500ms
         setTimeout(refetch, 500);
-      } catch (e) {
+      } catch (error) {
         // handled inside deleteToken
       }
     }

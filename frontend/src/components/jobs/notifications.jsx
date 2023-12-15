@@ -12,7 +12,7 @@ export function generateJobNotification(observableName, jobId) {
       new Audio(`${PUBLIC_URL}/notification.mp3`)
         .play()
         .then()
-        .catch((e) => console.error(e));
+        .catch((error) => console.error(error));
 
       // notification icon
       setNotificationFavicon(true);

@@ -43,9 +43,9 @@ const publicRoutesLazy = [
       </Suspense>
     ),
   },
-].map((r) => ({
-  ...r,
-  element: <Suspense fallback={<FallBackLoading />}>{r.element}</Suspense>,
+].map((routes) => ({
+  ...routes,
+  element: <Suspense fallback={<FallBackLoading />}>{routes.element}</Suspense>,
 }));
 
 // no auth public components
@@ -66,11 +66,11 @@ const noAuthRoutesLazy = [
     path: "/reset-password",
     element: <ResetPassword />,
   },
-].map((r) => ({
-  ...r,
+].map((routes) => ({
+  ...routes,
   element: (
     <IfAuthRedirectGuard>
-      <Suspense fallback={<FallBackLoading />}>{r.element}</Suspense>
+      <Suspense fallback={<FallBackLoading />}>{routes.element}</Suspense>
     </IfAuthRedirectGuard>
   ),
 }));
@@ -196,11 +196,11 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
-].map((r) => ({
-  ...r,
+].map((routes) => ({
+  ...routes,
   element: (
     <AuthGuard>
-      <Suspense fallback={<FallBackLoading />}>{r.element}</Suspense>
+      <Suspense fallback={<FallBackLoading />}>{routes.element}</Suspense>
     </AuthGuard>
   ),
 }));

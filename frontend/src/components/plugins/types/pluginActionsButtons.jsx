@@ -68,7 +68,7 @@ export function OrganizationPluginStateToggle({
   refetch,
   pluginOwner,
 }) {
-  const user = useAuthStore(React.useCallback((s) => s.user, []));
+  const user = useAuthStore(React.useCallback((state) => state.user, []));
   const {
     noOrg,
     fetchAll: fetchAllOrganizations,

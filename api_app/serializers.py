@@ -890,12 +890,6 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         return last_job_for_md5
 
 
-class PluginConfigCompleteSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = PluginConfig
-        fields = rfs.ALL_FIELDS
-
-
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     class Meta:
         model = OwnershipAbstractModel
@@ -1146,6 +1140,14 @@ class ParameterCompleteSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Parameter
+        fields = rfs.ALL_FIELDS
+
+
+class PluginConfigCompleteSerializer(rfs.ModelSerializer):
+    parameter = ParameterCompleteSerializer(read_only=True)
+
+    class Meta:
+        model = PluginConfig
         fields = rfs.ALL_FIELDS
 
 

@@ -377,7 +377,10 @@ export const playbookTableColumns = [
     id: "analyzers",
     accessor: (row) => row.analyzers,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.ANALYZER} />
+      <PlaybooksCollapse
+        pluginList={value}
+        pluginType_={PluginsTypes.ANALYZER}
+      />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -388,7 +391,10 @@ export const playbookTableColumns = [
     id: "connectors",
     accessor: (row) => row.connectors,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.CONNECTOR} />
+      <PlaybooksCollapse
+        pluginList={value}
+        pluginType_={PluginsTypes.CONNECTOR}
+      />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -398,7 +404,7 @@ export const playbookTableColumns = [
     id: "pivots",
     accessor: (row) => row.pivots,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.PIVOT} />
+      <PlaybooksCollapse pluginList={value} pluginType_={PluginsTypes.PIVOT} />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
@@ -408,7 +414,10 @@ export const playbookTableColumns = [
     id: "visualizers",
     accessor: (row) => row.visualizers,
     Cell: ({ value }) => (
-      <PlaybooksCollapse value={value} pluginType_={PluginsTypes.VISUALIZER} />
+      <PlaybooksCollapse
+        pluginList={value}
+        pluginType_={PluginsTypes.VISUALIZER}
+      />
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,

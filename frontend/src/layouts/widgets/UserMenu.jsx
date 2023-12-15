@@ -22,7 +22,7 @@ import { useOrganizationStore } from "../../stores/useOrganizationStore";
  */
 export default function UserMenu(props) {
   // auth store
-  const user = useAuthStore(React.useCallback((s) => s.user, []));
+  const user = useAuthStore(React.useCallback((state) => state.user, []));
   const {
     organization: { owner },
     isUserAdmin,

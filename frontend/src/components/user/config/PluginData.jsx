@@ -25,7 +25,7 @@ import {
 function isJSON(str) {
   try {
     JSON.parse(str); // && !!str
-  } catch (e) {
+  } catch (error) {
     return false;
   }
   return true;
@@ -439,5 +439,5 @@ PluginData.propTypes = {
 };
 
 PluginData.defaultProps = {
-  entryFilter: (x) => x,
+  entryFilter: (filterValue) => filterValue,
 };

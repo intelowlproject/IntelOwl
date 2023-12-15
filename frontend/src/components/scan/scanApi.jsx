@@ -256,9 +256,9 @@ export async function createJob(
     addToast("Failed!", respData?.message, "danger");
     const error = new Error(`job status ${respData.status}`);
     return Promise.reject(error);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
+  } catch (error) {
+    console.error(error);
+    addToast("Failed!", prettifyErrors(error), "danger");
+    return Promise.reject(error);
   }
 }

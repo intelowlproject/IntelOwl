@@ -21,7 +21,7 @@ const tableProps = {
     {
       Header: "Actions",
       id: "actions",
-      accessor: (r) => r,
+      accessor: (pluginReport) => pluginReport,
       maxWidth: 60,
       disableSortBy: true,
       Cell: ({ value: plugin, customProps: { job, refetch } }) => (
@@ -80,7 +80,7 @@ const tableProps = {
     {
       Header: "Running Time",
       id: "running_time",
-      accessor: (r) => r,
+      accessor: (pluginReport) => pluginReport,
       disableSortBy: true,
       maxWidth: 125,
       Cell: ({ value: plugin }) => (

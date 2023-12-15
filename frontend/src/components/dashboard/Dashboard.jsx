@@ -72,8 +72,8 @@ export default function Dashboard() {
         />
       </div>
       <Row className="d-flex flex-wrap flex-lg-nowrap">
-        {charts1.map(([id, header, Component], i) => (
-          <Col key={id} md={12} lg={i === 0 ? 6 : 3}>
+        {charts1.map(([id, header, Component], index) => (
+          <Col key={id} md={12} lg={index === 0 ? 6 : 3}>
             <SmallInfoCard
               id={id}
               header={header}

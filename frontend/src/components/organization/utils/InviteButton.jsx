@@ -37,7 +37,7 @@ function InvitationForm({ onFormSubmit }) {
       try {
         await sendInvite(values);
         onFormSubmit();
-      } catch (e) {
+      } catch (error) {
         // error was handled inside sendInvite
       } finally {
         formik.setSubmitting(false);

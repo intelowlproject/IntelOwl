@@ -74,9 +74,11 @@ export function PluginInfoCard({ pluginInfo }) {
                 <div className="d-flex flex-column align-items-start">
                   <strong>Except:</strong>
                   <ul className="d-flex flex-column align-items-start">
-                    {pluginInfo.not_supported_filetypes.sort().map((v) => (
-                      <li key={v}>{v}</li>
-                    ))}
+                    {pluginInfo.not_supported_filetypes
+                      .sort()
+                      .map((unsupportFiletype) => (
+                        <li key={unsupportFiletype}>{unsupportFiletype}</li>
+                      ))}
                   </ul>
                 </div>
               )}
@@ -256,7 +258,7 @@ export function PluginVerificationIcon({ pluginName, verification }) {
   );
 }
 
-export function PlaybooksCollapse({ value, pluginType_ }) {
+export function PlaybooksCollapse({ pluginList, pluginType_ }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
   return (
@@ -267,14 +269,14 @@ export function PlaybooksCollapse({ value, pluginType_ }) {
         id="PlaybooksCollapse"
       >
         <small>
-          {value?.length} {pluginType_}{" "}
+          {pluginList?.length} {pluginType_}{" "}
         </small>
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
       <Collapse isOpen={isOpen} id="PlaybooksCollapse">
         <ul className="d-flex flex-column align-items-start">
-          {value?.sort().map((v) => (
-            <li key={v}>{v}</li>
+          {pluginList?.sort().map((pluginName) => (
+            <li key={pluginName}>{pluginName}</li>
           ))}
         </ul>
       </Collapse>
@@ -331,7 +333,7 @@ PluginVerificationIcon.propTypes = {
 };
 
 PlaybooksCollapse.propTypes = {
-  value: PropTypes.array.isRequired,
+  pluginList: PropTypes.array.isRequired,
   pluginType_: PropTypes.oneOf(Object.values(PluginsTypes)).isRequired,
 };
 

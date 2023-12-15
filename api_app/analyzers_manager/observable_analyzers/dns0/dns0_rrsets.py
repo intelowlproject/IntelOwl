@@ -8,7 +8,9 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers.dns0.dns0_base import DNS0Mixin
+from api_app.models import Parameter, PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = getLogger(__name__)
@@ -85,10 +87,51 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
 
     @classmethod
     def _monkeypatch(cls):
+        for config in ["DNS0_rrsets_data", "DNS0_rrsets_name"]:
+            ac = AnalyzerConfig.objects.get(name=config)
+            PluginConfig.objects.create(
+                analyzer_config=ac.pk,
+                parameter=Parameter.objects.get(
+                    name="limit", python_module__pk=ac.python_module_id
+                ),
+                for_organization=False,
+                owner=None,
+                value=100,
+            )
+            PluginConfig.objects.create(
+                analyzer_config=ac.pk,
+                parameter=Parameter.objects.get(
+                    name="from", python_module__pk=ac.python_module_id
+                ),
+                for_organization=False,
+                owner=None,
+                value="-1M",
+            )
+
+        ac = AnalyzerConfig.objects.get(name="DNS0_rrsets_name")
+        PluginConfig.objects.create(
+            analyzer_config=ac.pk,
+            parameter=Parameter.objects.get(
+                name="direction", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value="left",
+        )
+
+        ac = AnalyzerConfig.objects.get(name="DNS0_rrsets_data")
+        PluginConfig.objects.create(
+            analyzer_config=ac.pk,
+            parameter=Parameter.objects.get(
+                name="direction", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value="right",
+        )
+
         patches = [
             if_mock_connections(
-                patch.object(DNS0Rrsets, "from", return_value={"from": "-1M"}),
-                patch.object(DNS0Rrsets, "limit", return_value={"limit": 100}),
                 patch(
                     "requests.get",
                     return_value=MockUpResponse(

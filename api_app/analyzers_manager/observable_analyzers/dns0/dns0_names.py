@@ -10,6 +10,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from api_app.analyzers_manager.observable_analyzers.dns0.dns0_base import DNS0Mixin
+from api_app.models import Parameter, PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = getLogger(__name__)
@@ -98,10 +99,15 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
 
     @classmethod
     def _monkeypatch(cls):
+        PluginConfig.objects.get_or_create(
+            parameter=Parameter.objects.get(
+                name="from", analyzer_config__python_module__pk=cls.python_module.pk
+            ),
+            for_organization=False,
+            owner=None,
+        )
         patches = [
             if_mock_connections(
-                patch.object(DNS0Names, "from", return_value={"from": "-1M"}),
-                patch.object(DNS0Names, "limit", return_value={"limit": 100}),
                 patch(
                     "requests.get",
                     return_value=MockUpResponse(

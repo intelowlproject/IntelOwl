@@ -561,7 +561,7 @@ export const ingestorTableColumns = [
   {
     Header: "Actions",
     id: "actions",
-    accessor: (r) => r,
+    accessor: (ingestorConfig) => ingestorConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">

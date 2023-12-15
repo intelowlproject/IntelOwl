@@ -1,6 +1,7 @@
 import React from "react";
 
 export function prettifyErrors(errorResponse) {
+  // multiple validation errors
   // only validation errors returns an array of errors
   /**
       "errors":{
@@ -23,6 +24,24 @@ export function prettifyErrors(errorResponse) {
     });
     prettyHTMLList = prettyHTMLList.map((e) => <li>{e}</li>);
     return <ul>{prettyHTMLList}</ul>;
+  }
+  // single validation error
+  /**
+    "errors":{
+      "detail": "Not implemented",
+    }
+  */
+  if (errorResponse.response.data?.errors?.detail) {
+    return errorResponse.response.data.errors.detail;
+  }
+  // error directly in response data
+  /**
+    "data":{
+      "detail": "Method "POST" not allowed.",
+    }
+  */
+  if (errorResponse.response.data?.detail) {
+    return errorResponse.response.data.detail;
   }
 
   return JSON.stringify(errorResponse.response.data);

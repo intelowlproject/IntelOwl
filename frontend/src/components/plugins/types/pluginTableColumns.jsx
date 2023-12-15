@@ -23,6 +23,7 @@ import {
   OrganizationPluginStateToggle,
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
+  PluginPullButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 
@@ -206,12 +207,14 @@ export const analyzersTableColumns = [
           refetch={value?.refetch}
           type={PluginsTypes.ANALYZER}
         />
-        {value?.docker_based && (
-          <PluginHealthCheckButton
-            pluginName={value.name}
-            pluginType_={PluginsTypes.ANALYZER}
-          />
-        )}
+        <PluginHealthCheckButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.ANALYZER}
+        />
+        <PluginPullButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.ANALYZER}
+        />
       </div>
     ),
     maxWidth: 100,
@@ -271,6 +274,10 @@ export const connectorTableColumns = [
           pluginName={value?.name}
           pluginType_={PluginsTypes.CONNECTOR}
         />
+        <PluginPullButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.CONNECTOR}
+        />
       </div>
     ),
     maxWidth: 125,
@@ -323,6 +330,14 @@ export const pivotTableColumns = [
           disabled={value?.orgPluginDisabled}
           refetch={value?.refetch}
           type={PluginsTypes.PIVOT}
+        />
+        <PluginHealthCheckButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.PIVOT}
+        />
+        <PluginPullButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.PIVOT}
         />
       </div>
     ),
@@ -494,7 +509,7 @@ export const visualizerTableColumns = [
     maxWidth: 90,
   },
 ];
-// Visualizers columns: these columns are shown for the visualizers
+// Ingestors columns: these columns are shown for the ingestors
 export const ingestorTableColumns = [
   ...pluginTableColumns,
   {
@@ -541,5 +556,24 @@ export const ingestorTableColumns = [
     ),
     disableSortBy: true,
     maxWidth: 145,
+  },
+  {
+    Header: "Actions",
+    id: "actions",
+    accessor: (r) => r,
+    disableSortBy: true,
+    Cell: ({ value }) => (
+      <div className="d-flex justify-content-center mx-2">
+        <PluginHealthCheckButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.INGESTOR}
+        />
+        <PluginPullButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.INGESTOR}
+        />
+      </div>
+    ),
+    maxWidth: 90,
   },
 ];

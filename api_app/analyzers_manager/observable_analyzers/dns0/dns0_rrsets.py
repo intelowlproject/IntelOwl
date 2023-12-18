@@ -116,6 +116,24 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
                 owner=None,
                 value="first_seen",
             )
+            PluginConfig.objects.create(
+                analyzer_config=ac,
+                parameter=Parameter.objects.get(
+                    name="fuzzy", python_module__pk=ac.python_module_id
+                ),
+                for_organization=False,
+                owner=None,
+                value="",
+            )
+            PluginConfig.objects.create(
+                analyzer_config=ac,
+                parameter=Parameter.objects.get(
+                    name="format", python_module__pk=ac.python_module_id
+                ),
+                for_organization=False,
+                owner=None,
+                value="json",
+            )
 
         ac = AnalyzerConfig.objects.get(name="DNS0_rrsets_name")
         PluginConfig.objects.create(

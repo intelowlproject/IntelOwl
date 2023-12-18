@@ -100,7 +100,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
 
     @classmethod
     def _monkeypatch(cls):
-        ac = AnalyzerConfig.objects.get(name="DNS0_rrsets_name")
+        ac = AnalyzerConfig.objects.get(name="DNS0_names")
         PluginConfig.objects.create(
             analyzer_config=ac.pk,
             parameter=Parameter.objects.get(

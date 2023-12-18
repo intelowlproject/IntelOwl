@@ -424,6 +424,22 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                     status=status.HTTP_201_CREATED,
                 )
 
+    # ############################################################## #
+    @action(
+        url_path="getyourorgjob",
+        detail=False,
+        methods=["GET"],
+    )
+    def get_org_jobs(self, request):
+        logger.info("will this be rendered")
+        # i have to get the current user
+        # then get the organisation
+        # use the member of the organisation to get the job data
+        # aggregate all the data and return
+        return Response("this is the response")
+
+    # ############################################################# #
+
     @action(
         url_path="aggregate/status",
         detail=False,

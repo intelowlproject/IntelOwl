@@ -41,17 +41,6 @@ params = [
         },
     },
     {
-        "name": "q",
-        "type": "str",
-        "description": "The keyword to search for.",
-        "is_secret": False,
-        "required": False,
-        "python_module": {
-            "module": "dns0.dns0_names.DNS0Names",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
-    },
-    {
         "name": "root",
         "type": "bool",
         "description": "Limit results to root domains.",

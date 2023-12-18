@@ -5,8 +5,8 @@ import json
 from typing import Dict
 from urllib.parse import urlparse
 
+import dateparser
 import requests
-from dateutil import parser as dateutil_parser
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -122,7 +122,7 @@ class DNSdb(classes.ObservableAnalyzer):
         :rtype: int
         """
         try:
-            return int(dateutil_parser.parse(date_string).timestamp())
+            return int(dateparser.parse(date_string).timestamp())
         except ValueError:
             error_message = f"{date_string} cannot be converted to a valid datetime"
         except TypeError:

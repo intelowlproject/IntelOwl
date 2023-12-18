@@ -102,7 +102,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
     def _monkeypatch(cls):
         ac = AnalyzerConfig.objects.get(name="DNS0_names")
         PluginConfig.objects.create(
-            analyzer_config=ac.pk,
+            analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="limit", python_module__pk=ac.python_module_id
             ),

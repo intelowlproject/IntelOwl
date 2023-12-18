@@ -90,7 +90,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
         for config in ["DNS0_rrsets_data", "DNS0_rrsets_name"]:
             ac = AnalyzerConfig.objects.get(name=config)
             PluginConfig.objects.create(
-                analyzer_config=ac.pk,
+                analyzer_config=ac,
                 parameter=Parameter.objects.get(
                     name="limit", python_module__pk=ac.python_module_id
                 ),
@@ -99,7 +99,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
                 value=100,
             )
             PluginConfig.objects.create(
-                analyzer_config=ac.pk,
+                analyzer_config=ac,
                 parameter=Parameter.objects.get(
                     name="from", python_module__pk=ac.python_module_id
                 ),
@@ -110,7 +110,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
 
         ac = AnalyzerConfig.objects.get(name="DNS0_rrsets_name")
         PluginConfig.objects.create(
-            analyzer_config=ac.pk,
+            analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="direction", python_module__pk=ac.python_module_id
             ),
@@ -121,7 +121,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
 
         ac = AnalyzerConfig.objects.get(name="DNS0_rrsets_data")
         PluginConfig.objects.create(
-            analyzer_config=ac.pk,
+            analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="direction", python_module__pk=ac.python_module_id
             ),

@@ -122,6 +122,24 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
         PluginConfig.objects.create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
+                name="to", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value="",
+        )
+        PluginConfig.objects.create(
+            analyzer_config=ac,
+            parameter=Parameter.objects.get(
+                name="not_before", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value="",
+        )
+        PluginConfig.objects.create(
+            analyzer_config=ac,
+            parameter=Parameter.objects.get(
                 name="sort", python_module__pk=ac.python_module_id
             ),
             for_organization=False,
@@ -145,6 +163,25 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             for_organization=False,
             owner=None,
             value="json",
+        )
+        PluginConfig.objects.create(
+            analyzer_config=ac,
+            parameter=Parameter.objects.get(
+                name="offset", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value=0,
+        )
+
+        PluginConfig.objects.create(
+            analyzer_config=ac,
+            parameter=Parameter.objects.get(
+                name="root", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value=0,
         )
 
         patches = [

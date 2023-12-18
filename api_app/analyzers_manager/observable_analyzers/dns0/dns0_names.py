@@ -104,15 +104,6 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
         PluginConfig.objects.create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
-                name="limit", python_module__pk=ac.python_module_id
-            ),
-            for_organization=False,
-            owner=None,
-            value=100,
-        )
-        PluginConfig.objects.create(
-            analyzer_config=ac,
-            parameter=Parameter.objects.get(
                 name="from", python_module__pk=ac.python_module_id
             ),
             for_organization=False,
@@ -149,20 +140,20 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
         PluginConfig.objects.create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
-                name="fuzzy", python_module__pk=ac.python_module_id
-            ),
-            for_organization=False,
-            owner=None,
-            value=[],
-        )
-        PluginConfig.objects.create(
-            analyzer_config=ac,
-            parameter=Parameter.objects.get(
                 name="format", python_module__pk=ac.python_module_id
             ),
             for_organization=False,
             owner=None,
             value="json",
+        )
+        PluginConfig.objects.create(
+            analyzer_config=ac,
+            parameter=Parameter.objects.get(
+                name="limit", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value=100,
         )
         PluginConfig.objects.create(
             analyzer_config=ac,
@@ -173,7 +164,15 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value=0,
         )
-
+        PluginConfig.objects.create(
+            analyzer_config=ac,
+            parameter=Parameter.objects.get(
+                name="fuzzy", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value=[],
+        )
         PluginConfig.objects.create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(

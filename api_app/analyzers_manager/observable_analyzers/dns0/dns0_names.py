@@ -181,7 +181,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             ),
             for_organization=False,
             owner=None,
-            value=0,
+            value=True,
         )
 
         patches = [

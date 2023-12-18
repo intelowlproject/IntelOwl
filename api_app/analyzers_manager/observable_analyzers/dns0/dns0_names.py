@@ -119,6 +119,15 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value="-1M",
         )
+        PluginConfig.objects.create(
+            analyzer_config=ac,
+            parameter=Parameter.objects.get(
+                name="sort", python_module__pk=ac.python_module_id
+            ),
+            for_organization=False,
+            owner=None,
+            value="first_seen",
+        )
 
         patches = [
             if_mock_connections(

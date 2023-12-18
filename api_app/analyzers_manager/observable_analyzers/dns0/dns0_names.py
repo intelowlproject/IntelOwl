@@ -135,7 +135,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             ),
             for_organization=False,
             owner=None,
-            value="",
+            value=[],
         )
         PluginConfig.objects.create(
             analyzer_config=ac,

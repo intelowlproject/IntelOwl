@@ -101,7 +101,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
     @classmethod
     def _monkeypatch(cls):
         ac = AnalyzerConfig.objects.get(name="DNS0_names")
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="from", python_module__pk=ac.python_module_id
@@ -110,7 +110,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value="-1M",
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="to", python_module__pk=ac.python_module_id
@@ -119,7 +119,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value="",
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="not_before", python_module__pk=ac.python_module_id
@@ -128,7 +128,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value="",
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="sort", python_module__pk=ac.python_module_id
@@ -137,7 +137,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value="first_seen",
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="format", python_module__pk=ac.python_module_id
@@ -146,7 +146,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value="json",
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="limit", python_module__pk=ac.python_module_id
@@ -155,7 +155,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value=100,
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="offset", python_module__pk=ac.python_module_id
@@ -164,7 +164,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value=0,
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="fuzzy", python_module__pk=ac.python_module_id
@@ -173,7 +173,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             owner=None,
             value=[],
         )
-        PluginConfig.objects.create(
+        PluginConfig.objects.get_or_create(
             analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="root", python_module__pk=ac.python_module_id

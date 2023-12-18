@@ -111,7 +111,7 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
             value=100,
         )
         PluginConfig.objects.create(
-            analyzer_config=ac.pk,
+            analyzer_config=ac,
             parameter=Parameter.objects.get(
                 name="from", python_module__pk=ac.python_module_id
             ),

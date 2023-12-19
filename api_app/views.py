@@ -509,6 +509,77 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         # this is for file
         return self.__aggregation_response_dynamic("md5", False)
 
+    #############################################################
+    @action(
+        url_path="aggregate/org/status",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_org_status(self, request):
+        annotations = {
+            key.lower(): Count("status", filter=Q(status=key))
+            for key in Job.Status.values
+        }
+        return self.__aggregation_response_static(annotations)
+
+    @action(
+        url_path="aggregate/org/type",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_org_type(self, request):
+        annotations = {
+            "file": Count("is_sample", filter=Q(is_sample=True)),
+            "observable": Count("is_sample", filter=Q(is_sample=False)),
+        }
+        return self.__aggregation_response_static(annotations)
+
+    @action(
+        url_path="aggregate/org/observable_classification",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_org_observable_classification(self, request):
+        annotations = {
+            oc.lower(): Count(
+                "observable_classification", filter=Q(observable_classification=oc)
+            )
+            for oc in ObservableTypes.values
+        }
+        return self.__aggregation_response_static(annotations)
+
+    @action(
+        url_path="aggregate/org/file_mimetype",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_org_file_mimetype(self, request):
+        return self.__aggregation_response_dynamic("file_mimetype")
+
+    @action(
+        url_path="aggregate/org/observable_name",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_org_observable_name(self, request):
+        return self.__aggregation_response_dynamic("observable_name", False)
+
+    @action(
+        url_path="aggregate/org/md5",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_org_md5(self, request):
+        # this is for file
+        return self.__aggregation_response_dynamic("md5", False)
+
+    #################################################################
     def __aggregation_response_static(self, annotations: dict) -> Response:
         delta, basis = self.__parse_range(self.request)
         qs = (

@@ -111,6 +111,8 @@ class Plugin(metaclass=ABCMeta):
         """
         self.report.end_time = timezone.now()
         self.report.save()
+        if settings.ELASTICSEARCH_ENABLED:
+            self.report.send_business_intelligence_data()
 
     def after_run_success(self, content: typing.Any):
         if isinstance(content, typing.Generator):

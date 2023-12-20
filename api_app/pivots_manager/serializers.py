@@ -5,6 +5,7 @@ from api_app.models import Job
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
+    AbstractReportBISerializer,
     AbstractReportSerializer,
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
@@ -16,6 +17,13 @@ class PivotReportSerializer(AbstractReportSerializer):
         model = PivotReport
         fields = AbstractReportSerializer.Meta.fields
         list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class
+
+
+class PivotReportBISerializer(AbstractReportBISerializer):
+    class Meta:
+        model = PivotReport
+        fields = AbstractReportBISerializer.Meta.fields
+        list_serializer_class = AbstractReportBISerializer.Meta.list_serializer_class
 
 
 class PivotMapSerializer(rfs.ModelSerializer):

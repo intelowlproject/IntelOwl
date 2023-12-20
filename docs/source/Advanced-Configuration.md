@@ -24,7 +24,8 @@ This page includes details about some advanced features that Intel Owl provides 
 
 ## ElasticSearch
 
-Intel Owl makes use of [django-elasticsearch-dsl](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html) to index Job results into elasticsearch. The `save` and `delete` operations are auto-synced so you always have the latest data in ES.
+### DSL
+IntelOwl makes use of [django-elasticsearch-dsl](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html) to index Job results into elasticsearch. The `save` and `delete` operations are auto-synced so you always have the latest data in ES.
 
 In the `env_file_app_template`, you'd see various elasticsearch related environment variables. The user should spin their own Elastic Search instance and configure these variables.
 
@@ -36,7 +37,7 @@ Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboa
 
 1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elasticsearch` on port `9200` which is exposed to the shared docker network.
    (Alternatively, you can spin up a local Elastic Search instance, by appending `--elastic` to the `python3 start.py ...` command. Note that the local Elastic Search instance consumes large amount of memory, and hence having >=16GB is recommended.))
-2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elasticsearch:9200`.
+2. In the `env_file_app`, we set `ELASTICSEARCH_DSL_ENABLED` to `True` and `ELASTICSEARCH_DSL_HOST` to `elasticsearch:9200`.
 3. Configure the version of the ElasticSearch Library used [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our Elasticsearch server. This is required for compatibility. To do that, you can leverage the option `--pyelastic-version` of the `start.py` script. The default value of that parameter indicates the version that would be installed by default.
 4. Rebuild the docker images with `python3 start.py test --pyelastic-version x.x.x build` (required only if you changed the default value of `--pyelastic-version`)
 5. Now start the docker containers and execute,
@@ -46,6 +47,29 @@ docker exec -ti intelowl_uwsgi python manage.py search_index --rebuild
 ```
 
 This will build and populate all existing job objects into the `jobs` index.
+
+
+### Business Intelligence
+IntelOwl makes use of [elasticsearch-py](https://elasticsearch-py.readthedocs.io/en/7.x/index.html) to store data that can be used for Business Intelligence purpose.
+Since plugin reports are deleted periodically, this feature allows to save indefinitely small amount of data to keep track of how analyzers perform and user usage.
+At the moment, the following information are sent to elastic:
+- application name
+- timestamp
+- username
+- configuration used
+- process_time
+- status
+- end_time
+- parameters
+
+Documents are saved in the `ELEASTICSEARCH_BI_INDEX-%YEAR-%MONTH`, allowing to manage the retention accordingly.
+To activate this feature, it is necessary to set `ELASTICSEARCH_BI_ENABLED`
+to `True` in the `env_file_app` and
+`ELASTICSEARCH_BI_HOST` to `elasticsearch:9200`
+or your elasticsearch server.
+At last, you have to copy your ssl certificate in the `configuration` folder
+and set `ELASTICSEARCH_SSL_CERTIFICATE_FILE_NAME` to your certificate file name. 
+
 
 ## Authentication options
 

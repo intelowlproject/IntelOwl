@@ -8,6 +8,7 @@ import json
 import logging
 import typing
 import uuid
+from ssl import create_default_context
 
 from celery import Task, shared_task, signals
 from celery.worker.consumer import Consumer
@@ -17,6 +18,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
+from elasticsearch import Elasticsearch
 
 from api_app.choices import Status
 from intel_owl import secrets
@@ -302,29 +304,17 @@ def create_caches(user_pk: int):
     from api_app.visualizers_manager.models import VisualizerConfig
     from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
-    for plugin in AnalyzerConfig.objects.all():
-        PythonListConfigSerializer(
-            child=AnalyzerConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-
-    for plugin in ConnectorConfig.objects.all():
-        PythonListConfigSerializer(
-            child=ConnectorConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-
-    for plugin in PivotConfig.objects.all():
-        PythonListConfigSerializer(
-            child=PivotConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-
-    for plugin in VisualizerConfig.objects.all():
-        PythonListConfigSerializer(
-            child=VisualizerConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-    for plugin in IngestorConfig.objects.all():
-        PythonListConfigSerializer(
-            child=IngestorConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
+    for python_config_class, serializer_class in [
+        (AnalyzerConfig, AnalyzerConfigSerializer),
+        (ConnectorConfig, ConnectorConfigSerializer),
+        (PivotConfig, PivotConfigSerializer),
+        (VisualizerConfig, VisualizerConfigSerializer),
+        (IngestorConfig, IngestorConfigSerializer),
+    ]:
+        for plugin in python_config_class.objects.all():
+            PythonListConfigSerializer(
+                child=serializer_class()
+            ).to_representation_single_plugin(plugin, user)
 
 
 @signals.beat_init.connect
@@ -352,6 +342,45 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )
+
+
+@shared_task(base=FailureLoggedTask, name="send_bi_to_elastic", soft_time_limit=300)
+def send_bi_to_elastic(max_timeout: int = 60):
+    from api_app.analyzers_manager.models import AnalyzerReport
+    from api_app.connectors_manager.models import ConnectorReport
+    from api_app.ingestors_manager.models import IngestorReport
+    from api_app.models import AbstractReport
+    from api_app.pivots_manager.models import PivotReport
+    from api_app.visualizers_manager.models import VisualizerReport
+
+    if settings.ELASTICSEARCH_BI_ENABLED:
+        elastic_ssl_context = create_default_context(
+            cafile=str(settings.ELASTICSEARCH_SSL_CERTIFICATE_PATH)
+        )
+        elastic_client = Elasticsearch(
+            settings.ELASTICSEARCH_BI_HOST,
+            ssl_context=elastic_ssl_context,
+            scheme="https",
+            maxsize=20,
+            max_retries=10,
+            retry_on_timeout=True,
+            timeout=30,
+            sniff_on_connection_fail=True,
+            sniff_timeout=30,
+        )
+
+        for report_class in [
+            AnalyzerReport,
+            ConnectorReport,
+            PivotReport,
+            IngestorReport,
+            VisualizerReport,
+        ]:
+            report_class: typing.Type[AbstractReport]
+            report_class.objects.filter(sent_to_bi=False).send_to_elastic_as_bi(
+                elastic_client=elastic_client, max_timeout=max_timeout
+            )
+        elastic_client.close()
 
 
 # set logger

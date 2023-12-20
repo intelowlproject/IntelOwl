@@ -1196,21 +1196,18 @@ class AbstractReportListSerializer(rfs.ListSerializer):
     ...
 
 
-class AbstractReportSerializer(rfs.ModelSerializer):
+class AbstractReportSerializerInterface(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
     class Meta:
-        fields = (
-            "id",
+        fields = [
             "name",
             "process_time",
-            "report",
             "status",
-            "errors",
             "start_time",
             "end_time",
             "parameters",
-        )
+        ]
         list_serializer_class = AbstractReportListSerializer
 
     def to_representation(self, instance: AbstractReport):
@@ -1220,6 +1217,39 @@ class AbstractReportSerializer(rfs.ModelSerializer):
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
+class AbstractReportBISerializer(AbstractReportSerializerInterface):
+    application = rfs.HiddenField(read_only=True, default="IntelOwl")
+    timestamp = rfs.DateTimeField(source="start_time")
+    username = rfs.CharField(source="job.user.username")
+
+    class Meta:
+        fields = AbstractReportSerializerInterface.Meta.fields + ["application"]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        return {
+            "_source": data,
+            "_type": "_doc",
+            "_index": settings.ELASTICSEARCH_BI_INDEX + "-" + now().strftime("%Y.%m"),
+            "_op_type": "index",
+        }
+
+
+class AbstractReportSerializer(AbstractReportSerializerInterface):
+    class Meta:
+        fields = AbstractReportSerializerInterface.Meta.fields + [
+            "id",
+            "report",
+            "errors",
+        ]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
 
 
 class CrontabScheduleSerializer(rfs.ModelSerializer):

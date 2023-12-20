@@ -1,8 +1,12 @@
 import datetime
+import logging
 import uuid
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Generator, Type
 
 from django.contrib.postgres.expressions import ArraySubquery
+from django.core.paginator import Paginator
+
+from api_app.serializers import AbstractReportBISerializer
 
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
@@ -226,7 +230,36 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
 
 
 class AbstractReportQuerySet(QuerySet):
-    ...
+    @classmethod
+    def _get_serializer_class(cls) -> Type[AbstractReportBISerializer]:
+        raise NotImplementedError()
+
+    def send_to_elastic_as_bi(self, elastic_client, max_timeout: int = 60) -> bool:
+        from elasticsearch import Elasticsearch
+        from elasticsearch.helpers import bulk
+
+        assert isinstance(elastic_client, Elasticsearch)
+        BULK_MAX_SIZE = 10000
+        found_errors = False
+
+        p = Paginator(self, BULK_MAX_SIZE)
+        for i in p.page_range:
+            page = p.get_page(i)
+            objects: AbstractReportQuerySet = page.object_list
+            serializer = self._get_serializer_class()(instance=objects, many=True)
+            objects_serialized = serializer.data
+            success, errors = bulk(
+                elastic_client, objects_serialized, request_timeout=max_timeout
+            )
+            if errors:
+                logging.error(
+                    f"Errors on sending to elastic: {errors}."
+                    f" We are not marking objects as sent."
+                )
+                found_errors |= errors
+            else:
+                objects.update(sent_to_bi=True)
+        return found_errors
 
 
 class ModelWithOwnershipQuerySet:

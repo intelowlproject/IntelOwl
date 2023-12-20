@@ -1,6 +1,9 @@
+from typing import Type
+
 from django.db.models import Q
 
-from api_app.queryset import PythonConfigQuerySet
+from api_app.pivots_manager.serializers import PivotReportBISerializer
+from api_app.queryset import AbstractReportQuerySet, PythonConfigQuerySet
 
 
 class PivotConfigQuerySet(PythonConfigQuerySet):
@@ -27,3 +30,9 @@ class PivotConfigQuerySet(PythonConfigQuerySet):
                 | Q(related_connector_configs=None)
             )
         return qs.distinct()
+
+
+class PivotReportQuerySet(AbstractReportQuerySet):
+    @classmethod
+    def _get_serializer_class(cls) -> Type[PivotReportBISerializer]:
+        return PivotReportBISerializer

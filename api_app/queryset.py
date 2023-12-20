@@ -256,7 +256,7 @@ class AbstractReportQuerySet(QuerySet):
             if errors:
                 logging.error(
                     f"Errors on sending to elastic: {errors}."
-                    f" We are not marking objects as sent."
+                    " We are not marking objects as sent."
                 )
                 found_errors |= errors
             else:

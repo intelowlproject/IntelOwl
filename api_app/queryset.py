@@ -6,10 +6,9 @@ from typing import TYPE_CHECKING, Generator, Type
 from django.contrib.postgres.expressions import ArraySubquery
 from django.core.paginator import Paginator
 
-from api_app.serializers import AbstractReportBISerializer
-
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
+    from api_app.serializers import AbstractReportBISerializer
 
 from celery.canvas import Signature
 from django.db import models
@@ -231,7 +230,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
 
 class AbstractReportQuerySet(QuerySet):
     @classmethod
-    def _get_serializer_class(cls) -> Type[AbstractReportBISerializer]:
+    def _get_serializer_class(cls) -> Type["AbstractReportBISerializer"]:
         raise NotImplementedError()
 
     def send_to_elastic_as_bi(self, elastic_client, max_timeout: int = 60) -> bool:
@@ -239,18 +238,21 @@ class AbstractReportQuerySet(QuerySet):
         from elasticsearch.helpers import bulk
 
         assert isinstance(elastic_client, Elasticsearch)
-        BULK_MAX_SIZE = 10000
+        BULK_MAX_SIZE = 1000
         found_errors = False
 
-        p = Paginator(self, BULK_MAX_SIZE)
+        p = Paginator(self.order_by("pk"), BULK_MAX_SIZE)
         for i in p.page_range:
             page = p.get_page(i)
             objects: AbstractReportQuerySet = page.object_list
             serializer = self._get_serializer_class()(instance=objects, many=True)
+            print("serialized")
             objects_serialized = serializer.data
+            print("in memory")
             success, errors = bulk(
                 elastic_client, objects_serialized, request_timeout=max_timeout
             )
+            print("sent update")
             if errors:
                 logging.error(
                     f"Errors on sending to elastic: {errors}."
@@ -258,7 +260,10 @@ class AbstractReportQuerySet(QuerySet):
                 )
                 found_errors |= errors
             else:
-                objects.update(sent_to_bi=True)
+                self.model.objects.filter(
+                    pk__in=objects.values_list("pk", flat=True)
+                ).update(sent_to_bi=True)
+                print("updated")
         return found_errors
 
 

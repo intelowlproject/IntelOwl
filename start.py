@@ -20,7 +20,7 @@ except ImportError:
 
 load_dotenv("docker/.env")
 CURRENT_VERSION = os.getenv("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
-PYELASTIC_DEFAULT_VERSION = "7.2.2"
+PYELASTIC_DEFAULT_VERSION = "7.4.1"
 PYCTI_DEFAULT_VERSION = "5.10.0"
 
 DOCKER_ANALYZERS = [

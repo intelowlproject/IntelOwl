@@ -1,10 +1,14 @@
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 from api_app.queryset import AbstractReportQuerySet
-from api_app.visualizers_manager.serializers import VisualizerReportBISerializer
+
+if TYPE_CHECKING:
+    from api_app.visualizers_manager.serializers import VisualizerReportBISerializer
 
 
 class VisualizerReportQuerySet(AbstractReportQuerySet):
     @classmethod
-    def _get_serializer_class(cls) -> Type[VisualizerReportBISerializer]:
+    def _get_serializer_class(cls) -> Type["VisualizerReportBISerializer"]:
+        from api_app.visualizers_manager.serializers import VisualizerReportBISerializer
+
         return VisualizerReportBISerializer

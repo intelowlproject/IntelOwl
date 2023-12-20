@@ -11,6 +11,8 @@ django-ses == 3.5.0
 django-iam-dbauth==0.1.4
 django-prettyjson==0.4.1
 django-silk==5.0.3
+django-elasticsearch-dsl==8.0
+
 jsonschema==4.19.0
 # django rest framework libs
 Authlib==1.2.0

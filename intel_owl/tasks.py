@@ -357,17 +357,24 @@ def send_bi_to_elastic(max_timeout: int = 60):
         elastic_ssl_context = create_default_context(
             cafile=str(settings.ELASTICSEARCH_SSL_CERTIFICATE_PATH)
         )
-        elastic_client = Elasticsearch(
-            settings.ELASTICSEARCH_BI_HOST,
-            ssl_context=elastic_ssl_context,
-            scheme="https",
-            maxsize=20,
-            max_retries=10,
-            retry_on_timeout=True,
-            timeout=30,
-            sniff_on_connection_fail=True,
-            sniff_timeout=30,
-        )
+        from importlib.metadata import version
+
+        v = version("elasticsearch")
+        major_version = int(v.split(".")[0])
+        if major_version < 8:
+            elastic_client = Elasticsearch(
+                settings.ELASTICSEARCH_BI_HOST,
+                ssl_context=elastic_ssl_context,
+                scheme="https",
+                maxsize=20,
+                max_retries=10,
+                retry_on_timeout=True,
+                timeout=30,
+                sniff_on_connection_fail=True,
+                sniff_timeout=30,
+            )
+        else:
+            raise RuntimeError(f"Elastic version {v} is not supported at the moment.")
 
         for report_class in [
             AnalyzerReport,

@@ -9,7 +9,7 @@ ELASTICSEARCH_BI_ENABLED = (
     secrets.get_secret("ELASTICSEARCH_BI_ENABLED", False) == "True"
 )
 if ELASTICSEARCH_BI_ENABLED:
-    ELASTICSEARCH_BI_HOST = secrets.get_secret("ELASTICSEARCH_BI_HOST")
+    ELASTICSEARCH_BI_HOST = secrets.get_secret("ELASTICSEARCH_BI_HOST").split(",")
     ELASTICSEARCH_SSL_CERTIFICATE_PATH = CONFIG_ROOT / secrets.get_secret(
         "ELASTICSEARCH_SSL_CERTIFICATE_FILE_NAME", "elasticsearch.crt"
     )

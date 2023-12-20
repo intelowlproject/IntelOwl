@@ -1204,7 +1204,6 @@ class AbstractReportSerializerInterface(rfs.ModelSerializer):
             "name",
             "process_time",
             "status",
-            "start_time",
             "end_time",
             "parameters",
         ]
@@ -1220,15 +1219,29 @@ class AbstractReportSerializerInterface(rfs.ModelSerializer):
 
 
 class AbstractReportBISerializer(AbstractReportSerializerInterface):
-    application = rfs.HiddenField(read_only=True, default="IntelOwl")
+    application = rfs.CharField(read_only=True, default="IntelOwl")
     timestamp = rfs.DateTimeField(source="start_time")
     username = rfs.CharField(source="job.user.username")
+    environment = rfs.SerializerMethodField(method_name="get_environment")
 
     class Meta:
-        fields = AbstractReportSerializerInterface.Meta.fields + ["application"]
+        fields = AbstractReportSerializerInterface.Meta.fields + [
+            "application",
+            "timestamp",
+            "username",
+            "environment",
+        ]
         list_serializer_class = (
             AbstractReportSerializerInterface.Meta.list_serializer_class
         )
+
+    def get_environment(self, instance: AbstractReport):
+        if settings.STAGE_PRODUCTION:
+            return "prod"
+        elif settings.STAGE_STAGING:
+            return "stag"
+        else:
+            return "test"
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
@@ -1246,6 +1259,7 @@ class AbstractReportSerializer(AbstractReportSerializerInterface):
             "id",
             "report",
             "errors",
+            "start_time",
         ]
         list_serializer_class = (
             AbstractReportSerializerInterface.Meta.list_serializer_class

@@ -1,9 +1,11 @@
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 from django.db.models import Q
 
-from api_app.pivots_manager.serializers import PivotReportBISerializer
 from api_app.queryset import AbstractReportQuerySet, PythonConfigQuerySet
+
+if TYPE_CHECKING:
+    from api_app.pivots_manager.serializers import PivotReportBISerializer
 
 
 class PivotConfigQuerySet(PythonConfigQuerySet):
@@ -34,5 +36,7 @@ class PivotConfigQuerySet(PythonConfigQuerySet):
 
 class PivotReportQuerySet(AbstractReportQuerySet):
     @classmethod
-    def _get_serializer_class(cls) -> Type[PivotReportBISerializer]:
+    def _get_serializer_class(cls) -> Type["PivotReportBISerializer"]:
+        from api_app.pivots_manager.serializers import PivotReportBISerializer
+
         return PivotReportBISerializer

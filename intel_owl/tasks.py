@@ -33,7 +33,9 @@ class FailureLoggedRequest(Request):
         return result
 
     def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
-        logger.critical(f"Failure detected for task {self.task.name}")
+        logger.critical(
+            f"Failure detected for task {self.task.name} with exception {exc_info} and request {self._request_dict}"
+        )
         return super().on_failure(
             exc_info, send_failed_event=send_failed_event, return_ok=return_ok
         )

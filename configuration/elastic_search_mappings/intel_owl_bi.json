@@ -1,9 +1,7 @@
-// PUT intel_owl_bi
 {
   "settings" : {
     "number_of_shards" : 3
   },
-  "index_patterns": "intelowl_-*",
   "mappings": {
       "_doc": {
         "dynamic": false,

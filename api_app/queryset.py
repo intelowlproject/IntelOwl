@@ -1,8 +1,10 @@
 import datetime
+import json
 import logging
 import uuid
 from typing import TYPE_CHECKING, Generator, Type
 
+from django.conf import settings
 from django.contrib.postgres.expressions import ArraySubquery
 from django.core.paginator import Paginator
 
@@ -233,11 +235,22 @@ class AbstractReportQuerySet(QuerySet):
     def _get_serializer_class(cls) -> Type["AbstractReportBISerializer"]:
         raise NotImplementedError()
 
-    def send_to_elastic_as_bi(self, elastic_client, max_timeout: int = 60) -> bool:
-        from elasticsearch import Elasticsearch
+    def _create_index_template(self):
+        if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
+            name=settings.ELASTICSEARCH_BI_INDEX
+        ):
+            with open(
+                settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
+            ) as f:
+                body = json.load(f)
+                body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
+                settings.ELASTICSEARCH_CLIENT.indices.put_template(
+                    name=settings.ELASTICSEARCH_BI_INDEX, body=body
+                )
+
+    def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
         from elasticsearch.helpers import bulk
 
-        assert isinstance(elastic_client, Elasticsearch)
         BULK_MAX_SIZE = 1000
         found_errors = False
 
@@ -246,13 +259,12 @@ class AbstractReportQuerySet(QuerySet):
             page = p.get_page(i)
             objects: AbstractReportQuerySet = page.object_list
             serializer = self._get_serializer_class()(instance=objects, many=True)
-            print("serialized")
             objects_serialized = serializer.data
-            print("in memory")
             success, errors = bulk(
-                elastic_client, objects_serialized, request_timeout=max_timeout
+                settings.ELASTICSEARCH_CLIENT,
+                objects_serialized,
+                request_timeout=max_timeout,
             )
-            print("sent update")
             if errors:
                 logging.error(
                     f"Errors on sending to elastic: {errors}."
@@ -263,7 +275,7 @@ class AbstractReportQuerySet(QuerySet):
                 self.model.objects.filter(
                     pk__in=objects.values_list("pk", flat=True)
                 ).update(sent_to_bi=True)
-                print("updated")
+        self._create_index_template()
         return found_errors
 
 

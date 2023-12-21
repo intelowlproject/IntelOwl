@@ -70,6 +70,9 @@ or your elasticsearch server.
 At last, you have to copy your ssl certificate in the `configuration` folder
 and set `ELASTICSEARCH_SSL_CERTIFICATE_FILE_NAME` to your certificate file name. 
 
+An index template is created after the first bulk submission of reports. 
+If you want to use kibana to visualize your data/make dashboard, you must create an index pattern:
+Go to Kibana -> Management -> Index Patterns -> search for your index and use as time field `timestamp` 
 
 ## Authentication options
 

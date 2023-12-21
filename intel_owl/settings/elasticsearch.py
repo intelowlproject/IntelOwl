@@ -2,6 +2,10 @@
 # See the file 'LICENSE' for copying permission.
 
 # Elastic Search Configuration
+from ssl import create_default_context
+
+from elasticsearch import Elasticsearch
+
 from intel_owl import secrets
 from intel_owl.settings import CONFIG_ROOT
 
@@ -20,6 +24,28 @@ if ELASTICSEARCH_BI_ENABLED:
         or not ELASTICSEARCH_BI_INDEX
     ):
         print("Elasticsearch not correctly configured")
+    else:
+        elastic_ssl_context = create_default_context(
+            cafile=str(ELASTICSEARCH_SSL_CERTIFICATE_PATH)
+        )
+        from importlib.metadata import version
+
+        v = version("elasticsearch")
+        major_version = int(v.split(".")[0])
+        if major_version < 8:
+            ELASTICSEARCH_CLIENT = Elasticsearch(
+                ELASTICSEARCH_BI_HOST,
+                ssl_context=elastic_ssl_context,
+                scheme="https",
+                maxsize=20,
+                max_retries=10,
+                retry_on_timeout=True,
+                timeout=30,
+                sniff_on_connection_fail=True,
+                sniff_timeout=30,
+            )
+        else:
+            raise RuntimeError(f"Elastic version {v} is not supported at the moment.")
 
 ELASTICSEARCH_DSL_ENABLED = (
     secrets.get_secret("ELASTICSEARCH_DSL_ENABLED", False) == "True"

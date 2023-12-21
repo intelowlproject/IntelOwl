@@ -1198,21 +1198,14 @@ class AbstractReportListSerializer(rfs.ListSerializer):
 
 class AbstractReportSerializerInterface(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
+    type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
 
     class Meta:
-        fields = [
-            "name",
-            "process_time",
-            "status",
-            "end_time",
-            "parameters",
-        ]
+        fields = ["name", "process_time", "status", "end_time", "parameters", "type"]
         list_serializer_class = AbstractReportListSerializer
 
-    def to_representation(self, instance: AbstractReport):
-        data = super().to_representation(instance)
-        data["type"] = instance.__class__.__name__.replace("Report", "").lower()
-        return data
+    def get_type(self, instance: AbstractReport):
+        return instance.__class__.__name__.replace("Report", "").lower()
 
     def to_internal_value(self, data):
         raise NotImplementedError()

@@ -8,7 +8,6 @@ import json
 import logging
 import typing
 import uuid
-from ssl import create_default_context
 
 from celery import Task, shared_task, signals
 from celery.worker.consumer import Consumer
@@ -18,7 +17,6 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
-from elasticsearch import Elasticsearch
 
 from api_app.choices import Status
 from intel_owl import secrets
@@ -354,28 +352,6 @@ def send_bi_to_elastic(max_timeout: int = 60):
     from api_app.visualizers_manager.models import VisualizerReport
 
     if settings.ELASTICSEARCH_BI_ENABLED:
-        elastic_ssl_context = create_default_context(
-            cafile=str(settings.ELASTICSEARCH_SSL_CERTIFICATE_PATH)
-        )
-        from importlib.metadata import version
-
-        v = version("elasticsearch")
-        major_version = int(v.split(".")[0])
-        if major_version < 8:
-            elastic_client = Elasticsearch(
-                settings.ELASTICSEARCH_BI_HOST,
-                ssl_context=elastic_ssl_context,
-                scheme="https",
-                maxsize=20,
-                max_retries=10,
-                retry_on_timeout=True,
-                timeout=30,
-                sniff_on_connection_fail=True,
-                sniff_timeout=30,
-            )
-        else:
-            raise RuntimeError(f"Elastic version {v} is not supported at the moment.")
-
         for report_class in [
             AnalyzerReport,
             ConnectorReport,
@@ -385,9 +361,8 @@ def send_bi_to_elastic(max_timeout: int = 60):
         ]:
             report_class: typing.Type[AbstractReport]
             report_class.objects.filter(sent_to_bi=False).send_to_elastic_as_bi(
-                elastic_client=elastic_client, max_timeout=max_timeout
+                max_timeout=max_timeout
             )
-        elastic_client.close()
 
 
 # set logger

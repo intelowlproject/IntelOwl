@@ -1,0 +1,42 @@
+// PUT intel_owl_bi
+{
+  "settings" : {
+    "number_of_shards" : 3
+  },
+  "index_patterns": "intelowl_-*",
+  "mappings": {
+      "_doc": {
+        "dynamic": false,
+        "properties": {
+          "timestamp": {
+            "type": "date"
+          },
+          "application": {
+            "type": "keyword"
+          },
+          "username": {
+            "type": "keyword"
+          },
+          "environment": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          },
+          "process_time": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "end_time": {
+            "type": "date"
+          },
+          "parameters": {
+            "type": "object",
+            "dynamic": true
+          }
+        }
+      }
+  }
+}

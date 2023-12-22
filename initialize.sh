@@ -99,7 +99,7 @@ if  [ "$(docker --help | grep -q 'compose')" == 0 ] && ! [ -x "$(command -v dock
   fi
 else
   if  docker --help | grep -q 'compose'; then
-    docker_compose_version="$(docker compose version | cut -d 'v' -f3)"
+    docker_compose_version="$(docker compose version | awk '{print $4}' | cut -d '-' -f1)"
   else
     IFS=',' read -ra temp <<< "$(docker-compose --version)"
     docker_compose_version=$(echo "${temp[0]}"| awk '{print $NF}')

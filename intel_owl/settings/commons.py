@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).parent.parent.parent.parent
 PROJECT_LOCATION = BASE_DIR / "intel_owl"
 BASE_STATIC_PATH = PROJECT_LOCATION / "static"
 MEDIA_ROOT = BASE_DIR / "files_required"
+CONFIG_ROOT = PROJECT_LOCATION / "configuration"
 YARA_RULES_PATH = MEDIA_ROOT / "yara"
 
 # test / ci

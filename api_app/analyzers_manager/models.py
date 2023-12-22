@@ -13,6 +13,7 @@ from api_app.analyzers_manager.constants import (
     TypeChoices,
 )
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
+from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
@@ -21,6 +22,7 @@ logger = getLogger(__name__)
 
 
 class AnalyzerReport(AbstractReport):
+    objects = AnalyzerReportQuerySet.as_manager()
     config = models.ForeignKey(
         "AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )

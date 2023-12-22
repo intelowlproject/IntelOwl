@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from ..serializers import (
+    AbstractReportBISerializer,
     AbstractReportSerializer,
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
@@ -27,3 +28,10 @@ class ConnectorReportSerializer(AbstractReportSerializer):
         model = ConnectorReport
         fields = AbstractReportSerializer.Meta.fields
         list_serializer_class = AbstractReportSerializer.Meta.list_serializer_class
+
+
+class ConnectorReportBISerializer(AbstractReportBISerializer):
+    class Meta:
+        model = ConnectorReport
+        fields = AbstractReportBISerializer.Meta.fields
+        list_serializer_class = AbstractReportBISerializer.Meta.list_serializer_class

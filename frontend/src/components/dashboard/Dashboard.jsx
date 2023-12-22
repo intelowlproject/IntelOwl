@@ -40,7 +40,7 @@ const charts2 = [
 export default function Dashboard() {
   const { guideState, setGuideState } = useGuideContext();
 
-  const [state, setState] = useState(true);
+  const [state, setState] = useState(() => false);
   const [labelstate, setlabelState] = useState("Combined Reports");
 
   useEffect(() => {
@@ -52,6 +52,17 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    console.debug("State updated:", state);
+
+    // to handle the async nature of use state
+    if (state) {
+      setlabelState("Own Org Reports");
+    } else {
+      setlabelState("Combined Reports");
+    }
+  }, [state]);
+
   console.debug("Dashboard rendered!");
 
   const { range, onTimeIntervalChange } = useTimePickerStore();
@@ -60,14 +71,9 @@ export default function Dashboard() {
   useTitle("IntelOwl | Dashboard", { restoreOnUnmount: true });
 
   async function handleChange() {
-    console.debug("state is changed!");
-    console.debug("this is working");
-    setState(!state);
-    if (state) {
-      setlabelState("Own Org Reports");
-    } else {
-      setlabelState("Combined Reports");
-    }
+    console.debug("state is changed!", state);
+
+    setState((prevState) => !prevState);
   }
   return (
     <Container fluid id="Dashboard">
@@ -103,7 +109,11 @@ export default function Dashboard() {
               header={header}
               body={
                 <div className="pt-2">
-                  <Component />
+                  <Component
+                    myprop={{
+                      key: state,
+                    }}
+                  />
                 </div>
               }
               style={{ minHeight: 360 }}
@@ -119,7 +129,11 @@ export default function Dashboard() {
               header={header}
               body={
                 <div className="pt-2">
-                  <Component />
+                  <Component
+                    myprop={{
+                      key: state,
+                    }}
+                  />
                 </div>
               }
               style={{ minHeight: 360 }}

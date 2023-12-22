@@ -20,6 +20,12 @@ import {
   JOB_AGG_FILE_MIMETYPE_URI,
   JOB_AGG_OBS_NAME_URI,
   JOB_AGG_FILE_MD5_URI,
+  JOB_AGG_STATUS_URI_ORG,
+  JOB_AGG_TYPE_URI_ORG,
+  JOB_AGG_OBS_CLASSIFICATION_URI_ORG,
+  JOB_AGG_FILE_MIMETYPE_URI_ORG,
+  JOB_AGG_OBS_NAME_URI_ORG,
+  JOB_AGG_FILE_MD5_URI_ORG,
 } from "../../../constants/apiURLs";
 
 // constants
@@ -27,12 +33,25 @@ const colors = getRandomColorsArray(10, true);
 
 // bar charts
 
-export const JobStatusBarChart = React.memo(() => {
+export const JobStatusBarChart = React.memo((props) => {
   console.debug("JobStatusBarChart rendered!");
+  /* eslint-disable */
+  var sendURL = JOB_AGG_STATUS_URI;
+  const porp = props.myprop;
+  const getValue = porp.key;
+  console.debug("props is ", getValue);
+  /* eslint-enable */
+
+  if (getValue) {
+    /* eslint-disable */
+    sendURL = JOB_AGG_STATUS_URI_ORG;
+    console.debug("this is sending to my urls", sendURL);
+    /* eslint-enable */
+  }
 
   const chartProps = React.useMemo(
     () => ({
-      url: JOB_AGG_STATUS_URI,
+      url: sendURL,
       accessorFnAggregation: (jobStatusesPerDay) => jobStatusesPerDay,
       componentsFn: () =>
         Object.entries(JobStatusColors).map(([jobStatus, jobColor]) => (
@@ -44,18 +63,29 @@ export const JobStatusBarChart = React.memo(() => {
           />
         )),
     }),
-    [],
+    [sendURL],
   );
 
   return <AnyChartWidget {...chartProps} />;
 });
 
-export const JobTypeBarChart = React.memo(() => {
+export const JobTypeBarChart = React.memo((props) => {
   console.debug("JobTypeBarChart rendered!");
+  /* eslint-disable */
+  var sendURL = JOB_AGG_TYPE_URI;
+  const porp = props.myprop;
+  const getValue = porp.key;
+  console.debug("props is ", getValue);
+  /* eslint-enable */
+
+  if (getValue) {
+    sendURL = JOB_AGG_TYPE_URI_ORG;
+    console.debug("this is sending to my urls", sendURL);
+  }
 
   const chartProps = React.useMemo(
     () => ({
-      url: JOB_AGG_TYPE_URI,
+      url: sendURL,
       accessorFnAggregation: (jobTypesPerDay) => jobTypesPerDay,
       componentsFn: () =>
         Object.entries(JobTypeColors).map(([jobType, jobColor]) => (
@@ -67,18 +97,28 @@ export const JobTypeBarChart = React.memo(() => {
           />
         )),
     }),
-    [],
+    [sendURL],
   );
 
   return <AnyChartWidget {...chartProps} />;
 });
 
-export const JobObsClassificationBarChart = React.memo(() => {
+export const JobObsClassificationBarChart = React.memo((props) => {
   console.debug("JobObsClassificationBarChart rendered!");
+  /* eslint-disable */
+  var sendURL = JOB_AGG_OBS_CLASSIFICATION_URI;
+  const porp = props.myprop;
+  const getValue = porp.key;
+  console.debug("props is ", getValue);
+  /* eslint-enable */
 
+  if (getValue) {
+    sendURL = JOB_AGG_OBS_CLASSIFICATION_URI_ORG;
+    console.debug("this is sending to my urls", sendURL);
+  }
   const chartProps = React.useMemo(
     () => ({
-      url: JOB_AGG_OBS_CLASSIFICATION_URI,
+      url: sendURL,
       accessorFnAggregation: (jobObservableSubTypesPerDay) =>
         jobObservableSubTypesPerDay,
       componentsFn: () =>
@@ -93,18 +133,28 @@ export const JobObsClassificationBarChart = React.memo(() => {
           ),
         ),
     }),
-    [],
+    [sendURL],
   );
 
   return <AnyChartWidget {...chartProps} />;
 });
 
-export const JobFileMimetypeBarChart = React.memo(() => {
+export const JobFileMimetypeBarChart = React.memo((props) => {
   console.debug("JobFileMimetypeBarChart rendered!");
+  /* eslint-disable */
+  var sendURL = JOB_AGG_FILE_MIMETYPE_URI;
+  const porp = props.myprop;
+  const getValue = porp.key;
+  console.debug("props is ", getValue);
+  /* eslint-enable */
 
+  if (getValue) {
+    sendURL = JOB_AGG_FILE_MIMETYPE_URI_ORG;
+    console.debug("this is sending to my urls", sendURL);
+  }
   const chartProps = React.useMemo(
     () => ({
-      url: JOB_AGG_FILE_MIMETYPE_URI,
+      url: sendURL,
       accessorFnAggregation: (jobFileSubTypesPerDay) =>
         jobFileSubTypesPerDay?.aggregation,
       componentsFn: (respData) => {
@@ -120,7 +170,7 @@ export const JobFileMimetypeBarChart = React.memo(() => {
         ));
       },
     }),
-    [],
+    [sendURL],
   );
 
   return <AnyChartWidget {...chartProps} />;
@@ -128,12 +178,22 @@ export const JobFileMimetypeBarChart = React.memo(() => {
 
 // pie charts
 
-export const JobObsNamePieChart = React.memo(() => {
+export const JobObsNamePieChart = React.memo((props) => {
   console.debug("JobObsNamePieChart rendered!");
+  /* eslint-disable */
+  var sendURL = JOB_AGG_OBS_NAME_URI;
+  const porp = props.myprop;
+  const getValue = porp.key;
+  console.debug("props is ", getValue);
+  /* eslint-enable */
 
+  if (getValue) {
+    sendURL = JOB_AGG_OBS_NAME_URI_ORG;
+    console.debug("this is sending to my urls", sendURL);
+  }
   const chartProps = React.useMemo(
     () => ({
-      url: JOB_AGG_OBS_NAME_URI,
+      url: sendURL,
       modifierFn: (respData) =>
         Object.entries(respData?.aggregation).map(
           ([observableName, analyzedTimes], index) => ({
@@ -143,18 +203,28 @@ export const JobObsNamePieChart = React.memo(() => {
           }),
         ),
     }),
-    [],
+    [sendURL],
   );
 
   return <PieChartWidget {...chartProps} />;
 });
 
-export const JobFileHashPieChart = React.memo(() => {
+export const JobFileHashPieChart = React.memo((props) => {
   console.debug("JobFileHashPieChart rendered!");
+  /* eslint-disable */
+  var sendURL = JOB_AGG_FILE_MD5_URI;
+  const porp = props.myprop;
+  const getValue = porp.key;
+  console.debug("props is ", getValue);
+  /* eslint-enable */
 
+  if (getValue) {
+    sendURL = JOB_AGG_FILE_MD5_URI_ORG;
+    console.debug("this is sending to my urls", sendURL);
+  }
   const chartProps = React.useMemo(
     () => ({
-      url: JOB_AGG_FILE_MD5_URI,
+      url: sendURL,
       modifierFn: (respData) =>
         Object.entries(respData?.aggregation).map(
           ([fileMd5, analyzedTimes], index) => ({
@@ -164,7 +234,7 @@ export const JobFileHashPieChart = React.memo(() => {
           }),
         ),
     }),
-    [],
+    [sendURL],
   );
 
   return <PieChartWidget {...chartProps} />;

@@ -40,6 +40,7 @@ from .models import (
     AbstractReport,
     Comment,
     Job,
+    Membership,
     PluginConfig,
     PythonConfig,
     Tag,
@@ -60,7 +61,7 @@ from .serializers import (
     TagSerializer,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("__name__")
 
 
 # REST API endpoints
@@ -424,22 +425,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                     status=status.HTTP_201_CREATED,
                 )
 
-    # ############################################################## #
-    @action(
-        url_path="getyourorgjob",
-        detail=False,
-        methods=["GET"],
-    )
-    def get_org_jobs(self, request):
-        logger.info("will this be rendered")
-        # i have to get the current user
-        # then get the organisation
-        # use the member of the organisation to get the job data
-        # aggregate all the data and return
-        return Response("this is the response")
-
-    # ############################################################# #
-
+    # *********************************************************
     @action(
         url_path="aggregate/status",
         detail=False,
@@ -517,11 +503,32 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_org_status(self, request):
+        current_user = request.user
+        organization = None
+        users_of_organization = None
+        try:
+            # Check if the user has a membership
+            if current_user.has_membership():
+                organization = current_user.membership.organization
+                if organization:
+                    users_of_organization = [
+                        membership.user for membership in organization.members.all()
+                    ]
+
+        except Membership.DoesNotExist:
+            # Handle the case where the user has no membership
+            logger.error("User has no membership.")
+
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
             for key in Job.Status.values
         }
-        return self.__aggregation_response_static(annotations)
+        if organization:
+            return self.__aggregation_response_static(
+                annotations, users=users_of_organization
+            )
+        else:
+            return self.__aggregation_response_static(annotations, user=current_user)
 
     @action(
         url_path="aggregate/org/type",
@@ -530,11 +537,32 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_org_type(self, request):
+        current_user = request.user
+        organization = None
+        users_of_organization = None
+        try:
+            # Check if the user has a membership
+            if current_user.has_membership():
+                organization = current_user.membership.organization
+                if organization:
+                    users_of_organization = [
+                        membership.user for membership in organization.members.all()
+                    ]
+
+        except Membership.DoesNotExist:
+            # Handle the case where the user has no membership
+            logger.error("User has no membership.")
+
         annotations = {
             "file": Count("is_sample", filter=Q(is_sample=True)),
             "observable": Count("is_sample", filter=Q(is_sample=False)),
         }
-        return self.__aggregation_response_static(annotations)
+        if organization:
+            return self.__aggregation_response_static(
+                annotations, users=users_of_organization
+            )
+        else:
+            return self.__aggregation_response_static(annotations, user=current_user)
 
     @action(
         url_path="aggregate/org/observable_classification",
@@ -543,13 +571,34 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_org_observable_classification(self, request):
+        current_user = request.user
+        organization = None
+        users_of_organization = None
+        try:
+            # Check if the user has a membership
+            if current_user.has_membership():
+                organization = current_user.membership.organization
+                if organization:
+                    users_of_organization = [
+                        membership.user for membership in organization.members.all()
+                    ]
+
+        except Membership.DoesNotExist:
+            # Handle the case where the user has no membership
+            logger.info("User has no membership.")
+
         annotations = {
             oc.lower(): Count(
                 "observable_classification", filter=Q(observable_classification=oc)
             )
             for oc in ObservableTypes.values
         }
-        return self.__aggregation_response_static(annotations)
+        if organization:
+            return self.__aggregation_response_static(
+                annotations, users=users_of_organization
+            )
+        else:
+            return self.__aggregation_response_static(annotations, user=current_user)
 
     @action(
         url_path="aggregate/org/file_mimetype",
@@ -558,7 +607,29 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_org_file_mimetype(self, request):
-        return self.__aggregation_response_dynamic("file_mimetype")
+        current_user = request.user
+        organization = None
+        users_of_organization = None
+        try:
+            # Check if the user has a membership
+            if current_user.has_membership():
+                organization = current_user.membership.organization
+                if organization:
+                    users_of_organization = [
+                        membership.user for membership in organization.members.all()
+                    ]
+
+        except Membership.DoesNotExist:
+            # Handle the case where the user has no membership
+            logger.info("User has no membership.")
+        if organization:
+            return self.__aggregation_response_dynamic(
+                "file_mimetype", users=users_of_organization
+            )
+        else:
+            return self.__aggregation_response_dynamic(
+                "file_mimetype", user=current_user
+            )
 
     @action(
         url_path="aggregate/org/observable_name",
@@ -567,7 +638,30 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_org_observable_name(self, request):
-        return self.__aggregation_response_dynamic("observable_name", False)
+        current_user = request.user
+        organization = None
+        users_of_organization = None
+        try:
+            # Check if the user has a membership
+            if current_user.has_membership():
+                organization = current_user.membership.organization
+                if organization:
+                    users_of_organization = [
+                        membership.user for membership in organization.members.all()
+                    ]
+
+        except Membership.DoesNotExist:
+            # Handle the case where the user has no membership
+            logger.info("User has no membership.")
+        if organization:
+            logger.info(organization)
+            return self.__aggregation_response_dynamic(
+                "observable_name", False, users=users_of_organization
+            )
+        else:
+            return self.__aggregation_response_dynamic(
+                "observable_name", False, user=current_user
+            )
 
     @action(
         url_path="aggregate/org/md5",
@@ -577,13 +671,39 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     @cache_action_response(timeout=60 * 5)
     def aggregate_org_md5(self, request):
         # this is for file
-        return self.__aggregation_response_dynamic("md5", False)
+        current_user = request.user
+        organization = None
+        users_of_organization = None
+        try:
+            if current_user.has_membership():
+                organization = current_user.membership.organization
+                if organization:
+                    users_of_organization = [
+                        membership.user for membership in organization.members.all()
+                    ]
+
+        except Membership.DoesNotExist:
+            # Handle the case where the user has no membership
+            logger.error("User has no membership.")
+        if organization:
+            return self.__aggregation_response_dynamic(
+                "md5", False, users=users_of_organization
+            )
+        else:
+            return self.__aggregation_response_dynamic("md5", False, user=current_user)
 
     #################################################################
-    def __aggregation_response_static(self, annotations: dict) -> Response:
+    def __aggregation_response_static(
+        self, annotations: dict, users=None, user=None
+    ) -> Response:
         delta, basis = self.__parse_range(self.request)
+        filter_kwargs = {"received_request_time__gte": delta}
+        if user:
+            filter_kwargs["user"] = user
+        if users:
+            filter_kwargs["user__in"] = users
         qs = (
-            Job.objects.filter(received_request_time__gte=delta)
+            Job.objects.filter(**filter_kwargs)
             .annotate(date=Trunc("received_request_time", basis))
             .values("date")
             .annotate(**annotations)
@@ -591,11 +711,19 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         return Response(qs)
 
     def __aggregation_response_dynamic(
-        self, field_name: str, group_by_date: bool = True, limit: int = 5
+        self,
+        field_name: str,
+        group_by_date: bool = True,
+        limit: int = 5,
+        users=None,
+        user=None,
     ) -> Response:
         delta, basis = self.__parse_range(self.request)
-
         filter_kwargs = {"received_request_time__gte": delta}
+        if user:
+            filter_kwargs["user"] = user
+        if users:
+            filter_kwargs["user__in"] = users
         if field_name == "md5":
             filter_kwargs["is_sample"] = True
 

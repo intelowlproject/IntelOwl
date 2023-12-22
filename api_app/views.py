@@ -40,7 +40,6 @@ from .models import (
     AbstractReport,
     Comment,
     Job,
-    Membership,
     PluginConfig,
     PythonConfig,
     Tag,
@@ -515,9 +514,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                         membership.user for membership in organization.members.all()
                     ]
 
-        except Membership.DoesNotExist:
+        except AttributeError:
             # Handle the case where the user has no membership
-            logger.error("User has no membership.")
+            logger.info("User has no membership.")
 
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
@@ -549,9 +548,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                         membership.user for membership in organization.members.all()
                     ]
 
-        except Membership.DoesNotExist:
+        except AttributeError:
             # Handle the case where the user has no membership
-            logger.error("User has no membership.")
+            logger.info("User has no membership.")
 
         annotations = {
             "file": Count("is_sample", filter=Q(is_sample=True)),
@@ -583,7 +582,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                         membership.user for membership in organization.members.all()
                     ]
 
-        except Membership.DoesNotExist:
+        except AttributeError:
             # Handle the case where the user has no membership
             logger.info("User has no membership.")
 
@@ -619,9 +618,10 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                         membership.user for membership in organization.members.all()
                     ]
 
-        except Membership.DoesNotExist:
+        except AttributeError:
             # Handle the case where the user has no membership
             logger.info("User has no membership.")
+
         if organization:
             return self.__aggregation_response_dynamic(
                 "file_mimetype", users=users_of_organization
@@ -650,9 +650,10 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                         membership.user for membership in organization.members.all()
                     ]
 
-        except Membership.DoesNotExist:
+        except AttributeError:
             # Handle the case where the user has no membership
             logger.info("User has no membership.")
+
         if organization:
             logger.info(organization)
             return self.__aggregation_response_dynamic(
@@ -682,9 +683,10 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                         membership.user for membership in organization.members.all()
                     ]
 
-        except Membership.DoesNotExist:
+        except AttributeError:
             # Handle the case where the user has no membership
-            logger.error("User has no membership.")
+            logger.info("User has no membership.")
+
         if organization:
             return self.__aggregation_response_dynamic(
                 "md5", False, users=users_of_organization

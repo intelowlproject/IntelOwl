@@ -20,12 +20,6 @@ import {
   JOB_AGG_FILE_MIMETYPE_URI,
   JOB_AGG_OBS_NAME_URI,
   JOB_AGG_FILE_MD5_URI,
-  JOB_AGG_STATUS_URI_ORG,
-  JOB_AGG_TYPE_URI_ORG,
-  JOB_AGG_OBS_CLASSIFICATION_URI_ORG,
-  JOB_AGG_FILE_MIMETYPE_URI_ORG,
-  JOB_AGG_OBS_NAME_URI_ORG,
-  JOB_AGG_FILE_MD5_URI_ORG,
 } from "../../../constants/apiURLs";
 
 // constants
@@ -42,12 +36,10 @@ export const JobStatusBarChart = React.memo((props) => {
   console.debug("props is ", getValue);
   /* eslint-enable */
 
-  if (getValue) {
-    /* eslint-disable */
-    sendURL = JOB_AGG_STATUS_URI_ORG;
-    console.debug("this is sending to my urls", sendURL);
-    /* eslint-enable */
-  }
+  /* eslint-disable */
+  sendURL = `${JOB_AGG_STATUS_URI}?org=${getValue}`;
+  console.debug("this is sending to my urls", sendURL);
+  /* eslint-enable */
 
   const chartProps = React.useMemo(
     () => ({
@@ -78,10 +70,8 @@ export const JobTypeBarChart = React.memo((props) => {
   console.debug("props is ", getValue);
   /* eslint-enable */
 
-  if (getValue) {
-    sendURL = JOB_AGG_TYPE_URI_ORG;
-    console.debug("this is sending to my urls", sendURL);
-  }
+  sendURL = `${JOB_AGG_TYPE_URI}?org=${getValue}`;
+  console.debug("this is sending to my urls", sendURL);
 
   const chartProps = React.useMemo(
     () => ({
@@ -112,10 +102,8 @@ export const JobObsClassificationBarChart = React.memo((props) => {
   console.debug("props is ", getValue);
   /* eslint-enable */
 
-  if (getValue) {
-    sendURL = JOB_AGG_OBS_CLASSIFICATION_URI_ORG;
-    console.debug("this is sending to my urls", sendURL);
-  }
+  sendURL = `${JOB_AGG_OBS_CLASSIFICATION_URI}?org=${getValue}`;
+
   const chartProps = React.useMemo(
     () => ({
       url: sendURL,
@@ -148,10 +136,9 @@ export const JobFileMimetypeBarChart = React.memo((props) => {
   console.debug("props is ", getValue);
   /* eslint-enable */
 
-  if (getValue) {
-    sendURL = JOB_AGG_FILE_MIMETYPE_URI_ORG;
-    console.debug("this is sending to my urls", sendURL);
-  }
+  sendURL = `${JOB_AGG_FILE_MIMETYPE_URI}?org=${getValue}`;
+  console.debug("this is sending to my urls", sendURL);
+
   const chartProps = React.useMemo(
     () => ({
       url: sendURL,
@@ -187,10 +174,8 @@ export const JobObsNamePieChart = React.memo((props) => {
   console.debug("props is ", getValue);
   /* eslint-enable */
 
-  if (getValue) {
-    sendURL = JOB_AGG_OBS_NAME_URI_ORG;
-    console.debug("this is sending to my urls", sendURL);
-  }
+  sendURL = `${JOB_AGG_OBS_NAME_URI}?org=${getValue}`;
+
   const chartProps = React.useMemo(
     () => ({
       url: sendURL,
@@ -218,10 +203,8 @@ export const JobFileHashPieChart = React.memo((props) => {
   console.debug("props is ", getValue);
   /* eslint-enable */
 
-  if (getValue) {
-    sendURL = JOB_AGG_FILE_MD5_URI_ORG;
-    console.debug("this is sending to my urls", sendURL);
-  }
+  sendURL = `${JOB_AGG_FILE_MD5_URI}?org=${getValue}`;
+
   const chartProps = React.useMemo(
     () => ({
       url: sendURL,

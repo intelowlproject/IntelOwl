@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, FormGroup, Input, Label } from "reactstrap";
+import {
+  Container,
+  Row,
+  Col,
+  FormGroup,
+  Input,
+  Label,
+  ButtonGroup,
+  Button,
+} from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 import {
   ElasticTimePicker,
@@ -17,6 +26,7 @@ import {
 } from "./utils/charts";
 
 import { useGuideContext } from "../../contexts/GuideContext";
+import { JobResultSections } from "../../constants/miscConst";
 
 const charts1 = [
   ["JobStatusBarChart", "Job: Status", JobStatusBarChart],
@@ -38,6 +48,7 @@ const charts2 = [
 ];
 
 export default function Dashboard() {
+  const isSelectedUI = JobResultSections.VISUALIZER;
   const { guideState, setGuideState } = useGuideContext();
 
   const [state, setState] = useState(() => false);
@@ -100,6 +111,36 @@ export default function Dashboard() {
             {labelstate}
           </Label>
         </FormGroup>
+        <ButtonGroup className="ms-2 mb-3">
+          <Button
+            outline={!isSelectedUI}
+            color={isSelectedUI ? "primary" : "tertiary"}
+            // onClick={() =>
+            //   // navigate(
+            //   //   `/jobs/${job.id}/${
+            //   //     JobResultSections.VISUALIZER
+            //   //   }/${encodeURIComponent(UIElements[0].id)}`,
+            //   //   { state: { userChanged: true } },
+            //   // )
+            // }
+          >
+            {JobResultSections.VISUALIZER.charAt(0).toUpperCase() +
+              JobResultSections.VISUALIZER.slice(1)}
+          </Button>
+          <Button
+            outline={isSelectedUI}
+            color={!isSelectedUI ? "primary" : "tertiary"}
+            // onClick={() =>
+            //   // navigate(
+            //   //   `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].id}`,
+            //   //   { state: { userChanged: true } },
+            //   // )
+            // }
+          >
+            {JobResultSections.RAW.charAt(0).toUpperCase() +
+              JobResultSections.RAW.slice(1)}
+          </Button>
+        </ButtonGroup>
       </div>
       <Row className="d-flex flex-wrap flex-lg-nowrap">
         {charts1.map(([id, header, Component], index) => (

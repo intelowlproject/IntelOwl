@@ -432,11 +432,21 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_status(self, request):
+        org_param = request.GET.get("org", "").lower() == "true"
+        logger.error(org_param)
+        users_of_organization = None
+        if org_param:
+            organization = request.user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
             for key in Job.Status.values
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=users_of_organization
+        )
 
     @action(
         url_path="aggregate/type",
@@ -445,11 +455,21 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_type(self, request):
+        org_param = request.GET.get("org", "").lower() == "true"
+        logger.error(org_param)
+        users_of_organization = None
+        if org_param:
+            organization = request.user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
         annotations = {
             "file": Count("is_sample", filter=Q(is_sample=True)),
             "observable": Count("is_sample", filter=Q(is_sample=False)),
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=users_of_organization
+        )
 
     @action(
         url_path="aggregate/observable_classification",
@@ -458,13 +478,23 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_observable_classification(self, request):
+        org_param = request.GET.get("org", "").lower() == "true"
+        logger.error(org_param)
+        users_of_organization = None
+        if org_param:
+            organization = request.user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
         annotations = {
             oc.lower(): Count(
                 "observable_classification", filter=Q(observable_classification=oc)
             )
             for oc in ObservableTypes.values
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=users_of_organization
+        )
 
     @action(
         url_path="aggregate/file_mimetype",
@@ -473,7 +503,17 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_file_mimetype(self, request):
-        return self.__aggregation_response_dynamic("file_mimetype")
+        org_param = request.GET.get("org", "").lower() == "true"
+        logger.error(org_param)
+        users_of_organization = None
+        if org_param:
+            organization = request.user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
+        return self.__aggregation_response_dynamic(
+            "file_mimetype", users=users_of_organization
+        )
 
     @action(
         url_path="aggregate/observable_name",
@@ -482,7 +522,17 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_observable_name(self, request):
-        return self.__aggregation_response_dynamic("observable_name", False)
+        org_param = request.GET.get("org", "").lower() == "true"
+        logger.error(org_param)
+        users_of_organization = None
+        if org_param:
+            organization = request.user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
+        return self.__aggregation_response_dynamic(
+            "observable_name", False, users=users_of_organization
+        )
 
     @action(
         url_path="aggregate/md5",
@@ -491,217 +541,199 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_md5(self, request):
+        org_param = request.GET.get("org", "").lower() == "true"
+        logger.error(org_param)
+        users_of_organization = None
+        if org_param:
+            organization = request.user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
         # this is for file
-        return self.__aggregation_response_dynamic("md5", False)
+        return self.__aggregation_response_dynamic(
+            "md5", False, users=users_of_organization
+        )
 
     #############################################################
-    @action(
-        url_path="aggregate/org/status",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_org_status(self, request):
-        current_user = request.user
-        organization = None
-        users_of_organization = None
-        try:
-            # Check if the user has a membership
-            if current_user.has_membership():
-                organization = current_user.membership.organization
-                if organization:
-                    users_of_organization = [
-                        membership.user for membership in organization.members.all()
-                    ]
+    # @action(
+    #     url_path="aggregate/org/status",
+    #     detail=False,
+    #     methods=["GET"],
+    # )
+    # @cache_action_response(timeout=60 * 5)
+    # def aggregate_org_status(self, request):
+    #     current_user = request.user
+    #     organization = None
+    #     users_of_organization = None
+    #     try:
+    #         # Check if the user has a membership
+    #         if current_user.has_membership():
+    #             organization = current_user.membership.organization
+    #             if organization:
+    #                 users_of_organization = [
+    #                     membership.user for membership in organization.members.all()
+    #                 ]
 
-        except AttributeError:
-            # Handle the case where the user has no membership
-            logger.info("User has no membership.")
+    #     except AttributeError:
+    #         # Handle the case where the user has no membership
+    #         logger.info("User has no membership.")
 
-        annotations = {
-            key.lower(): Count("status", filter=Q(status=key))
-            for key in Job.Status.values
-        }
-        if organization:
-            return self.__aggregation_response_static(
-                annotations, users=users_of_organization
-            )
-        else:
-            return self.__aggregation_response_static(annotations, user=current_user)
+    #     annotations = {
+    #         key.lower(): Count("status", filter=Q(status=key))
+    #         for key in Job.Status.values
+    #     }
+    #     if organization:
+    #         return self.__aggregation_response_static(
+    #             annotations, users=users_of_organization
+    #         )
+    #     else:
+    #         return self.__aggregation_response_static(annotations, user=current_user)
 
-    @action(
-        url_path="aggregate/org/type",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_org_type(self, request):
-        current_user = request.user
-        organization = None
-        users_of_organization = None
-        try:
-            # Check if the user has a membership
-            if current_user.has_membership():
-                organization = current_user.membership.organization
-                if organization:
-                    users_of_organization = [
-                        membership.user for membership in organization.members.all()
-                    ]
+    # @action(
+    #     url_path="aggregate/org/type",
+    #     detail=False,
+    #     methods=["GET"],
+    # )
+    # @cache_action_response(timeout=60 * 5)
+    # def aggregate_org_type(self, request):
+    #     current_user = request.user
+    #     organization = None
+    #     users_of_organization = None
+    #     try:
+    #         # Check if the user has a membership
+    #         if current_user.has_membership():
+    #             organization = current_user.membership.organization
+    #             if organization:
+    #                 users_of_organization = [
+    #                     membership.user for membership in organization.members.all()
+    #                 ]
 
-        except AttributeError:
-            # Handle the case where the user has no membership
-            logger.info("User has no membership.")
+    #     except AttributeError:
+    #         # Handle the case where the user has no membership
+    #         logger.info("User has no membership.")
 
-        annotations = {
-            "file": Count("is_sample", filter=Q(is_sample=True)),
-            "observable": Count("is_sample", filter=Q(is_sample=False)),
-        }
-        if organization:
-            return self.__aggregation_response_static(
-                annotations, users=users_of_organization
-            )
-        else:
-            return self.__aggregation_response_static(annotations, user=current_user)
+    #     annotations = {
+    #         "file": Count("is_sample", filter=Q(is_sample=True)),
+    #         "observable": Count("is_sample", filter=Q(is_sample=False)),
+    #     }
+    #     if organization:
+    #         return self.__aggregation_response_static(
+    #             annotations, users=users_of_organization
+    #         )
+    #     else:
+    #         return self.__aggregation_response_static(annotations, user=current_user)
 
-    @action(
-        url_path="aggregate/org/observable_classification",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_org_observable_classification(self, request):
-        current_user = request.user
-        organization = None
-        users_of_organization = None
-        try:
-            # Check if the user has a membership
-            if current_user.has_membership():
-                organization = current_user.membership.organization
-                if organization:
-                    users_of_organization = [
-                        membership.user for membership in organization.members.all()
-                    ]
+    # @action(
+    #     url_path="aggregate/org/observable_classification",
+    #     detail=False,
+    #     methods=["GET"],
+    # )
+    # @cache_action_response(timeout=60 * 5)
+    # def aggregate_org_observable_classification(self, request):
+    #     current_user = request.user
+    #     organization = None
+    #     users_of_organization = None
+    #     try:
+    #         # Check if the user has a membership
+    #         if current_user.has_membership():
+    #             organization = current_user.membership.organization
+    #             if organization:
+    #                 users_of_organization = [
+    #                     membership.user for membership in organization.members.all()
+    #                 ]
 
-        except AttributeError:
-            # Handle the case where the user has no membership
-            logger.info("User has no membership.")
+    #     except AttributeError:
+    #         # Handle the case where the user has no membership
+    #         logger.info("User has no membership.")
 
-        annotations = {
-            oc.lower(): Count(
-                "observable_classification", filter=Q(observable_classification=oc)
-            )
-            for oc in ObservableTypes.values
-        }
-        if organization:
-            return self.__aggregation_response_static(
-                annotations, users=users_of_organization
-            )
-        else:
-            return self.__aggregation_response_static(annotations, user=current_user)
+    #     annotations = {
+    #         oc.lower(): Count(
+    #             "observable_classification", filter=Q(observable_classification=oc)
+    #         )
+    #         for oc in ObservableTypes.values
+    #     }
+    #     if organization:
+    #         return self.__aggregation_response_static(
+    #             annotations, users=users_of_organization
+    #         )
+    #     else:
+    #         return self.__aggregation_response_static(annotations, user=current_user)
 
-    @action(
-        url_path="aggregate/org/file_mimetype",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_org_file_mimetype(self, request):
-        current_user = request.user
-        organization = None
-        users_of_organization = None
-        try:
-            # Check if the user has a membership
-            if current_user.has_membership():
-                organization = current_user.membership.organization
-                if organization:
-                    users_of_organization = [
-                        membership.user for membership in organization.members.all()
-                    ]
+    # @action(
+    #     url_path="aggregate/org/file_mimetype",
+    #     detail=False,
+    #     methods=["GET"],
+    # )
+    # @cache_action_response(timeout=60 * 5)
+    # def aggregate_org_file_mimetype(self, request):
+    #     current_user = request.user
+    #     organization = None
+    #     users_of_organization = None
+    #     try:
+    #         # Check if the user has a membership
+    #         if current_user.has_membership():
+    #             organization = current_user.membership.organization
+    #             if organization:
+    #                 users_of_organization = [
+    #                     membership.user for membership in organization.members.all()
+    #                 ]
 
-        except AttributeError:
-            # Handle the case where the user has no membership
-            logger.info("User has no membership.")
+    #     except AttributeError:
+    #         # Handle the case where the user has no membership
+    #         logger.info("User has no membership.")
 
-        if organization:
-            return self.__aggregation_response_dynamic(
-                "file_mimetype", users=users_of_organization
-            )
-        else:
-            return self.__aggregation_response_dynamic(
-                "file_mimetype", user=current_user
-            )
+    #     if organization:
+    #         return self.__aggregation_response_dynamic(
+    #             "file_mimetype", users=users_of_organization
+    #         )
+    #     else:
+    #         return self.__aggregation_response_dynamic(
+    #             "file_mimetype", user=current_user
+    #         )
 
-    @action(
-        url_path="aggregate/org/observable_name",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_org_observable_name(self, request):
-        current_user = request.user
-        organization = None
-        users_of_organization = None
-        try:
-            # Check if the user has a membership
-            if current_user.has_membership():
-                organization = current_user.membership.organization
-                if organization:
-                    users_of_organization = [
-                        membership.user for membership in organization.members.all()
-                    ]
+    # @action(
+    #     url_path="aggregate/org/observable_name",
+    #     detail=False,
+    #     methods=["GET"],
+    # )
+    # @cache_action_response(timeout=60 * 5)
+    # def aggregate_org_observable_name(self, request):
+    #     current_user = request.user
+    #     organization = None
+    #     users_of_organization = None
+    #     try:
+    #         # Check if the user has a membership
+    #         if current_user.has_membership():
+    #             organization = current_user.membership.organization
+    #             if organization:
+    #                 users_of_organization = [
+    #                     membership.user for membership in organization.members.all()
+    #                 ]
 
-        except AttributeError:
-            # Handle the case where the user has no membership
-            logger.info("User has no membership.")
+    #     except AttributeError:
+    #         # Handle the case where the user has no membership
+    #         logger.info("User has no membership.")
 
-        if organization:
-            logger.info(organization)
-            return self.__aggregation_response_dynamic(
-                "observable_name", False, users=users_of_organization
-            )
-        else:
-            return self.__aggregation_response_dynamic(
-                "observable_name", False, user=current_user
-            )
+    #     if organization:
+    #         logger.info(organization)
+    #         return self.__aggregation_response_dynamic(
+    #             "observable_name", False, users=users_of_organization
+    #         )
+    #     else:
+    #         return self.__aggregation_response_dynamic(
+    #             "observable_name", False, user=current_user
+    #         )
 
-    @action(
-        url_path="aggregate/org/md5",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_org_md5(self, request):
-        # this is for file
-        current_user = request.user
-        organization = None
-        users_of_organization = None
-        try:
-            if current_user.has_membership():
-                organization = current_user.membership.organization
-                if organization:
-                    users_of_organization = [
-                        membership.user for membership in organization.members.all()
-                    ]
-
-        except AttributeError:
-            # Handle the case where the user has no membership
-            logger.info("User has no membership.")
-
-        if organization:
-            return self.__aggregation_response_dynamic(
-                "md5", False, users=users_of_organization
-            )
-        else:
-            return self.__aggregation_response_dynamic("md5", False, user=current_user)
+    # @action(
+    #     url_path="aggregate/org/md5",
+    #     detail=False,
+    #     methods=["GET"],
+    # )
 
     #################################################################
-    def __aggregation_response_static(
-        self, annotations: dict, users=None, user=None
-    ) -> Response:
+    def __aggregation_response_static(self, annotations: dict, users=None) -> Response:
         delta, basis = self.__parse_range(self.request)
         filter_kwargs = {"received_request_time__gte": delta}
-        if user:
-            filter_kwargs["user"] = user
         if users:
             filter_kwargs["user__in"] = users
         qs = (
@@ -718,12 +750,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         group_by_date: bool = True,
         limit: int = 5,
         users=None,
-        user=None,
     ) -> Response:
         delta, basis = self.__parse_range(self.request)
         filter_kwargs = {"received_request_time__gte": delta}
-        if user:
-            filter_kwargs["user"] = user
         if users:
             filter_kwargs["user__in"] = users
         if field_name == "md5":

@@ -1,9 +1,4 @@
 from django.db import migrations
-from django.db.models.fields.related_descriptors import (
-    ForwardManyToOneDescriptor,
-    ForwardOneToOneDescriptor,
-    ManyToManyDescriptor,
-)
 
 from api_app.analyzers_manager.constants import ObservableTypes
 
@@ -55,7 +50,7 @@ def reverse_migrate(apps, schema_editor):
         module="dns0.dns0_rrsets.DNS0Rrsets",
         base_path="api_app.analyzers_manager.observable_analyzers",
     )
-    p = Parameter(name="include_subdomain", python_module=pm).delete()
+    Parameter(name="include_subdomain", python_module=pm).delete()
 
 
 class Migration(migrations.Migration):

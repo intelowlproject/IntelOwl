@@ -30,145 +30,134 @@ plugin = {
 
 params = [
     {
-        "python_module": {
-            "module": "dns0.dns0_rrsets.DNS0Rrsets",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
         "name": "direction",
         "type": "str",
         "description": "Used to dispatch matching direction.",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
-        "name": "include_subdomain",
-        "type": "bool",
-        "description": "Search for subdomains.",
-        "is_secret": False,
-        "required": False,
     },
     {
-        "python_module": {
-            "module": "dns0.dns0_rrsets.DNS0Rrsets",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
         "name": "api_key",
         "type": "str",
         "description": "",
         "is_secret": True,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "type",
         "type": "list",
         "description": "Limit results to certain record types (e.g. type=NS,A,AAAA). Accepts a comma-separated list of DNS record types, either in textual or numeric form.",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "from",
         "type": "str",
         "description": "Limit results to records seen after this date.",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "to",
         "type": "str",
         "description": "Limit results to records seen before this date.",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "not_before",
         "type": "str",
         "description": "Limit results to records not seen before this date.",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "sort",
         "type": "str",
         "description": "Available sorts are first_seen (the default) or last_seen. Both are descending sorts (most recent first).",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "format",
         "type": "str",
         "description": "Available formats are json, cof or dig. Default format is based on the Accept HTTP header.",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "limit",
         "type": "int",
         "description": "Limit the number of results.",
         "is_secret": False,
         "required": False,
-    },
-    {
         "python_module": {
             "module": "dns0.dns0_rrsets.DNS0Rrsets",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
+    },
+    {
         "name": "offset",
         "type": "int",
         "description": "Used for pagination.",
         "is_secret": False,
         "required": False,
+        "python_module": {
+            "module": "dns0.dns0_rrsets.DNS0Rrsets",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
     },
 ]
 
 values = [
     {
+        "for_organization": False,
+        "value": "left",
+        "updated_at": "2023-12-13T15:28:50.359044Z",
+        "owner": None,
         "parameter": {
-            "python_module": {
-                "module": "dns0.dns0_rrsets.DNS0Rrsets",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
-            },
             "name": "direction",
             "type": "str",
             "description": "Used to dispatch matching direction.",
             "is_secret": False,
             "required": False,
+            "python_module": {
+                "module": "dns0.dns0_rrsets.DNS0Rrsets",
+                "base_path": "api_app.analyzers_manager.observable_analyzers",
+            },
         },
-        "for_organization": False,
-        "value": "left",
-        "updated_at": "2023-12-13T15:28:50.359044Z",
-        "owner": None,
         "analyzer_config": "DNS0_rrsets_name",
         "connector_config": None,
         "visualizer_config": None,

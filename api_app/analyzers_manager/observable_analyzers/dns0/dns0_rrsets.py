@@ -169,7 +169,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
             PluginConfig.objects.get_or_create(
                 analyzer_config=ac,
                 parameter=Parameter.objects.get(
-                    name="include_subdomains", python_module__pk=ac.python_module_id
+                    name="include_subdomain", python_module__pk=ac.python_module_id
                 ),
                 for_organization=False,
                 owner=None,

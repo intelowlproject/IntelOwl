@@ -235,7 +235,8 @@ class AbstractReportQuerySet(QuerySet):
     def _get_serializer_class(cls) -> Type["AbstractReportBISerializer"]:
         raise NotImplementedError()
 
-    def _create_index_template(self):
+    @staticmethod
+    def _create_index_template():
         if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
             name=settings.ELASTICSEARCH_BI_INDEX
         ):
@@ -260,7 +261,7 @@ class AbstractReportQuerySet(QuerySet):
             objects: AbstractReportQuerySet = page.object_list
             serializer = self._get_serializer_class()(instance=objects, many=True)
             objects_serialized = serializer.data
-            success, errors = bulk(
+            _, errors = bulk(
                 settings.ELASTICSEARCH_CLIENT,
                 objects_serialized,
                 request_timeout=max_timeout,
@@ -272,6 +273,7 @@ class AbstractReportQuerySet(QuerySet):
                 )
                 found_errors |= errors
             else:
+                logging.info("BI sent")
                 self.model.objects.filter(
                     pk__in=objects.values_list("pk", flat=True)
                 ).update(sent_to_bi=True)

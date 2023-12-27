@@ -5,6 +5,7 @@ This page includes details about some advanced features that Intel Owl provides 
   - [ElasticSearch](#elastic-search)
     - [Kibana](#kibana)
     - [Example Configuration](#example-configuration)
+    - [Business Intelligence](#business-intelligence)
   - [Authentication options](#authentication-options)
     - [OAuth support](#google-oauth2)
     - [LDAP](#ldap)

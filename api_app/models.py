@@ -910,9 +910,7 @@ class AbstractReport(models.Model):
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
     parameters = models.JSONField(blank=False, null=False, editable=False)
-    sent_to_bi = models.BooleanField(
-        default=False, null=False, blank=False, editable=False
-    )
+    sent_to_bi = models.BooleanField(default=False, editable=False)
 
     class Meta:
         abstract = True

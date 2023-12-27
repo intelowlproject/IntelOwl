@@ -37,7 +37,7 @@ function OrganizationCreateForm({ onFormSubmit }) {
       try {
         await createOrganization(values);
         onFormSubmit();
-      } catch (e) {
+      } catch (error) {
         // error was handled inside sendInvite
       } finally {
         formik.setSubmitting(false);

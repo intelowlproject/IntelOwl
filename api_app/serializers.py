@@ -890,12 +890,6 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         return last_job_for_md5
 
 
-class PluginConfigCompleteSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = PluginConfig
-        fields = rfs.ALL_FIELDS
-
-
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     class Meta:
         model = OwnershipAbstractModel
@@ -1063,12 +1057,6 @@ class ParamListSerializer(rfs.ListSerializer):
         return {elem.pop("name"): elem for elem in result}
 
 
-class ParameterCompleteSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = Parameter
-        fields = rfs.ALL_FIELDS
-
-
 class ParameterSerializer(rfs.ModelSerializer):
     value = SerializerMethodField()
 
@@ -1147,6 +1135,22 @@ class PythonModuleSerializer(rfs.ModelSerializer):
         fields = ["module", "base_path"]
 
 
+class ParameterCompleteSerializer(rfs.ModelSerializer):
+    python_module = PythonModuleSerializer(read_only=True)
+
+    class Meta:
+        model = Parameter
+        exclude = ["id"]
+
+
+class PluginConfigCompleteSerializer(rfs.ModelSerializer):
+    parameter = ParameterCompleteSerializer(read_only=True)
+
+    class Meta:
+        model = PluginConfig
+        exclude = ["id"]
+
+
 class AbstractConfigSerializer(rfs.ModelSerializer):
     ...
 
@@ -1192,30 +1196,67 @@ class AbstractReportListSerializer(rfs.ListSerializer):
     ...
 
 
-class AbstractReportSerializer(rfs.ModelSerializer):
+class AbstractReportSerializerInterface(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
+    type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
 
     class Meta:
-        fields = (
-            "id",
-            "name",
-            "process_time",
-            "report",
-            "status",
-            "errors",
-            "start_time",
-            "end_time",
-            "parameters",
-        )
+        fields = ["name", "process_time", "status", "end_time", "parameters", "type"]
         list_serializer_class = AbstractReportListSerializer
 
-    def to_representation(self, instance: AbstractReport):
-        data = super().to_representation(instance)
-        data["type"] = instance.__class__.__name__.replace("Report", "").lower()
-        return data
+    def get_type(self, instance: AbstractReport):
+        return instance.__class__.__name__.replace("Report", "").lower()
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
+class AbstractReportBISerializer(AbstractReportSerializerInterface):
+    application = rfs.CharField(read_only=True, default="IntelOwl")
+    timestamp = rfs.DateTimeField(source="start_time")
+    username = rfs.CharField(source="job.user.username")
+    environment = rfs.SerializerMethodField(method_name="get_environment")
+
+    class Meta:
+        fields = AbstractReportSerializerInterface.Meta.fields + [
+            "application",
+            "timestamp",
+            "username",
+            "environment",
+        ]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
+
+    def get_environment(self, instance: AbstractReport):
+        if settings.STAGE_PRODUCTION:
+            return "prod"
+        elif settings.STAGE_STAGING:
+            return "stag"
+        else:
+            return "test"
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        return {
+            "_source": data,
+            "_type": "_doc",
+            "_index": settings.ELASTICSEARCH_BI_INDEX + "-" + now().strftime("%Y.%m"),
+            "_op_type": "index",
+        }
+
+
+class AbstractReportSerializer(AbstractReportSerializerInterface):
+    class Meta:
+        fields = AbstractReportSerializerInterface.Meta.fields + [
+            "id",
+            "report",
+            "errors",
+            "start_time",
+        ]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
 
 
 class CrontabScheduleSerializer(rfs.ModelSerializer):

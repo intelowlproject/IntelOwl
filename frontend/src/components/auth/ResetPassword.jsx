@@ -87,7 +87,7 @@ export default function ResetPassword() {
         await resetPassword(body);
         // just to give small lag
         setTimeout(() => navigate("/login"), 500);
-      } catch (e) {
+      } catch (error) {
         // handled inside resetPassword
       }
     },

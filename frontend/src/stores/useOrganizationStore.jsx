@@ -53,9 +53,9 @@ export const useOrganizationStore = create((set, _get) => ({
           pluginsState: pluginsStateResp.data.data,
         });
       }
-    } catch (e) {
+    } catch (error) {
       // 404 means user is not part of organization
-      if (e.response.status === 404)
+      if (error.response.status === 404)
         set({
           isUserOwner: false,
           organization: {},
@@ -66,7 +66,7 @@ export const useOrganizationStore = create((set, _get) => ({
         });
 
       // update error
-      set({ loading: false, error: e });
+      set({ loading: false, error });
     }
   },
   fetchOnlyBasicInfo: async () => {
@@ -91,9 +91,9 @@ export const useOrganizationStore = create((set, _get) => ({
         },
         membersCount,
       });
-    } catch (e) {
+    } catch (error) {
       // update error
-      set({ error: e });
+      set({ error });
     }
   },
   refetchMembers: async () => {
@@ -105,9 +105,9 @@ export const useOrganizationStore = create((set, _get) => ({
       const { members } = resp.data;
       // update members key
       set({ members });
-    } catch (e) {
+    } catch (error) {
       // update error
-      set({ error: e });
+      set({ error });
     }
   },
   refetchInvs: async () => {
@@ -119,9 +119,9 @@ export const useOrganizationStore = create((set, _get) => ({
       const { pending_invitations: pendingInvitations } = resp.data;
       // update pendingInvitations key
       set({ pendingInvitations });
-    } catch (e) {
+    } catch (error) {
       // update error
-      set({ error: e });
+      set({ error });
     }
   },
   isUserAdmin: (username) => {

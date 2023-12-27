@@ -14,9 +14,9 @@ async function createNewToken() {
     const resp = await axios.post(APIACCESS_BASE_URI);
     addToast("Generated new API key for you!", null, "success", true);
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg.toString(), "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg.toString(), "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -25,9 +25,9 @@ async function deleteToken() {
     const resp = await axios.delete(APIACCESS_BASE_URI);
     addToast("API key was deleted!", null, "success", true);
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg.toString(), "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg.toString(), "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -38,9 +38,9 @@ async function deleteTokenById(id, clientName) {
     const resp = await axios.delete(`${SESSIONS_BASE_URI}/${id}`);
     addToast(`Revoked Session (${clientName}).`, null, "success", true, 6000);
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg.toString(), "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg.toString(), "danger", true);
+    return Promise.reject(error);
   }
 }
 

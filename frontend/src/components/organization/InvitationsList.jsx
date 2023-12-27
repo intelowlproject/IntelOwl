@@ -26,7 +26,11 @@ export default function InvitationsList() {
     {
       url: BASE_URI_INVITATION,
     },
-    (respData) => respData.sort((a, b) => a.created_at - b.created_at),
+    (respData) =>
+      respData.sort(
+        (currentInvitation, nextInvitation) =>
+          currentInvitation.created_at - nextInvitation.created_at,
+      ),
   );
 
   // page title

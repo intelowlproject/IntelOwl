@@ -28,6 +28,11 @@
     "no-undef": "error",
     "no-use-before-define": "off",
     "import/no-unresolved": "off",
+    "id-length": [
+      "error",
+      { "min": 3, "exceptions": ["_", "id", "pk", "ip", "IP"] }
+    ],
+    "no-warning-comments": "error",
     "no-console": [
       "error",
       {

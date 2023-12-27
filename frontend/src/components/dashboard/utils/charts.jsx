@@ -33,14 +33,14 @@ export const JobStatusBarChart = React.memo(() => {
   const chartProps = React.useMemo(
     () => ({
       url: JOB_AGG_STATUS_URI,
-      accessorFnAggregation: (d) => d,
+      accessorFnAggregation: (jobStatusesPerDay) => jobStatusesPerDay,
       componentsFn: () =>
-        Object.entries(JobStatusColors).map(([dkey, color]) => (
+        Object.entries(JobStatusColors).map(([jobStatus, jobColor]) => (
           <Bar
             stackId="jobstatus"
-            key={dkey}
-            dataKey={dkey}
-            fill={`var(--${color})`}
+            key={jobStatus}
+            dataKey={jobStatus}
+            fill={`var(--${jobColor})`}
           />
         )),
     }),
@@ -56,10 +56,15 @@ export const JobTypeBarChart = React.memo(() => {
   const chartProps = React.useMemo(
     () => ({
       url: JOB_AGG_TYPE_URI,
-      accessorFnAggregation: (d) => d,
+      accessorFnAggregation: (jobTypesPerDay) => jobTypesPerDay,
       componentsFn: () =>
-        Object.entries(JobTypeColors).map(([dataKey, color]) => (
-          <Bar stackId="jobtype" key={dataKey} dataKey={dataKey} fill={color} />
+        Object.entries(JobTypeColors).map(([jobType, jobColor]) => (
+          <Bar
+            stackId="jobtype"
+            key={jobType}
+            dataKey={jobType}
+            fill={jobColor}
+          />
         )),
     }),
     [],
@@ -74,11 +79,19 @@ export const JobObsClassificationBarChart = React.memo(() => {
   const chartProps = React.useMemo(
     () => ({
       url: JOB_AGG_OBS_CLASSIFICATION_URI,
-      accessorFnAggregation: (d) => d,
+      accessorFnAggregation: (jobObservableSubTypesPerDay) =>
+        jobObservableSubTypesPerDay,
       componentsFn: () =>
-        Object.entries(ObservableClassificationColors).map(([dKey, color]) => (
-          <Bar stackId="joboc" key={dKey} dataKey={dKey} fill={color} />
-        )),
+        Object.entries(ObservableClassificationColors).map(
+          ([observableClassification, observableColor]) => (
+            <Bar
+              stackId="joboc"
+              key={observableClassification}
+              dataKey={observableClassification}
+              fill={observableColor}
+            />
+          ),
+        ),
     }),
     [],
   );
@@ -92,16 +105,17 @@ export const JobFileMimetypeBarChart = React.memo(() => {
   const chartProps = React.useMemo(
     () => ({
       url: JOB_AGG_FILE_MIMETYPE_URI,
-      accessorFnAggregation: (d) => d?.aggregation,
+      accessorFnAggregation: (jobFileSubTypesPerDay) =>
+        jobFileSubTypesPerDay?.aggregation,
       componentsFn: (respData) => {
-        const { values: mtList } = respData;
-        if (!mtList || !mtList?.length) return null;
-        return mtList.map((mc, i) => (
+        const { values: mimetypeList } = respData;
+        if (!mimetypeList || !mimetypeList?.length) return null;
+        return mimetypeList.map((mimetype, index) => (
           <Bar
             stackId="jobfilemimetype"
-            key={mc}
-            dataKey={mc}
-            fill={colors[i]}
+            key={mimetype}
+            dataKey={mimetype}
+            fill={colors[index]}
           />
         ));
       },
@@ -121,11 +135,13 @@ export const JobObsNamePieChart = React.memo(() => {
     () => ({
       url: JOB_AGG_OBS_NAME_URI,
       modifierFn: (respData) =>
-        Object.entries(respData?.aggregation).map(([key, val], i) => ({
-          name: key.toLowerCase(),
-          value: val,
-          fill: colors[i],
-        })),
+        Object.entries(respData?.aggregation).map(
+          ([observableName, analyzedTimes], index) => ({
+            name: observableName.toLowerCase(),
+            value: analyzedTimes,
+            fill: colors[index],
+          }),
+        ),
     }),
     [],
   );
@@ -140,11 +156,13 @@ export const JobFileHashPieChart = React.memo(() => {
     () => ({
       url: JOB_AGG_FILE_MD5_URI,
       modifierFn: (respData) =>
-        Object.entries(respData?.aggregation).map(([key, val], i) => ({
-          name: key.toLowerCase(),
-          value: val,
-          fill: colors[i],
-        })),
+        Object.entries(respData?.aggregation).map(
+          ([fileMd5, analyzedTimes], index) => ({
+            name: fileMd5.toLowerCase(),
+            value: analyzedTimes,
+            fill: colors[index],
+          }),
+        ),
     }),
     [],
   );

@@ -11,14 +11,16 @@ async function createCustomConfig(data) {
     const resp = await axios.post(PLUGIN_CONFIG_URI, data);
     addToast("Data posted successfully", null, "success", true);
     return resp;
-  } catch (e) {
+  } catch (error) {
     if (
-      e?.response.status === 400 &&
-      e.response?.data?.errors?.non_field_errors[0].endsWith("already exists.")
+      error?.response.status === 400 &&
+      error.response?.data?.errors?.non_field_errors[0].endsWith(
+        "already exists.",
+      )
     )
       addToast("Failed!", "This config already exists!", "danger", true);
-    else addToast("Failed!", e.parsedMsg.toString(), "danger", true);
-    return Promise.reject(e);
+    else addToast("Failed!", error.parsedMsg.toString(), "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -29,9 +31,9 @@ async function updateCustomConfig(value, id) {
     const resp = await axios.patch(`${PLUGIN_CONFIG_URI}/${id}`, { value });
     addToast("Data updated successfully", null, "success", true);
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg.toString(), "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg.toString(), "danger", true);
+    return Promise.reject(error);
   }
 }
 
@@ -42,9 +44,9 @@ async function deleteCustomConfig(id) {
     const resp = await axios.delete(`${PLUGIN_CONFIG_URI}/${id}`);
     addToast("Data deleted successfully", null, "success", true);
     return resp;
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg.toString(), "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg.toString(), "danger", true);
+    return Promise.reject(error);
   }
 }
 

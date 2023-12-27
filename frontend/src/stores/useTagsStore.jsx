@@ -15,8 +15,8 @@ export const useTagsStore = create((set, _get) => ({
         tags: resp.data,
         loading: false,
       });
-    } catch (e) {
-      set({ error: e, loading: false });
+    } catch (error) {
+      set({ error, loading: false });
     }
   },
   create: async (label, color) => {
@@ -27,8 +27,8 @@ export const useTagsStore = create((set, _get) => ({
         tags: [...state.tags, resp.data],
       }));
       return Promise.resolve(resp.data);
-    } catch (e) {
-      return Promise.reject(e);
+    } catch (error) {
+      return Promise.reject(error);
     }
   },
   update: async (tagId, body) => {
@@ -36,11 +36,11 @@ export const useTagsStore = create((set, _get) => ({
       const resp = await axios.patch(`${TAG_BASE_URI}/${tagId}`, body);
       set((state) => ({
         ...state,
-        tags: [...state.tags.filter((t) => t.id !== tagId), resp.data],
+        tags: [...state.tags.filter((tag) => tag.id !== tagId), resp.data],
       }));
       return Promise.resolve(resp.data);
-    } catch (e) {
-      return Promise.reject(e);
+    } catch (error) {
+      return Promise.reject(error);
     }
   },
 }));

@@ -43,7 +43,12 @@ export function MembersList() {
   // memo
   const sortedMembers = React.useMemo(
     () =>
-      members?.length ? [...members].sort((a, b) => a.joined - b.joined) : [],
+      members?.length
+        ? [...members].sort(
+            (currentMember, nextMember) =>
+              currentMember.joined - nextMember.joined,
+          )
+        : [],
     [members],
   );
 

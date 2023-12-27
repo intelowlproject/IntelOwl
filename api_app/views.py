@@ -117,6 +117,7 @@ def ask_analysis_availability(request):
 )
 @api_view(["POST"])
 def ask_multi_analysis_availability(request):
+    logger.info(f"received ask_multi_analysis_availability from user {request.user}")
     serializer = JobAvailabilitySerializer(
         data=request.data, context={"request": request}, many=True
     )
@@ -127,8 +128,10 @@ def ask_multi_analysis_availability(request):
         result = []
     else:
         result = jobs
+    jrs = JobResponseSerializer(result, many=True).data
+    logger.info(f"finished ask_multi_analysis_availability from user {request.user}")
     return Response(
-        JobResponseSerializer(result, many=True).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -141,11 +144,14 @@ def ask_multi_analysis_availability(request):
 )
 @api_view(["POST"])
 def analyze_file(request):
+    logger.info(f"received analyze_file from user {request.user}")
     fas = FileAnalysisSerializer(data=request.data, context={"request": request})
     fas.is_valid(raise_exception=True)
     job = fas.save(send_task=True)
+    jrs = JobResponseSerializer(job).data
+    logger.info(f"finished analyze_file from user {request.user}")
     return Response(
-        JobResponseSerializer(job).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -170,13 +176,16 @@ def analyze_file(request):
 )
 @api_view(["POST"])
 def analyze_multiple_files(request):
+    logger.info(f"received analyze_multiple_files from user {request.user}")
     fas = FileAnalysisSerializer(
         data=request.data, context={"request": request}, many=True
     )
     fas.is_valid(raise_exception=True)
     jobs = fas.save(send_task=True)
+    jrs = JobResponseSerializer(jobs, many=True).data
+    logger.info(f"finished analyze_multiple_files from user {request.user}")
     return Response(
-        JobResponseSerializer(jobs, many=True).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -189,11 +198,14 @@ def analyze_multiple_files(request):
 )
 @api_view(["POST"])
 def analyze_observable(request):
+    logger.info(f"received analyze_observable from user {request.user}")
     oas = ObservableAnalysisSerializer(data=request.data, context={"request": request})
     oas.is_valid(raise_exception=True)
     job = oas.save(send_task=True)
+    jrs = JobResponseSerializer(job).data
+    logger.info(f"finished analyze_observable from user {request.user}")
     return Response(
-        JobResponseSerializer(job).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -214,13 +226,16 @@ def analyze_observable(request):
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):
+    logger.info(f"received analyze_multiple_observables from user {request.user}")
     oas = ObservableAnalysisSerializer(
         data=request.data, many=True, context={"request": request}
     )
     oas.is_valid(raise_exception=True)
     jobs = oas.save(send_task=True)
+    jrs = JobResponseSerializer(jobs, many=True).data
+    logger.info(f"finished analyze_multiple_observables from user {request.user}")
     return Response(
-        JobResponseSerializer(jobs, many=True).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 

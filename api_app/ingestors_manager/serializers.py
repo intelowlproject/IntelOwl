@@ -5,6 +5,7 @@ from rest_framework import serializers as rfs
 from certego_saas.apps.user.serializers import UserSerializer
 
 from ..serializers import (
+    AbstractReportBISerializer,
     AbstractReportSerializer,
     CrontabScheduleSerializer,
     PeriodicTaskSerializer,
@@ -53,3 +54,16 @@ class IngestorReportSerializer(AbstractReportSerializer):
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
+class IngestorReportBISerializer(AbstractReportBISerializer):
+    name = rfs.SerializerMethodField()
+
+    class Meta:
+        model = IngestorReport
+        fields = AbstractReportBISerializer.Meta.fields
+        list_serializer_class = AbstractReportBISerializer.Meta.list_serializer_class
+
+    @classmethod
+    def get_name(cls, instance: IngestorReport):
+        return instance.name or instance.config.pk

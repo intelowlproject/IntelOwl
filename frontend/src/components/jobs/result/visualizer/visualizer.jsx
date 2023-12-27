@@ -146,8 +146,8 @@ export default function VisualizerReport({ visualizerReport }) {
     validateLevel(levelElement),
   );
   validatedLevels.sort(
-    (firstLevel, secondLevel) =>
-      firstLevel.levelPosition - secondLevel.levelPosition,
+    (currentLevel, nextLevel) =>
+      currentLevel.levelPosition - nextLevel.levelPosition,
   );
 
   console.debug("VisualizerReport - validatedLevels");

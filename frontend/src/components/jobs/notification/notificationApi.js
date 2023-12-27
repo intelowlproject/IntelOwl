@@ -8,8 +8,8 @@ export async function notificationMarkAsRead(notifId) {
   try {
     await axios.post(`${NOTIFICATION_BASE_URI}/${notifId}/mark-as-read`);
     return Promise.resolve(true);
-  } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger", true);
-    return Promise.reject(e);
+  } catch (error) {
+    addToast("Failed!", error.parsedMsg, "danger", true);
+    return Promise.reject(error);
   }
 }

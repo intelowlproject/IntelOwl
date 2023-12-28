@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  FormGroup,
-  Input,
-  Label,
-  ButtonGroup,
-  Button,
-} from "reactstrap";
+import { Container, Row, Col, ButtonGroup, Button } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 import {
   ElasticTimePicker,
@@ -26,7 +17,7 @@ import {
 } from "./utils/charts";
 
 import { useGuideContext } from "../../contexts/GuideContext";
-import { JobResultSections } from "../../constants/miscConst";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
 const charts1 = [
   ["JobStatusBarChart", "Job: Status", JobStatusBarChart],
@@ -48,11 +39,11 @@ const charts2 = [
 ];
 
 export default function Dashboard() {
-  const isSelectedUI = JobResultSections.VISUALIZER;
+  // const isSelectedUI = JobResultSections.VISUALIZER;
   const { guideState, setGuideState } = useGuideContext();
 
-  const [state, setState] = useState(() => false);
-  const [labelstate, setlabelState] = useState("Combined Reports");
+  const [orgstate, setorgState] = useState(() => false);
+  // const [labelstate, setlabelState] = useState("Global");
 
   useEffect(() => {
     if (guideState.tourActive) {
@@ -63,17 +54,6 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    console.debug("State updated:", state);
-
-    // to handle the async nature of use state
-    if (state) {
-      setlabelState("Own Org Reports");
-    } else {
-      setlabelState("Combined Reports");
-    }
-  }, [state]);
-
   console.debug("Dashboard rendered!");
 
   const { range, onTimeIntervalChange } = useTimePickerStore();
@@ -81,17 +61,37 @@ export default function Dashboard() {
   // page title
   useTitle("IntelOwl | Dashboard", { restoreOnUnmount: true });
 
-  async function handleChange() {
-    console.debug("state is changed!", state);
+  const { organization } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        organization: state.organization,
+      }),
+      [],
+    ),
+  );
 
-    setState((prevState) => !prevState);
-  }
   return (
     <Container fluid id="Dashboard">
-      <div className="g-0 d-flex align-items-bottom flex-column flex-lg-row mb-2">
+      {/* <div className="g-0 d-flex align-items-baseline flex-column flex-lg-row mb-2">
         <h3 className="fw-bold" id="Dashboard_title">
           Dashboard
         </h3>
+        <ButtonGroup className="ms-2 mb-3 d-flex align-items-center">
+          <Button
+            outline={!state}
+            color={state ? "primary" : "tertiary"}
+            onClick={() => handleChange()}
+          >
+            GLOBAL
+          </Button>
+          <Button
+            outline={state}
+            color={!state ? "primary" : "tertiary"}
+            onClick={() => handleChange()}
+          >
+              ORG
+          </Button>
+        </ButtonGroup>
         <ElasticTimePicker
           className="ms-auto"
           size="sm"
@@ -99,49 +99,53 @@ export default function Dashboard() {
           onChange={onTimeIntervalChange}
           id="Dashboard_timepicker"
         />
-        <FormGroup switch className="d-flex align-items-center">
-          <Input
-            type="switch"
-            role="switch"
-            onClick={() => handleChange()}
-            style={{ width: "3.5em", height: "2em" }}
-            className="ms-auto"
+
+      </div> */}
+
+      <div className="d-flex flex-wrap justify-content-between align-items-baseline mb-2">
+        <div>
+          <h3 className="fw-bold" id="Dashboard_title">
+            Dashboard
+          </h3>
+        </div>
+        <div className="d-flex flex-wrap align-items-baseline ">
+          {organization?.name ? (
+            <ButtonGroup className="mb-3">
+              <Button
+                outline={orgstate}
+                color={!orgstate ? "primary" : "tertiary"}
+                onClick={async () => {
+                  if (orgstate) {
+                    setorgState((prevState) => !prevState);
+                  }
+                }}
+              >
+                GLOBAL
+              </Button>
+              <Button
+                outline={!orgstate}
+                color={orgstate ? "primary" : "tertiary"}
+                onClick={async () => {
+                  if (!orgstate) {
+                    setorgState((prevState) => !prevState);
+                  }
+                }}
+              >
+                ORG
+              </Button>
+            </ButtonGroup>
+          ) : null}
+
+          <ElasticTimePicker
+            className="ms-2"
+            size="sm"
+            defaultSelected={range}
+            onChange={onTimeIntervalChange}
+            id="Dashboard_timepicker"
           />
-          <Label check style={{ fontSize: "1.3em" }} className="ms-3">
-            {labelstate}
-          </Label>
-        </FormGroup>
-        <ButtonGroup className="ms-2 mb-3">
-          <Button
-            outline={!isSelectedUI}
-            color={isSelectedUI ? "primary" : "tertiary"}
-            // onClick={() =>
-            //   // navigate(
-            //   //   `/jobs/${job.id}/${
-            //   //     JobResultSections.VISUALIZER
-            //   //   }/${encodeURIComponent(UIElements[0].id)}`,
-            //   //   { state: { userChanged: true } },
-            //   // )
-            // }
-          >
-            {JobResultSections.VISUALIZER.charAt(0).toUpperCase() +
-              JobResultSections.VISUALIZER.slice(1)}
-          </Button>
-          <Button
-            outline={isSelectedUI}
-            color={!isSelectedUI ? "primary" : "tertiary"}
-            // onClick={() =>
-            //   // navigate(
-            //   //   `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].id}`,
-            //   //   { state: { userChanged: true } },
-            //   // )
-            // }
-          >
-            {JobResultSections.RAW.charAt(0).toUpperCase() +
-              JobResultSections.RAW.slice(1)}
-          </Button>
-        </ButtonGroup>
+        </div>
       </div>
+
       <Row className="d-flex flex-wrap flex-lg-nowrap">
         {charts1.map(([id, header, Component], index) => (
           <Col key={id} md={12} lg={index === 0 ? 6 : 3}>
@@ -151,8 +155,8 @@ export default function Dashboard() {
               body={
                 <div className="pt-2">
                   <Component
-                    myprop={{
-                      key: state,
+                    sendProp={{
+                      key: orgstate,
                     }}
                   />
                 </div>
@@ -171,8 +175,8 @@ export default function Dashboard() {
               body={
                 <div className="pt-2">
                   <Component
-                    myprop={{
-                      key: state,
+                    sendProp={{
+                      key: orgstate,
                     }}
                   />
                 </div>

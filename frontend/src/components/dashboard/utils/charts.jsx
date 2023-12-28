@@ -31,8 +31,8 @@ export const JobStatusBarChart = React.memo((props) => {
   console.debug("JobStatusBarChart rendered!");
   /* eslint-disable */
   var sendURL = JOB_AGG_STATUS_URI;
-  const porp = props.myprop;
-  const getValue = porp.key;
+  const parameter = props.sendProp;
+  const getValue = parameter.key;
   console.debug("props is ", getValue);
   /* eslint-enable */
 
@@ -65,8 +65,8 @@ export const JobTypeBarChart = React.memo((props) => {
   console.debug("JobTypeBarChart rendered!");
   /* eslint-disable */
   var sendURL = JOB_AGG_TYPE_URI;
-  const porp = props.myprop;
-  const getValue = porp.key;
+  const parameter = props.sendProp;
+  const getValue = parameter.key;
   console.debug("props is ", getValue);
   /* eslint-enable */
 
@@ -97,8 +97,8 @@ export const JobObsClassificationBarChart = React.memo((props) => {
   console.debug("JobObsClassificationBarChart rendered!");
   /* eslint-disable */
   var sendURL = JOB_AGG_OBS_CLASSIFICATION_URI;
-  const porp = props.myprop;
-  const getValue = porp.key;
+  const parameter = props.sendProp;
+  const getValue = parameter.key;
   console.debug("props is ", getValue);
   /* eslint-enable */
 
@@ -131,8 +131,8 @@ export const JobFileMimetypeBarChart = React.memo((props) => {
   console.debug("JobFileMimetypeBarChart rendered!");
   /* eslint-disable */
   var sendURL = JOB_AGG_FILE_MIMETYPE_URI;
-  const porp = props.myprop;
-  const getValue = porp.key;
+  const parameter = props.sendProp;
+  const getValue = parameter.key;
   console.debug("props is ", getValue);
   /* eslint-enable */
 
@@ -169,8 +169,8 @@ export const JobObsNamePieChart = React.memo((props) => {
   console.debug("JobObsNamePieChart rendered!");
   /* eslint-disable */
   var sendURL = JOB_AGG_OBS_NAME_URI;
-  const porp = props.myprop;
-  const getValue = porp.key;
+  const parameter = props.sendProp;
+  const getValue = parameter.key;
   console.debug("props is ", getValue);
   /* eslint-enable */
 
@@ -198,8 +198,8 @@ export const JobFileHashPieChart = React.memo((props) => {
   console.debug("JobFileHashPieChart rendered!");
   /* eslint-disable */
   var sendURL = JOB_AGG_FILE_MD5_URI;
-  const porp = props.myprop;
-  const getValue = porp.key;
+  const parameter = props.sendProp;
+  const getValue = parameter.key;
   console.debug("props is ", getValue);
   /* eslint-enable */
 

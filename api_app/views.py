@@ -529,7 +529,8 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             "md5", False, users=users_of_organization
         )
 
-    def get_org_members(self, user=None):
+    @staticmethod
+    def get_org_members(user=None):
         organization = user.membership.organization
         users_of_organization = [
             membership.user for membership in organization.members.all()

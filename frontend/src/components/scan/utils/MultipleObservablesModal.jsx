@@ -3,12 +3,16 @@ import PropTypes from "prop-types";
 import { Modal, ModalHeader, ModalBody, Button, Input } from "reactstrap";
 
 import { ContentSection } from "@certego/certego-ui";
-import { observableValidators } from "./observableValidators";
+import {
+  observableValidators,
+  sanitizeObservable,
+} from "./observableValidators";
 
 // components
 export function MultipleObservablesModal(props) {
   const { isOpen, toggle, formik, ...rest } = props;
   const [extractedObservables, setExtractedObservables] = React.useState({});
+  const [textAreaInput, setTextAreaInput] = React.useState("");
 
   const extractObservables = (inputText) => {
     // split text where there are spaces, breakline or , and ;
@@ -38,6 +42,35 @@ export function MultipleObservablesModal(props) {
     console.debug("MultipleObservablesModal - observables:");
     console.debug(observables);
     setExtractedObservables(observables);
+
+    const textHighlightColor = (text) => {
+      if (observables.domain.includes(text)) return "mark text-primary";
+      if (observables.ip.includes(text)) return "mark text-warning";
+      if (observables.hash.includes(text)) return "mark text-success";
+      if (observables.url.includes(text)) return "mark text-danger";
+      return null;
+    };
+
+    setTextAreaInput(
+      inputText.split(/\n/).map((line) => (
+        <>
+          <span>
+            {line.split(/\s/).map((part) => (
+              <>
+                <span
+                  className={textHighlightColor(sanitizeObservable(part))}
+                  key={`highlightArea__${part}`}
+                >
+                  {part}
+                </span>
+                &nbsp;
+              </>
+            ))}
+          </span>
+          <br />
+        </>
+      )),
+    );
   };
 
   const saveAndCloseModal = () => {
@@ -57,7 +90,7 @@ export function MultipleObservablesModal(props) {
       scrollable
       backdrop="static"
       labelledBy="Load Multiple Observables"
-      style={{ minWidth: "70%" }}
+      style={{ minWidth: "90%" }}
       {...rest}
     >
       <ModalHeader className="bg-tertiary" toggle={toggle}>
@@ -71,9 +104,9 @@ export function MultipleObservablesModal(props) {
           <ContentSection
             className="bg-darker"
             id="load_multiple_observables-section"
-            style={{ width: "60%", maxHeight: "560px" }}
+            style={{ width: "40%" }}
           >
-            <small className="text-muted">
+            <small className="text-muted mb-2">
               Enter any text to extract observables for further lookup.
             </small>
             <Input
@@ -81,22 +114,59 @@ export function MultipleObservablesModal(props) {
               name="textArea"
               type="textarea"
               onChange={(e) => extractObservables(e.target.value)}
-              style={{ minHeight: "500px", overflowY: "auto" }}
-              className="my-2"
+              style={{ minHeight: "600px", overflowY: "auto" }}
+              className="my-2 mt-3"
             />
           </ContentSection>
           {/* lateral menu with the extracted observables */}
-          <ContentSection
+          <ContentSection className="ms-2 bg-darker" style={{ width: "60%" }}>
+            <h5 className="text-accent">Extracted observables</h5>
+            <div
+              className="d-flex-start-start"
+              style={{ maxHeight: "660px", overflowY: "auto" }}
+            >
+              <div
+                id="load_multiple_observables-highlightArea"
+                style={{ width: "65%", height: "600px", overflowY: "auto" }}
+                className="form-control my-2"
+              >
+                {textAreaInput}
+              </div>
+              <div
+                className="ps-4"
+                style={{ width: "35%", height: "600px", overflowY: "auto" }}
+              >
+                {Object.values(extractedObservables).flat().length === 0 ? (
+                  <small className="text-muted">No observable found.</small>
+                ) : (
+                  Object.entries(extractedObservables).map(([key, iocs]) => (
+                    <div>
+                      <h6 key={key} className="text-secondary px-3">
+                        {key}:
+                      </h6>
+                      <ul>
+                        {iocs?.map((ioc) => (
+                          <li key={`extractedObservables__${key}__${ioc}`}>
+                            {ioc}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </ContentSection>
+          {/* <ContentSection
             className="ms-2 bg-darker"
-            style={{ width: "40%", maxHeight: "560px", overflowY: "auto" }}
+            style={{ width: "20%", maxHeight: "560px", overflowY: "auto" }}
           >
             <div style={{ minHeight: "540px", overflowY: "auto" }}>
-              <h5 className="text-accent">Extracted observables</h5>
               {Object.values(extractedObservables).flat().length === 0 ? (
                 <small className="text-muted">No observable found.</small>
               ) : (
                 Object.entries(extractedObservables).map(([key, iocs]) => (
-                  <div>
+                  <div >
                     <h6 key={key} className="text-secondary px-3">
                       {key}:
                     </h6>
@@ -111,7 +181,7 @@ export function MultipleObservablesModal(props) {
                 ))
               )}
             </div>
-          </ContentSection>
+          </ContentSection> */}
         </div>
         <div className="d-flex justify-content-end mb-1">
           <Button

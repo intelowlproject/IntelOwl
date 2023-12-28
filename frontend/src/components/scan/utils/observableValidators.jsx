@@ -7,6 +7,7 @@ import {
 import {
   ObservableClassifications,
   FileExtensions,
+  InvalidTLD,
 } from "../../../constants/jobConst";
 
 /* Remove [] inside the string, remove any no-word characters at the end of the string */
@@ -26,10 +27,7 @@ const observableType2RegExMap = {
 };
 
 export function observableValidators(stringToValidate) {
-  console.debug("stringToValidate", stringToValidate);
-
   const sanitizedString = sanitizeObservable(stringToValidate);
-  console.debug("sanitizedString", sanitizedString);
 
   let stringClassification = "";
   Object.entries(observableType2RegExMap).forEach(([typeName, typeRegEx]) => {
@@ -41,8 +39,13 @@ export function observableValidators(stringToValidate) {
   // domain
   if (stringClassification === ObservableClassifications.DOMAIN) {
     const stringEnd = sanitizedString.split(".").pop();
-    // remove file extentions
-    if (Object.values(FileExtensions).includes(stringEnd)) return null;
+    // remove file extentions and invalid TLD
+    if (
+      Object.values(FileExtensions)
+        .concat(Object.values(InvalidTLD))
+        .includes(stringEnd)
+    )
+      return null;
   }
 
   // hash

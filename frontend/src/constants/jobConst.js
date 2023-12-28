@@ -178,3 +178,11 @@ export const FileExtensions = Object.freeze({
   ISO: "iso",
   SH: "sh",
 });
+
+export const InvalidTLD = Object.freeze({
+  IP: "ip",
+  DOMAIN: "domain",
+  PORT: "port",
+  PATH: "path",
+  NAME: "name",
+});

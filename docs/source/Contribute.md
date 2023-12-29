@@ -176,18 +176,19 @@ There are two possible cases:
 If you are doing the step number `2`, you can skip this paragraph.
 
 First, you need to create the python code that will be actually executed. You can easily take other plugins as example to write this.
-Then, you have to create a `Python Module` model. You can do this in the `django admin`page : 
+Then, you have to create a `Python Module` model. You can do this in the `Django Admin` page: 
 You have to specify which type of Plugin you wrote, and its python module. Again, you can use as an example an already configured `Python Module`.
-Some `Python Module` requires to update some part of its code in a schedule way: for example `Yara` requires to update the rule repositories, `QuarkEngine` to update its database and so on.
+
+Some `Python Module` requires to update some part of its code in a **schedule way**: for example `Yara` requires to update the rule repositories, `QuarkEngine` to update its database and so on.
 If the `Python Module` that you define need this type of behaviour, you have to configure two things:
+- In the python code, you have to override a method called `update` and put the updating logic (see other plugins for examples) there.
 - In the model class, you have to add the `update_schedule` (crontab syntax) that define when the update should be executed.
-- In the python code, you have to override a method called `update` and put there the updating logic (see other plugins for examples)
 
 
 Some `Python Module` requires further check to see if the service provider is able to answer requests; for example if you have done too many requests, or the website is currently down for maintenance and so on.
 If the `Python Module` that you define need this type of behaviour, you have to configure two things:
+- In the python code, you can override a method called `health_check` and put there the custom health check logic. As default, plugins will try to make an HTTP `HEAD` request to the configured url.
 - In the model class, you have to add the `health_check_schedule` (crontab syntax) that define when the health check should be executed.
-- In the python code, you can override a method called `health_check` and put there the custom health check logic. As default, plugins will try to make a `head` request to the configured url.
 
 
 Press `Save and continue editing` to, at the moment, manually ad the `Parameters` that the python code requires (the class attributes that you needed): 

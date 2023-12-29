@@ -13,7 +13,7 @@ from typing import Any, Dict, Generator, List, Union
 import django.core.exceptions
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
@@ -211,27 +211,29 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
-        attrs["visualizers_to_execute"] = list(
-            self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
-        )
+        attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(**attrs)
         attrs["warnings"] = self.filter_warnings
         attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 
     def set_visualizers_to_execute(
         self,
-        playbook_to_execute: PlaybookConfig = None,
-    ) -> Generator[VisualizerConfig, None, None]:
-        if playbook_to_execute:
-            yield from VisualizerConfig.objects.filter(
-                playbooks__in=[playbook_to_execute]
-            ).annotate_runnable(self.context["request"].user).filter(runnable=True)
+        tlp: str,
+        playbook_requested: PlaybookConfig = None,
+        **kwargs,
+    ) -> List[VisualizerConfig]:
+        if playbook_requested:
+            visualizers = VisualizerConfig.objects.filter(
+                playbooks__in=[playbook_requested]
+            )
+        else:
+            visualizers = []
+        return list(self.plugins_to_execute(tlp, visualizers))
 
     def set_connectors_to_execute(
         self, connectors_requested: List[ConnectorConfig], tlp: str, **kwargs
     ) -> List[ConnectorConfig]:
-        connectors_executed = list(self.plugins_to_execute(tlp, connectors_requested))
-        return connectors_executed
+        return list(self.plugins_to_execute(tlp, connectors_requested))
 
     def set_analyzers_to_execute(
         self, analyzers_requested: List[AnalyzerConfig], tlp: str, **kwargs
@@ -247,30 +249,40 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def plugins_to_execute(
         self,
         tlp,
-        plugins_requested: List[Union[AnalyzerConfig, ConnectorConfig]],
-    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig], None, None]:
+        plugins_requested: Union[
+            List[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]], QuerySet
+        ],
+    ) -> Generator[
+        Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig], None, None
+    ]:
         if not plugins_requested:
             return
-        qs = plugins_requested[0].__class__.objects.filter(
-            pk__in=[plugin.pk for plugin in plugins_requested]
-        )
+        if isinstance(plugins_requested, QuerySet):
+            qs = plugins_requested
+        else:
+            qs = plugins_requested[0].__class__.objects.filter(
+                pk__in=[plugin.pk for plugin in plugins_requested]
+            )
         for plugin_config in qs.annotate_runnable(self.context["request"].user):
             try:
                 if not plugin_config.runnable:
                     raise NotRunnableConnector(
                         f"{plugin_config.name} won't run: is disabled or not configured"
                     )
-
-                if (
-                    TLP[tlp] > TLP[plugin_config.maximum_tlp]
-                ):  # check if job's tlp allows running
-                    # e.g. if connector_tlp is GREEN(1),
-                    # run for job_tlp CLEAR(0) & GREEN(1) only
-                    raise NotRunnableConnector(
-                        f"{plugin_config.name} won't run because "
-                        f"job.tlp is '{tlp}') while plugin"
-                        f" maximum_tlp ('{plugin_config.maximum_tlp}')"
-                    )
+                try:
+                    if (
+                        TLP[tlp] > TLP[plugin_config.maximum_tlp]
+                    ):  # check if job's tlp allows running
+                        # e.g. if connector_tlp is GREEN(1),
+                        # run for job_tlp CLEAR(0) & GREEN(1) only
+                        raise NotRunnableConnector(
+                            f"{plugin_config.name} won't run because "
+                            f"job.tlp is '{tlp}') while plugin"
+                            f" maximum_tlp ('{plugin_config.maximum_tlp}')"
+                        )
+                except AttributeError:
+                    # in case the plugin does not have maximum_tlp:
+                    pass
             except NotRunnableConnector as e:
                 self.filter_warnings.append(str(e))
                 logger.info(e)

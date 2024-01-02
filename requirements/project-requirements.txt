@@ -35,7 +35,7 @@ flower==2.0.0
 
 # plugins
 GitPython==3.1.37
-checkdmarc==4.8.4
+checkdmarc==5.1.0
 dnspython==2.4.2
 dnstwist[full]==20230918
 google>=3.0.0

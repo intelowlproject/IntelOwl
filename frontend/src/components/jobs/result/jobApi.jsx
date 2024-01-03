@@ -35,8 +35,8 @@ export async function downloadJobSample(jobId) {
       responseType: "blob",
     });
     blob = new Blob([resp.data]);
-  } catch (e) {
-    addToast("Failed", e.parsedMsg, "warning");
+  } catch (error) {
+    addToast("Failed", error.parsedMsg, "warning");
   }
   return blob;
 }
@@ -51,12 +51,12 @@ export async function killJob(jobId) {
     if (success) {
       addToast(<span>Sent kill request for job #{jobId}</span>, null, "info");
     }
-  } catch (e) {
+  } catch (error) {
     addToast(
       <span>
         Failed. Operation: <em>kill job #{jobId}</em>
       </span>,
-      e.parsedMsg,
+      error.parsedMsg,
       "warning",
     );
   }
@@ -73,12 +73,12 @@ export async function deleteJob(jobId) {
     if (success) {
       addToast(<span>Deleted Job #{jobId}</span>, null, "info");
     }
-  } catch (e) {
+  } catch (error) {
     addToast(
       <span>
         Failed. Operation: <em>delete job #{jobId}</em>
       </span>,
-      e.parsedMsg,
+      error.parsedMsg,
       "warning",
     );
   }
@@ -105,12 +105,12 @@ export async function killPlugin(jobId, plugin) {
         "info",
       );
     }
-  } catch (e) {
+  } catch (error) {
     addToast(
       <span>
         Failed. Operation: kill {plugin.type} <em>{plugin.name}</em>
       </span>,
-      e.parsedMsg,
+      error.parsedMsg,
       "warning",
     );
   }
@@ -137,12 +137,12 @@ export async function retryPlugin(jobId, plugin) {
         "info",
       );
     }
-  } catch (e) {
+  } catch (error) {
     addToast(
       <span>
         Failed. Operation: retry {plugin.type} <em>{plugin.name}</em>
       </span>,
-      e.parsedMsg,
+      error.parsedMsg,
       "warning",
     );
   }

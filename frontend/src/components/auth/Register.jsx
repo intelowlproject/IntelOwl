@@ -208,7 +208,7 @@ export default function Register() {
         });
 
         setShowAfterRegistrationModal(true);
-      } catch (e) {
+      } catch (error) {
         // handled inside registerUser
       }
     },

@@ -100,8 +100,8 @@ export const usePluginConfigurationStore = create((set, get) => ({
         analyzers,
         analyzersLoading: false,
       });
-    } catch (e) {
-      set({ analyzersError: e, analyzersLoading: false });
+    } catch (error) {
+      set({ analyzersError: error, analyzersLoading: false });
     }
   },
   retrieveConnectorsConfiguration: async () => {
@@ -117,8 +117,8 @@ export const usePluginConfigurationStore = create((set, get) => ({
         connectors,
         connectorsLoading: false,
       });
-    } catch (e) {
-      set({ connectorsError: e, connectorsLoading: false });
+    } catch (error) {
+      set({ connectorsError: error, connectorsLoading: false });
     }
   },
   retrieveVisualizersConfiguration: async () => {
@@ -134,8 +134,8 @@ export const usePluginConfigurationStore = create((set, get) => ({
         visualizers,
         visualizersLoading: false,
       });
-    } catch (e) {
-      set({ visualizersError: e, visualizersLoading: false });
+    } catch (error) {
+      set({ visualizersError: error, visualizersLoading: false });
     }
   },
   retrieveIngestorsConfiguration: async () => {
@@ -151,8 +151,8 @@ export const usePluginConfigurationStore = create((set, get) => ({
         ingestors,
         ingestorsLoading: false,
       });
-    } catch (e) {
-      set({ ingestorsError: e, ingestorsLoading: false });
+    } catch (error) {
+      set({ ingestorsError: error, ingestorsLoading: false });
     }
   },
   retrievePivotsConfiguration: async () => {
@@ -168,8 +168,8 @@ export const usePluginConfigurationStore = create((set, get) => ({
         pivots,
         pivotsLoading: false,
       });
-    } catch (e) {
-      set({ pivotsError: e, pivotsLoading: false });
+    } catch (error) {
+      set({ pivotsError: error, pivotsLoading: false });
     }
   },
   retrievePlaybooksConfiguration: async () => {
@@ -185,8 +185,8 @@ export const usePluginConfigurationStore = create((set, get) => ({
         playbooks,
         playbooksLoading: false,
       });
-    } catch (e) {
-      set({ playbooksError: e, playbooksLoading: false });
+    } catch (error) {
+      set({ playbooksError: error, playbooksLoading: false });
     }
   },
   checkPluginHealth: async (type, PluginName) => {
@@ -211,15 +211,15 @@ export const usePluginConfigurationStore = create((set, get) => ({
           true,
         );
       return Promise.resolve(resp.status);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       addToast(
         `${PluginName} - health check: failed`,
-        prettifyErrors(e),
+        prettifyErrors(error),
         "danger",
         true,
       );
-      return e.response.status;
+      return error.response.status;
     }
   },
   pluginPull: async (type, PluginName) => {
@@ -244,9 +244,9 @@ export const usePluginConfigurationStore = create((set, get) => ({
           true,
         );
       return Promise.resolve(resp.status);
-    } catch (e) {
-      addToast("Plugin pull: failed", prettifyErrors(e), "danger", true);
-      return e.response.status;
+    } catch (error) {
+      addToast("Plugin pull: failed", prettifyErrors(error), "danger", true);
+      return error.response.status;
     }
   },
   deletePlaybook: async (playbook) => {
@@ -256,8 +256,8 @@ export const usePluginConfigurationStore = create((set, get) => ({
       );
       addToast(`${playbook} deleted`, null, "info");
       return Promise.resolve(response);
-    } catch (e) {
-      addToast("Failed!", prettifyErrors(e), "danger");
+    } catch (error) {
+      addToast("Failed!", prettifyErrors(error), "danger");
       return null;
     }
   },

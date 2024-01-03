@@ -128,7 +128,7 @@ export default function RecentScans({ classification, param }) {
   */
   useMemo(() => {
     if (classification === JobTypes.FILE && param) {
-      param.text().then((x) => setFileMd5(md5(x)));
+      param.text().then((text) => setFileMd5(md5(text)));
     }
   }, [classification, param]);
 
@@ -145,7 +145,7 @@ export default function RecentScans({ classification, param }) {
   // remove duplicate job
   const allRecentScans = Array.from(
     [...recentScans, ...recentScansUser]
-      .reduce((m, scan) => m.set(scan.pk, scan), new Map())
+      .reduce((allScan, scan) => allScan.set(scan.pk, scan), new Map())
       .values(),
   );
   console.debug("allRecentScans", allRecentScans);

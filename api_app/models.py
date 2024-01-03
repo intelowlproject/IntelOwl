@@ -892,6 +892,7 @@ class AbstractConfig(models.Model):
 
 
 class AbstractReport(models.Model):
+    objects = AbstractReportQuerySet.as_manager()
     # constants
     Status = ReportStatus
 
@@ -908,8 +909,8 @@ class AbstractReport(models.Model):
     job = models.ForeignKey(
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
-    objects = AbstractReportQuerySet.as_manager()
     parameters = models.JSONField(blank=False, null=False, editable=False)
+    sent_to_bi = models.BooleanField(default=False, editable=False)
 
     class Meta:
         abstract = True

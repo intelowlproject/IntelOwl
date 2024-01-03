@@ -31,10 +31,10 @@ export async function saveJobAsPlaybook(values) {
         "info",
       );
     }
-  } catch (e) {
+  } catch (error) {
     addToast(
       <span>Failed creation of playbook with name {values.name}</span>,
-      e.parsedMsg,
+      error.parsedMsg,
       "warning",
     );
   }

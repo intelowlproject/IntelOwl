@@ -22,7 +22,7 @@ export function prettifyErrors(errorResponse) {
         }
       });
     });
-    prettyHTMLList = prettyHTMLList.map((e) => <li>{e}</li>);
+    prettyHTMLList = prettyHTMLList.map((error) => <li>{error}</li>);
     return <ul>{prettyHTMLList}</ul>;
   }
   // single validation error

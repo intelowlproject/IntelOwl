@@ -7,10 +7,12 @@ from api_app.choices import PythonModuleBasePaths
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
+from api_app.visualizers_manager.queryset import VisualizerReportQuerySet
 from api_app.visualizers_manager.validators import validate_report
 
 
 class VisualizerReport(AbstractReport):
+    objects = VisualizerReportQuerySet.as_manager()
     config = models.ForeignKey(
         "VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )

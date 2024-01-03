@@ -18,8 +18,8 @@ export const useRecentScansStore = create((set, _get) => ({
         recentScansUser: resp.data,
         loadingScansUser: false,
       });
-    } catch (e) {
-      set({ recentScansUserError: e, loadingScansUser: false });
+    } catch (error) {
+      set({ recentScansUserError: error, loadingScansUser: false });
     }
   },
   fetchRecentscans: async (md5) => {
@@ -30,8 +30,8 @@ export const useRecentScansStore = create((set, _get) => ({
         recentScans: resp.data,
         loadingScansInsertedAnalyzable: false,
       });
-    } catch (e) {
-      set({ recentScansError: e, loadingScansInsertedAnalyzable: false });
+    } catch (error) {
+      set({ recentScansError: error, loadingScansInsertedAnalyzable: false });
     }
   },
 }));

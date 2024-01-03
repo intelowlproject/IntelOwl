@@ -29,7 +29,7 @@ export default function initAxios() {
   });
   // response interceptor
   axios.interceptors.response.use(
-    (r) => r,
+    (response) => response,
     (error) => {
       if (!error?.response) {
         return Promise.reject(error);
@@ -46,7 +46,7 @@ export default function initAxios() {
         response.data;
       try {
         err.parsedMsg = isObject(errField) ? objToString(errField) : errField;
-      } catch (e) {
+      } catch (errorResponse) {
         err.parsedMsg = errField;
       }
       // force logout

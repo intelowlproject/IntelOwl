@@ -701,4 +701,56 @@ describe("ScanForm adavanced use", () => {
       ]);
     });
   });
+
+  test("test multiple observables of different types", async () => {
+    const user = userEvent.setup();
+    render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.]com");
+    // add second observable to analyze
+    const addNewValueButton = screen.getByRole("button", {
+      name: "Add new value",
+    });
+    expect(addNewValueButton).toBeInTheDocument();
+    await user.click(addNewValueButton);
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    // doubled braked are required by user-event library
+    await user.type(secondObservableInputElement, "1.1.1.1");
+
+    const startScanButton = screen.getByRole("button", { name: "Start Scan" });
+    expect(startScanButton).toBeInTheDocument();
+    user.click(startScanButton);
+
+    await waitFor(() => {
+      // no call to the API to check old analysis (one of the advanced settings)
+      expect(axios.post.mock.calls.length).toBe(1);
+      expect(axios.post.mock.calls).toEqual([
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "google.com"], ["ip", "1.1.1.1"]],
+            playbook_requested: "TEST_PLAYBOOK_DOMAIN",
+            tlp: "CLEAR",
+            scan_mode: 2,
+            scan_check_time: "48:00:00",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
+          },
+          { headers: { "Content-Type": "application/json" } },
+        ],
+      ]);
+    });
+  })
 });

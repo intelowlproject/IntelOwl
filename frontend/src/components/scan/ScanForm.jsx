@@ -61,11 +61,9 @@ import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../../utils/time";
 import { JobTypes, ObservableClassifications } from "../../constants/jobConst";
 import {
-  DOMAIN_REGEX,
-  IP_REGEX,
-  HASH_REGEX,
-  URL_REGEX,
-} from "../../constants/regexConst";
+  sanitizeObservable,
+  getObservableClassification,
+} from "../../utils/observables";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -75,17 +73,6 @@ function DangerErrorMessage(fieldName) {
     />
   );
 }
-
-// constants
-const observableType2RegExMap = {
-  domain: DOMAIN_REGEX,
-  ip: IP_REGEX,
-  url: URL_REGEX,
-  hash: HASH_REGEX,
-};
-
-export const sanitizeObservable = (observable) =>
-  observable.replaceAll("[", "").replaceAll("]", "").trim();
 
 // Component
 export default function ScanForm() {
@@ -439,14 +426,7 @@ export default function ScanForm() {
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
-      let newClassification = ObservableClassifications.GENERIC;
-      Object.entries(observableType2RegExMap).forEach(
-        ([typeName, typeRegEx]) => {
-          if (typeRegEx.test(sanitizeObservable(observableValue))) {
-            newClassification = typeName;
-          }
-        },
-      );
+      const newClassification = getObservableClassification(observableValue);
       formik.setFieldValue("classification", newClassification, false);
       // in case a playbook is available and i changed classification or no playbook is selected i select a playbook
       if (

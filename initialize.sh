@@ -92,7 +92,7 @@ if ! docker compose version; then
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Install docker compose
-    sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins
+    sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
     sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
     # Check if docker compose is installed
     if ! docker compose version; then

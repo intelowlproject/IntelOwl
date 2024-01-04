@@ -26,7 +26,6 @@ start () {
   for value in "${docker_analyzers[@]}"; do
     path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
   done
-
   for value in "${docker_analyzers[@]}"; do
     path_mapping["all_analyzers"]+="${path_mapping[$value]} ";
     path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} ";

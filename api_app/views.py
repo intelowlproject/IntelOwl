@@ -60,7 +60,7 @@ from .serializers import (
     TagSerializer,
 )
 
-logger = logging.getLogger("__name__")
+logger = logging.getLogger(__name__)
 
 
 # REST API endpoints

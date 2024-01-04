@@ -42,8 +42,7 @@ export default function Dashboard() {
   // const isSelectedUI = JobResultSections.VISUALIZER;
   const { guideState, setGuideState } = useGuideContext();
 
-  const [orgstate, setorgState] = useState(() => false);
-  // const [labelstate, setlabelState] = useState("Global");
+  const [orgState, setOrgState] = useState(() => false);
 
   useEffect(() => {
     if (guideState.tourActive) {
@@ -72,36 +71,6 @@ export default function Dashboard() {
 
   return (
     <Container fluid id="Dashboard">
-      {/* <div className="g-0 d-flex align-items-baseline flex-column flex-lg-row mb-2">
-        <h3 className="fw-bold" id="Dashboard_title">
-          Dashboard
-        </h3>
-        <ButtonGroup className="ms-2 mb-3 d-flex align-items-center">
-          <Button
-            outline={!state}
-            color={state ? "primary" : "tertiary"}
-            onClick={() => handleChange()}
-          >
-            GLOBAL
-          </Button>
-          <Button
-            outline={state}
-            color={!state ? "primary" : "tertiary"}
-            onClick={() => handleChange()}
-          >
-              ORG
-          </Button>
-        </ButtonGroup>
-        <ElasticTimePicker
-          className="ms-auto"
-          size="sm"
-          defaultSelected={range}
-          onChange={onTimeIntervalChange}
-          id="Dashboard_timepicker"
-        />
-
-      </div> */}
-
       <div className="d-flex flex-wrap justify-content-between align-items-baseline mb-2">
         <div>
           <h3 className="fw-bold" id="Dashboard_title">
@@ -112,22 +81,22 @@ export default function Dashboard() {
           {organization?.name ? (
             <ButtonGroup className="mb-3">
               <Button
-                outline={orgstate}
-                color={!orgstate ? "primary" : "tertiary"}
+                outline={orgState}
+                color={orgState ? "tertiary" : "primary"}
                 onClick={async () => {
-                  if (orgstate) {
-                    setorgState((prevState) => !prevState);
+                  if (orgState) {
+                    setOrgState((prevState) => !prevState);
                   }
                 }}
               >
                 GLOBAL
               </Button>
               <Button
-                outline={!orgstate}
-                color={orgstate ? "primary" : "tertiary"}
+                outline={!orgState}
+                color={orgState ? "primary" : "tertiary"}
                 onClick={async () => {
-                  if (!orgstate) {
-                    setorgState((prevState) => !prevState);
+                  if (!orgState) {
+                    setOrgState((prevState) => !prevState);
                   }
                 }}
               >
@@ -155,8 +124,8 @@ export default function Dashboard() {
               body={
                 <div className="pt-2">
                   <Component
-                    sendProp={{
-                      key: orgstate,
+                    sendOrgState={{
+                      key: orgState,
                     }}
                   />
                 </div>
@@ -175,8 +144,8 @@ export default function Dashboard() {
               body={
                 <div className="pt-2">
                   <Component
-                    sendProp={{
-                      key: orgstate,
+                    sendOrgState={{
+                      key: orgState,
                     }}
                   />
                 </div>

@@ -737,7 +737,10 @@ describe("ScanForm adavanced use", () => {
         [
           PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
           {
-            observables: [["domain", "google.com"], ["ip", "1.1.1.1"]],
+            observables: [
+              ["domain", "google.com"],
+              ["ip", "1.1.1.1"],
+            ],
             playbook_requested: "TEST_PLAYBOOK_DOMAIN",
             tlp: "CLEAR",
             scan_mode: 2,
@@ -752,5 +755,5 @@ describe("ScanForm adavanced use", () => {
         ],
       ]);
     });
-  })
+  });
 });

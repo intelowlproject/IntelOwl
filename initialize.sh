@@ -100,7 +100,7 @@ if ! docker compose version; then
       exit 1
     fi
   else
-    echo 'You chose to do not install docker compose. Exiting'
+    echo 'You chose to do not install docker compose. Exiting' >&2
     exit 1
   fi
 else

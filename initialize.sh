@@ -104,6 +104,10 @@ else
     IFS=',' read -ra temp <<< "$(docker-compose --version)"
     docker_compose_version=$(echo "${temp[0]}"| awk '{print $NF}')
   fi
+  if [[ -z "$docker_compose_version" ]]; then
+    IFS=' ' read -ra temp <<< "$(docker-compose --version)"
+    docker_compose_version=$(echo "${temp[2]}"| cut -d ',' -f1)
+  fi
   if [[ $(semantic_version_comp "$docker_compose_version" "$MINIMUM_DOCKER_COMPOSE_VERSION") == "lessThan" ]]; then
     echo "Error: Docker-compose version is too old. Please upgrade to at least $MINIMUM_DOCKER_COMPOSE_VERSION." >&2
     exit 1

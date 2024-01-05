@@ -37,8 +37,10 @@ print_help () {
   echo "                               own certificate."
   echo "    --pycti-version            The pycti version to choose. This must match the"
   echo "                               OpenCTI server version you are connecting to."
+  echo "                               Default is ${pycti_default_version}."
   echo "    --pyelastic-version        The py-elasticsearch version to choose. This must"
   echo "                               match the server version you are connecting to."
+  echo "                               Default is ${pyelastic_default_version}."
 }
 
 check_parameters () {

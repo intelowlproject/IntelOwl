@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
+version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
 
 check_parameters () {
   if [[ $# -lt 2 ]]; then
@@ -9,14 +10,18 @@ check_parameters () {
     exit 2
   fi
   # little trick for exact matching in arrays
-  if ! [[ ${mode_argument["${1}"]} ]]; then
+  if ! [[ ${env_arguments["${1}"]} ]]; then
     echo "Error! Illegal environment specified." >&2
     exit 2
   fi
-  if ! [[ ${docker_argument["${2}"]} ]]; then
+  if ! [[ ${cmd_arguments["${2}"]} ]]; then
     echo "Error! Illegal command specified." >&2
     exit 2
   fi
+
+  env_argument=$1
+  cmd_argument=$2
+  shift 2
 }
 
 # we should be able to start only with this script even the first time
@@ -26,9 +31,9 @@ check_parameters () {
 #  fi
 # load all variables from file
 
-declare -A mode_argument=(["prod"]=1 ["test"]=1 ["ci"]=1)
+declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
 declare -A test_mode=(["test"]=1 ["ci"]=1)
-declare -A docker_argument=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
+declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
 
 check_parameters "$@"
 

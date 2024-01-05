@@ -8,11 +8,12 @@ check_parameters () {
     echo "Synopsis: start <env> <command> [OPTIONS]"
     exit 2
   fi
-  if ! [[ ${mode_argument[*]} =~ $1 ]]; then
+  # little trick for exact matching in arrays
+  if ! [[ ${mode_argument["${1}"]} ]]; then
     echo "Error! Illegal environment specified." >&2
     exit 2
   fi
-  if ! [[ ${docker_argument[*]} =~ $2 ]]; then
+  if ! [[ ${docker_argument["${2}"]} ]]; then
     echo "Error! Illegal command specified." >&2
     exit 2
   fi
@@ -25,9 +26,9 @@ check_parameters () {
 #  fi
 # load all variables from file
 
-mode_argument=("prod" "test" "ci")
-test_mode=("test" "ci")
-docker_argument=("build" "up" "start" "restart" "down" "stop" "kill" "logs" "ps")
+declare -A mode_argument=(["prod"]=1 ["test"]=1 ["ci"]=1)
+declare -A test_mode=(["test"]=1 ["ci"]=1)
+declare -A docker_argument=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
 
 check_parameters "$@"
 

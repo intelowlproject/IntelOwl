@@ -359,7 +359,7 @@ This is a "SOAR" feature that allows the users to connect multiple analysis toge
 
 Right now the support for this kind of plugin in the GUI is very limited, while the backend is fully operative. We are working on the frontend.
 
-#### List of pre-build Pivots
+#### List of pre-built Pivots
 None
 
 ### Visualizers
@@ -395,7 +395,7 @@ Ingestors can be _spammy_ so be careful about enabling them.
 
 A very powerful use is case is to **combine Ingestors with Connectors** to automatically extract data from external sources, analyze them with IntelOwl and push them externally to another platform (like MISP or a SIEM)
 
-#### List of pre-build Ingestors
+#### List of pre-built Ingestors
 - `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
 
 ### Playbooks

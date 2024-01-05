@@ -104,6 +104,7 @@ if [[ ${test_mode[*]} =~ $env_argument ]]; then
   test_appendix="test"
 fi
 
+# parse arguments
 set_defaults_values
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -112,47 +113,68 @@ while [[ $# -gt 0 ]]; do
     shift 2
   ;;
   --version)
+    if ! [[ $2 =~ $version_regex ]]; then
+      echo "Error! Wrong version format." >&2
+      exit 1
+    fi
     version=$2
     shift 2
   ;;
   --all_analyzers)
     all_analyzers=true
-
+    shift 1
   ;;
   --multi_queue)
-
+    multi_queue=true
+    shift 1
   ;;
   --nfs)
-
+    nfs=true
+    shift 1
   ;;
   --use-external-database)
-
+    use_external_database=true
+    shift 1
   ;;
   --use-external-broker)
-
+    use_external_broker=true
+    shift 1
   ;;
   --flower)
-
+    flower=true
+    shift 1
   ;;
   --custom)
-
+    custom=true
+    shift 1
   ;;
   --debug-build)
-
+    debug_build=true
+    shift 1
   ;;
   --elastic)
-
+    elastic=true
+    shift 1
   ;;
   --pyelastic-version)
-    export PYELASTIC_VERSION=$1
+    if ! [[ $2 =~ $generic_version_regex ]]; then
+      echo "Error! Wrong pyelastic version format." >&2
+      exit 1
+    fi
+    export PYELASTIC_VERSION=$2
     shift 2
   ;;
   --pycti-version)
-    export PYCTI_VERSION=$1
+    if ! [[ $2 =~ $generic_version_regex ]]; then
+      echo "Error! Wrong pycti version format." >&2
+      exit 1
+    fi
+    export PYCTI_VERSION=$2
     shift 2
   ;;
   --https)
-
+    https=true
+    shift 1
   ;;
   -h | --help)
     print_help

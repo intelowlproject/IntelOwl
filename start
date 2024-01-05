@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 start () {
+  if [[ $# -lt 1 ]]; then
+    echo "Error! Provide at least one parameter." >&2
+    exit 2
+  fi
+
   # we should be able to start only with this script even the first time
 #  if [ -d venv/ ]; then
 #    ./initialize.sh
@@ -32,6 +37,10 @@ start () {
   done
 
   # TODO: check on number of mandatory parameter passed to the script
+  if ! [[ ${mode_argument[*]} =~ $1 ]]; then
+    echo "Error! Illegal environment specified." >&2
+    exit 2
+  fi
   if [[ ${test_mode[*]} =~ $1 ]]; then
     is_test=true
     test_appendix="test"

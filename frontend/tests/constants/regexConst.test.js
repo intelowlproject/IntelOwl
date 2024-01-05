@@ -31,12 +31,22 @@ describe("Regex constant", () => {
     expect(IP_REGEX.test("0:0:0:0:0:ffff:0:0:0")).toBeFalsy();
     expect(IP_REGEX.test("0:0:0:0:0:ffff:ffff:fffff")).toBeFalsy();
     // IPv6 compressed
-    expect(IP_REGEX.test("0000:0000:0000:0000:0000:ffff:0000:0000")).toBeTruthy();
-    expect(IP_REGEX.test("0000:0000:0000:0000:0000:ffff:0101:0101")).toBeTruthy();
-    expect(IP_REGEX.test("0000:0000:0000:0000:0000:ffff:ffff:ffff")).toBeTruthy();
+    expect(
+      IP_REGEX.test("0000:0000:0000:0000:0000:ffff:0000:0000"),
+    ).toBeTruthy();
+    expect(
+      IP_REGEX.test("0000:0000:0000:0000:0000:ffff:0101:0101"),
+    ).toBeTruthy();
+    expect(
+      IP_REGEX.test("0000:0000:0000:0000:0000:ffff:ffff:ffff"),
+    ).toBeTruthy();
     expect(IP_REGEX.test("0000:0000:0000:0000:0000:ffff:0000")).toBeFalsy();
-    expect(IP_REGEX.test("0000:0000:0000:0000:0000:ffff:0000:0000:0000")).toBeFalsy();
-    expect(IP_REGEX.test("0000:0000:0000:0000:0000:ffff:ffff:fffff")).toBeFalsy();
+    expect(
+      IP_REGEX.test("0000:0000:0000:0000:0000:ffff:0000:0000:0000"),
+    ).toBeFalsy();
+    expect(
+      IP_REGEX.test("0000:0000:0000:0000:0000:ffff:ffff:fffff"),
+    ).toBeFalsy();
     // check other observable not matched
     expect(IP_REGEX.test("test.com")).toBeFalsy();
     expect(IP_REGEX.test("http://test.com")).toBeFalsy();

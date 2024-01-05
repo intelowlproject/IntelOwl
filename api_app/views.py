@@ -431,16 +431,12 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_status(self, request):
-        org_param = request.GET.get("org", "").lower() == "true"
-        users_of_organization = None
-        if org_param:
-            users_of_organization = self.get_org_members(request.user)
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
             for key in Job.Status.values
         }
         return self.__aggregation_response_static(
-            annotations, users=users_of_organization
+            annotations, users=self.get_org_members(request)
         )
 
     @action(
@@ -450,16 +446,12 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_type(self, request):
-        org_param = request.GET.get("org", "").lower() == "true"
-        users_of_organization = None
-        if org_param:
-            users_of_organization = self.get_org_members(request.user)
         annotations = {
             "file": Count("is_sample", filter=Q(is_sample=True)),
             "observable": Count("is_sample", filter=Q(is_sample=False)),
         }
         return self.__aggregation_response_static(
-            annotations, users=users_of_organization
+            annotations, users=self.get_org_members(request)
         )
 
     @action(
@@ -469,10 +461,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_observable_classification(self, request):
-        org_param = request.GET.get("org", "").lower() == "true"
-        users_of_organization = None
-        if org_param:
-            users_of_organization = self.get_org_members(request.user)
         annotations = {
             oc.lower(): Count(
                 "observable_classification", filter=Q(observable_classification=oc)
@@ -480,7 +468,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             for oc in ObservableTypes.values
         }
         return self.__aggregation_response_static(
-            annotations, users=users_of_organization
+            annotations, users=self.get_org_members(request)
         )
 
     @action(
@@ -490,12 +478,8 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_file_mimetype(self, request):
-        org_param = request.GET.get("org", "").lower() == "true"
-        users_of_organization = None
-        if org_param:
-            users_of_organization = self.get_org_members(request.user)
         return self.__aggregation_response_dynamic(
-            "file_mimetype", users=users_of_organization
+            "file_mimetype", users=self.get_org_members(request)
         )
 
     @action(
@@ -505,12 +489,8 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_observable_name(self, request):
-        org_param = request.GET.get("org", "").lower() == "true"
-        users_of_organization = None
-        if org_param:
-            users_of_organization = self.get_org_members(request.user)
         return self.__aggregation_response_dynamic(
-            "observable_name", False, users=users_of_organization
+            "observable_name", False, users=self.get_org_members(request)
         )
 
     @action(
@@ -520,21 +500,21 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_md5(self, request):
-        org_param = request.GET.get("org", "").lower() == "true"
-        users_of_organization = None
-        if org_param:
-            users_of_organization = self.get_org_members(request.user)
         # this is for file
         return self.__aggregation_response_dynamic(
-            "md5", False, users=users_of_organization
+            "md5", False, users=self.get_org_members(request)
         )
 
     @staticmethod
-    def get_org_members(user=None):
-        organization = user.membership.organization
-        users_of_organization = [
-            membership.user for membership in organization.members.all()
-        ]
+    def get_org_members(request):
+        user = request.user
+        org_param = request.GET.get("org", "").lower() == "true"
+        users_of_organization = None
+        if org_param:
+            organization = user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
         return users_of_organization
 
     def __aggregation_response_static(self, annotations: dict, users=None) -> Response:

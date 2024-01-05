@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
+
 start () {
-  if [[ $# -lt 1 ]]; then
-    echo "Error! Provide at least one parameter." >&2
+  if [[ $# -lt 2 ]]; then
+    echo "Error! Provide at least the environment and a command." >&2
+    echo "Synopsis: start <env> <command> [OPTIONS]"
     exit 2
   fi
 
@@ -38,6 +41,10 @@ start () {
 
   # TODO: check on number of mandatory parameter passed to the script
   if ! [[ ${mode_argument[*]} =~ $1 ]]; then
+    echo "Error! Illegal environment specified." >&2
+    exit 2
+  fi
+  if ! [[ ${mode_argument[*]} =~ $2 ]]; then
     echo "Error! Illegal environment specified." >&2
     exit 2
   fi

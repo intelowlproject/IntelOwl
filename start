@@ -3,10 +3,48 @@
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
 version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
 
+print_help () {
+  echo "SYNOPSIS"
+  echo -e "Usage: start <env> <command> [OPTIONS]\n"
+  echo "ARGUMENTS"
+  echo "    <env>    Environment for execution"
+  echo -e "    <command>    Command for docker compose\n"
+  echo "OPTIONS"
+  echo "    --version <value>          Choose the version you would like to install"
+  echo "                               (>=3.0.0). Works only in 'prod' mode. Default"
+  echo "                               version is the most recently released."
+  echo "    --all_analyzers            Uses every integration."
+  echo "    --tor_analyzers            Uses the integrations/tor_analyzers/compose.yml"
+  echo "                               file."
+  echo "    --malware_tools_analyzers  Uses the integrations/malware_tools_analyzers/"
+  echo "                               compose.yml file."
+  echo "    --cyberchef                Uses the integrations/cyberchef/compose.yml file."
+  echo "    --pcap_analyzers           Uses the integrations/pcap_analyzers/compose.yml"
+  echo "                               file."
+  echo "    --multi_queue              Uses the multiqueue.override.yml compose file."
+  echo "    --nfs                      Uses the nfs.override.yml compose file."
+  echo "    --traefik                  Uses the traefik.override.yml compose file."
+  echo "    --use-external-database    Do not use postgres.override.yml compose file."
+  echo "    --use-external-broker      Do not use rabbitmq.override.yml compose file."
+  echo "    --flower                   Uses the flower.override.yml compose file."
+  echo "    --custom                   Uses custom.override.yml to leverage your"
+  echo "                               customized configuration."
+  echo "    --debug-build              See more verbose output from the build."
+  echo "    --elastic                  This spins up Elasticsearch and Kibana on your"
+  echo "                               machine (might need >=16GB of RAM)."
+  echo "    --https                    This leverage the https.override.yml file that"
+  echo "                               can be used to host IntelOwl with HTTPS and your"
+  echo "                               own certificate."
+  echo "    --pycti-version            The pycti version to choose. This must match the"
+  echo "                               OpenCTI server version you are connecting to."
+  echo "    --pyelastic-version        The py-elasticsearch version to choose. This must"
+  echo "                               match the server version you are connecting to."
+}
+
 check_parameters () {
   if [[ $# -lt 2 ]]; then
     echo "Error! Provide at least the environment and a command." >&2
-    echo "Synopsis: start <env> <command> [OPTIONS]"
+    print_help
     exit 2
   fi
 
@@ -26,7 +64,6 @@ check_parameters () {
 
   env_argument=$1
   cmd_argument=$2
-  shift 2
 }
 
 
@@ -37,7 +74,7 @@ check_parameters () {
 #  fi
 # load all variables from file
 
-check_parameters "$@"
+check_parameters "$@" && shift 2
 
 export "$(grep -v '^#' docker/.env | xargs -d '\n')"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
@@ -59,13 +96,16 @@ if [[ ${test_mode[*]} =~ $env_argument ]]; then
   test_appendix="test"
 fi
 
+shift 2
 while [[ $# -gt 0 ]]; do
   case $1 in
   --project_name)
 
   ;;
   --version)
-
+    value="${$1:-$current_version}"
+    echo value
+    shift
   ;;
   --all_analyzers)
 
@@ -103,6 +143,10 @@ while [[ $# -gt 0 ]]; do
   --https)
 
   ;;
+  -h | --help)
+    print_help
+    exit 0
+    ;;
   --) shift; break;; # explicit end of arguments
   *)
     echo "Error! Invalid option $1."

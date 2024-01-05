@@ -10,37 +10,38 @@ print_help () {
   echo "    <env>    Environment for execution"
   echo -e "    <command>    Command for docker compose\n"
   echo "OPTIONS"
-  echo "    --version <value>          Choose the version you would like to install"
-  echo "                               (>=3.0.0). Works only in 'prod' mode. Default"
-  echo "                               version is the most recently released."
-  echo "    --all_analyzers            Uses every integration."
-  echo "    --tor_analyzers            Uses the integrations/tor_analyzers/compose.yml"
-  echo "                               file."
-  echo "    --malware_tools_analyzers  Uses the integrations/malware_tools_analyzers/"
-  echo "                               compose.yml file."
-  echo "    --cyberchef                Uses the integrations/cyberchef/compose.yml file."
-  echo "    --pcap_analyzers           Uses the integrations/pcap_analyzers/compose.yml"
-  echo "                               file."
-  echo "    --multi_queue              Uses the multiqueue.override.yml compose file."
-  echo "    --nfs                      Uses the nfs.override.yml compose file."
-  echo "    --traefik                  Uses the traefik.override.yml compose file."
-  echo "    --use-external-database    Do not use postgres.override.yml compose file."
-  echo "    --use-external-broker      Do not use rabbitmq.override.yml compose file."
-  echo "    --flower                   Uses the flower.override.yml compose file."
-  echo "    --custom                   Uses custom.override.yml to leverage your"
-  echo "                               customized configuration."
-  echo "    --debug-build              See more verbose output from the build."
-  echo "    --elastic                  This spins up Elasticsearch and Kibana on your"
-  echo "                               machine (might need >=16GB of RAM)."
-  echo "    --https                    This leverage the https.override.yml file that"
-  echo "                               can be used to host IntelOwl with HTTPS and your"
-  echo "                               own certificate."
-  echo "    --pycti-version            The pycti version to choose. This must match the"
-  echo "                               OpenCTI server version you are connecting to."
-  echo "                               Default is ${pycti_default_version}."
-  echo "    --pyelastic-version        The py-elasticsearch version to choose. This must"
-  echo "                               match the server version you are connecting to."
-  echo "                               Default is ${pyelastic_default_version}."
+  echo "    --project_name <name>       Specify project name."
+  echo "    --version <value>           Choose the version you would like to install"
+  echo "                                (>=3.0.0). Works only in 'prod' mode. Default"
+  echo "                                version is the most recently released."
+  echo "    --all_analyzers             Uses every integration."
+  echo "    --tor_analyzers             Uses the integrations/tor_analyzers/compose.yml"
+  echo "                                file."
+  echo "    --malware_tools_analyzers   Uses the integrations/malware_tools_analyzers/"
+  echo "                                compose.yml file."
+  echo "    --cyberchef                 Uses the integrations/cyberchef/compose.yml file."
+  echo "    --pcap_analyzers            Uses the integrations/pcap_analyzers/compose.yml"
+  echo "                                file."
+  echo "    --multi_queue               Uses the multiqueue.override.yml compose file."
+  echo "    --nfs                       Uses the nfs.override.yml compose file."
+  echo "    --traefik                   Uses the traefik.override.yml compose file."
+  echo "    --use-external-database     Do not use postgres.override.yml compose file."
+  echo "    --use-external-broker       Do not use rabbitmq.override.yml compose file."
+  echo "    --flower                    Uses the flower.override.yml compose file."
+  echo "    --custom                    Uses custom.override.yml to leverage your"
+  echo "                                customized configuration."
+  echo "    --debug-build               See more verbose output from the build."
+  echo "    --elastic                   This spins up Elasticsearch and Kibana on your"
+  echo "                                machine (might need >=16GB of RAM)."
+  echo "    --https                     This leverage the https.override.yml file that"
+  echo "                                can be used to host IntelOwl with HTTPS and your"
+  echo "                                own certificate."
+  echo "    --pycti-version <value>     The pycti version to choose. This must match the"
+  echo "                                OpenCTI server version you are connecting to."
+  echo "                                Default is ${pycti_default_version}."
+  echo "    --pyelastic-version <value> The py-elasticsearch version to choose. This must"
+  echo "                                match the server version you are connecting to."
+  echo "                                Default is ${pyelastic_default_version}."
 }
 
 check_parameters () {
@@ -68,7 +69,12 @@ check_parameters () {
   cmd_argument=$2
 }
 
-
+set_defaults_values () {
+  project_name="intel_owl"
+  version=current_version
+  export PYELASTIC_VERSION=pyelastic_default_version
+  export PYCTI_VERSION=pycti_default_version
+}
 # we should be able to start only with this script even the first time
 #  if [ -d venv/ ]; then
 #    ./initialize.sh
@@ -98,18 +104,19 @@ if [[ ${test_mode[*]} =~ $env_argument ]]; then
   test_appendix="test"
 fi
 
-shift 2
+set_defaults_values
 while [[ $# -gt 0 ]]; do
   case $1 in
   --project_name)
-
+    project_name=$2
+    shift 2
   ;;
   --version)
-    value="${$1:-$current_version}"
-    echo value
-    shift
+    version=$2
+    shift 2
   ;;
   --all_analyzers)
+    all_analyzers=true
 
   ;;
   --multi_queue)
@@ -137,10 +144,12 @@ while [[ $# -gt 0 ]]; do
 
   ;;
   --pyelastic-version)
-
+    export PYELASTIC_VERSION=$1
+    shift 2
   ;;
   --pycti-version)
-
+    export PYCTI_VERSION=$1
+    shift 2
   ;;
   --https)
 

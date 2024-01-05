@@ -85,7 +85,7 @@ set_defaults_values () {
   export PYCTI_VERSION=pycti_default_version
 }
 # we should be able to start only with this script even the first time
-#  if [ -d venv/ ]; then
+#  if ! [ -d venv/ ]; then
 #    ./initialize.sh
   # TODO: check that we are really in a venv
 #  fi
@@ -109,7 +109,7 @@ for value in "${docker_analyzers[@]}"; do
 done
 
 test_appendix=""
-if [[ ${test_mode["${env_argument}"]} ]]; then
+if ! [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix="test"
 fi

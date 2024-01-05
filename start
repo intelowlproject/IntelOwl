@@ -29,13 +29,13 @@ check_parameters () {
   shift 2
 }
 
+
 # we should be able to start only with this script even the first time
 #  if [ -d venv/ ]; then
 #    ./initialize.sh
   # TODO: check that we are really in a venv
 #  fi
 # load all variables from file
-
 
 check_parameters "$@"
 
@@ -48,13 +48,9 @@ docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_an
 
 declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
 for value in "${docker_analyzers[@]}"; do
-  path_mapping[$value]+="integrations/${value}/compose.yml"
-done
-for value in "${docker_analyzers[@]}"; do
+  path_mapping["${value}"]+="integrations/${value}/compose.yml"
   path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
-done
-for value in "${docker_analyzers[@]}"; do
-  path_mapping["all_analyzers"]+="${path_mapping[$value]} ";
+  path_mapping["all_analyzers"]+="${path_mapping[${value}]} ";
   path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} ";
 done
 
@@ -63,3 +59,54 @@ if [[ ${test_mode[*]} =~ $env_argument ]]; then
   test_appendix="test"
 fi
 
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  --project_name)
+
+  ;;
+  --version)
+
+  ;;
+  --all_analyzers)
+
+  ;;
+  --multi_queue)
+
+  ;;
+  --nfs)
+
+  ;;
+  --use-external-database)
+
+  ;;
+  --use-external-broker)
+
+  ;;
+  --flower)
+
+  ;;
+  --custom)
+
+  ;;
+  --debug-build)
+
+  ;;
+  --elastic)
+
+  ;;
+  --pyelastic-version)
+
+  ;;
+  --pycti-version)
+
+  ;;
+  --https)
+
+  ;;
+  --) shift; break;; # explicit end of arguments
+  *)
+    echo "Error! Invalid option $1."
+    exit 1
+    ;;
+  esac
+done

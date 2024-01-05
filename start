@@ -44,8 +44,8 @@ start () {
     echo "Error! Illegal environment specified." >&2
     exit 2
   fi
-  if ! [[ ${mode_argument[*]} =~ $2 ]]; then
-    echo "Error! Illegal environment specified." >&2
+  if ! [[ ${docker_argument[*]} =~ $2 ]]; then
+    echo "Error! Illegal command specified." >&2
     exit 2
   fi
   if [[ ${test_mode[*]} =~ $1 ]]; then

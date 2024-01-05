@@ -2,44 +2,12 @@
 
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
 
-start () {
+check_parameters () {
   if [[ $# -lt 2 ]]; then
     echo "Error! Provide at least the environment and a command." >&2
     echo "Synopsis: start <env> <command> [OPTIONS]"
     exit 2
   fi
-
-  # we should be able to start only with this script even the first time
-#  if [ -d venv/ ]; then
-#    ./initialize.sh
-    # TODO: check that we are really in a venv
-#  fi
-  # load all variables from file
-
-  mode_argument=("prod" "test" "ci")
-  test_mode=("test" "ci")
-  docker_argument=("build" "up" "start" "restart" "down" "stop" "kill" "logs" "ps")
-
-  export "$(grep -v '^#' docker/.env | xargs -d '\n')"
-  current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
-  pyelastic_default_version="7.4.1"
-  pycti_default_version="5.10.0"
-
-  docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers")
-
-  declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
-  for value in "${docker_analyzers[@]}"; do
-    path_mapping[$value]+="integrations/${value}/compose.yml"
-  done
-  for value in "${docker_analyzers[@]}"; do
-    path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
-  done
-  for value in "${docker_analyzers[@]}"; do
-    path_mapping["all_analyzers"]+="${path_mapping[$value]} ";
-    path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} ";
-  done
-
-  # TODO: check on number of mandatory parameter passed to the script
   if ! [[ ${mode_argument[*]} =~ $1 ]]; then
     echo "Error! Illegal environment specified." >&2
     exit 2
@@ -48,10 +16,42 @@ start () {
     echo "Error! Illegal command specified." >&2
     exit 2
   fi
-  if [[ ${test_mode[*]} =~ $1 ]]; then
-    is_test=true
-    test_appendix="test"
-  fi
 }
 
-start "$@"
+# we should be able to start only with this script even the first time
+#  if [ -d venv/ ]; then
+#    ./initialize.sh
+  # TODO: check that we are really in a venv
+#  fi
+# load all variables from file
+
+mode_argument=("prod" "test" "ci")
+test_mode=("test" "ci")
+docker_argument=("build" "up" "start" "restart" "down" "stop" "kill" "logs" "ps")
+
+check_parameters "$@"
+
+export "$(grep -v '^#' docker/.env | xargs -d '\n')"
+current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
+pyelastic_default_version="7.4.1"
+pycti_default_version="5.10.0"
+
+docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers")
+
+declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
+for value in "${docker_analyzers[@]}"; do
+  path_mapping[$value]+="integrations/${value}/compose.yml"
+done
+for value in "${docker_analyzers[@]}"; do
+  path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
+done
+for value in "${docker_analyzers[@]}"; do
+  path_mapping["all_analyzers"]+="${path_mapping[$value]} ";
+  path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} ";
+done
+
+if [[ ${test_mode[*]} =~ $1 ]]; then
+  is_test=true
+  test_appendix="test"
+fi
+

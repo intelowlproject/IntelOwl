@@ -32,7 +32,6 @@ import {
   PUBLIC_URL,
   VERSION,
   INTELOWL_TWITTER_ACCOUNT,
-  STAGE,
 } from "../constants/environment";
 
 // local
@@ -219,10 +218,7 @@ function AppHeader() {
             alt="IntelOwl logo"
           />
           <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
-            {VERSION} -
-          </small>
-          <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
-            &nbsp;{STAGE}
+            {VERSION}
           </small>
         </NavbarBrand>
         <NavbarToggler onClick={() => setIsOpen(!isOpen)} />

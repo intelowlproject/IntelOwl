@@ -3,9 +3,14 @@
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
 version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
 
-print_help () {
+print_synopsis () {
   echo "SYNOPSIS"
-  echo -e "Usage: start <env> <command> [OPTIONS]\n"
+  echo -e "    start <env> <command> [OPTIONS]"
+  echo -e "    start -h|--help\n"
+}
+
+print_help () {
+  print_synopsis
   echo "ARGUMENTS"
   echo "    <env>    Environment for execution"
   echo -e "    <command>    Command for docker compose\n"
@@ -45,9 +50,13 @@ print_help () {
 }
 
 check_parameters () {
+  if [[ $# == 1 && ( $1 == "--help" || $1 == "-h" ) ]]; then
+    print_help
+    exit 0
+  fi
   if [[ $# -lt 2 ]]; then
     echo "Error! Provide at least the environment and a command." >&2
-    print_help
+    print_synopsis
     exit 2
   fi
 
@@ -99,7 +108,8 @@ for value in "${docker_analyzers[@]}"; do
   path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} ";
 done
 
-if [[ ${test_mode[*]} =~ $env_argument ]]; then
+test_appendix=""
+if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix="test"
 fi
@@ -112,7 +122,7 @@ while [[ $# -gt 0 ]]; do
     project_name=$2
     shift 2
   ;;
-  --version)
+  -v | --version)
     if ! [[ $2 =~ $version_regex ]]; then
       echo "Error! Wrong version format." >&2
       exit 1
@@ -187,3 +197,14 @@ while [[ $# -gt 0 ]]; do
     ;;
   esac
 done
+
+# here all variables should be parsed and ready for use
+cmd_py_version=("up" "build")
+if [[ ( ! $env_argument == "test" || ${cmd_py_version[*]} =~ $cmd_argument ) && \
+  ( $PYELASTIC_VERSION != pyelastic_default_version || \
+  $PYCTI_VERSION != pycti_default_version ) ]]; then
+    echo "pycti_version and pyelastic_version options are valid only while running in" >&2
+    echo "'test' mode and while building a new image. This is because they can change" >&2
+    echo "the version of those library only during the build of a new Docker Image." >&2
+    exit 11
+fi

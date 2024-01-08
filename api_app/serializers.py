@@ -217,7 +217,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
         attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(**attrs)
-        attrs["warnings"] = self.filter_warnings
+        attrs["warnings"] = list(self.filter_warnings)
         attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 

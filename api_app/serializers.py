@@ -1287,10 +1287,11 @@ class JobBISerializer((AbstractBIInterface), ModelSerializer):
     username = rfs.CharField(source="user.username")
     name = rfs.CharField(source="pk")
     type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
-    end_time: rfs.DateTimeField(source="finished_analysis_time")
+    end_time = rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
 
     class Meta:
+        model = Job
         fields = AbstractBIInterface.Meta.fields + ["playbook", "runtime_configuration"]
         list_serializer_class = (
             AbstractReportSerializerInterface.Meta.list_serializer_class

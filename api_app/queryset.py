@@ -39,7 +39,7 @@ from certego_saas.apps.user.models import User
 
 class SendToBiQuerySet(models.QuerySet):
     @classmethod
-    def _get_serializer_class(cls) -> Type["AbstractBIInterface"]:
+    def _get_bi_serializer_class(cls) -> Type["AbstractBIInterface"]:
         raise NotImplementedError()
 
     @staticmethod
@@ -62,11 +62,11 @@ class SendToBiQuerySet(models.QuerySet):
         BULK_MAX_SIZE = 1000
         found_errors = False
 
-        p = Paginator(self.order_by("pk"), BULK_MAX_SIZE)
+        p = Paginator(self, BULK_MAX_SIZE)
         for i in p.page_range:
             page = p.get_page(i)
             objects = page.object_list
-            serializer = self._get_serializer_class()(instance=objects, many=True)
+            serializer = self._get_bi_serializer_class()(instance=objects, many=True)
             objects_serialized = serializer.data
             _, errors = bulk(
                 settings.ELASTICSEARCH_CLIENT,
@@ -130,6 +130,11 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
+    def _get_bi_serializer_class(cls):
+        from api_app.serializers import JobBISerializer
+
+        return JobBISerializer
+
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
         User has access to:

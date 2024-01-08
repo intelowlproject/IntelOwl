@@ -21,6 +21,7 @@ class VisualizerReport(AbstractReport):
 
     class Meta:
         ordering = ["pk"]
+        indexes = AbstractReport.Meta.indexes
 
 
 class VisualizerConfig(PythonConfig):

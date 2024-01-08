@@ -89,14 +89,6 @@ load_env () {
   export "$(grep -v '^#' $1 | xargs -d '\n')"
 }
 
-join_by_string() {
-  local separator="$1"
-  shift
-  local first="$1"
-  shift
-  printf "%s" "$first" "${@/#/$separator}"
-}
-
 # we should be able to start only with this script even the first time
 #  if ! [ -d venv/ ]; then
 #    ./initialize.sh

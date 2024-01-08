@@ -99,7 +99,7 @@ load_env () {
 check_parameters "$@" && shift 2
 
 load_env "docker/.env"
-current_version=${REACT_APP_INTELOWL_VERSIO$1N/"v"/""}
+current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 pyelastic_default_version="7.4.1"
 pycti_default_version="5.10.0"
 
@@ -292,7 +292,7 @@ fi
 if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
   echo "Requested version ${version} is different from current version ${current_version}"
   git config --global --add safe.directory "$(pwd)" # it could be not the right directory, to verify during tests
-  git checkout tags/"$current_version"
+  git checkout "v${version}"
 fi
 
 # build final command
@@ -311,4 +311,5 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
+echo "${to_run[*]}"
 sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"

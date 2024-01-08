@@ -296,8 +296,7 @@ if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
 fi
 
 # build final command
-docker compose version > /dev/null 2>&1
-if [ $? -ne 0 ]; then
+if ! docker compose version > /dev/null 2>&1; then
   echo "Error! Docker compose V2 not installed. Run ./initialize.sh to check for all dependencies." >&2
   exit 127
 fi

@@ -242,7 +242,7 @@ for value in "${docker_analyzers[@]}"; do
     docker_flags+=("${value}")
   fi
 done
-if [ "$all_analyzers" ] && ! [ ${#docker_flags[@]} -eq 0 ]; then
+if [ "${analyzers["all_analyzers"]}" ] && ! [ ${#docker_flags[@]} -eq 0 ]; then
   echo "It is not possible to select both --all_analyzers and another docker container."
   exit 1
 fi
@@ -269,7 +269,7 @@ done
 if [[ $env_argument == "test" ]]; then
   test_values=("multi_queue" "flower")
   for value in "${test_values[@]}"; do
-    if [ "${params[$value]}" ]; then
+    if [ "${params["$value"]}" ]; then
       compose_files+=("${path_mapping["test_$value"]}")
     fi
   done
@@ -279,12 +279,12 @@ fi
 if [ "${analyzers["all_analyzers"]}" ]; then
   IFS=', ' read -r -a all_analyzers_array <<< "${path_mapping["all_analyzers"]}"
   for analyzer in "${all_analyzers_array[@]}" ; do
-    compose_files+=("${path_mapping["$analyzer"]}")
+    compose_files+=("${analyzer}")
   done
   if [ $is_test ]; then
     IFS=', ' read -r -a all_analyzers_array_test <<< "${path_mapping["all_analyzers${test_appendix}"]}"
     for analyzer in "${all_analyzers_array_test[@]}" ; do
-      compose_files+=("${path_mapping["$analyzer"]}")
+      compose_files+=("${analyzer}")
     done
   fi
 fi
@@ -312,4 +312,4 @@ for value in "${compose_files[@]}" ; do
   fi
 done
 echo "${to_run[*]}"
-sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+#sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"

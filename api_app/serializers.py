@@ -20,7 +20,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import SerializerMethodField
+from rest_framework.fields import SerializerMethodField, empty
 
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
@@ -161,6 +161,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
 
+    def run_validation(self, data=empty):
+        result = super().run_validation(data=data)
+        self.filter_warnings.clear()
+        return result
+
     @staticmethod
     def set_default_value_from_playbook(attrs: Dict) -> None:
         playbook = attrs["playbook_requested"]
@@ -212,7 +217,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
         attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(**attrs)
-        attrs["warnings"] = self.filter_warnings
+        attrs["warnings"] = list(self.filter_warnings)
         attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 

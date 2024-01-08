@@ -86,7 +86,7 @@ set_defaults_values () {
 }
 
 load_env () {
-  export "$(grep -v '^#' $1 | xargs -d '\n')"
+  export "$(grep -v '^#' "$1" | xargs -d '\n')"
 }
 
 # we should be able to start only with this script even the first time
@@ -99,7 +99,7 @@ load_env () {
 check_parameters "$@" && shift 2
 
 load_env "docker/.env"
-current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
+current_version=${REACT_APP_INTELOWL_VERSIO$1N/"v"/""}
 pyelastic_default_version="7.4.1"
 pycti_default_version="5.10.0"
 
@@ -225,8 +225,8 @@ done
 # here all variables should be parsed and ready for use
 cmd_py_version=("up" "build")
 if [[ ( ! $env_argument == "test" || ${cmd_py_version[*]} =~ $cmd_argument ) && \
-  ( $PYELASTIC_VERSION != $pyelastic_default_version || \
-  $PYCTI_VERSION != $pycti_default_version ) ]]; then
+  ( $PYELASTIC_VERSION != "$pyelastic_default_version" || \
+  $PYCTI_VERSION != "$pycti_default_version" ) ]]; then
     echo "pycti_version and pyelastic_version options are valid only while running in" >&2
     echo "'test' mode and while building a new image. This is because they can change" >&2
     echo "the version of those library only during the build of a new Docker Image." >&2

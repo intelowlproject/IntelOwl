@@ -36,6 +36,7 @@ from api_app.choices import TLP
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
 
+
 class SendToBiQuerySet(models.QuerySet):
     @classmethod
     def _get_serializer_class(cls) -> Type["AbstractBIInterface"]:
@@ -44,10 +45,10 @@ class SendToBiQuerySet(models.QuerySet):
     @staticmethod
     def _create_index_template():
         if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
-                name=settings.ELASTICSEARCH_BI_INDEX
+            name=settings.ELASTICSEARCH_BI_INDEX
         ):
             with open(
-                    settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
+                settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
             ) as f:
                 body = json.load(f)
                 body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
@@ -85,7 +86,6 @@ class SendToBiQuerySet(models.QuerySet):
                 ).update(sent_to_bi=True)
         self._create_index_template()
         return found_errors
-
 
 
 class CleanOnCreateQuerySet(models.QuerySet):

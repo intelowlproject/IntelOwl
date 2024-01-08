@@ -20,7 +20,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import SerializerMethodField, Field
+from rest_framework.fields import Field, SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
 from certego_saas.apps.organization.organization import Organization
@@ -1205,8 +1205,6 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
         return super(PythonConfigSerializer, self).to_representation(instance)
 
 
-
-
 class AbstractReportSerializerInterface(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
     type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
@@ -1226,11 +1224,11 @@ class AbstractBIInterface(ModelSerializer):
     application = rfs.CharField(read_only=True, default="IntelOwl")
     environment = rfs.SerializerMethodField(method_name="get_environment")
     timestamp: Field
-    username : Field
-    name : Field
-    type : Field
-    process_time : Field
-    status : Field
+    username: Field
+    name: Field
+    type: Field
+    process_time: Field
+    status: Field
     end_time: Field
 
     class Meta:
@@ -1265,10 +1263,11 @@ class AbstractBIInterface(ModelSerializer):
         }
 
 
-class AbstractReportBISerializer(AbstractBIInterface, AbstractReportSerializerInterface):
+class AbstractReportBISerializer(
+    AbstractBIInterface, AbstractReportSerializerInterface
+):
     timestamp = rfs.DateTimeField(source="start_time")
     username = rfs.CharField(source="job.user.username")
-
 
     class Meta:
         fields = AbstractBIInterface.Meta.fields + [
@@ -1282,6 +1281,7 @@ class AbstractReportBISerializer(AbstractBIInterface, AbstractReportSerializerIn
         data = super().to_representation(instance)
         return self.to_elastic_dict(data)
 
+
 class JobBISerializer((AbstractBIInterface), ModelSerializer):
     timestamp = rfs.DateTimeField(source="received_request_time")
     username = rfs.CharField(source="user.username")
@@ -1289,11 +1289,9 @@ class JobBISerializer((AbstractBIInterface), ModelSerializer):
     type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
     end_time: rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
+
     class Meta:
-        fields = AbstractBIInterface.Meta.fields + [
-            "playbook",
-            "runtime_configuration"
-        ]
+        fields = AbstractBIInterface.Meta.fields + ["playbook", "runtime_configuration"]
         list_serializer_class = (
             AbstractReportSerializerInterface.Meta.list_serializer_class
         )
@@ -1302,10 +1300,10 @@ class JobBISerializer((AbstractBIInterface), ModelSerializer):
         data = super().to_representation(instance)
         return self.to_elastic_dict(data)
 
-    def get_type(self, instance:Job):
+    def get_type(self, instance: Job):
         return instance.__class__.__name__.lower()
 
-    def get_playbook(self, instance:Job):
+    def get_playbook(self, instance: Job):
         return instance.playbook_to_execute.name if instance.playbook_to_execute else ""
 
 

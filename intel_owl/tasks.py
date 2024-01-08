@@ -351,6 +351,7 @@ def send_bi_to_elastic(max_timeout: int = 60):
     from api_app.models import AbstractReport
     from api_app.pivots_manager.models import PivotReport
     from api_app.visualizers_manager.models import VisualizerReport
+    from api_app.models import Job
 
     if settings.ELASTICSEARCH_BI_ENABLED:
         for report_class in [
@@ -361,7 +362,10 @@ def send_bi_to_elastic(max_timeout: int = 60):
             VisualizerReport,
         ]:
             report_class: typing.Type[AbstractReport]
-            report_class.objects.filter(sent_to_bi=False).send_to_elastic_as_bi(
+            report_class.objects.filter(sent_to_bi=False).order_by("-start_time").send_to_elastic_as_bi(
+                max_timeout=max_timeout
+            )
+        Job.objects.filter(sent_to_bi=False).order_by("-received_request_time").send_to_elastic_as_bi(
                 max_timeout=max_timeout
             )
 

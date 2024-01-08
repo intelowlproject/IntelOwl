@@ -2,6 +2,8 @@
 
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
 version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
+pyelastic_default_version="7.4.1"
+pycti_default_version="5.10.0"
 
 print_synopsis () {
   echo "SYNOPSIS"
@@ -24,7 +26,8 @@ print_help () {
   echo "                                file."
   echo "    --malware_tools_analyzers   Uses the integrations/malware_tools_analyzers/"
   echo "                                compose.yml file."
-  echo "    --cyberchef                 Uses the integrations/cyberchef/compose.yml file."
+  echo "    --cyberchef                 Uses the integrations/cyberchef/compose.yml"
+  echo "                                file."
   echo "    --pcap_analyzers            Uses the integrations/pcap_analyzers/compose.yml"
   echo "                                file."
   echo "    --multi_queue               Uses the multiqueue.override.yml compose file."
@@ -44,9 +47,9 @@ print_help () {
   echo "    --pycti-version <value>     The pycti version to choose. This must match the"
   echo "                                OpenCTI server version you are connecting to."
   echo "                                Default is ${pycti_default_version}."
-  echo "    --pyelastic-version <value> The py-elasticsearch version to choose. This must"
-  echo "                                match the server version you are connecting to."
-  echo "                                Default is ${pyelastic_default_version}."
+  echo "    --pyelastic-version <value> The py-elasticsearch version to choose. This"
+  echo "                                must match the server version you are"
+  echo "                                connecting to. Default is ${pyelastic_default_version}."
 }
 
 check_parameters () {
@@ -100,8 +103,6 @@ check_parameters "$@" && shift 2
 
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
-pyelastic_default_version="7.4.1"
-pycti_default_version="5.10.0"
 
 docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers")
 
@@ -224,7 +225,7 @@ done
 
 # here all variables should be parsed and ready for use
 cmd_py_version=("up" "build")
-if [[ ( ! $env_argument == "test" || ${cmd_py_version[*]} =~ $cmd_argument ) && \
+if [[ ( ! $env_argument == "test" || ! ${cmd_py_version[*]} =~ $cmd_argument ) && \
   ( $PYELASTIC_VERSION != "$pyelastic_default_version" || \
   $PYCTI_VERSION != "$pycti_default_version" ) ]]; then
     echo "pycti_version and pyelastic_version options are valid only while running in" >&2
@@ -238,11 +239,11 @@ load_env "docker/.env.start${test_appendix}"
 
 # check if all_analyzers and other flags have been used
 for value in "${docker_analyzers[@]}"; do
-  if [ "${params[$value]}" ]; then
+  if [ "${analyzers["$value"]}" ]; then
     docker_flags+=("${value}")
   fi
 done
-if [ "${analyzers["all_analyzers"]}" ] && ! [ ${#docker_flags[@]} -eq 0 ]; then
+if [ "${analyzers["all_analyzers"]}" ] && [ ${#docker_flags[@]} -ne 0 ]; then
   echo "It is not possible to select both --all_analyzers and another docker container."
   exit 1
 fi
@@ -285,6 +286,13 @@ if [ "${analyzers["all_analyzers"]}" ]; then
     IFS=', ' read -r -a all_analyzers_array_test <<< "${path_mapping["all_analyzers${test_appendix}"]}"
     for analyzer in "${all_analyzers_array_test[@]}" ; do
       compose_files+=("${analyzer}")
+    done
+  fi
+else
+  # add the single analyzers compose files
+  if [ ${#docker_flags[@]} -ne 0 ]; then
+    for analyzer in "${docker_flags[@]}"; do
+      compose_files+=("${path_mapping["$analyzer"]}")
     done
   fi
 fi

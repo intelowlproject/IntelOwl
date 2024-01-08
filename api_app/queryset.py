@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
-    from api_app.serializers import AbstractReportBISerializer
+    from api_app.serializers import AbstractBIInterface
 
 from celery.canvas import Signature
 from django.db import models
@@ -35,6 +35,57 @@ from django.utils.timezone import now
 from api_app.choices import TLP
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
+
+class SendToBiQuerySet(models.QuerySet):
+    @classmethod
+    def _get_serializer_class(cls) -> Type["AbstractBIInterface"]:
+        raise NotImplementedError()
+
+    @staticmethod
+    def _create_index_template():
+        if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
+                name=settings.ELASTICSEARCH_BI_INDEX
+        ):
+            with open(
+                    settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
+            ) as f:
+                body = json.load(f)
+                body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
+                settings.ELASTICSEARCH_CLIENT.indices.put_template(
+                    name=settings.ELASTICSEARCH_BI_INDEX, body=body
+                )
+
+    def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
+        from elasticsearch.helpers import bulk
+
+        BULK_MAX_SIZE = 1000
+        found_errors = False
+
+        p = Paginator(self.order_by("pk"), BULK_MAX_SIZE)
+        for i in p.page_range:
+            page = p.get_page(i)
+            objects = page.object_list
+            serializer = self._get_serializer_class()(instance=objects, many=True)
+            objects_serialized = serializer.data
+            _, errors = bulk(
+                settings.ELASTICSEARCH_CLIENT,
+                objects_serialized,
+                request_timeout=max_timeout,
+            )
+            if errors:
+                logging.error(
+                    f"Errors on sending to elastic: {errors}."
+                    " We are not marking objects as sent."
+                )
+                found_errors |= errors
+            else:
+                logging.info("BI sent")
+                self.model.objects.filter(
+                    pk__in=objects.values_list("pk", flat=True)
+                ).update(sent_to_bi=True)
+        self._create_index_template()
+        return found_errors
+
 
 
 class CleanOnCreateQuerySet(models.QuerySet):
@@ -78,7 +129,7 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         return self.annotate(runnable=Exists(qs))
 
 
-class JobQuerySet(CleanOnCreateQuerySet):
+class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
         User has access to:
@@ -230,55 +281,8 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
 
-class AbstractReportQuerySet(QuerySet):
-    @classmethod
-    def _get_serializer_class(cls) -> Type["AbstractReportBISerializer"]:
-        raise NotImplementedError()
-
-    @staticmethod
-    def _create_index_template():
-        if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
-            name=settings.ELASTICSEARCH_BI_INDEX
-        ):
-            with open(
-                settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
-            ) as f:
-                body = json.load(f)
-                body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
-                settings.ELASTICSEARCH_CLIENT.indices.put_template(
-                    name=settings.ELASTICSEARCH_BI_INDEX, body=body
-                )
-
-    def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
-        from elasticsearch.helpers import bulk
-
-        BULK_MAX_SIZE = 1000
-        found_errors = False
-
-        p = Paginator(self.order_by("pk"), BULK_MAX_SIZE)
-        for i in p.page_range:
-            page = p.get_page(i)
-            objects: AbstractReportQuerySet = page.object_list
-            serializer = self._get_serializer_class()(instance=objects, many=True)
-            objects_serialized = serializer.data
-            _, errors = bulk(
-                settings.ELASTICSEARCH_CLIENT,
-                objects_serialized,
-                request_timeout=max_timeout,
-            )
-            if errors:
-                logging.error(
-                    f"Errors on sending to elastic: {errors}."
-                    " We are not marking objects as sent."
-                )
-                found_errors |= errors
-            else:
-                logging.info("BI sent")
-                self.model.objects.filter(
-                    pk__in=objects.values_list("pk", flat=True)
-                ).update(sent_to_bi=True)
-        self._create_index_template()
-        return found_errors
+class AbstractReportQuerySet(SendToBiQuerySet):
+    ...
 
 
 class ModelWithOwnershipQuerySet:

@@ -20,7 +20,8 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import SerializerMethodField
+from rest_framework.fields import SerializerMethodField, Field
+from rest_framework.serializers import ModelSerializer
 
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
@@ -1204,8 +1205,6 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
         return super(PythonConfigSerializer, self).to_representation(instance)
 
 
-class AbstractReportListSerializer(rfs.ListSerializer):
-    ...
 
 
 class AbstractReportSerializerInterface(rfs.ModelSerializer):
@@ -1214,7 +1213,7 @@ class AbstractReportSerializerInterface(rfs.ModelSerializer):
 
     class Meta:
         fields = ["name", "process_time", "status", "end_time", "parameters", "type"]
-        list_serializer_class = AbstractReportListSerializer
+        list_serializer_class = rfs.ListSerializer
 
     def get_type(self, instance: AbstractReport):
         return instance.__class__.__name__.replace("Report", "").lower()
@@ -1223,24 +1222,32 @@ class AbstractReportSerializerInterface(rfs.ModelSerializer):
         raise NotImplementedError()
 
 
-class AbstractReportBISerializer(AbstractReportSerializerInterface):
+class AbstractBIInterface(ModelSerializer):
     application = rfs.CharField(read_only=True, default="IntelOwl")
-    timestamp = rfs.DateTimeField(source="start_time")
-    username = rfs.CharField(source="job.user.username")
     environment = rfs.SerializerMethodField(method_name="get_environment")
+    timestamp: Field
+    username : Field
+    name : Field
+    type : Field
+    process_time : Field
+    status : Field
+    end_time: Field
 
     class Meta:
-        fields = AbstractReportSerializerInterface.Meta.fields + [
+        fields = [
             "application",
+            "environment",
             "timestamp",
             "username",
-            "environment",
+            "name",
+            "type",
+            "process_time",
+            "status",
+            "end_time",
         ]
-        list_serializer_class = (
-            AbstractReportSerializerInterface.Meta.list_serializer_class
-        )
 
-    def get_environment(self, instance: AbstractReport):
+    @staticmethod
+    def get_environment(instance):
         if settings.STAGE_PRODUCTION:
             return "prod"
         elif settings.STAGE_STAGING:
@@ -1248,14 +1255,58 @@ class AbstractReportBISerializer(AbstractReportSerializerInterface):
         else:
             return "test"
 
-    def to_representation(self, instance: AbstractReport):
-        data = super().to_representation(instance)
+    @staticmethod
+    def to_elastic_dict(data):
         return {
             "_source": data,
             "_type": "_doc",
             "_index": settings.ELASTICSEARCH_BI_INDEX + "-" + now().strftime("%Y.%m"),
             "_op_type": "index",
         }
+
+
+class AbstractReportBISerializer(AbstractBIInterface, AbstractReportSerializerInterface):
+    timestamp = rfs.DateTimeField(source="start_time")
+    username = rfs.CharField(source="job.user.username")
+
+
+    class Meta:
+        fields = AbstractBIInterface.Meta.fields + [
+            "parameters",
+        ]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        return self.to_elastic_dict(data)
+
+class JobBISerializer((AbstractBIInterface), ModelSerializer):
+    timestamp = rfs.DateTimeField(source="received_request_time")
+    username = rfs.CharField(source="user.username")
+    name = rfs.CharField(source="pk")
+    type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
+    end_time: rfs.DateTimeField(source="finished_analysis_time")
+    playbook = rfs.SerializerMethodField(source="get_playbook")
+    class Meta:
+        fields = AbstractBIInterface.Meta.fields + [
+            "playbook",
+            "runtime_configuration"
+        ]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
+
+    def to_representation(self, instance: Job):
+        data = super().to_representation(instance)
+        return self.to_elastic_dict(data)
+
+    def get_type(self, instance:Job):
+        return instance.__class__.__name__.lower()
+
+    def get_playbook(self, instance:Job):
+        return instance.playbook_to_execute.name if instance.playbook_to_execute else ""
 
 
 class AbstractReportSerializer(AbstractReportSerializerInterface):

@@ -306,6 +306,7 @@ class Job(models.Model):
     scan_check_time = models.DurationField(
         null=True, blank=True, default=datetime.timedelta(hours=24)
     )
+    sent_to_bi = models.BooleanField(editable=False, default=False)
 
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'

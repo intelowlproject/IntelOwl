@@ -1,13 +1,13 @@
 # Installation
 
 ## Requirements
-The project leverages `docker-compose` with a custom python script so you need to have the following packages installed in your machine:
-* [docker](https://docs.docker.com/get-docker/) - v1.13.0+
-* [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
+The project leverages `docker compose` with a custom Bash script and you need to have the following packages installed in your machine:
+* [docker](https://docs.docker.com/get-docker/) - v19.03.0+
+* [docker-compose](https://docs.docker.com/compose/install/) - v2.3.4+
 * [python](https://www.python.org/) - v3.6+
-* There are additional python dependencies (mentioned in the `requirements/pre-requirements.txt` file) that can be installed using the `initialize.sh` script.
 
 In some systems you could find pre-installed older versions. Please check this and install a supported version before attempting the installation. Otherwise it would fail.
+**Note:** We've added a new script `initialize.sh` that will check compatibility with your system and attempt to install the required dependencies.
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -21,9 +21,8 @@ In some systems you could find pre-installed older versions. Please check this a
 ## TL;DR
 Obviously we strongly suggest reading through all the page to configure IntelOwl in the most appropriate way.
 
-However, if you feel lazy, you could just install and test IntelOwl with the following steps. Be sure to run `docker` and `python` commands with `sudo` if permissions/roles have not been set
-
-**Note:** We've added a new script `initialize.sh` that will check compatibility with your system and attempt to install the required dependencies.
+However, if you feel lazy, you could just install and test IntelOwl with the following steps. 
+`docker` will be run with `sudo` if permissions/roles have not been set.
 
 ```bash
 # clone the IntelOwl project repository
@@ -36,17 +35,14 @@ cp docker/env_file_postgres_template docker/env_file_postgres
 cp docker/env_file_integrations_template docker/env_file_integrations
 cp frontend/public/env_template.js frontend/public/env.js
 
-# verify installed dependencies
-./initialize.sh
-
-# start the app
-sudo python3 start.py prod up
-
+# verify installed dependencies and start the app
+./start prod up
 # now the application is running on http://localhost:80
+
 # create a super user 
 sudo docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
-# now you can login with the created user form http://localhost:80
+# now you can login with the created user form http://localhost:80/login
 
 # Have fun!
 ```
@@ -56,10 +52,13 @@ sudo docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 The first time you start IntelOwl, a lot of database migrations are being applied. This requires some time. If you get 500 status code errors in the GUI, just wait few minutes and then refresh the page.
 </div>
 
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank">YouTube video</a> that may help in the installation process. (<i>ManySteps have changed since v2.0.0</i>)
-</div>
+[//]: # (<div class="admonition hint">)
+
+[//]: # (<p class="admonition-title">Hint</p>)
+
+[//]: # (There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank">YouTube video</a> that may help in the installation process. &#40;<i>ManySteps have changed since v2.0.0</i>&#41;)
+
+[//]: # (</div>)
 
 ## Deployment Components
 IntelOwl is composed of various different technologies, namely:
@@ -74,7 +73,7 @@ IntelOwl is composed of various different technologies, namely:
 * Kibana (*optional*): GUI for Elastic Search. We provide a saved configuration with dashboards and visualizations.
 * Flower (*optional*): Celery Management Web Interface
 
-All these components are managed via docker-compose.
+All these components are managed via `docker compose`.
 
 ## Deployment Preparation
 
@@ -91,7 +90,7 @@ cp docker/env_file_postgres_template docker/env_file_postgres
 cp docker/env_file_integrations_template docker/env_file_integrations
 cp frontend/public/env_template.js frontend/public/env.js
 
-sudo ./initialize.sh
+./initialize.sh
 ```
 
 ### Environment configuration (required)
@@ -151,7 +150,7 @@ Logrotate configuration is more stable.
 
 ### Crontab configuration (recommended for advanced deployments)
 We added few Crontab configurations that could be installed in the host machine at system level to solve some possible edge-case issues:
-* Memory leaks: Once a week it is suggested to do a full restart of the application to clean-up the memory used by the application. Practical experience suggest us to do that to solve some recurrent memory issues in Celery. This cron (`application_restart`) assumes that you have executed IntelOwl with the parameters `-all_analyzers`. If you didn't, feel free to change the cron as you wish.
+* Memory leaks: Once a week it is suggested to do a full restart of the application to clean-up the memory used by the application. Practical experience suggest us to do that to solve some recurrent memory issues in Celery. This cron (`application_restart`) assumes that you have executed IntelOwl with the parameters `--all_analyzers`. If you didn't, feel free to change the cron as you wish.
 
 This configuration is optional but strongly recommended for people who want to have a production grade deployment. To install it you need to run the following script in each deployed server:
 ```commandline
@@ -178,7 +177,7 @@ There are 3 options to execute the web server:
 
     You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file and put those required files in the specified locations.
 
-    Then you should call the `start.py` script with the parameter `--https` to leverage the right Docker Compose file for HTTPS.
+    Then you should call the `./start` script with the parameter `--https` to leverage the right Docker Compose file for HTTPS.
   
     Plus, if you use [Flower](Advanced-Configuration.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
 
@@ -188,16 +187,16 @@ There are 3 options to execute the web server:
 
     Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
     
-    After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
+    After the configuration is done, you can add the option `--traefik` while executing [`./start`](#run)
 
 ## Run
 
 <div class="admonition note">
 <p class="admonition-title">Important Info</p>
 IntelOwl depends heavily on docker and docker compose so as to hide this complexity from the enduser the project
-leverages a custom script (<code>start.py</code>) to interface with <code>docker-compose</code>.
+leverages a custom shell script (<code>start</code>) to interface with <code>docker compose</code>.
 
-You may invoke <code>$ python3 start.py --help</code> to get help and usage info.
+You may invoke <code>$ ./start --help</code> to get help and usage info.
 
 The CLI provides the primitives to correctly build, run or stop the containers for IntelOwl. Therefore,
 <ul>
@@ -210,10 +209,21 @@ The CLI provides the primitives to correctly build, run or stop the containers f
 Now that you have completed different configurations, starting the containers is as simple as invoking:
 
 ```bash
-$ python3 start.py prod up
+$ ./start prod up
 ```
 
-You can add the parameter `-d` to run the application in the background.
+You can add the `docker` options `-d` to run the application in the background. 
+<div class="admonition note">
+<p class="admonition-title">Important Info</p>
+All `docker` and `docker compose` specific options must be passed at the end of the script, after a `--` token.
+This token indicates the end of IntelOwl's options and the beginning of Docker options.
+
+Example:
+```bash
+./start prod up -- -d
+```
+</div>
+
 
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
@@ -224,12 +234,12 @@ This  can be helpful to keep using old versions in case of retrocompatibility is
 ### Stop
 To stop the application you have to:
 * if executed without `-d` parameter: press `CTRL+C` 
-* if executed with `-d` parameter: `python3 start.py prod down`
+* if executed with `-d` parameter: `./start prod down`
 
 ### Cleanup of database and application
 This is a destructive operation but can be useful to start again the project from scratch
 
-`python3 start.py prod down -v`
+`./start prod down -- -v`
 
 ## After Deployment
 
@@ -243,9 +253,9 @@ To manage users, organizations and their visibility please refer to this [sectio
 ### Rebuilding the project / Creating custom docker build
 If you make some code changes and you like to rebuild the project, follow these steps:
 
-1. `python3 start.py test build --tag=<your_tag> .` to build the new docker image.
+1. `./start test build -- --tag=<your_tag> .` to build the new docker image.
 2. Add this new image tag in the `docker/test.override.yml` file.
-3. Start the containers with `python3 start.py test up --build`.
+3. Start the containers with `./start test up -- --build`.
 
 ### Update to the most recent version
 To update the project with the most recent available code you have to follow these steps:
@@ -253,8 +263,8 @@ To update the project with the most recent available code you have to follow the
 ```bash
 $ cd <your_intel_owl_directory> # go into the project directory
 $ git pull # pull new changes
-$ python3 start.py prod down # kill and destroy the currently running IntelOwl containers 
-$ python3 start.py prod up # restart the IntelOwl application
+$ ./start prod down # kill and destroy the currently running IntelOwl containers 
+$ ./start prod up # restart the IntelOwl application
 ```
 
 <div class="admonition warning">

@@ -141,10 +141,6 @@ else
 fi
 echo "Activating virtual environment \`venv\`"
 source venv/bin/activate
-echo "Installing python dependencies using pip..."
-#pip requires --user flag for gentoo
-pip3 install -r requirements/pre-requirements.txt
-echo "Python dependencies installed!"
 
 echo "Adding Logrotate configuration to Systems logrotate"
 cd ./docker/scripts

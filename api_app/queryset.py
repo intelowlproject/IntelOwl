@@ -130,7 +130,6 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
-
     @classmethod
     def _get_bi_serializer_class(cls):
         from api_app.serializers import JobBISerializer

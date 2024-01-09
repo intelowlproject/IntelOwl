@@ -6,7 +6,6 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
-from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
 from tests.mock_utils import patch
 
 class ZippyAnalyser(FileAnalyzer):

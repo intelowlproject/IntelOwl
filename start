@@ -94,8 +94,8 @@ load_env () {
 
 if ! [ -d venv/ ]; then
   ./initialize.sh
-  source venv/bin/activate
 fi
+source venv/bin/activate
 
 check_parameters "$@" && shift 2
 

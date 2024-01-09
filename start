@@ -92,12 +92,10 @@ load_env () {
   export "$(grep -v '^#' "$1" | xargs -d '\n')"
 }
 
-# we should be able to start only with this script even the first time
-#  if ! [ -d venv/ ]; then
-#    ./initialize.sh
-  # TODO: check that we are really in a venv
-#  fi
-# load all variables from file
+if ! [ -d venv/ ]; then
+  ./initialize.sh
+  source venv/bin/activate
+fi
 
 check_parameters "$@" && shift 2
 

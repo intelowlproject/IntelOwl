@@ -634,14 +634,12 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
         observables = data.pop("observables", [])
-        for classification, name in observables:
+        # TODO we could change the signature, but this means change frontend + clients
+        for _, name in observables:
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
-
             item["observable_name"] = name
-            if classification:
-                item["observable_classification"] = classification
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:

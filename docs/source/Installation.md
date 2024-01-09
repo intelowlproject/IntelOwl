@@ -42,7 +42,7 @@ cp frontend/public/env_template.js frontend/public/env.js
 # create a super user 
 sudo docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
-# now you can login with the created user form http://localhost:80/login
+# now you can login with the created user from http://localhost:80/login
 
 # Have fun!
 ```

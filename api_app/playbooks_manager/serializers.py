@@ -15,7 +15,7 @@ from api_app.serializers import ModelWithOwnershipSerializer, TagSerializer
 class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     class Meta:
         model = PlaybookConfig
-        exclude = ["disabled_in_organizations"]
+        fields = rfs.ALL_FIELDS
 
     type = rfs.ListField(child=rfs.CharField(read_only=True), read_only=True)
     analyzers = rfs.PrimaryKeyRelatedField(

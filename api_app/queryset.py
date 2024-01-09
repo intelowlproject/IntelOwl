@@ -70,10 +70,16 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         qs = self.filter(
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
-
         if user and user.has_membership():
+            qs = qs.alias(
+                disabled_in_organization=Exists(
+                    self.model.filter(pk=OuterRef("pk")).orgs_configuration.filter(
+                        organization__pk=user.membership.organization_id, disabled=True
+                    )
+                )
+            )
             qs = qs.exclude(
-                disabled_in_organizations=user.membership.organization,
+                disabled_in_organization=user.membership.organization,
             )
         return self.annotate(runnable=Exists(qs))
 

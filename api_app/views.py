@@ -832,9 +832,10 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
-        obj.disabled_in_organizations.add(organization)
+        org_configuration.disable_manually(request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     @disable_in_org.mapping.delete
@@ -847,9 +848,10 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if not org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
-        obj.disabled_in_organizations.remove(organization)
+        org_configuration.enable_manually(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

@@ -79,6 +79,8 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     disabled_in_organizations = None
     maximum_jobs = models.IntegerField(default=10)
 
+    org_configuration = None
+
     @classmethod
     @property
     def plugin_type(cls) -> str:
@@ -108,3 +110,6 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
             max_size_report=self.maximum_jobs,
             parameters=self._get_params(self.user, {}),
         )
+
+    def get_or_create_org_configuration(self):
+        return None

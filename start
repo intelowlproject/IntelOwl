@@ -320,5 +320,4 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
-echo "${to_run[*]}"
 sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"

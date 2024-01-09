@@ -17,7 +17,7 @@ class ZippyAnalyser(FileAnalyzer):
         text_data = binary_data.decode('utf-8')
         try:
             response=(EnsembledZippy().run_on_text_chunked(text_data))
-        except Exception as e:
+        except Exception as _:
             print("Zippy not imported correctly")
             raise AnalyzerRunException
         print(response)

@@ -401,7 +401,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         pc = PlaybookConfig.objects.create(name="test", description="test", type=["ip"])
         v.playbooks.set([pc])
         visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-            self.ajcs, pc
+            self.ajcs, tlp="CLEAR", playbook_requested=pc
         )
         self.assertCountEqual(visualizers, [v])
         pc.delete()
@@ -413,13 +413,13 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         v.save()
         self.assertTrue(v.is_runnable(self.user))
         visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-            self.ajcs, pc
+            self.ajcs, tlp="CLEAR", playbook_requested=pc
         )
         self.assertCountEqual(visualizers, [v])
         v.disabled = True
         v.save()
         visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
-            self.ajcs, pc
+            self.ajcs, tlp="CLEAR", playbook_requested=pc
         )
         self.assertCountEqual(visualizers, [])
         v.disabled = False

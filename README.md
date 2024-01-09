@@ -20,24 +20,28 @@
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7120/badge)](https://bestpractices.coreinfrastructure.org/projects/7120)
 # Intel Owl
 
-Do you want to get **threat intelligence data** about a malware, an IP or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
+Do you want to get **threat intelligence data** about a malware, an IP address or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
 
 You are in the right place!
 
 IntelOwl is an Open Source solution for management of Threat Intelligence at scale. It integrates a number of analyzers available online and a lot of cutting-edge malware analysis tools.
 
 ### Features
+This application is built to **scale out** and to **speed up the retrieval of threat info**.
 
-- Provides enrichment of Threat Intel for malware as well as observables (IP, Domain, URL, hash, etc).
-- This application is built to **scale out** and to **speed up the retrieval of threat info**.
-- Thanks to the official libraries [pyintelowl](https://github.com/intelowlproject/pyintelowl) and [go-intelowl](https://github.com/intelowlproject/go-intelowl), it can be integrated easily in your stack of security tools to automate common jobs usually performed, for instance, by SOC analysts manually.
-- Intel Owl is composed of:
-  - **analyzers** that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
-  - **connectors** that can be run to export data to external platforms (like MISP or OpenCTI)
-  - **visualizers** that can be run to create custom visualizations of analyzers results
-  - **playbooks** that are meant to make analysis easily repeatable
-- API REST written in Django and Python 3.9.
-- Built-in frontend client written in ReactJS, with **[certego-ui](https://github.com/certego/certego-ui)**: provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
+It provides:
+- **Enrichment of Threat Intel** for files as well as observables (IP, Domain, URL, hash, etc).
+- A Fully-fledged REST APIs written in Django and Python.
+- An easy way to be integrated in your stack of security tools to automate common jobs usually performed, for instance, by SOC analysts manually. (Thanks to the official libraries [pyintelowl](https://github.com/intelowlproject/pyintelowl) and [go-intelowl](https://github.com/intelowlproject/go-intelowl))
+- A **built-in GUI**: provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
+- A **framework** composed of modular components called **Plugins**:
+  - *analyzers* that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
+  - *connectors* that can be run to export data to external platforms (like MISP or OpenCTI)
+  - *pivots* that are designed to trigger the execution of a chain of analysis and connect them to each other
+  - *visualizers* that are designed to create custom visualizations of analyzers results
+  - *ingestors* that allows to automatically ingest stream of observables or files to IntelOwl itself
+  - *playbooks* that are meant to make analysis easily repeatable
+
 
 ### Documentation [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
 We try hard to keep our documentation well written, easy to understand and always updated.

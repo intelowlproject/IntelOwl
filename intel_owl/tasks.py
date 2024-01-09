@@ -157,8 +157,6 @@ def update(python_module_pk: int):
     if settings.NFS:
         update_plugin(None, python_module_pk)
     else:
-        pass
-
         queues = {config.queue for config in python_module.configs}
         for queue in queues:
             broadcast(

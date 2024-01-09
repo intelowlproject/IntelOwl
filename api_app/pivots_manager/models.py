@@ -2,6 +2,8 @@ import logging
 import typing
 from typing import Type
 
+from django.contrib.contenttypes.fields import GenericRelation
+
 from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuerySet
 from api_app.queryset import PythonConfigQuerySet
 from api_app.validators import plugin_name_validator
@@ -96,6 +98,9 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         related_name="executed_by_pivot",
         null=False,
         blank=False,
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     def _generate_full_description(self) -> str:

@@ -8,8 +8,10 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
 
 from api_app.interfaces import OwnershipAbstractModel
 
@@ -841,6 +843,87 @@ class PluginConfig(OwnershipAbstractModel):
         return "2" if self.is_secret() else "1"
 
 
+class OrganizationPluginConfiguration(models.Model):
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to={
+            "model__endswith": "config",
+            "app_label__endswith": "manager",
+        },
+    )
+    object_id = models.CharField()
+    config = GenericForeignKey("content_type", "object_id")
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+    disabled = models.BooleanField(default=False)
+    disabled_comment = models.TextField(null=True, blank=True)
+
+    rate_limit_timeout = models.DurationField(
+        null=True, blank=True, help_text="Expects data in the format 'DD HH:MM:SS'"
+    )
+    rate_limit_enable_task = models.ForeignKey(
+        PeriodicTask, on_delete=models.SET_NULL, null=True, blank=True, editable=False
+    )
+
+    def disable_for_rate_limit(self):
+        self.disabled = True
+
+        enabled_to = now() + self.rate_limit_timeout
+        self.disabled_comment = (
+            "Disabled because rate limit hit at "
+            f"{now().strftime('%d %m %Y: %H %M %s')}."
+            "Will be enabled at "
+            f"{enabled_to.strftime('%d %m %Y: %H %M %s')}"
+        )
+        clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
+            1
+        ]
+        if not self.rate_limit_enable_task:
+            from intel_owl.tasks import disable_configuration_for_org_for_rate_limit
+
+            self.rate_limit_enable_task = PeriodicTask.objects.create(
+                name=f"{self.config.name}{self.organization.name}RateLimitCleaner",
+                clocked=clock_schedule,
+                one_off=True,
+                task=f"{disable_configuration_for_org_for_rate_limit.__module__}.{disable_configuration_for_org_for_rate_limit.__name__}",
+            )
+        else:
+            self.rate_limit_enable_task.clocked = clock_schedule
+            self.rate_limit_enable_task.save()
+        self.save()
+
+    def disable_manually(self, user: User):
+        self.disable = True
+        self.disable_comment = f"Disabled by user {user.username}"
+        self.rate_limit_enable_task = None
+        self.save()
+
+    def enable_manually(self, user):
+        self.disable = False
+        self.disable_comment = None
+        self.save()
+
+
+"""
+def migrate(apps, schema_editor):
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
+    for config in AnalyzerConfig.objects.exclude(disabled_in_organization=None):
+        for org in config.disabled_in_organizations.all():
+            OrganizationPluginConfiguration.objects.create(
+                organization=org, content_object=config, disabled=True
+            )
+
+def reverse_migrate(apps, schema_editor):
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    for config in AnalyzerConfig.objects.exclude(orgs_configuration=None):
+        for org in config.orgs_configuration.all():
+            config.disabled_in_organizations.add(org)
+"""
+
+
 class AbstractConfig(models.Model):
     objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
@@ -856,6 +939,9 @@ class AbstractConfig(models.Model):
     disabled_in_organizations = models.ManyToManyField(
         Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
+    orgs_configuration = GenericRelation(
+        OrganizationPluginConfiguration, related_name="%(class)s"
+    )
 
     class Meta:
         indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
@@ -863,6 +949,17 @@ class AbstractConfig(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_or_create_org_configuration(
+        self, organization: Organization
+    ) -> OrganizationPluginConfiguration:
+        try:
+            org_configuration = self.orgs_configuration.get(organization=organization)
+        except OrganizationPluginConfiguration.DoesNotExist:
+            org_configuration = OrganizationPluginConfiguration.objects.create(
+                content_object=self, organization=organization
+            )
+        return org_configuration
 
     @classmethod
     @property
@@ -889,8 +986,9 @@ class AbstractConfig(models.Model):
         if user.has_membership():
             return (
                 not self.disabled
-                and user.membership.organization
-                not in self.disabled_in_organizations.all()
+                and not self.orgs_configuration.filter(
+                    disabled=True, organization__pk=user.membership.organization_id
+                ).exists()
             )
         return not self.disabled
 

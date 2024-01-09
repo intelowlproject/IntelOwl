@@ -9,7 +9,15 @@ from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
 
 from .forms import ParameterInlineForm
-from .models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule, Tag
+from .models import (
+    AbstractConfig,
+    Job,
+    OrganizationPluginConfiguration,
+    Parameter,
+    PluginConfig,
+    PythonModule,
+    Tag,
+)
 from .tabulars import (
     ParameterInline,
     PluginConfigInlineForParameter,
@@ -178,17 +186,25 @@ class AbstractConfigAdminView(CustomAdminView):
     @admin.display(description="Disabled in orgs")
     def disabled_in_orgs(self, instance: AbstractConfig):
         return list(
-            instance.disabled_in_organizations.all().values_list("name", flat=True)
+            instance.orgs_configuration.all().values_list(
+                "organization__name", flat=True
+            )
         )
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-    list_display = (
-        "name",
-        "python_module",
-        "disabled",
-        "disabled_in_orgs",
-        "routing_key",
-    )
+    list_display = AbstractConfigAdminView.list_display + ("routing_key",)
     inlines = [PluginConfigInlineForPythonConfig]
     list_filter = ["routing_key"]
+
+
+@admin.register(OrganizationPluginConfiguration)
+class OrganizationPluginConfigurationAdminView(CustomAdminView):
+    list_display = [
+        "config",
+        "organization",
+        "disabled",
+        "disabled_comment",
+        "rate_limit_timeout",
+    ]
+    list_filter = ["organization"]

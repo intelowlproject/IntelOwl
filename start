@@ -299,7 +299,10 @@ fi
 
 if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
   echo "Requested version ${version} is different from current version ${current_version}"
-  git config --global --add safe.directory "$(pwd)" # it could be not the right directory, to verify during tests
+  directory=$(git config --global --get safe.directory)
+  if ! [ $? ] || ! [[ "${directory}" == $(pwd) ]]; then
+    git config --global --add safe.directory "$(pwd)"
+  fi
   git checkout "v${version}"
 fi
 

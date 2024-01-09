@@ -140,7 +140,7 @@ If you use a local PostgreSQL instance (this is the default), in the `env_file_p
 ### Logrotate configuration (strongly recommended)
 If you want to have your logs rotated correctly, we suggest you to add the configuration for the system Logrotate.
 To do that you can leverage the `initialize.sh` script. Otherwise, if you have skipped that part, you can manually install logrotate by launching the following script:
-```commandline
+```bash
 cd ./docker/scripts
 ./install_logrotate.sh
 ```
@@ -153,7 +153,7 @@ We added few Crontab configurations that could be installed in the host machine 
 * Memory leaks: Once a week it is suggested to do a full restart of the application to clean-up the memory used by the application. Practical experience suggest us to do that to solve some recurrent memory issues in Celery. This cron (`application_restart`) assumes that you have executed IntelOwl with the parameters `--all_analyzers`. If you didn't, feel free to change the cron as you wish.
 
 This configuration is optional but strongly recommended for people who want to have a production grade deployment. To install it you need to run the following script in each deployed server:
-```commandline
+```bash
 cd ./docker/scripts
 ./install_crontab.sh
 ```
@@ -276,12 +276,12 @@ After an upgrade, sometimes a database error in Celery Containers could happen. 
 <p class="admonition-title">Note</p>
 After having upgraded IntelOwl, in case the application does not start and you get an error like this:
 
-```commandline
+```bash
 PermissionError: [Errno 13] Permission denied: '/var/log/intel_owl/django/authentication.log
 ```
 
 just run this:
-```commandline
+```bash
 sudo chown -R www-data:www-data /var/lib/docker/volumes/intel_owl_generic_logs/_data/django
 ```
 
@@ -320,7 +320,7 @@ This is not supported. Please perform a major upgrade once at a time.
 #### Updating to >=4.0.0 from a 3.x.x version
 IntelOwl v4 introduced some major changes regarding the permission management, allowing an easier way to manage users and visibility. But that did break the previous available DB.
 So, to migrate to the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.
-```commandline
+```bash
 python3 start.py prod down -v
 ```
 Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides an easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).

@@ -110,7 +110,7 @@ DANGEROUSLY_DISABLE_HOST_CHECK=true npm start
 
 Most of the time you would need to test the changes you made together with the backend. In that case, you would need to run the backend locally too:
 
-```commandline
+```bash
 ./start prod up
 ```
 

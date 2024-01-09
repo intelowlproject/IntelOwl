@@ -13,7 +13,7 @@ export async function saveJobAsPlaybook(values) {
     connectors: values.connectors,
     pivots: values.pivots,
     runtime_configuration: values.runtimeConfiguration,
-    tags: values.tags,
+    tags_labels: values.tags_labels,
     tlp: values.tlp,
     scan_mode: values.scan_mode,
     scan_check_time: values.scan_check_time,

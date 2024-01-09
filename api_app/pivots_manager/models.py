@@ -30,6 +30,7 @@ class PivotReport(AbstractReport):
 
     class Meta:
         unique_together = [("config", "job")]
+        indexes = AbstractReport.Meta.indexes
 
 
 class PivotMap(models.Model):

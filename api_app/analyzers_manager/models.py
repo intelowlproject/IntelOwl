@@ -30,6 +30,7 @@ class AnalyzerReport(AbstractReport):
 
     class Meta:
         unique_together = [("config", "job")]
+        indexes = AbstractReport.Meta.indexes
 
 
 class MimeTypes(models.TextChoices):

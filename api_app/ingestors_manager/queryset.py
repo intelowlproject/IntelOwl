@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class IngestorReportQuerySet(AbstractReportQuerySet):
     @classmethod
-    def _get_serializer_class(cls) -> Type["IngestorReportBISerializer"]:
+    def _get_bi_serializer_class(cls) -> Type["IngestorReportBISerializer"]:
         from api_app.ingestors_manager.serializers import IngestorReportBISerializer
 
         return IngestorReportBISerializer

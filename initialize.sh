@@ -57,6 +57,10 @@ if ! [ -x "$(command -v docker)" ]; then
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Install docker
+    if ! curl --version > /dev/null 2>&1; then
+      echo "curl is required to install dependencies." >&2
+      exit 1
+    fi
     curl -fsSL https://get.docker.com -o get-docker.sh
     sudo sh get-docker.sh
     # Check if docker is installed

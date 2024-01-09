@@ -38,14 +38,6 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
-        migrations.RemoveIndex(
-            model_name="job",
-            name="JobBISearch",
-        ),
-        migrations.RemoveField(
-            model_name="job",
-            name="sent_to_bi",
-        ),
         migrations.AddField(
             model_name="organizationpluginconfiguration",
             name="content_type",

@@ -33,6 +33,9 @@
           "parameters": {
             "type": "object",
             "dynamic": true
+          },
+          "playbook": {
+            "type": "keyword"
           }
         }
       }

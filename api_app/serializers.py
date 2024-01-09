@@ -1287,7 +1287,7 @@ class AbstractReportBISerializer(
         return self.to_elastic_dict(data)
 
 
-class JobBISerializer((AbstractBIInterface), ModelSerializer):
+class JobBISerializer(AbstractBIInterface, ModelSerializer):
     timestamp = rfs.DateTimeField(source="received_request_time")
     username = rfs.CharField(source="user.username")
     name = rfs.CharField(source="pk")

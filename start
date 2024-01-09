@@ -94,6 +94,10 @@ load_env () {
 
 if ! [ -d venv/ ]; then
   ./initialize.sh
+  if ! [ $? ]; then
+    echo "Failed to install dependencies." >&2
+    exit 1
+  fi
 fi
 source venv/bin/activate
 

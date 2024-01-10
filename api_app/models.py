@@ -853,7 +853,7 @@ class OrganizationPluginConfiguration(models.Model):
             "app_label__endswith": "manager",
         },
     )
-    object_id = models.CharField()
+    object_id = models.IntegerField()
     config = GenericForeignKey("content_type", "object_id")
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)

@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("object_id", models.CharField()),
+                ("object_id", models.IntegerField()),
                 ("disabled", models.BooleanField(default=False)),
                 ("disabled_comment", models.TextField(blank=True, null=True)),
                 (

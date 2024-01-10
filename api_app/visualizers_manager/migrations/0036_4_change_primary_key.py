@@ -42,7 +42,6 @@ class Migration(migrations.Migration):
             model_name="visualizerconfig",
             name="playbooks",
             field=models.ManyToManyField(
-                blank=True,
                 related_name="visualizers",
                 to="playbooks_manager.PlaybookConfig",
             ),

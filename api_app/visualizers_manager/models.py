@@ -26,9 +26,6 @@ class VisualizerReport(AbstractReport):
 
 
 class VisualizerConfig(PythonConfig):
-    name = models.CharField(
-        max_length=100, null=False, validators=[plugin_name_validator], unique=True
-    )
     playbooks = models.ManyToManyField(
         PlaybookConfig,
         related_name="visualizers",

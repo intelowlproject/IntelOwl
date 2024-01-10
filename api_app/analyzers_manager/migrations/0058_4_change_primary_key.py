@@ -37,6 +37,10 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             migrate
         ),
+        migrations.AlterUniqueTogether(
+            name='analyzerreport',
+            unique_together={('config', 'job')},
+        ),
         migrations.RemoveField(
             model_name="analyzerreport",
             name="old_config"

@@ -931,7 +931,6 @@ class AbstractConfig(models.Model):
         max_length=100,
         null=False,
         unique=True,
-        primary_key=True,
         validators=[plugin_name_validator],
     )
     description = models.TextField(null=False)

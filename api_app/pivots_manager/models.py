@@ -76,9 +76,6 @@ class PivotMap(models.Model):
 
 class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     objects = PivotConfigQuerySet.as_manager()
-    name = models.CharField(
-        max_length=100, null=False, validators=[plugin_name_validator], unique=True
-    )
     python_module = models.ForeignKey(
         PythonModule,
         on_delete=models.PROTECT,

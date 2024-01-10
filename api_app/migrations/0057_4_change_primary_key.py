@@ -141,6 +141,14 @@ class Migration(migrations.Migration):
             name="old_visualizer_config"
         ),
         migrations.RemoveField(
+            model_name='pluginconfig',
+            name='old_analyzer_config',
+        ),
+        migrations.RemoveField(
+            model_name='pluginconfig',
+            name='old_connector_config',
+        ),
+        migrations.RemoveField(
             model_name="job",
             name="visualizers_to_execute2"
         ),
@@ -160,4 +168,5 @@ class Migration(migrations.Migration):
             model_name="job",
             name="connectors_requested2"
         )
+
     ]

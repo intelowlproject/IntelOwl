@@ -18,6 +18,7 @@ from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
+from api_app.validators import plugin_name_validator
 
 logger = getLogger(__name__)
 

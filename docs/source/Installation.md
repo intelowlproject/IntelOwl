@@ -4,7 +4,6 @@
 The project leverages `docker compose` with a custom Bash script and you need to have the following packages installed in your machine:
 * [docker](https://docs.docker.com/get-docker/) - v19.03.0+
 * [docker-compose](https://docs.docker.com/compose/install/) - v2.3.4+
-* [python](https://www.python.org/) - v3.6+
 
 In some systems you could find pre-installed older versions. Please check this and install a supported version before attempting the installation. Otherwise it would fail.
 **Note:** We've added a new script `initialize.sh` that will check compatibility with your system and attempt to install the required dependencies.

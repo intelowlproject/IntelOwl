@@ -17,6 +17,12 @@ def migrate(apps, schema_editor):
         analyzers_requested2=ArraySubquery(
             Job.objects.filter(pk=models.OuterRef("pk")).values("analyzers_requested__name")
         ),
+        connectors_to_execute2=ArraySubquery(
+            Job.objects.filter(pk=models.OuterRef("pk")).values("connectors_to_execute__name")
+        ),
+        connectors_requested2=ArraySubquery(
+            Job.objects.filter(pk=models.OuterRef("pk")).values("connectors_requested__name")
+        ),
 
     )
 
@@ -24,6 +30,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("visualizers_manager", "0036_1_change_primary_key"),
         ("analyzers_manager", "0058_1_change_primary_key"),
+        ("connectors_manager", "0029_1_change_primary_key"),
         ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
     ]
 
@@ -38,6 +45,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="pluginconfig",
             name="analyzer_config",
+            field=models.CharField(
+                max_length=100, null=True, blank=True
+            )
+        ),
+        migrations.AlterField(
+            model_name="pluginconfig",
+            name="connector_config",
             field=models.CharField(
                 max_length=100, null=True, blank=True
             )
@@ -72,6 +86,26 @@ class Migration(migrations.Migration):
                 size=None,
             ),
         ),
+        migrations.AddField(
+            model_name="job",
+            name="connectors_to_execute2",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=100),
+                blank=True,
+                default=list,
+                size=None,
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="connectors_requested2",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=100),
+                blank=True,
+                default=list,
+                size=None,
+            ),
+        ),
         migrations.RunPython(
             migrate
         ),
@@ -86,5 +120,13 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name="job",
             name="analyzers_requested",
+        ),
+        migrations.RemoveField(
+            model_name="job",
+            name="connectors_to_execute",
+        ),
+        migrations.RemoveField(
+            model_name="job",
+            name="connectors_requested",
         ),
     ]

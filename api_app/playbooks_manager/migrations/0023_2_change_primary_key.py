@@ -11,12 +11,16 @@ def migrate(apps, schema_editor):
         analyzers2=ArraySubquery(
             Playbook.objects.filter(pk=models.OuterRef("pk")).values("analyzers__name")
         ),
+        connectors2=ArraySubquery(
+            Playbook.objects.filter(pk=models.OuterRef("pk")).values("connectors__name")
+        ),
 
     )
 
 class Migration(migrations.Migration):
     dependencies = [
         ("analyzers_manager", "0058_1_change_primary_key"),
+        ("connectors_manager", "0029_1_change_primary_key"),
         ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
     ]
 
@@ -31,11 +35,25 @@ class Migration(migrations.Migration):
                         size=None,
             ),
         ),
+        migrations.AddField(
+            model_name="playbookconfig",
+            name="connectors2",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=100),
+                blank=True,
+                default=list,
+                size=None,
+            ),
+        ),
         migrations.RunPython(
             migrate
         ),
         migrations.RemoveField(
             model_name="playbookconfig",
             name="analyzers",
+        ),
+        migrations.RemoveField(
+            model_name="playbookconfig",
+            name="connectors",
         )
     ]

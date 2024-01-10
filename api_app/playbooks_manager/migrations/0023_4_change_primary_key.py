@@ -5,15 +5,19 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     Playbook = apps.get_model("playbooks_manager", "PlaybookConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     for playbook in Playbook.objects.all():
         acs = AnalyzerConfig.objects.filter(name__in=playbook.analyzers2)
+        ccs = ConnectorConfig.objects.filter(name__in=playbook.connectors2)
         playbook.analyzers.set(acs)
+        playbook.connectors.set(ccs)
 
 
 
 class Migration(migrations.Migration):
     dependencies = [
         ("analyzers_manager", "0058_3_change_primary_key"),
+        ("connectors_manager", "0029_3_change_primary_key"),
         ("playbooks_manager", "0023_2_change_primary_key"),
     ]
 
@@ -27,11 +31,24 @@ class Migration(migrations.Migration):
                 to="analyzers_manager.AnalyzerConfig",
             ),
         ),
+        migrations.AddField(
+            model_name="playbookconfig",
+            name="connectors",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="playbooks",
+                to="connectors_manager.ConnectorConfig",
+            ),
+        ),
         migrations.RunPython(
             migrate,
         ),
         migrations.RemoveField(
             model_name="playbookconfig",
             name="analyzers2"
+        ),
+        migrations.RemoveField(
+            model_name="playbookconfig",
+            name="connectors2"
         ),
     ]

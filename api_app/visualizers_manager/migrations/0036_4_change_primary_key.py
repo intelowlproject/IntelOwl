@@ -6,15 +6,19 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     VisualizerReport = apps.get_model("visualizers_manager", "VisualizerReport")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     name = VisualizerConfig.objects.filter(name=models.OuterRef("old_config")).values_list("pk")[:1]
     VisualizerReport.objects.update(
         config=models.Subquery(name)
     )
+    for config in VisualizerConfig.objects.all():
+        config.playbooks.set(PlaybookConfig.objects.filter(name__in=config.playbooks2))
 
 
 class Migration(migrations.Migration):
     dependencies = [
         ("visualizers_manager", "0036_3_change_primary_key"),
+        ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
     ]
 
     operations = [
@@ -34,11 +38,25 @@ class Migration(migrations.Migration):
             ),
             preserve_default=False,
         ),
+        migrations.AddField(
+            model_name="visualizerconfig",
+            name="playbooks",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="visualizers",
+                to="playbooks_manager.PlaybookConfig",
+            ),
+        ),
         migrations.RunPython(
             migrate
         ),
         migrations.RemoveField(
             model_name="visualizerreport",
             name="old_config"
+        ),
+        migrations.RemoveField(
+            model_name="visualizerconfig",
+            name="playbooks2"
         )
+
     ]

@@ -1,3 +1,6 @@
+/* eslint-disable id-length */
+// ignored min length of variables because some file extensions are only 2 characters
+
 // IMPORTANT - do not change the order of status
 export const JobStatuses = Object.freeze({
   PENDING: "pending",

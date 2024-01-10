@@ -22,6 +22,7 @@ This page includes details about some advanced features that Intel Owl provides 
     - [Multi Queue](#multi-queue)
     - [Queue Customization](#queue-customization)
     - [Queue monitoring](#queue-monitoring)
+  - [Manual usage](#manual-usage)
 
 ## ElasticSearch
 
@@ -264,3 +265,34 @@ FLOWER_PWD
 
 or change the `.htpasswd` file that is created in the `docker` directory in the `intelowl_flower` container.
 
+## Manual Usage
+The `./start` script essentially acts as a wrapper over Docker Compose, performing additional checks.
+IntelOwl can still be started by using the standard `docker compose` command, but all the dependencies have to be manually installed by the user. 
+
+### Options
+The `--project-directory` and `-p` options are required to run the project.
+Default values set by `./start` script are "docker" and "intel_owl", respectively.
+
+The startup is based on [chaining](https://docs.docker.com/compose/multiple-compose-files/merge/) various Docker Compose YAML files using `-f` option. 
+All Docker Compose files are stored in `docker/` directory of the project.
+The default compose file, named `default.yml`, requires configuration for an external database and message broker.
+In their absence, the `postgres.override.yml` and `rabbitmq.override.yml` files should be chained to the default one.
+
+The command composed, considering what is said above (using `sudo`), is
+```bash
+sudo docker compose --project-directory docker -f docker/default.yml -f docker/postgres.override.yml -f docker/rabbitmq.override.yml -p intel_owl up
+```
+
+The other most common compose file that can be used is for the testing environment. 
+The equivalent of running `./start test up` is adding the `test.override.yml` file, resulting in:
+```bash
+sudo docker compose --project-directory docker -f docker/default.yml -f docker/postgres.override.yml -f docker/rabbitmq.override.yml -f docker/test.override.yml -p intel_owl up
+```
+
+All other options available in the `./start` script (`./start -h` to view them) essentially chain other compose file to `docker compose` command with corresponding filenames.
+
+### Optional Analyzer
+IntelOwl includes integrations with [some analyzer](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#optional-analyzers) that are not enabled by default.
+These analyzers, stored under the `integrations/` directory, are packed within Docker Compose files.
+The `compose.yml` file has to be chained to include the analyzer. 
+The additional `compose-test.yml` file has to be chained for testing environment.

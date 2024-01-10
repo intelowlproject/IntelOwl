@@ -92,14 +92,13 @@ load_env () {
   export "$(grep -v '^#' "$1" | xargs -d '\n')"
 }
 
-if ! [ -d venv/ ]; then
+if ! docker compose version > /dev/null 2>&1; then
   ./initialize.sh
   if ! [ $? ]; then
     echo "Failed to install dependencies." >&2
-    exit 1
+    exit 127
   fi
 fi
-source venv/bin/activate
 
 check_parameters "$@" && shift 2
 
@@ -311,12 +310,6 @@ if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
   git checkout "v${version}"
 fi
 
-# build final command
-if ! docker compose version > /dev/null 2>&1; then
-  echo "Error! Docker compose V2 not installed. Run ./initialize.sh to check for all dependencies." >&2
-  exit 127
-fi
-
 if [ $debug_build ]; then
   export BUILDKIT_PROGRESS="plain"
 fi
@@ -327,9 +320,8 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
-echo "${to_run[*]}"
-#if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-#  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-#else
-#  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-#fi
+if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
+  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+else
+  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+fi

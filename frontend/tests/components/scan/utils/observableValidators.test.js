@@ -29,7 +29,7 @@ describe("Observable validators tests", () => {
     });
   });
 
-  test.each(["test.exe", "test.pdf,", ",test.js,"])(
+  test.each(["test.exe", "test.pdf,", ",test.js,", "256.256.256.256"])(
     "test invalid domains (%s)",
     (valueToValidate) => {
       expect(observableValidators(valueToValidate)).toBeNull();

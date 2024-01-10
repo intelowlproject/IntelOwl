@@ -46,6 +46,8 @@ export function observableValidators(stringToValidate) {
         .includes(stringEnd)
     )
       return null;
+    // remove domain if stringEnd is a number
+    if (!Number.isNaN(parseInt(stringEnd, 10))) return null;
   }
 
   // hash

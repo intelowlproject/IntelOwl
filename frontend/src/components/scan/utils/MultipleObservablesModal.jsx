@@ -44,17 +44,17 @@ export function MultipleObservablesModal(props) {
     setExtractedObservables(observables);
 
     const textHighlightColor = (text) => {
-      if (observables.domain.includes(text)) return "mark text-primary";
-      if (observables.ip.includes(text)) return "mark text-warning";
-      if (observables.hash.includes(text)) return "mark text-success";
-      if (observables.url.includes(text)) return "mark text-danger";
+      if (observables.domain.includes(text)) return "bg-dark text-primary";
+      if (observables.ip.includes(text)) return "bg-dark text-warning";
+      if (observables.hash.includes(text)) return "bg-dark text-success";
+      if (observables.url.includes(text)) return "bg-dark text-danger";
       return null;
     };
 
     setTextAreaInput(
       inputText.split(/\n/).map((line) => (
         <>
-          <span>
+          <span className="d-inline-flex flex-wrap">
             {line.split(/\s/).map((part) => (
               <>
                 <span
@@ -90,7 +90,7 @@ export function MultipleObservablesModal(props) {
       scrollable
       backdrop="static"
       labelledBy="Load Multiple Observables"
-      style={{ minWidth: "90%" }}
+      style={{ minWidth: "95%" }}
       {...rest}
     >
       <ModalHeader className="bg-tertiary" toggle={toggle}>
@@ -157,31 +157,6 @@ export function MultipleObservablesModal(props) {
               </div>
             </div>
           </ContentSection>
-          {/* <ContentSection
-            className="ms-2 bg-darker"
-            style={{ width: "20%", maxHeight: "560px", overflowY: "auto" }}
-          >
-            <div style={{ minHeight: "540px", overflowY: "auto" }}>
-              {Object.values(extractedObservables).flat().length === 0 ? (
-                <small className="text-muted">No observable found.</small>
-              ) : (
-                Object.entries(extractedObservables).map(([key, iocs]) => (
-                  <div >
-                    <h6 key={key} className="text-secondary px-3">
-                      {key}:
-                    </h6>
-                    <ul>
-                      {iocs?.map((ioc) => (
-                        <li key={`extractedObservables__${key}__${ioc}`}>
-                          {ioc}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))
-              )}
-            </div>
-          </ContentSection> */}
         </div>
         <div className="d-flex justify-content-end mb-1">
           <Button

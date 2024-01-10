@@ -5,12 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("visualizers_manager", "0036_1_change_primary_key"),
+        ("analyzers_manager", "0058_1_change_primary_key"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name="visualizerreport",
+            model_name="analyzerreport",
             name = "config",
             field=models.CharField(
                 max_length=100,

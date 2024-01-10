@@ -5,6 +5,7 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     name = VisualizerConfig.objects.filter(name=models.OuterRef("old_visualizer_config")).values_list("pk")[:1]
     PluginConfig.objects.update(
         visualizer_config=models.Subquery(name)
@@ -12,12 +13,18 @@ def migrate(apps, schema_editor):
     Job = apps.get_model("api_app", "Job")
     for job in Job.objects.all():
         vcs = VisualizerConfig.objects.filter(name__in=job.visualizers_to_execute2)
+        acs = AnalyzerConfig.objects.filter(name__in=job.analyzers_to_execute2)
+        acs_requested = AnalyzerConfig.objects.filter(name__in=job.analyzers_requested2)
         job.visualizers_to_execute.set(vcs)
+        job.analyzers_to_execute.set(acs)
+        job.analyzers_requested.set(acs_requested)
+
 
 
 class Migration(migrations.Migration):
     dependencies = [
         ("visualizers_manager", "0036_3_change_primary_key"),
+        ("analyzers_manager", "0058_3_change_primary_key"),
         ("api_app", "0057_2_change_primary_key"),
     ]
 
@@ -26,6 +33,11 @@ class Migration(migrations.Migration):
             model_name="pluginconfig",
             old_name="visualizer_config",
             new_name="old_visualizer_config"
+        ),
+        migrations.RenameField(
+            model_name="pluginconfig",
+            old_name="analyzer_config",
+            new_name="old_analyzer_config"
         ),
         migrations.AddField(
             model_name="pluginconfig",
@@ -41,12 +53,43 @@ class Migration(migrations.Migration):
             preserve_default=False,
         ),
         migrations.AddField(
+            model_name="pluginconfig",
+            name="analyzer_config",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="values",
+                to="analyzers_manager.analyzerconfig",
+            ),
+            preserve_default=False,
+        ),
+        migrations.AddField(
             model_name="job",
             name="visualizers_to_execute",
             field=models.ManyToManyField(
                 blank=True,
                 related_name="executed_in_jobs",
                 to="visualizers_manager.VisualizerConfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="analyzers_to_execute",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="executed_in_jobs",
+                to="analyzers_manager.AnalyzerConfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="analyzers_requested",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="requested_in_jobs",
+                to="analyzers_manager.AnalyzerConfig",
             ),
         ),
         migrations.RunPython(
@@ -59,5 +102,13 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name="job",
             name="visualizers_to_execute2"
+        ),
+        migrations.RemoveField(
+            model_name="job",
+            name="analyzers_to_execute2"
+        ),
+        migrations.RemoveField(
+            model_name="job",
+            name="analyzers_requested2"
         )
     ]

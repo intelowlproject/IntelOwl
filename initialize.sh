@@ -4,7 +4,6 @@ set -e
 
 MINIMUM_DOCKER_VERSION=19.03.0
 MINIMUM_DOCKER_COMPOSE_VERSION=2.3.4
-#MINIMUM_PYTHON_VERSION=3.6
 
 # Function to compare 2 semver version
 semantic_version_comp () {
@@ -117,32 +116,6 @@ else
     echo "Docker compose version $docker_compose_version detected"
   fi
 fi
-
-# Check if python is installed
-#if ! [ -x "$(command -v python3)" ]; then
-#  echo 'Error: Python3 is not installed. Please install it.' >&2
-#  exit 1
-#else
-#  python_version=$(python3 --version| awk '{print $NF}')
-#  if [[ $(semantic_version_comp "$python_version" "$MINIMUM_PYTHON_VERSION") == "lessThan" ]]; then
-#    echo "Error: Python3 version is too old. Please upgrade to at least $MINIMUM_PYTHON_VERSION." >&2
-#    exit 1
-#  else
-#    echo "Python3 version $python_version detected"
-#  fi
-#fi
-#
-#if [ -d "venv" ]; then
-#  echo "Found virtual environment \`venv\`"
-#else
-#  echo "Creating virtual environment \`venv\`"
-#
-#  if ! dpkg -s python3-venv ; then
-#    echo "Installing python3-venv from apt"
-#    sudo apt install python3-venv -y
-#  fi
-#  python3 -m venv venv
-#fi
 
 echo "Adding Logrotate configuration to Systems logrotate"
 cd ./docker/scripts

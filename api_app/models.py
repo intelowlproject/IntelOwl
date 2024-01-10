@@ -51,9 +51,10 @@ from api_app.queryset import (
     AbstractConfigQuerySet,
     AbstractReportQuerySet,
     JobQuerySet,
+    OrganizationPluginConfigurationQuerySet,
     ParameterQuerySet,
     PluginConfigQuerySet,
-    PythonConfigQuerySet, OrganizationPluginConfigurationQuerySet,
+    PythonConfigQuerySet,
 )
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
@@ -940,9 +941,7 @@ class AbstractConfig(models.Model):
     disabled_in_organizations = models.ManyToManyField(
         Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
-    orgs_configuration = GenericRelation(
-        OrganizationPluginConfiguration
-    )
+    orgs_configuration = GenericRelation(OrganizationPluginConfiguration)
 
     class Meta:
         indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
@@ -964,7 +963,9 @@ class AbstractConfig(models.Model):
 
     @classmethod
     def get_content_type(cls) -> ContentType:
-        return ContentType.objects.get(model=cls._meta.model_name, app_label=cls._meta.app_label)
+        return ContentType.objects.get(
+            model=cls._meta.model_name, app_label=cls._meta.app_label
+        )
 
     @classmethod
     @property

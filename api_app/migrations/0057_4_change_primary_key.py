@@ -2,16 +2,25 @@
 import django.core.validators
 from django.db import migrations, models
 
+
 def migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     IngestorConfig = apps.get_model("ingestors_manager", "IngestorConfig")
-    name_visualizer = VisualizerConfig.objects.filter(name=models.OuterRef("old_visualizer_config")).values_list("pk")[:1]
-    name_analyzer = AnalyzerConfig.objects.filter(name=models.OuterRef("old_analyzer_config")).values_list("pk")[:1]
-    name_connector = ConnectorConfig.objects.filter(name=models.OuterRef("old_connector_config")).values_list("pk")[:1]
-    name_ingestor = IngestorConfig.objects.filter(name=models.OuterRef("old_ingestor_config")).values_list("pk")[:1]
+    name_visualizer = VisualizerConfig.objects.filter(
+        name=models.OuterRef("old_visualizer_config")
+    ).values_list("pk")[:1]
+    name_analyzer = AnalyzerConfig.objects.filter(
+        name=models.OuterRef("old_analyzer_config")
+    ).values_list("pk")[:1]
+    name_connector = ConnectorConfig.objects.filter(
+        name=models.OuterRef("old_connector_config")
+    ).values_list("pk")[:1]
+    name_ingestor = IngestorConfig.objects.filter(
+        name=models.OuterRef("old_ingestor_config")
+    ).values_list("pk")[:1]
     PluginConfig.objects.update(
         visualizer_config=models.Subquery(name_visualizer),
         connector_config=models.Subquery(name_connector),
@@ -20,11 +29,13 @@ def migrate(apps, schema_editor):
     )
     Job = apps.get_model("api_app", "Job")
     for job in Job.objects.all():
-        vcs = VisualizerConfig.objects.filter(name__in=job.visualizers_to_execute2)
-        acs = AnalyzerConfig.objects.filter(name__in=job.analyzers_to_execute2)
-        acs_requested = AnalyzerConfig.objects.filter(name__in=job.analyzers_requested2)
-        ccs = ConnectorConfig.objects.filter(name__in=job.connectors_to_execute2)
-        ccs_requested = ConnectorConfig.objects.filter(name__in=job.connectors_requested2)
+        vcs = VisualizerConfig.objects.filter(name__in=job.visualizers_to_execute2).values_list("pk", flat=True)
+        acs = AnalyzerConfig.objects.filter(name__in=job.analyzers_to_execute2).values_list("pk", flat=True)
+        acs_requested = AnalyzerConfig.objects.filter(name__in=job.analyzers_requested2).values_list("pk", flat=True)
+        ccs = ConnectorConfig.objects.filter(name__in=job.connectors_to_execute2).values_list("pk", flat=True)
+        ccs_requested = ConnectorConfig.objects.filter(
+            name__in=job.connectors_requested2
+        ).values_list("pk", flat=True)
         job.visualizers_to_execute.set(vcs)
         job.analyzers_to_execute.set(acs)
         job.analyzers_requested.set(acs_requested)
@@ -45,22 +56,22 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name="pluginconfig",
             old_name="visualizer_config",
-            new_name="old_visualizer_config"
+            new_name="old_visualizer_config",
         ),
         migrations.RenameField(
             model_name="pluginconfig",
             old_name="analyzer_config",
-            new_name="old_analyzer_config"
+            new_name="old_analyzer_config",
         ),
         migrations.RenameField(
             model_name="pluginconfig",
             old_name="connector_config",
-            new_name="old_connector_config"
+            new_name="old_connector_config",
         ),
         migrations.RenameField(
             model_name="pluginconfig",
             old_name="ingestor_config",
-            new_name="old_ingestor_config"
+            new_name="old_ingestor_config",
         ),
         migrations.AddField(
             model_name="pluginconfig",
@@ -162,42 +173,22 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             migrate,
         ),
+        migrations.RemoveField(model_name="pluginconfig", name="old_visualizer_config"),
         migrations.RemoveField(
             model_name="pluginconfig",
-            name="old_visualizer_config"
+            name="old_analyzer_config",
         ),
         migrations.RemoveField(
-            model_name='pluginconfig',
-            name='old_analyzer_config',
+            model_name="pluginconfig",
+            name="old_connector_config",
         ),
         migrations.RemoveField(
-            model_name='pluginconfig',
-            name='old_connector_config',
+            model_name="pluginconfig",
+            name="old_ingestor_config",
         ),
-        migrations.RemoveField(
-            model_name='pluginconfig',
-            name='old_ingestor_config',
-        ),
-
-        migrations.RemoveField(
-            model_name="job",
-            name="visualizers_to_execute2"
-        ),
-        migrations.RemoveField(
-            model_name="job",
-            name="analyzers_to_execute2"
-        ),
-        migrations.RemoveField(
-            model_name="job",
-            name="analyzers_requested2"
-        ),
-        migrations.RemoveField(
-            model_name="job",
-            name="connectors_to_execute2"
-        ),
-        migrations.RemoveField(
-            model_name="job",
-            name="connectors_requested2"
-        )
-
+        migrations.RemoveField(model_name="job", name="visualizers_to_execute2"),
+        migrations.RemoveField(model_name="job", name="analyzers_to_execute2"),
+        migrations.RemoveField(model_name="job", name="analyzers_requested2"),
+        migrations.RemoveField(model_name="job", name="connectors_to_execute2"),
+        migrations.RemoveField(model_name="job", name="connectors_requested2"),
     ]

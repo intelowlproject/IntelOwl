@@ -6,10 +6,10 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     AnalyzerReport = apps.get_model("analyzers_manager", "AnalyzerReport")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    name = AnalyzerConfig.objects.filter(name=models.OuterRef("old_config")).values_list("pk")[:1]
-    AnalyzerReport.objects.update(
-        config=models.Subquery(name)
-    )
+    name = AnalyzerConfig.objects.filter(
+        name=models.OuterRef("old_config")
+    ).values_list("pk")[:1]
+    AnalyzerReport.objects.update(config=models.Subquery(name))
 
 
 class Migration(migrations.Migration):
@@ -19,9 +19,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="analyzerreport",
-            old_name="config",
-            new_name="old_config"
+            model_name="analyzerreport", old_name="config", new_name="old_config"
         ),
         migrations.AddField(
             model_name="analyzerreport",
@@ -34,15 +32,10 @@ class Migration(migrations.Migration):
             ),
             preserve_default=False,
         ),
-        migrations.RunPython(
-            migrate
-        ),
+        migrations.RunPython(migrate),
         migrations.AlterUniqueTogether(
-            name='analyzerreport',
-            unique_together={('config', 'job')},
+            name="analyzerreport",
+            unique_together={("config", "job")},
         ),
-        migrations.RemoveField(
-            model_name="analyzerreport",
-            name="old_config"
-        )
+        migrations.RemoveField(model_name="analyzerreport", name="old_config"),
     ]

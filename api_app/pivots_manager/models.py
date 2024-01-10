@@ -6,7 +6,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuerySet
 from api_app.queryset import PythonConfigQuerySet
-from api_app.validators import plugin_name_validator
 
 if typing.TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer

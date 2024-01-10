@@ -6,10 +6,10 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     IngestorReport = apps.get_model("ingestors_manager", "IngestorReport")
     IngestorConfig = apps.get_model("ingestors_manager", "IngestorConfig")
-    name = IngestorConfig.objects.filter(name=models.OuterRef("old_config")).values_list("pk")[:1]
-    IngestorReport.objects.update(
-        config=models.Subquery(name)
-    )
+    name = IngestorConfig.objects.filter(
+        name=models.OuterRef("old_config")
+    ).values_list("pk")[:1]
+    IngestorReport.objects.update(config=models.Subquery(name))
 
 
 class Migration(migrations.Migration):
@@ -19,9 +19,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="ingestorreport",
-            old_name="config",
-            new_name="old_config"
+            model_name="ingestorreport", old_name="config", new_name="old_config"
         ),
         migrations.AddField(
             model_name="ingestorreport",
@@ -34,11 +32,6 @@ class Migration(migrations.Migration):
             ),
             preserve_default=False,
         ),
-        migrations.RunPython(
-            migrate
-        ),
-        migrations.RemoveField(
-            model_name="ingestorreport",
-            name="old_config"
-        )
+        migrations.RunPython(migrate),
+        migrations.RemoveField(model_name="ingestorreport", name="old_config"),
     ]

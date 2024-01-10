@@ -29,16 +29,12 @@ class Migration(migrations.Migration):
                     )
                 ],
             ),
-
         ),
         migrations.AlterField(
             model_name="connectorconfig",
             name="id",
             field=models.BigAutoField(
-                auto_created=True,
-                serialize=False,
-                verbose_name="ID",
-                primary_key=True
-            )
+                auto_created=True, serialize=False, verbose_name="ID", primary_key=True
+            ),
         ),
     ]

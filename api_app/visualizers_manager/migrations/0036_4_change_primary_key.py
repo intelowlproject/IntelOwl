@@ -7,10 +7,10 @@ def migrate(apps, schema_editor):
     VisualizerReport = apps.get_model("visualizers_manager", "VisualizerReport")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
-    name = VisualizerConfig.objects.filter(name=models.OuterRef("old_config")).values_list("pk")[:1]
-    VisualizerReport.objects.update(
-        config=models.Subquery(name)
-    )
+    name = VisualizerConfig.objects.filter(
+        name=models.OuterRef("old_config")
+    ).values_list("pk")[:1]
+    VisualizerReport.objects.update(config=models.Subquery(name))
     for config in VisualizerConfig.objects.all():
         config.playbooks.set(PlaybookConfig.objects.filter(name__in=config.playbooks2))
 
@@ -23,9 +23,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="visualizerreport",
-            old_name="config",
-            new_name="old_config"
+            model_name="visualizerreport", old_name="config", new_name="old_config"
         ),
         migrations.AddField(
             model_name="visualizerreport",
@@ -46,16 +44,7 @@ class Migration(migrations.Migration):
                 to="playbooks_manager.PlaybookConfig",
             ),
         ),
-        migrations.RunPython(
-            migrate
-        ),
-        migrations.RemoveField(
-            model_name="visualizerreport",
-            name="old_config"
-        ),
-        migrations.RemoveField(
-            model_name="visualizerconfig",
-            name="playbooks2"
-        )
-
+        migrations.RunPython(migrate),
+        migrations.RemoveField(model_name="visualizerreport", name="old_config"),
+        migrations.RemoveField(model_name="visualizerconfig", name="playbooks2"),
     ]

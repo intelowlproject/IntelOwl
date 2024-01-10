@@ -9,7 +9,7 @@ from django.contrib.postgres.expressions import ArraySubquery
 from django.core.paginator import Paginator
 
 if TYPE_CHECKING:
-    from api_app.models import PythonConfig, AbstractConfig
+    from api_app.models import PythonConfig
     from api_app.serializers import AbstractBIInterface
 
 from celery.canvas import Signature
@@ -114,12 +114,13 @@ class CleanOnCreateQuerySet(models.QuerySet):
 
 
 class OrganizationPluginConfigurationQuerySet(models.QuerySet):
-    def filter_for_config(self, config_class, config_pk:str):
-        return self.filter(content_type=config_class.get_content_type(), object_id=config_pk)
+    def filter_for_config(self, config_class, config_pk: str):
+        return self.filter(
+            content_type=config_class.get_content_type(), object_id=config_pk
+        )
 
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
-    
     def alias_enabled_in_organization(self, organization):
         from api_app.models import OrganizationPluginConfiguration
 
@@ -127,12 +128,10 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
         return self.alias(
             enabled_in_organization=Exists(
-                opc.filter_for_config(
-                    config_class=self.model, config_pk=OuterRef("pk")
-                )
+                opc.filter_for_config(config_class=self.model, config_pk=OuterRef("pk"))
             )
         )
-    
+
     def annotate_runnable(self, user: User = None) -> QuerySet:
         # the plugin is runnable IF
         # - it is not disabled
@@ -142,9 +141,7 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         ).exclude(disabled=True)
         if user and user.has_membership():
             qs = qs.alias_enabled_in_organization(user.membership.organization)
-            qs = qs.exclude(
-                enabled_in_organization=False
-            )
+            qs = qs.exclude(enabled_in_organization=False)
         return self.annotate(runnable=Exists(qs))
 
 

@@ -40,9 +40,10 @@ from .models import (
     AbstractReport,
     Comment,
     Job,
+    OrganizationPluginConfiguration,
     PluginConfig,
     PythonConfig,
-    Tag, OrganizationPluginConfiguration,
+    Tag,
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig

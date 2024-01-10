@@ -5,18 +5,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("ingestors_manager", "0016_2_change_primary_key"),
+        ("playbooks_manager", "0024_1_change_primary_key"),
         ("api_app", "0057_2_change_primary_key"),
     ]
 
     operations = [
         migrations.RunSQL(
-            'ALTER TABLE "ingestors_manager_ingestorconfig" DROP CONSTRAINT "ingestors_manager_ingestorconfig_pkey" CASCADE;'
-            'CREATE UNIQUE INDEX "ingestors_manager_ingestorconfig_idkey" ON "ingestors_manager_ingestorconfig" USING btree(id);'
-            'ALTER TABLE "ingestors_manager_ingestorconfig" ADD CONSTRAINT "ingestors_manager_ingestorconfig_idkey" PRIMARY KEY USING INDEX "ingestors_manager_ingestorconfig_idkey";'
+            'ALTER TABLE "playbooks_manager_playbookconfig" DROP CONSTRAINT "playbooks_manager_playbookconfig_pkey" CASCADE;'
+            'CREATE UNIQUE INDEX "playbooks_manager_playbookconfig_idkey" ON "playbooks_manager_playbookconfig" USING btree(id);'
+            'ALTER TABLE "playbooks_manager_playbookconfig" ADD CONSTRAINT "playbooks_manager_playbookconfig_idkey" PRIMARY KEY USING INDEX "playbooks_manager_playbookconfig_idkey";'
         ),
         migrations.AlterField(
-            model_name="ingestorconfig",
+            model_name="playbookconfig",
             name="name",
             field=models.CharField(
                 max_length=100,
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name="ingestorconfig",
+            model_name="playbookconfig",
             name="id",
             field=models.BigAutoField(
                 auto_created=True, serialize=False, verbose_name="ID", primary_key=True

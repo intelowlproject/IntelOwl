@@ -7,7 +7,6 @@ from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.connectors_manager.exceptions import ConnectorConfigurationException
 from api_app.connectors_manager.queryset import ConnectorReportQuerySet
 from api_app.models import AbstractReport, PythonConfig, PythonModule
-from api_app.validators import plugin_name_validator
 
 
 class ConnectorReport(AbstractReport):

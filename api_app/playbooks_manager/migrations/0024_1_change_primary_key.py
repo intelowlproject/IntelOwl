@@ -3,9 +3,9 @@ from django.db import migrations, models
 
 
 def migrate(apps, schema_editor):
-    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
     id = 1
-    for config in AnalyzerConfig.objects.all():
+    for config in PlaybookConfig.objects.all():
         config.id = id
         config.save()
         id += 1
@@ -13,14 +13,13 @@ def migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0057_analyzerreport_analyzerreportsbisearch"),
-        ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
-        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
+        ("playbooks_manager", "0023_4_change_primary_key"),
+        ("api_app", "0057_4_change_primary_key"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="analyzerconfig",
+            model_name="playbookconfig",
             name="id",
             field=models.BigIntegerField(
                 auto_created=True,
@@ -33,7 +32,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(migrate),
         migrations.AlterField(
-            model_name="analyzerconfig",
+            model_name="playbookconfig",
             name="id",
             field=models.BigIntegerField(
                 auto_created=True,

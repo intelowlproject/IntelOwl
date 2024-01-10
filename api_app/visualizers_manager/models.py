@@ -6,7 +6,6 @@ from django.db import models
 from api_app.choices import PythonModuleBasePaths
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.validators import plugin_name_validator
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
 from api_app.visualizers_manager.queryset import VisualizerReportQuerySet
 from api_app.visualizers_manager.validators import validate_report

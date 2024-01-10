@@ -295,6 +295,9 @@ else
   if [ ${#docker_flags[@]} -ne 0 ]; then
     for analyzer in "${docker_flags[@]}"; do
       compose_files+=("${path_mapping["$analyzer"]}")
+      if [ $is_test ]; then
+        compose_files+=("${path_mapping["$analyzer$test_appendix"]}")
+      fi
     done
   fi
 fi
@@ -324,8 +327,9 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
-if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-else
-  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-fi
+echo "${to_run[*]}"
+#if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
+#  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+#else
+#  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+#fi

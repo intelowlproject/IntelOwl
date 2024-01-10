@@ -73,11 +73,11 @@ export function TagSelectInput(props) {
   const options = React.useMemo(
     () =>
       allTags.length
-        ? allTags.map((t) => ({
-            value: t,
-            label: <JobTag tag={t} />,
+        ? allTags.map((tag) => ({
+            value: tag,
+            label: <JobTag tag={tag} />,
             labelOptionExtra:
-              tagToEdit?.id === t.id ? (
+              tagToEdit?.id === tag.id ? (
                 <TagForm
                   tagToEdit={tagToEdit}
                   onFormSuccess={onTagEditSuccess}
@@ -86,7 +86,7 @@ export function TagSelectInput(props) {
                 <MdEdit
                   className="center pointer"
                   title="edit"
-                  onClick={() => setTagToEdit(t)}
+                  onClick={() => setTagToEdit(tag)}
                 />
               ),
           }))
@@ -102,8 +102,8 @@ export function TagSelectInput(props) {
         ...selectedTags,
         { value: newTag, label: <JobTag tag={newTag} /> },
       ]);
-    } catch (e) {
-      addToast("Failed!", e.parsedMsg.toString(), "danger");
+    } catch (err) {
+      addToast("Failed!", err.parsedMsg.toString(), "danger");
     }
   };
   const onChange = (selectedOpts, { action }) => {
@@ -149,8 +149,8 @@ function TagForm(props) {
           ? await updateTag(tagToEdit.id, values)
           : await createTag(values.label, values.color);
         setTimeout(() => onFormSuccess(tagToEdit, newTag), 250); // fake delay for better UX
-      } catch (e) {
-        addToast("Failed!", e.parsedMsg.toString(), "danger");
+      } catch (error) {
+        addToast("Failed!", error.parsedMsg.toString(), "danger");
       } finally {
         formik.setSubmitting(false);
       }

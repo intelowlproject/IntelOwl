@@ -81,17 +81,19 @@ export default function Login() {
 
   // auth store
   const loginUser = useAuthStore(
-    React.useCallback((s) => s.service.loginUser, []),
+    React.useCallback((state) => state.service.loginUser, []),
   );
 
-  const updateToken = useAuthStore(React.useCallback((s) => s.updateToken, []));
+  const updateToken = useAuthStore(
+    React.useCallback((state) => state.updateToken, []),
+  );
 
   // callbacks
   const onSubmit = React.useCallback(
     async (values, _formik) => {
       try {
         await loginUser(values);
-      } catch (e) {
+      } catch (error) {
         // handled inside loginUser
       }
     },
@@ -124,8 +126,8 @@ export default function Login() {
             <div className="col-auto">
               <a
                 href={`${AUTH_BASE_URI}/google`}
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={(event) => {
+                  event.preventDefault();
                   const url = `${AUTH_BASE_URI}/google`;
                   axios
                     .get(`${url}?no_redirect=true`)

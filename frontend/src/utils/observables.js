@@ -1,23 +1,14 @@
 import {
   DOMAIN_REGEX,
   IP_REGEX,
-  HASH_REGEX,
   URL_REGEX,
-} from "../../../constants/regexConst";
+  HASH_REGEX,
+} from "../constants/regexConst";
 import {
   ObservableClassifications,
   FileExtensions,
   InvalidTLD,
-} from "../../../constants/jobConst";
-
-/* Remove [] inside the string, remove any no-word characters at the end of the string */
-export const sanitizeObservable = (observable) =>
-  observable
-    .replaceAll("[", "")
-    .replaceAll("]", "")
-    .trim()
-    .replace(/\W*$/, "")
-    .replace(/^\W/, "");
+} from "../constants/jobConst";
 
 const observableType2RegExMap = {
   domain: DOMAIN_REGEX,
@@ -25,6 +16,16 @@ const observableType2RegExMap = {
   url: URL_REGEX,
   hash: HASH_REGEX,
 };
+
+/* Remove [] inside the string, remove any no-word characters at the end of the string */
+export function sanitizeObservable(observable) {
+  return observable
+    .replaceAll("[", "")
+    .replaceAll("]", "")
+    .trim()
+    .replace(/\W*$/, "")
+    .replace(/^\W/, "");
+}
 
 export function observableValidators(stringToValidate) {
   const sanitizedString = sanitizeObservable(stringToValidate);
@@ -68,4 +69,11 @@ export function observableValidators(stringToValidate) {
       observable: sanitizedString,
     };
   return null;
+}
+
+export function getObservableClassification(observable) {
+  let classification = ObservableClassifications.GENERIC;
+  const validationValue = observableValidators(observable);
+  if (validationValue !== null) classification = validationValue.classification;
+  return classification;
 }

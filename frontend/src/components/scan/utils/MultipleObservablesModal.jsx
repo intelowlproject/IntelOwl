@@ -6,7 +6,7 @@ import { ContentSection } from "@certego/certego-ui";
 import {
   observableValidators,
   sanitizeObservable,
-} from "./observableValidators";
+} from "../../../utils/observables";
 
 // components
 export function MultipleObservablesModal(props) {
@@ -113,7 +113,7 @@ export function MultipleObservablesModal(props) {
               id="load_multiple_observables-textArea"
               name="textArea"
               type="textarea"
-              onChange={(e) => extractObservables(e.target.value)}
+              onChange={(event) => extractObservables(event.target.value)}
               style={{ minHeight: "600px", overflowY: "auto" }}
               className="my-2 mt-3"
             />

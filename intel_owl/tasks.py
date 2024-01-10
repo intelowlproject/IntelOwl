@@ -33,7 +33,10 @@ class FailureLoggedRequest(Request):
         return result
 
     def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
-        logger.critical(f"Failure detected for task {self.task.name}")
+        logger.critical(
+            f"Failure detected for task {self.task.name}"
+            f" with exception {exc_info} and request {self._request_dict}"
+        )
         return super().on_failure(
             exc_info, send_failed_event=send_failed_event, return_ok=return_ok
         )
@@ -154,8 +157,6 @@ def update(python_module_pk: int):
     if settings.NFS:
         update_plugin(None, python_module_pk)
     else:
-        pass
-
         queues = {config.queue for config in python_module.configs}
         for queue in queues:
             broadcast(
@@ -302,29 +303,17 @@ def create_caches(user_pk: int):
     from api_app.visualizers_manager.models import VisualizerConfig
     from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
-    for plugin in AnalyzerConfig.objects.all():
-        PythonListConfigSerializer(
-            child=AnalyzerConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-
-    for plugin in ConnectorConfig.objects.all():
-        PythonListConfigSerializer(
-            child=ConnectorConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-
-    for plugin in PivotConfig.objects.all():
-        PythonListConfigSerializer(
-            child=PivotConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-
-    for plugin in VisualizerConfig.objects.all():
-        PythonListConfigSerializer(
-            child=VisualizerConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
-    for plugin in IngestorConfig.objects.all():
-        PythonListConfigSerializer(
-            child=IngestorConfigSerializer()
-        ).to_representation_single_plugin(plugin, user)
+    for python_config_class, serializer_class in [
+        (AnalyzerConfig, AnalyzerConfigSerializer),
+        (ConnectorConfig, ConnectorConfigSerializer),
+        (PivotConfig, PivotConfigSerializer),
+        (VisualizerConfig, VisualizerConfigSerializer),
+        (IngestorConfig, IngestorConfigSerializer),
+    ]:
+        for plugin in python_config_class.objects.all():
+            PythonListConfigSerializer(
+                child=serializer_class()
+            ).to_representation_single_plugin(plugin, user)
 
 
 @signals.beat_init.connect
@@ -352,6 +341,32 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
             MessageGroupId=str(uuid.uuid4()),
             args=[user.pk],
         )
+
+
+@shared_task(base=FailureLoggedTask, name="send_bi_to_elastic", soft_time_limit=300)
+def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
+    from api_app.analyzers_manager.models import AnalyzerReport
+    from api_app.connectors_manager.models import ConnectorReport
+    from api_app.ingestors_manager.models import IngestorReport
+    from api_app.models import AbstractReport, Job
+    from api_app.pivots_manager.models import PivotReport
+    from api_app.visualizers_manager.models import VisualizerReport
+
+    if settings.ELASTICSEARCH_BI_ENABLED:
+        for report_class in [
+            AnalyzerReport,
+            ConnectorReport,
+            PivotReport,
+            IngestorReport,
+            VisualizerReport,
+        ]:
+            report_class: typing.Type[AbstractReport]
+            report_class.objects.filter(sent_to_bi=False).order_by("-start_time")[
+                :max_objects
+            ].send_to_elastic_as_bi(max_timeout=max_timeout)
+        Job.objects.filter(sent_to_bi=False).order_by("-received_request_time")[
+            :max_objects
+        ].send_to_elastic_as_bi(max_timeout=max_timeout)
 
 
 # set logger

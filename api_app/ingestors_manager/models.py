@@ -8,6 +8,7 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.ingestors_manager.exceptions import IngestorConfigurationException
+from api_app.ingestors_manager.queryset import IngestorReportQuerySet
 from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class IngestorReport(AbstractReport):
+    objects = IngestorReportQuerySet.as_manager()
     config = models.ForeignKey(
         "IngestorConfig", related_name="reports", on_delete=models.CASCADE
     )
@@ -34,6 +36,7 @@ class IngestorReport(AbstractReport):
 
     class Meta:
         ordering = ["pk"]
+        indexes = AbstractReport.Meta.indexes
 
     def clean_report(self):
         if isinstance(self.report, list) and self.max_size_report is not None:

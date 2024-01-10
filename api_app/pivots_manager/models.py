@@ -2,7 +2,7 @@ import logging
 import typing
 from typing import Type
 
-from api_app.pivots_manager.queryset import PivotConfigQuerySet
+from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuerySet
 from api_app.queryset import PythonConfigQuerySet
 from api_app.validators import plugin_name_validator
 
@@ -21,12 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 class PivotReport(AbstractReport):
+    objects = PivotReportQuerySet.as_manager()
     config = models.ForeignKey(
         "PivotConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
 
     class Meta:
         unique_together = [("config", "job")]
+        indexes = AbstractReport.Meta.indexes
 
 
 class PivotMap(models.Model):

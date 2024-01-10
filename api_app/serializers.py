@@ -13,14 +13,15 @@ from typing import Any, Dict, Generator, List, Union
 import django.core.exceptions
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import SerializerMethodField
+from rest_framework.fields import Field, SerializerMethodField, empty
+from rest_framework.serializers import ModelSerializer
 
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
@@ -161,6 +162,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
 
+    def run_validation(self, data=empty):
+        result = super().run_validation(data=data)
+        self.filter_warnings.clear()
+        return result
+
     @staticmethod
     def set_default_value_from_playbook(attrs: Dict) -> None:
         playbook = attrs["playbook_requested"]
@@ -211,27 +217,29 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
         attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
-        attrs["visualizers_to_execute"] = list(
-            self.set_visualizers_to_execute(attrs.get("playbook_requested", None))
-        )
-        attrs["warnings"] = self.filter_warnings
+        attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(**attrs)
+        attrs["warnings"] = list(self.filter_warnings)
         attrs["tags"] = attrs.pop("tags_labels", [])
         return attrs
 
     def set_visualizers_to_execute(
         self,
-        playbook_to_execute: PlaybookConfig = None,
-    ) -> Generator[VisualizerConfig, None, None]:
-        if playbook_to_execute:
-            yield from VisualizerConfig.objects.filter(
-                playbooks__in=[playbook_to_execute]
-            ).annotate_runnable(self.context["request"].user).filter(runnable=True)
+        tlp: str,
+        playbook_requested: PlaybookConfig = None,
+        **kwargs,
+    ) -> List[VisualizerConfig]:
+        if playbook_requested:
+            visualizers = VisualizerConfig.objects.filter(
+                playbooks__in=[playbook_requested]
+            )
+        else:
+            visualizers = []
+        return list(self.plugins_to_execute(tlp, visualizers))
 
     def set_connectors_to_execute(
         self, connectors_requested: List[ConnectorConfig], tlp: str, **kwargs
     ) -> List[ConnectorConfig]:
-        connectors_executed = list(self.plugins_to_execute(tlp, connectors_requested))
-        return connectors_executed
+        return list(self.plugins_to_execute(tlp, connectors_requested))
 
     def set_analyzers_to_execute(
         self, analyzers_requested: List[AnalyzerConfig], tlp: str, **kwargs
@@ -247,30 +255,40 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def plugins_to_execute(
         self,
         tlp,
-        plugins_requested: List[Union[AnalyzerConfig, ConnectorConfig]],
-    ) -> Generator[Union[AnalyzerConfig, ConnectorConfig], None, None]:
+        plugins_requested: Union[
+            List[Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig]], QuerySet
+        ],
+    ) -> Generator[
+        Union[AnalyzerConfig, ConnectorConfig, VisualizerConfig], None, None
+    ]:
         if not plugins_requested:
             return
-        qs = plugins_requested[0].__class__.objects.filter(
-            pk__in=[plugin.pk for plugin in plugins_requested]
-        )
+        if isinstance(plugins_requested, QuerySet):
+            qs = plugins_requested
+        else:
+            qs = plugins_requested[0].__class__.objects.filter(
+                pk__in=[plugin.pk for plugin in plugins_requested]
+            )
         for plugin_config in qs.annotate_runnable(self.context["request"].user):
             try:
                 if not plugin_config.runnable:
                     raise NotRunnableConnector(
                         f"{plugin_config.name} won't run: is disabled or not configured"
                     )
-
-                if (
-                    TLP[tlp] > TLP[plugin_config.maximum_tlp]
-                ):  # check if job's tlp allows running
-                    # e.g. if connector_tlp is GREEN(1),
-                    # run for job_tlp CLEAR(0) & GREEN(1) only
-                    raise NotRunnableConnector(
-                        f"{plugin_config.name} won't run because "
-                        f"job.tlp is '{tlp}') while plugin"
-                        f" maximum_tlp ('{plugin_config.maximum_tlp}')"
-                    )
+                try:
+                    if (
+                        TLP[tlp] > TLP[plugin_config.maximum_tlp]
+                    ):  # check if job's tlp allows running
+                        # e.g. if connector_tlp is GREEN(1),
+                        # run for job_tlp CLEAR(0) & GREEN(1) only
+                        raise NotRunnableConnector(
+                            f"{plugin_config.name} won't run because "
+                            f"job.tlp is '{tlp}') while plugin"
+                            f" maximum_tlp ('{plugin_config.maximum_tlp}')"
+                        )
+                except AttributeError:
+                    # in case the plugin does not have maximum_tlp:
+                    pass
             except NotRunnableConnector as e:
                 self.filter_warnings.append(str(e))
                 logger.info(e)
@@ -617,14 +635,12 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
         observables = data.pop("observables", [])
-        for classification, name in observables:
+        # TODO we could change the signature, but this means change frontend + clients
+        for _, name in observables:
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
-
             item["observable_name"] = name
-            if classification:
-                item["observable_classification"] = classification
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
@@ -890,12 +906,6 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         return last_job_for_md5
 
 
-class PluginConfigCompleteSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = PluginConfig
-        fields = rfs.ALL_FIELDS
-
-
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):
     class Meta:
         model = OwnershipAbstractModel
@@ -1063,12 +1073,6 @@ class ParamListSerializer(rfs.ListSerializer):
         return {elem.pop("name"): elem for elem in result}
 
 
-class ParameterCompleteSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = Parameter
-        fields = rfs.ALL_FIELDS
-
-
 class ParameterSerializer(rfs.ModelSerializer):
     value = SerializerMethodField()
 
@@ -1147,6 +1151,22 @@ class PythonModuleSerializer(rfs.ModelSerializer):
         fields = ["module", "base_path"]
 
 
+class ParameterCompleteSerializer(rfs.ModelSerializer):
+    python_module = PythonModuleSerializer(read_only=True)
+
+    class Meta:
+        model = Parameter
+        exclude = ["id"]
+
+
+class PluginConfigCompleteSerializer(rfs.ModelSerializer):
+    parameter = ParameterCompleteSerializer(read_only=True)
+
+    class Meta:
+        model = PluginConfig
+        exclude = ["id"]
+
+
 class AbstractConfigSerializer(rfs.ModelSerializer):
     ...
 
@@ -1188,34 +1208,120 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
         return super(PythonConfigSerializer, self).to_representation(instance)
 
 
-class AbstractReportListSerializer(rfs.ListSerializer):
-    ...
-
-
-class AbstractReportSerializer(rfs.ModelSerializer):
+class AbstractReportSerializerInterface(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
+    type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
 
     class Meta:
-        fields = (
-            "id",
-            "name",
-            "process_time",
-            "report",
-            "status",
-            "errors",
-            "start_time",
-            "end_time",
-            "parameters",
-        )
-        list_serializer_class = AbstractReportListSerializer
+        fields = ["name", "process_time", "status", "end_time", "parameters", "type"]
+        list_serializer_class = rfs.ListSerializer
 
-    def to_representation(self, instance: AbstractReport):
-        data = super().to_representation(instance)
-        data["type"] = instance.__class__.__name__.replace("Report", "").lower()
-        return data
+    def get_type(self, instance: AbstractReport):
+        return instance.__class__.__name__.replace("Report", "").lower()
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
+class AbstractBIInterface(ModelSerializer):
+    application = rfs.CharField(read_only=True, default="IntelOwl")
+    environment = rfs.SerializerMethodField(method_name="get_environment")
+    timestamp: Field
+    username: Field
+    name: Field
+    type: Field
+    process_time: Field
+    status: Field
+    end_time: Field
+
+    class Meta:
+        fields = [
+            "application",
+            "environment",
+            "timestamp",
+            "username",
+            "name",
+            "type",
+            "process_time",
+            "status",
+            "end_time",
+        ]
+
+    @staticmethod
+    def get_environment(instance):
+        if settings.STAGE_PRODUCTION:
+            return "prod"
+        elif settings.STAGE_STAGING:
+            return "stag"
+        else:
+            return "test"
+
+    @staticmethod
+    def to_elastic_dict(data):
+        return {
+            "_source": data,
+            "_type": "_doc",
+            "_index": settings.ELASTICSEARCH_BI_INDEX + "-" + now().strftime("%Y.%m"),
+            "_op_type": "index",
+        }
+
+
+class AbstractReportBISerializer(
+    AbstractBIInterface, AbstractReportSerializerInterface
+):
+    timestamp = rfs.DateTimeField(source="start_time")
+    username = rfs.CharField(source="job.user.username")
+
+    class Meta:
+        fields = AbstractBIInterface.Meta.fields + [
+            "parameters",
+        ]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        return self.to_elastic_dict(data)
+
+
+class JobBISerializer(AbstractBIInterface, ModelSerializer):
+    timestamp = rfs.DateTimeField(source="received_request_time")
+    username = rfs.CharField(source="user.username")
+    name = rfs.CharField(source="pk")
+    type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
+    end_time = rfs.DateTimeField(source="finished_analysis_time")
+    playbook = rfs.SerializerMethodField(source="get_playbook")
+
+    class Meta:
+        model = Job
+        fields = AbstractBIInterface.Meta.fields + ["playbook", "runtime_configuration"]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
+
+    def to_representation(self, instance: Job):
+        data = super().to_representation(instance)
+        return self.to_elastic_dict(data)
+
+    def get_type(self, instance: Job):
+        return instance.__class__.__name__.lower()
+
+    def get_playbook(self, instance: Job):
+        return instance.playbook_to_execute.name if instance.playbook_to_execute else ""
+
+
+class AbstractReportSerializer(AbstractReportSerializerInterface):
+    class Meta:
+        fields = AbstractReportSerializerInterface.Meta.fields + [
+            "id",
+            "report",
+            "errors",
+            "start_time",
+        ]
+        list_serializer_class = (
+            AbstractReportSerializerInterface.Meta.list_serializer_class
+        )
 
 
 class CrontabScheduleSerializer(rfs.ModelSerializer):

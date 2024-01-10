@@ -9,10 +9,10 @@ export async function createComment(formValues) {
     const resp = await axios.post(`${COMMENT_BASE_URI}`, formValues);
 
     return Promise.resolve(resp);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
+  } catch (error) {
+    console.error(error);
+    addToast("Failed!", prettifyErrors(error), "danger");
+    return Promise.reject(error);
   }
 }
 
@@ -21,9 +21,9 @@ export async function deleteComment(commentId) {
     const resp = await axios.delete(`${COMMENT_BASE_URI}/${commentId}`);
 
     return Promise.resolve(resp);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
+  } catch (error) {
+    console.error(error);
+    addToast("Failed!", prettifyErrors(error), "danger");
+    return Promise.reject(error);
   }
 }

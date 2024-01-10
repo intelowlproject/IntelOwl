@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
 import userEvent from "@testing-library/user-event";
 import ScanForm from "../../../../../src/components/scan/ScanForm";
+import { sanitizeObservable } from "../../../../../src/utils/observables";
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
@@ -12,7 +13,6 @@ import {
 import { ScanModesNumeric } from "../../../../../src/constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../../../src/utils/time";
 import RecentScans from "../../../../../src/components/scan/utils/RecentScans";
-import { sanitizeObservable } from "../../../../../src/components/scan/utils/observableValidators";
 
 import {
   mockedUseAuthStore,

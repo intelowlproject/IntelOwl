@@ -32,7 +32,6 @@ import {
   PUBLIC_URL,
   VERSION,
   INTELOWL_TWITTER_ACCOUNT,
-  STAGE,
 } from "../constants/environment";
 
 // local
@@ -130,8 +129,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
       <UncontrolledPopover
         target="social-button"
         placement="bottom"
-        trigger="hover"
-        delay={{ show: 0, hide: 500 }}
+        trigger="click"
         popperClassName="p-2 bg-dark"
       >
         <div className="d-flex-center flex-column">
@@ -204,7 +202,7 @@ function AppHeader() {
 
   // auth store
   const isAuthenticated = useAuthStore(
-    React.useCallback((s) => s.isAuthenticated(), []),
+    React.useCallback((state) => state.isAuthenticated(), []),
   );
 
   return (
@@ -220,10 +218,7 @@ function AppHeader() {
             alt="IntelOwl logo"
           />
           <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
-            {VERSION} -
-          </small>
-          <small className="text-accent" style={{ fontFamily: "Pacifico" }}>
-            &nbsp;{STAGE}
+            {VERSION}
           </small>
         </NavbarBrand>
         <NavbarToggler onClick={() => setIsOpen(!isOpen)} />

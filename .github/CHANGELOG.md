@@ -2,7 +2,23 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.2)
+
+This release has been done mainly to adjusts a broken database migration introduced in the previous release.
+
+**Main Improvements**
+* Added new analyzers for [DNS0](https://docs.dns0.eu/) PassiveDNS data
+* Added the chance to collect metrics ([Business Intelligence](https://intelowl.readthedocs.io/en/develop/Advanced-Configuration.html#business-intelligence) regarding Plugins Usage and send it to an ElasticSearch instance.
+* Added new buttons to test ["Healthcheck" and "Pull" operations](https://intelowl.readthedocs.io/en/latest/Usage.html#special-plugins-operations) for each Plugin (A feature introduced in the previous version)
+
+**Other improvements**
+* Various generic fixes and adjustments in the GUI
+* dependencies upgrades
+* adjusted contribution guides
+
 ## [v5.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.1)
+
+!!! This release has been found with a broken database migration !!! Please upgrade to v5.2.2 to fix the problem.
 
 **General improvements**
 * Incremented wait time of containers' healthchecks to avoid to break clean installations

@@ -53,7 +53,7 @@ from api_app.queryset import (
     JobQuerySet,
     ParameterQuerySet,
     PluginConfigQuerySet,
-    PythonConfigQuerySet,
+    PythonConfigQuerySet, OrganizationPluginConfigurationQuerySet,
 )
 from api_app.validators import plugin_name_validator, validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
@@ -844,6 +844,7 @@ class PluginConfig(OwnershipAbstractModel):
 
 
 class OrganizationPluginConfiguration(models.Model):
+    objects = OrganizationPluginConfigurationQuerySet.as_manager()
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -895,14 +896,14 @@ class OrganizationPluginConfiguration(models.Model):
         self.save()
 
     def disable_manually(self, user: User):
-        self.disable = True
-        self.disable_comment = f"Disabled by user {user.username}"
+        self.disabled = True
+        self.disabled_comment = f"Disabled by user {user.username}"
         self.rate_limit_enable_task = None
         self.save()
 
     def enable_manually(self, user):
-        self.disable = False
-        self.disable_comment = None
+        self.disabled = False
+        self.disabled_comment += f"Enabled back by {user.username}"
         self.save()
 
 
@@ -940,7 +941,7 @@ class AbstractConfig(models.Model):
         Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
     orgs_configuration = GenericRelation(
-        OrganizationPluginConfiguration, related_name="%(class)s"
+        OrganizationPluginConfiguration
     )
 
     class Meta:
@@ -957,9 +958,13 @@ class AbstractConfig(models.Model):
             org_configuration = self.orgs_configuration.get(organization=organization)
         except OrganizationPluginConfiguration.DoesNotExist:
             org_configuration = OrganizationPluginConfiguration.objects.create(
-                content_object=self, organization=organization
+                config=self, organization=organization
             )
         return org_configuration
+
+    @classmethod
+    def get_content_type(cls) -> ContentType:
+        return ContentType.objects.get(model=cls._meta.model_name, app_label=cls._meta.app_label)
 
     @classmethod
     @property

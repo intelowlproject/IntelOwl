@@ -42,7 +42,7 @@ from .models import (
     Job,
     PluginConfig,
     PythonConfig,
-    Tag,
+    Tag, OrganizationPluginConfiguration,
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
@@ -659,26 +659,14 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
 )
 @api_view(["GET"])
 def plugin_state_viewer(request):
-    from api_app.analyzers_manager.models import AnalyzerConfig
-    from api_app.connectors_manager.models import ConnectorConfig
-    from api_app.playbooks_manager.models import PlaybookConfig
-    from api_app.visualizers_manager.models import VisualizerConfig
-
     if not request.user.has_membership():
         raise PermissionDenied()
 
     result = {"data": {}}
-
-    classes = [AnalyzerConfig, ConnectorConfig, VisualizerConfig, PlaybookConfig]
-    for Class_ in classes:
-        for plugin in Class_.objects.all():
-            plugin: AbstractConfig
-            if plugin.disabled_in_organizations.filter(
-                pk=request.user.membership.organization.pk
-            ).exists():
-                result["data"][plugin.name] = {
-                    "disabled": True,
-                }
+    for opc in OrganizationPluginConfiguration.objects.filter(disabled=True):
+        result["data"][opc.object_id] = {
+            "disabled": True,
+        }
     return Response(result)
 
 

@@ -13,7 +13,6 @@ from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.queryset import IngestorQuerySet
-from api_app.validators import plugin_name_validator
 
 logger = logging.getLogger(__name__)
 
@@ -55,12 +54,7 @@ class IngestorReport(AbstractReport):
 
 
 class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
-    name = models.CharField(
-        max_length=100,
-        null=False,
-        primary_key=True,
-        validators=[plugin_name_validator],
-    )
+
     objects = IngestorQuerySet.as_manager()
     python_module = models.ForeignKey(
         PythonModule,

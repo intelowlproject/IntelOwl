@@ -7,9 +7,16 @@ def migrate(apps, schema_editor):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
-    name = VisualizerConfig.objects.filter(name=models.OuterRef("old_visualizer_config")).values_list("pk")[:1]
+    IngestorConfig = apps.get_model("ingestors_manager", "IngestorConfig")
+    name_visualizer = VisualizerConfig.objects.filter(name=models.OuterRef("old_visualizer_config")).values_list("pk")[:1]
+    name_analyzer = AnalyzerConfig.objects.filter(name=models.OuterRef("old_analyzer_config")).values_list("pk")[:1]
+    name_connector = ConnectorConfig.objects.filter(name=models.OuterRef("old_connector_config")).values_list("pk")[:1]
+    name_ingestor = IngestorConfig.objects.filter(name=models.OuterRef("old_ingestor_config")).values_list("pk")[:1]
     PluginConfig.objects.update(
-        visualizer_config=models.Subquery(name)
+        visualizer_config=models.Subquery(name_visualizer),
+        connector_config=models.Subquery(name_connector),
+        analyzer_config=models.Subquery(name_analyzer),
+        ingestor_config=models.Subquery(name_ingestor),
     )
     Job = apps.get_model("api_app", "Job")
     for job in Job.objects.all():
@@ -30,6 +37,7 @@ class Migration(migrations.Migration):
         ("visualizers_manager", "0036_3_change_primary_key"),
         ("analyzers_manager", "0058_3_change_primary_key"),
         ("connectors_manager", "0029_3_change_primary_key"),
+        ("ingestors_manager", "0016_3_change_primary_key"),
         ("api_app", "0057_2_change_primary_key"),
     ]
 
@@ -48,6 +56,11 @@ class Migration(migrations.Migration):
             model_name="pluginconfig",
             old_name="connector_config",
             new_name="old_connector_config"
+        ),
+        migrations.RenameField(
+            model_name="pluginconfig",
+            old_name="ingestor_config",
+            new_name="old_ingestor_config"
         ),
         migrations.AddField(
             model_name="pluginconfig",
@@ -85,6 +98,19 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="values",
                 to="connectors_manager.connectorconfig",
+            ),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name="pluginconfig",
+            name="ingestor_config",
+            field=models.ForeignKey(
+                default=None,
+                null=True,
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="values",
+                to="ingestors_manager.ingestorconfig",
             ),
             preserve_default=False,
         ),
@@ -148,6 +174,11 @@ class Migration(migrations.Migration):
             model_name='pluginconfig',
             name='old_connector_config',
         ),
+        migrations.RemoveField(
+            model_name='pluginconfig',
+            name='old_ingestor_config',
+        ),
+
         migrations.RemoveField(
             model_name="job",
             name="visualizers_to_execute2"

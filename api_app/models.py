@@ -930,6 +930,7 @@ class AbstractConfig(models.Model):
     name = models.CharField(
         max_length=100,
         null=False,
+        primary_key=True,
         unique=True,
         validators=[plugin_name_validator],
     )
@@ -1050,6 +1051,12 @@ class AbstractReport(models.Model):
 
 
 class PythonConfig(AbstractConfig):
+    name = models.CharField(
+        max_length=100,
+        null=False,
+        unique=True,
+        validators=[plugin_name_validator],
+    )
     objects = PythonConfigQuerySet.as_manager()
     soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
     routing_key = models.CharField(max_length=50, default="default")

@@ -31,6 +31,7 @@ class Migration(migrations.Migration):
         ("visualizers_manager", "0036_1_change_primary_key"),
         ("analyzers_manager", "0058_1_change_primary_key"),
         ("connectors_manager", "0029_1_change_primary_key"),
+        ("ingestors_manager", "0016_1_change_primary_key"),
         ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
     ]
 
@@ -52,6 +53,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="pluginconfig",
             name="connector_config",
+            field=models.CharField(
+                max_length=100, null=True, blank=True
+            )
+        ),
+        migrations.AlterField(
+            model_name="pluginconfig",
+            name="ingestor_config",
             field=models.CharField(
                 max_length=100, null=True, blank=True
             )

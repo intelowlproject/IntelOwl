@@ -12,6 +12,11 @@ def migrate(apps, schema_editor):
                 "playbooks__name"
             )
         ),
+        disabled2=ArraySubquery(
+            VisualizerConfig.objects.filter(pk=models.OuterRef("pk")).values(
+                "disabled_in_organizations__pk"
+            )
+        )
     )
 
 
@@ -36,6 +41,17 @@ class Migration(migrations.Migration):
                 size=None,
             ),
         ),
+        migrations.AddField(
+            model_name="visualizerconfig",
+            name="disabled2",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.IntegerField(),
+                blank=True,
+                default=list,
+                size=None,
+            ),
+        ),
         migrations.RunPython(migrate),
         migrations.RemoveField(model_name="visualizerconfig", name="playbooks"),
+        migrations.RemoveField(model_name="visualizerconfig", name="disabled_in_organizations"),
     ]

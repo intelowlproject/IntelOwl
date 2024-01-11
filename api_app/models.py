@@ -908,39 +908,17 @@ class OrganizationPluginConfiguration(models.Model):
         self.save()
 
 
-"""
-def migrate(apps, schema_editor):
-    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
-    for config in AnalyzerConfig.objects.exclude(disabled_in_organization=None):
-        for org in config.disabled_in_organizations.all():
-            OrganizationPluginConfiguration.objects.create(
-                organization=org, content_object=config, disabled=True
-            )
-
-def reverse_migrate(apps, schema_editor):
-    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    for config in AnalyzerConfig.objects.exclude(orgs_configuration=None):
-        for org in config.orgs_configuration.all():
-            config.disabled_in_organizations.add(org)
-"""
-
-
 class AbstractConfig(models.Model):
     objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,
-        primary_key=True,
         unique=True,
         validators=[plugin_name_validator],
     )
     description = models.TextField(null=False)
 
     disabled = models.BooleanField(null=False, default=False)
-    disabled_in_organizations = models.ManyToManyField(
-        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
-    )
     orgs_configuration = GenericRelation(OrganizationPluginConfiguration)
 
     class Meta:
@@ -1052,12 +1030,6 @@ class AbstractReport(models.Model):
 
 
 class PythonConfig(AbstractConfig):
-    name = models.CharField(
-        max_length=100,
-        null=False,
-        unique=True,
-        validators=[plugin_name_validator],
-    )
     objects = PythonConfigQuerySet.as_manager()
     soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
     routing_key = models.CharField(max_length=50, default="default")

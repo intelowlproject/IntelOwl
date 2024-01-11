@@ -13,10 +13,22 @@ def migrate(apps, schema_editor):
             ).values_list("pk")[:1]
         ),
     )
+    for config in PivotConfig.objects.all():
+        if config.disabled2:
+            OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
+            ContentType= apps.get_model("contenttypes", "ContentType")
+            ct = ContentType.objects.get_for_model(config)
+            for org in config.disabled2:
+                if org:
+                    OrganizationPluginConfiguration.objects.create(
+                        organization=org, object_id=config.pk,content_type=ct,  disabled=True
+                    )
+
 
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
         ("playbooks_manager", "0024_3_change_primary_key"),
         ("pivots_manager", "0024_2_change_primary_key"),
     ]
@@ -32,8 +44,8 @@ class Migration(migrations.Migration):
             name="playbook_to_execute",
             field=models.ForeignKey(
                 default=None,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="pivots",
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="executed_by_pivot",
                 to="playbooks_manager.playbookconfig",
             ),
             preserve_default=False,
@@ -41,7 +53,15 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             migrate,
         ),
+        migrations.AlterField(
+            model_name='pivotconfig',
+            name='playbook_to_execute',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='executed_by_pivot',
+                                    to='playbooks_manager.playbookconfig'),
+        ),
         migrations.RemoveField(
             model_name="pivotconfig", name="old_playbook_to_execute"
         ),
+        migrations.RemoveField(model_name="pivotconfig", name="disabled2"),
+
     ]

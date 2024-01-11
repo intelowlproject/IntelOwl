@@ -10,10 +10,20 @@ def migrate(apps, schema_editor):
         name=models.OuterRef("old_config")
     ).values_list("pk")[:1]
     AnalyzerReport.objects.update(config=models.Subquery(name))
+    for config in AnalyzerConfig.objects.all():
+        if config.disabled2:
+            ContentType = apps.get_model("contenttypes", "ContentType")
+            ct = ContentType.objects.get_for_model(config)
+            OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
+            for org in config.disabled2:
+                if org:
+                    OrganizationPluginConfiguration.objects.create(
+                        organization=org, object_id=config.pk,content_type=ct, disabled=True)
 
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
         ("analyzers_manager", "0058_3_change_primary_key"),
     ]
 
@@ -37,5 +47,6 @@ class Migration(migrations.Migration):
             name="analyzerreport",
             unique_together={("config", "job")},
         ),
+        migrations.RemoveField(model_name="analyzerconfig", name="disabled2"),
         migrations.RemoveField(model_name="analyzerreport", name="old_config"),
     ]

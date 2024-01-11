@@ -13,10 +13,20 @@ def migrate(apps, schema_editor):
     VisualizerReport.objects.update(config=models.Subquery(name))
     for config in VisualizerConfig.objects.all():
         config.playbooks.set(PlaybookConfig.objects.filter(name__in=config.playbooks2))
+        if config.disabled2:
+            ContentType = apps.get_model("contenttypes", "ContentType")
+            ct = ContentType.objects.get_for_model(config)
+            OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
+            for org in config.disabled2:
+                if org:
+                    OrganizationPluginConfiguration.objects.create(
+                        organization=org, object_id=config.pk, content_type=ct,  disabled=True
+                    )
 
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
         ("visualizers_manager", "0036_3_change_primary_key"),
         ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
     ]
@@ -47,4 +57,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate),
         migrations.RemoveField(model_name="visualizerreport", name="old_config"),
         migrations.RemoveField(model_name="visualizerconfig", name="playbooks2"),
+        migrations.RemoveField(model_name="visualizerconfig", name="disabled2"),
     ]

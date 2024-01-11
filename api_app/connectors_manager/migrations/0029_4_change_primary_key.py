@@ -10,10 +10,21 @@ def migrate(apps, schema_editor):
         name=models.OuterRef("old_config")
     ).values_list("pk")[:1]
     ConnectorReport.objects.update(config=models.Subquery(name))
+    for config in ConnectorConfig.objects.all():
+        if config.disabled2:
+            ContentType = apps.get_model("contenttypes", "ContentType")
+            ct = ContentType.objects.get_for_model(config)
+            OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
+            for org in config.disabled2:
+                if org:
+                    OrganizationPluginConfiguration.objects.create(
+                        organization=org, object_id=config.pk,content_type=ct, disabled=True
+                    )
 
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
         ("connectors_manager", "0029_3_change_primary_key"),
     ]
 
@@ -37,5 +48,6 @@ class Migration(migrations.Migration):
             name="connectorreport",
             unique_together={("config", "job")},
         ),
+        migrations.RemoveField(model_name="connectorconfig", name="disabled2"),
         migrations.RemoveField(model_name="connectorreport", name="old_config"),
     ]

@@ -1176,7 +1176,6 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
     class Meta:
         exclude = [
-            "disabled_in_organizations",
             "python_module",
             "routing_key",
             "soft_time_limit",

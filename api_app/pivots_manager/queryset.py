@@ -36,7 +36,7 @@ class PivotConfigQuerySet(PythonConfigQuerySet):
 
 class PivotReportQuerySet(AbstractReportQuerySet):
     @classmethod
-    def _get_serializer_class(cls) -> Type["PivotReportBISerializer"]:
+    def _get_bi_serializer_class(cls) -> Type["PivotReportBISerializer"]:
         from api_app.pivots_manager.serializers import PivotReportBISerializer
 
         return PivotReportBISerializer

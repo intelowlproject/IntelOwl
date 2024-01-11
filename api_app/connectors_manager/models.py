@@ -17,6 +17,7 @@ class ConnectorReport(AbstractReport):
 
     class Meta:
         unique_together = [("config", "job")]
+        indexes = AbstractReport.Meta.indexes
 
 
 class ConnectorConfig(PythonConfig):

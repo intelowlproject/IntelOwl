@@ -36,6 +36,7 @@ class IngestorReport(AbstractReport):
 
     class Meta:
         ordering = ["pk"]
+        indexes = AbstractReport.Meta.indexes
 
     def clean_report(self):
         if isinstance(self.report, list) and self.max_size_report is not None:

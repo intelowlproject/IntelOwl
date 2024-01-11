@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class ConnectorReportQuerySet(AbstractReportQuerySet):
     @classmethod
-    def _get_serializer_class(cls) -> Type["ConnectorReportBISerializer"]:
+    def _get_bi_serializer_class(cls) -> Type["ConnectorReportBISerializer"]:
         from api_app.connectors_manager.serializers import ConnectorReportBISerializer
 
         return ConnectorReportBISerializer

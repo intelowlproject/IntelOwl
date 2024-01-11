@@ -24,7 +24,7 @@ class ZippyAnalyser(FileAnalyzer):
         return response.json()
 
     @classmethod
-    def _monkeypatch_zippy(cls):
+    def _monkeypatch(cls):
         patches = [
             patch(
                 'zippy.EnsembledZippy.run_on_text_chunked',

@@ -29,7 +29,8 @@ docker/.env.start
 .cache
 .google-cookie
 .quark-engine
-
+.python_history
+.viminfo
 
 # Unit test / coverage reports
 htmlcov/

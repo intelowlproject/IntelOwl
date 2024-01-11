@@ -1080,8 +1080,6 @@ class PythonConfig(AbstractConfig):
 
     @classmethod
     def get_subclasses(cls) -> typing.List["PythonConfig"]:
-        from django.contrib.contenttypes.models import ContentType
-
         child_models = [ct.model_class() for ct in ContentType.objects.all()]
         return [
             model

@@ -73,7 +73,7 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
 
     def validate_unique(self) -> None:
         number_plugins = sum(
-            [bool(self.cleaned_data.get(val, False)) for val in self._plugins]
+            bool(self.cleaned_data.get(val, False)) for val in self._plugins
         )
         if number_plugins != 1:
             self.add_error(

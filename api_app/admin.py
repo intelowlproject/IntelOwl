@@ -8,7 +8,7 @@ from django.db.models import JSONField, ManyToManyField
 from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
 
-from .forms import ParameterInlineForm, OrganizationPluginConfigurationForm
+from .forms import OrganizationPluginConfigurationForm, ParameterInlineForm
 from .models import (
     AbstractConfig,
     Job,
@@ -198,8 +198,8 @@ class PythonConfigAdminView(AbstractConfigAdminView):
     list_filter = ["routing_key"]
 
 
+@admin.register(OrganizationPluginConfiguration)
 class OrganizationPluginConfigurationAdminView(CustomAdminView):
-
     list_display = [
         "config",
         "organization",
@@ -208,7 +208,5 @@ class OrganizationPluginConfigurationAdminView(CustomAdminView):
         "rate_limit_timeout",
     ]
     exclude = ["content_type", "object_id"]
-    list_filter = ["organization"]
-    form =  OrganizationPluginConfigurationForm
-
-
+    list_filter = ["organization", "content_type"]
+    form = OrganizationPluginConfigurationForm

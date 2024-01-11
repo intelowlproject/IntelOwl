@@ -1,11 +1,12 @@
-from itertools import chain
-from typing import Type
-
 from django import forms
+from django.core.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Parameter, OrganizationPluginConfiguration, AbstractConfig
+from api_app.models import OrganizationPluginConfiguration, Parameter
+from api_app.pivots_manager.models import PivotConfig
+from api_app.playbooks_manager.models import PlaybookConfig
+from api_app.visualizers_manager.models import VisualizerConfig
 
 
 class MultilineJSONField(forms.JSONField):
@@ -47,17 +48,50 @@ class ParameterInlineForm(forms.ModelForm):
 
 
 class OrganizationPluginConfigurationForm(forms.ModelForm):
-    _config: Type[AbstractConfig]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["configuration"] = forms.ModelChoiceField(
-            queryset=self._config.objects.filter(orgs_configuration__isnull=True)
+    analyzer = forms.ModelChoiceField(
+        queryset=AnalyzerConfig.objects.filter(orgs_configuration__isnull=True),
+        required=False,
+    )
+    connector = forms.ModelChoiceField(
+        queryset=ConnectorConfig.objects.filter(orgs_configuration__isnull=True),
+        required=False,
     )
 
+    visualizer = forms.ModelChoiceField(
+        queryset=VisualizerConfig.objects.filter(orgs_configuration__isnull=True),
+        required=False,
+    )
+    pivot = forms.ModelChoiceField(
+        queryset=PivotConfig.objects.filter(orgs_configuration__isnull=True),
+        required=False,
+    )
+    playbook = forms.ModelChoiceField(
+        queryset=PlaybookConfig.objects.filter(orgs_configuration__isnull=True),
+        required=False,
+    )
+    _plugins = ["analyzer", "connector", "visualizer", "pivot", "playbook"]
+
+    def validate_unique(self) -> None:
+        number_plugins = sum(
+            [bool(self.cleaned_data.get(val, False)) for val in self._plugins]
+        )
+        if number_plugins != 1:
+            self.add_error(
+                field=None,
+                error={
+                    field: "You must select exactly one configuration"
+                    for field in self._plugins
+                },
+            )
+        return super().validate_unique()
 
     def save(self, commit=True):
-        config = self.cleaned_data.get('configuration', None)
+        for field in self._plugins:
+            config = self.cleaned_data.get(field, None)
+            if field:
+                break
+        else:
+            raise ValidationError("Config is required")
         instance = super().save(commit=False)
         instance.config = config
         if commit:
@@ -66,6 +100,4 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
 
     class Meta:
         model = OrganizationPluginConfiguration
-        fields = [
-            "disabled", "disabled_comment", "organization", "rate_limit_timeout"
-        ]
+        fields = ["disabled", "disabled_comment", "organization", "rate_limit_timeout"]

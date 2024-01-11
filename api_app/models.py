@@ -868,8 +868,9 @@ class OrganizationPluginConfiguration(models.Model):
     rate_limit_enable_task = models.ForeignKey(
         PeriodicTask, on_delete=models.SET_NULL, null=True, blank=True, editable=False
     )
+
     class Meta:
-        unique_together = [ ("object_id", "organization", "content_type")]
+        unique_together = [("object_id", "organization", "content_type")]
 
     def disable_for_rate_limit(self):
         self.disabled = True

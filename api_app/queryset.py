@@ -121,14 +121,14 @@ class OrganizationPluginConfigurationQuerySet(models.QuerySet):
 
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
-    def alias_enabled_in_organization(self, organization):
+    def alias_disabled_in_organization(self, organization):
         from api_app.models import OrganizationPluginConfiguration
 
         opc = OrganizationPluginConfiguration.objects.filter(organization=organization)
 
         return self.alias(
-            enabled_in_organization=Exists(
-                opc.filter_for_config(config_class=self.model, config_pk=OuterRef("pk"))
+            disabled_in_organization=Exists(
+                opc.filter_for_config(config_class=self.model, config_pk=OuterRef("pk")).filter(disabled=True)
             )
         )
 
@@ -140,8 +140,8 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
         if user and user.has_membership():
-            qs = qs.alias_enabled_in_organization(user.membership.organization)
-            qs = qs.exclude(enabled_in_organization=False)
+            qs = qs.alias_disabled_in_organization(user.membership.organization)
+            qs = qs.exclude(disabled_in_organization=True)
         return self.annotate(runnable=Exists(qs))
 
 

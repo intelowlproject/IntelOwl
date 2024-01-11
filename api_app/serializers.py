@@ -136,6 +136,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         many=True,
         default=AnalyzerConfig.objects.none(),
     )
+    playbook_requested = rfs.SlugRelatedField(
+        slug_field="name",
+        queryset=PlaybookConfig.objects.all(),
+        many=False,
+        required=False
+    )
 
     def validate_runtime_configuration(self, runtime_config: Dict):
         from api_app.validators import validate_runtime_configuration
@@ -406,11 +412,15 @@ class JobSerializer(_AbstractJobViewSerializer):
         exclude = ("file",)
 
     comments = CommentSerializer(many=True, read_only=True)
-    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
+    pivots_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    analyzers_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    analyzers_requested = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    connectors_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    connectors_requested = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    visualizers_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     permissions = rfs.SerializerMethodField()
-
-    def get_pivots_to_execute(self, obj: Job):
-        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
     def get_fields(self):
         # this method override is required for a cyclic import

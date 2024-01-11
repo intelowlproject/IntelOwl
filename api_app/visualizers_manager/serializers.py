@@ -3,6 +3,7 @@
 
 from rest_framework import serializers as rfs
 
+from ..playbooks_manager.models import PlaybookConfig
 from ..serializers import (
     AbstractReportBISerializer,
     AbstractReportSerializer,
@@ -13,6 +14,8 @@ from .models import VisualizerConfig, VisualizerReport
 
 
 class VisualizerConfigSerializer(PythonConfigSerializer):
+    playbooks = rfs.SlugRelatedField(many=True, queryset=PlaybookConfig.objects.all(), slug_field="name")
+
     class Meta:
         model = VisualizerConfig
         exclude = PythonConfigSerializer.Meta.exclude
@@ -28,7 +31,7 @@ class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration)
 class VisualizerReportSerializer(AbstractReportSerializer):
     name = rfs.SerializerMethodField()
 
-    config = rfs.PrimaryKeyRelatedField(queryset=VisualizerConfig.objects.all())
+    config = rfs.SlugRelatedField(queryset=VisualizerConfig.objects.all(), slug_field="name")
 
     @classmethod
     def get_name(cls, instance: VisualizerReport):

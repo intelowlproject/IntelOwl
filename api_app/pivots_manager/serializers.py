@@ -28,8 +28,8 @@ class PivotReportBISerializer(AbstractReportBISerializer):
 
 class PivotMapSerializer(rfs.ModelSerializer):
     starting_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
-    pivot_config = rfs.PrimaryKeyRelatedField(
-        queryset=PivotConfig.objects.all(), required=True
+    pivot_config = rfs.SlugRelatedField(
+        queryset=PivotConfig.objects.all(), required=True, slug_field="name"
     )
     ending_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
 
@@ -49,13 +49,14 @@ class PivotMapSerializer(rfs.ModelSerializer):
 
 
 class PivotConfigSerializer(PythonConfigSerializer):
-    playbook_to_execute = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all()
+    playbook_to_execute = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(),
+    slug_field = "name"
     )
 
     name = rfs.CharField(read_only=True)
     description = rfs.CharField(read_only=True)
-    related_configs = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
+    related_configs = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
 
     class Meta:
         model = PivotConfig

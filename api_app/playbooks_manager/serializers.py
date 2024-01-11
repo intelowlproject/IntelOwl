@@ -18,19 +18,20 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
         fields = rfs.ALL_FIELDS
 
     type = rfs.ListField(child=rfs.CharField(read_only=True), read_only=True)
-    analyzers = rfs.PrimaryKeyRelatedField(
+    analyzers = rfs.SlugRelatedField(
         many=True,
         queryset=AnalyzerConfig.objects.all(),
         required=True,
         allow_empty=False,
+        slug_field="name"
     )
-    connectors = rfs.PrimaryKeyRelatedField(
-        many=True, queryset=ConnectorConfig.objects.all(), required=True
+    connectors = rfs.SlugRelatedField(
+        many=True, queryset=ConnectorConfig.objects.all(), required=True, slug_field="name"
     )
     pivots = rfs.SlugRelatedField(
         many=True, queryset=PivotConfig.objects.all(), required=True, slug_field="name"
     )
-    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
+    visualizers = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
 
     runtime_configuration = rfs.DictField(required=True)
 

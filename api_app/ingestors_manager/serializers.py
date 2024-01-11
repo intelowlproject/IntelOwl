@@ -3,6 +3,7 @@
 from rest_framework import serializers as rfs
 
 from certego_saas.apps.user.serializers import UserSerializer
+from ..playbooks_manager.models import PlaybookConfig
 
 from ..serializers import (
     AbstractReportBISerializer,
@@ -17,7 +18,7 @@ from .models import IngestorConfig, IngestorReport
 
 class IngestorConfigSerializer(PythonConfigSerializer):
     schedule = CrontabScheduleSerializer(read_only=True)
-
+    playbook_to_execute = rfs.SlugRelatedField(queryset=PlaybookConfig.objects.all(), slug_field="name", many=False)
     class Meta:
         model = IngestorConfig
         exclude = ["user", "periodic_task"]

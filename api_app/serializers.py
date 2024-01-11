@@ -124,12 +124,14 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     runtime_configuration = rfs.JSONField(required=False, write_only=True)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
 
-    connectors_requested = rfs.PrimaryKeyRelatedField(
+    connectors_requested = rfs.SlugRelatedField(
+        slug_field="name",
         queryset=ConnectorConfig.objects.all(),
         many=True,
         default=ConnectorConfig.objects.none(),
     )
-    analyzers_requested = rfs.PrimaryKeyRelatedField(
+    analyzers_requested = rfs.SlugRelatedField(
+        slug_field="name",
         queryset=AnalyzerConfig.objects.all(),
         many=True,
         default=AnalyzerConfig.objects.none(),
@@ -499,8 +501,8 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
 
 
 class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerializer):
-    playbooks_requested = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True
+    playbooks_requested = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True, slug_field="name"
     )
 
     def to_internal_value(self, data):
@@ -656,8 +658,8 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
 class MultiplePlaybooksMultipleObservableAnalysisSerializer(
     MultipleObservableAnalysisSerializer
 ):
-    playbooks_requested = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True
+    playbooks_requested = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True, slug_field="name"
     )
 
     def to_internal_value(self, data):
@@ -799,17 +801,17 @@ class JobResponseSerializer(rfs.ModelSerializer):
     STATUS_NOT_AVAILABLE = "not_available"
 
     job_id = rfs.IntegerField(source="pk")
-    analyzers_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="analyzers_to_execute", many=True
+    analyzers_running = rfs.SlugRelatedField(
+        read_only=True, source="analyzers_to_execute", many=True, slug_field="name",
     )
-    connectors_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="connectors_to_execute", many=True
+    connectors_running = rfs.SlugRelatedField(
+        read_only=True, source="connectors_to_execute", many=True, slug_field="name",
     )
-    visualizers_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="visualizers_to_execute", many=True
+    visualizers_running = rfs.SlugRelatedField(
+        read_only=True, source="visualizers_to_execute", many=True, slug_field="name",
     )
-    playbook_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="playbook_to_execute"
+    playbook_running = rfs.SlugRelatedField(
+        read_only=True, source="playbook_to_execute", slug_field="name",
     )
 
     class Meta:
@@ -848,11 +850,11 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
 
     md5 = rfs.CharField(max_length=128, required=True)
-    analyzers = rfs.PrimaryKeyRelatedField(
-        queryset=AnalyzerConfig.objects.all(), many=True, required=False
+    analyzers = rfs.SlugRelatedField(
+        queryset=AnalyzerConfig.objects.all(), many=True, required=False, slug_field="name",
     )
-    playbooks = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), required=False, many=True
+    playbooks = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), required=False, many=True, slug_field="name",
     )
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)
@@ -885,11 +887,11 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         # triggered.
         query = Q(md5=validated_data["md5"]) & Q(status__in=statuses_to_check)
         if validated_data.get("playbooks", []):
-            query &= Q(playbook_requested__in=validated_data["playbooks"])
+            query &= Q(playbook_requested__name__in=validated_data["playbooks"])
         else:
             analyzers = validated_data.get("analyzers", [])
             for analyzer in analyzers:
-                query &= Q(analyzers_requested__in=[analyzer])
+                query &= Q(analyzers_requested__name__in=[analyzer])
         # we want a job that has every analyzer requested
         if validated_data.get("minutes_ago", None):
             minutes_ago_time = now() - datetime.timedelta(

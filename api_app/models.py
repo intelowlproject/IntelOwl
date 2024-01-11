@@ -868,6 +868,8 @@ class OrganizationPluginConfiguration(models.Model):
     rate_limit_enable_task = models.ForeignKey(
         PeriodicTask, on_delete=models.SET_NULL, null=True, blank=True, editable=False
     )
+    class Meta:
+        unique_together = [ ("object_id", "organization", "content_type")]
 
     def disable_for_rate_limit(self):
         self.disabled = True
@@ -907,7 +909,7 @@ class OrganizationPluginConfiguration(models.Model):
 
     def enable_manually(self, user):
         self.disabled = False
-        self.disabled_comment += f"Enabled back by {user.username}"
+        self.disabled_comment += f"\nEnabled back by {user.username}"
         self.save()
 
 

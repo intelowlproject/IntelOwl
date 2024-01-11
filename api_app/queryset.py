@@ -128,7 +128,9 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
         return self.alias(
             disabled_in_organization=Exists(
-                opc.filter_for_config(config_class=self.model, config_pk=OuterRef("pk")).filter(disabled=True)
+                opc.filter_for_config(
+                    config_class=self.model, config_pk=OuterRef("pk")
+                ).filter(disabled=True)
             )
         )
 

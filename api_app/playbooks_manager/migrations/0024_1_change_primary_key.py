@@ -18,10 +18,14 @@ def migrate(apps, schema_editor):
             )
         ),
         analyzers2=ArraySubquery(
-            PlaybookConfig.objects.filter(pk=models.OuterRef("pk")).values("analyzers__name")
+            PlaybookConfig.objects.filter(pk=models.OuterRef("pk")).values(
+                "analyzers__name"
+            )
         ),
         connectors2=ArraySubquery(
-            PlaybookConfig.objects.filter(pk=models.OuterRef("pk")).values("connectors__name")
+            PlaybookConfig.objects.filter(pk=models.OuterRef("pk")).values(
+                "connectors__name"
+            )
         ),
         tags2=ArraySubquery(
             PlaybookConfig.objects.filter(pk=models.OuterRef("pk")).values("tags__pk")
@@ -30,8 +34,9 @@ def migrate(apps, schema_editor):
             PlaybookConfig.objects.filter(pk=models.OuterRef("pk")).values(
                 "disabled_in_organizations__pk"
             )
-        )
+        ),
     )
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -40,7 +45,8 @@ class Migration(migrations.Migration):
         ("api_app", "0057_4_change_primary_key"),
     ]
 
-    operations = [migrations.AddField(
+    operations = [
+        migrations.AddField(
             model_name="playbookconfig",
             name="disabled2",
             field=django.contrib.postgres.fields.ArrayField(
@@ -102,7 +108,6 @@ class Migration(migrations.Migration):
                 size=None,
             ),
         ),
-
         migrations.RunPython(migrate),
         migrations.AlterField(
             model_name="playbookconfig",
@@ -114,10 +119,7 @@ class Migration(migrations.Migration):
                 primary_key=False,
             ),
         ),
-        migrations.RemoveField(
-            model_name="playbookconfig",
-            name="pivots"
-        ),
+        migrations.RemoveField(model_name="playbookconfig", name="pivots"),
         migrations.RemoveField(
             model_name="playbookconfig",
             name="analyzers",
@@ -129,5 +131,8 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name="playbookconfig",
             name="tags",
-        ),migrations.RemoveField(model_name="playbookconfig", name="disabled_in_organizations"),
+        ),
+        migrations.RemoveField(
+            model_name="playbookconfig", name="disabled_in_organizations"
+        ),
     ]

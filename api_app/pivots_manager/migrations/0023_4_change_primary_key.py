@@ -7,8 +7,12 @@ def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     for pivot in PivotConfig.objects.all():
-        acs = AnalyzerConfig.objects.filter(name__in=pivot.related_analyzer_configs2).values_list("pk", flat=True)
-        ccs = ConnectorConfig.objects.filter(name__in=pivot.related_connector_configs2).values_list("pk", flat=True)
+        acs = AnalyzerConfig.objects.filter(
+            name__in=pivot.related_analyzer_configs2
+        ).values_list("pk", flat=True)
+        ccs = ConnectorConfig.objects.filter(
+            name__in=pivot.related_connector_configs2
+        ).values_list("pk", flat=True)
         pivot.related_analyzer_configs.set(acs)
         pivot.related_connector_configs.set(ccs)
 

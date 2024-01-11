@@ -50,8 +50,7 @@ class PivotMapSerializer(rfs.ModelSerializer):
 
 class PivotConfigSerializer(PythonConfigSerializer):
     playbook_to_execute = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(),
-    slug_field = "name"
+        queryset=PlaybookConfig.objects.all(), slug_field="name"
     )
 
     name = rfs.CharField(read_only=True)

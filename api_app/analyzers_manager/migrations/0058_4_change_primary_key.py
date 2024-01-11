@@ -14,11 +14,17 @@ def migrate(apps, schema_editor):
         if config.disabled2:
             ContentType = apps.get_model("contenttypes", "ContentType")
             ct = ContentType.objects.get_for_model(config)
-            OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
+            OrganizationPluginConfiguration = apps.get_model(
+                "api_app", "OrganizationPluginConfiguration"
+            )
             for org in config.disabled2:
                 if org:
                     OrganizationPluginConfiguration.objects.create(
-                        organization=org, object_id=config.pk,content_type=ct, disabled=True)
+                        organization=org,
+                        object_id=config.pk,
+                        content_type=ct,
+                        disabled=True,
+                    )
 
 
 class Migration(migrations.Migration):

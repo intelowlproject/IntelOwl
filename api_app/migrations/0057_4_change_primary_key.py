@@ -29,10 +29,18 @@ def migrate(apps, schema_editor):
     )
     Job = apps.get_model("api_app", "Job")
     for job in Job.objects.all():
-        vcs = VisualizerConfig.objects.filter(name__in=job.visualizers_to_execute2).values_list("pk", flat=True)
-        acs = AnalyzerConfig.objects.filter(name__in=job.analyzers_to_execute2).values_list("pk", flat=True)
-        acs_requested = AnalyzerConfig.objects.filter(name__in=job.analyzers_requested2).values_list("pk", flat=True)
-        ccs = ConnectorConfig.objects.filter(name__in=job.connectors_to_execute2).values_list("pk", flat=True)
+        vcs = VisualizerConfig.objects.filter(
+            name__in=job.visualizers_to_execute2
+        ).values_list("pk", flat=True)
+        acs = AnalyzerConfig.objects.filter(
+            name__in=job.analyzers_to_execute2
+        ).values_list("pk", flat=True)
+        acs_requested = AnalyzerConfig.objects.filter(
+            name__in=job.analyzers_requested2
+        ).values_list("pk", flat=True)
+        ccs = ConnectorConfig.objects.filter(
+            name__in=job.connectors_to_execute2
+        ).values_list("pk", flat=True)
         ccs_requested = ConnectorConfig.objects.filter(
             name__in=job.connectors_requested2
         ).values_list("pk", flat=True)

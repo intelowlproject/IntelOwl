@@ -7,8 +7,12 @@ def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     for playbook in Playbook.objects.all():
-        acs = AnalyzerConfig.objects.filter(name__in=playbook.analyzers2).values_list("pk", flat=True)
-        ccs = ConnectorConfig.objects.filter(name__in=playbook.connectors2).values_list("pk", flat=True)
+        acs = AnalyzerConfig.objects.filter(name__in=playbook.analyzers2).values_list(
+            "pk", flat=True
+        )
+        ccs = ConnectorConfig.objects.filter(name__in=playbook.connectors2).values_list(
+            "pk", flat=True
+        )
         playbook.analyzers.set(acs)
         playbook.connectors.set(ccs)
 

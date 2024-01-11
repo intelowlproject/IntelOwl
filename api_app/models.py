@@ -886,10 +886,13 @@ class OrganizationPluginConfiguration(models.Model):
             from intel_owl.tasks import disable_configuration_for_org_for_rate_limit
 
             self.rate_limit_enable_task = PeriodicTask.objects.create(
-                name=f"{self.config.name}{self.organization.name}RateLimitCleaner",
+                name=f"{self.config.name}"
+                f"-{self.organization.name}"
+                "RateLimitCleaner",
                 clocked=clock_schedule,
                 one_off=True,
-                task=f"{disable_configuration_for_org_for_rate_limit.__module__}.{disable_configuration_for_org_for_rate_limit.__name__}",
+                task=f"{disable_configuration_for_org_for_rate_limit.__module__}"
+                f".{disable_configuration_for_org_for_rate_limit.__name__}",
             )
         else:
             self.rate_limit_enable_task.clocked = clock_schedule

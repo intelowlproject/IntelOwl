@@ -23,10 +23,13 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
         queryset=AnalyzerConfig.objects.all(),
         required=True,
         allow_empty=False,
-        slug_field="name"
+        slug_field="name",
     )
     connectors = rfs.SlugRelatedField(
-        many=True, queryset=ConnectorConfig.objects.all(), required=True, slug_field="name"
+        many=True,
+        queryset=ConnectorConfig.objects.all(),
+        required=True,
+        slug_field="name",
     )
     pivots = rfs.SlugRelatedField(
         many=True, queryset=PivotConfig.objects.all(), required=True, slug_field="name"

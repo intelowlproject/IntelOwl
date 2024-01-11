@@ -16,7 +16,7 @@ def migrate(apps, schema_editor):
             VisualizerConfig.objects.filter(pk=models.OuterRef("pk")).values(
                 "disabled_in_organizations__pk"
             )
-        )
+        ),
     )
 
 
@@ -53,5 +53,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(migrate),
         migrations.RemoveField(model_name="visualizerconfig", name="playbooks"),
-        migrations.RemoveField(model_name="visualizerconfig", name="disabled_in_organizations"),
+        migrations.RemoveField(
+            model_name="visualizerconfig", name="disabled_in_organizations"
+        ),
     ]

@@ -3,16 +3,17 @@ import django
 from django.contrib.postgres.expressions import ArraySubquery
 from django.db import migrations, models
 
+
 def migrate(apps, schema_editor):
     PivotConfig = apps.get_model("pivots_manager", "PivotConfig")
     PivotConfig.objects.update(
-
-        disabled2 = ArraySubquery(
-        PivotConfig.objects.filter(pk=models.OuterRef("pk")).values(
-            "disabled_in_organizations__pk"
+        disabled2=ArraySubquery(
+            PivotConfig.objects.filter(pk=models.OuterRef("pk")).values(
+                "disabled_in_organizations__pk"
+            )
         )
     )
-    )
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -40,7 +41,6 @@ class Migration(migrations.Migration):
             field=models.CharField(max_length=100, null=True, blank=True),
         ),
         migrations.RemoveField(
-            model_name="pivotconfig",
-            name="disabled_in_organizations"
-        )
+            model_name="pivotconfig", name="disabled_in_organizations"
+        ),
     ]

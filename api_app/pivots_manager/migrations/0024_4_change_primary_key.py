@@ -15,15 +15,19 @@ def migrate(apps, schema_editor):
     )
     for config in PivotConfig.objects.all():
         if config.disabled2:
-            OrganizationPluginConfiguration = apps.get_model("api_app", "OrganizationPluginConfiguration")
-            ContentType= apps.get_model("contenttypes", "ContentType")
+            OrganizationPluginConfiguration = apps.get_model(
+                "api_app", "OrganizationPluginConfiguration"
+            )
+            ContentType = apps.get_model("contenttypes", "ContentType")
             ct = ContentType.objects.get_for_model(config)
             for org in config.disabled2:
                 if org:
                     OrganizationPluginConfiguration.objects.create(
-                        organization=org, object_id=config.pk,content_type=ct,  disabled=True
+                        organization=org,
+                        object_id=config.pk,
+                        content_type=ct,
+                        disabled=True,
                     )
-
 
 
 class Migration(migrations.Migration):
@@ -54,14 +58,16 @@ class Migration(migrations.Migration):
             migrate,
         ),
         migrations.AlterField(
-            model_name='pivotconfig',
-            name='playbook_to_execute',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='executed_by_pivot',
-                                    to='playbooks_manager.playbookconfig'),
+            model_name="pivotconfig",
+            name="playbook_to_execute",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="executed_by_pivot",
+                to="playbooks_manager.playbookconfig",
+            ),
         ),
         migrations.RemoveField(
             model_name="pivotconfig", name="old_playbook_to_execute"
         ),
         migrations.RemoveField(model_name="pivotconfig", name="disabled2"),
-
     ]

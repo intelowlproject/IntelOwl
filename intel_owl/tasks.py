@@ -368,12 +368,20 @@ def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
             :max_objects
         ].send_to_elastic_as_bi(max_timeout=max_timeout)
 
-@shared_task(base=FailureLoggedTask, name="disable_configuration_for_org_for_rate_limit", soft_time_limit=30)
-def disable_configuration_for_org_for_rate_limit(org_configuration_pk:int):
+
+@shared_task(
+    base=FailureLoggedTask,
+    name="disable_configuration_for_org_for_rate_limit",
+    soft_time_limit=30,
+)
+def disable_configuration_for_org_for_rate_limit(org_configuration_pk: int):
     from api_app.models import OrganizationPluginConfiguration
 
-    opc: OrganizationPluginConfiguration = OrganizationPluginConfiguration.objects.get(pk=org_configuration_pk)
+    opc: OrganizationPluginConfiguration = OrganizationPluginConfiguration.objects.get(
+        pk=org_configuration_pk
+    )
     opc.disable_for_rate_limit()
+
 
 # set logger
 @signals.setup_logging.connect

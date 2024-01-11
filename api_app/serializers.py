@@ -140,7 +140,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         slug_field="name",
         queryset=PlaybookConfig.objects.all(),
         many=False,
-        required=False
+        required=False,
     )
 
     def validate_runtime_configuration(self, runtime_config: Dict):
@@ -412,12 +412,24 @@ class JobSerializer(_AbstractJobViewSerializer):
         exclude = ("file",)
 
     comments = CommentSerializer(many=True, read_only=True)
-    pivots_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
-    analyzers_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
-    analyzers_requested = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
-    connectors_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
-    connectors_requested = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
-    visualizers_to_execute = rfs.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    pivots_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    analyzers_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    analyzers_requested = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    connectors_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    connectors_requested = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    visualizers_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
     playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     permissions = rfs.SerializerMethodField()
@@ -812,16 +824,27 @@ class JobResponseSerializer(rfs.ModelSerializer):
 
     job_id = rfs.IntegerField(source="pk")
     analyzers_running = rfs.SlugRelatedField(
-        read_only=True, source="analyzers_to_execute", many=True, slug_field="name",
+        read_only=True,
+        source="analyzers_to_execute",
+        many=True,
+        slug_field="name",
     )
     connectors_running = rfs.SlugRelatedField(
-        read_only=True, source="connectors_to_execute", many=True, slug_field="name",
+        read_only=True,
+        source="connectors_to_execute",
+        many=True,
+        slug_field="name",
     )
     visualizers_running = rfs.SlugRelatedField(
-        read_only=True, source="visualizers_to_execute", many=True, slug_field="name",
+        read_only=True,
+        source="visualizers_to_execute",
+        many=True,
+        slug_field="name",
     )
     playbook_running = rfs.SlugRelatedField(
-        read_only=True, source="playbook_to_execute", slug_field="name",
+        read_only=True,
+        source="playbook_to_execute",
+        slug_field="name",
     )
 
     class Meta:
@@ -861,10 +884,16 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 
     md5 = rfs.CharField(max_length=128, required=True)
     analyzers = rfs.SlugRelatedField(
-        queryset=AnalyzerConfig.objects.all(), many=True, required=False, slug_field="name",
+        queryset=AnalyzerConfig.objects.all(),
+        many=True,
+        required=False,
+        slug_field="name",
     )
     playbooks = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(), required=False, many=True, slug_field="name",
+        queryset=PlaybookConfig.objects.all(),
+        required=False,
+        many=True,
+        slug_field="name",
     )
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)

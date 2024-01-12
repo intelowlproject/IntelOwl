@@ -1,6 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+# DEPRECATION NOTICE!!!!
+# THIS SCRIPT HAS BEEN DEPRECATED AND WILL BE REMOVED IN THE NEXT MAJOR VERSION
+# PLEASE USE the bash `start` script instead
+
 import argparse
 import os
 import re

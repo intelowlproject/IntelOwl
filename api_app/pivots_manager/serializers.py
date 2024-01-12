@@ -28,8 +28,8 @@ class PivotReportBISerializer(AbstractReportBISerializer):
 
 class PivotMapSerializer(rfs.ModelSerializer):
     starting_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
-    pivot_config = rfs.SlugRelatedField(
-        queryset=PivotConfig.objects.all(), required=True, slug_field="name"
+    pivot_config = rfs.PrimaryKeyRelatedField(
+        queryset=PivotConfig.objects.all(), required=True
     )
     ending_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=True)
 

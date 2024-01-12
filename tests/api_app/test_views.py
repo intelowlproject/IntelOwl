@@ -656,7 +656,7 @@ class TagViewsetTests(CustomViewSetTestCase):
 
 class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABCMeta):
     def test_organization_disable(self):
-        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        plugin_pk = self.model_class.objects.order_by("?").first().name
         org, _ = Organization.objects.get_or_create(name="test")
 
         # a guest user cannot disable plugin config at org level
@@ -729,7 +729,7 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         org.delete()
 
     def test_organization_enable(self):
-        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        plugin_pk = self.model_class.objects.order_by("?").first().name
         org, _ = Organization.objects.get_or_create(name="test")
 
         # a guest user cannot enable plugin config at org level

@@ -860,7 +860,7 @@ class OrganizationPluginConfiguration(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     disabled = models.BooleanField(default=False)
-    disabled_comment = models.TextField(null=True, blank=True)
+    disabled_comment = models.TextField(default="", blank=True)
 
     rate_limit_timeout = models.DurationField(
         null=True, blank=True, help_text="Expects data in the format 'DD HH:MM:SS'"
@@ -950,6 +950,10 @@ class AbstractConfig(models.Model):
         return ContentType.objects.get(
             model=cls._meta.model_name, app_label=cls._meta.app_label
         )
+
+    @property
+    def disabled_in_organizations(self) -> QuerySet:
+        return self.orgs_configuration.filter(disabled=True)
 
     @classmethod
     @property

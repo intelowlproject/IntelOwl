@@ -57,11 +57,11 @@ def update_plugin(state, python_module_pk: int):
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=300)
-def execute_ingestor(config_pk: str):
+def execute_ingestor(config_name: str):
     from api_app.ingestors_manager.classes import Ingestor
     from api_app.ingestors_manager.models import IngestorConfig
 
-    config: IngestorConfig = IngestorConfig.objects.get(pk=config_pk)
+    config: IngestorConfig = IngestorConfig.objects.get(name=config_name)
     if config.disabled:
         logger.info(f"Not executing ingestor {config.name} because disabled")
     else:

@@ -712,7 +712,9 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         m.is_admin = True  # and owner is also and admin
         m.is_owner = True
         m.save()
-        plugin.disabled_in_organizations.set([])  # reset the disabled plugins
+        plugin.disabled_in_organizations.update(
+            disabled=False
+        )  # reset the disabled plugins
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
         )  # isn't it disabled?
@@ -724,7 +726,7 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
             plugin.disabled_in_organizations.all().exists()
         )  # now it's disabled
 
-        plugin.disabled_in_organizations.set([])
+        plugin.disabled_in_organizations.delete()
         m.delete()
         org.delete()
 
@@ -778,10 +780,10 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(
             result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
         )
-        plugin.disabled_in_organizations.add(org)  # disabling it
+        plugin.orgs_configuration.update(disabled=True)  # disabling it
         response = self.client.delete(
             f"{self.URL}/{plugin_name}/organization"
-        )  # enabling it
+        )  # disable it
         self.assertEqual(response.status_code, 202)
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
@@ -791,7 +793,7 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         m.is_owner = True
         m.is_admin = True  # an owner is also an admin
         m.save()
-        plugin.disabled_in_organizations.set([])
+        plugin.disabled_in_organizations.update(disabled=False)
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
         )  # isn't it disabled?
@@ -809,7 +811,7 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(
             result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
         )
-        plugin.disabled_in_organizations.add(org)  # disabling it
+        plugin.orgs_configuration.update(disabled=True)  # disabling it
         response = self.client.delete(
             f"{self.URL}/{plugin_name}/organization"
         )  # enabling it

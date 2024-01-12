@@ -23,6 +23,7 @@ class PivotMapSerializerTestCase(CustomTestCase):
             status="reported_without_fails",
         )
         self.pc = PivotConfig.objects.create(
+            name="test",
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -70,6 +71,7 @@ class PivotConfigSerializerTestCase(CustomTestCase):
     def test_read(self):
         ac = AnalyzerConfig.objects.first()
         pc = PivotConfig.objects.create(
+            name="test",
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),

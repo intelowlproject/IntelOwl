@@ -429,6 +429,7 @@ class JobTestCase(CustomTestCase):
             status=Job.Status.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(
+            name="test",
             python_module=PythonModule.objects.get(
                 base_path="api_app.pivots_manager.pivots",
                 module="self_analyzable.SelfAnalyzable",

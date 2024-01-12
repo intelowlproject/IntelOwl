@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ),
                 ("object_id", models.IntegerField()),
                 ("disabled", models.BooleanField(default=False)),
-                ("disabled_comment", models.TextField(blank=True, null=True)),
+                ("disabled_comment", models.TextField(blank=True, default="")),
                 (
                     "rate_limit_timeout",
                     models.DurationField(

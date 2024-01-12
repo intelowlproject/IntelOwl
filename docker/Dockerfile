@@ -49,6 +49,15 @@ COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
+
+# Installing dependencies for zippy_scan file analyzer
+RUN git clone https://github.com/thinkst/zippy \
+&& cd zippy && python3 setup.py build \
+&& python3 setup.py sdist \
+&& pip3 install dist/*.tar.gz
+
+RUN rm -r zippy
+
 RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
     # install elasticsearch-dsl's appropriate version as specified by user
     && pip3 install --no-cache-dir elasticsearch-dsl==${PYELASTIC_VERSION} \

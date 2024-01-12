@@ -11,16 +11,6 @@ sleep 3
 # makemigrations is needed only for the durin package.
 # The customization of the parameters is not applied until the migration is done
 
-# Installing dependencies for zippy_scan file analyzer
-git clone https://github.com/thinkst/zippy
-cd zippy
-python3 setup.py build 
-python3 setup.py sdist 
-pip3 install dist/*.tar.gz
-cd ..
-rm -r zippy
-
-
 python manage.py makemigrations durin
 python manage.py makemigrations rest_email_auth
 python manage.py migrate

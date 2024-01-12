@@ -62,7 +62,8 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
                 return True
         return False
 
-    def validate_tags_labels(self, tags_labels):
+    @staticmethod
+    def validate_tags_labels(tags_labels):
         for label in tags_labels:
             yield Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}

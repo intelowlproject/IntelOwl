@@ -4,7 +4,7 @@ from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths, ScanMode
-from api_app.models import PythonModule
+from api_app.models import PythonModule, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -124,6 +124,7 @@ class PlaybookConfigViewSetTestCase(
             disabled=False,
             type="file",
         )
+        tag, _ = Tag.objects.get_or_create(label="testlabel1", color="#FF5733")
 
         response = self.client.post(
             self.URL,
@@ -140,6 +141,9 @@ class PlaybookConfigViewSetTestCase(
                 },
                 "scan_mode": ScanMode.FORCE_NEW_ANALYSIS,
                 "scan_check_time": None,
+                "tags_labels": [
+                    tag.label,
+                ],
             },
             format="json",
         )

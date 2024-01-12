@@ -6,11 +6,6 @@ from django.db import migrations, models
 
 def migrate(apps, schema_editor):
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
-    id = 1
-    for config in PlaybookConfig.objects.all():
-        config.id = id
-        config.save()
-        id += 1
     PlaybookConfig.objects.update(
         pivots2=ArraySubquery(
             PlaybookConfig.objects.filter(pk=models.OuterRef("pk")).values(
@@ -58,18 +53,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="playbookconfig",
-            name="id",
-            field=models.BigIntegerField(
-                auto_created=True,
-                serialize=False,
-                verbose_name="ID",
-                primary_key=False,
-                null=True,
-                blank=True,
-            ),
-        ),
-        migrations.AddField(
-            model_name="playbookconfig",
             name="pivots2",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=100),
@@ -109,16 +92,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(migrate),
-        migrations.AlterField(
-            model_name="playbookconfig",
-            name="id",
-            field=models.BigIntegerField(
-                auto_created=True,
-                serialize=False,
-                verbose_name="ID",
-                primary_key=False,
-            ),
-        ),
         migrations.RemoveField(model_name="playbookconfig", name="pivots"),
         migrations.RemoveField(
             model_name="playbookconfig",

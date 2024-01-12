@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             'ALTER TABLE "visualizers_manager_visualizerconfig" DROP CONSTRAINT "visualizers_manager_visualizerconfig_pkey" CASCADE;'
-            'CREATE UNIQUE INDEX "visualizers_manager_visualizerconfig_idkey" ON "visualizers_manager_visualizerconfig" USING btree(id);'
-            'ALTER TABLE "visualizers_manager_visualizerconfig" ADD CONSTRAINT "visualizers_manager_visualizerconfig_idkey" PRIMARY KEY USING INDEX "visualizers_manager_visualizerconfig_idkey";'
         ),
         migrations.AlterField(
             model_name="visualizerconfig",
@@ -29,7 +27,7 @@ class Migration(migrations.Migration):
                 ],
             ),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name="visualizerconfig",
             name="id",
             field=models.BigAutoField(

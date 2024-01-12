@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             'ALTER TABLE "ingestors_manager_ingestorconfig" DROP CONSTRAINT "ingestors_manager_ingestorconfig_pkey" CASCADE;'
-            'CREATE UNIQUE INDEX "ingestors_manager_ingestorconfig_idkey" ON "ingestors_manager_ingestorconfig" USING btree(id);'
-            'ALTER TABLE "ingestors_manager_ingestorconfig" ADD CONSTRAINT "ingestors_manager_ingestorconfig_idkey" PRIMARY KEY USING INDEX "ingestors_manager_ingestorconfig_idkey";'
         ),
         migrations.AlterField(
             model_name="ingestorconfig",
@@ -29,7 +27,7 @@ class Migration(migrations.Migration):
                 ],
             ),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name="ingestorconfig",
             name="id",
             field=models.BigAutoField(

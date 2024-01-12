@@ -13,8 +13,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             'ALTER TABLE "connectors_manager_connectorconfig" DROP CONSTRAINT "connectors_manager_connectorconfig_pkey" CASCADE;'
-            'CREATE UNIQUE INDEX "connectors_manager_connectorconfig_idkey" ON "connectors_manager_connectorconfig" USING btree(id);'
-            'ALTER TABLE "connectors_manager_connectorconfig" ADD CONSTRAINT "connectors_manager_connectorconfig_idkey" PRIMARY KEY USING INDEX "connectors_manager_connectorconfig_idkey";'
         ),
         migrations.AlterField(
             model_name="connectorconfig",
@@ -30,7 +28,7 @@ class Migration(migrations.Migration):
                 ],
             ),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name="connectorconfig",
             name="id",
             field=models.BigAutoField(

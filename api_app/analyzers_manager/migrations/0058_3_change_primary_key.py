@@ -13,8 +13,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             'ALTER TABLE "analyzers_manager_analyzerconfig" DROP CONSTRAINT "analyzers_manager_analyzerconfig_pkey" CASCADE;'
-            'CREATE UNIQUE INDEX "analyzers_manager_analyzerconfig_idkey" ON "analyzers_manager_analyzerconfig" USING btree(id);'
-            'ALTER TABLE "analyzers_manager_analyzerconfig" ADD CONSTRAINT "analyzers_manager_analyzerconfig_idkey" PRIMARY KEY USING INDEX "analyzers_manager_analyzerconfig_idkey";'
         ),
         migrations.AlterField(
             model_name="analyzerconfig",
@@ -30,7 +28,7 @@ class Migration(migrations.Migration):
                 ],
             ),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name="analyzerconfig",
             name="id",
             field=models.BigAutoField(

@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             'ALTER TABLE "playbooks_manager_playbookconfig" DROP CONSTRAINT "playbooks_manager_playbookconfig_pkey" CASCADE;'
-            'CREATE UNIQUE INDEX "playbooks_manager_playbookconfig_idkey" ON "playbooks_manager_playbookconfig" USING btree(id);'
-            'ALTER TABLE "playbooks_manager_playbookconfig" ADD CONSTRAINT "playbooks_manager_playbookconfig_idkey" PRIMARY KEY USING INDEX "playbooks_manager_playbookconfig_idkey";'
         ),
         migrations.AlterField(
             model_name="playbookconfig",
@@ -29,7 +27,7 @@ class Migration(migrations.Migration):
                 ],
             ),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name="playbookconfig",
             name="id",
             field=models.BigAutoField(

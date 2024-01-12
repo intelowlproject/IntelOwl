@@ -435,7 +435,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             key.lower(): Count("status", filter=Q(status=key))
             for key in Job.Status.values
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/type",
@@ -448,7 +450,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             "file": Count("is_sample", filter=Q(is_sample=True)),
             "observable": Count("is_sample", filter=Q(is_sample=False)),
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/observable_classification",
@@ -463,7 +467,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             )
             for oc in ObservableTypes.values
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/file_mimetype",
@@ -472,7 +478,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_file_mimetype(self, request):
-        return self.__aggregation_response_dynamic("file_mimetype")
+        return self.__aggregation_response_dynamic(
+            "file_mimetype", users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/observable_name",
@@ -481,7 +489,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_observable_name(self, request):
-        return self.__aggregation_response_dynamic("observable_name", False)
+        return self.__aggregation_response_dynamic(
+            "observable_name", False, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/md5",
@@ -491,12 +501,29 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     @cache_action_response(timeout=60 * 5)
     def aggregate_md5(self, request):
         # this is for file
-        return self.__aggregation_response_dynamic("md5", False)
+        return self.__aggregation_response_dynamic(
+            "md5", False, users=self.get_org_members(request)
+        )
 
-    def __aggregation_response_static(self, annotations: dict) -> Response:
+    @staticmethod
+    def get_org_members(request):
+        user = request.user
+        org_param = request.GET.get("org", "").lower() == "true"
+        users_of_organization = None
+        if org_param:
+            organization = user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
+        return users_of_organization
+
+    def __aggregation_response_static(self, annotations: dict, users=None) -> Response:
         delta, basis = self.__parse_range(self.request)
+        filter_kwargs = {"received_request_time__gte": delta}
+        if users:
+            filter_kwargs["user__in"] = users
         qs = (
-            Job.objects.filter(received_request_time__gte=delta)
+            Job.objects.filter(**filter_kwargs)
             .annotate(date=Trunc("received_request_time", basis))
             .values("date")
             .annotate(**annotations)
@@ -504,11 +531,16 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         return Response(qs)
 
     def __aggregation_response_dynamic(
-        self, field_name: str, group_by_date: bool = True, limit: int = 5
+        self,
+        field_name: str,
+        group_by_date: bool = True,
+        limit: int = 5,
+        users=None,
     ) -> Response:
         delta, basis = self.__parse_range(self.request)
-
         filter_kwargs = {"received_request_time__gte": delta}
+        if users:
+            filter_kwargs["user__in"] = users
         if field_name == "md5":
             filter_kwargs["is_sample"] = True
 

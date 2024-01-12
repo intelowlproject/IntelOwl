@@ -149,7 +149,7 @@ Logrotate configuration is more stable.
 
 ### Crontab configuration (recommended for advanced deployments)
 We added few Crontab configurations that could be installed in the host machine at system level to solve some possible edge-case issues:
-* Memory leaks: Once a week it is suggested to do a full restart of the application to clean-up the memory used by the application. Practical experience suggest us to do that to solve some recurrent memory issues in Celery. This cron (`application_restart`) assumes that you have executed IntelOwl with the parameters `--all_analyzers`. If you didn't, feel free to change the cron as you wish.
+* Memory leaks: Once a week it is suggested to do a full restart of the application to clean-up the memory used by the application. Practical experience suggest us to do that to solve some recurrent memory issues in Celery. A cron called `application_restart` has been added for this purpose (it uses the absolute path of `start` script in the container). This cron assumes that you have executed IntelOwl with the parameters `--all_analyzers`. If you didn't, feel free to change the cron as you wish.
 
 This configuration is optional but strongly recommended for people who want to have a production grade deployment. To install it you need to run the following script in each deployed server:
 ```bash

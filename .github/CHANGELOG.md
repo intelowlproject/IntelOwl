@@ -2,6 +2,18 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v5.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.3)
+
+This release mainly contains bug fixing, dependencies upgrades and adjustments.
+
+The support for Docker Compose v1 has been dropped. Please upgrade to Docker Compose v2.
+
+**IMPORTANT DEPRECATION NOTICE**:
+The python `start.py` script is being replaced with a more light Bash script called `script` at the next Major version.
+Thanks to this change the installation requirements are a lot less than before and it should be easier to install and execute IntelOwl.
+Please start to use the new `start` script from now to avoid future issues.
+For more information: [Installation docs](https://intelowl.readthedocs.io/en/develop/Installation.html) 
+
 ## [v5.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.2)
 
 This release has been done mainly to adjusts a broken database migration introduced in the previous release.

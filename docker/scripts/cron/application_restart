@@ -1,1 +1,1 @@
-0 2 * * 0  root ./start test down --all_analyzers && ./start test up --all_analyzers -- -d
+0 2 * * 0  root /opt/deploy/intel_owl/start test down --all_analyzers && /opt/deploy/intel_owl/start test up --all_analyzers -- -d

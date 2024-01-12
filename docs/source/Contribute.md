@@ -68,7 +68,7 @@ sed -i "s/STAGE:\"prod\"/STAGE:\"local\"/g" frontend/public/env.js
 Now, you can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
 
 ```bash
-python3 start.py test up
+./start test up
 ```
 
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
@@ -76,13 +76,13 @@ Every time you perform a change, you should perform an operation to reflect the 
 - if you changed the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
 
 ```bash
-python3 start.py test down && python3 start.py test up --build
+./start test down && ./start test up -- --build
 ```
 
 - if you changed either analyzers, connectors, playbooks or anything that is executed asynchronously by the "celery" containers, you just need to restart the application because we leverage Docker bind volumes that will reflect the changes to the containers. This saves the time of the build
 
 ```bash
-python3 start.py test down && python3 start.py test up
+./start test down && ./start test up
 ```
 
 - if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
@@ -110,8 +110,8 @@ DANGEROUSLY_DISABLE_HOST_CHECK=true npm start
 
 Most of the time you would need to test the changes you made together with the backend. In that case, you would need to run the backend locally too:
 
-```commandline
-python3 start.py prod up
+```bash
+./start prod up
 ```
 
 <div class="admonition note">
@@ -458,13 +458,13 @@ IntelOwl makes use of the django testing framework and the `unittest` library fo
 ### Setup containers
 
 The point here is to launch the code in your environment and not the last official image in Docker Hub.
-For this, use the `test` or the `ci` option when launching the containers with the `start.py` script.
+For this, use the `test` or the `ci` option when launching the containers with the `./start` script.
 
 - Use the `test` option to _actually_ execute tests that simulate a real world environment without mocking connections.
 - Use the `ci` option to execute tests in a CI environment where connections are mocked.
 
 ```bash
-$ python3 start.py test up
+$ ./start test up
 $ # which corresponds to the command: docker-compose -f docker/default.yml -f docker/test.override.yml up
 ```
 
@@ -556,8 +556,8 @@ if flake8 shows any errors, fix them.
 2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
 
 ```bash
-$ python3 start.py ci build
-$ python3 start.py ci up
+$ ./start ci build
+$ ./start ci up
 ```
 
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:

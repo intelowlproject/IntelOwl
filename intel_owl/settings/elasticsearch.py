@@ -24,6 +24,11 @@ if ELASTICSEARCH_BI_ENABLED:
         or not ELASTICSEARCH_BI_INDEX
     ):
         print("Elasticsearch not correctly configured")
+    elif not ELASTICSEARCH_SSL_CERTIFICATE_PATH.exists():
+        print(
+            f"Elasticsearch certificate {ELASTICSEARCH_SSL_CERTIFICATE_PATH}"
+            " not found"
+        )
     else:
         elastic_ssl_context = create_default_context(
             cafile=str(ELASTICSEARCH_SSL_CERTIFICATE_PATH)

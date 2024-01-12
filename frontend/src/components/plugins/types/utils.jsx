@@ -47,7 +47,7 @@ export function PluginInfoCard({ pluginInfo }) {
               <h6 className="text-secondary">Supported types</h6>
             )}
             <ul>
-              {pluginInfo.observable_supported.sort().map((value) => (
+              {pluginInfo?.observable_supported?.sort().map((value) => (
                 <li
                   key={`plugininfocard-supported_types__${pluginInfo?.name}-${value}`}
                 >
@@ -61,7 +61,7 @@ export function PluginInfoCard({ pluginInfo }) {
               <h6 className="text-secondary">Supported types</h6>
             )}
             <ul>
-              {pluginInfo.supported_filetypes.sort().map((value) => (
+              {pluginInfo?.supported_filetypes?.sort().map((value) => (
                 <li
                   key={`plugininfocard-supported_types__${pluginInfo?.name}-${value}`}
                 >
@@ -69,13 +69,13 @@ export function PluginInfoCard({ pluginInfo }) {
                 </li>
               ))}
             </ul>
-            {pluginInfo.supported_filetypes[0] === "everything" &&
+            {pluginInfo.supported_filetypes?.[0] === "everything" &&
               pluginInfo.not_supported_filetypes.length !== 0 && (
                 <div className="d-flex flex-column align-items-start">
                   <strong>Except:</strong>
                   <ul className="d-flex flex-column align-items-start">
                     {pluginInfo.not_supported_filetypes
-                      .sort()
+                      ?.sort()
                       .map((unsupportFiletype) => (
                         <li key={unsupportFiletype}>{unsupportFiletype}</li>
                       ))}

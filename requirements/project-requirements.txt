@@ -35,7 +35,7 @@ flower==2.0.0
 
 # plugins
 GitPython==3.1.41
-checkdmarc==4.8.4
+checkdmarc==5.2.7
 dnspython==2.4.2
 dnstwist[full]==20230918
 google>=3.0.0
@@ -49,7 +49,7 @@ OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2023.2.7
-Pillow==10.0.1
+Pillow==10.2.0
 pydeep==0.4
 pyelftools==0.30
 PyExifTool==0.5.0
@@ -62,7 +62,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==23.9.1
+quark-engine==23.12.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.3.0

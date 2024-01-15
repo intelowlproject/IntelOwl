@@ -27,28 +27,6 @@ def migrate(apps, schema_editor):
         analyzer_config=models.Subquery(name_analyzer),
         ingestor_config=models.Subquery(name_ingestor),
     )
-    Job = apps.get_model("api_app", "Job")
-    for job in Job.objects.all():
-        vcs = VisualizerConfig.objects.filter(
-            name__in=job.visualizers_to_execute2
-        ).values_list("pk", flat=True)
-        acs = AnalyzerConfig.objects.filter(
-            name__in=job.analyzers_to_execute2
-        ).values_list("pk", flat=True)
-        acs_requested = AnalyzerConfig.objects.filter(
-            name__in=job.analyzers_requested2
-        ).values_list("pk", flat=True)
-        ccs = ConnectorConfig.objects.filter(
-            name__in=job.connectors_to_execute2
-        ).values_list("pk", flat=True)
-        ccs_requested = ConnectorConfig.objects.filter(
-            name__in=job.connectors_requested2
-        ).values_list("pk", flat=True)
-        job.visualizers_to_execute.set(vcs)
-        job.analyzers_to_execute.set(acs)
-        job.analyzers_requested.set(acs_requested)
-        job.connectors_to_execute.set(ccs)
-        job.connectors_requested.set(ccs_requested)
 
 
 class Migration(migrations.Migration):
@@ -133,51 +111,6 @@ class Migration(migrations.Migration):
             ),
             preserve_default=False,
         ),
-        migrations.AddField(
-            model_name="job",
-            name="visualizers_to_execute",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="executed_in_jobs",
-                to="visualizers_manager.VisualizerConfig",
-            ),
-        ),
-        migrations.AddField(
-            model_name="job",
-            name="analyzers_to_execute",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="executed_in_jobs",
-                to="analyzers_manager.AnalyzerConfig",
-            ),
-        ),
-        migrations.AddField(
-            model_name="job",
-            name="analyzers_requested",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="requested_in_jobs",
-                to="analyzers_manager.AnalyzerConfig",
-            ),
-        ),
-        migrations.AddField(
-            model_name="job",
-            name="connectors_to_execute",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="executed_in_jobs",
-                to="connectors_manager.ConnectorConfig",
-            ),
-        ),
-        migrations.AddField(
-            model_name="job",
-            name="connectors_requested",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="requested_in_jobs",
-                to="connectors_manager.ConnectorConfig",
-            ),
-        ),
         migrations.RunPython(
             migrate,
         ),
@@ -194,9 +127,31 @@ class Migration(migrations.Migration):
             model_name="pluginconfig",
             name="old_ingestor_config",
         ),
-        migrations.RemoveField(model_name="job", name="visualizers_to_execute2"),
-        migrations.RemoveField(model_name="job", name="analyzers_to_execute2"),
-        migrations.RemoveField(model_name="job", name="analyzers_requested2"),
-        migrations.RemoveField(model_name="job", name="connectors_to_execute2"),
-        migrations.RemoveField(model_name="job", name="connectors_requested2"),
+    ] + [
+        migrations.RunSQL(
+            # contraints + column
+            f'ALTER TABLE "api_app_job_{field}" ADD COLUMN "{model}_id2" BIGINT '
+            f'CONSTRAINT "job_{field}_constraint_pk" REFERENCES "{table}_{model}"("id") '
+            "DEFERRABLE INITIALLY DEFERRED;"
+            f'SET CONSTRAINTS "job_{field}_constraint_pk" IMMEDIATE;'
+            # populate
+            f'UPDATE "api_app_job_{field}" as "SURROGATA" SET {model}_id2 = ('
+            f'SELECT "CONFIG"."id" FROM "{table}_{model}" AS "CONFIG" WHERE "CONFIG"."name" = '
+            f'"SURROGATA"."{model}_id"'
+            ') WHERE "SURROGATA"."job_id" IS NOT NULL; '
+            # unique
+            f'ALTER TABLE "api_app_job_{field}" ADD CONSTRAINT '
+            f'"job_{field}_constraint_pk_unique" UNIQUE("job_id", "{model}_id2");'
+            # delete old field
+            f'ALTER TABLE "api_app_job_{field}" DROP COLUMN "{model}_id";'
+            # rename
+            f'ALTER TABLE "api_app_job_{field}" RENAME COLUMN "{model}_id2" TO "{model}_id";'
+        )
+        for field, table, model in [
+            ("analyzers_to_execute", "analyzers_manager", "analyzerconfig"),
+            ("analyzers_requested", "analyzers_manager", "analyzerconfig"),
+            ("connectors_to_execute", "connectors_manager", "connectorconfig"),
+            ("connectors_requested", "connectors_manager", "connectorconfig"),
+            ("visualizers_to_execute", "visualizers_manager", "visualizerconfig"),
+        ]
     ]

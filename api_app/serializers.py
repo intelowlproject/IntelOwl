@@ -1295,7 +1295,11 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
 
     class Meta:
         model = Job
-        fields = AbstractBIInterface.Meta.fields + ["playbook", "runtime_configuration"]
+        fields = AbstractBIInterface.Meta.fields + [
+            "playbook",
+            "runtime_configuration",
+            "is_sample",
+        ]
         list_serializer_class = (
             AbstractReportSerializerInterface.Meta.list_serializer_class
         )

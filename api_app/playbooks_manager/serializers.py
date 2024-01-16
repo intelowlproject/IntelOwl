@@ -6,6 +6,8 @@ from api_app.analyzers_manager.constants import TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import ScanMode
 from api_app.connectors_manager.models import ConnectorConfig
+from api_app.helpers import gen_random_colorhex
+from api_app.models import Tag
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.fields import DayDurationField
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -36,10 +38,16 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
 
     scan_mode = rfs.ChoiceField(choices=ScanMode.choices, required=True)
     scan_check_time = DayDurationField(required=True, allow_null=True)
-    tags = TagSerializer(required=False, allow_empty=True, many=True)
+    tags = TagSerializer(required=False, allow_empty=True, many=True, read_only=True)
     tlp = rfs.CharField(read_only=True)
     weight = rfs.IntegerField(read_only=True, required=False, allow_null=True)
     is_deletable = rfs.SerializerMethodField()
+    tags_labels = rfs.ListField(
+        child=rfs.CharField(required=True),
+        default=list,
+        required=False,
+        write_only=True,
+    )
 
     def get_is_deletable(self, instance: PlaybookConfig):
         # if the playbook is not a default one
@@ -53,6 +61,19 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
             ):
                 return True
         return False
+
+    @staticmethod
+    def validate_tags_labels(tags_labels):
+        for label in tags_labels:
+            yield Tag.objects.get_or_create(
+                label=label, defaults={"color": gen_random_colorhex()}
+            )[0]
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if attrs.get("tags_labels"):
+            attrs["tags"] = attrs.pop("tags_labels", [])
+        return attrs
 
     def create(self, validated_data):
         types_supported = list(

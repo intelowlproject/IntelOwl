@@ -66,6 +66,7 @@ import {
   sanitizeObservable,
   getObservableClassification,
 } from "../../utils/observables";
+import { SpinnerIcon } from "../common/SpinnerIcon";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -231,6 +232,8 @@ export default function ScanForm() {
   const [
     analyzersLoading,
     connectorsLoading,
+    visualizersLoading,
+    pivotsLoading,
     playbooksLoading,
     analyzersError,
     connectorsError,
@@ -241,6 +244,8 @@ export default function ScanForm() {
   ] = usePluginConfigurationStore((state) => [
     state.analyzersLoading,
     state.connectorsLoading,
+    state.visualizersLoading,
+    state.pivotsLoading,
     state.playbooksLoading,
     state.analyzersError,
     state.connectorsError,
@@ -249,6 +254,12 @@ export default function ScanForm() {
     state.connectors,
     state.playbooks,
   ]);
+
+  const pluginsLoading =
+    analyzersLoading ||
+    connectorsLoading ||
+    visualizersLoading ||
+    pivotsLoading;
 
   const analyzersGrouped = React.useMemo(() => {
     const grouped = {
@@ -525,10 +536,9 @@ export default function ScanForm() {
 
   const [isRuntimeConfigModalOpen, setRuntimeConfigModalOpen] =
     React.useState(false);
-  const toggleRuntimeConfigModal = React.useCallback(
-    () => setRuntimeConfigModalOpen((open) => !open),
-    [setRuntimeConfigModalOpen],
-  );
+  const toggleRuntimeConfigModal = () => {
+    if (!pluginsLoading) setRuntimeConfigModalOpen((open) => !open);
+  };
   const [isMultipleObservablesModalOpen, setMultipleObservablesModalOpen] =
     React.useState(false);
   const toggleMultipleObservablesModal = React.useCallback(
@@ -778,8 +788,19 @@ export default function ScanForm() {
               <Col sm={1} className="d-flex-center justify-content-end mb-3">
                 <IconButton
                   id="scanform-runtimeconf-editbtn"
-                  Icon={MdEdit}
-                  title="Edit runtime configuration"
+                  Icon={
+                    pluginsLoading &&
+                    (formik.values.analyzers.length > 0 ||
+                      formik.values.connectors.length > 0 ||
+                      Object.keys(formik.values.playbook).length > 0)
+                      ? SpinnerIcon
+                      : MdEdit
+                  }
+                  title={
+                    pluginsLoading
+                      ? "Runtime configuration is loading"
+                      : "Edit runtime configuration"
+                  }
                   titlePlacement="top"
                   size="sm"
                   color="tertiary"

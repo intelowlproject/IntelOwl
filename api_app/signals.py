@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 
+from api_app.decorators import prevent_signal_recursion
 from api_app.helpers import calculate_md5
 from api_app.models import Job, Parameter, PluginConfig, PythonConfig, PythonModule
 
@@ -25,6 +26,11 @@ def pre_save_job(sender, instance: Job, **kwargs):
             if instance.is_sample
             else instance.observable_name.encode("utf-8")
         )
+
+
+@receiver(models.signals.post_save, sender=Job)
+@prevent_signal_recursion
+def post_save_job(sender, instance: Job, *args, **kwargs):
     if instance.finished_analysis_time and instance.received_request_time:
         td = instance.finished_analysis_time - instance.received_request_time
         instance.process_time = round(td.total_seconds(), 2)

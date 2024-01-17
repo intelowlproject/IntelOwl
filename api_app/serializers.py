@@ -1287,7 +1287,7 @@ class AbstractReportBISerializer(AbstractBIInterface):
         return self.to_elastic_dict(data)
 
     def get_class_instance(self, instance: AbstractReport):
-        return super().get_class_instance(instance).split("Report")[0]
+        return super().get_class_instance(instance).split("report")[0]
 
 
 class JobBISerializer(AbstractBIInterface, ModelSerializer):

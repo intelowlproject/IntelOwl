@@ -1280,6 +1280,7 @@ class AbstractReportBISerializer(AbstractBIInterface):
         fields = AbstractBIInterface.Meta.fields + [
             "parameters",
         ]
+        list_serializer_class = rfs.ListSerializer
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)

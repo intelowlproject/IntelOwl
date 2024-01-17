@@ -36,7 +36,11 @@
           },
           "playbook": {
             "type": "keyword"
+          },
+          "class_instance": {
+            "type": "keyword"
           }
+
         }
       }
   }

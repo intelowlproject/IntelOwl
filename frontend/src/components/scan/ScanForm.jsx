@@ -328,8 +328,8 @@ export default function ScanForm() {
           currentAnalyzer.isDisabled === nextAnalyzer.isDisabled
             ? 0
             : currentAnalyzer.isDisabled
-              ? 1
-              : -1,
+            ? 1
+            : -1,
         ),
     [analyzersGrouped, formik.values.classification],
   );
@@ -361,8 +361,8 @@ export default function ScanForm() {
           currentConnector.isDisabled === nextConnector.isDisabled
             ? 0
             : currentConnector.isDisabled
-              ? 1
-              : -1,
+            ? 1
+            : -1,
         ),
     [connectors],
   );

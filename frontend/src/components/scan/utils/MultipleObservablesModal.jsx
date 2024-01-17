@@ -13,6 +13,7 @@ export function MultipleObservablesModal(props) {
   const { isOpen, toggle, formik, ...rest } = props;
   const [extractedObservables, setExtractedObservables] = React.useState({});
   const [textAreaInput, setTextAreaInput] = React.useState("");
+  console.debug(textAreaInput);
 
   const extractObservables = (inputText) => {
     // split text where there are spaces, breakline or , and ;
@@ -90,7 +91,7 @@ export function MultipleObservablesModal(props) {
       scrollable
       backdrop="static"
       labelledBy="Load Multiple Observables"
-      style={{ minWidth: "95%" }}
+      style={{ minWidth: "70%" }}
       {...rest}
     >
       <ModalHeader className="bg-tertiary" toggle={toggle}>
@@ -104,7 +105,7 @@ export function MultipleObservablesModal(props) {
           <ContentSection
             className="bg-darker"
             id="load_multiple_observables-section"
-            style={{ width: "40%" }}
+            style={{ width: "60%" }}
           >
             <small className="text-muted mb-2">
               Enter any text to extract observables for further lookup.
@@ -115,46 +116,34 @@ export function MultipleObservablesModal(props) {
               type="textarea"
               onChange={(event) => extractObservables(event.target.value)}
               style={{ minHeight: "600px", overflowY: "auto" }}
-              className="my-2 mt-3"
+              className="my-2"
             />
           </ContentSection>
           {/* lateral menu with the extracted observables */}
-          <ContentSection className="ms-2 bg-darker" style={{ width: "60%" }}>
+          <ContentSection className="ms-2 bg-darker" style={{ width: "40%" }}>
             <h5 className="text-accent">Extracted observables</h5>
             <div
-              className="d-flex-start-start"
-              style={{ maxHeight: "660px", overflowY: "auto" }}
+              className="ps-4 pt-1 my-2"
+              style={{ height: "600px", overflowY: "auto" }}
             >
-              <div
-                id="load_multiple_observables-highlightArea"
-                style={{ width: "65%", height: "600px", overflowY: "auto" }}
-                className="form-control my-2"
-              >
-                {textAreaInput}
-              </div>
-              <div
-                className="ps-4"
-                style={{ width: "35%", height: "600px", overflowY: "auto" }}
-              >
-                {Object.values(extractedObservables).flat().length === 0 ? (
-                  <small className="text-muted">No observable found.</small>
-                ) : (
-                  Object.entries(extractedObservables).map(([key, iocs]) => (
-                    <div>
-                      <h6 key={key} className="text-secondary px-3">
-                        {key}:
-                      </h6>
-                      <ul>
-                        {iocs?.map((ioc) => (
-                          <li key={`extractedObservables__${key}__${ioc}`}>
-                            {ioc}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))
-                )}
-              </div>
+              {Object.values(extractedObservables).flat().length === 0 ? (
+                <small className="text-muted">No observable found.</small>
+              ) : (
+                Object.entries(extractedObservables).map(([key, iocs]) => (
+                  <div>
+                    <h6 key={key} className="text-secondary px-3">
+                      {key}:
+                    </h6>
+                    <ul>
+                      {iocs?.map((ioc) => (
+                        <li key={`extractedObservables__${key}__${ioc}`}>
+                          {ioc}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              )}
             </div>
           </ContentSection>
         </div>

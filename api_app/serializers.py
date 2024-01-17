@@ -1229,7 +1229,9 @@ class AbstractBIInterface(ModelSerializer):
     timestamp: Field
     username: Field
     name: Field
-    type: Field
+    class_instance = rfs.SerializerMethodField(
+        read_only=True, method_name="get_class_instance"
+    )
     process_time: Field
     status: Field
     end_time: Field
@@ -1241,11 +1243,14 @@ class AbstractBIInterface(ModelSerializer):
             "timestamp",
             "username",
             "name",
-            "type",
+            "class_instance",
             "process_time",
             "status",
             "end_time",
         ]
+
+    def get_class_instance(self, instance):
+        return instance.__class__.__name__.lower()
 
     @staticmethod
     def get_environment(instance):
@@ -1266,30 +1271,29 @@ class AbstractBIInterface(ModelSerializer):
         }
 
 
-class AbstractReportBISerializer(
-    AbstractBIInterface, AbstractReportSerializerInterface
-):
+class AbstractReportBISerializer(AbstractBIInterface):
     timestamp = rfs.DateTimeField(source="start_time")
     username = rfs.CharField(source="job.user.username")
+    name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
     class Meta:
         fields = AbstractBIInterface.Meta.fields + [
             "parameters",
         ]
-        list_serializer_class = (
-            AbstractReportSerializerInterface.Meta.list_serializer_class
-        )
+        list_serializer_class = rfs.ListSerializer
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
         return self.to_elastic_dict(data)
+
+    def get_class_instance(self, instance: AbstractReport):
+        return super().get_class_instance(instance).split("report")[0]
 
 
 class JobBISerializer(AbstractBIInterface, ModelSerializer):
     timestamp = rfs.DateTimeField(source="received_request_time")
     username = rfs.CharField(source="user.username")
     name = rfs.CharField(source="pk")
-    type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
     end_time = rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
 
@@ -1307,9 +1311,6 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
     def to_representation(self, instance: Job):
         data = super().to_representation(instance)
         return self.to_elastic_dict(data)
-
-    def get_type(self, instance: Job):
-        return instance.__class__.__name__.lower()
 
     def get_playbook(self, instance: Job):
         return instance.playbook_to_execute.name if instance.playbook_to_execute else ""

@@ -136,6 +136,9 @@ class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
 
         return JobBISerializer
 
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
+
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
         User has access to:
@@ -288,7 +291,8 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
 
 
 class AbstractReportQuerySet(SendToBiQuerySet):
-    ...
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
 
 
 class ModelWithOwnershipQuerySet:

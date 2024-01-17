@@ -44,21 +44,19 @@ class SendToBiQuerySet(models.QuerySet):
 
     @staticmethod
     def _create_index_template():
-        if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
-            name=settings.ELASTICSEARCH_BI_INDEX
-        ):
-            with open(
-                settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
-            ) as f:
-                body = json.load(f)
-                body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
-                settings.ELASTICSEARCH_CLIENT.indices.put_template(
-                    name=settings.ELASTICSEARCH_BI_INDEX, body=body
-                )
+        with open(
+            settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
+        ) as f:
+            body = json.load(f)
+            body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
+            settings.ELASTICSEARCH_CLIENT.indices.put_template(
+                name=settings.ELASTICSEARCH_BI_INDEX, body=body
+            )
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
         from elasticsearch.helpers import bulk
 
+        self._create_index_template()
         BULK_MAX_SIZE = 1000
         found_errors = False
 
@@ -84,7 +82,6 @@ class SendToBiQuerySet(models.QuerySet):
                 self.model.objects.filter(
                     pk__in=objects.values_list("pk", flat=True)
                 ).update(sent_to_bi=True)
-        self._create_index_template()
         return found_errors
 
 

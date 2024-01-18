@@ -6,10 +6,6 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     PivotConfig = apps.get_model("pivots_manager", "PivotConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
-    print("DIOCANEEEEEEEEEEEEEEEEE")
-    for pc in PivotConfig.objects.all():
-        print(pc.name)
-        print(pc.old_playbook_to_execute)
     PivotConfig.objects.update(
         playbook_to_execute2=models.Subquery(
             PlaybookConfig.objects.filter(

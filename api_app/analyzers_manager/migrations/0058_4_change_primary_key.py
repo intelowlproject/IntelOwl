@@ -44,11 +44,22 @@ class Migration(migrations.Migration):
                 default=None,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="reports",
+                null=True,
                 to="analyzers_manager.analyzerconfig",
             ),
             preserve_default=False,
         ),
         migrations.RunPython(migrate),
+        migrations.AlterField(
+            model_name="analyzerreport",
+            name="config",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reports",
+                to="analyzers_manager.analyzerconfig",
+            ),
+        ),
         migrations.AlterUniqueTogether(
             name="analyzerreport",
             unique_together={("config", "job")},

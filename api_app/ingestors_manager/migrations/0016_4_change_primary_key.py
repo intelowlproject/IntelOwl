@@ -29,9 +29,20 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="reports",
                 to="ingestors_manager.ingestorconfig",
+                null=True,
             ),
             preserve_default=False,
         ),
         migrations.RunPython(migrate),
+        migrations.AlterField(
+            model_name="ingestorreport",
+            name="config",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reports",
+                to="ingestors_manager.ingestorconfig",
+            ),
+        ),
         migrations.RemoveField(model_name="ingestorreport", name="old_config"),
     ]

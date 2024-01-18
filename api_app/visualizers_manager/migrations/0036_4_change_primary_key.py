@@ -45,6 +45,7 @@ class Migration(migrations.Migration):
             name="config",
             field=models.ForeignKey(
                 default=None,
+                null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="reports",
                 to="visualizers_manager.visualizerconfig",
@@ -60,6 +61,16 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(migrate),
+        migrations.AlterField(
+            model_name="visualizerreport",
+            name="config",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reports",
+                to="visualizers_manager.visualizerconfig",
+            ),
+        ),
         migrations.RemoveField(model_name="visualizerreport", name="old_config"),
         migrations.RemoveField(model_name="visualizerconfig", name="playbooks2"),
         migrations.RemoveField(model_name="visualizerconfig", name="disabled2"),

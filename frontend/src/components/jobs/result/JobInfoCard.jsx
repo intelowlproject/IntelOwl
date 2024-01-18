@@ -24,10 +24,15 @@ import { JobTag } from "../../common/JobTag";
 import { PlaybookTag } from "../../common/PlaybookTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
+import { extractCountry } from "./utils/extractCountry";
+import { getIcon } from "./visualizer/icons";
+import { ObservableClassifications } from "../../../constants/jobConst";
 
 export function JobInfoCard({ job }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
+  const country = extractCountry(job);
+  const countryIcon = getIcon(country.countryCode);
 
   return (
     <div id="JobInfoCardSection">
@@ -39,12 +44,26 @@ export function JobInfoCard({ job }) {
             md={10}
           >
             <h3>
-              {job.is_sample ? (
-                <VscFile className="me-1" />
-              ) : (
-                <VscGlobe className="me-1" />
-              )}
-
+              {job.is_sample && <VscFile className="me-1" />}
+              {job?.observable_classification ===
+                ObservableClassifications.IP &&
+                country.countryCode && (
+                  <span className="px-1">
+                    {countryIcon}
+                    <UncontrolledTooltip
+                      placement="right"
+                      target={`Icon-${country.countryCode.toLowerCase()}`}
+                    >
+                      {country.countryName}
+                    </UncontrolledTooltip>
+                  </span>
+                )}
+              {!job.is_sample &&
+                (job?.observable_classification !==
+                  ObservableClassifications.IP ||
+                  (job?.observable_classification ===
+                    ObservableClassifications.IP &&
+                    !country.countryCode)) && <VscGlobe className="me-1" />}
               {job.is_sample ? (
                 <CopyToClipboardButton
                   showOnHover

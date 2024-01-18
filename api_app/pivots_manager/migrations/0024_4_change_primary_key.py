@@ -6,10 +6,14 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     PivotConfig = apps.get_model("pivots_manager", "PivotConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    print("DIOCANEEEEEEEEEEEEEEEEE")
+    for pc in PivotConfig.objects.all():
+        print(pc.name)
+        print(pc.old_playbook_to_execute)
     PivotConfig.objects.update(
-        playbook_to_execute=models.Subquery(
+        playbook_to_execute2=models.Subquery(
             PlaybookConfig.objects.filter(
-                name=models.OuterRef("old_playbook_to_execute")
+                name=models.OuterRef("playbook_to_execute")
             ).values_list("pk")[:1]
         ),
     )
@@ -38,14 +42,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
+        migrations.AlterField(
             model_name="pivotconfig",
-            old_name="playbook_to_execute",
-            new_name="old_playbook_to_execute",
+            name="playbook_to_execute",
+            field=models.CharField(max_length=100, null=True, blank=True),
         ),
         migrations.AddField(
             model_name="pivotconfig",
-            name="playbook_to_execute",
+            name="playbook_to_execute2",
             field=models.ForeignKey(
                 default=None,
                 on_delete=django.db.models.deletion.PROTECT,
@@ -57,17 +61,11 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             migrate,
         ),
-        migrations.AlterField(
+        migrations.RemoveField(model_name="pivotconfig", name="playbook_to_execute"),
+        migrations.RenameField(
             model_name="pivotconfig",
-            name="playbook_to_execute",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT,
-                related_name="executed_by_pivot",
-                to="playbooks_manager.playbookconfig",
-            ),
-        ),
-        migrations.RemoveField(
-            model_name="pivotconfig", name="old_playbook_to_execute"
+            old_name="playbook_to_execute2",
+            new_name="playbook_to_execute",
         ),
         migrations.RemoveField(model_name="pivotconfig", name="disabled2"),
     ]

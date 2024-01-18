@@ -292,4 +292,56 @@ describe("extractCountry test", () => {
     expect(country.countryCode).toBe("IT");
     expect(country.countryName).toBe("Italy");
   });
+
+  test("AbuseIPBD with no data and Maxmind with no data", () => {
+    const job = {
+      id: 2,
+      analyzer_reports: [
+        {
+          name: "AbuseIPDB",
+          process_time: 0.07,
+          status: "SUCCESS",
+          report: {},
+        },
+        {
+          name: "Maxmind",
+          process_time: 0.07,
+          status: "SUCCESS",
+          end_time: "2024-01-15T14:56:32.328332Z",
+          report: {},
+        },
+      ],
+      connector_reports: [],
+      pivot_reports: [],
+      visualizer_reports: [],
+      is_sample: false,
+      md5: "",
+      observable_name: "1.1.1.1",
+      observable_classification: "ip",
+      file_name: "",
+      file_mimetype: "",
+      status: "reported_without_fails",
+      runtime_configuration: {},
+      received_request_time: "2024-01-15T14:56:32.019310Z",
+      finished_analysis_time: "2024-01-15T14:56:32.353326Z",
+      process_time: null,
+      tlp: "CLEAR",
+      errors: [],
+      warnings: [],
+      scan_mode: 2,
+      scan_check_time: "1 00:00:00",
+      sent_to_bi: false,
+      playbook_requested: "",
+      playbook_to_execute: "",
+      analyzers_requested: ["AbuseIPDB", "Maxmind"],
+      connectors_requested: [],
+      analyzers_to_execute: ["AbuseIPDB", "Maxmind"],
+      connectors_to_execute: [],
+      visualizers_to_execute: [],
+    };
+
+    const country = extractCountry(job);
+    expect(country.countryCode).toBe("");
+    expect(country.countryName).toBe("");
+  });
 });

@@ -7,10 +7,10 @@ def migrate(apps, schema_editor):
     VisualizerReport = apps.get_model("visualizers_manager", "VisualizerReport")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
-    name = VisualizerConfig.objects.filter(
-        name=models.OuterRef("old_config")
-    ).values_list("pk")[:1]
-    VisualizerReport.objects.update(config=models.Subquery(name))
+    name = VisualizerConfig.objects.filter(name=models.OuterRef("config")).values_list(
+        "pk"
+    )[:1]
+    VisualizerReport.objects.update(config2=models.Subquery(name))
     for config in VisualizerConfig.objects.all():
         config.playbooks.set(PlaybookConfig.objects.filter(name__in=config.playbooks2))
         if config.disabled2:
@@ -37,30 +37,41 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name="visualizerreport", old_name="config", new_name="old_config"
+        migrations.AlterField(
+            model_name="visualizerreport",
+            name="config",
+            field=models.CharField(max_length=100, null=True, blank=True),
         ),
         migrations.AddField(
             model_name="visualizerreport",
-            name="config",
+            name="config2",
             field=models.ForeignKey(
                 default=None,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="reports",
                 to="visualizers_manager.visualizerconfig",
+                null=True,
             ),
             preserve_default=False,
         ),
-        migrations.AddField(
-            model_name="visualizerconfig",
-            name="playbooks",
-            field=models.ManyToManyField(
-                related_name="visualizers",
-                to="playbooks_manager.PlaybookConfig",
+        migrations.RunPython(migrate),
+        migrations.RemoveField(model_name="visualizerreport", name="config"),
+        migrations.AlterField(
+            model_name="visualizerreport",
+            name="config2",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reports",
+                to="visualizers_manager.visualizerconfig",
             ),
         ),
-        migrations.RunPython(migrate),
-        migrations.RemoveField(model_name="visualizerreport", name="old_config"),
-        migrations.RemoveField(model_name="visualizerconfig", name="playbooks2"),
+        migrations.RenameField(
+            model_name="visualizerreport", old_name="config2", new_name="config"
+        ),
+        migrations.AlterUniqueTogether(
+            name="visualizerreport",
+            unique_together={("config", "job")},
+        ),
         migrations.RemoveField(model_name="visualizerconfig", name="disabled2"),
+        migrations.RemoveField(model_name="visualizerconfig", name="playbook2"),
     ]

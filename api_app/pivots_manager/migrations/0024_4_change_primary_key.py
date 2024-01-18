@@ -55,6 +55,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="executed_by_pivot",
                 to="playbooks_manager.playbookconfig",
+                null=True,
             ),
             preserve_default=False,
         ),
@@ -66,6 +67,15 @@ class Migration(migrations.Migration):
             model_name="pivotconfig",
             old_name="playbook_to_execute2",
             new_name="playbook_to_execute",
+        ),
+        migrations.AlterField(
+            model_name="pivotconfig",
+            name="playbook_to_execute",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="executed_by_pivot",
+                to="playbooks_manager.playbookconfig",
+            ),
         ),
         migrations.RemoveField(model_name="pivotconfig", name="disabled2"),
     ]

@@ -14,23 +14,6 @@ def migrate(apps, schema_editor):
     config.full_clean()
     config.save()
 
-    PythonModule = apps.get_model("api_app", "PythonModule")
-    Parameter = apps.get_model("api_app", "Parameter")
-    pm = PythonModule.objects.get(
-        module="dns0.dns0_rrsets.DNS0Rrsets",
-        base_path="api_app.analyzers_manager.observable_analyzers",
-    )
-    p = Parameter(
-        name="include_subdomain",
-        type="bool",
-        description="Search for subdomains.",
-        is_secret=False,
-        required=False,
-        python_module=pm,
-    )
-    p.full_clean()
-    p.save()
-
 
 def reverse_migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
@@ -43,14 +26,6 @@ def reverse_migrate(apps, schema_editor):
     ]
     config.full_clean()
     config.save()
-
-    PythonModule = apps.get_model("api_app", "PythonModule")
-    Parameter = apps.get_model("api_app", "Parameter")
-    pm = PythonModule.objects.get(
-        module="dns0.dns0_rrsets.DNS0Rrsets",
-        base_path="api_app.analyzers_manager.observable_analyzers",
-    )
-    Parameter(name="include_subdomain", python_module=pm).delete()
 
 
 class Migration(migrations.Migration):

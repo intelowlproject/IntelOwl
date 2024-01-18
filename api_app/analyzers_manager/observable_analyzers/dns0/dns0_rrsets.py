@@ -34,6 +34,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
     name: str
     data: str
     type: list[str]
+    include_subdomain: bool
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -75,7 +76,11 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
                 query_type = "name"
             elif self.direction == "right":
                 query_type = "data"
-        params[query_type] = self.observable_name
+
+        query = self.observable_name
+        if hasattr(self, "include_subdomain") and self.include_subdomain:
+            query = "." + query
+        params[query_type] = query
 
         # pass list of dns types parameter
         if hasattr(self, "type") and self.type:
@@ -160,6 +165,15 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
                 for_organization=False,
                 owner=None,
                 value=[],
+            )
+            PluginConfig.objects.get_or_create(
+                analyzer_config=ac,
+                parameter=Parameter.objects.get(
+                    name="include_subdomain", python_module__pk=ac.python_module_id
+                ),
+                for_organization=False,
+                owner=None,
+                value=False,
             )
 
         ac = AnalyzerConfig.objects.get(name="DNS0_rrsets_name")

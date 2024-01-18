@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
         ("connectors_manager", "0029_2_change_primary_key"),
         ("api_app", "0057_2_change_primary_key"),
         ("playbooks_manager", "0023_2_change_primary_key"),
+        ("pivots_manager", "0023_2_change_primary_key"),
     ]
 
     operations = [

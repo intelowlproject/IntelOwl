@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from api_app.choices import TLP, PythonModuleBasePaths
@@ -30,6 +30,9 @@ class ConnectorConfig(PythonConfig):
         on_delete=models.PROTECT,
         related_name="%(class)ss",
         limit_choices_to={"base_path": PythonModuleBasePaths.Connector.value},
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     @classmethod

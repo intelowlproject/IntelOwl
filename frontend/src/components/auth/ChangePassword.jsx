@@ -43,7 +43,7 @@ export default function ChangePassword() {
 
   // auth store
   const changePassword = useAuthStore(
-    React.useCallback((s) => s.service.changePassword, []),
+    React.useCallback((state) => state.service.changePassword, []),
   );
 
   // callback

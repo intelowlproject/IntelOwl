@@ -1,0 +1,47 @@
+{
+  "settings" : {
+    "number_of_shards" : 3
+  },
+  "mappings": {
+      "_doc": {
+        "dynamic": false,
+        "properties": {
+          "timestamp": {
+            "type": "date"
+          },
+          "application": {
+            "type": "keyword"
+          },
+          "username": {
+            "type": "keyword"
+          },
+          "environment": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          },
+          "process_time": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "end_time": {
+            "type": "date"
+          },
+          "parameters": {
+            "type": "object",
+            "dynamic": true
+          },
+          "playbook": {
+            "type": "keyword"
+          },
+          "class_instance": {
+            "type": "keyword"
+          }
+
+        }
+      }
+  }
+}

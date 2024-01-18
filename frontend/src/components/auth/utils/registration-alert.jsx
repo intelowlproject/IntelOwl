@@ -38,7 +38,7 @@ export function AfterRegistrationModalAlert(props) {
   // callbacks
   const toggle = React.useCallback(() => {
     navigate("/");
-    setIsOpen((o) => !o);
+    setIsOpen((open) => !open);
   }, [navigate, setIsOpen]);
 
   return (
@@ -88,7 +88,7 @@ export function ConfigurationModalAlert(props) {
   // callbacks
   const toggle = React.useCallback(() => {
     navigate("/");
-    setIsOpen((o) => !o);
+    setIsOpen((open) => !open);
   }, [navigate, setIsOpen]);
 
   return (

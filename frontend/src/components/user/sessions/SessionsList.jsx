@@ -19,7 +19,11 @@ export default function SessionsList() {
       url: SESSIONS_BASE_URI,
     },
     (respData) =>
-      respData.sort((a, b) => !a.is_current || a.created - b.created),
+      respData.sort(
+        (currentSession, nextSession) =>
+          !currentSession.is_current ||
+          currentSession.created - nextSession.created,
+      ),
   );
 
   // callbacks
@@ -29,7 +33,7 @@ export default function SessionsList() {
         await deleteTokenById(id, clientName);
         // reload after 500ms
         setTimeout(refetch, 500);
-      } catch (e) {
+      } catch (error) {
         // handled inside deleteTokenById
       }
     },

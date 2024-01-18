@@ -9,7 +9,10 @@ def migrate(apps, schema_editor):
     PythonModule = apps.get_model("api_app", "PythonModule")
     for task in PeriodicTask.objects.filter(name__endswith="Analyzer"):
         pm_pk = task.analyzer.python_module
-        pm = PythonModule.objects.get(module=pm_pk)
+        if isinstance(pm_pk, str):
+            pm = PythonModule.objects.get(module=pm_pk)
+        else:
+            pm = PythonModule.objects.get(pk=pm_pk.pk)
         task.name = pm.base_path + "." + pm.module + "Update"
         task.save()
         if pm.update_task:

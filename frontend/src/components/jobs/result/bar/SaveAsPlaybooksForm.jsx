@@ -42,8 +42,8 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
       try {
         await saveJobAsPlaybook(values);
         onFormSubmit();
-      } catch (e) {
-        addToast(<span>Error!</span>, e.parsedMsg, "warning");
+      } catch (error) {
+        addToast(<span>Error!</span>, error.parsedMsg, "warning");
       } finally {
         formik.setSubmitting(false);
       }
@@ -130,7 +130,10 @@ export function SaveAsPlaybookButton({ job }) {
   initialValues.connectors = job.connectors_to_execute;
   initialValues.pivots = job.pivots_to_execute;
   initialValues.runtimeConfiguration = job.runtime_configuration;
-  if (job.tags.length) initialValues.tags = job.tags;
+  if (job.tags.length) {
+    initialValues.tags_labels = [];
+    job.tags.forEach((tag) => initialValues.tags_labels.push(tag.label));
+  }
   initialValues.tlp = job.tlp;
   initialValues.scan_mode = job.scan_mode;
   initialValues.scan_check_time = job.scan_check_time;

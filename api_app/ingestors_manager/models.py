@@ -4,12 +4,20 @@ import logging
 
 from django.conf import settings
 from django.db import models
+from django.db.models import QuerySet
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.ingestors_manager.exceptions import IngestorConfigurationException
+from api_app.ingestors_manager.queryset import IngestorReportQuerySet
 from api_app.interfaces import CreateJobsFromPlaybookInterface
-from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
+from api_app.models import (
+    AbstractReport,
+    Job,
+    OrganizationPluginConfiguration,
+    PythonConfig,
+    PythonModule,
+)
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.queryset import IngestorQuerySet
 
@@ -17,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class IngestorReport(AbstractReport):
+    objects = IngestorReportQuerySet.as_manager()
     config = models.ForeignKey(
         "IngestorConfig", related_name="reports", on_delete=models.CASCADE
     )
@@ -34,6 +43,7 @@ class IngestorReport(AbstractReport):
 
     class Meta:
         ordering = ["pk"]
+        indexes = AbstractReport.Meta.indexes
 
     def clean_report(self):
         if isinstance(self.report, list) and self.max_size_report is not None:
@@ -74,8 +84,13 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     periodic_task = models.OneToOneField(
         PeriodicTask, related_name="ingestor", on_delete=models.PROTECT
     )
-    disabled_in_organizations = None
     maximum_jobs = models.IntegerField(default=10)
+
+    org_configuration = None
+
+    @property
+    def disabled_in_organizations(self) -> QuerySet:
+        return OrganizationPluginConfiguration.objects.none()
 
     @classmethod
     @property
@@ -106,3 +121,6 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
             max_size_report=self.maximum_jobs,
             parameters=self._get_params(self.user, {}),
         )
+
+    def get_or_create_org_configuration(self):
+        return None

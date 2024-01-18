@@ -4,7 +4,9 @@ from rest_framework import serializers as rfs
 
 from certego_saas.apps.user.serializers import UserSerializer
 
+from ..playbooks_manager.models import PlaybookConfig
 from ..serializers import (
+    AbstractReportBISerializer,
     AbstractReportSerializer,
     CrontabScheduleSerializer,
     PeriodicTaskSerializer,
@@ -16,6 +18,9 @@ from .models import IngestorConfig, IngestorReport
 
 class IngestorConfigSerializer(PythonConfigSerializer):
     schedule = CrontabScheduleSerializer(read_only=True)
+    playbook_to_execute = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), slug_field="name", many=False
+    )
 
     class Meta:
         model = IngestorConfig
@@ -53,3 +58,16 @@ class IngestorReportSerializer(AbstractReportSerializer):
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
+class IngestorReportBISerializer(AbstractReportBISerializer):
+    name = rfs.SerializerMethodField()
+
+    class Meta:
+        model = IngestorReport
+        fields = AbstractReportBISerializer.Meta.fields
+        list_serializer_class = AbstractReportBISerializer.Meta.list_serializer_class
+
+    @classmethod
+    def get_name(cls, instance: IngestorReport):
+        return instance.name or instance.config.pk

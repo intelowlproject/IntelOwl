@@ -61,11 +61,10 @@ import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../../utils/time";
 import { JobTypes, ObservableClassifications } from "../../constants/jobConst";
 import {
-  DOMAIN_REGEX,
-  IP_REGEX,
-  HASH_REGEX,
-  URL_REGEX,
-} from "../../constants/regexConst";
+  sanitizeObservable,
+  getObservableClassification,
+} from "../../utils/observables";
+import { SpinnerIcon } from "../common/SpinnerIcon";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -75,17 +74,6 @@ function DangerErrorMessage(fieldName) {
     />
   );
 }
-
-// constants
-const observableType2RegExMap = {
-  domain: DOMAIN_REGEX,
-  ip: IP_REGEX,
-  url: URL_REGEX,
-  hash: HASH_REGEX,
-};
-
-export const sanitizeObservable = (observable) =>
-  observable.replaceAll("[", "").replaceAll("]", "").trim();
 
 // Component
 export default function ScanForm() {
@@ -242,6 +230,8 @@ export default function ScanForm() {
   const [
     analyzersLoading,
     connectorsLoading,
+    visualizersLoading,
+    pivotsLoading,
     playbooksLoading,
     analyzersError,
     connectorsError,
@@ -252,6 +242,8 @@ export default function ScanForm() {
   ] = usePluginConfigurationStore((state) => [
     state.analyzersLoading,
     state.connectorsLoading,
+    state.visualizersLoading,
+    state.pivotsLoading,
     state.playbooksLoading,
     state.analyzersError,
     state.connectorsError,
@@ -260,6 +252,12 @@ export default function ScanForm() {
     state.connectors,
     state.playbooks,
   ]);
+
+  const pluginsLoading =
+    analyzersLoading ||
+    connectorsLoading ||
+    visualizersLoading ||
+    pivotsLoading;
 
   const analyzersGrouped = React.useMemo(() => {
     const grouped = {
@@ -302,93 +300,101 @@ export default function ScanForm() {
   const analyzersOptions = React.useMemo(
     () =>
       analyzersGrouped[formik.values.classification]
-        .map((v) => ({
-          isDisabled: !v.verification.configured || v.disabled,
-          value: v.name,
+        .map((analyzer) => ({
+          isDisabled: !analyzer.verification.configured || analyzer.disabled,
+          value: analyzer.name,
           label: (
             <div
-              id={`analyzer${v.name}`}
+              id={`analyzer${analyzer.name}`}
               className="d-flex justify-content-start align-items-start flex-column"
             >
               <div className="d-flex justify-content-start align-items-baseline flex-column">
-                <div>{v.name}&nbsp;</div>
+                <div>{analyzer.name}&nbsp;</div>
                 <div className="small text-start text-muted">
-                  {markdownToHtml(v.description)}
+                  {markdownToHtml(analyzer.description)}
                 </div>
               </div>
-              {!v.verification.configured && (
+              {!analyzer.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.details}
+                  ⚠ {analyzer.verification.details}
                 </div>
               )}
             </div>
           ),
-          labelDisplay: v.name,
+          labelDisplay: analyzer.name,
         }))
-        .sort((a, b) =>
+        .sort((currentAnalyzer, nextAnalyzer) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
+          currentAnalyzer.isDisabled === nextAnalyzer.isDisabled
+            ? 0
+            : currentAnalyzer.isDisabled
+              ? 1
+              : -1,
         ),
     [analyzersGrouped, formik.values.classification],
   );
   const connectorOptions = React.useMemo(
     () =>
       connectors
-        .map((v) => ({
-          isDisabled: !v.verification.configured || v.disabled,
-          value: v.name,
+        .map((connector) => ({
+          isDisabled: !connector.verification.configured || connector.disabled,
+          value: connector.name,
           label: (
             <div className="d-flex justify-content-start align-items-start flex-column">
               <div className="d-flex justify-content-start align-items-baseline flex-column">
-                <div>{v.name}&nbsp;</div>
+                <div>{connector.name}&nbsp;</div>
                 <div className="small text-start text-muted">
-                  {markdownToHtml(v.description)}
+                  {markdownToHtml(connector.description)}
                 </div>
               </div>
-              {!v.verification.configured && (
+              {!connector.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.details}
+                  ⚠ {connector.verification.details}
                 </div>
               )}
             </div>
           ),
-          labelDisplay: v.name,
+          labelDisplay: connector.name,
         }))
-        .sort((a, b) =>
+        .sort((currentConnector, nextConnector) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
+          currentConnector.isDisabled === nextConnector.isDisabled
+            ? 0
+            : currentConnector.isDisabled
+              ? 1
+              : -1,
         ),
     [connectors],
   );
 
   const playbookOptions = (classification) =>
     playbooksGrouped[classification]
-      .map((v) => ({
-        isDisabled: v.disabled,
-        value: v.name,
-        analyzers: v.analyzers,
-        connectors: v.connectors,
-        visualizers: v.visualizers,
-        pivots: v.pivots,
+      .map((playbook) => ({
+        isDisabled: playbook.disabled,
+        value: playbook.name,
+        analyzers: playbook.analyzers,
+        connectors: playbook.connectors,
+        visualizers: playbook.visualizers,
+        pivots: playbook.pivots,
         label: (
           <div className="d-flex justify-content-start align-items-start flex-column">
             <div className="d-flex justify-content-start align-items-baseline flex-column">
-              <div>{v.name}&nbsp;</div>
+              <div>{playbook.name}&nbsp;</div>
               <div className="small text-left text-muted">
-                {markdownToHtml(v.description)}
+                {markdownToHtml(playbook.description)}
               </div>
             </div>
           </div>
         ),
-        labelDisplay: v.name,
-        tags: v.tags.map((tag) => ({
+        labelDisplay: playbook.name,
+        tags: playbook.tags.map((tag) => ({
           value: tag,
           label: <JobTag tag={tag} />,
         })),
-        tlp: v.tlp,
-        scan_mode: `${v.scan_mode}`,
-        scan_check_time: v.scan_check_time,
-        runtime_configuration: v.runtime_configuration,
+        tlp: playbook.tlp,
+        scan_mode: `${playbook.scan_mode}`,
+        scan_check_time: playbook.scan_check_time,
+        runtime_configuration: playbook.runtime_configuration,
       }))
       .filter((item) => !item.isDisabled);
 
@@ -431,14 +437,7 @@ export default function ScanForm() {
   const updateSelectedObservable = (observableValue, index) => {
     if (index === 0) {
       const oldClassification = formik.values.classification;
-      let newClassification = ObservableClassifications.GENERIC;
-      Object.entries(observableType2RegExMap).forEach(
-        ([typeName, typeRegEx]) => {
-          if (typeRegEx.test(sanitizeObservable(observableValue))) {
-            newClassification = typeName;
-          }
-        },
-      );
+      const newClassification = getObservableClassification(observableValue);
       formik.setFieldValue("classification", newClassification, false);
       // in case a playbook is available and i changed classification or no playbook is selected i select a playbook
       if (
@@ -534,10 +533,9 @@ export default function ScanForm() {
   }, [formik.values]);
 
   const [isModalOpen, setModalOpen] = React.useState(false);
-  const toggleModal = React.useCallback(
-    () => setModalOpen((o) => !o),
-    [setModalOpen],
-  );
+  const toggleModal = () => {
+    if (!pluginsLoading) setModalOpen((open) => !open);
+  };
 
   console.debug(`classification: ${formik.values.classification}`);
   console.debug("formik");
@@ -569,15 +567,15 @@ export default function ScanForm() {
             <Row>
               <div className="col-sm-3 col-form-label" />
               <FormGroup className="mb-0 mt-2 d-flex col-sm-9">
-                {[JobTypes.OBSERVABLE, JobTypes.FILE].map((ch) => (
-                  <FormGroup check inline key={`observableType__${ch}`}>
+                {[JobTypes.OBSERVABLE, JobTypes.FILE].map((jobType) => (
+                  <FormGroup check inline key={`observableType__${jobType}`}>
                     <Col>
                       <Field
                         as={Input}
-                        id={`observableType__${ch}`}
+                        id={`observableType__${jobType}`}
                         type="radio"
                         name="observableType"
-                        value={ch}
+                        value={jobType}
                         onClick={(event) => {
                           formik.setFieldValue(
                             "observableType",
@@ -604,7 +602,7 @@ export default function ScanForm() {
                         }}
                       />
                       <Label check>
-                        {ch === JobTypes.OBSERVABLE
+                        {jobType === JobTypes.OBSERVABLE
                           ? "observable (domain, IP, URL, HASH, etc...)"
                           : "file"}
                       </Label>
@@ -653,9 +651,9 @@ export default function ScanForm() {
                                     formik.touched.observable_names &&
                                     formik.touched.observable_names[index]
                                   }
-                                  onChange={(e) =>
+                                  onChange={(event) =>
                                     updateSelectedObservable(
-                                      e.target.value,
+                                      event.target.value,
                                       index,
                                     )
                                   }
@@ -742,8 +740,19 @@ export default function ScanForm() {
               <Col sm={1} className="d-flex-center justify-content-end mb-3">
                 <IconButton
                   id="scanform-runtimeconf-editbtn"
-                  Icon={MdEdit}
-                  title="Edit runtime configuration"
+                  Icon={
+                    pluginsLoading &&
+                    (formik.values.analyzers.length > 0 ||
+                      formik.values.connectors.length > 0 ||
+                      Object.keys(formik.values.playbook).length > 0)
+                      ? SpinnerIcon
+                      : MdEdit
+                  }
+                  title={
+                    pluginsLoading
+                      ? "Runtime configuration is loading"
+                      : "Edit runtime configuration"
+                  }
                   titlePlacement="top"
                   size="sm"
                   color="tertiary"
@@ -779,8 +788,8 @@ export default function ScanForm() {
                         <MultiSelectDropdownInput
                           options={analyzersOptions}
                           value={formik.values.analyzers}
-                          onChange={(v) =>
-                            formik.setFieldValue("analyzers", v, false)
+                          onChange={(value) =>
+                            formik.setFieldValue("analyzers", value, false)
                           }
                         />
                       )}
@@ -797,8 +806,8 @@ export default function ScanForm() {
                       <MultiSelectDropdownInput
                         options={connectorOptions}
                         value={formik.values.connectors}
-                        onChange={(v) =>
-                          formik.setFieldValue("connectors", v, false)
+                        onChange={(value) =>
+                          formik.setFieldValue("connectors", value, false)
                         }
                       />
                     )}
@@ -821,7 +830,9 @@ export default function ScanForm() {
                         options={playbookOptions(formik.values.classification)}
                         styles={selectStyles}
                         value={formik.values.playbook}
-                        onChange={(v) => updateSelectedPlaybook(v)}
+                        onChange={(selectedPlaybook) =>
+                          updateSelectedPlaybook(selectedPlaybook)
+                        }
                       />
                     )}
                   />
@@ -833,17 +844,17 @@ export default function ScanForm() {
               <Label sm={3}>TLP</Label>
               <Col sm={9}>
                 <div>
-                  {TlpChoices.map((ch) => (
-                    <FormGroup inline check key={`tlpchoice__${ch}`}>
-                      <Label check for={`tlpchoice__${ch}`}>
-                        <TLPTag value={ch} />
+                  {TlpChoices.map((tlp) => (
+                    <FormGroup inline check key={`tlpchoice__${tlp}`}>
+                      <Label check for={`tlpchoice__${tlp}`}>
+                        <TLPTag value={tlp} />
                       </Label>
                       <Field
                         as={Input}
-                        id={`tlpchoice__${ch}`}
+                        id={`tlpchoice__${tlp}`}
                         type="radio"
                         name="tlp"
-                        value={ch}
+                        value={tlp}
                         invalid={formik.errors.tlp && formik.touched.tlp}
                         onChange={formik.handleChange}
                       />
@@ -880,8 +891,8 @@ export default function ScanForm() {
                   <TagSelectInput
                     id="scanform-tagselectinput"
                     selectedTags={formik.values.tags}
-                    setSelectedTags={(v) =>
-                      formik.setFieldValue("tags", v, false)
+                    setSelectedTags={(selectedTags) =>
+                      formik.setFieldValue("tags", selectedTags, false)
                     }
                   />
                 </Col>

@@ -4,7 +4,7 @@ from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths, ScanMode
-from api_app.models import PythonModule
+from api_app.models import PythonModule, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -38,7 +38,7 @@ class PlaybookConfigViewSetTestCase(
         p.delete()
 
     def test_update(self):
-        plugin = self.model_class.objects.order_by("?").first().pk
+        plugin = self.model_class.objects.order_by("?").first().name
         response = self.client.patch(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 200, response.json())
         response = self.client.put(f"{self.URL}/{plugin}")
@@ -75,22 +75,22 @@ class PlaybookConfigViewSetTestCase(
 
         self.client.force_authenticate(m_user.user)
         # 2. user can't delete default playbook
-        response = self.client.delete(f"{self.URL}/{p_default.pk}")
+        response = self.client.delete(f"{self.URL}/{p_default.name}")
         self.assertEqual(response.status_code, 403, response.json())
         # 3. user can't delete playbook creted by an owner/admin for the organization
-        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.name}")
         self.assertEqual(response.status_code, 403, response.json())
         # 4. user can delete custom playbook created by itself
-        response = self.client.delete(f"{self.URL}/{p_custom_user.pk}")
+        response = self.client.delete(f"{self.URL}/{p_custom_user.name}")
         self.assertEqual(response.status_code, 204)
         # 5. owner/admin can't delete default playbook
         m_user.is_owner = True
         m_user.is_admin = True
         m_user.save()
-        response = self.client.delete(f"{self.URL}/{p_default.pk}")
+        response = self.client.delete(f"{self.URL}/{p_default.name}")
         self.assertEqual(response.status_code, 403, response.json())
         # 6. owner/admin can delete playbook creted by an admin of the organization
-        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.name}")
         self.assertEqual(response.status_code, 204)
         # 7. user can't delete a playbook created by an user of another organization
         org2, _ = Organization.objects.get_or_create(name="test2")
@@ -101,7 +101,7 @@ class PlaybookConfigViewSetTestCase(
             name="test4", type=["ip"], tlp="CLEAR", owner=m_user.user
         )
         self.client.force_authenticate(m_user_org2.user)
-        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.name}")
         self.assertEqual(response.status_code, 404)
         # 8. owner/admin can't delete a playbook created by an admin of another org
         m_user_org2.is_owner = True
@@ -110,7 +110,7 @@ class PlaybookConfigViewSetTestCase(
         p_custom_org1.for_organization = True
         p_custom_org1.owner = m_owner.user
         p_custom_org1.save()
-        response = self.client.delete(f"{self.URL}/{p_custom_org1.pk}")
+        response = self.client.delete(f"{self.URL}/{p_custom_org1.name}")
         self.assertEqual(response.status_code, 404)
 
     def test_create(self):
@@ -124,13 +124,14 @@ class PlaybookConfigViewSetTestCase(
             disabled=False,
             type="file",
         )
+        tag, _ = Tag.objects.get_or_create(label="testlabel1", color="#FF5733")
 
         response = self.client.post(
             self.URL,
             data={
                 "name": "TestCreate",
                 "description": "test",
-                "analyzers": [ac.pk],
+                "analyzers": [ac.name],
                 "connectors": [],
                 "pivots": [],
                 "runtime_configuration": {
@@ -140,6 +141,9 @@ class PlaybookConfigViewSetTestCase(
                 },
                 "scan_mode": ScanMode.FORCE_NEW_ANALYSIS,
                 "scan_check_time": None,
+                "tags_labels": [
+                    tag.label,
+                ],
             },
             format="json",
         )

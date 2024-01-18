@@ -13,6 +13,7 @@ import { prettifyErrors } from "../../utils/api";
 
 import { ScanModesNumeric } from "../../constants/advancedSettingsConst";
 import { JobTypes } from "../../constants/jobConst";
+import { getObservableClassification } from "../../utils/observables";
 
 function sampleArrayPayload(data, fieldName, payload) {
   Array.from(data).forEach((value) => {
@@ -22,7 +23,7 @@ function sampleArrayPayload(data, fieldName, payload) {
 
 function createJobPayload(
   analyzables,
-  classification,
+  isSample,
   playbook,
   analyzers,
   connectors,
@@ -32,7 +33,6 @@ function createJobPayload(
   _scanMode,
   scanCheckTime,
 ) {
-  const isSample = classification === JobTypes.FILE;
   let payload = {};
   /* we add a custom function to the object to reuse the code:
   in this way append method is available for bot FormData and {}.
@@ -52,7 +52,7 @@ function createJobPayload(
   } else {
     const observables = [];
     analyzables.forEach((observable) => {
-      observables.push([classification, observable]);
+      observables.push([getObservableClassification(observable), observable]);
     });
     payload.append("observables", observables);
   }
@@ -181,7 +181,7 @@ export async function createJob(
 
     const payload = createJobPayload(
       analyzables,
-      classification,
+      isSample,
       playbook,
       analyzers,
       connectors,
@@ -256,9 +256,9 @@ export async function createJob(
     addToast("Failed!", respData?.message, "danger");
     const error = new Error(`job status ${respData.status}`);
     return Promise.reject(error);
-  } catch (e) {
-    console.error(e);
-    addToast("Failed!", prettifyErrors(e), "danger");
-    return Promise.reject(e);
+  } catch (error) {
+    console.error(error);
+    addToast("Failed!", prettifyErrors(error), "danger");
+    return Promise.reject(error);
   }
 }

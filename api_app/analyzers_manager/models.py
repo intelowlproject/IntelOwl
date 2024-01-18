@@ -4,6 +4,7 @@
 from logging import getLogger
 from typing import Optional
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -13,6 +14,7 @@ from api_app.analyzers_manager.constants import (
     TypeChoices,
 )
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
+from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
@@ -21,12 +23,14 @@ logger = getLogger(__name__)
 
 
 class AnalyzerReport(AbstractReport):
+    objects = AnalyzerReportQuerySet.as_manager()
     config = models.ForeignKey(
         "AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
 
     class Meta:
         unique_together = [("config", "job")]
+        indexes = AbstractReport.Meta.indexes
 
 
 class MimeTypes(models.TextChoices):
@@ -164,6 +168,9 @@ class AnalyzerConfig(PythonConfig):
         models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
         default=list,
         blank=True,
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     @classmethod

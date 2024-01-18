@@ -36,3 +36,23 @@ def deprecated_endpoint(deprecation_date=None, end_of_life_date=None):
         return wrapper_deprecated
 
     return decorator_deprecated
+
+
+def prevent_signal_recursion(func):
+    @functools.wraps(func)
+    def no_recursion(sender, instance=None, **kwargs):
+        if not instance:
+            return
+
+        if hasattr(instance, "_dirty"):
+            return
+
+        func(sender, instance=instance, **kwargs)
+
+        try:
+            instance._dirty = True
+            instance.save()
+        finally:
+            del instance._dirty
+
+    return no_recursion

@@ -188,6 +188,7 @@ export function RuntimeConfigurationModal(props) {
             id="edit_runtime_configuration-modal"
             placeholder={editableConfig}
             onChange={setJsonInput}
+            waitAfterKeyPress={100}
             height="500px"
             width="450px"
           />

@@ -68,7 +68,7 @@ sed -i "s/STAGE:\"prod\"/STAGE:\"local\"/g" frontend/public/env.js
 Now, you can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
 
 ```bash
-python3 start.py test up
+./start test up
 ```
 
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
@@ -76,13 +76,13 @@ Every time you perform a change, you should perform an operation to reflect the 
 - if you changed the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
 
 ```bash
-python3 start.py test down && python3 start.py test up --build
+./start test down && ./start test up -- --build
 ```
 
 - if you changed either analyzers, connectors, playbooks or anything that is executed asynchronously by the "celery" containers, you just need to restart the application because we leverage Docker bind volumes that will reflect the changes to the containers. This saves the time of the build
 
 ```bash
-python3 start.py test down && python3 start.py test up
+./start test down && ./start test up
 ```
 
 - if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
@@ -110,8 +110,8 @@ DANGEROUSLY_DISABLE_HOST_CHECK=true npm start
 
 Most of the time you would need to test the changes you made together with the backend. In that case, you would need to run the backend locally too:
 
-```commandline
-python3 start.py prod up
+```bash
+./start prod up
 ```
 
 <div class="admonition note">
@@ -176,18 +176,19 @@ There are two possible cases:
 If you are doing the step number `2`, you can skip this paragraph.
 
 First, you need to create the python code that will be actually executed. You can easily take other plugins as example to write this.
-Then, you have to create a `Python Module` model. You can do this in the `django admin`page : 
+Then, you have to create a `Python Module` model. You can do this in the `Django Admin` page: 
 You have to specify which type of Plugin you wrote, and its python module. Again, you can use as an example an already configured `Python Module`.
-Some `Python Module` requires to update some part of its code in a schedule way: for example `Yara` requires to update the rule repositories, `QuarkEngine` to update its database and so on.
+
+Some `Python Module` requires to update some part of its code in a **schedule way**: for example `Yara` requires to update the rule repositories, `QuarkEngine` to update its database and so on.
 If the `Python Module` that you define need this type of behaviour, you have to configure two things:
+- In the python code, you have to override a method called `update` and put the updating logic (see other plugins for examples) there.
 - In the model class, you have to add the `update_schedule` (crontab syntax) that define when the update should be executed.
-- In the python code, you have to override a method called `update` and put there the updating logic (see other plugins for examples)
 
 
 Some `Python Module` requires further check to see if the service provider is able to answer requests; for example if you have done too many requests, or the website is currently down for maintenance and so on.
 If the `Python Module` that you define need this type of behaviour, you have to configure two things:
+- In the python code, you can override a method called `health_check` and put there the custom health check logic. As default, plugins will try to make an HTTP `HEAD` request to the configured url.
 - In the model class, you have to add the `health_check_schedule` (crontab syntax) that define when the health check should be executed.
-- In the python code, you can override a method called `health_check` and put there the custom health check logic. As default, plugins will try to make a `head` request to the configured url.
 
 
 Press `Save and continue editing` to, at the moment, manually ad the `Parameters` that the python code requires (the class attributes that you needed): 
@@ -457,13 +458,13 @@ IntelOwl makes use of the django testing framework and the `unittest` library fo
 ### Setup containers
 
 The point here is to launch the code in your environment and not the last official image in Docker Hub.
-For this, use the `test` or the `ci` option when launching the containers with the `start.py` script.
+For this, use the `test` or the `ci` option when launching the containers with the `./start` script.
 
 - Use the `test` option to _actually_ execute tests that simulate a real world environment without mocking connections.
 - Use the `ci` option to execute tests in a CI environment where connections are mocked.
 
 ```bash
-$ python3 start.py test up
+$ ./start test up
 $ # which corresponds to the command: docker-compose -f docker/default.yml -f docker/test.override.yml up
 ```
 
@@ -555,8 +556,8 @@ if flake8 shows any errors, fix them.
 2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
 
 ```bash
-$ python3 start.py ci build
-$ python3 start.py ci up
+$ ./start ci build
+$ ./start ci up
 ```
 
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:

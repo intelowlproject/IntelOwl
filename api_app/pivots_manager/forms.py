@@ -19,7 +19,6 @@ class PivotConfigAdminForm(forms.ModelForm):
             "routing_key",
             "soft_time_limit",
             "disabled",
-            "disabled_in_organizations",
             "python_module",
             "related_analyzer_configs",
             "related_connector_configs",

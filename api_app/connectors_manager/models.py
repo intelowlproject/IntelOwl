@@ -1,20 +1,23 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from api_app.choices import TLP, PythonModuleBasePaths
 from api_app.connectors_manager.exceptions import ConnectorConfigurationException
+from api_app.connectors_manager.queryset import ConnectorReportQuerySet
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
 
 class ConnectorReport(AbstractReport):
+    objects = ConnectorReportQuerySet.as_manager()
     config = models.ForeignKey(
         "ConnectorConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
 
     class Meta:
         unique_together = [("config", "job")]
+        indexes = AbstractReport.Meta.indexes
 
 
 class ConnectorConfig(PythonConfig):
@@ -27,6 +30,9 @@ class ConnectorConfig(PythonConfig):
         on_delete=models.PROTECT,
         related_name="%(class)ss",
         limit_choices_to={"base_path": PythonModuleBasePaths.Connector.value},
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     @classmethod

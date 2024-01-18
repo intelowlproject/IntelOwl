@@ -18,7 +18,7 @@ export default function NotificationsList({ notifications, refetchFn }) {
       try {
         await notificationMarkAsRead(notifId);
         await refetchFn();
-      } catch (e) {
+      } catch (error) {
         // handled inside notificationMarkAsRead
       }
     },

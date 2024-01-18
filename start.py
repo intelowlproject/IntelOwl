@@ -1,11 +1,16 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+# DEPRECATION NOTICE!!!!
+# THIS SCRIPT HAS BEEN DEPRECATED AND WILL BE REMOVED IN THE NEXT MAJOR VERSION
+# PLEASE USE the bash `start` script instead
+
 import argparse
 import os
 import re
 import subprocess
 import sys
+from shlex import join, split
 
 try:
     from dotenv import load_dotenv
@@ -20,7 +25,7 @@ except ImportError:
 
 load_dotenv("docker/.env")
 CURRENT_VERSION = os.getenv("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
-PYELASTIC_DEFAULT_VERSION = "7.2.2"
+PYELASTIC_DEFAULT_VERSION = "7.4.1"
 PYCTI_DEFAULT_VERSION = "5.10.0"
 
 DOCKER_ANALYZERS = [
@@ -207,12 +212,6 @@ def start():
         help="This leverage the https.override.yml file that can be used "
         "to host IntelOwl with HTTPS and your own certificate",
     )
-    parser.add_argument(
-        "--use-docker-v1",
-        required=False,
-        action="store_true",
-        help="This flag avoids the script to check if it can use Docker v2 every time",
-    )
 
     args, unknown = parser.parse_known_args()
     # logic
@@ -300,30 +299,39 @@ def start():
         git.checkout(f"tags/v{args.version}")
 
     # construct final command
-    base_command = [
-        "docker-compose",
-        "-p",
-        args.project_name,
-        "--project-directory",
-        "docker",
-    ]
-
-    if not args.use_docker_v1:
-        # check docker version and use docker 2 if available
-        cmd = "docker --help | grep 'compose'"
-        ps = subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+    cmd = split("docker compose version")
+    try:
+        ps = subprocess.run(
+            cmd,
+            shell=False,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
         )
-        output = ps.communicate()[0]
-        if output:
-            base_command = ["docker", "compose"] + base_command[1:]
+    except subprocess.CalledProcessError:
+        print("Failed to run docker compose")
+        sys.exit(127)
+
+    output = ps.stdout
+    if output:
+        base_command = [
+            "docker",
+            "compose",
+            "-p",
+            args.project_name,
+            "--project-directory",
+            "docker",
+        ]
+    else:
+        print("Failed to retrieve docker compose version")
+        sys.exit(126)
 
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        command = base_command + [args.docker_command] + unknown
+        command = split(join(base_command + [args.docker_command] + unknown))
         env = os.environ.copy()
         env["DOCKER_BUILDKIT"] = "1"
         if args.debug_build:
@@ -335,7 +343,7 @@ def start():
             "(press Ctrl+C again to force) ----",
         )
         try:
-            subprocess.run(base_command + ["down"], check=True)
+            subprocess.run(split(join(base_command + ["down"])), check=True)
         except KeyboardInterrupt:
             # just need to catch it
             pass

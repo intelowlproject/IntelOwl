@@ -2,9 +2,10 @@ import logging
 import typing
 from typing import Type
 
-from api_app.pivots_manager.queryset import PivotConfigQuerySet
+from django.contrib.contenttypes.fields import GenericRelation
+
+from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuerySet
 from api_app.queryset import PythonConfigQuerySet
-from api_app.validators import plugin_name_validator
 
 if typing.TYPE_CHECKING:
     from api_app.serializers import PythonConfigSerializer
@@ -21,12 +22,14 @@ logger = logging.getLogger(__name__)
 
 
 class PivotReport(AbstractReport):
+    objects = PivotReportQuerySet.as_manager()
     config = models.ForeignKey(
         "PivotConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
 
     class Meta:
         unique_together = [("config", "job")]
+        indexes = AbstractReport.Meta.indexes
 
 
 class PivotMap(models.Model):
@@ -72,9 +75,6 @@ class PivotMap(models.Model):
 
 class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     objects = PivotConfigQuerySet.as_manager()
-    name = models.CharField(
-        max_length=100, null=False, validators=[plugin_name_validator], unique=True
-    )
     python_module = models.ForeignKey(
         PythonModule,
         on_delete=models.PROTECT,
@@ -94,6 +94,9 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         related_name="executed_by_pivot",
         null=False,
         blank=False,
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     def _generate_full_description(self) -> str:

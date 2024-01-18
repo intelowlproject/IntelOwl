@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
-import { Container, Row, Col } from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, ButtonGroup, Button } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
-
 import {
   ElasticTimePicker,
   SmallInfoCard,
@@ -18,6 +17,7 @@ import {
 } from "./utils/charts";
 
 import { useGuideContext } from "../../contexts/GuideContext";
+import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
 const charts1 = [
   ["JobStatusBarChart", "Job: Status", JobStatusBarChart],
@@ -39,7 +39,10 @@ const charts2 = [
 ];
 
 export default function Dashboard() {
+  // const isSelectedUI = JobResultSections.VISUALIZER;
   const { guideState, setGuideState } = useGuideContext();
+
+  const [orgState, setOrgState] = useState(() => false);
 
   useEffect(() => {
     if (guideState.tourActive) {
@@ -57,29 +60,74 @@ export default function Dashboard() {
   // page title
   useTitle("IntelOwl | Dashboard", { restoreOnUnmount: true });
 
+  const { organization } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        organization: state.organization,
+      }),
+      [],
+    ),
+  );
+
   return (
     <Container fluid id="Dashboard">
-      <div className="g-0 d-flex align-items-baseline flex-column flex-lg-row mb-2">
-        <h3 className="fw-bold" id="Dashboard_title">
-          Dashboard
-        </h3>
-        <ElasticTimePicker
-          className="ms-auto"
-          size="sm"
-          defaultSelected={range}
-          onChange={onTimeIntervalChange}
-          id="Dashboard_timepicker"
-        />
+      <div className="d-flex flex-wrap justify-content-between align-items-baseline mb-2">
+        <div>
+          <h3 className="fw-bold" id="Dashboard_title">
+            Dashboard
+          </h3>
+        </div>
+        <div className="d-flex flex-wrap align-items-baseline ">
+          {organization?.name ? (
+            <ButtonGroup className="mb-3">
+              <Button
+                outline={orgState}
+                color={orgState ? "tertiary" : "primary"}
+                onClick={async () => {
+                  if (orgState) {
+                    setOrgState((prevState) => !prevState);
+                  }
+                }}
+              >
+                GLOBAL
+              </Button>
+              <Button
+                outline={!orgState}
+                color={orgState ? "primary" : "tertiary"}
+                onClick={async () => {
+                  if (!orgState) {
+                    setOrgState((prevState) => !prevState);
+                  }
+                }}
+              >
+                ORG
+              </Button>
+            </ButtonGroup>
+          ) : null}
+
+          <ElasticTimePicker
+            className="ms-2"
+            size="sm"
+            defaultSelected={range}
+            onChange={onTimeIntervalChange}
+            id="Dashboard_timepicker"
+          />
+        </div>
       </div>
+
       <Row className="d-flex flex-wrap flex-lg-nowrap">
-        {charts1.map(([id, header, Component], i) => (
-          <Col key={id} md={12} lg={i === 0 ? 6 : 3}>
+        {charts1.map(([id, header, Component], index) => (
+          <Col key={id} md={12} lg={index === 0 ? 6 : 3}>
             <SmallInfoCard
               id={id}
               header={header}
               body={
                 <div className="pt-2">
-                  <Component />
+                  <Component
+                    sendOrgState={{
+                      key: orgState,
+                    }}
+                  />
                 </div>
               }
               style={{ minHeight: 360 }}
@@ -95,7 +143,11 @@ export default function Dashboard() {
               header={header}
               body={
                 <div className="pt-2">
-                  <Component />
+                  <Component
+                    sendOrgState={{
+                      key: orgState,
+                    }}
+                  />
                 </div>
               }
               style={{ minHeight: 360 }}

@@ -40,6 +40,7 @@ from .models import (
     AbstractReport,
     Comment,
     Job,
+    OrganizationPluginConfiguration,
     PluginConfig,
     PythonConfig,
     Tag,
@@ -117,6 +118,7 @@ def ask_analysis_availability(request):
 )
 @api_view(["POST"])
 def ask_multi_analysis_availability(request):
+    logger.info(f"received ask_multi_analysis_availability from user {request.user}")
     serializer = JobAvailabilitySerializer(
         data=request.data, context={"request": request}, many=True
     )
@@ -127,8 +129,10 @@ def ask_multi_analysis_availability(request):
         result = []
     else:
         result = jobs
+    jrs = JobResponseSerializer(result, many=True).data
+    logger.info(f"finished ask_multi_analysis_availability from user {request.user}")
     return Response(
-        JobResponseSerializer(result, many=True).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -141,11 +145,14 @@ def ask_multi_analysis_availability(request):
 )
 @api_view(["POST"])
 def analyze_file(request):
+    logger.info(f"received analyze_file from user {request.user}")
     fas = FileAnalysisSerializer(data=request.data, context={"request": request})
     fas.is_valid(raise_exception=True)
     job = fas.save(send_task=True)
+    jrs = JobResponseSerializer(job).data
+    logger.info(f"finished analyze_file from user {request.user}")
     return Response(
-        JobResponseSerializer(job).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -170,13 +177,16 @@ def analyze_file(request):
 )
 @api_view(["POST"])
 def analyze_multiple_files(request):
+    logger.info(f"received analyze_multiple_files from user {request.user}")
     fas = FileAnalysisSerializer(
         data=request.data, context={"request": request}, many=True
     )
     fas.is_valid(raise_exception=True)
     jobs = fas.save(send_task=True)
+    jrs = JobResponseSerializer(jobs, many=True).data
+    logger.info(f"finished analyze_multiple_files from user {request.user}")
     return Response(
-        JobResponseSerializer(jobs, many=True).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -189,11 +199,14 @@ def analyze_multiple_files(request):
 )
 @api_view(["POST"])
 def analyze_observable(request):
+    logger.info(f"received analyze_observable from user {request.user}")
     oas = ObservableAnalysisSerializer(data=request.data, context={"request": request})
     oas.is_valid(raise_exception=True)
     job = oas.save(send_task=True)
+    jrs = JobResponseSerializer(job).data
+    logger.info(f"finished analyze_observable from user {request.user}")
     return Response(
-        JobResponseSerializer(job).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -214,13 +227,16 @@ def analyze_observable(request):
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):
+    logger.info(f"received analyze_multiple_observables from user {request.user}")
     oas = ObservableAnalysisSerializer(
         data=request.data, many=True, context={"request": request}
     )
     oas.is_valid(raise_exception=True)
     jobs = oas.save(send_task=True)
+    jrs = JobResponseSerializer(jobs, many=True).data
+    logger.info(f"finished analyze_multiple_observables from user {request.user}")
     return Response(
-        JobResponseSerializer(jobs, many=True).data,
+        jrs,
         status=status.HTTP_200_OK,
     )
 
@@ -420,7 +436,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             key.lower(): Count("status", filter=Q(status=key))
             for key in Job.Status.values
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/type",
@@ -433,7 +451,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             "file": Count("is_sample", filter=Q(is_sample=True)),
             "observable": Count("is_sample", filter=Q(is_sample=False)),
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/observable_classification",
@@ -448,7 +468,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             )
             for oc in ObservableTypes.values
         }
-        return self.__aggregation_response_static(annotations)
+        return self.__aggregation_response_static(
+            annotations, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/file_mimetype",
@@ -457,7 +479,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_file_mimetype(self, request):
-        return self.__aggregation_response_dynamic("file_mimetype")
+        return self.__aggregation_response_dynamic(
+            "file_mimetype", users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/observable_name",
@@ -466,7 +490,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @cache_action_response(timeout=60 * 5)
     def aggregate_observable_name(self, request):
-        return self.__aggregation_response_dynamic("observable_name", False)
+        return self.__aggregation_response_dynamic(
+            "observable_name", False, users=self.get_org_members(request)
+        )
 
     @action(
         url_path="aggregate/md5",
@@ -476,12 +502,29 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     @cache_action_response(timeout=60 * 5)
     def aggregate_md5(self, request):
         # this is for file
-        return self.__aggregation_response_dynamic("md5", False)
+        return self.__aggregation_response_dynamic(
+            "md5", False, users=self.get_org_members(request)
+        )
 
-    def __aggregation_response_static(self, annotations: dict) -> Response:
+    @staticmethod
+    def get_org_members(request):
+        user = request.user
+        org_param = request.GET.get("org", "").lower() == "true"
+        users_of_organization = None
+        if org_param:
+            organization = user.membership.organization
+            users_of_organization = [
+                membership.user for membership in organization.members.all()
+            ]
+        return users_of_organization
+
+    def __aggregation_response_static(self, annotations: dict, users=None) -> Response:
         delta, basis = self.__parse_range(self.request)
+        filter_kwargs = {"received_request_time__gte": delta}
+        if users:
+            filter_kwargs["user__in"] = users
         qs = (
-            Job.objects.filter(received_request_time__gte=delta)
+            Job.objects.filter(**filter_kwargs)
             .annotate(date=Trunc("received_request_time", basis))
             .values("date")
             .annotate(**annotations)
@@ -489,11 +532,16 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         return Response(qs)
 
     def __aggregation_response_dynamic(
-        self, field_name: str, group_by_date: bool = True, limit: int = 5
+        self,
+        field_name: str,
+        group_by_date: bool = True,
+        limit: int = 5,
+        users=None,
     ) -> Response:
         delta, basis = self.__parse_range(self.request)
-
         filter_kwargs = {"received_request_time__gte": delta}
+        if users:
+            filter_kwargs["user__in"] = users
         if field_name == "md5":
             filter_kwargs["is_sample"] = True
 
@@ -612,26 +660,14 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
 )
 @api_view(["GET"])
 def plugin_state_viewer(request):
-    from api_app.analyzers_manager.models import AnalyzerConfig
-    from api_app.connectors_manager.models import ConnectorConfig
-    from api_app.playbooks_manager.models import PlaybookConfig
-    from api_app.visualizers_manager.models import VisualizerConfig
-
     if not request.user.has_membership():
         raise PermissionDenied()
 
     result = {"data": {}}
-
-    classes = [AnalyzerConfig, ConnectorConfig, VisualizerConfig, PlaybookConfig]
-    for Class_ in classes:
-        for plugin in Class_.objects.all():
-            plugin: AbstractConfig
-            if plugin.disabled_in_organizations.filter(
-                pk=request.user.membership.organization.pk
-            ).exists():
-                result["data"][plugin.name] = {
-                    "disabled": True,
-                }
+    for opc in OrganizationPluginConfiguration.objects.filter(disabled=True):
+        result["data"][opc.config.name] = {
+            "disabled": True,
+        }
     return Response(result)
 
 
@@ -764,7 +800,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
-    lookup_field = "pk"
+    lookup_field = "name"
 
     @add_docs(
         description="Disable/Enable plugin for your organization",
@@ -776,8 +812,8 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         detail=True,
         url_path="organization",
     )
-    def disable_in_org(self, request, pk=None):
-        logger.info(f"get disable_in_org from user {request.user}, name {pk}")
+    def disable_in_org(self, request, name=None):
+        logger.info(f"get disable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
             if not request.user.membership.is_admin:
@@ -785,14 +821,15 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
-        obj.disabled_in_organizations.add(organization)
+        org_configuration.disable_manually(request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     @disable_in_org.mapping.delete
-    def enable_in_org(self, request, pk=None):
-        logger.info(f"get enable_in_org from user {request.user}, name {pk}")
+    def enable_in_org(self, request, name=None):
+        logger.info(f"get enable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
             if not request.user.membership.is_admin:
@@ -800,9 +837,10 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if not org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
-        obj.disabled_in_organizations.remove(organization)
+        org_configuration.enable_manually(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -869,14 +907,14 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         detail=True,
         url_path="health_check",
     )
-    def health_check(self, request, pk=None):
-        logger.info(f"get healthcheck from user {request.user}, name {pk}")
+    def health_check(self, request, name=None):
+        logger.info(f"get healthcheck from user {request.user}, name {name}")
         config: PythonConfig = self.get_object()
         python_obj = config.python_module.python_class(config)
         try:
             health_status = python_obj.health_check(request.user)
         except NotImplementedError as e:
-            logger.info(f"NotImplementedError {e}, user {request.user}, name {pk}")
+            logger.info(f"NotImplementedError {e}, user {request.user}, name {name}")
             raise ValidationError({"detail": "No healthcheck implemented"})
         except Exception as e:
             logger.exception(e)
@@ -891,8 +929,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         detail=True,
         url_path="pull",
     )
-    def pull(self, request, pk=None):
-        logger.info(f"post pull from user {request.user}, name {pk}")
+    def pull(self, request, name=None):
+        logger.info(f"post pull from user {request.user}, name {name}")
         obj: PythonConfig = self.get_object()
         python_obj = obj.python_module.python_class(obj)
         try:

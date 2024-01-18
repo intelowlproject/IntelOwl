@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Spinner, Button, Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
 import { MdDelete, MdFileDownload } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
@@ -10,11 +10,7 @@ import { IconButton } from "@certego/certego-ui";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-
-// we can't delete this function because IconButton expects Icon as a function
-function PluginSpinner() {
-  return <Spinner type="border" size="sm" className="text-darker" />;
-}
+import { SpinnerIcon } from "../../common/SpinnerIcon";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -39,7 +35,7 @@ export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
         id={`table-pluginhealthcheckbtn__${pluginName}`}
         color="info"
         size="sm"
-        Icon={!isLoading ? RiHeartPulseLine : PluginSpinner}
+        Icon={!isLoading ? RiHeartPulseLine : SpinnerIcon}
         title={!isLoading ? "Perform health check" : "Please wait..."}
         onClick={onClick}
         titlePlacement="top"
@@ -61,7 +57,7 @@ export function OrganizationPluginStateToggle({
   refetch,
   pluginOwner,
 }) {
-  const user = useAuthStore(React.useCallback((s) => s.user, []));
+  const user = useAuthStore(React.useCallback((state) => state.user, []));
   const {
     noOrg,
     fetchAll: fetchAllOrganizations,
@@ -229,7 +225,7 @@ export function PluginPullButton({ pluginName, pluginType_ }) {
         id={`table-pluginpullbtn__${pluginName}`}
         color="info"
         size="sm"
-        Icon={!isLoading ? MdFileDownload : PluginSpinner}
+        Icon={!isLoading ? MdFileDownload : SpinnerIcon}
         title={!isLoading ? "Pull" : "Please wait..."}
         onClick={onClick}
         titlePlacement="top"

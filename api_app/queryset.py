@@ -1,11 +1,16 @@
 import datetime
+import json
+import logging
 import uuid
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Generator, Type
 
+from django.conf import settings
 from django.contrib.postgres.expressions import ArraySubquery
+from django.core.paginator import Paginator
 
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
+    from api_app.serializers import AbstractBIInterface
 
 from celery.canvas import Signature
 from django.db import models
@@ -30,6 +35,54 @@ from django.utils.timezone import now
 from api_app.choices import TLP
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
+
+
+class SendToBiQuerySet(models.QuerySet):
+    @classmethod
+    def _get_bi_serializer_class(cls) -> Type["AbstractBIInterface"]:
+        raise NotImplementedError()
+
+    @staticmethod
+    def _create_index_template():
+        with open(
+            settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
+        ) as f:
+            body = json.load(f)
+            body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
+            settings.ELASTICSEARCH_CLIENT.indices.put_template(
+                name=settings.ELASTICSEARCH_BI_INDEX, body=body
+            )
+
+    def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
+        from elasticsearch.helpers import bulk
+
+        self._create_index_template()
+        BULK_MAX_SIZE = 1000
+        found_errors = False
+
+        p = Paginator(self, BULK_MAX_SIZE)
+        for i in p.page_range:
+            page = p.get_page(i)
+            objects = page.object_list
+            serializer = self._get_bi_serializer_class()(instance=objects, many=True)
+            objects_serialized = serializer.data
+            _, errors = bulk(
+                settings.ELASTICSEARCH_CLIENT,
+                objects_serialized,
+                request_timeout=max_timeout,
+            )
+            if errors:
+                logging.error(
+                    f"Errors on sending to elastic: {errors}."
+                    " We are not marking objects as sent."
+                )
+                found_errors |= errors
+            else:
+                logging.info("BI sent")
+                self.model.objects.filter(
+                    pk__in=objects.values_list("pk", flat=True)
+                ).update(sent_to_bi=True)
+        return found_errors
 
 
 class CleanOnCreateQuerySet(models.QuerySet):
@@ -57,7 +110,27 @@ class CleanOnCreateQuerySet(models.QuerySet):
         )
 
 
+class OrganizationPluginConfigurationQuerySet(models.QuerySet):
+    def filter_for_config(self, config_class, config_pk: str):
+        return self.filter(
+            content_type=config_class.get_content_type(), object_id=config_pk
+        )
+
+
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
+    def alias_disabled_in_organization(self, organization):
+        from api_app.models import OrganizationPluginConfiguration
+
+        opc = OrganizationPluginConfiguration.objects.filter(organization=organization)
+
+        return self.alias(
+            disabled_in_organization=Exists(
+                opc.filter_for_config(
+                    config_class=self.model, config_pk=OuterRef("pk")
+                ).filter(disabled=True)
+            )
+        )
+
     def annotate_runnable(self, user: User = None) -> QuerySet:
         # the plugin is runnable IF
         # - it is not disabled
@@ -65,15 +138,22 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         qs = self.filter(
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
-
         if user and user.has_membership():
-            qs = qs.exclude(
-                disabled_in_organizations=user.membership.organization,
-            )
+            qs = qs.alias_disabled_in_organization(user.membership.organization)
+            qs = qs.exclude(disabled_in_organization=True)
         return self.annotate(runnable=Exists(qs))
 
 
-class JobQuerySet(CleanOnCreateQuerySet):
+class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
+    @classmethod
+    def _get_bi_serializer_class(cls):
+        from api_app.serializers import JobBISerializer
+
+        return JobBISerializer
+
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
+
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
         User has access to:
@@ -225,8 +305,9 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
 
-class AbstractReportQuerySet(QuerySet):
-    ...
+class AbstractReportQuerySet(SendToBiQuerySet):
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
 
 
 class ModelWithOwnershipQuerySet:

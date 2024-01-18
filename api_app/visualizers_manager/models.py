@@ -1,16 +1,18 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
+from api_app.visualizers_manager.queryset import VisualizerReportQuerySet
 from api_app.visualizers_manager.validators import validate_report
 
 
 class VisualizerReport(AbstractReport):
+    objects = VisualizerReportQuerySet.as_manager()
     config = models.ForeignKey(
         "VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
@@ -19,6 +21,7 @@ class VisualizerReport(AbstractReport):
 
     class Meta:
         ordering = ["pk"]
+        indexes = AbstractReport.Meta.indexes
 
 
 class VisualizerConfig(PythonConfig):
@@ -35,6 +38,9 @@ class VisualizerConfig(PythonConfig):
                 PythonModuleBasePaths.Visualizer.value,
             ]
         },
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     @classmethod

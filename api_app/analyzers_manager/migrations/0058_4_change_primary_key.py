@@ -6,10 +6,10 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     AnalyzerReport = apps.get_model("analyzers_manager", "AnalyzerReport")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    name = AnalyzerConfig.objects.filter(name=models.OuterRef("config")).values_list(
-        "pk"
-    )[:1]
-    AnalyzerReport.objects.update(config2=models.Subquery(name))
+    name = AnalyzerConfig.objects.filter(
+        name=models.OuterRef("old_config")
+    ).values_list("pk")[:1]
+    AnalyzerReport.objects.update(config=models.Subquery(name))
     for config in AnalyzerConfig.objects.all():
         if config.disabled2:
             ContentType = apps.get_model("contenttypes", "ContentType")
@@ -34,40 +34,25 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="analyzerreport",
-            name="config",
-            field=models.CharField(max_length=100, null=True, blank=True),
+        migrations.RenameField(
+            model_name="analyzerreport", old_name="config", new_name="old_config"
         ),
         migrations.AddField(
             model_name="analyzerreport",
-            name="config2",
+            name="config",
             field=models.ForeignKey(
                 default=None,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="reports",
                 to="analyzers_manager.analyzerconfig",
-                null=True,
             ),
             preserve_default=False,
         ),
         migrations.RunPython(migrate),
-        migrations.RemoveField(model_name="analyzerreport", name="config"),
-        migrations.AlterField(
-            model_name="analyzerreport",
-            name="config2",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="reports",
-                to="analyzers_manager.analyzerconfig",
-            ),
-        ),
-        migrations.RenameField(
-            model_name="analyzerreport", old_name="config2", new_name="config"
-        ),
         migrations.AlterUniqueTogether(
             name="analyzerreport",
             unique_together={("config", "job")},
         ),
         migrations.RemoveField(model_name="analyzerconfig", name="disabled2"),
+        migrations.RemoveField(model_name="analyzerreport", name="old_config"),
     ]

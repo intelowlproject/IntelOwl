@@ -42,6 +42,7 @@ class Migration(migrations.Migration):
             name="config",
             field=models.ForeignKey(
                 default=None,
+                null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="reports",
                 to="connectors_manager.connectorconfig",
@@ -52,6 +53,16 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name="connectorreport",
             unique_together={("config", "job")},
+        ),
+        migrations.AlterField(
+            model_name="connectorreport",
+            name="config",
+            field=models.ForeignKey(
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reports",
+                to="connectors_manager.connectorconfig",
+            ),
         ),
         migrations.RemoveField(model_name="connectorconfig", name="disabled2"),
         migrations.RemoveField(model_name="connectorreport", name="old_config"),

@@ -340,8 +340,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     def _raise_container_not_running(self) -> None:
         raise AnalyzerConfigurationException(
             f"{self.name} docker container is not running.\n"
-            f"You have to enable it using the appropriate "
-            f"parameter when executing start.py."
+            "You have to enable it using the appropriate "
+            "parameter when executing ./start."
         )
 
     def _docker_run(

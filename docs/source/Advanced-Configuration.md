@@ -22,6 +22,7 @@ This page includes details about some advanced features that Intel Owl provides 
     - [Multi Queue](#multi-queue)
     - [Queue Customization](#queue-customization)
     - [Queue monitoring](#queue-monitoring)
+  - [Manual usage](#manual-usage)
 
 ## ElasticSearch
 
@@ -37,10 +38,10 @@ Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboa
 #### Example Configuration
 
 1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elasticsearch` on port `9200` which is exposed to the shared docker network.
-   (Alternatively, you can spin up a local Elastic Search instance, by appending `--elastic` to the `python3 start.py ...` command. Note that the local Elastic Search instance consumes large amount of memory, and hence having >=16GB is recommended.))
+   (Alternatively, you can spin up a local Elastic Search instance, by appending `--elastic` to the `./start` command. Note that the local Elastic Search instance consumes large amount of memory, and hence having >=16GB is recommended.))
 2. In the `env_file_app`, we set `ELASTICSEARCH_DSL_ENABLED` to `True` and `ELASTICSEARCH_DSL_HOST` to `elasticsearch:9200`.
-3. Configure the version of the ElasticSearch Library used [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our Elasticsearch server. This is required for compatibility. To do that, you can leverage the option `--pyelastic-version` of the `start.py` script. The default value of that parameter indicates the version that would be installed by default.
-4. Rebuild the docker images with `python3 start.py test --pyelastic-version x.x.x build` (required only if you changed the default value of `--pyelastic-version`)
+3. Configure the version of the ElasticSearch Library used [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our Elasticsearch server. This is required for compatibility. To do that, you can leverage the option `--pyelastic-version` of the `./start` script. The default value of that parameter indicates the version that would be installed by default.
+4. Rebuild the docker images with `./start test build --pyelastic-version x.x.x` (required only if you changed the default value of `--pyelastic-version`)
 5. Now start the docker containers and execute,
 
 ```bash
@@ -88,7 +89,7 @@ IntelOwl provides support for some of the most common authentication methods:
 The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
 
 It is important to add the correct callback in the "Authorized redirect URIs" section to allow the application to redirect properly after the successful login. Add this:
-```commandline
+```url
 http://<localhost|yourowndomain>/api/auth/google-callback
 ```
 
@@ -147,10 +148,10 @@ We found out (see issues in [IntelOwl](https://github.com/intelowlproject/IntelO
 
 Because of that, we decided to provide to the users the chance to customize the version of PyCTI installed in IntelOwl based on the OpenCTI version that they are using.
 
-To do that, you would need to leverage the option `--pycti-version` provided by the `script.py` helper:
-* check the default version that would be installed by checking the description of the option `--pycti-version` with `python3 start.py -h`
-* if the default version is different from your OpenCTI server version, you need to rebuild the IntelOwl Image with `python3 start.py test --pycti-version <your_version> build`
-* then restart the project `python3 start.py test up --build`
+To do that, you would need to leverage the option `--pycti-version` provided by the `./start` helper:
+* check the default version that would be installed by checking the description of the option `--pycti-version` with `./start -h`
+* if the default version is different from your OpenCTI server version, you need to rebuild the IntelOwl Image with `./start test build --pycti-version <your_version>`
+* then restart the project `./start test up -- --build`
 * enjoy
 
 ## Cloud Support
@@ -181,7 +182,7 @@ Only FIFO queues are supported.
 
 Also, you need to set the environment variable `AWS_SQS` to `True` and populate the `AWS_USER_NUMBER`. This is required to connect in the right way to the selected SQS queues.
 
-Ultimately, to avoid to run RabbitMQ locally, you would need to use the option `--use-external-broker` when launching IntelOwl with the `start.py` script.
+Ultimately, to avoid to run RabbitMQ locally, you would need to use the option `--use-external-broker` when launching IntelOwl with the `./start` script.
 
 #### RDS
 
@@ -190,7 +191,7 @@ If you like, you could use AWS RDS instead of PostgreSQL for your database. In t
 If you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials to access the Postgres DB.
 To allow that just set `AWS_RDS_IAM_ROLE` to `True`. In this case `DB_PASSWORD` is not required anymore.
 
-Moreover, to avoid to run PostgreSQL locally, you would need to use the option `--use-external-database` when launching IntelOwl with the `start.py` script.
+Moreover, to avoid to run PostgreSQL locally, you would need to use the option `--use-external-database` when launching IntelOwl with the `./start` script.
 
 #### SES
 
@@ -213,7 +214,7 @@ Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable
 You can use a `Network File System` for the shared_files that are downloaded runtime by IntelOwl (for example Yara rules).
 
 To use this feature, you would need to add the address of the remote file system inside the `.env` file,
-and you would need to use the option `--nfs` when launching IntelOwl with the `start.py` script.
+and you would need to use the option `--nfs` when launching IntelOwl with the `./start` script.
 
 ### Google Kubernetes Engine
 
@@ -232,7 +233,7 @@ IntelOwl provides an additional [multi-queue.override.yml](https://github.com/in
 If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
 
 ```bash
-python3 start.py prod --multi-queue up
+./start prod up --multi-queue
 ```
 
 This functionality is not enabled by default because this deployment would start 2 more containers so the resource consumption is higher. We suggest to use this option only when leveraging IntelOwl massively.
@@ -252,7 +253,7 @@ IntelOwl provides an additional [flower.override.yml](https://github.com/intelow
 If you want to leverage it, you should add the option `--flower` when starting the project. Example:
 
 ```bash
-python3 start.py prod --flower up
+./start prod up --flower
 ```
 
 The flower interface is available at port 5555: to set the credentials for its access, update the environment variables
@@ -264,3 +265,34 @@ FLOWER_PWD
 
 or change the `.htpasswd` file that is created in the `docker` directory in the `intelowl_flower` container.
 
+## Manual Usage
+The `./start` script essentially acts as a wrapper over Docker Compose, performing additional checks.
+IntelOwl can still be started by using the standard `docker compose` command, but all the dependencies have to be manually installed by the user. 
+
+### Options
+The `--project-directory` and `-p` options are required to run the project.
+Default values set by `./start` script are "docker" and "intel_owl", respectively.
+
+The startup is based on [chaining](https://docs.docker.com/compose/multiple-compose-files/merge/) various Docker Compose YAML files using `-f` option. 
+All Docker Compose files are stored in `docker/` directory of the project.
+The default compose file, named `default.yml`, requires configuration for an external database and message broker.
+In their absence, the `postgres.override.yml` and `rabbitmq.override.yml` files should be chained to the default one.
+
+The command composed, considering what is said above (using `sudo`), is
+```bash
+sudo docker compose --project-directory docker -f docker/default.yml -f docker/postgres.override.yml -f docker/rabbitmq.override.yml -p intel_owl up
+```
+
+The other most common compose file that can be used is for the testing environment. 
+The equivalent of running `./start test up` is adding the `test.override.yml` file, resulting in:
+```bash
+sudo docker compose --project-directory docker -f docker/default.yml -f docker/postgres.override.yml -f docker/rabbitmq.override.yml -f docker/test.override.yml -p intel_owl up
+```
+
+All other options available in the `./start` script (`./start -h` to view them) essentially chain other compose file to `docker compose` command with corresponding filenames.
+
+### Optional Analyzer
+IntelOwl includes integrations with [some analyzer](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#optional-analyzers) that are not enabled by default.
+These analyzers, stored under the `integrations/` directory, are packed within Docker Compose files.
+The `compose.yml` file has to be chained to include the analyzer. 
+The additional `compose-test.yml` file has to be chained for testing environment.

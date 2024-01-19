@@ -87,13 +87,13 @@ table, th, td {
 To enable all the optional analyzers you can add the option `--all_analyzers` when starting the project. Example:
 
 ```bash
-python3 start.py prod --all_analyzers up
+./start prod up --all_analyzers
 ```
 
 Otherwise you can enable just one of the cited integration by using the related option. Example:
 
 ```bash
-python3 start.py prod --tor_analyzers up
+./start prod up --tor_analyzers
 ```
 
 ## Customize analyzer execution

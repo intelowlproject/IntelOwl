@@ -219,6 +219,9 @@ class Job(models.Model):
                 fields=["playbook_to_execute", "finished_analysis_time", "user"],
                 name="PlaybookConfigOrdering",
             ),
+            models.Index(
+                fields=["sent_to_bi", "-received_request_time"], name="JobBISearch"
+            ),
         ]
 
     # constants
@@ -306,6 +309,7 @@ class Job(models.Model):
     scan_check_time = models.DurationField(
         null=True, blank=True, default=datetime.timedelta(hours=24)
     )
+    sent_to_bi = models.BooleanField(editable=False, default=False)
 
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
@@ -914,6 +918,11 @@ class AbstractReport(models.Model):
 
     class Meta:
         abstract = True
+        indexes = [
+            models.Index(
+                fields=["sent_to_bi", "-start_time"], name="%(class)ssBISearch"
+            )
+        ]
 
     def __str__(self):
         return f"{self.__class__.__name__}(job:#{self.job_id}, {self.config.name})"

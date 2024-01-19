@@ -157,8 +157,6 @@ def update(python_module_pk: int):
     if settings.NFS:
         update_plugin(None, python_module_pk)
     else:
-        pass
-
         queues = {config.queue for config in python_module.configs}
         for queue in queues:
             broadcast(
@@ -346,11 +344,11 @@ def beat_init_connect(*args, sender: Consumer = None, **kwargs):
 
 
 @shared_task(base=FailureLoggedTask, name="send_bi_to_elastic", soft_time_limit=300)
-def send_bi_to_elastic(max_timeout: int = 60):
+def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
     from api_app.analyzers_manager.models import AnalyzerReport
     from api_app.connectors_manager.models import ConnectorReport
     from api_app.ingestors_manager.models import IngestorReport
-    from api_app.models import AbstractReport
+    from api_app.models import AbstractReport, Job
     from api_app.pivots_manager.models import PivotReport
     from api_app.visualizers_manager.models import VisualizerReport
 
@@ -363,9 +361,12 @@ def send_bi_to_elastic(max_timeout: int = 60):
             VisualizerReport,
         ]:
             report_class: typing.Type[AbstractReport]
-            report_class.objects.filter(sent_to_bi=False).send_to_elastic_as_bi(
-                max_timeout=max_timeout
-            )
+            report_class.objects.filter(sent_to_bi=False).order_by("-start_time")[
+                :max_objects
+            ].send_to_elastic_as_bi(max_timeout=max_timeout)
+        Job.objects.filter(sent_to_bi=False).order_by("-received_request_time")[
+            :max_objects
+        ].send_to_elastic_as_bi(max_timeout=max_timeout)
 
 
 # set logger

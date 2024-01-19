@@ -1,0 +1,327 @@
+#!/usr/bin/env bash
+
+generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
+version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
+pyelastic_default_version="7.4.1"
+pycti_default_version="5.10.0"
+
+print_synopsis () {
+  echo "SYNOPSIS"
+  echo -e "    start <env> <command> [OPTIONS]"
+  echo -e "    start -h|--help\n"
+}
+
+print_help () {
+  print_synopsis
+  echo "ARGUMENTS"
+  echo "    <env>    Environment for execution"
+  echo -e "    <command>    Command for docker compose\n"
+  echo "OPTIONS"
+  echo "    --project_name <name>       Specify project name."
+  echo "    --version <value>           Choose the version you would like to install"
+  echo "                                (>=3.0.0). Works only in 'prod' mode. Default"
+  echo "                                version is the most recently released."
+  echo "    --all_analyzers             Uses every integration."
+  echo "    --tor_analyzers             Uses the integrations/tor_analyzers/compose.yml"
+  echo "                                file."
+  echo "    --malware_tools_analyzers   Uses the integrations/malware_tools_analyzers/"
+  echo "                                compose.yml file."
+  echo "    --cyberchef                 Uses the integrations/cyberchef/compose.yml"
+  echo "                                file."
+  echo "    --pcap_analyzers            Uses the integrations/pcap_analyzers/compose.yml"
+  echo "                                file."
+  echo "    --multi_queue               Uses the multiqueue.override.yml compose file."
+  echo "    --nfs                       Uses the nfs.override.yml compose file."
+  echo "    --traefik                   Uses the traefik.override.yml compose file."
+  echo "    --use-external-database     Do not use postgres.override.yml compose file."
+  echo "    --use-external-broker       Do not use rabbitmq.override.yml compose file."
+  echo "    --flower                    Uses the flower.override.yml compose file."
+  echo "    --custom                    Uses custom.override.yml to leverage your"
+  echo "                                customized configuration."
+  echo "    --debug-build               See more verbose output from the build."
+  echo "    --elastic                   This spins up Elasticsearch and Kibana on your"
+  echo "                                machine (might need >=16GB of RAM)."
+  echo "    --https                     This leverage the https.override.yml file that"
+  echo "                                can be used to host IntelOwl with HTTPS and your"
+  echo "                                own certificate."
+  echo "    --pycti-version <value>     The pycti version to choose. This must match the"
+  echo "                                OpenCTI server version you are connecting to."
+  echo "                                Default is ${pycti_default_version}."
+  echo "    --pyelastic-version <value> The py-elasticsearch version to choose. This"
+  echo "                                must match the server version you are"
+  echo "                                connecting to. Default is ${pyelastic_default_version}."
+}
+
+check_parameters () {
+  if [[ $# == 1 && ( $1 == "--help" || $1 == "-h" ) ]]; then
+    print_help
+    exit 0
+  fi
+  if [[ $# -lt 2 ]]; then
+    echo "Error! Provide at least the environment and a command." >&2
+    print_synopsis
+    exit 2
+  fi
+
+  # little trick for exact matching in arrays
+  declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
+  declare -A test_mode=(["test"]=1 ["ci"]=1)
+  declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
+
+  if ! [[ ${env_arguments["${1}"]} ]]; then
+    echo "Error! Illegal environment specified." >&2
+    exit 2
+  fi
+  if ! [[ ${cmd_arguments["${2}"]} ]]; then
+    echo "Error! Illegal command specified." >&2
+    exit 2
+  fi
+
+  env_argument=$1
+  cmd_argument=$2
+}
+
+set_defaults_values () {
+  project_name="intel_owl"
+  version=$current_version
+  export PYELASTIC_VERSION=$pyelastic_default_version
+  export PYCTI_VERSION=$pycti_default_version
+}
+
+load_env () {
+  export "$(grep -v '^#' "$1" | xargs -d '\n')"
+}
+
+if ! docker compose version > /dev/null 2>&1; then
+  ./initialize.sh
+  if ! [ $? ]; then
+    echo "Failed to install dependencies." >&2
+    exit 127
+  fi
+fi
+
+check_parameters "$@" && shift 2
+
+load_env "docker/.env"
+current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
+
+docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers")
+
+declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
+for value in "${docker_analyzers[@]}"; do
+  path_mapping["${value}"]+="integrations/${value}/compose.yml"
+  path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
+  # cannot use a list as value of associative array. we have to use a string and convert dynamically
+  path_mapping["all_analyzers"]+="${path_mapping[${value}]} "
+  path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} "
+done
+
+test_appendix=""
+if ! [[ ${test_mode["${env_argument}"]} ]]; then
+  is_test=true
+  test_appendix=".test"
+fi
+
+# parse arguments and put them in an associative array to better use them later
+declare -A params
+declare -A analyzers
+set_defaults_values
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  --project_name)
+    project_name=$2
+    shift 2
+  ;;
+  -v | --version)
+    if ! [[ $2 =~ $version_regex ]]; then
+      echo "Error! Wrong version format." >&2
+      exit 1
+    fi
+    version=$2
+    shift 2
+  ;;
+  --all_analyzers)
+    analyzers["all_analyzers"]=true
+    shift 1
+  ;;
+  --tor_analyzers)
+    analyzers["tor_analyzers"]=true
+    shift 1
+    ;;
+  --malware_tools_analyzers)
+    analyzers["malware_tools_analyzers"]=true
+    shift 1
+    ;;
+  --cyberchef)
+    analyzers["cyberchef"]=true
+    shift 1
+    ;;
+  --pcap_analyzers)
+    params["pcap_analyzers"]=true
+    shift 1
+    ;;
+  --multi_queue)
+    params["multi_queue"]=true
+    shift 1
+  ;;
+  --nfs)
+    params["nfs"]=true
+    shift 1
+  ;;
+  --use-external-database)
+    params["use_external_database"]=true
+    shift 1
+  ;;
+  --use-external-broker)
+    params["use_external_broker"]=true
+    shift 1
+  ;;
+  --flower)
+    params["flower"]=true
+    shift 1
+  ;;
+  --custom)
+    params["custom"]=true
+    shift 1
+  ;;
+  --debug-build)
+    debug_build=true
+    shift 1
+  ;;
+  --elastic)
+    params["elastic"]=true
+    shift 1
+  ;;
+  --pyelastic-version)
+    if ! [[ $2 =~ $generic_version_regex ]]; then
+      echo "Error! Wrong pyelastic version format." >&2
+      exit 1
+    fi
+    export PYELASTIC_VERSION=$2
+    shift 2
+  ;;
+  --pycti-version)
+    if ! [[ $2 =~ $generic_version_regex ]]; then
+      echo "Error! Wrong pycti version format." >&2
+      exit 1
+    fi
+    export PYCTI_VERSION=$2
+    shift 2
+  ;;
+  --https)
+    params["https"]=true
+    shift 1
+  ;;
+  -h | --help)
+    print_help
+    exit 0
+    ;;
+  --) shift 1; break;; # explicit end of arguments
+  *)
+    echo "Error! Invalid option $1."
+    exit 1
+    ;;
+  esac
+done
+
+# here all variables should be parsed and ready for use
+cmd_py_version=("up" "build")
+if [[ ( ! $env_argument == "test" || ! ${cmd_py_version[*]} =~ $cmd_argument ) && \
+  ( $PYELASTIC_VERSION != "$pyelastic_default_version" || \
+  $PYCTI_VERSION != "$pycti_default_version" ) ]]; then
+    echo "pycti_version and pyelastic_version options are valid only while running in" >&2
+    echo "'test' mode and while building a new image. This is because they can change" >&2
+    echo "the version of those library only during the build of a new Docker Image." >&2
+    exit 11
+fi
+
+# load relevant .env file
+load_env "docker/.env.start${test_appendix}"
+
+# check if all_analyzers and other flags have been used
+for value in "${docker_analyzers[@]}"; do
+  if [ "${analyzers["$value"]}" ]; then
+    docker_flags+=("${value}")
+  fi
+done
+if [ "${analyzers["all_analyzers"]}" ] && [ ${#docker_flags[@]} -ne 0 ]; then
+  echo "It is not possible to select both --all_analyzers and another docker container."
+  exit 1
+fi
+
+# default file
+compose_files=("${path_mapping["default"]}")
+if ! [ "${params["use_external_database"]}" ]; then
+  compose_files+=("${path_mapping["postgres"]}")
+fi
+if ! [ "${params["use_external_broker"]}" ]; then
+  compose_files+=("${path_mapping["rabbitmq"]}")
+fi
+if $is_test; then
+  compose_files+=("${path_mapping["$env_argument"]}")
+fi
+
+# add all the other ones
+for value in "${!params[@]}"; do
+  if [ "${params[$value]}" ]; then
+    compose_files+=("${path_mapping["$value"]}")
+  fi
+done
+# add all the test files
+if [[ $env_argument == "test" ]]; then
+  test_values=("multi_queue" "flower")
+  for value in "${test_values[@]}"; do
+    if [ "${params["$value"]}" ]; then
+      compose_files+=("${path_mapping["test_$value"]}")
+    fi
+  done
+fi
+
+# add and parse analyzers
+if [ "${analyzers["all_analyzers"]}" ]; then
+  IFS=', ' read -r -a all_analyzers_array <<< "${path_mapping["all_analyzers"]}"
+  for analyzer in "${all_analyzers_array[@]}" ; do
+    compose_files+=("${analyzer}")
+  done
+  if [ $is_test ]; then
+    IFS=', ' read -r -a all_analyzers_array_test <<< "${path_mapping["all_analyzers${test_appendix}"]}"
+    for analyzer in "${all_analyzers_array_test[@]}" ; do
+      compose_files+=("${analyzer}")
+    done
+  fi
+else
+  # add the single analyzers compose files
+  if [ ${#docker_flags[@]} -ne 0 ]; then
+    for analyzer in "${docker_flags[@]}"; do
+      compose_files+=("${path_mapping["$analyzer"]}")
+      if [ $is_test ]; then
+        compose_files+=("${path_mapping["$analyzer$test_appendix"]}")
+      fi
+    done
+  fi
+fi
+
+if [[ $env_argument == "prod" && $version != "${current_version}" ]]; then
+  echo "Requested version ${version} is different from current version ${current_version}"
+  directory=$(git config --global --get safe.directory)
+  if ! [ $? ] || ! [[ "${directory}" == $(pwd) ]]; then
+    git config --global --add safe.directory "$(pwd)"
+  fi
+  git checkout "v${version}"
+fi
+
+if [ $debug_build ]; then
+  export BUILDKIT_PROGRESS="plain"
+fi
+export DOCKER_BUILDKIT=1
+
+for value in "${compose_files[@]}" ; do
+  if [ -n "${value}" ]; then
+    to_run+=" -f $value"
+  fi
+done
+if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
+  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+else
+  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+fi

@@ -38,7 +38,6 @@ class Migration(migrations.Migration):
             model_name="ingestorreport",
             name="config",
             field=models.ForeignKey(
-                default=None,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="reports",
                 to="ingestors_manager.ingestorconfig",

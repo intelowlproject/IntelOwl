@@ -294,11 +294,31 @@ Maintainers strive to keep the upgrade between major version easy but it's not a
 Below you can find the additional process required to upgrade from each major versions.
 </div>
 
+### Updating to >v6.0.x from version v5.x.x
+
+You can safely update to >[v6.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.0) from a 5.x.x version of IntelOwl.
+
+
 #### Updating to >=6.0.0 from a 5.x.x version
 IntelOwl v6 introduced some major changes regarding how the project is started.
 Before upgrading, some important things should be checked by the administrator:
 * Docker Compose V1 support has been dropped project-wide. If you are still using a Compose version prior to v2.3.4, please [upgrade](https://docs.docker.com/compose/migrate/) to a newer version or install Docker Compose V2.
 * IntelOwl is now started with the new Bash `start` script that has the same options as the old Python `start.py` script but is more manageable and has decreased the overall project dependencies. The `start.py` script has now been removed.
+
+The migration procedure is as follows:
+- You have IntelOwl version 5.x.x up and running
+- Bring down the application (you can use the start.py script or manually)
+- Go inside the docker folder `cd docker`
+- Bring only the postgres 12 container up `docker run  -d --name intelowl_postgres_12 -v intelowl_postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:12-alpine `
+- Dump the entire database. You need the user and the database that you configured during startup for this `docker exec -t intelowl_postgres_12  pg_dump -U $POSTGRES_USER -d $POSTGRES_DB --no-owner> /tmp/dump_intelowl.sql `
+- Remove the backup container `docker rm intelowl_postgres_12`
+- Remove the postgres volume `docker volume rm intelowl_postgres_data`
+- Start the intermediary postgres 16 container `docker run  -d --name intelowl_postgres_16 -v postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:16-alpine `
+- Add the data to the volume `cat /tmp/dump_postgres.sql| docker exec -i intelowl_postgres_16 psql -U $POSTGRES_USER -d $POSTGRES_PASSWORD`
+- Remove the intermediary container `docker rm intelowl_postgres_16`
+- Update IntelOwl to the latest version
+- Bring up the application back again
+
 
 #### Updating to >=5.0.0 from a 4.x.x version
 IntelOwl v5 introduced some major changes regarding how the plugins and their related configuration are managed in the application.

@@ -5,11 +5,11 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'name': 'Mmdb_server', 'python_module': {'module': 'mmdb_server.MmdbServer', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'description': 'mmdb-server is an open source fast API server to lookup IP addresses for their geographic location, AS number.', 'disabled': False, 'soft_time_limit': 60, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['ip'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'health_check_task': None, 'model': 'analyzers_manager.AnalyzerConfig'}
+plugin = {'name': 'Mmdb_server', 'python_module': {'module': 'mmdb_server.MmdbServer', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'description': '[mmdb-server](https://github.com/adulau/mmdb-server) is an open source fast API server to lookup IP addresses for their geographic location, AS number.', 'disabled': False, 'soft_time_limit': 60, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'CLEAR', 'observable_supported': ['ip'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'health_check_task': None, 'model': 'analyzers_manager.AnalyzerConfig'}
 
-params = []
+params = [{'python_module': {'module': 'mmdb_server.MmdbServer', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'base_url', 'type': 'str', 'description': 'base url for mmdb_server', 'is_secret': False, 'required': True}]
 
-values = []
+values = [{'parameter': {'python_module': {'module': 'mmdb_server.MmdbServer', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'base_url', 'type': 'str', 'description': 'base url for mmdb_server', 'is_secret': False, 'required': True}, 'for_organization': False, 'value': 'https://ip.circl.lu/geolookup/', 'updated_at': '2024-01-20T14:58:26.616067Z', 'owner': None, 'analyzer_config': 'Mmdb_server', 'connector_config': None, 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None}]
 
 
 def _get_real_obj(Model, field, value):
@@ -67,8 +67,8 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0052_periodic_task_bi'),
-        ('analyzers_manager', '0056_alter_analyzer_config_dns0_rrsets_data'),
+        ('api_app', '0054_job_jobbisearch'),
+        ('analyzers_manager', '0057_analyzerreport_analyzerreportsbisearch'),
     ]
 
     operations = [

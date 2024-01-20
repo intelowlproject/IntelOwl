@@ -12,7 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class MmdbServer(classes.ObservableAnalyzer):
-    base_url = "https://ip.circl.lu/geolookup/"
+    """
+    This analyzer is a wrapper for the mmdb-server project.
+    """
+
+    base_url = str
 
     observable_name: str
 
@@ -23,7 +27,6 @@ class MmdbServer(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             logger.exception("Error while querying mmdb server")
             raise AnalyzerRunException(e)
-        logger.info(response)
         return response.json()
 
     @classmethod

@@ -16,7 +16,7 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.remove(*["Mmdb_serve"])
+    pc.analyzers.remove(*["Mmdb_server"])
     pc.full_clean()
     pc.save()
 

@@ -14,16 +14,14 @@ logger = logging.getLogger(__name__)
 class MmdbServer(classes.ObservableAnalyzer):
     base_url = "https://ip.circl.lu/geolookup/"
 
+    observable_name: str
+
     def run(self):
-        logger.info("nilay1")
-        observable_ip = self.observable_name
-        logger.info("nilay2")
         try:
-            response = requests.get(self.base_url + observable_ip)
+            response = requests.get(self.base_url + self.observable_name)
             # response.raise_for_status()
-            logger.info("End point was hit")
         except requests.RequestException as e:
-            logger.info("An error occured")
+            logger.exception("Error while querying mmdb server")
             raise AnalyzerRunException(e)
         logger.info(response)
         return response.json()
@@ -34,7 +32,57 @@ class MmdbServer(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=MockUpResponse(
+                        {
+                            [
+                                {
+                                    "country": {"iso_code": "BE"},
+                                    "meta": {
+                                        "description": {
+                                            "en": "Geo Open MMDB database - https://github.com/adulau/mmdb-server"
+                                        },
+                                        "build_db": "2022-02-05 11:37:33",
+                                        "db_source": "GeoOpen-Country",
+                                        "nb_nodes": 1159974,
+                                    },
+                                    "ip": "188.65.220.25",
+                                    "country_info": {
+                                        "Country": "Belgium",
+                                        "Alpha-2 code": "BE",
+                                        "Alpha-3 code": "BEL",
+                                        "Numeric code": "56",
+                                        "Latitude (average)": "50.8333",
+                                        "Longitude (average)": "4",
+                                    },
+                                },
+                                {
+                                    "country": {
+                                        "iso_code": "BE",
+                                        "AutonomousSystemNumber": "49677",
+                                        "AutonomousSystemOrganization": "MAEHDROS-AS",
+                                    },
+                                    "meta": {
+                                        "description": {
+                                            "en": "Geo Open MMDB database - https://github.com/adulau/mmdb-server"
+                                        },
+                                        "build_db": "2022-02-06 10:30:25",
+                                        "db_source": "GeoOpen-Country-ASN",
+                                        "nb_nodes": 1159815,
+                                    },
+                                    "ip": "188.65.220.25",
+                                    "country_info": {
+                                        "Country": "Belgium",
+                                        "Alpha-2 code": "BE",
+                                        "Alpha-3 code": "BEL",
+                                        "Numeric code": "56",
+                                        "Latitude (average)": "50.8333",
+                                        "Longitude (average)": "4",
+                                    },
+                                },
+                            ]
+                        },
+                        200,
+                    ),
                 ),
             )
         ]

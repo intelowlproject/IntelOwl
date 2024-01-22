@@ -26,9 +26,9 @@ class MmdbServer(classes.ObservableAnalyzer):
     def run(self):
         try:
             response = requests.get(self.base_url + self.observable_name)
-            # response.raise_for_status()
+            response.raise_for_status()
         except requests.RequestException as e:
-            logger.exception("Error while querying mmdb server")
+            logger.exception("Error while querying mmdb server: {e}")
             raise AnalyzerRunException(e)
         return response.json()
 

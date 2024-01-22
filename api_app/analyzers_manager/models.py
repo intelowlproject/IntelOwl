@@ -49,7 +49,7 @@ class MimeTypes(models.TextChoices):
     JAVA = "application/java-archive"
     RTF1 = "text/rtf"
     RTF2 = "application/rtf"
-    DOS = "application/x-dosexec"
+    DOS = "application/vnd.microsoft.portable-executable"
     SHARED_LIB = "application/x-sharedlib"
     EXE = "application/vnd.microsoft.portable-executable"
     ELF = "application/x-elf"

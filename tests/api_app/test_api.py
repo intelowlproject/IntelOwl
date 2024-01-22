@@ -41,8 +41,8 @@ class ApiViewTests(CustomViewSetTestCase):
             ],
             "connectors_requested": [],
             "file_mimetypes": [
-                "application/x-dosexec",
-                "application/x-dosexec",
+                "application/vnd.microsoft.portable-executable",
+                "application/vnd.microsoft.portable-executable",
             ],
         }
 

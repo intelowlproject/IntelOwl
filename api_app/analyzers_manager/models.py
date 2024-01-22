@@ -51,7 +51,7 @@ class MimeTypes(models.TextChoices):
     RTF2 = "application/rtf"
     DOS = "application/x-dosexec"
     SHARED_LIB = "application/x-sharedlib"
-    EXE = "application/x-executable"
+    EXE = "application/vnd.microsoft.portable-executable"
     ELF = "application/x-elf"
     OCTET = "application/octet-stream"
     PCAP = "application/vnd.tcpdump.pcap"

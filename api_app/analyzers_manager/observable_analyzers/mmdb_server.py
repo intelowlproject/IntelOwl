@@ -12,15 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class MmdbServer(classes.ObservableAnalyzer):
-    def update(self) -> bool:
-        pass
-
     """
     This analyzer is a wrapper for the mmdb-server project.
     """
 
-    base_url = str
+    def update(self) -> bool:
+        pass
 
+    base_url = str
     observable_name: str
 
     def run(self):
@@ -40,7 +39,7 @@ class MmdbServer(classes.ObservableAnalyzer):
                     "requests.get",
                     return_value=MockUpResponse(
                         {
-                            tuple(
+                            (
                                 [
                                     {
                                         "country": {"iso_code": "BE"},

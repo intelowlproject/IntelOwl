@@ -7,16 +7,61 @@ import api_app.fields
 
 def migrate(apps, schema_editor):
     Job = apps.get_model("api_app", "Job")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     Job.objects.filter(
         file_mimetype__in=["application/x-executable", "application/x-dosexec"]
     ).update(file_mimetype="application/vnd.microsoft.portable-executable")
 
+    for config in AnalyzerConfig.objects.filter(
+        not_supported_filetypes__contains=[
+            "application/x-executable",
+            "application/x-dosexec",
+        ]
+    ):
+        config.not_supported_filetypes.remove("application/x-executable")
+        config.not_supported_filetypes.remove("application/x-dosexec")
+        config.not_supported_filetypes.append(
+            "application/vnd.microsoft.portable-executable"
+        )
+        config.save()
+    for config in AnalyzerConfig.objects.filter(
+        supported_filetypes__contains=[
+            "application/x-executable",
+            "application/x-dosexec",
+        ]
+    ):
+        config.supported_filetypes.remove("application/x-executable")
+        config.supported_filetypes.remove("application/x-dosexec")
+        config.supported_filetypes.append(
+            "application/vnd.microsoft.portable-executable"
+        )
+        config.save()
+
 
 def reverse_migrate(apps, schema_editor):
     Job = apps.get_model("api_app", "Job")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     Job.objects.filter(
         file_mimetype="application/vnd.microsoft.portable-executable"
     ).update(file_mimetype="application/x-executable")
+    for config in AnalyzerConfig.objects.filter(
+        not_supported_filetypes__contains=[
+            "application/vnd.microsoft.portable-executable"
+        ]
+    ):
+        config.not_supported_filetypes.remove(
+            "application/vnd.microsoft.portable-executable"
+        )
+        config.not_supported_filetypes.append("application/x-executable")
+        config.save()
+    for config in AnalyzerConfig.objects.filter(
+        supported_filetypes__contains=["application/vnd.microsoft.portable-executable"]
+    ):
+        config.supported_filetypes.remove(
+            "application/vnd.microsoft.portable-executable"
+        )
+        config.supported_filetypes.append("application/x-executable")
+        config.save()
 
 
 class Migration(migrations.Migration):
@@ -176,4 +221,5 @@ class Migration(migrations.Migration):
                 size=None,
             ),
         ),
+        migrations.RunPython(migrate, reverse_migrate),
     ]

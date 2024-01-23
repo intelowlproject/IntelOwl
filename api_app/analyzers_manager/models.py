@@ -49,7 +49,6 @@ class MimeTypes(models.TextChoices):
     JAVA = "application/java-archive"
     RTF1 = "text/rtf"
     RTF2 = "application/rtf"
-    DOS = "application/vnd.microsoft.portable-executable"
     SHARED_LIB = "application/x-sharedlib"
     EXE = "application/vnd.microsoft.portable-executable"
     ELF = "application/x-elf"
@@ -85,6 +84,8 @@ class MimeTypes(models.TextChoices):
     XPKCS7 = "application/x-pkcs7-signature"
     MIXED = "multipart/mixed"
     X_SHELLSCRIPT = "text/x-shellscript"
+
+    _NEW_EXE = "application/vnd.microsoft.portable-executable"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:

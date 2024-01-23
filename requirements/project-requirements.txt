@@ -41,7 +41,7 @@ dnstwist[full]==20230918
 google>=3.0.0
 google-cloud-webrisk==1.13.0
 intezer-sdk==1.19.4
-lief==0.13.1
+lief==0.14.0
 maxminddb==2.5.1
 mwdblib==4.5.0
 oletools==0.60

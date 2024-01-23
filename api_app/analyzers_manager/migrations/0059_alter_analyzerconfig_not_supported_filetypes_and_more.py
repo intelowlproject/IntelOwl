@@ -18,8 +18,8 @@ def migrate(apps, schema_editor):
             not_supported_filetypes__contains=[
                 "application/x-dosexec",
             ]
-        ),
-        Q(
+        )
+        | Q(
             not_supported_filetypes__contains=[
                 "application/x-executable",
             ]
@@ -37,13 +37,14 @@ def migrate(apps, schema_editor):
             "application/vnd.microsoft.portable-executable"
         )
         config.save()
+
     for config in AnalyzerConfig.objects.filter(
         Q(
             supported_filetypes__contains=[
                 "application/x-dosexec",
             ]
-        ),
-        Q(
+        )
+        | Q(
             supported_filetypes__contains=[
                 "application/x-executable",
             ]
@@ -82,6 +83,8 @@ def reverse_migrate(apps, schema_editor):
     for config in AnalyzerConfig.objects.filter(
         supported_filetypes__contains=["application/vnd.microsoft.portable-executable"]
     ):
+        print("diocane")
+        print(config.name)
         config.supported_filetypes.remove(
             "application/vnd.microsoft.portable-executable"
         )

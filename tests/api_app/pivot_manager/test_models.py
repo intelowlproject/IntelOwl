@@ -102,7 +102,9 @@ class PivotConfigTestCase(CustomTestCase):
         jobs = list(pc.create_jobs(content, job.tlp, job.user, send_task=False))
         self.assertEqual(1, len(jobs))
         self.assertEqual("PivotOnTest.0", jobs[0].file_name)
-        self.assertEqual("application/x-dosexec", jobs[0].file_mimetype)
+        self.assertEqual(
+            "application/vnd.microsoft.portable-executable", jobs[0].file_mimetype
+        )
 
     def test_create_job(self):
         job = Job(observable_name="test.com", tlp="AMBER", user=User.objects.first())

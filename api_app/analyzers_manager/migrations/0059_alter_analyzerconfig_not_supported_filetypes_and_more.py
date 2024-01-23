@@ -5,9 +5,24 @@ from django.db import migrations, models
 import api_app.fields
 
 
+def migrate(apps, schema_editor):
+    Job = apps.get_model("api_app", "Job")
+    Job.objects.filter(
+        file_mimetype__in=["application/x-executable", "application/x-dosexec"]
+    ).update(file_mimetype="application/vnd.microsoft.portable-executable")
+
+
+def reverse_migrate(apps, schema_editor):
+    Job = apps.get_model("api_app", "Job")
+    Job.objects.filter(
+        file_mimetype="application/vnd.microsoft.portable-executable"
+    ).update(file_mimetype="application/x-executable")
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("analyzers_manager", "0058_4_change_primary_key"),
+        ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
     ]
 
     operations = [

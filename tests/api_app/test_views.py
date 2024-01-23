@@ -388,7 +388,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "is_sample": True,
                 "md5": "test.file",
                 "file_name": "test.file",
-                "file_mimetype": "application/x-dosexec",
+                "file_mimetype": "application/vnd.microsoft.portable-executable",
             }
         )
 

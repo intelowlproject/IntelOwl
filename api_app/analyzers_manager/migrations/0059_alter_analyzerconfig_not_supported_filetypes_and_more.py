@@ -58,6 +58,8 @@ def migrate(apps, schema_editor):
             config.supported_filetypes.remove("application/x-dosexec")
         except ValueError:
             pass
+        if config.name == "ELF_Info":
+            continue
         config.supported_filetypes.append(
             "application/vnd.microsoft.portable-executable"
         )
@@ -83,8 +85,6 @@ def reverse_migrate(apps, schema_editor):
     for config in AnalyzerConfig.objects.filter(
         supported_filetypes__contains=["application/vnd.microsoft.portable-executable"]
     ):
-        print("diocane")
-        print(config.name)
         config.supported_filetypes.remove(
             "application/vnd.microsoft.portable-executable"
         )

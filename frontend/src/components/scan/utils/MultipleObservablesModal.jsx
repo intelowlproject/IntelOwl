@@ -3,17 +3,12 @@ import PropTypes from "prop-types";
 import { Modal, ModalHeader, ModalBody, Button, Input } from "reactstrap";
 
 import { ContentSection } from "@certego/certego-ui";
-import {
-  observableValidators,
-  sanitizeObservable,
-} from "../../../utils/observables";
+import { observableValidators } from "../../../utils/observables";
 
 // components
 export function MultipleObservablesModal(props) {
   const { isOpen, toggle, formik, ...rest } = props;
   const [extractedObservables, setExtractedObservables] = React.useState({});
-  const [textAreaInput, setTextAreaInput] = React.useState("");
-  console.debug(textAreaInput);
 
   const extractObservables = (inputText) => {
     // split text where there are spaces, breakline or , and ;
@@ -43,35 +38,6 @@ export function MultipleObservablesModal(props) {
     console.debug("MultipleObservablesModal - observables:");
     console.debug(observables);
     setExtractedObservables(observables);
-
-    const textHighlightColor = (text) => {
-      if (observables.domain.includes(text)) return "bg-dark text-primary";
-      if (observables.ip.includes(text)) return "bg-dark text-warning";
-      if (observables.hash.includes(text)) return "bg-dark text-success";
-      if (observables.url.includes(text)) return "bg-dark text-danger";
-      return null;
-    };
-
-    setTextAreaInput(
-      inputText.split(/\n/).map((line) => (
-        <>
-          <span className="d-inline-flex flex-wrap">
-            {line.split(/\s/).map((part) => (
-              <>
-                <span
-                  className={textHighlightColor(sanitizeObservable(part))}
-                  key={`highlightArea__${part}`}
-                >
-                  {part}
-                </span>
-                &nbsp;
-              </>
-            ))}
-          </span>
-          <br />
-        </>
-      )),
-    );
   };
 
   const saveAndCloseModal = () => {

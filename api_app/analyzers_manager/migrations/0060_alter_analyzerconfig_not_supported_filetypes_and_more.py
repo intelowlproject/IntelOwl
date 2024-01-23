@@ -94,7 +94,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0058_4_change_primary_key"),
+        ("analyzers_manager", "0059_alter_analyzer_config_dns0_rrsets_data"),
         ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
     ]
 

@@ -85,8 +85,6 @@ class MimeTypes(models.TextChoices):
     MIXED = "multipart/mixed"
     X_SHELLSCRIPT = "text/x-shellscript"
 
-    _NEW_EXE = "application/vnd.microsoft.portable-executable"
-
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:
         if file_name.endswith(".js") or file_name.endswith(".jse"):

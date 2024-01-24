@@ -11,7 +11,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 class Ip2location(classes.ObservableAnalyzer):
     base_url: str = "https://api.ip2location.io/"
     _api_key_name: str
-    ip2location_api_version: str
+    api_version: str
 
     def get_response(self, payload):
         return requests.get(self.base_url, params=payload)
@@ -24,7 +24,7 @@ class Ip2location(classes.ObservableAnalyzer):
                 1. keyless : Requires No API key and has a daily limit of 500 queries
                 2. keyed: Requires API key.
             """
-            if self.ip2location_api_version == "keyed":
+            if self.api_version == "keyed":
                 payload["key"] = self._api_key_name
 
             location_info = self.get_response(payload)

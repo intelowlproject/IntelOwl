@@ -20,7 +20,7 @@ class ConnectorConfigSerializer(PythonConfigSerializer):
 class ConnectorConfigSerializerForMigration(PythonConfigSerializerForMigration):
     class Meta:
         model = ConnectorConfig
-        exclude = PythonConfigSerializerForMigration.Meta.exclude
+        fields = PythonConfigSerializerForMigration.Meta.fields
 
 
 class ConnectorReportSerializer(AbstractReportSerializer):

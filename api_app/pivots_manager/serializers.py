@@ -66,4 +66,4 @@ class PivotConfigSerializer(PythonConfigSerializer):
 class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):
     class Meta:
         model = PivotConfig
-        exclude = PythonConfigSerializerForMigration.Meta.exclude
+        fields = PythonConfigSerializerForMigration.Meta.fields

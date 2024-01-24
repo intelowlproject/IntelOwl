@@ -38,7 +38,7 @@ class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
 
     class Meta:
         model = IngestorConfig
-        fields = PythonConfigSerializerForMigration.Meta.fields
+        exclude = PythonConfigSerializerForMigration.Meta.exclude
 
     def to_internal_value(self, data):
         raise NotImplementedError()

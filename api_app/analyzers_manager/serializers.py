@@ -39,4 +39,4 @@ class AnalyzerConfigSerializerForMigration(PythonConfigSerializerForMigration):
 
     class Meta:
         model = AnalyzerConfig
-        fields = PythonConfigSerializerForMigration.Meta.fields
+        exclude = PythonConfigSerializerForMigration.Meta.exclude

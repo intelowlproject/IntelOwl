@@ -23,7 +23,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
+        ("playbooks_manager", "0024_4_change_primary_key"),
     ]
 
     operations = [

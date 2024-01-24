@@ -12,17 +12,11 @@ from api_app.fields import ChoiceArrayField
 from api_app.interfaces import OwnershipAbstractModel
 from api_app.models import AbstractConfig, Tag
 from api_app.playbooks_manager.queryset import PlaybookConfigQuerySet
-from api_app.validators import plugin_name_validator, validate_runtime_configuration
+from api_app.validators import validate_runtime_configuration
 
 
 class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
     objects = PlaybookConfigQuerySet.as_manager()
-    name = models.CharField(
-        max_length=100,
-        null=False,
-        primary_key=True,
-        validators=[plugin_name_validator],
-    )
     type = ChoiceArrayField(
         models.CharField(choices=AllTypes.choices, null=False, max_length=50)
     )

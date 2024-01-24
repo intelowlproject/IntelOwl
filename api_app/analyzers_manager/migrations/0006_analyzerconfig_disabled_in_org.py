@@ -11,7 +11,7 @@ def migrate_disabled_config(apps, schema_editor):
     OrganizationPluginState = apps.get_model("api_app", "OrganizationPluginState")
     for plugin_state in OrganizationPluginState.objects.filter(type="1", disabled=True):
         config = AnalyzerConfig.objects.get(name=plugin_state.plugin_name)
-        config.disabled_in_organizations.add(plugin_state.organization)
+        config.disabled_in_organizations.update(plugin_state.organization)
 
 
 def backwards_migrate_disabled_config(apps, schema_editor):

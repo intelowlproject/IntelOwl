@@ -452,7 +452,6 @@ The following are the most important fields that you can change without touching
 - `name`: Name of the analyzer
 - `description`: Description of the analyzer
 - `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `disabled_in_organization`: you can choose to disable analyzers in some organizations only.
 - `python_module`: Python path of the class that will be executed 
 - `maximum_tlp`: see [TLP Support](#tlp-support)
 - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.

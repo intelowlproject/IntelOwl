@@ -656,11 +656,11 @@ class TagViewsetTests(CustomViewSetTestCase):
 
 class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABCMeta):
     def test_organization_disable(self):
-        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        plugin_name = self.model_class.objects.order_by("?").first().name
         org, _ = Organization.objects.get_or_create(name="test")
 
         # a guest user cannot disable plugin config at org level
-        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        response = self.client.post(f"{self.URL}/{plugin_name}/organization")
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
@@ -672,7 +672,7 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         m, _ = Membership.objects.get_or_create(
             user=self.user, organization=org, is_owner=False
         )
-        response = self.client.post(f"{self.URL}/{plugin_pk}/organization")
+        response = self.client.post(f"{self.URL}/{plugin_name}/organization")
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
@@ -683,19 +683,19 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         # an admin can disable plugin config at org level
         m.is_admin = True
         m.save()
-        plugin = self.model_class.objects.get(pk=plugin_pk)
+        plugin = self.model_class.objects.get(name=plugin_name)
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
         )  # isn't it disabled?
         response = self.client.post(
-            f"{self.URL}/{plugin_pk}/organization"
+            f"{self.URL}/{plugin_name}/organization"
         )  # disabling it
         self.assertEqual(response.status_code, 201)
         self.assertTrue(
             plugin.disabled_in_organizations.all().exists()
         )  # now it's disabled
         response = self.client.post(
-            f"{self.URL}/{plugin_pk}/organization"
+            f"{self.URL}/{plugin_name}/organization"
         )  # try to disable it again
         self.assertEqual(response.status_code, 400, response.json())
         self.assertEqual(
@@ -712,28 +712,30 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         m.is_admin = True  # and owner is also and admin
         m.is_owner = True
         m.save()
-        plugin.disabled_in_organizations.set([])  # reset the disabled plugins
+        plugin.disabled_in_organizations.update(
+            disabled=False
+        )  # reset the disabled plugins
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
         )  # isn't it disabled?
         response = self.client.post(
-            f"{self.URL}/{plugin_pk}/organization"
+            f"{self.URL}/{plugin_name}/organization"
         )  # disabling it
         self.assertEqual(response.status_code, 201)
         self.assertTrue(
             plugin.disabled_in_organizations.all().exists()
         )  # now it's disabled
 
-        plugin.disabled_in_organizations.set([])
+        plugin.disabled_in_organizations.delete()
         m.delete()
         org.delete()
 
     def test_organization_enable(self):
-        plugin_pk = self.model_class.objects.order_by("?").first().pk
+        plugin_name = self.model_class.objects.order_by("?").first().name
         org, _ = Organization.objects.get_or_create(name="test")
 
         # a guest user cannot enable plugin config at org level
-        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        response = self.client.delete(f"{self.URL}/{plugin_name}/organization")
         self.assertEqual(response.status_code, 403, response.json())
         result = response.json()
         self.assertIn("detail", result)
@@ -745,7 +747,7 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         m, _ = Membership.objects.get_or_create(
             user=self.user, organization=org, is_owner=False
         )
-        response = self.client.delete(f"{self.URL}/{plugin_pk}/organization")
+        response = self.client.delete(f"{self.URL}/{plugin_name}/organization")
         result = response.json()
         self.assertEqual(response.status_code, 403, result)
         self.assertIn("detail", result)
@@ -760,12 +762,12 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         m.is_admin = True
         m.save()
         self.client.force_authenticate(m.user)
-        plugin = self.model_class.objects.get(pk=plugin_pk)
+        plugin = self.model_class.objects.get(name=plugin_name)
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
         )  # isn't it disabled?
         response = self.client.delete(
-            f"{self.URL}/{plugin_pk}/organization"
+            f"{self.URL}/{plugin_name}/organization"
         )  # enabling it
         result = response.json()
         self.assertEqual(response.status_code, 400, result)  # validation error
@@ -778,10 +780,10 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(
             result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
         )
-        plugin.disabled_in_organizations.add(org)  # disabling it
+        plugin.orgs_configuration.update(disabled=True)  # disabling it
         response = self.client.delete(
-            f"{self.URL}/{plugin_pk}/organization"
-        )  # enabling it
+            f"{self.URL}/{plugin_name}/organization"
+        )  # disable it
         self.assertEqual(response.status_code, 202)
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
@@ -791,12 +793,12 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         m.is_owner = True
         m.is_admin = True  # an owner is also an admin
         m.save()
-        plugin.disabled_in_organizations.set([])
+        plugin.disabled_in_organizations.update(disabled=False)
         self.assertFalse(
             plugin.disabled_in_organizations.all().exists()
         )  # isn't it disabled?
         response = self.client.delete(
-            f"{self.URL}/{plugin_pk}/organization"
+            f"{self.URL}/{plugin_name}/organization"
         )  # enabling it
         result = response.json()
         self.assertEqual(response.status_code, 400, result)  # validation error
@@ -809,9 +811,9 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
         self.assertEqual(
             result["errors"]["detail"], f"Plugin {plugin.name} already enabled"
         )
-        plugin.disabled_in_organizations.add(org)  # disabling it
+        plugin.orgs_configuration.update(disabled=True)  # disabling it
         response = self.client.delete(
-            f"{self.URL}/{plugin_pk}/organization"
+            f"{self.URL}/{plugin_name}/organization"
         )  # enabling it
         self.assertEqual(response.status_code, 202)
         self.assertFalse(

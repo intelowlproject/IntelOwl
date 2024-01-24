@@ -70,6 +70,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0018_playbookconfig_scan_check_time_and_more"),
+        ("analyzers_manager", "0054_analyzer_config_dns0_rrsets_name"),
     ]
 
     operations = [

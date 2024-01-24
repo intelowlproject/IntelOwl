@@ -37,7 +37,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - uwsgi
+      uwsgi:
+        condition: service_healthy
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -76,7 +77,8 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      - uwsgi
+      uwsgi:
+        condition: service_healthy
     <<: *no-healthcheck
 
 

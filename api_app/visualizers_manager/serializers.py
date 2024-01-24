@@ -27,7 +27,7 @@ class VisualizerConfigSerializer(PythonConfigSerializer):
 class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration):
     class Meta:
         model = VisualizerConfig
-        fields = PythonConfigSerializerForMigration.Meta.fields
+        exclude = PythonConfigSerializerForMigration.Meta.exclude
 
 
 class VisualizerReportSerializer(AbstractReportSerializer):

@@ -222,9 +222,9 @@ export const jobTableColumns = [
     id: "playbook_to_execute",
     accessor: (job) => job,
     Cell: ({ value: job }) => {
-      /*Don't move from here!
+      /* Don't move from here!
       If playbooks is initialized in the top of the file is done before the loading in the table job
-      and does not contain data*/
+      and does not contain data */
       const { playbooks } = usePluginConfigurationStore.getState();
 
       return (

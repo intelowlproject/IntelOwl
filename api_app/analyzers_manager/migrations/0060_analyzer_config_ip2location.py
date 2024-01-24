@@ -6,7 +6,6 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "id": 1,
     "python_module": {
         "module": "ip2location.Ip2location",
         "base_path": "api_app.analyzers_manager.observable_analyzers",

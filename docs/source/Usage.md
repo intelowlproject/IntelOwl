@@ -258,6 +258,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `IPApi`: Get information about IPs using [batch-endpoint](https://ip-api.com/docs/api:batch) and DNS using [DNS-endpoint](https://ip-api.com/docs/dns).
 * `IPInfo`: Location Information about an IP
+* `Ip2location`: [API Docs](https://www.ip2location.io/ip2location-documentation) IP2Location.io allows users to check IP address location in real time. (Supports both with or without key)
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in).
 * `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)

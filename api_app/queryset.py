@@ -110,7 +110,27 @@ class CleanOnCreateQuerySet(models.QuerySet):
         )
 
 
+class OrganizationPluginConfigurationQuerySet(models.QuerySet):
+    def filter_for_config(self, config_class, config_pk: str):
+        return self.filter(
+            content_type=config_class.get_content_type(), object_id=config_pk
+        )
+
+
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
+    def alias_disabled_in_organization(self, organization):
+        from api_app.models import OrganizationPluginConfiguration
+
+        opc = OrganizationPluginConfiguration.objects.filter(organization=organization)
+
+        return self.alias(
+            disabled_in_organization=Exists(
+                opc.filter_for_config(
+                    config_class=self.model, config_pk=OuterRef("pk")
+                ).filter(disabled=True)
+            )
+        )
+
     def annotate_runnable(self, user: User = None) -> QuerySet:
         # the plugin is runnable IF
         # - it is not disabled
@@ -118,11 +138,9 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         qs = self.filter(
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
-
         if user and user.has_membership():
-            qs = qs.exclude(
-                disabled_in_organizations=user.membership.organization,
-            )
+            qs = qs.alias_disabled_in_organization(user.membership.organization)
+            qs = qs.exclude(disabled_in_organization=True)
         return self.annotate(runnable=Exists(qs))
 
 

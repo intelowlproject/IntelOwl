@@ -214,11 +214,13 @@ class AbstractConfigTestCase(CustomTestCase):
 
         m = Membership.objects.create(user=self.user, organization=org, is_owner=True)
         muc: VisualizerConfig
-        muc.disabled_in_organizations.add(org)
+        org_config = muc.get_or_create_org_configuration(org)
+        org_config.disabled = True
+        org_config.save()
         self.assertFalse(
             VisualizerConfig.objects.filter(name="test")
             .exclude(disabled=True)
-            .exclude(disabled_in_organizations=self.user.membership.organization)
+            .exclude(orgs_configuration__organization=self.user.membership.organization)
         )
         self.assertFalse(muc.is_runnable(self.user))
 
@@ -417,8 +419,8 @@ class PluginConfigTestCase(CustomTestCase):
 class JobTestCase(CustomTestCase):
     def test_pivots_to_execute(self):
         ac = AnalyzerConfig.objects.first()
-        ac2 = AnalyzerConfig.objects.exclude(pk__in=[ac]).first()
-        ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac, ac2]).first()
+        ac2 = AnalyzerConfig.objects.exclude(pk__in=[ac.pk]).first()
+        ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac.pk, ac2.pk]).first()
         j1 = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -427,6 +429,7 @@ class JobTestCase(CustomTestCase):
             status=Job.Status.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(
+            name="test",
             python_module=PythonModule.objects.get(
                 base_path="api_app.pivots_manager.pivots",
                 module="self_analyzable.SelfAnalyzable",

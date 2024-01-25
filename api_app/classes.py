@@ -268,3 +268,18 @@ class Plugin(metaclass=ABCMeta):
                 else:
                     return True
         raise NotImplementedError()
+
+    def disable_for_rate_limit(self):
+        if self._user.has_membership():
+            org_configuration = self._config.get_or_create_org_configuration(
+                self._user.membership.organization
+            )
+            if org_configuration.rate_limit_timeout is not None:
+                org_configuration.disable_for_rate_limit()
+            else:
+                logger.warning(
+                    f"You are trying to disable {self.name}"
+                    " for rate limit without specifying a timeout."
+                )
+        else:
+            logger.info(f"User {self._user.username} is not in organization.")

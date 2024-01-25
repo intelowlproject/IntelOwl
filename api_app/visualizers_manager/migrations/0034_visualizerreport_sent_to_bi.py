@@ -6,6 +6,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("visualizers_manager", "0033_visualizerreport_parameters"),
+        ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
+        ("pivots_manager", "0022_pivotreport_pivotreportsbisearch"),
     ]
 
     operations = [

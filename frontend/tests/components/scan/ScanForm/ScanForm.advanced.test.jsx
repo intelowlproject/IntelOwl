@@ -665,7 +665,11 @@ describe("ScanForm adavanced use", () => {
       name: "Save & Close",
     });
     expect(saveButton).toBeInTheDocument();
-    await user.click(saveButton);
+    // await 500ms before continuing further
+    await new Promise((res) => {
+      setTimeout(res, 500);
+    });
+    user.click(saveButton);
 
     const startScanButton = screen.getByRole("button", {
       name: "Start Scan",
@@ -673,9 +677,6 @@ describe("ScanForm adavanced use", () => {
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
     await user.click(startScanButton);
-
-    /* IMPORTANT! Only in the test, editing and saving of the configuration 
-    were performed incorrectly so the "runtime_configuration" field is empty */
 
     await waitFor(() => {
       // no call to the API to check old analysis (one of the advanced settings)
@@ -688,13 +689,13 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             tlp: "AMBER",
             scan_mode: 1,
-            // runtime_configuration: {
-            //   analyzers: {
-            //     TEST_ANALYZER: {query_type: 'A'}
-            //   },
-            //   connectors: {},
-            //   visualizers: {},
-            // }
+            runtime_configuration: {
+              analyzers: {
+                TEST_ANALYZER: { query_type: "A" },
+              },
+              connectors: {},
+              visualizers: {},
+            },
           },
           { headers: { "Content-Type": "application/json" } },
         ],

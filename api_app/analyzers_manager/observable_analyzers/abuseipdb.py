@@ -10,7 +10,6 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 class AbuseIPDB(ObservableAnalyzer):
     url: str = "https://api.abuseipdb.com/api/v2/check"
 
-    verbose: bool
     _api_key_name: str
     max_age: int
     max_reports: int

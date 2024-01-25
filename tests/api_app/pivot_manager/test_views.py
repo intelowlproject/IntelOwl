@@ -15,6 +15,9 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     def model_class(cls) -> Type[PivotMap]:
         return PivotMap
 
+    def get_plugin(self):
+        return self.model_class.objects.order_by("?").first().pk
+
     def test_get(self):
         plugin = self.model_class.objects.order_by("?").first().pk
         response = self.client.get(f"{self.URL}/{plugin}")
@@ -43,6 +46,7 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
             status="reported_without_fails",
         )
         self.pc = PivotConfig.objects.create(
+            name="test",
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
@@ -72,6 +76,7 @@ class PivotConfigViewSetTestCase(
     def setUp(self):
         super().setUp()
         self.pc = PivotConfig(
+            name="test",
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),

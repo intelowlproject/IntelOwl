@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
 import { MdEdit, MdInfoOutline } from "react-icons/md";
+import { RiFileAddLine } from "react-icons/ri";
 import {
   FormGroup,
   Label,
@@ -54,6 +55,7 @@ import { TLPTag } from "../common/TLPTag";
 import { markdownToHtml } from "../common/markdownToHtml";
 import { JobTag } from "../common/JobTag";
 import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
+import { MultipleObservablesModal } from "./utils/MultipleObservablesModal";
 import RecentScans from "./utils/RecentScans";
 import { TagSelectInput } from "./utils/TagSelectInput";
 import { createJob } from "./scanApi";
@@ -498,7 +500,7 @@ export default function ScanForm() {
     }
   };
 
-  // useEffect for setting the default playbook if an observableor a file is loaded before playbooks are fetched
+  // useEffect for setting the default playbook if an observable or a file is loaded before playbooks are fetched
   useEffect(() => {
     if (
       (formik.values.observable_names.length &&
@@ -532,10 +534,30 @@ export default function ScanForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
-  const [isModalOpen, setModalOpen] = React.useState(false);
-  const toggleModal = () => {
-    if (!pluginsLoading) setModalOpen((open) => !open);
+  const [isRuntimeConfigModalOpen, setRuntimeConfigModalOpen] =
+    React.useState(false);
+  const toggleRuntimeConfigModal = () => {
+    if (!pluginsLoading) setRuntimeConfigModalOpen((open) => !open);
   };
+  const [isMultipleObservablesModalOpen, setMultipleObservablesModalOpen] =
+    React.useState(false);
+  const toggleMultipleObservablesModal = React.useCallback(
+    () => setMultipleObservablesModalOpen((open) => !open),
+    [setMultipleObservablesModalOpen],
+  );
+
+  // useEffect for setting the default playbook if multiple observables are loaded
+  useEffect(() => {
+    if (
+      formik.values.observable_names.length &&
+      formik.values.observable_names[0] !== ""
+    ) {
+      formik.values.observable_names.forEach((observable, index) =>
+        updateSelectedObservable(observable, index),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toggleMultipleObservablesModal, formik.values.observable_names]);
 
   console.debug(`classification: ${formik.values.classification}`);
   console.debug("formik");
@@ -566,7 +588,7 @@ export default function ScanForm() {
           <Form onSubmit={formik.handleSubmit}>
             <Row>
               <div className="col-sm-3 col-form-label" />
-              <FormGroup className="mb-0 mt-2 d-flex col-sm-9">
+              <FormGroup className="mb-0 mt-2 d-flex col-sm-8">
                 {[JobTypes.OBSERVABLE, JobTypes.FILE].map((jobType) => (
                   <FormGroup check inline key={`observableType__${jobType}`}>
                     <Col>
@@ -610,6 +632,26 @@ export default function ScanForm() {
                   </FormGroup>
                 ))}
               </FormGroup>
+              <Col sm={1} className="d-flex-center justify-content-end mb-3">
+                {formik.values.classification !== "file" && (
+                  <IconButton
+                    id="scanform-multipleobservables-btn"
+                    Icon={RiFileAddLine}
+                    title="Load multilple observables"
+                    titlePlacement="top"
+                    size="sm"
+                    color="tertiary"
+                    onClick={toggleMultipleObservablesModal}
+                  />
+                )}
+                {isMultipleObservablesModalOpen && (
+                  <MultipleObservablesModal
+                    isOpen={isMultipleObservablesModalOpen}
+                    toggle={toggleMultipleObservablesModal}
+                    formik={formik}
+                  />
+                )}
+              </Col>
             </Row>
             {formik.values.observableType === JobTypes.OBSERVABLE ? (
               <FieldArray
@@ -628,48 +670,54 @@ export default function ScanForm() {
                       <div className="invalid-feedback d-block">
                         {formik.errors.no_observables}
                       </div>
-                      {formik.values.observable_names &&
-                      formik.values.observable_names.length > 0
-                        ? formik.values.observable_names.map((name, index) => (
-                            <div
-                              className="py-2 d-flex"
-                              key={`observable_names.${index + 0}`}
-                            >
-                              <Col sm={11} className="pe-3">
-                                <Field
-                                  as={Input}
-                                  type="text"
-                                  placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a"
-                                  id={`observable_names.${index}`}
-                                  name={`observable_names.${index}`}
-                                  className="input-dark"
-                                  invalid={
-                                    Boolean(
-                                      formik.errors.observable_names &&
-                                        formik.errors.observable_names[index],
-                                    ) &&
-                                    formik.touched.observable_names &&
-                                    formik.touched.observable_names[index]
-                                  }
-                                  onChange={(event) =>
-                                    updateSelectedObservable(
-                                      event.target.value,
-                                      index,
-                                    )
-                                  }
-                                />
-                                {DangerErrorMessage("observable_names")}
-                              </Col>
-                              <Button
-                                color="primary"
-                                className="mx-auto rounded-1 text-larger col-sm-1"
-                                onClick={() => arrayHelpers.remove(index)}
-                              >
-                                <BsFillTrashFill />
-                              </Button>
-                            </div>
-                          ))
-                        : null}
+                      <div style={{ maxHeight: "27vh", overflowY: "scroll" }}>
+                        {formik.values.observable_names &&
+                        formik.values.observable_names.length > 0
+                          ? formik.values.observable_names.map(
+                              (name, index) => (
+                                <div
+                                  className="py-2 d-flex"
+                                  key={`observable_names.${index + 0}`}
+                                >
+                                  <Col sm={11} className="pe-3">
+                                    <Field
+                                      as={Input}
+                                      type="text"
+                                      placeholder="google.com, 8.8.8.8, https://google.com, 1d5920f4b44b27a802bd77c4f0536f5a"
+                                      id={`observable_names.${index}`}
+                                      name={`observable_names.${index}`}
+                                      className="input-dark"
+                                      invalid={
+                                        Boolean(
+                                          formik.errors.observable_names &&
+                                            formik.errors.observable_names[
+                                              index
+                                            ],
+                                        ) &&
+                                        formik.touched.observable_names &&
+                                        formik.touched.observable_names[index]
+                                      }
+                                      onChange={(event) =>
+                                        updateSelectedObservable(
+                                          event.target.value,
+                                          index,
+                                        )
+                                      }
+                                    />
+                                    {DangerErrorMessage("observable_names")}
+                                  </Col>
+                                  <Button
+                                    color="primary"
+                                    className="mx-auto rounded-1 text-larger col-sm-1"
+                                    onClick={() => arrayHelpers.remove(index)}
+                                  >
+                                    <BsFillTrashFill />
+                                  </Button>
+                                </div>
+                              ),
+                            )
+                          : null}
+                      </div>
                       <Row className="my-2 pt-0">
                         <Button
                           color="primary"
@@ -763,12 +811,12 @@ export default function ScanForm() {
                       Object.keys(formik.values.playbook).length > 0
                     )
                   }
-                  onClick={toggleModal}
+                  onClick={toggleRuntimeConfigModal}
                 />
-                {isModalOpen && (
+                {isRuntimeConfigModalOpen && (
                   <RuntimeConfigurationModal
-                    isOpen={isModalOpen}
-                    toggle={toggleModal}
+                    isOpen={isRuntimeConfigModalOpen}
+                    toggle={toggleRuntimeConfigModal}
                     formik={formik}
                   />
                 )}

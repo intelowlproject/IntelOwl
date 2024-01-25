@@ -330,8 +330,8 @@ export default function ScanForm() {
           currentAnalyzer.isDisabled === nextAnalyzer.isDisabled
             ? 0
             : currentAnalyzer.isDisabled
-              ? 1
-              : -1,
+            ? 1
+            : -1,
         ),
     [analyzersGrouped, formik.values.classification],
   );
@@ -363,8 +363,8 @@ export default function ScanForm() {
           currentConnector.isDisabled === nextConnector.isDisabled
             ? 0
             : currentConnector.isDisabled
-              ? 1
-              : -1,
+            ? 1
+            : -1,
         ),
     [connectors],
   );
@@ -670,7 +670,7 @@ export default function ScanForm() {
                       <div className="invalid-feedback d-block">
                         {formik.errors.no_observables}
                       </div>
-                      <div style={{ maxHeight: "27vh", overflow: "scroll" }}>
+                      <div style={{ maxHeight: "27vh", overflowY: "scroll" }}>
                         {formik.values.observable_names &&
                         formik.values.observable_names.length > 0
                           ? formik.values.observable_names.map(

@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('api_app', '0059_alter_organizationpluginconfiguration_unique_together'),
-        ('analyzers_manager', '0059_alter_analyzer_config_dns0_rrsets_data'),
+        ('analyzers_manager', '0060_analyzer_config_ip2location'),
     ]
 
     operations = [

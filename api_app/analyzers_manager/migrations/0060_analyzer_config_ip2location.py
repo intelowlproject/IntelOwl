@@ -34,7 +34,7 @@ params = [
             "module": "ip2location.Ip2location",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
-        "name": "_api_key_name",
+        "name": "api_key_name",
         "type": "str",
         "description": "Ip2location API key name.",
         "is_secret": True,

@@ -263,12 +263,12 @@ class YaraRepo:
                 # limited to 20 strings reasons because it could be a very long list
                 for string in match.strings[:20]:
                     string: yara.StringMatch
-                    instances: List[yara.StringMatchInstance] = string.instances
                     entry = {
                         "identifier": string.identifier,
-                        "plaintext": [i.plaintext()[:50] for i in instances][:20],
+                        "plaintext": [str(i) for i in string.instances[:20]],
                     }
                     strings.append(entry)
+                    logger.debug(f"{strings=}")
 
                 logger.info(
                     f"{self} found {len(strings)} strings for {filename}"

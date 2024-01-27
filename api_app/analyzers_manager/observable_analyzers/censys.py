@@ -15,6 +15,9 @@ class Censys(classes.ObservableAnalyzer):
     Please apply secreats using: https://search.censys.io/account/api
     """
 
+    def update():
+        pass
+
     base_url = "https://search.censys.io/api/v2"
 
     censys_analysis: str
@@ -31,7 +34,11 @@ class Censys(classes.ObservableAnalyzer):
             )
         try:
             response = requests.get(
-                self.base_url + uri, auth=(self._api_id_name, self._api_secret_name)
+                self.base_url + uri,
+                auth=(self._api_id_name, self._api_secret_name),
+                headers={
+                    "Accept": "application/json",
+                },
             )
             response.raise_for_status()
         except requests.RequestException as e:

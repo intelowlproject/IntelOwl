@@ -9,7 +9,13 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Censys(classes.ObservableAnalyzer):
-    base_url = "https://www.censys.io/api/v1"
+    """
+    Censys search analyzer class. Analyzes IP addresses.
+    Ugraded api endpoint v2
+    Please apply secreats using: https://search.censys.io/account/api
+    """
+
+    base_url = "https://search.censys.io/api/v2"
 
     censys_analysis: str
     _api_id_name: str
@@ -17,7 +23,7 @@ class Censys(classes.ObservableAnalyzer):
 
     def run(self):
         if self.censys_analysis == "search":
-            uri = f"/view/ipv4/{self.observable_name}"
+            uri = f"/hosts/{self.observable_name}"
         else:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."

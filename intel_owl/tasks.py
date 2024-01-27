@@ -57,11 +57,11 @@ def update_plugin(state, python_module_pk: int):
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=300)
-def execute_ingestor(config_pk: str):
+def execute_ingestor(config_name: str):
     from api_app.ingestors_manager.classes import Ingestor
     from api_app.ingestors_manager.models import IngestorConfig
 
-    config: IngestorConfig = IngestorConfig.objects.get(pk=config_pk)
+    config: IngestorConfig = IngestorConfig.objects.get(name=config_name)
     if config.disabled:
         logger.info(f"Not executing ingestor {config.name} because disabled")
     else:
@@ -361,12 +361,26 @@ def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
             VisualizerReport,
         ]:
             report_class: typing.Type[AbstractReport]
-            report_class.objects.filter(sent_to_bi=False).order_by("-start_time")[
-                :max_objects
-            ].send_to_elastic_as_bi(max_timeout=max_timeout)
-        Job.objects.filter(sent_to_bi=False).order_by("-received_request_time")[
-            :max_objects
-        ].send_to_elastic_as_bi(max_timeout=max_timeout)
+            report_class.objects.filter(sent_to_bi=False).filter_completed().order_by(
+                "-start_time"
+            )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)
+        Job.objects.filter(sent_to_bi=False).filter_completed().order_by(
+            "-received_request_time"
+        )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)
+
+
+@shared_task(
+    base=FailureLoggedTask,
+    name="disable_configuration_for_org_for_rate_limit",
+    soft_time_limit=30,
+)
+def disable_configuration_for_org_for_rate_limit(org_configuration_pk: int):
+    from api_app.models import OrganizationPluginConfiguration
+
+    opc: OrganizationPluginConfiguration = OrganizationPluginConfiguration.objects.get(
+        pk=org_configuration_pk
+    )
+    opc.disable_for_rate_limit()
 
 
 # set logger

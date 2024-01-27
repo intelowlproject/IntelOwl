@@ -258,6 +258,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `IPApi`: Get information about IPs using [batch-endpoint](https://ip-api.com/docs/api:batch) and DNS using [DNS-endpoint](https://ip-api.com/docs/dns).
 * `IPInfo`: Location Information about an IP
+* `Ip2location`: [API Docs](https://www.ip2location.io/ip2location-documentation) IP2Location.io allows users to check IP address location in real time. (Supports both with or without key)
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in).
 * `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
@@ -452,7 +453,6 @@ The following are the most important fields that you can change without touching
 - `name`: Name of the analyzer
 - `description`: Description of the analyzer
 - `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `disabled_in_organization`: you can choose to disable analyzers in some organizations only.
 - `python_module`: Python path of the class that will be executed 
 - `maximum_tlp`: see [TLP Support](#tlp-support)
 - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.

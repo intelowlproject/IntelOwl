@@ -40,6 +40,7 @@ from .models import (
     AbstractReport,
     Comment,
     Job,
+    OrganizationPluginConfiguration,
     PluginConfig,
     PythonConfig,
     Tag,
@@ -659,26 +660,14 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
 )
 @api_view(["GET"])
 def plugin_state_viewer(request):
-    from api_app.analyzers_manager.models import AnalyzerConfig
-    from api_app.connectors_manager.models import ConnectorConfig
-    from api_app.playbooks_manager.models import PlaybookConfig
-    from api_app.visualizers_manager.models import VisualizerConfig
-
     if not request.user.has_membership():
         raise PermissionDenied()
 
     result = {"data": {}}
-
-    classes = [AnalyzerConfig, ConnectorConfig, VisualizerConfig, PlaybookConfig]
-    for Class_ in classes:
-        for plugin in Class_.objects.all():
-            plugin: AbstractConfig
-            if plugin.disabled_in_organizations.filter(
-                pk=request.user.membership.organization.pk
-            ).exists():
-                result["data"][plugin.name] = {
-                    "disabled": True,
-                }
+    for opc in OrganizationPluginConfiguration.objects.filter(disabled=True):
+        result["data"][opc.config.name] = {
+            "disabled": True,
+        }
     return Response(result)
 
 
@@ -811,7 +800,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
-    lookup_field = "pk"
+    lookup_field = "name"
 
     @add_docs(
         description="Disable/Enable plugin for your organization",
@@ -823,8 +812,8 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         detail=True,
         url_path="organization",
     )
-    def disable_in_org(self, request, pk=None):
-        logger.info(f"get disable_in_org from user {request.user}, name {pk}")
+    def disable_in_org(self, request, name=None):
+        logger.info(f"get disable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
             if not request.user.membership.is_admin:
@@ -832,14 +821,15 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
-        obj.disabled_in_organizations.add(organization)
+        org_configuration.disable_manually(request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     @disable_in_org.mapping.delete
-    def enable_in_org(self, request, pk=None):
-        logger.info(f"get enable_in_org from user {request.user}, name {pk}")
+    def enable_in_org(self, request, name=None):
+        logger.info(f"get enable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
             if not request.user.membership.is_admin:
@@ -847,9 +837,10 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if not org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
-        obj.disabled_in_organizations.remove(organization)
+        org_configuration.enable_manually(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -916,14 +907,14 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         detail=True,
         url_path="health_check",
     )
-    def health_check(self, request, pk=None):
-        logger.info(f"get healthcheck from user {request.user}, name {pk}")
+    def health_check(self, request, name=None):
+        logger.info(f"get healthcheck from user {request.user}, name {name}")
         config: PythonConfig = self.get_object()
         python_obj = config.python_module.python_class(config)
         try:
             health_status = python_obj.health_check(request.user)
         except NotImplementedError as e:
-            logger.info(f"NotImplementedError {e}, user {request.user}, name {pk}")
+            logger.info(f"NotImplementedError {e}, user {request.user}, name {name}")
             raise ValidationError({"detail": "No healthcheck implemented"})
         except Exception as e:
             logger.exception(e)
@@ -938,8 +929,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         detail=True,
         url_path="pull",
     )
-    def pull(self, request, pk=None):
-        logger.info(f"post pull from user {request.user}, name {pk}")
+    def pull(self, request, name=None):
+        logger.info(f"post pull from user {request.user}, name {name}")
         obj: PythonConfig = self.get_object()
         python_obj = obj.python_module.python_class(obj)
         try:

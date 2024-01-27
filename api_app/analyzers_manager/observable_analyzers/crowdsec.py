@@ -21,6 +21,8 @@ class Crowdsec(ObservableAnalyzer):
         if response.status_code == 404:
             result = {"not_found": True}
         else:
+            if response.status_code == 429:
+                self.disable_for_rate_limit()
             response.raise_for_status()
             result = response.json()
         result["link"] = f"https://app.crowdsec.net/cti/{self.observable_name}"

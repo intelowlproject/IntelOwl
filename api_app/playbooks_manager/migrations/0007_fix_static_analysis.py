@@ -43,6 +43,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0006_rename_static_analysis"),
+        ("analyzers_manager", "0028_alter_analyzerconfig_name"),
     ]
 
     operations = [

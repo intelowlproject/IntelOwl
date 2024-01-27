@@ -124,15 +124,23 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     runtime_configuration = rfs.JSONField(required=False, write_only=True)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
 
-    connectors_requested = rfs.PrimaryKeyRelatedField(
+    connectors_requested = rfs.SlugRelatedField(
+        slug_field="name",
         queryset=ConnectorConfig.objects.all(),
         many=True,
         default=ConnectorConfig.objects.none(),
     )
-    analyzers_requested = rfs.PrimaryKeyRelatedField(
+    analyzers_requested = rfs.SlugRelatedField(
+        slug_field="name",
         queryset=AnalyzerConfig.objects.all(),
         many=True,
         default=AnalyzerConfig.objects.none(),
+    )
+    playbook_requested = rfs.SlugRelatedField(
+        slug_field="name",
+        queryset=PlaybookConfig.objects.all(),
+        many=False,
+        required=False,
     )
 
     def validate_runtime_configuration(self, runtime_config: Dict):
@@ -404,11 +412,27 @@ class JobSerializer(_AbstractJobViewSerializer):
         exclude = ("file",)
 
     comments = CommentSerializer(many=True, read_only=True)
-    pivots_to_execute = rfs.SerializerMethodField(read_only=True)
+    pivots_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    analyzers_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    analyzers_requested = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    connectors_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    connectors_requested = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    visualizers_to_execute = rfs.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     permissions = rfs.SerializerMethodField()
-
-    def get_pivots_to_execute(self, obj: Job):
-        return obj.pivots_to_execute.all().values_list("name", flat=True)
 
     def get_fields(self):
         # this method override is required for a cyclic import
@@ -499,8 +523,8 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
 
 
 class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerializer):
-    playbooks_requested = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True
+    playbooks_requested = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True, slug_field="name"
     )
 
     def to_internal_value(self, data):
@@ -656,8 +680,8 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
 class MultiplePlaybooksMultipleObservableAnalysisSerializer(
     MultipleObservableAnalysisSerializer
 ):
-    playbooks_requested = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True
+    playbooks_requested = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True, slug_field="name"
     )
 
     def to_internal_value(self, data):
@@ -799,17 +823,28 @@ class JobResponseSerializer(rfs.ModelSerializer):
     STATUS_NOT_AVAILABLE = "not_available"
 
     job_id = rfs.IntegerField(source="pk")
-    analyzers_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="analyzers_to_execute", many=True
+    analyzers_running = rfs.SlugRelatedField(
+        read_only=True,
+        source="analyzers_to_execute",
+        many=True,
+        slug_field="name",
     )
-    connectors_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="connectors_to_execute", many=True
+    connectors_running = rfs.SlugRelatedField(
+        read_only=True,
+        source="connectors_to_execute",
+        many=True,
+        slug_field="name",
     )
-    visualizers_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="visualizers_to_execute", many=True
+    visualizers_running = rfs.SlugRelatedField(
+        read_only=True,
+        source="visualizers_to_execute",
+        many=True,
+        slug_field="name",
     )
-    playbook_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="playbook_to_execute"
+    playbook_running = rfs.SlugRelatedField(
+        read_only=True,
+        source="playbook_to_execute",
+        slug_field="name",
     )
 
     class Meta:
@@ -848,11 +883,17 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
 
     md5 = rfs.CharField(max_length=128, required=True)
-    analyzers = rfs.PrimaryKeyRelatedField(
-        queryset=AnalyzerConfig.objects.all(), many=True, required=False
+    analyzers = rfs.SlugRelatedField(
+        queryset=AnalyzerConfig.objects.all(),
+        many=True,
+        required=False,
+        slug_field="name",
     )
-    playbooks = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), required=False, many=True
+    playbooks = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(),
+        required=False,
+        many=True,
+        slug_field="name",
     )
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)
@@ -885,11 +926,11 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         # triggered.
         query = Q(md5=validated_data["md5"]) & Q(status__in=statuses_to_check)
         if validated_data.get("playbooks", []):
-            query &= Q(playbook_requested__in=validated_data["playbooks"])
+            query &= Q(playbook_requested__name__in=validated_data["playbooks"])
         else:
             analyzers = validated_data.get("analyzers", [])
             for analyzer in analyzers:
-                query &= Q(analyzers_requested__in=[analyzer])
+                query &= Q(analyzers_requested__name__in=[analyzer])
         # we want a job that has every analyzer requested
         if validated_data.get("minutes_ago", None):
             minutes_ago_time = now() - datetime.timedelta(
@@ -1176,7 +1217,6 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
     class Meta:
         exclude = [
-            "disabled_in_organizations",
             "python_module",
             "routing_key",
             "soft_time_limit",
@@ -1202,7 +1242,7 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
     python_module = PythonModuleSerializer(read_only=True)
 
     class Meta:
-        exclude = ["disabled_in_organizations"]
+        exclude = ["id"]
 
     def to_representation(self, instance):
         return super(PythonConfigSerializer, self).to_representation(instance)
@@ -1229,7 +1269,9 @@ class AbstractBIInterface(ModelSerializer):
     timestamp: Field
     username: Field
     name: Field
-    type: Field
+    class_instance = rfs.SerializerMethodField(
+        read_only=True, method_name="get_class_instance"
+    )
     process_time: Field
     status: Field
     end_time: Field
@@ -1241,11 +1283,14 @@ class AbstractBIInterface(ModelSerializer):
             "timestamp",
             "username",
             "name",
-            "type",
+            "class_instance",
             "process_time",
             "status",
             "end_time",
         ]
+
+    def get_class_instance(self, instance):
+        return instance.__class__.__name__.lower()
 
     @staticmethod
     def get_environment(instance):
@@ -1266,36 +1311,39 @@ class AbstractBIInterface(ModelSerializer):
         }
 
 
-class AbstractReportBISerializer(
-    AbstractBIInterface, AbstractReportSerializerInterface
-):
+class AbstractReportBISerializer(AbstractBIInterface):
     timestamp = rfs.DateTimeField(source="start_time")
     username = rfs.CharField(source="job.user.username")
+    name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
 
     class Meta:
         fields = AbstractBIInterface.Meta.fields + [
             "parameters",
         ]
-        list_serializer_class = (
-            AbstractReportSerializerInterface.Meta.list_serializer_class
-        )
+        list_serializer_class = rfs.ListSerializer
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
         return self.to_elastic_dict(data)
+
+    def get_class_instance(self, instance: AbstractReport):
+        return super().get_class_instance(instance).split("report")[0]
 
 
 class JobBISerializer(AbstractBIInterface, ModelSerializer):
     timestamp = rfs.DateTimeField(source="received_request_time")
     username = rfs.CharField(source="user.username")
     name = rfs.CharField(source="pk")
-    type = rfs.SerializerMethodField(read_only=True, method_name="get_type")
     end_time = rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
 
     class Meta:
         model = Job
-        fields = AbstractBIInterface.Meta.fields + ["playbook", "runtime_configuration"]
+        fields = AbstractBIInterface.Meta.fields + [
+            "playbook",
+            "runtime_configuration",
+            "is_sample",
+        ]
         list_serializer_class = (
             AbstractReportSerializerInterface.Meta.list_serializer_class
         )
@@ -1303,9 +1351,6 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
     def to_representation(self, instance: Job):
         data = super().to_representation(instance)
         return self.to_elastic_dict(data)
-
-    def get_type(self, instance: Job):
-        return instance.__class__.__name__.lower()
 
     def get_playbook(self, instance: Job):
         return instance.playbook_to_execute.name if instance.playbook_to_execute else ""

@@ -6,14 +6,15 @@ import requests
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
-import logging
-logger=logging.getLogger(__name__)
+
+
 class Censys(classes.ObservableAnalyzer):
-    '''
+    """
     Censys search analyzer class. Analyzes IP addresses.
     Ugraded api endpoint v2
     Please apply secreats using: https://search.censys.io/account/api
-    '''
+    """
+
     base_url = "https://search.censys.io/api/v2"
 
     censys_analysis: str

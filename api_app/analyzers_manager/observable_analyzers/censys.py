@@ -15,7 +15,7 @@ class Censys(classes.ObservableAnalyzer):
     Please apply secreats using: https://search.censys.io/account/api
     """
 
-    def update():
+    def update(self):
         pass
 
     base_url = "https://search.censys.io/api/v2"

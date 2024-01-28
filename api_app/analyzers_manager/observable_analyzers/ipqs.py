@@ -152,11 +152,42 @@ class IPQualityScore(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
+        sample_response = {
+            "message": "Success.",
+            "success": True,
+            "unsafe": False,
+            "domain": "test.com",
+            "ip_address": "0.0.0.0",
+            "server": "gws",
+            "content_type": "text/html; charset=UTF-8",
+            "status_code": 200,
+            "page_size": 82252,
+            "domain_rank": 1,
+            "dns_valid": True,
+            "parking": False,
+            "spamming": False,
+            "malware": False,
+            "phishing": False,
+            "suspicious": False,
+            "adult": False,
+            "risk_score": 0,
+            "country_code": "US",
+            "category": "Search Engines",
+            "domain_age": {
+                "human": "26 years ago",
+                "timestamp": 874296000,
+                "iso": "1997-09-15T00:00:00-04:00",
+            },
+            "redirected": False,
+            "language_code": "N/A",
+            "final_url": "http://test.com",
+            "request_id": "KWc8M5Dvep",
+        }
         patches = [
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=MockUpResponse(sample_response, 200),
                 ),
             )
         ]

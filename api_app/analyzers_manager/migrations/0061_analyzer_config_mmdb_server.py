@@ -5,15 +5,75 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'python_module': {'module': 'mmdb_server.MmdbServer', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'Mmdb_server', 'description': '[mmdb-server](https://github.com/adulau/mmdb-server) is an open source fast API server to lookup IP addresses for their geographic location, AS number.', 'disabled': False, 'soft_time_limit': 60, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'CLEAR', 'observable_supported': ['ip'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'health_check_task': None, 'model': 'analyzers_manager.AnalyzerConfig'}
+plugin = {
+    "python_module": {
+        "module": "mmdb_server.MmdbServer",
+        "base_path": "api_app.analyzers_manager.observable_analyzers",
+    },
+    "name": "Mmdb_server",
+    "description": "[mmdb-server](https://github.com/adulau/mmdb-server) is an open source fast API server to lookup IP addresses for their geographic location, AS number.",
+    "disabled": False,
+    "soft_time_limit": 60,
+    "routing_key": "default",
+    "health_check_status": True,
+    "type": "observable",
+    "docker_based": False,
+    "maximum_tlp": "CLEAR",
+    "observable_supported": ["ip"],
+    "supported_filetypes": [],
+    "run_hash": False,
+    "run_hash_type": "",
+    "not_supported_filetypes": [],
+    "health_check_task": None,
+    "model": "analyzers_manager.AnalyzerConfig",
+}
 
-params = [{'python_module': {'module': 'mmdb_server.MmdbServer', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'base_url', 'type': 'str', 'description': 'base url for mmdb_server', 'is_secret': False, 'required': True}]
+params = [
+    {
+        "python_module": {
+            "module": "mmdb_server.MmdbServer",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "base_url",
+        "type": "str",
+        "description": "base url for mmdb_server",
+        "is_secret": False,
+        "required": True,
+    }
+]
 
-values = [{'parameter': {'python_module': {'module': 'mmdb_server.MmdbServer', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'base_url', 'type': 'str', 'description': 'base url for mmdb_server', 'is_secret': False, 'required': True}, 'for_organization': False, 'value': 'https://ip.circl.lu/geolookup/', 'updated_at': '2024-01-23T20:23:55.745858Z', 'owner': None, 'analyzer_config': 148, 'connector_config': None, 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None}]
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "mmdb_server.MmdbServer",
+                "base_path": "api_app.analyzers_manager.observable_analyzers",
+            },
+            "name": "base_url",
+            "type": "str",
+            "description": "base url for mmdb_server",
+            "is_secret": False,
+            "required": True,
+        },
+        "for_organization": False,
+        "value": "https://ip.circl.lu/geolookup/",
+        "updated_at": "2024-01-23T20:23:55.745858Z",
+        "owner": None,
+        "analyzer_config": 148,
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+    }
+]
 
 
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
+    if (
+        type(getattr(Model, field))
+        in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]
+        and value
+    ):
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -26,13 +86,14 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get(pk=value)
     return value
 
+
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
     for field, value in data.items():
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            value = _get_real_obj(Model, field ,value)
+            value = _get_real_obj(Model, field, value)
             no_mtm[field] = value
     try:
         o = Model.objects.get(**no_mtm)
@@ -43,10 +104,11 @@ def _create_object(Model, data):
         for field, value in mtm.items():
             attribute = getattr(o, field)
             attribute.set(value)
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     _create_object(Model, plugin)
@@ -56,25 +118,16 @@ def migrate(apps, schema_editor):
         _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api_app', '0059_alter_organizationpluginconfiguration_unique_together'),
-        ('analyzers_manager', '0060_analyzer_config_ip2location'),
+        ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
+        ("analyzers_manager", "0060_analyzer_config_ip2location"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

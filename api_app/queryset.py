@@ -215,6 +215,17 @@ class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
             .annotate(importance=F("date_weight") + F("user_weight"))
         )
 
+    def running(
+        self, check_pending: bool = False, minutes_ago: int = 25
+    ) -> "JobQuerySet":
+        qs = self.exclude(
+            status__in=[status.value for status in self.model.Status.final_statuses()]
+        )
+        if not check_pending:
+            qs = qs.exclude(status=self.model.Status.PENDING.value)
+        difference = now() - datetime.timedelta(minutes=minutes_ago)
+        return qs.filter(received_request_time__lte=difference)
+
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
     def annotate_configured(

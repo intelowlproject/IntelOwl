@@ -48,44 +48,43 @@ class Censys(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
+        response = {
+            "code": 200,
+            "status": "OK",
+            "result": {
+                "ip": "190.121.56.10",
+                "services": [],
+                "location": {
+                    "continent": "South America",
+                    "country": "Chile",
+                    "country_code": "CL",
+                    "city": "Osorno",
+                    "postal_code": "5290000",
+                    "timezone": "America/Santiago",
+                    "province": "Los Lagos Region",
+                    "coordinates": {
+                        "latitude": -40.57395,
+                        "longitude": -73.13348,
+                    },
+                },
+                "location_updated_at": "2024-01-27T14:52:11.775086600Z",
+                "autonomous_system": {
+                    "asn": 14117,
+                    "description": "Telefonica del Sur S.A.",
+                    "bgp_prefix": "190.121.56.0/21",
+                    "name": "Telefonica del Sur S.A.",
+                    "country_code": "CL",
+                },
+                "autonomous_system_updated_at": "2024-01-27T14:52:11.775086600Z",
+                "last_updated_at": "2023-04-30T00:04:14.886Z",
+            },
+        }
         patches = [
             if_mock_connections(
                 patch(
                     "requests.get",
                     return_value=MockUpResponse(
-                        {
-                            {
-                                "code": 200,
-                                "status": "OK",
-                                "result": {
-                                    "ip": "190.121.56.10",
-                                    "services": [],
-                                    "location": {
-                                        "continent": "South America",
-                                        "country": "Chile",
-                                        "country_code": "CL",
-                                        "city": "Osorno",
-                                        "postal_code": "5290000",
-                                        "timezone": "America/Santiago",
-                                        "province": "Los Lagos Region",
-                                        "coordinates": {
-                                            "latitude": -40.57395,
-                                            "longitude": -73.13348,
-                                        },
-                                    },
-                                    "location_updated_at": "2024-01-27T14:52:11.775086600Z",
-                                    "autonomous_system": {
-                                        "asn": 14117,
-                                        "description": "Telefonica del Sur S.A.",
-                                        "bgp_prefix": "190.121.56.0/21",
-                                        "name": "Telefonica del Sur S.A.",
-                                        "country_code": "CL",
-                                    },
-                                    "autonomous_system_updated_at": "2024-01-27T14:52:11.775086600Z",
-                                    "last_updated_at": "2023-04-30T00:04:14.886Z",
-                                },
-                            }
-                        },
+                        response,
                         200,
                     ),
                 ),

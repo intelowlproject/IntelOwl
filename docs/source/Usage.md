@@ -253,11 +253,13 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `IPApi`: Get information about IPs using [batch-endpoint](https://ip-api.com/docs/api:batch) and DNS using [DNS-endpoint](https://ip-api.com/docs/dns).
 * `IPInfo`: Location Information about an IP
+* `Ip2location`: [API Docs](https://www.ip2location.io/ip2location-documentation) IP2Location.io allows users to check IP address location in real time. (Supports both with or without key)
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in).
 * `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
@@ -265,6 +267,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MaxMindGeoIP`: extract GeoIP info for an observable
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
+* `Mmdb_server`: [Mmdb_server](https://github.com/adulau/mmdb-server) mmdb-server is an open source fast API server to lookup IP addresses for their geographic location, AS number. 
 * `Mnemonic_PassiveDNS` : Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 * `Netlas`: search an IP against [Netlas](https://netlas.io/api)
@@ -302,7 +305,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
-
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -320,6 +322,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
 * `IntelX_Intelligent_Search`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `MISP`: scan an observable on a MISP instance
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.

@@ -35,7 +35,7 @@ flower==2.0.0
 
 # plugins
 GitPython==3.1.41
-checkdmarc==5.2.7
+checkdmarc==5.3.1
 dnspython==2.4.2
 dnstwist[full]==20230918
 google>=3.0.0
@@ -65,7 +65,7 @@ py-tlsh==4.7.2
 quark-engine==23.12.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
-yara-python==4.3.0
+yara-python==4.3.1
 pydragonfly==0.1.0
 greynoise==2.0.0
 XLMMacroDeobfuscator[secure]==0.2.3

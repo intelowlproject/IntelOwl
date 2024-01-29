@@ -74,7 +74,12 @@ const authLinks = (
 const guestLinks = (
   <>
     <NavItem>
-      <RRNavLink id="login-btn" className="btn btn-sm btn-info" end to="/login">
+      <RRNavLink
+        id="login-btn"
+        className="btn btn-sm btn-primary"
+        end
+        to="/login"
+      >
         Login
       </RRNavLink>
     </NavItem>
@@ -120,7 +125,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
           <span className="ms-1">Docs</span>
         </a>
       </NavItem>
-      <Button id="social-button" size="sm" className="mx-2 btn-info">
+      <Button id="social-button" size="sm" className="mx-2 btn-accent">
         <>
           <MdShare />
           <span className="ms-1">Social</span>

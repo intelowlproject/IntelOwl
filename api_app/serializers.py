@@ -1242,7 +1242,7 @@ class PythonConfigSerializerForMigration(PythonConfigSerializer):
     python_module = PythonModuleSerializer(read_only=True)
 
     class Meta:
-        exclude = ["orgs_configuration"]
+        exclude = ["id"]
 
     def to_representation(self, instance):
         return super(PythonConfigSerializer, self).to_representation(instance)

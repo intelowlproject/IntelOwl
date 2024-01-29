@@ -43,6 +43,9 @@ class CronTests(CustomTestCase):
         self.assertCountEqual(check_stuck_analysis(check_pending=False), [])
 
         self.assertCountEqual(check_stuck_analysis(check_pending=True), [_job.pk])
+        _job.status = Job.Status.ANALYZERS_RUNNING.value
+        _job.save()
+        self.assertCountEqual(check_stuck_analysis(check_pending=False), [_job.pk])
         _job.delete()
 
     def test_remove_old_jobs(self):

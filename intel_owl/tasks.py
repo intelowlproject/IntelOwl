@@ -14,7 +14,6 @@ from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
 from celery.worker.request import Request
 from django.conf import settings
-from django.db.models import Q
 from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
 
@@ -113,12 +112,8 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
         job.save(update_fields=["status", "finished_analysis_time"])
 
     logger.info("started check_stuck_analysis")
-    query = Q(status=Job.Status.RUNNING.value)
-    if check_pending:
-        query |= Q(status=Job.Status.PENDING.value)
-    difference = now() - datetime.timedelta(minutes=minutes_ago)
-    running_jobs = Job.objects.filter(query).filter(
-        received_request_time__lte=difference
+    running_jobs = Job.objects.running(
+        check_pending=check_pending, minutes_ago=minutes_ago
     )
     logger.info(f"checking if {running_jobs.count()} jobs are stuck")
 

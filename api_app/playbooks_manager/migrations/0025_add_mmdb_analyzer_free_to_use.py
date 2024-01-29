@@ -7,16 +7,18 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
+    AnalyzerConfig = apps.get_model("analyzersManager", "AnalyzersConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.add(*["Mmdb_server"])
+    pc.analyzers.add(AnalyzerConfig.objects.get(name="Mmdb_server").id)
     pc.full_clean()
     pc.save()
 
 
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
+    AnalyzerConfig = apps.get_model("analyzersManager", "AnalyzersConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.remove(*["Mmdb_server"])
+    pc.analyzers.remove(AnalyzerConfig.objects.get(name="Mmdb_server").id)
     pc.full_clean()
     pc.save()
 
@@ -24,6 +26,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0024_4_change_primary_key"),
+        ("analyzers_manager", "0061_analyzer_config_mmdb_server"),
     ]
 
     operations = [

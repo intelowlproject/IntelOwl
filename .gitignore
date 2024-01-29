@@ -13,6 +13,10 @@ venv/
 intel_owl_test_env/
 compose-elk.yml
 
+.python_history
+.viminfo
+
+
 # docs
 docs_env/
 docs/build/
@@ -29,7 +33,6 @@ docker/.env.start
 .cache
 .google-cookie
 .quark-engine
-
 
 # Unit test / coverage reports
 htmlcov/

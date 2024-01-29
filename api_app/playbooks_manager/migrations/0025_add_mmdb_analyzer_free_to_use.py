@@ -26,7 +26,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0024_4_change_primary_key"),
-        ("analyzers_manager", "0061_analyzer_config_mmdb_server"),
+        ("analyzers_manager", "0062_analyzer_config_mmdb_server"),
     ]
 
     operations = [

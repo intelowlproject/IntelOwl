@@ -127,7 +127,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
-        ("analyzers_manager", "0060_analyzer_config_ip2location"),
+        ("analyzers_manager", "0061_analyzer_config_ipqs_fraud_and_risk_scoring"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

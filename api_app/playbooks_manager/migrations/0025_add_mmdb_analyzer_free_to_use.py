@@ -7,7 +7,7 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
-    AnalyzerConfig = apps.get_model("analyzersManager", "AnalyzersConfig")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzersConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
     pc.analyzers.add(AnalyzerConfig.objects.get(name="Mmdb_server").id)
     pc.full_clean()
@@ -16,7 +16,7 @@ def migrate(apps, schema_editor):
 
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
-    AnalyzerConfig = apps.get_model("analyzersManager", "AnalyzersConfig")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzersConfig")
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
     pc.analyzers.remove(AnalyzerConfig.objects.get(name="Mmdb_server").id)
     pc.full_clean()

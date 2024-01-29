@@ -18,6 +18,14 @@ services:
       - DJANGO_TEST_SERVER=True
       - DJANGO_WATCHMAN_TIMEOUT=20
 
+  daphne:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl
+
   nginx:
     build:
       context: ..

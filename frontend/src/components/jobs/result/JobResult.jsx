@@ -13,6 +13,24 @@ import {
   setNotificationFavicon,
 } from "../notifications";
 
+const wsClient = new WebSocket(`ws://127.0.0.1/ws/jobs/1`);
+wsClient.onopen = (data) => {
+  console.debug("ws opened!, received: ");
+  console.debug(data);
+};
+wsClient.onclose = (data) => {
+  console.debug("ws closed!, received: ");
+  console.debug(data);
+};
+wsClient.onmessage = (data) => {
+  console.debug("ws received a message!, received: ");
+  console.debug(data);
+};
+wsClient.onerror = (data) => {
+  console.debug("ws error!, received: ");
+  console.debug(data);
+};
+
 export default function JobResult() {
   console.debug("JobResult rendered!");
 

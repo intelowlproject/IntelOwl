@@ -28,6 +28,7 @@ ARG PYCTI_VERSION=5.10.0
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
+    ${LOG_PATH}/asgi \
     /opt/deploy/files_required /opt/deploy/files_required/yara /opt/deploy/configuration
 
 # install required packages. some notes about:o

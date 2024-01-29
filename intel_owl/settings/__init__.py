@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "silk",
     # celery
     "django_celery_beat",
+    # websocket
+    "channels",
 ]
 
 from .auth import *  # lgtm [py/polluting-import]

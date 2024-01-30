@@ -442,7 +442,9 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
             }
         )
-        response = self.client.post(self.jobs_recent_scans_user_uri)
+        response = self.client.post(
+            self.jobs_recent_scans_user_uri, data={"is_sample": False}
+        )
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)

@@ -2,7 +2,8 @@ import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import md5 from "md5";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardBody } from "reactstrap";
+import { Card, CardHeader, CardBody, UncontrolledTooltip } from "reactstrap";
+import { MdInfoOutline } from "react-icons/md";
 import { DateHoverable, Loader } from "@certego/certego-ui";
 import { useRecentScansStore } from "../../../stores/useRecentScansStore";
 import { JobResultSections } from "../../../constants/miscConst";
@@ -102,7 +103,7 @@ export default function RecentScans({ classification, param }) {
     recentScansUser,
     recentScans,
     fetchRecentScansUser,
-    fetchRecentscans,
+    fetchRecentScans,
   ] = useRecentScansStore((state) => [
     state.loadingScansUser,
     state.loadingScansInsertedAnalyzable,
@@ -111,7 +112,7 @@ export default function RecentScans({ classification, param }) {
     state.recentScansUser,
     state.recentScans,
     state.fetchRecentScansUser,
-    state.fetchRecentscans,
+    state.fetchRecentScans,
   ]);
 
   console.debug(
@@ -121,25 +122,27 @@ export default function RecentScans({ classification, param }) {
     loadingScansInsertedAnalyzable,
   );
 
+  const isSample = classification === JobTypes.FILE;
+
   // file md5
   const [fileMd5, setFileMd5] = React.useState("");
   /* md5 computation takes lots of time for huge file:
   this freezes the scan form ui (render this component), we need this caching.
   */
   useMemo(() => {
-    if (classification === JobTypes.FILE && param) {
+    if (isSample && param) {
       param.text().then((text) => setFileMd5(md5(text)));
     }
-  }, [classification, param]);
+  }, [isSample, param]);
 
   React.useEffect(() => {
-    fetchRecentScansUser();
-  }, [fetchRecentScansUser]);
+    fetchRecentScansUser(isSample);
+  }, [fetchRecentScansUser, isSample]);
   console.debug("recentScansUser", recentScansUser);
 
   React.useEffect(() => {
-    fetchRecentscans(fileMd5.length ? fileMd5 : md5(param));
-  }, [fetchRecentscans, fileMd5, param]);
+    fetchRecentScans(fileMd5.length ? fileMd5 : md5(param), isSample);
+  }, [fetchRecentScans, fileMd5, param, isSample]);
   console.debug("recentScans", recentScans);
 
   // remove duplicate job
@@ -157,7 +160,23 @@ export default function RecentScans({ classification, param }) {
       render={() => (
         <div>
           <div className="d-flex justify-content-between my-4 align-items-end">
-            <h5 className="fw-bold mb-0">Recent Scans</h5>
+            <div className="d-flex justify-content-between align-items-center">
+              <h5 className="fw-bold mb-0 me-2">Recent Scans</h5>
+              <MdInfoOutline id="recentscans-info-icon" />
+              <UncontrolledTooltip
+                target="recentscans-info-icon"
+                placement="right"
+                fade={false}
+                innerClassName="p-2 text-start text-nowrap md-fit-content"
+              >
+                <ul>
+                  <li>Observable: scans up to 14 days ago</li>
+                  <li>File: scans up to 60 days ago</li>
+                </ul>
+                If no observable or file has been inserted, recent scans are
+                related to the user and not the organization
+              </UncontrolledTooltip>
+            </div>
             <small className="mx-2 text-gray">
               {allRecentScans?.length} total
             </small>

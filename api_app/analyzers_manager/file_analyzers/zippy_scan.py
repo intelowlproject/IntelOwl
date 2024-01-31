@@ -18,7 +18,7 @@ class ZippyAnalyser(FileAnalyzer):
 
     engine: str
 
-    def update():
+    def update(self):
         pass
 
     def run(self):

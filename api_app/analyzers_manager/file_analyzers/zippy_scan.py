@@ -49,7 +49,7 @@ class ZippyAnalyser(FileAnalyzer):
     def _monkeypatch(cls):
         patches = [
             patch(
-                "EnsembledZippy().run_on_text_chunked",
+                "z.run_on_text_chunked",
                 return_value={"mocked_response": "AI 0.62739394"},
             ),
         ]

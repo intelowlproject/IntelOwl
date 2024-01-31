@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+    phoneinfoga:
+      container_name: phoneinfoga
+      restart: unless-stopped
+      image: sundowndev/phoneinfoga:latest
+      espose:
+        - "5000"
+      env_file:
+      - env_file_integrations
+      environment:
+      - GIN_MODE=release

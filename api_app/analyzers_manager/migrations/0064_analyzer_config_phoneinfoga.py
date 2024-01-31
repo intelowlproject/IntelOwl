@@ -17,7 +17,7 @@ plugin = {
     "routing_key": "default",
     "health_check_status": True,
     "type": "observable",
-    "docker_based": False,
+    "docker_based": True,
     "maximum_tlp": "GREEN",
     "observable_supported": ["generic"],
     "supported_filetypes": [],

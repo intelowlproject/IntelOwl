@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-from zippy import EnsembledZippy
+from zippy import CompressionEngine, EnsembledZippy, Zippy
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -16,19 +16,31 @@ class ZippyAnalyser(FileAnalyzer):
     Tells if a file is written by HUMAN or AI
     """
 
+    engine: str
+
     def update():
         pass
 
     def run(self):
-        logger.info("nilay")
+        z = None
+        if self.engine == "lzma":
+            z = Zippy(engine=CompressionEngine.LZMA)
+        elif self.engine == "zlib":
+            z = Zippy(engine=CompressionEngine.ZLIB)
+        elif self.engine == "brotli":
+            z = Zippy(engine=CompressionEngine.BROTLI)
+        else:
+            z = EnsembledZippy()
+
+        logger.info("Running Zippy on file %s using %s", self.filepath, self.engine)
         binary_data = self.read_file_bytes()
         text_data = binary_data.decode("utf-8")
         filename = self.filepath
-        logger.info("nilay2")
+        logger.info("")
         try:
-            response = EnsembledZippy().run_on_file_chunked(filename)
+            response = z.run_on_file_chunked(filename)
         except Exception:
-            logger.exception("EnsembledZippy().run_on_text_chunked(text_data) failed")
+            logger.exception("%s.run_on_text_chunked(text_data) failed", self.engine)
             raise AnalyzerRunException
         # returning a response tuple with the text checked and AI or HUMAN
         return response + (text_data,)

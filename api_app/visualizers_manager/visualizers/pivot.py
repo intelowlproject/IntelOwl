@@ -27,9 +27,20 @@ class Pivot(Visualizer):
                     "motivation", f"Pivot {child_report.config.name} failed"
                 )
                 children_job_list.append(
-                    self.Base(
-                        value=f"Job was not created: {motivation}",
-                        disable=False,
+                    self.HList(
+                        value=[
+                            self.Base(
+                                value="",
+                                icon=self.Icon.WARNING,
+                                color=self.Color.WARNING,
+                                disable=False,
+                            ),
+                            self.Base(
+                                value=f"Job was not created: {motivation}",
+                                disable=False,
+                            ),
+                        ],
+                        alignment=self.Alignment.CENTER,
                     )
                 )
 
@@ -41,10 +52,11 @@ class Pivot(Visualizer):
                     value=[
                         self.Title(
                             title=self.Base(
-                                value="Job created by",
+                                value="Parent job",
                                 description=(
-                                    "This element indicates if the job as been created "
-                                    "via pivoting from another job."
+                                    "This element indicates the job that created this "
+                                    "job via pivots. In case it's empty it means "
+                                    "this job has NOT been created from another."
                                 ),
                             ),
                             value=(
@@ -57,10 +69,10 @@ class Pivot(Visualizer):
                         ),
                         self.VList(
                             name=self.Base(
-                                value="Created Jobs",
+                                value="Children Jobs",
                                 description=(
-                                    "This is the list of jobs created from "
-                                    "the results of this jobs."
+                                    "This is the list of jobs created from this job "
+                                    "via pivots."
                                 ),
                                 disable=False,
                             ),

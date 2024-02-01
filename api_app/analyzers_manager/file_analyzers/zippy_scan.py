@@ -6,7 +6,8 @@ from zippy import CompressionEngine, EnsembledZippy, Zippy
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponseNoOp, patch
+
+# from tests.mock_utils import MockResponseNoOp, patch
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +45,3 @@ class ZippyAnalyser(FileAnalyzer):
             raise AnalyzerRunException
         # returning a response tuple with the text checked and AI or HUMAN
         return response + (text_data,)
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            patch(
-                "z.run_on_text_chunked",
-                return_value=MockResponseNoOp(),
-            ),
-        ]
-        return super()._monkeypatch(patches=patches)

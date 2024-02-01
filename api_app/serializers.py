@@ -408,7 +408,8 @@ class JobSerializer(_AbstractJobViewSerializer):
     permissions = rfs.SerializerMethodField()
 
     def get_pivots_to_execute(self, obj: Job):
-        return obj.pivots_to_execute.all().values_list("name", flat=True)
+        # this cast is required or serializer doesn't work with websocket
+        return list(obj.pivots_to_execute.all().values_list("name", flat=True))
 
     def get_fields(self):
         # this method override is required for a cyclic import

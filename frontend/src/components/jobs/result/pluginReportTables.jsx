@@ -24,14 +24,14 @@ const tableProps = {
       accessor: (pluginReport) => pluginReport,
       maxWidth: 60,
       disableSortBy: true,
-      Cell: ({ value: plugin, customProps: { job, refetch } }) => (
+      Cell: ({ value: plugin, customProps: { job } }) => (
         <div className="d-flex-center">
           {job.permissions?.plugin_actions === true &&
             ["running", "pending"].includes(plugin.status.toLowerCase()) && (
               <IconButton
                 id={`killplugin-${plugin.id}`}
                 Icon={MdPauseCircleOutline}
-                onClick={() => killPlugin(job.id, plugin).then(refetch)}
+                onClick={() => killPlugin(job.id, plugin)}
                 color="accent"
                 size="xs"
                 title={`Kill ${plugin.type} run`}
@@ -44,7 +44,7 @@ const tableProps = {
               <IconButton
                 id={`retryplugin-${plugin.id}`}
                 Icon={MdOutlineRefresh}
-                onClick={() => retryPlugin(job.id, plugin).then(refetch)}
+                onClick={() => retryPlugin(job.id, plugin)}
                 color="light"
                 size="xs"
                 title={`Retry ${plugin.type} run`}
@@ -118,50 +118,50 @@ const tableProps = {
   ),
 };
 
-export function AnalyzersReportTable({ job, refetch }) {
+export function AnalyzersReportTable({ job }) {
   console.debug("AnalyzersReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
         data={job?.analyzer_reports}
-        customProps={{ job, refetch }}
+        customProps={{ job }}
         {...tableProps}
       />
     </div>
   );
 }
 
-export function ConnectorsReportTable({ job, refetch }) {
+export function ConnectorsReportTable({ job }) {
   console.debug("ConnectorsReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
         data={job?.connector_reports}
-        customProps={{ job, refetch }}
+        customProps={{ job }}
         {...tableProps}
       />
     </div>
   );
 }
-export function PivotsReportTable({ job, refetch }) {
-  console.debug("ConnectorsReportTable rendered");
+export function PivotsReportTable({ job }) {
+  console.debug("PivotsReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
         data={job?.pivot_reports}
-        customProps={{ job, refetch }}
+        customProps={{ job }}
         {...tableProps}
       />
     </div>
   );
 }
-export function VisualizersReportTable({ job, refetch }) {
-  console.debug("AnalyzersReportTable rendered");
+export function VisualizersReportTable({ job }) {
+  console.debug("VisualizersReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
         data={job?.visualizer_reports}
-        customProps={{ job, refetch }}
+        customProps={{ job }}
         {...tableProps}
       />
     </div>

@@ -51,14 +51,8 @@ in case we use empty param for this page we fall in an infinite redirect loop.
 const LOADING_VISUALIZER_UI_ELEMENT_CODE = "loading";
 const NO_VISUALIZER_UI_ELEMENT_CODE = "no-visualizer";
 
-export function JobOverview({
-  isRunningJob,
-  job,
-  refetch,
-  section,
-  subSection,
-}) {
-  console.debug("JobOverview rendered");
+export function JobOverview({ isRunningJob, job, section, subSection }) {
+  console.debug(`JobOverview rendered: ${JSON.stringify(job)}`);
   console.debug(`section: ${section}, subSection: ${subSection}`);
 
   const isSelectedUI = section === JobResultSections.VISUALIZER;
@@ -80,7 +74,7 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <AnalyzersReportTable job={job} refetch={refetch} />,
+        report: <AnalyzersReportTable job={job} />,
       },
       {
         id: "connector",
@@ -97,7 +91,7 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <ConnectorsReportTable job={job} refetch={refetch} />,
+        report: <ConnectorsReportTable job={job} />,
       },
       {
         id: "pivot",
@@ -114,7 +108,7 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <PivotsReportTable job={job} refetch={refetch} />,
+        report: <PivotsReportTable job={job} />,
       },
       {
         id: "visualizer",
@@ -135,7 +129,7 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <VisualizersReportTable job={job} refetch={refetch} />,
+        report: <VisualizersReportTable job={job} />,
       },
       {
         id: "full",
@@ -158,7 +152,7 @@ export function JobOverview({
         ),
       },
     ],
-    [job, refetch],
+    [job],
   );
 
   // state
@@ -399,7 +393,6 @@ export function JobOverview({
 JobOverview.propTypes = {
   isRunningJob: PropTypes.bool.isRequired,
   job: PropTypes.object.isRequired,
-  refetch: PropTypes.func.isRequired,
   section: PropTypes.string.isRequired,
   subSection: PropTypes.string.isRequired,
 };

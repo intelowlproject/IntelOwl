@@ -1,11 +1,9 @@
-import React from "react";
-import useAxios from "axios-hooks";
+import React, { useEffect } from "react";
 import useTitle from "react-use/lib/useTitle";
-import useInterval from "react-use/lib/useInterval";
 import { useParams } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
-import { JOB_BASE_URI } from "../../../constants/apiURLs";
+import { WEBSOCKET_JOBS_URI } from "../../../constants/apiURLs";
 import { JobOverview } from "./JobOverview";
 
 import {
@@ -13,30 +11,11 @@ import {
   setNotificationFavicon,
 } from "../notifications";
 
-const wsClient = new WebSocket(`ws://127.0.0.1/ws/jobs/1`);
-wsClient.onopen = (data) => {
-  console.debug("ws opened!, received: ");
-  console.debug(data);
-};
-wsClient.onclose = (data) => {
-  console.debug("ws closed!, received: ");
-  console.debug(data);
-};
-wsClient.onmessage = (data) => {
-  console.debug("ws received a message!, received: ");
-  console.debug(data);
-};
-wsClient.onerror = (data) => {
-  console.debug("ws error!, received: ");
-  console.debug(data);
-};
-
 export default function JobResult() {
   console.debug("JobResult rendered!");
 
-  // local state
   const [initialLoading, setInitialLoading] = React.useState(true);
-  const [isRunning, setIsRunning] = React.useState(false);
+  const [job, setJob] = React.useState(undefined);
   // this state var is used to check if we notified the user, in this way we avoid to notify more than once
   const [notified, setNotified] = React.useState(false);
   // this state var is used to check if the user changed page, in case he waited the result on the page we avoid the notification
@@ -48,63 +27,86 @@ export default function JobResult() {
   const { section } = params;
   const { subSection } = params;
 
-  // API to download the job data
-  const [{ data: job, loading, error }, refetch] = useAxios({
-    url: `${JOB_BASE_URI}/${jobId}`,
-  });
+  // setup ws (we need to use useref to avoid to create a ws each render)
+  const jobWebsocket = React.useRef();
+  if (!jobWebsocket.current) {
+    const websocketUrl = `${
+      window.location.protocol === "https:" ? "wss" : "ws"
+    }://${window.location.hostname}/${WEBSOCKET_JOBS_URI}/${jobId}`;
+    console.debug(`connect to websocket API: ${websocketUrl}`);
+    jobWebsocket.current = new WebSocket(websocketUrl);
+    jobWebsocket.current.onopen = (data) => {
+      console.debug("ws opened:");
+      console.debug(data);
+    };
+    jobWebsocket.current.onclose = (data) => {
+      console.debug("ws closed:");
+      console.debug(data);
+    };
+    jobWebsocket.current.onmessage = (data) => {
+      console.debug("ws received:");
+      console.debug(data);
+      const jobData = JSON.parse(data.data);
+      console.debug(jobData);
+      setJob(jobData);
+    };
+    jobWebsocket.current.onerror = (data) => {
+      console.debug("ws error:");
+      console.debug(data);
+    };
+  }
+
+  useEffect(() => {
+    /* this is required because the first loading we don't have job data
+      and this is a problem for JobOverview that needs the UI sections names
+      so the first time the page has a spinner, after the first request
+      the spinner will be moved in the sections.
+    */
+    if (job) setInitialLoading(false);
+  }, [job]);
+
+  // page title
+  useTitle(
+    `IntelOwl | Job (#${jobId}, ${
+      // eslint-disable-next-line no-nested-ternary
+      job ? (job.is_sample ? job.file_name : job.observable_name) : ""
+    })`,
+    { restoreOnUnmount: true },
+  );
 
   // in case the job is not running and started (the job is not undefined) it means it terminated.
-  const jobTerminated = job !== undefined && !isRunning;
+  const jobIsRunning =
+    job === undefined ||
+    [
+      "pending",
+      "running",
+      "analyzers_running",
+      "connectors_running",
+      "pivots_running",
+      "visualizers_running",
+      "analyzers_completed",
+      "connectors_completed",
+      "pivots_completed",
+      "visualizers_completed",
+    ].includes(job.status);
 
   console.debug(
-    `JobResult - initialLoading: ${initialLoading}, isRunning: ${isRunning}, ` +
-      `notified: ${notified}, toNotify: ${toNotify}, jobTerminated: ${jobTerminated}`,
-  );
-
-  // HTTP polling only in case the job is running
-  useInterval(
-    refetch,
-    isRunning ? 5 * 1000 : null, // 5 seconds
-  );
-
-  // every time the job data are downloaded we check if it terminated or not
-  React.useEffect(
-    () =>
-      setIsRunning(
-        job === undefined ||
-          [
-            "pending",
-            "running",
-            "analyzers_running",
-            "connectors_running",
-            "pivots_running",
-            "visualizers_running",
-            "analyzers_completed",
-            "connectors_completed",
-            "pivots_completed",
-            "visualizers_completed",
-          ].includes(job.status),
-      ),
-    [job],
+    `JobResult - initialLoading: ${initialLoading}, jobIsRunning: ${jobIsRunning}, ` +
+      `notified: ${notified}, toNotify: ${toNotify}`,
   );
 
   // In case the job terminated and it's not to notify, it means the user waited the result, notification is not needed.
   React.useEffect(() => {
-    if (jobTerminated && !toNotify) {
+    if (!jobIsRunning && !toNotify) {
       setNotified(true);
     }
-  }, [isRunning, jobTerminated, toNotify]);
+  }, [jobIsRunning, toNotify]);
 
   // notify the user when the job ends, he left the web page and we didn't notified the user before.
-  if (jobTerminated && toNotify && !notified) {
+  if (!jobIsRunning && toNotify && !notified) {
     generateJobNotification(job.observable_name, job.id);
     setNotified(true);
   }
-
-  // initial loading (spinner)
-  React.useEffect(() => {
-    if (!loading) setInitialLoading(false);
-  }, [loading]);
 
   /* add a focus listener:
   when gain focus set it has been notified and reset the favicon
@@ -119,24 +121,13 @@ export default function JobResult() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // page title
-  useTitle(
-    `IntelOwl | Job (#${jobId}, ${
-      // eslint-disable-next-line no-nested-ternary
-      job ? (job.is_sample ? job.file_name : job.observable_name) : ""
-    })`,
-    { restoreOnUnmount: true },
-  );
-
   return (
     <Loader
       loading={initialLoading}
-      error={error}
       render={() => (
         <JobOverview
-          isRunningJob={isRunning}
+          isRunningJob={jobIsRunning}
           job={job}
-          refetch={refetch}
           section={section}
           subSection={subSection}
         />

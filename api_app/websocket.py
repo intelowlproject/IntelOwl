@@ -1,35 +1,36 @@
-import json
 import logging
 
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
+
+from api_app.models import Job
+from api_app.serializers import JobSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class JobConsumer(WebsocketConsumer):
+class JobConsumer(JsonWebsocketConsumer):
     def connect(self):
-        logger.debug("websocket connect!")
-        job_id = self.scope["url_route"]["kwargs"]["job_id"]
         user = self.scope["user"]
-        logger.debug(f"this is the job id: {job_id}")
-        logger.debug(f"user: {user}")
+        job_id = self.scope["url_route"]["kwargs"]["job_id"]
+        logger.info(f"user: {user} requested the analysis for the job {job_id}")
         self.accept()
+        job = Job.objects.get(id=job_id)
+        job_serializer = JobSerializer(job)
+        job_data = job_serializer.data
+        logger.debug(f"job data: {job_data}")
+        self.send_json(content=job_data)
 
     def disconnect(self):
-        logger.debug("websocket disconnect!")
-        # self.send(bytes_data="disconnect request received")
+        user = self.scope["user"]
+        logger.debug(f"user {user} disconnected!")
         self.close()
 
-    # Receive message from WebSocket
-    def receive(self):
-        logger.debug("websocket receive!")
-        self.send(text_data=json.dumps({"message": "it's working"}))
-        # TODO: non so se viene inviato sempre almeno un messaggio.
-        # in ogni caso quando uno va ad aprire un job vecchio viene usata la websocket
-        # (in frontend non può sapere se è running o no)
-        # e bisognerà gestire la casistica reportando subito il job.
-        # nel caso in cui l'analisi sia appena partita e il job è running va detto
-        # si fa un check sul db e si ritorna o lo status se è running o tutto il job
+    def receive_json(self, content):
+        logger.info("websocket receive!")
+        user = self.scope["user"]
+        logger.warning(
+            f"user {user} send {content} to the websocket, this shouldn't happen"
+        )
 
 
 # sto metodo deve essere usato in altre parti del codice (direi alla fine del job)

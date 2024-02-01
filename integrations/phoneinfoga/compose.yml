@@ -7,11 +7,10 @@ services:
       image: sundowndev/phoneinfoga:latest
       command:
         - "serve"
+        - "--no-client"
       expose:
         - "5000"
       env_file:
       - env_file_integrations
-      environment:
-      - GIN_MODE=release
       depends_on:
       - uwsgi

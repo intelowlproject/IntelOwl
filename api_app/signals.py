@@ -42,6 +42,12 @@ def pre_delete_job(sender, instance: Job, **kwargs):
         instance.file.delete()
 
 
+@receiver(models.signals.post_delete, sender=Job)
+def post_delete_job(sender, instance: Job, **kwargs):
+    if instance.analysis.jobs.count() == 0:
+        instance.analysis.delete()
+
+
 @receiver(models.signals.post_migrate, sender=django_celery_beat.apps.BeatConfig)
 def post_migrate_beat(
     sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs

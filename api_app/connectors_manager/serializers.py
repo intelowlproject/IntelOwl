@@ -1,12 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from ..serializers import (
-    AbstractReportBISerializer,
-    AbstractReportSerializer,
+from ..serializers.plugin import (
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
+from ..serializers.report import AbstractReportBISerializer, AbstractReportSerializer
 from .models import ConnectorConfig, ConnectorReport
 
 

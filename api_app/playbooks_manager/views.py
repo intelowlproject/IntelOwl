@@ -10,8 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api_app.playbooks_manager.serializers import PlaybookConfigSerializer
-from api_app.serializers import (
-    FileAnalysisSerializer,
+from api_app.serializers.job import (
+    FileJobSerializer,
     JobResponseSerializer,
     ObservableAnalysisSerializer,
 )
@@ -59,12 +59,12 @@ class PlaybookConfigViewSet(
 
     @add_docs(
         description="This endpoint allows to start a Job related to a file",
-        request=FileAnalysisSerializer,
+        request=FileJobSerializer,
         responses={200: JobResponseSerializer},
     )
     @action(methods=["POST"], url_name="analyze_multiple_files", detail=False)
     def analyze_multiple_files(self, request):
-        oas = FileAnalysisSerializer(
+        oas = FileJobSerializer(
             data=request.data, many=True, context={"request": request}
         )
         oas.is_valid(raise_exception=True)

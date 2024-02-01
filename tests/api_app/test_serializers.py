@@ -12,17 +12,9 @@ from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import (
-    CommentSerializer,
-    FileAnalysisSerializer,
-    JobRecentScanSerializer,
-    JobResponseSerializer,
-    JobSerializer,
-    ObservableAnalysisSerializer,
-    PluginConfigSerializer,
-    PythonListConfigSerializer,
-    _AbstractJobCreateSerializer,
-)
+from api_app.serializers.job import JobRecentScanSerializer, JobSerializer, _AbstractJobCreateSerializer, \
+    FileJobSerializer, ObservableAnalysisSerializer, CommentSerializer, JobResponseSerializer
+from api_app.serializers.plugin import PluginConfigSerializer, PythonListConfigSerializer
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -445,7 +437,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
 
 class FileJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
-        self.fas = FileAnalysisSerializer(
+        self.fas = FileJobSerializer(
             data={}, context={"request": MockUpRequest(self.user)}
         )
 
@@ -455,7 +447,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         a.save()
 
         with self.assertRaises(ValidationError):
-            FileAnalysisSerializer.set_analyzers_to_execute(
+            FileJobSerializer.set_analyzers_to_execute(
                 self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
             )
         a.type = "file"
@@ -465,7 +457,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
                 name="Tranco", supported_filetypes__len=0
             ).exists()
         )
-        analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
+        analyzers = FileJobSerializer.set_analyzers_to_execute(
             self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
         )
         self.assertCountEqual(analyzers, [a])
@@ -485,11 +477,11 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         )
 
         with self.assertRaises(ValidationError):
-            FileAnalysisSerializer.set_analyzers_to_execute(
+            FileJobSerializer.set_analyzers_to_execute(
                 self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
             )
 
-        analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
+        analyzers = FileJobSerializer.set_analyzers_to_execute(
             self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
         )
         self.assertCountEqual(analyzers, [a])
@@ -499,11 +491,11 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         a.save()
 
         with self.assertRaises(ValidationError):
-            FileAnalysisSerializer.set_analyzers_to_execute(
+            FileJobSerializer.set_analyzers_to_execute(
                 self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
             )
 
-        analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
+        analyzers = FileJobSerializer.set_analyzers_to_execute(
             self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
         )
         self.assertCountEqual(analyzers, [a])

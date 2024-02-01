@@ -1,8 +1,8 @@
 from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
-    MultipleFileAnalysisSerializer,
-    MultipleObservableAnalysisSerializer,
+    MultipleFileJobSerializer,
+    MultipleObservableJobSerializer,
 )
 from tests import CustomTestCase
 
@@ -18,7 +18,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
 
     def test__get_file_serializer(self):
         serializer = self.c._get_file_serializer([b"test"], tlp="CLEAR", user=self.user)
-        self.assertIsInstance(serializer, MultipleFileAnalysisSerializer)
+        self.assertIsInstance(serializer, MultipleFileJobSerializer)
         serializer.is_valid(raise_exception=True)
         jobs = serializer.save(send_task=False)
         self.assertEqual(len(jobs), 1)
@@ -32,7 +32,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         serializer = self.c._get_observable_serializer(
             ["google.com"], tlp="CLEAR", user=self.user
         )
-        self.assertIsInstance(serializer, MultipleObservableAnalysisSerializer)
+        self.assertIsInstance(serializer, MultipleObservableJobSerializer)
         serializer.is_valid(raise_exception=True)
         jobs = serializer.save(send_task=False)
         self.assertEqual(len(jobs), 1)

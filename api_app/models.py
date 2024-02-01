@@ -12,6 +12,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
 from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
+from treebeard.mp_tree import MP_Node
 
 from api_app.interfaces import OwnershipAbstractModel
 
@@ -207,7 +208,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Job(models.Model):
+class Job(MP_Node):
     objects = JobQuerySet.as_manager()
 
     class Meta:
@@ -230,7 +231,14 @@ class Job(models.Model):
     # constants
     TLP = TLP
     Status = Status
-
+    analysis = models.ForeignKey(
+        "analyses_manager.Analysis",
+        on_delete=models.PROTECT,
+        related_name="jobs",
+        null=True,
+        blank=True,
+        default=None,
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

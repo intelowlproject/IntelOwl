@@ -47,19 +47,18 @@ from .models import (
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
-from .serializers import (
+from .serializers import TagSerializer
+from .serializers.job import (
     CommentSerializer,
-    FileAnalysisSerializer,
+    FileJobSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
     JobRecentScanSerializer,
     JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
-    PluginConfigSerializer,
-    PythonConfigSerializer,
-    TagSerializer,
 )
+from .serializers.plugin import PluginConfigSerializer, PythonConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -140,13 +139,13 @@ def ask_multi_analysis_availability(request):
 @add_docs(
     description="This endpoint allows to start a Job related for a single File."
     " Retained for retro-compatibility",
-    request=FileAnalysisSerializer,
+    request=FileJobSerializer,
     responses={200: JobResponseSerializer(many=True)},
 )
 @api_view(["POST"])
 def analyze_file(request):
     logger.info(f"received analyze_file from user {request.user}")
-    fas = FileAnalysisSerializer(data=request.data, context={"request": request})
+    fas = FileJobSerializer(data=request.data, context={"request": request})
     fas.is_valid(raise_exception=True)
     job = fas.save(send_task=True)
     jrs = JobResponseSerializer(job).data
@@ -178,9 +177,7 @@ def analyze_file(request):
 @api_view(["POST"])
 def analyze_multiple_files(request):
     logger.info(f"received analyze_multiple_files from user {request.user}")
-    fas = FileAnalysisSerializer(
-        data=request.data, context={"request": request}, many=True
-    )
+    fas = FileJobSerializer(data=request.data, context={"request": request}, many=True)
     fas.is_valid(raise_exception=True)
     jobs = fas.save(send_task=True)
     jrs = JobResponseSerializer(jobs, many=True).data

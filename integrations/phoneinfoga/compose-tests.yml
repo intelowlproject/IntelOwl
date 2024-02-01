@@ -5,7 +5,7 @@ services:
       container_name: phoneinfoga
       restart: unless-stopped
       image: sundowndev/phoneinfoga:latest
-      espose:
+      exspose:
         - "5000"
       env_file:
       - env_file_integrations

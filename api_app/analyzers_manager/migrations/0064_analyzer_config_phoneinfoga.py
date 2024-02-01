@@ -51,7 +51,7 @@ values = [
             },
             "name": "scanner_name",
             "type": "str",
-            "description": "scanner name for phoneinfoga",
+            "description": "scanner name for [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
             "is_secret": False,
             "required": True,
         },

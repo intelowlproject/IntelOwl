@@ -7,8 +7,6 @@ from zippy import CompressionEngine, EnsembledZippy, Zippy
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
-# from tests.mock_utils import MockResponseNoOp, patch
-
 logger = logging.getLogger(__name__)
 
 

@@ -5,7 +5,6 @@ import logging
 import uuid
 from abc import ABCMeta, abstractmethod
 
-from django.core.cache import cache
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
@@ -35,6 +34,7 @@ from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
 from .decorators import deprecated_endpoint
 from .filters import JobFilter
+from .mixins import PaginationMixin
 from .models import (
     AbstractConfig,
     AbstractReport,
@@ -794,7 +794,9 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
+class AbstractConfigViewSet(
+    PaginationMixin, viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta
+):
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
     lookup_field = "name"
@@ -848,43 +850,6 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         return self.serializer_class.Meta.model.objects.all().prefetch_related(
             "python_module__parameters"
         )
-
-    def list(self, request, *args, **kwargs):
-        cache_name = (
-            f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
-        )
-
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-
-        if page is not None:
-            page = self.serializer_class.Meta.model.objects.filter(
-                pk__in=[plugin.pk for plugin in page]
-            )
-            if "page" in request.query_params and "page_size" in request.query_params:
-                cache_name += (
-                    f"_{request.query_params['page']}_"
-                    f"{request.query_params['page_size']}"
-                )
-            cache_hit = cache.get(cache_name)
-            if cache_hit is None:
-                logger.debug(f"View {cache_name} cache not hit")
-                serializer = self.get_serializer(page, many=True)
-                data = serializer.data
-                cache.set(cache_name, value=data, timeout=24 * 7)
-            else:
-                logger.debug(f"View {cache_name} cache hit")
-                data = cache_hit
-            return self.get_paginated_response(data)
-        cache_hit = cache.get(cache_name)
-
-        if cache_hit is None:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
-        else:
-            data = cache_hit
-
-        return Response(data)
 
     @add_docs(
         description="Health Check: "

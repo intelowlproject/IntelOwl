@@ -13,6 +13,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
+from ..mixins import PaginationMixin
 from ..models import Job
 from .models import Analysis
 from .serializers import AnalysisSerializer, AnalysisTreeSerializer
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class AnalysisViewSet(
+    PaginationMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
@@ -30,6 +32,9 @@ class AnalysisViewSet(
     serializer_class = AnalysisSerializer
     ordering = ["name"]
     lookup_field = "pk"
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("jobs")
 
     def get_object(self):
         obj = super().get_object()

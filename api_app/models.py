@@ -1136,7 +1136,7 @@ class PythonConfig(AbstractConfig):
             cache.delete(key)
 
     def refresh_cache_keys(self, user: User = None):
-        from api_app.serializers import PythonListConfigSerializer
+        from api_app.serializers.plugin import PythonConfigListSerializer
 
         base_key = (
             f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
@@ -1145,12 +1145,12 @@ class PythonConfig(AbstractConfig):
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
         if user:
-            PythonListConfigSerializer(
+            PythonConfigListSerializer(
                 child=self.serializer_class()
             ).to_representation_single_plugin(self, user)
         else:
             for generic_user in User.objects.exclude(email=""):
-                PythonListConfigSerializer(
+                PythonConfigListSerializer(
                     child=self.serializer_class()
                 ).to_representation_single_plugin(self, generic_user)
 

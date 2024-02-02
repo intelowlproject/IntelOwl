@@ -23,7 +23,7 @@ from api_app.serializers.job import (
 )
 from api_app.serializers.plugin import (
     PluginConfigSerializer,
-    PythonListConfigSerializer,
+    PythonConfigListSerializer,
 )
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
@@ -629,7 +629,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             disabled=False,
             maximum_tlp="CLEAR",
         )
-        acs = PythonListConfigSerializer(
+        acs = PythonConfigListSerializer(
             context={"request": MockUpRequest(self.user)},
             child=AnalyzerConfigSerializer(),
         )
@@ -662,7 +662,7 @@ class AbstractListConfigSerializerTestCase(CustomTestCase):
             required=True,
             is_secret=True,
         )
-        acs = PythonListConfigSerializer(
+        acs = PythonConfigListSerializer(
             context={"request": MockUpRequest(self.user)},
             child=AnalyzerConfigSerializer(),
         )

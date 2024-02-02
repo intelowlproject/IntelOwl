@@ -161,7 +161,7 @@ class ParameterSerializer(rfs.ModelSerializer):
             return param.value
 
 
-class PythonListConfigSerializer(rfs.ListSerializer):
+class PythonConfigListSerializer(rfs.ListSerializer):
     plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation_single_plugin(self, plugin: PythonConfig, user: User):
@@ -255,7 +255,7 @@ class PythonConfigSerializer(AbstractConfigSerializer):
             "health_check_status",
             "health_check_task",
         ]
-        list_serializer_class = PythonListConfigSerializer
+        list_serializer_class = PythonConfigListSerializer
 
     def to_internal_value(self, data):
         raise NotImplementedError()

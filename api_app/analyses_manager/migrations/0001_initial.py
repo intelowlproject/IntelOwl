@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.CreateModel(
             name="Analysis",
+            options={"verbose_name_plural": "analyses"},
             fields=[
                 (
                     "id",
@@ -53,5 +54,11 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
+        ),
+        migrations.AddIndex(
+            model_name="analysis",
+            index=models.Index(
+                fields=["start_time"], name="analyses_ma_start_t_6a1f30_idx"
+            ),
         ),
     ]

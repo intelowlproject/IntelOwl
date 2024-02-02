@@ -498,7 +498,8 @@ class MultipleJobSerializer(rfs.ListSerializer):
         result = super().save(**kwargs, parent=parent)
         if parent:
             analysis = Analysis.objects.create(
-                name="Pivot analysis", owner=self.context["request"].user
+                name="Pivot analysis",
+                owner=self.context["request"].user,
             )
             analysis.jobs.add(parent)
         elif len(result) > 1:
@@ -508,7 +509,10 @@ class MultipleJobSerializer(rfs.ListSerializer):
             analysis.jobs.set(result)
         else:
             return result
+        analysis: Analysis
         analysis.name = analysis.name + f" #{analysis.id}"
+        analysis.start_time = parent.received_request_time
+        analysis.status = analysis.Status.RUNNING.value
         analysis.save()
         return result
 

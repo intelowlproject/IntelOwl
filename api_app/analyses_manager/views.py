@@ -71,39 +71,45 @@ class AnalysisViewSet(
 
     @action(methods=["POST"], url_name="add_job", detail=True)
     def add_job(self, request, pk):
-        obj: Analysis = self.get_object()
-        job = self._get_job(request)
-        self._check_job_and_analysis(job, obj)
+        analysis: Analysis = self.get_object()
+        job: Job = self._get_job(request)
+        self._check_job_and_analysis(job, analysis)
         if job.analysis is None:
-            job.analysis = obj
+            job.analysis = analysis
             job.save()
+            # we are possibly changing the status of the analysis
+            job.analysis.set_correct_status(save=True)
+
             return Response(
-                status=status.HTTP_200_OK, data=AnalysisSerializer(instance=obj).data
+                status=status.HTTP_200_OK,
+                data=AnalysisSerializer(instance=analysis).data,
             )
 
-        elif job.analysis_id == obj.id:
+        elif job.analysis_id == analysis.id:
             raise BadRequest("Job is already part of this analysis")
         else:
             raise BadRequest("Job is already part of different analysis")
 
     @action(methods=["POST"], url_name="remove_job", detail=True)
     def remove_job(self, request, pk):
-        obj: Analysis = self.get_object()
+        analysis: Analysis = self.get_object()
         request: HttpRequest
-        job = self._get_job(request)
-        self._check_job_and_analysis(job, obj)
-        if job.analysis_id != obj.pk:
+        job: Job = self._get_job(request)
+        self._check_job_and_analysis(job, analysis)
+        if job.analysis_id != analysis.pk:
             raise BadRequest(f"You can't remove job {job.id} from analysis")
         job.analysis = None
         job.save()
+        # we are possibly changing the status of the analysis
+        analysis.set_correct_status(save=True)
         return Response(
-            status=status.HTTP_200_OK, data=AnalysisSerializer(instance=obj).data
+            status=status.HTTP_200_OK, data=AnalysisSerializer(instance=analysis).data
         )
 
     @action(methods=["POST"], url_name="conclude", detail=True)
     def conclude(self, request, pk):
         obj: Analysis = self.get_object()
-        obj.conclude()
+        obj.set_correct_status(save=True)
         return Response(status=status.HTTP_200_OK)
 
     @action(methods=["GET"], url_name="graph", detail=True)

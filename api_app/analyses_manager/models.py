@@ -15,19 +15,19 @@ class Analysis(OwnershipAbstractModel):
     end_time = models.DateTimeField(default=None, null=True, blank=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.CASCADE,
         related_name="analyses",
     )
     status = models.CharField(
         choices=AnalysisStatusChoices.choices,
         max_length=20,
-        default=AnalysisStatusChoices.STARTED.value,
+        default=AnalysisStatusChoices.CREATED.value,
     )
     Status = AnalysisStatusChoices
 
     class Meta:
         verbose_name_plural = "analyses"
+        indexes = [models.Index(fields=["start_time"])]
 
     def __str__(self):
         return (
@@ -36,7 +36,25 @@ class Analysis(OwnershipAbstractModel):
             f"-> {self.status}"
         )
 
-    def conclude(self):
-        self.status = self.Status.CONCLUDED.value
-        self.end_time = datetime.now()
-        self.save()
+    def set_correct_status(self, save: bool = True):
+        from api_app.models import Job
+
+        # if I have some jobs
+        if self.jobs.exists():
+            # and at least one is running
+            if self.jobs.exclude(status__in=Job.Status.final_statuses()).count() > 0:
+                self.status = self.Status.RUNNING.value
+                self.end_time = None
+            # and they are all completed
+            else:
+                self.status = self.Status.CONCLUDED.value
+                self.end_time = (
+                    self.jobs.order_by("finished_analysis_time")
+                    .last()
+                    .finished_analysis_time
+                )
+        else:
+            self.status = self.Status.CREATED.value
+            self.end_time = None
+        if save:
+            self.save(update_fields=["status", "end_time"])

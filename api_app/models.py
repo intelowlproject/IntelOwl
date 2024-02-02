@@ -434,6 +434,7 @@ class Job(MP_Node):
                 self.status = self.Status.REPORTED_WITH_FAILS
 
         self.finished_analysis_time = get_now()
+
         logger.info(f"{self.__repr__()} setting status to {self.status}")
         self.save(
             update_fields=[
@@ -442,6 +443,9 @@ class Job(MP_Node):
                 "finished_analysis_time",
             ]
         )
+        # we update the status of the analysis
+        if self.analysis:
+            self.analysis.set_correct_status(save=True)
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")

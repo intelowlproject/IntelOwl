@@ -36,9 +36,8 @@ class Migration(migrations.Migration):
                     "status",
                     models.CharField(
                         choices=[
-                            ("started", "Started"),
-                            ("jobs_running", "Jobs Running"),
-                            ("jobs_ended", "Jobs Ended"),
+                            ("created", "Created"),
+                            ("running", "Running"),
                             ("concluded", "Concluded"),
                         ],
                         default="started",
@@ -48,8 +47,7 @@ class Migration(migrations.Migration):
                 (
                     "owner",
                     models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
+                        on_delete=django.db.models.deletion.CASCADE,
                         related_name="analyses",
                         to=settings.AUTH_USER_MODEL,
                     ),

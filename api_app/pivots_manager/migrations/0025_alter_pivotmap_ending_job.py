@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0061_job_analysis"),
+        ("api_app", "0058_4_change_primary_key"),
         ("pivots_manager", "0024_4_change_primary_key"),
     ]
 

@@ -12,9 +12,19 @@ from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers.job import JobRecentScanSerializer, JobSerializer, _AbstractJobCreateSerializer, \
-    FileJobSerializer, ObservableAnalysisSerializer, CommentSerializer, JobResponseSerializer
-from api_app.serializers.plugin import PluginConfigSerializer, PythonListConfigSerializer
+from api_app.serializers.job import (
+    CommentSerializer,
+    FileJobSerializer,
+    JobRecentScanSerializer,
+    JobResponseSerializer,
+    JobSerializer,
+    ObservableAnalysisSerializer,
+    _AbstractJobCreateSerializer,
+)
+from api_app.serializers.plugin import (
+    PluginConfigSerializer,
+    PythonListConfigSerializer,
+)
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization

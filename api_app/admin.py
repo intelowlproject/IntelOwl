@@ -68,6 +68,9 @@ class JobAdminView(CustomAdminView):
     )
     list_filter = ("status", "user", "tags")
 
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
     @admin.display(description="Tags")
     def get_tags(self, instance: Job):
         return [tag.label for tag in instance.tags.all()]

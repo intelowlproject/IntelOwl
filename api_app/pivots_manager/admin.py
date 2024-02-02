@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.contrib import admin
+from django.http import HttpRequest
 
 from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
 from api_app.pivots_manager.forms import PivotConfigAdminForm
@@ -29,3 +30,6 @@ class PivotConfigAdminView(PythonConfigAdminView):
 @admin.register(PivotMap)
 class PivotMapAdminView(admin.ModelAdmin):
     list_display = ["pk", "starting_job", "pivot_config", "ending_job", "owner"]
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False

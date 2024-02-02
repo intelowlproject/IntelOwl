@@ -27,7 +27,7 @@ class Analysis(OwnershipAbstractModel):
     Status = AnalysisStatusChoices
 
     class Meta:
-        ...
+        verbose_name_plural = "analyses"
 
     def __str__(self):
         return (

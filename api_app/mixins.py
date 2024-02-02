@@ -1,10 +1,11 @@
 import logging
 
+from django.core.cache import cache
+from rest_framework.response import Response
+
 from certego_saas.ext.pagination import CustomPageNumberPagination
 
 logger = logging.getLogger(__name__)
-from django.core.cache import cache
-from rest_framework.response import Response
 
 
 class PaginationMixin:

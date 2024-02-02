@@ -494,15 +494,22 @@ class MultipleJobSerializer(rfs.ListSerializer):
     def update(self, instance, validated_data):
         raise NotImplementedError("This serializer does not support update().")
 
-    def create(self, validated_data):
-        result = super().create(validated_data)
-        if len(result) > 1:
+    def save(self, parent: Job = None, **kwargs):
+        result = super().save(**kwargs, parent=parent)
+        if parent:
+            analysis = Analysis.objects.create(
+                name="Pivot analysis", owner=self.context["request"].user
+            )
+            analysis.jobs.add(parent)
+        elif len(result) > 1:
             analysis = Analysis.objects.create(
                 name="Custom analysis", owner=self.context["request"].user
             )
-            analysis.name = analysis.name + f" #{analysis.id}"
-            analysis.save()
             analysis.jobs.set(result)
+        else:
+            return result
+        analysis.name = analysis.name + f" #{analysis.id}"
+        analysis.save()
         return result
 
 

@@ -44,7 +44,7 @@ def pre_delete_job(sender, instance: Job, **kwargs):
 
 @receiver(models.signals.post_delete, sender=Job)
 def post_delete_job(sender, instance: Job, **kwargs):
-    if instance.analysis.jobs.count() == 0:
+    if instance.analysis and instance.analysis.jobs.count() == 0:
         instance.analysis.delete()
 
 

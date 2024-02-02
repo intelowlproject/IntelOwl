@@ -47,7 +47,7 @@ class CreateJobsFromPlaybookInterface:
             return self._get_observable_serializer(values, tlp, user)
 
     def _get_observable_serializer(self, values: Iterable[Any], tlp: str, user: User):
-        from api_app.serializers import ObservableAnalysisSerializer
+        from api_app.serializers.job import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
         return ObservableAnalysisSerializer(
@@ -63,7 +63,7 @@ class CreateJobsFromPlaybookInterface:
     def _get_file_serializer(
         self, values: Iterable[Union[bytes, File]], tlp: str, user: User
     ):
-        from api_app.serializers import FileJobSerializer
+        from api_app.serializers.job import FileJobSerializer
         from tests.mock_utils import MockUpRequest
 
         files = [

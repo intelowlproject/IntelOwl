@@ -17,31 +17,36 @@ class ZippyAnalyser(FileAnalyzer):
     Tells if a file is written by HUMAN or AI
     """
 
+    ENGINES = {
+        "lzma": CompressionEngine.LZMA,
+        "zlib": CompressionEngine.ZLIB,
+        "brotli": CompressionEngine.BROTLI,
+    }
+
     engine: str
 
     def update(self):
         pass
 
     def run(self):
-        z = None
-        if self.engine == "lzma":
-            z = Zippy(engine=CompressionEngine.LZMA)
-        elif self.engine == "zlib":
-            z = Zippy(engine=CompressionEngine.ZLIB)
-        elif self.engine == "brotli":
-            z = Zippy(engine=CompressionEngine.BROTLI)
-        else:
-            z = EnsembledZippy()
+        z = (
+            Zippy(engine=self.ENGINES[self.engine])
+            if self.engine in self.ENGINES
+            else EnsembledZippy()
+        )
 
         logger.info("Running Zippy on file %s using %s", self.filepath, self.engine)
         binary_data = self.read_file_bytes()
-        text_data = binary_data.decode("utf-8")
-        filename = self.filepath
-        logger.info("")
         try:
-            response = z.run_on_file_chunked(filename)
-        except Exception:
+            text_data = binary_data.decode("utf-8")
+            response = z.run_on_file_chunked(filename=self.filepath)
+        except UnicodeDecodeError:
+            logger.exception("Cannot decode file %s", self.filepath)
+            raise AnalyzerRunException("Cannot decode file")
+        except Exception as e:
             logger.exception("%s.run_on_text_chunked(text_data) failed", self.engine)
-            raise AnalyzerRunException
+            logger.exception(e)
+            raise AnalyzerRunException(f"{self.engine} failed")
+        response = response + (text_data, "engine used: " + self.engine)
         # returning a response tuple with the text checked and AI or HUMAN
-        return response + (text_data,)
+        return response

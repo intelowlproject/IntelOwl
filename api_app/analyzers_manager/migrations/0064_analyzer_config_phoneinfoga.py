@@ -36,7 +36,7 @@ params = [
         },
         "name": "phoneinfoga_scanner_name",
         "type": "str",
-        "description": "scanner name for [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
+        "description": "Scanner name for [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
         "is_secret": False,
         "required": False,
     }

@@ -20,12 +20,15 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
         pass
 
     observable_name: str
-    scanner_name: str
+    phoneinfoga_scanner_name: str
     name: str = "phoneinfoga"
 
     def run(self):
         response: None
-        url: str = f"http://phoneinfoga:5000/api/v2/scanners/{self.scanner_name}/run"
+        url: str = (
+            f"http://phoneinfoga:5000/api/v2/scanners/"
+            f"{self.phoneinfoga_scanner_name}/run"
+        )
 
         try:
             response = requests.post(

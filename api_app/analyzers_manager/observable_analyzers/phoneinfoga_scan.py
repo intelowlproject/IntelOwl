@@ -6,7 +6,7 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (  # AnalyzerConfigurationException
     AnalyzerRunException,
 )
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +44,8 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
             raise AnalyzerRunException(e)
         return response.json()
 
-    @classmethod
-    def _monkeypatch(cls):
+    @staticmethod
+    def mocked_docker_analyzer_post(*args, **kwargs):
         mockrespose = {
             "result": {
                 "valid": True,
@@ -60,16 +60,4 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
                 "line_type": "mobile",
             }
         }
-
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockUpResponse(
-                        mockrespose,
-                        200,
-                    ),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)
+        return MockUpResponse(mockrespose, 200)

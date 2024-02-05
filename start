@@ -5,6 +5,13 @@ version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
 pyelastic_default_version="7.4.1"
 pycti_default_version="5.10.0"
 
+# little trick for exact matching in arrays
+declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
+declare -A test_mode=(["test"]=1 ["ci"]=1)
+declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
+
+declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
+
 print_synopsis () {
   echo "SYNOPSIS"
   echo -e "    start <env> <command> [OPTIONS]"
@@ -63,11 +70,6 @@ check_parameters () {
     exit 2
   fi
 
-  # little trick for exact matching in arrays
-  declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
-  declare -A test_mode=(["test"]=1 ["ci"]=1)
-  declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
-
   if ! [[ ${env_arguments["${1}"]} ]]; then
     echo "Error! Illegal environment specified." >&2
     exit 2
@@ -107,7 +109,6 @@ current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
 docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers" "phoneinfoga")
 
-declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
 for value in "${docker_analyzers[@]}"; do
   path_mapping["${value}"]+="integrations/${value}/compose.yml"
   path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
@@ -116,15 +117,18 @@ for value in "${docker_analyzers[@]}"; do
   path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} "
 done
 
-test_appendix=""
-if ! [[ ${test_mode["${env_argument}"]} ]]; then
+if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
+else
+  is_test=false
+  test_appendix=""
 fi
 
 # parse arguments and put them in an associative array to better use them later
 declare -A params
 declare -A analyzers
+project_name=""
 set_defaults_values
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -262,7 +266,7 @@ fi
 if ! [ "${params["use_external_broker"]}" ]; then
   compose_files+=("${path_mapping["rabbitmq"]}")
 fi
-if $is_test; then
+if [ "$is_test" = true ]; then
   compose_files+=("${path_mapping["$env_argument"]}")
 fi
 
@@ -288,7 +292,7 @@ if [ "${analyzers["all_analyzers"]}" ]; then
   for analyzer in "${all_analyzers_array[@]}" ; do
     compose_files+=("${analyzer}")
   done
-  if [ $is_test ]; then
+  if [ "$is_test" = true ]; then
     IFS=', ' read -r -a all_analyzers_array_test <<< "${path_mapping["all_analyzers${test_appendix}"]}"
     for analyzer in "${all_analyzers_array_test[@]}" ; do
       compose_files+=("${analyzer}")
@@ -299,7 +303,7 @@ else
   if [ ${#docker_flags[@]} -ne 0 ]; then
     for analyzer in "${docker_flags[@]}"; do
       compose_files+=("${path_mapping["$analyzer"]}")
-      if [ $is_test ]; then
+      if [ "$is_test" = true ]; then
         compose_files+=("${path_mapping["$analyzer$test_appendix"]}")
       fi
     done

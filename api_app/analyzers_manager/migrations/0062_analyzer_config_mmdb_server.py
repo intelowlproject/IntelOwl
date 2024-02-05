@@ -59,7 +59,7 @@ values = [
         "value": "https://ip.circl.lu/geolookup/",
         "updated_at": "2024-01-23T20:23:55.745858Z",
         "owner": None,
-        "analyzer_config": 148,
+        "analyzer_config": "Mmdb_server",
         "connector_config": None,
         "visualizer_config": None,
         "ingestor_config": None,
@@ -83,7 +83,10 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get_or_create(**real_vals)[0]
         # it is just the primary key serialized
         else:
-            value = other_model.objects.get(pk=value)
+            if isinstance(value, int):
+                value = other_model.objects.get(pk=value)
+            else:
+                value = other_model.objects.get(name=value)
     return value
 
 

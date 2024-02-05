@@ -459,7 +459,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 ),
             )
         )
-        return super()._monkeypatch(patches)
+        return super()._monkeypatch(self, patches)
 
     def health_check(self, user: User = None) -> bool:
         """

@@ -128,7 +128,7 @@ class Migration(migrations.Migration):
         ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
         (
             "analyzers_manager",
-            "0063_alter_analyzerconfig_not_supported_filetypes_and_more",
+            "0064_analyzer_config_zippy_scan",
         ),
     ]
 

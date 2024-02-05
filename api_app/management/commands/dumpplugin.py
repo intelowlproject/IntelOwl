@@ -96,7 +96,7 @@ def _get_real_obj(Model, field, value):
         else:
             if isinstance(value, int):
                 value = other_model.objects.get(pk=value)
-            else
+            else:
                 value = other_model.objects.get(name=value)
     return value
 

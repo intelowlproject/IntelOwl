@@ -5,6 +5,13 @@ version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
 pyelastic_default_version="7.4.1"
 pycti_default_version="5.10.0"
 
+# little trick for exact matching in arrays
+declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
+declare -A test_mode=(["test"]=1 ["ci"]=1)
+declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
+
+declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
+
 print_synopsis () {
   echo "SYNOPSIS"
   echo -e "    start <env> <command> [OPTIONS]"
@@ -63,11 +70,6 @@ check_parameters () {
     exit 2
   fi
 
-  # little trick for exact matching in arrays
-  declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
-  declare -A test_mode=(["test"]=1 ["ci"]=1)
-  declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
-
   if ! [[ ${env_arguments["${1}"]} ]]; then
     echo "Error! Illegal environment specified." >&2
     exit 2
@@ -107,7 +109,6 @@ current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
 docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers")
 
-declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
 for value in "${docker_analyzers[@]}"; do
   path_mapping["${value}"]+="integrations/${value}/compose.yml"
   path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
@@ -127,6 +128,7 @@ fi
 # parse arguments and put them in an associative array to better use them later
 declare -A params
 declare -A analyzers
+project_name=""
 set_defaults_values
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -322,8 +324,9 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
-if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-else
-  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-fi
+echo "${to_run[@]}"
+#if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
+#  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+#else
+#  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+#fi

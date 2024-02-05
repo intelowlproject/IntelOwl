@@ -1200,8 +1200,16 @@ class ParameterCompleteSerializer(rfs.ModelSerializer):
         exclude = ["id"]
 
 
+class ParameterDistinctSerializer(rfs.ModelSerializer):
+    python_module = PythonModuleSerializer(read_only=True)
+
+    class Meta:
+        model = Parameter
+        fields = ["python_module", "name"]
+
+
 class PluginConfigCompleteSerializer(rfs.ModelSerializer):
-    parameter = ParameterCompleteSerializer(read_only=True)
+    parameter = ParameterDistinctSerializer(read_only=True)
     analyzer_config = rfs.CharField(source="analyzer_config.name")
     connector_config = rfs.CharField(source="connector_config.name")
     visualizer_config = rfs.CharField(source="visualizer_config.name")

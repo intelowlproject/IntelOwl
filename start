@@ -324,9 +324,8 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
-echo "${to_run[@]}"
-#if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-#  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-#else
-#  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
-#fi
+if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
+  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+else
+  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+fi

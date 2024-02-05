@@ -207,7 +207,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `VirusTotal_v3_File`: check the file hash on VirusTotal. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
 - `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
-
+-  `Zippy_scan` : [Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated; takes in `lzma`,`zlib`,`brotli` as input based engines; `ensemble` being default.
 ##### Observable analyzers (ip, domain, url, hash)
 
 ###### Internal tools

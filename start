@@ -116,10 +116,12 @@ for value in "${docker_analyzers[@]}"; do
   path_mapping["all_analyzers.test"]+="${path_mapping["${value}.test"]} "
 done
 
-test_appendix=""
-if ! [[ ${test_mode["${env_argument}"]} ]]; then
+if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
+else
+  is_test=false
+  test_appendix=""
 fi
 
 # parse arguments and put them in an associative array to better use them later
@@ -257,7 +259,7 @@ fi
 if ! [ "${params["use_external_broker"]}" ]; then
   compose_files+=("${path_mapping["rabbitmq"]}")
 fi
-if $is_test; then
+if [ "$is_test" = true ]; then
   compose_files+=("${path_mapping["$env_argument"]}")
 fi
 
@@ -283,7 +285,7 @@ if [ "${analyzers["all_analyzers"]}" ]; then
   for analyzer in "${all_analyzers_array[@]}" ; do
     compose_files+=("${analyzer}")
   done
-  if [ $is_test ]; then
+  if [ "$is_test" = true ]; then
     IFS=', ' read -r -a all_analyzers_array_test <<< "${path_mapping["all_analyzers${test_appendix}"]}"
     for analyzer in "${all_analyzers_array_test[@]}" ; do
       compose_files+=("${analyzer}")
@@ -294,7 +296,7 @@ else
   if [ ${#docker_flags[@]} -ne 0 ]; then
     for analyzer in "${docker_flags[@]}"; do
       compose_files+=("${path_mapping["$analyzer"]}")
-      if [ $is_test ]; then
+      if [ "$is_test" = true ]; then
         compose_files+=("${path_mapping["$analyzer$test_appendix"]}")
       fi
     done

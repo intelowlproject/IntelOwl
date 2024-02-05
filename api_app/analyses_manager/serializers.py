@@ -8,6 +8,12 @@ from api_app.serializers.job import JobTreeSerializer
 
 
 class AnalysisSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
+
+    tags = rfs.ListField(child=rfs.CharField(read_only=True), read_only=True, default=[])
+    tlp = rfs.CharField(read_only=True)
+    total_jobs = rfs.IntegerField(read_only=True)
+    jobs = rfs.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Analysis
         fields = rfs.ALL_FIELDS

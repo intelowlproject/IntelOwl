@@ -9,29 +9,30 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+
 
 from ..mixins import PaginationMixin
 from ..models import Job
 from .models import Analysis
 from .serializers import AnalysisSerializer, AnalysisTreeSerializer
+from ..permissions import IsObjectOwnerPermission
+from ..views import ModelWithOwnershipViewSet
 
 logger = logging.getLogger(__name__)
 
 
 class AnalysisViewSet(
     PaginationMixin,
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet,
+    ModelWithOwnershipViewSet,
+    ModelViewSet
 ):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
     serializer_class = AnalysisSerializer
     ordering = ["name"]
-    lookup_field = "pk"
+    queryset = Analysis.objects.all()
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related("jobs")
@@ -106,14 +107,8 @@ class AnalysisViewSet(
             status=status.HTTP_200_OK, data=AnalysisSerializer(instance=analysis).data
         )
 
-    @action(methods=["POST"], url_name="conclude", detail=True)
-    def conclude(self, request, pk):
-        obj: Analysis = self.get_object()
-        obj.set_correct_status(save=True)
-        return Response(status=status.HTTP_200_OK)
-
     @action(methods=["GET"], url_name="graph", detail=True)
-    def graph(self, request, pk):
+    def tree(self, request, pk):
         obj: Analysis = self.get_object()
         return Response(
             status=status.HTTP_200_OK, data=AnalysisTreeSerializer(instance=obj).data

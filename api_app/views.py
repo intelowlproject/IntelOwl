@@ -614,6 +614,11 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
+
+    def get_queryset(self):
+        return super().get_queryset().visible_for_user(self.request.user)
+
+
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.action in ["destroy", "update"]:
@@ -633,14 +638,11 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
 class PluginConfigViewSet(ModelWithOwnershipViewSet):
     serializer_class = PluginConfigSerializer
     pagination_class = None
+    queryset = PluginConfig.objects.all()
 
     def get_queryset(self):
         # the .exclude is to remove the default values
-        return (
-            PluginConfig.objects.visible_for_user(self.request.user)
-            .exclude(owner__isnull=True)
-            .order_by("id")
-        )
+        return super(PluginConfigViewSet, self).get_queryset().exclude(owner__isnull=True).order_by("id")
 
 
 @add_docs(

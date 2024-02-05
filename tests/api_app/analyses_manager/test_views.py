@@ -10,9 +10,11 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
     URL = "/api/analysis"
 
     def setUp(self):
+        super().setUp()
         self.analysis = Analysis.objects.create(owner=self.user, name="test")
 
     def tearDown(self) -> None:
+        super().tearDown()
         self.analysis.delete()
 
     @classmethod
@@ -21,10 +23,19 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         return Analysis
 
     def test_delete(self):
-        ...
+        analysis = self.get_object()
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.delete(f"{self.URL}/{analysis}")
+        self.assertEqual(response.status_code, 403)
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(f"{self.URL}/{analysis}")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.delete(f"{self.URL}/{analysis}")
+        self.assertEqual(response.status_code, 404)
 
     def test_create(self):
         ...
+
 
     def get_object(self):
         return self.analysis.pk

@@ -157,7 +157,7 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
 
     @classmethod
     def _get_bi_serializer_class(cls):
-        from api_app.serializers import JobBISerializer
+        from api_app.serializers.job import JobBISerializer
 
         return JobBISerializer
 

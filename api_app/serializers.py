@@ -1209,12 +1209,12 @@ class ParameterDistinctSerializer(rfs.ModelSerializer):
 
 
 class PluginConfigCompleteSerializer(rfs.ModelSerializer):
-    parameter = ParameterDistinctSerializer(read_only=True)
-    analyzer_config = rfs.CharField(source="analyzer_config.name")
-    connector_config = rfs.CharField(source="connector_config.name")
-    visualizer_config = rfs.CharField(source="visualizer_config.name")
-    ingestor_config = rfs.CharField(source="ingestor_config.name")
-    pivot_config = rfs.CharField(source="pivot_config.name")
+    parameter = ParameterCompleteSerializer(read_only=True)
+    analyzer_config = rfs.CharField(source="analyzer_config.name", allow_null=True)
+    connector_config = rfs.CharField(source="connector_config.name", allow_null=True)
+    visualizer_config = rfs.CharField(source="visualizer_config.name", allow_null=True)
+    ingestor_config = rfs.CharField(source="ingestor_config.name", allow_null=True)
+    pivot_config = rfs.CharField(source="pivot_config.name", allow_null=True)
 
     class Meta:
         model = PluginConfig

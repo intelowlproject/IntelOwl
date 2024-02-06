@@ -28,7 +28,7 @@ class IPReputationServices(Visualizer):
         else:
             hits = (
                 analyzer_report.report.get("data", {})
-                .get("total_votes", {})
+                .get("last_analysis_stats", {})
                 .get("malicious", 0)
             )
             virustotal_report = self.Title(

@@ -42,7 +42,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "intel_owl.wsgi.application"
-ASGI_APPLICATION = "intel_owl.asgi.application"
 
 # Internationalization
 

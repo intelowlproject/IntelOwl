@@ -18,6 +18,9 @@ services:
       - DJANGO_TEST_SERVER=True
       - DJANGO_WATCHMAN_TIMEOUT=20
 
+  redis:
+    image: library/redis:6.2.7-alpine
+  
   daphne:
     build:
       context: ..

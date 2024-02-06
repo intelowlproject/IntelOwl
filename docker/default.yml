@@ -39,6 +39,19 @@ services:
       - env_file_app
       - .env
 
+  redis:
+    image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
+    container_name: intelowl_redis
+    restart: unless-stopped
+    volumes:
+      - ../configuration:/opt/deploy/intel_owl/configuration
+      - generic_logs:/var/log/intel_owl
+      - shared_files:/opt/deploy/files_required
+    expose:
+      - "6379"
+    env_file:
+      - env_file_app
+
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_nginx

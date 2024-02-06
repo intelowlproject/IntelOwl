@@ -1,5 +1,6 @@
 import logging
 
+from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 
 from api_app.models import Job
@@ -17,20 +18,40 @@ class JobConsumer(JsonWebsocketConsumer):
         job = Job.objects.get(id=job_id)
         job_serializer = JobSerializer(job)
         job_data = job_serializer.data
-        logger.debug(f"job data: {job_data}")
-        self.send_json(content=job_data)
+        async_to_sync(self.channel_layer.group_add)(
+            JobConsumer.generate_group_name(job_id), self.channel_name
+        )
+        # send data
+        async_to_sync(self.channel_layer.group_send)(
+            JobConsumer.generate_group_name(job_id),
+            {"type": "send.job", "job": job_data},
+        )
 
-    def disconnect(self):
+    def disconnect(self, close_code):
         user = self.scope["user"]
-        logger.debug(f"user {user} disconnected!")
+        job_id = self.scope["url_route"]["kwargs"]["job_id"]
+        async_to_sync(self.channel_layer.group_discard)(
+            JobConsumer.generate_group_name(job_id), self.channel_name
+        )
+        logger.info(
+            f"user: {user} disconnected for the job: {job_id}. Close code: {close_code}"
+        )
         self.close()
 
     def receive_json(self, content):
-        logger.info("websocket receive!")
         user = self.scope["user"]
         logger.warning(
             f"user {user} send {content} to the websocket, this shouldn't happen"
         )
+
+    def send_job(self, event):
+        job_data = event["job"]
+        logger.debug(f"job data: {job_data}")
+        self.send_json(content=job_data)
+
+    @classmethod
+    def generate_group_name(cls, job_id: int):
+        return f"job-{job_id}"
 
 
 # sto metodo deve essere usato in altre parti del codice (direi alla fine del job)

@@ -26,10 +26,10 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         analysis = self.get_object()
         self.client.force_authenticate(user=self.superuser)
         response = self.client.delete(f"{self.URL}/{analysis}")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.client.force_authenticate(user=self.user)
         response = self.client.delete(f"{self.URL}/{analysis}")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, response.json())
         response = self.client.delete(f"{self.URL}/{analysis}")
         self.assertEqual(response.status_code, 404)
 

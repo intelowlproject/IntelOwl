@@ -28,6 +28,7 @@ class IPReputationServices(Visualizer):
         else:
             hits = (
                 analyzer_report.report.get("data", {})
+                .get("attributes", {})
                 .get("last_analysis_stats", {})
                 .get("malicious", 0)
             )

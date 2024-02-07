@@ -653,7 +653,7 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     def get_queryset(self):
         # the .exclude is to remove the default values
         return (
-            super(PluginConfigViewSet, self)
+            super()
             .get_queryset()
             .exclude(owner__isnull=True)
             .order_by("id")

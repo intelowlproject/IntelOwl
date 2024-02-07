@@ -142,10 +142,13 @@ class OTX(classes.ObservableAnalyzer):
             )
         )
         if not_supported_requested_section_list:
-            raise AnalyzerRunException(
-                f"Sections: {not_supported_requested_section_list} are not supported "
-                f"for indicator type: {otx_type}"
+            logger.warning(
+                f"Sections: {not_supported_requested_section_list}"
+                f" are not supported for indicator type: {otx_type}. "
+                f"We remove them from the search."
             )
+            for not_supported in not_supported_requested_section_list:
+                self.sections.remove(not_supported)
 
         result = {}
         for section in self.sections:

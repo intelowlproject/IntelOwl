@@ -399,6 +399,7 @@ export function JobOverview({
 JobOverview.propTypes = {
   isRunningJob: PropTypes.bool.isRequired,
   job: PropTypes.object.isRequired,
+  refetch: PropTypes.func.isRequired,
   section: PropTypes.string.isRequired,
   subSection: PropTypes.string.isRequired,
 };

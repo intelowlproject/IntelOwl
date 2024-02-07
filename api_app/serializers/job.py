@@ -963,6 +963,7 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         )
         return last_job_for_md5
 
+
 class JobBISerializer(AbstractBIInterface, ModelSerializer):
     timestamp = rfs.DateTimeField(source="received_request_time")
     username = rfs.CharField(source="user.username")

@@ -31,7 +31,8 @@ class PlaybookConfigViewSet(
 
     def get_queryset(self):
         return (
-            super().get_queryset()
+            super()
+            .get_queryset()
             .ordered_for_user(self.request.user)
             .prefetch_related(
                 "analyzers",

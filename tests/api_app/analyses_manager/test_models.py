@@ -123,8 +123,8 @@ class AnalysisTestCase(CustomTestCase):
         )
 
         tag1, _ = Tag.objects.get_or_create(
-                label="test1", defaults={"color": gen_random_colorhex()}
-            )
+            label="test1", defaults={"color": gen_random_colorhex()}
+        )
         tag2, _ = Tag.objects.get_or_create(
             label="test2", defaults={"color": gen_random_colorhex()}
         )
@@ -140,4 +140,3 @@ class AnalysisTestCase(CustomTestCase):
         job.delete()
         job2.delete()
         an.delete()
-

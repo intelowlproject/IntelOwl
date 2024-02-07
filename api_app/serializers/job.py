@@ -406,7 +406,9 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
 
 class JobTreeSerializer(ModelSerializer):
-    pivot_config = rfs.CharField(source="pivot_parent.pivot_config.name", allow_null=True, read_only=True)
+    pivot_config = rfs.CharField(
+        source="pivot_parent.pivot_config.name", allow_null=True, read_only=True
+    )
 
     class Meta:
         model = Job
@@ -417,9 +419,7 @@ class JobTreeSerializer(ModelSerializer):
         data = super().to_representation(instance)
         for child in instance.get_children():
             # recursive call
-            data.setdefault("children", []).append(
-                self.__class__(instance=child).data
-            )
+            data.setdefault("children", []).append(self.__class__(instance=child).data)
         if data["pivot_config"] is None:
             del data["pivot_config"]
         return data

@@ -4,31 +4,24 @@ import logging
 
 from django.core.exceptions import BadRequest
 from django.http import HttpRequest
-from rest_framework import mixins, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
-
-from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
-
+from rest_framework.viewsets import ModelViewSet
 
 from ..mixins import PaginationMixin
 from ..models import Job
+from ..permissions import IsObjectOwnerOrSameOrgPermission
+from ..views import ModelWithOwnershipViewSet
 from .models import Analysis
 from .serializers import AnalysisSerializer, AnalysisTreeSerializer
-from ..permissions import IsObjectOwnerPermission
-from ..views import ModelWithOwnershipViewSet
 
 logger = logging.getLogger(__name__)
 
 
-class AnalysisViewSet(
-    PaginationMixin,
-    ModelWithOwnershipViewSet,
-    ModelViewSet
-):
+class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
     serializer_class = AnalysisSerializer
     ordering = ["name"]

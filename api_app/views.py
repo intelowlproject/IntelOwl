@@ -20,7 +20,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.organization.permissions import (
+    IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
+)
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerPermission as IsObjectUserPermission,
 )
@@ -45,7 +47,11 @@ from .models import (
     PythonConfig,
     Tag,
 )
-from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
+from .permissions import (
+    IsObjectAdminPermission,
+    IsObjectOwnerOrSameOrgPermission,
+    IsObjectOwnerPermission,
+)
 from .pivots_manager.models import PivotConfig
 from .serializers import TagSerializer
 from .serializers.job import (
@@ -258,7 +264,7 @@ class CommentViewSet(ModelViewSet):
             permissions.append(IsObjectUserPermission())
         # the owner and anyone in the org can read the comment
         if self.action in ["retrieve"]:
-            permissions.append(IsObjectOwnerOrSameOrgPermission())
+            permissions.append(IsObjectUserOrSameOrgPermission())
 
         return permissions
 
@@ -295,7 +301,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.action in ["destroy", "kill"]:
-            permissions.append(IsObjectOwnerOrSameOrgPermission())
+            permissions.append(IsObjectUserOrSameOrgPermission())
         return permissions
 
     def get_queryset(self):
@@ -614,10 +620,11 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
-
     def get_queryset(self):
-        return super().get_queryset().visible_for_user(self.request.user)
-
+        qs = super().get_queryset()
+        if self.action == "list":
+            return qs.visible_for_user(self.request.user)
+        return qs
 
     def get_permissions(self):
         permissions = super().get_permissions()
@@ -642,7 +649,12 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
 
     def get_queryset(self):
         # the .exclude is to remove the default values
-        return super(PluginConfigViewSet, self).get_queryset().exclude(owner__isnull=True).order_by("id")
+        return (
+            super(PluginConfigViewSet, self)
+            .get_queryset()
+            .exclude(owner__isnull=True)
+            .order_by("id")
+        )
 
 
 @add_docs(

@@ -1,5 +1,8 @@
 from api_app.analyses_manager.models import Analysis
-from api_app.analyses_manager.serializers import AnalysisSerializer, AnalysisTreeSerializer
+from api_app.analyses_manager.serializers import (
+    AnalysisSerializer,
+    AnalysisTreeSerializer,
+)
 from api_app.models import Job
 from tests import CustomTestCase
 
@@ -32,6 +35,7 @@ class AnalysisSerializerTestCase(CustomTestCase):
         j2.delete()
         job.delete()
         an.delete()
+
 
 class AnalysisTreeSerializerTestCase(CustomTestCase):
     def test_to_representation(self):

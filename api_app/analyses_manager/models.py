@@ -3,13 +3,11 @@ from typing import List
 
 from django.conf import settings
 from django.db import models
-from django.utils.functional import cached_property
 
 from api_app.analyses_manager.choices import AnalysisStatusChoices
 from api_app.analyses_manager.queryset import AnalysisQuerySet
 from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
-from api_app.models import Tag
 
 
 class Analysis(OwnershipAbstractModel):
@@ -56,8 +54,8 @@ class Analysis(OwnershipAbstractModel):
             else:
                 self.status = self.Status.CONCLUDED.value
                 self.end_time = (
-                    self.jobs.order_by("finished_analysis_time")
-                    .last()
+                    self.jobs.order_by("-finished_analysis_time")
+                    .first()
                     .finished_analysis_time
                 )
         else:
@@ -72,8 +70,18 @@ class Analysis(OwnershipAbstractModel):
 
     @property
     def tlp(self) -> TLP:
-        return max(TLP[tlp_string] for tlp_string in self.jobs.values_list("tlp", flat=True)) if self.jobs.exists() else TLP.CLEAR.value
+        return (
+            max(
+                TLP[tlp_string]
+                for tlp_string in self.jobs.values_list("tlp", flat=True)
+            )
+            if self.jobs.exists()
+            else TLP.CLEAR.value
+        )
 
     @property
     def total_jobs(self) -> int:
-        return sum(job.get_descendant_count() for job in self.jobs.all()) + self.jobs.count()
+        return (
+            sum(job.get_descendant_count() for job in self.jobs.all())
+            + self.jobs.count()
+        )

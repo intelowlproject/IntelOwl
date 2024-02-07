@@ -12,6 +12,8 @@ import {
   setNotificationFavicon,
 } from "../notifications";
 
+import { JobFinalStatuses } from "../../../constants/jobConst";
+
 export default function JobResult() {
   console.debug("JobResult rendered!");
 
@@ -28,6 +30,8 @@ export default function JobResult() {
   const jobId = params.id;
   const { section } = params;
   const { subSection } = params;
+
+  const jobWebsocket = React.useRef();
 
   const jobIsRunning =
     job === undefined ||
@@ -92,7 +96,6 @@ export default function JobResult() {
   only in the last page (section and subSection) or we will create 3 ws, one for each redirect:
   jobs/1 -> jobs/1/visualizer -> jobs/1/visualizer/loading
   */
-  const jobWebsocket = React.useRef();
   if (job && jobIsRunning && section && subSection && !jobWebsocket.current) {
     const websocketUrl = `${
       window.location.protocol === "https:" ? "wss" : "ws"
@@ -111,6 +114,9 @@ export default function JobResult() {
       console.debug("ws received:");
       console.debug(data);
       const jobData = JSON.parse(data.data);
+      if (Object.values(JobFinalStatuses).includes(jobData.status)) {
+        jobWebsocket.current.close(1000);
+      }
       setJob(jobData);
     };
     jobWebsocket.current.onerror = (data) => {

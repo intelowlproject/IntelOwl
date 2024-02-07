@@ -9,6 +9,7 @@ import OTXv2
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.helpers import get_hash_type
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -76,7 +77,15 @@ class OTX(classes.ObservableAnalyzer):
         elif observable_classification == self.ObservableTypes.DOMAIN:
             otx_type = OTXv2.IndicatorTypes.DOMAIN
         elif observable_classification == self.ObservableTypes.HASH:
-            otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
+            matched_type = get_hash_type(self.observable_name)
+            if matched_type == "md5":
+                otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
+            elif matched_type == "sha-1":
+                otx_type = OTXv2.IndicatorTypes.FILE_HASH_SHA1
+            elif matched_type == "sha-256":
+                otx_type = OTXv2.IndicatorTypes.FILE_HASH_SHA256
+            else:
+                raise AnalyzerRunException(f"hash {matched_type} not supported")
         else:
             raise AnalyzerRunException(
                 f"not supported observable classification {observable_classification}"

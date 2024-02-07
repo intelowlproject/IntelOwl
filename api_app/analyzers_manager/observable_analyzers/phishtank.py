@@ -20,9 +20,9 @@ class Phishtank(ObservableAnalyzer):
     def run(self):
         headers = {"User-Agent": "phishtank/IntelOwl"}
         observable_to_analyze = self.observable_name
-        parsed = urlparse(self.observable_name)
         if self.observable_classification == self.ObservableTypes.DOMAIN:
-            observable_to_analyze = "http://" + parsed.hostname
+            observable_to_analyze = "http://" + self.observable_name
+        parsed = urlparse(observable_to_analyze)
         if not parsed.path:
             observable_to_analyze += "/"
         data = {

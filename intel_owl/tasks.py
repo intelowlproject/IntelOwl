@@ -220,7 +220,6 @@ def job_set_final_status(job_id: int):
     channel_layer = get_channel_layer()
     job_serializer = JobSerializer(job)
     job_data = job_serializer.data
-    logger.debug(f"job: {job_id} set to final status: {job.status}")
     async_to_sync(channel_layer.group_send)(
         JobConsumer.generate_group_name(job_id), {"type": "send.job", "job": job_data}
     )
@@ -300,7 +299,6 @@ def run_plugin(
     channel_layer = get_channel_layer()
     job_serializer = JobSerializer(job)
     job_data = job_serializer.data
-    logger.debug(f"job: {job_id} set to final status: {job.status}")
     async_to_sync(channel_layer.group_send)(
         JobConsumer.generate_group_name(job_id), {"type": "send.job", "job": job_data}
     )

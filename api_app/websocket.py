@@ -52,15 +52,3 @@ class JobConsumer(JsonWebsocketConsumer):
     @classmethod
     def generate_group_name(cls, job_id: int):
         return f"job-{job_id}"
-
-
-# sto metodo deve essere usato in altre parti del codice (direi alla fine del job)
-# per accedere alla websocket giusta su cui inviare il risultato:
-# channel_layer = get_channel_layer()
-# await channel_layer.send("channel_name", {
-#     "type": "chat.message",
-#     "text": "Hello there!",
-# })
-
-# nell'esempio della doc si salvano i canali disponibili (le ws aperte) sul db:
-# https://channels.readthedocs.io/en/latest/topics/channel_layers.html?highlight=get_channel_layer#single-channels

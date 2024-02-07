@@ -131,7 +131,7 @@ runtime_configuration = {
 pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
 ```
 #### PhoneInfoga
-PhoneInfoga provides several [scanners](https://sundowndev.github.io/phoneinfoga/getting-started/scanners/) to extract as much information as possible from a given phone number. Those scanners may require authentication, so they're automatically skipped when no authentication credentials are found.
+PhoneInfoga provides several [Scanners](https://sundowndev.github.io/phoneinfoga/getting-started/scanners/) to extract as much information as possible from a given phone number. Those scanners may require authentication, so they're automatically skipped when no authentication credentials are found.
 
 By default the scanner used is `local`. The analyzer will automatically parse API keys saved as environment variables present in the `docker/env_file_integrations` file.
 Go through this [guide](https://sundowndev.github.io/phoneinfoga/getting-started/scanners/) to initiate other required API keys related to this analyzer.

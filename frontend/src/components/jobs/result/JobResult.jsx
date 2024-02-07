@@ -146,6 +146,7 @@ export default function JobResult() {
         <JobOverview
           isRunningJob={jobIsRunning}
           job={job}
+          refetch={getJob}
           section={section}
           subSection={subSection}
         />

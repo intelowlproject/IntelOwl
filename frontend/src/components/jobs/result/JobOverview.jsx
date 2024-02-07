@@ -19,7 +19,6 @@ import { GoBackButton, Loader } from "@certego/certego-ui";
 import { JSONTree } from "react-json-tree";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import {
   AnalyzersReportTable,
   ConnectorsReportTable,
@@ -40,7 +39,6 @@ import { JobResultSections } from "../../../constants/miscConst";
 import { JobInfoCard } from "./JobInfoCard";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobActionsBar } from "./bar/JobActionBar";
-import { JOB_BASE_URI } from "../../../constants/apiURLs";
 
 /* THESE IDS CANNOT BE EMPTY!
 We perform a redirect in case the user landed in the visualzier page without a visualizer,
@@ -53,15 +51,17 @@ in case we use empty param for this page we fall in an infinite redirect loop.
 const LOADING_VISUALIZER_UI_ELEMENT_CODE = "loading";
 const NO_VISUALIZER_UI_ELEMENT_CODE = "no-visualizer";
 
-export function JobOverview({ isRunningJob, job, section, subSection }) {
+export function JobOverview({
+  isRunningJob,
+  job,
+  refetch,
+  section,
+  subSection,
+}) {
   console.debug(`JobOverview rendered: ${JSON.stringify(job)}`);
   console.debug(`section: ${section}, subSection: ${subSection}`);
 
   const isSelectedUI = section === JobResultSections.VISUALIZER;
-
-  const refetch = () => {
-    axios.get(`${JOB_BASE_URI}/${job.id}`);
-  };
 
   const rawElements = React.useMemo(
     () => [

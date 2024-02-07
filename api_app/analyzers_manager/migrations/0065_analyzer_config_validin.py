@@ -36,7 +36,7 @@ params = [
         },
         "name": "scan_choice",
         "type": "str",
-        "description": "all_records,a_records,aaaa_records,ns_records,ns_for,ptr_records,live_dns_query,dns_history_reverse_ip,ptr_records,cidr_dns_history,ptr_records_for_cidr\r\ndefault runs all of them; details at: https://app.validin.com/docs",
+        "description": "details at: https://app.validin.com/docs",
         "is_secret": False,
         "required": False,
     },

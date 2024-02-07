@@ -7,20 +7,20 @@ from django.db.models.fields.related_descriptors import (
 
 plugin = {
     "python_module": {
-        "module": "mmdb_server.MmdbServer",
-        "base_path": "api_app.analyzers_manager.observable_analyzers",
+        "module": "zippy_scan.ZippyAnalyser",
+        "base_path": "api_app.analyzers_manager.file_analyzers",
     },
-    "name": "Mmdb_server",
-    "description": "[mmdb-server](https://github.com/adulau/mmdb-server) is an open source fast API server to lookup IP addresses for their geographic location, AS number.",
+    "name": "Zippy_scan",
+    "description": "[Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",
     "health_check_status": True,
-    "type": "observable",
+    "type": "file",
     "docker_based": False,
     "maximum_tlp": "CLEAR",
-    "observable_supported": ["ip"],
-    "supported_filetypes": [],
+    "observable_supported": [],
+    "supported_filetypes": ["text/plain"],
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],
@@ -31,14 +31,14 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "mmdb_server.MmdbServer",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
+            "module": "zippy_scan.ZippyAnalyser",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
         },
-        "name": "base_url",
+        "name": "engine",
         "type": "str",
-        "description": "base url for mmdb_server",
+        "description": "engine to be used for zippy",
         "is_secret": False,
-        "required": True,
+        "required": False,
     }
 ]
 
@@ -46,20 +46,20 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "mmdb_server.MmdbServer",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
+                "module": "zippy_scan.ZippyAnalyser",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
             },
-            "name": "base_url",
+            "name": "engine",
             "type": "str",
-            "description": "base url for mmdb_server",
+            "description": "engine to be used for zippy",
             "is_secret": False,
-            "required": True,
+            "required": False,
         },
         "for_organization": False,
-        "value": "https://ip.circl.lu/geolookup/",
-        "updated_at": "2024-01-23T20:23:55.745858Z",
+        "value": "ensembled",
+        "updated_at": "2024-01-31T21:43:33.344103Z",
         "owner": None,
-        "analyzer_config": "Mmdb_server",
+        "analyzer_config": "Zippy_scan",
         "connector_config": None,
         "visualizer_config": None,
         "ingestor_config": None,
@@ -130,7 +130,10 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
-        ("analyzers_manager", "0061_analyzer_config_ipqs_fraud_and_risk_scoring"),
+        (
+            "analyzers_manager",
+            "0063_alter_analyzerconfig_not_supported_filetypes_and_more",
+        ),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

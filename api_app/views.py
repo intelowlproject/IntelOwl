@@ -333,8 +333,11 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     @action(detail=False, methods=["post"])
     def recent_scans_user(self, request):
         limit = request.data.get("limit", 5)
+        if "is_sample" not in request.data:
+            raise ValidationError({"detail": "is_sample is required"})
         jobs = (
             Job.objects.filter(user__pk=request.user.pk)
+            .filter(is_sample=request.data["is_sample"])
             .annotate_importance(request.user)
             .order_by("-importance", "-finished_analysis_time")[:limit]
         )

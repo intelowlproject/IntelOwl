@@ -388,7 +388,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "is_sample": True,
                 "md5": "test.file",
                 "file_name": "test.file",
-                "file_mimetype": "application/x-dosexec",
+                "file_mimetype": "application/vnd.microsoft.portable-executable",
             }
         )
 
@@ -442,7 +442,9 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "finished_analysis_time": now() - datetime.timedelta(hours=2),
             }
         )
-        response = self.client.post(self.jobs_recent_scans_user_uri)
+        response = self.client.post(
+            self.jobs_recent_scans_user_uri, data={"is_sample": False}
+        )
         content = response.json()
         msg = (response, content)
         self.assertEqual(200, response.status_code, msg=msg)

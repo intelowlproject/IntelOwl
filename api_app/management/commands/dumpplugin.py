@@ -94,7 +94,10 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get_or_create(**real_vals)[0]
         # it is just the primary key serialized
         else:
-            value = other_model.objects.get(pk=value)
+            if isinstance(value, int):
+                value = other_model.objects.get(pk=value)
+            else:
+                value = other_model.objects.get(name=value)
     return value
 
 def _create_object(Model, data):

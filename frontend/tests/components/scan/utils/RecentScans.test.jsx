@@ -51,7 +51,7 @@ describe("Recent Scans test", () => {
       }
     });
 
-    render(
+    const { container } = render(
       <BrowserRouter>
         <RecentScans classification="generic" param="" />
       </BrowserRouter>,
@@ -60,6 +60,10 @@ describe("Recent Scans test", () => {
     await waitFor(() => {
       const recentScansTitle = screen.getByText("Recent Scans");
       expect(recentScansTitle).toBeInTheDocument();
+      const recentScansInfoIcon = container.querySelector(
+        "#recentscans-info-icon",
+      );
+      expect(recentScansInfoIcon).toBeInTheDocument();
       const recentScansTotal = screen.getByText("0 total");
       expect(recentScansTotal).toBeInTheDocument();
       const elementText = screen.getByText("No recent scans available");
@@ -67,7 +71,10 @@ describe("Recent Scans test", () => {
     });
 
     // axios call
-    expect(axios.post.mock.calls[0]).toEqual([JOB_RECENT_SCANS_USER]);
+    expect(axios.post.mock.calls[0]).toEqual([
+      JOB_RECENT_SCANS_USER,
+      { is_sample: false },
+    ]);
     expect(axios.post.mock.calls[1]).toEqual([
       JOB_RECENT_SCANS,
       { md5: md5("") },
@@ -95,6 +102,10 @@ describe("Recent Scans test", () => {
     await waitFor(() => {
       const recentScansTitle = screen.getByText("Recent Scans");
       expect(recentScansTitle).toBeInTheDocument();
+      const recentScansInfoIcon = container.querySelector(
+        "#recentscans-info-icon",
+      );
+      expect(recentScansInfoIcon).toBeInTheDocument();
       const recentScansTotal = screen.getByText("1 total");
       expect(recentScansTotal).toBeInTheDocument();
       // card (observable and no playbook)
@@ -115,7 +126,10 @@ describe("Recent Scans test", () => {
     });
 
     // axios call
-    expect(axios.post.mock.calls[0]).toEqual([JOB_RECENT_SCANS_USER]);
+    expect(axios.post.mock.calls[0]).toEqual([
+      JOB_RECENT_SCANS_USER,
+      { is_sample: false },
+    ]);
     expect(axios.post.mock.calls[1]).toEqual([
       JOB_RECENT_SCANS,
       { md5: md5("") },
@@ -143,6 +157,10 @@ describe("Recent Scans test", () => {
     await waitFor(() => {
       const recentScansTitle = screen.getByText("Recent Scans");
       expect(recentScansTitle).toBeInTheDocument();
+      const recentScansInfoIcon = container.querySelector(
+        "#recentscans-info-icon",
+      );
+      expect(recentScansInfoIcon).toBeInTheDocument();
       const recentScansTotal = screen.getByText("2 total");
       expect(recentScansTotal).toBeInTheDocument();
 
@@ -178,7 +196,10 @@ describe("Recent Scans test", () => {
     });
 
     // axios call
-    expect(axios.post.mock.calls[0]).toEqual([JOB_RECENT_SCANS_USER]);
+    expect(axios.post.mock.calls[0]).toEqual([
+      JOB_RECENT_SCANS_USER,
+      { is_sample: false },
+    ]);
     expect(axios.post.mock.calls[1]).toEqual([
       JOB_RECENT_SCANS,
       { md5: md5("1.2.3.4") },
@@ -208,6 +229,10 @@ describe("Recent Scans test", () => {
     await waitFor(() => {
       const recentScansTitle = screen.getByText("Recent Scans");
       expect(recentScansTitle).toBeInTheDocument();
+      const recentScansInfoIcon = container.querySelector(
+        "#recentscans-info-icon",
+      );
+      expect(recentScansInfoIcon).toBeInTheDocument();
       const recentScansTotal = screen.getByText("1 total");
       expect(recentScansTotal).toBeInTheDocument();
 

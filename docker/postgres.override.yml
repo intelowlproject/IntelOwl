@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   postgres:
-    image: library/postgres:12-alpine
+    image: library/postgres:16-alpine
     container_name: intelowl_postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/

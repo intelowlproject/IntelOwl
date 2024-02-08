@@ -48,7 +48,15 @@ class Migration(migrations.Migration):
         ("api_app", "0053_job_sent_to_bi"),
         ("api_app", "0054_job_jobbisearch"),
     ]
-    dependencies = [("api_app", "0001_initial_adjusted")]
+    dependencies = [
+        ("api_app", "0001_1_initial_squashed"),
+        ("analyzers_manager", "0001_initial_squashed"),
+        ("connectors_manager", "0001_initial_squashed"),
+        ("visualizers_manager", "0001_initial_squashed"),
+        ("playbooks_manager", "0001_initial_squashed"),
+        ("ingestors_manager", "0001_initial_squashed"),
+        ("pivots_manager", "0001_1_initial_squashed"),
+    ]
     operations = [
         migrations.CreateModel(
             name="PluginConfig",
@@ -245,6 +253,73 @@ class Migration(migrations.Migration):
                 condition=models.Q(("owner__isnull", True)),
                 fields=("for_organization", "parameter", "pivot_config"),
                 name="plugin_config_unique_with_pivot_config",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="analyzers_requested",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="requested_in_jobs",
+                to="analyzers_manager.analyzerconfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="analyzers_to_execute",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="executed_in_jobs",
+                to="analyzers_manager.analyzerconfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="connectors_requested",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="requested_in_jobs",
+                to="connectors_manager.connectorconfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="connectors_to_execute",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="executed_in_jobs",
+                to="connectors_manager.connectorconfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="playbook_requested",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="requested_in_jobs",
+                to="playbooks_manager.playbookconfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="playbook_to_execute",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="executed_in_jobs",
+                to="playbooks_manager.playbookconfig",
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="visualizers_to_execute",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="executed_in_jobs",
+                to="visualizers_manager.visualizerconfig",
             ),
         ),
     ]

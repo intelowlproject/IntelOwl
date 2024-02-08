@@ -43,18 +43,8 @@ class Migration(migrations.Migration):
     ]
 
     dependencies = [
-        ("playbooks_manager", "0018_playbookconfig_scan_check_time_and_more"),
-        ("api_app", "0037_pythonmodule_and_more"),
-        (
-            "api_app",
-            "0046_remove_pluginconfig_plugin_config_no_config_all_null_and_more",
-        ),
-        ("api_app", "0039_remove_fields"),
-        ("api_app", "0036_alter_parameter_unique_together_and_more"),
-        ("api_app", "0035_pluginconfig_repositories"),
-        ("django_celery_beat", "0018_improve_crontab_helptext"),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("certego_saas_organization", "0001_initial"),
+        ("api_app", "0001_1_initial_squashed"),
+        ("playbooks_manager", "0001_initial_squashed"),
     ]
 
     operations = [

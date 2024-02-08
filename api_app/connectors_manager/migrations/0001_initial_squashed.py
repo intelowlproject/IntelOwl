@@ -6,18 +6,6 @@ import django.db.models.deletion
 import django.utils.timezone
 from django.db import migrations, models
 
-# Functions from the following migrations need manual copying.
-# Move them and any dependencies into this file, then update the
-# RunPython operations to refer to the local versions:
-# api_app.connectors_manager.migrations.0004_datamigration
-# api_app.connectors_manager.migrations.0006_connectorconfig_disabled_in_org
-# api_app.connectors_manager.migrations.0008_auto_20230308_1623
-# api_app.connectors_manager.migrations.0009_parent_playbook_foreign_key
-# api_app.connectors_manager.migrations.0010_remove_parent_playbook
-# api_app.connectors_manager.migrations.0012_slack
-# api_app.connectors_manager.migrations.0015_params
-# api_app.connectors_manager.migrations.0023_connectorconfig_routing_key_and_more
-
 
 class Migration(migrations.Migration):
     replaces = [
@@ -57,25 +45,7 @@ class Migration(migrations.Migration):
         ("connectors_manager", "0028_connectorreport_connectorreportsbisearch"),
     ]
 
-    dependencies = [
-        ("certego_saas_organization", "0001_initial"),
-        ("visualizers_manager", "0022_remove_visualizerconfig_analyzers_and_more"),
-        ("api_app", "0010_custom_config_playbooks"),
-        ("api_app", "0024_tlp"),
-        ("api_app", "0039_remove_fields"),
-        ("playbooks_manager", "0004_datamigration"),
-        ("api_app", "0019_mitm_configs"),
-        ("api_app", "0027_parameter"),
-        ("api_app", "0037_pythonmodule_and_more"),
-        ("django_celery_beat", "0018_improve_crontab_helptext"),
-        ("api_app", "0006_v3_release"),
-        ("api_app", "0023_runtime_config"),
-        (
-            "api_app",
-            "0046_remove_pluginconfig_plugin_config_no_config_all_null_and_more",
-        ),
-        ("api_app", "0022_single_playbook_post_migration"),
-    ]
+    dependencies = [("api_app", "0001_1_initial_squashed")]
     operations = [
         migrations.CreateModel(
             name="ConnectorReport",

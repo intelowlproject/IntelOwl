@@ -494,6 +494,13 @@ class Migration(migrations.Migration):
                 fields=["sent_to_bi", "-received_request_time"], name="JobBISearch"
             ),
         ),
+        migrations.AddIndex(
+            model_name="job",
+            index=models.Index(
+                fields=["playbook_to_execute", "finished_analysis_time", "user"],
+                name="PlaybookConfigOrdering",
+            ),
+        ),
         migrations.CreateModel(
             name="Comment",
             fields=[
@@ -532,13 +539,7 @@ class Migration(migrations.Migration):
                 "ordering": ["created_at"],
             },
         ),
-        migrations.AddIndex(
-            model_name="job",
-            index=models.Index(
-                fields=["playbook_to_execute", "finished_analysis_time", "user"],
-                name="PlaybookConfigOrdering",
-            ),
-        ),
+
         migrations.RunPython(
             code=create_default_clients,
             reverse_code=django.db.migrations.operations.special.RunPython.noop,
@@ -672,13 +673,9 @@ class Migration(migrations.Migration):
             ],
             options={
                 "unique_together": {
-                    ("name", "analyzer_config", "connector_config", "visualizer_config")
+                    ("name", "python_module")
                 },
             },
-        ),
-        migrations.AlterUniqueTogether(
-            name="parameter",
-            unique_together={("name", "python_module")},
         ),
         migrations.RunPython(
             code=migrate_python_module,

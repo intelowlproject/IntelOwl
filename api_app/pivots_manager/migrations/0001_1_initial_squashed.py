@@ -89,19 +89,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "field",
-                    models.CharField(
-                        help_text="Dotted path to the field",
-                        max_length=256,
-                        validators=[
-                            django.core.validators.RegexValidator(
-                                "^\\w+(\\.\\w+)*$",
-                                message="Object should be a python path",
-                            )
-                        ],
-                    ),
-                ),
-                (
                     "disabled_in_organizations",
                     models.ManyToManyField(
                         blank=True,

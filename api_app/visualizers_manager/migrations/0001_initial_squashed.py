@@ -125,6 +125,7 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
+                ("parameters", models.JSONField(default={}, editable=False)),
                 (
                     "name",
                     models.CharField(

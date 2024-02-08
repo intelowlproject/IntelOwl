@@ -26,7 +26,7 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
     def run(self):
         response: None
         url: str = (
-            f"http://phoneinfoga:5000/api/v2/scanners/" f"{self.scanner_name}/run"
+            f"http://phoneinfoga:5000/api/v2/scanners/{self.scanner_name}/run"
         )
 
         try:

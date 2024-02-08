@@ -4373,8 +4373,6 @@ class Migration(migrations.Migration):
                 ('run_hash_type', models.CharField(blank=True, choices=[('md5', 'Md5'), ('sha256', 'Sha256')], max_length=10)),
                 ('health_check_status', models.BooleanField(default=True, editable=False)),
                 ('health_check_task', models.OneToOneField(blank=True, editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='healthcheck_for_%(class)s', to='django_celery_beat.periodictask')),
-                ('update_task', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='analyzer', to='django_celery_beat.periodictask')),
-                ('update_schedule', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='analyzers', to='django_celery_beat.crontabschedule')),
                 ('soft_time_limit', models.IntegerField(default=60, validators=[django.core.validators.MinValueValidator(0)])),
                 ('routing_key', models.CharField(default='default', max_length=50)),
                 ('maximum_tlp', models.CharField(choices=[('CLEAR', 'Clear'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='RED', max_length=50)),

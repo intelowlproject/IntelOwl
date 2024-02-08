@@ -191,6 +191,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def validate(self, attrs: dict) -> dict:
         if attrs.get("playbook_requested"):
             self.set_default_value_from_playbook(attrs)
+        # this TLP validation must be after the Playbook checks to avoid
+        # to overwrite the Playbook default TLP
         if "tlp" not in attrs:
             attrs["tlp"] = TLP.CLEAR.value
         if "scan_mode" not in attrs:

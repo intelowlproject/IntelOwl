@@ -354,7 +354,7 @@ The following is the list of the available connectors. You can also navigate the
 
 ### Pivots
 
-With Intel v5.2.0 we introduced the `Pivot` Plugin.
+With IntelOwl v5.2.0 we introduced the `Pivot` Plugin.
 
 Pivots are designed to create a job from another job. This plugin allows the user to set certain conditions that trigger the execution of one or more subsequent jobs, strictly connected to the first one.
 
@@ -388,7 +388,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 
 ### Ingestors
 
-With Intel v5.1.0 we introduced the `Ingestor` Plugin.
+With IntelOwl v5.1.0 we introduced the `Ingestor` Plugin.
 
 Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.

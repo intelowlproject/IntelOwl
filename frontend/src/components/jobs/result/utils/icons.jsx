@@ -1,6 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { MdDeleteOutline, MdOutlineRefresh, MdComment } from "react-icons/md";
+import {
+  MdDeleteOutline,
+  MdOutlineRefresh,
+  MdComment,
+  MdFileDownload,
+} from "react-icons/md";
 
 export function DeleteIcon() {
   return (
@@ -28,6 +33,15 @@ export function retryJobIcon() {
     <span>
       <MdOutlineRefresh className="me-1" />
       Rescan
+    </span>
+  );
+}
+
+export function downloadReportIcon() {
+  return (
+    <span>
+      <MdFileDownload className="me-1" />
+      Report
     </span>
   );
 }

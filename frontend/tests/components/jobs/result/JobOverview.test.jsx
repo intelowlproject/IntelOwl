@@ -88,6 +88,9 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
+    expect(
+      within(utilitiesRow).getByRole("button", { name: "Report" }),
+    ).toBeInTheDocument();
   });
 
   test("metadata section", () => {

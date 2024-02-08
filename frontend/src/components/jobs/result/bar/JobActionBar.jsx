@@ -12,7 +12,12 @@ import { downloadJobSample, deleteJob } from "../jobApi";
 import { createJob } from "../../../scan/scanApi";
 import { ScanModesNumeric } from "../../../../constants/advancedSettingsConst";
 import { JobResultSections } from "../../../../constants/miscConst";
-import { DeleteIcon, CommentIcon, retryJobIcon } from "../utils/icons";
+import {
+  DeleteIcon,
+  CommentIcon,
+  retryJobIcon,
+  downloadReportIcon,
+} from "../utils/icons";
 
 export function JobActionsBar({ job }) {
   // routers
@@ -26,19 +31,25 @@ export function JobActionsBar({ job }) {
     setTimeout(() => navigate(-1), 250);
   };
 
-  const onDownloadSampleBtnClick = async () => {
-    const blob = await downloadJobSample(job.id);
-    if (!blob) return;
+  const fileDownload = (blob, filename) => {
     // create URL blob and a hidden <a> tag to serve file for download
     const fileLink = document.createElement("a");
     fileLink.href = window.URL.createObjectURL(blob);
     fileLink.rel = "noopener,noreferrer";
-    if (job?.file_name) {
-      // it forces the name of the downloaded file
-      fileLink.download = `${job.file_name}`;
-    }
+    fileLink.download = `${filename}`;
     // triggers the click event
     fileLink.click();
+  };
+
+  const onDownloadSampleBtnClick = async () => {
+    const blob = await downloadJobSample(job.id);
+    if (!blob) return;
+    let filename = "file";
+    if (job?.file_name) {
+      // it forces the name of the downloaded file
+      filename = `${job.file_name}`;
+    }
+    fileDownload(blob, filename);
   };
 
   const handleRetry = async () => {
@@ -68,6 +79,14 @@ export function JobActionsBar({ job }) {
         () => navigate(`/jobs/${jobId[0]}/${JobResultSections.VISUALIZER}/`),
         1000,
       );
+    }
+  };
+
+  const onDownloadReport = () => {
+    if (job) {
+      const blob = new Blob([JSON.stringify(job)], { type: "text/json" });
+      if (!blob) return;
+      fileDownload(blob, `job#${job.id}_report.json`);
     }
   };
 
@@ -108,11 +127,26 @@ export function JobActionsBar({ job }) {
       />
       <SaveAsPlaybookButton job={job} />
       {job?.is_sample && (
-        <Button size="sm" color="secondary" onClick={onDownloadSampleBtnClick}>
+        <Button
+          size="sm"
+          color="secondary"
+          className="ms-2"
+          onClick={onDownloadSampleBtnClick}
+        >
           <FaFileDownload />
           &nbsp;Sample
         </Button>
       )}
+      <IconButton
+        id="downloadreportbtn"
+        Icon={downloadReportIcon}
+        size="sm"
+        color="accent-2"
+        className="ms-2"
+        onClick={onDownloadReport}
+        title="Download report in json format"
+        titlePlacement="top"
+      />
     </ContentSection>
   );
 }

@@ -187,7 +187,7 @@ class Migration(migrations.Migration):
                 ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
                 ("task_id", models.UUIDField()),
                 ("sent_to_bi", models.BooleanField(default=False, editable=False)),
-                ("parameters", models.JSONField(default={}, editable=False)),
+                ("parameters", models.JSONField(editable=False)),
                 (
                     "job",
                     models.ForeignKey(

@@ -446,4 +446,9 @@ class Migration(migrations.Migration):
                 fields=["sent_to_bi", "-start_time"], name="analyzerreportsBISearch"
             ),
         ),
+        migrations.AlterField(
+            model_name="analyzerreport",
+            name="parameters",
+            field=models.JSONField(editable=False),
+        ),
     ]

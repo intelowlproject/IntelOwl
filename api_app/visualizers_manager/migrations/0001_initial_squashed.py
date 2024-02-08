@@ -199,4 +199,66 @@ class Migration(migrations.Migration):
             name="visualizerconfig",
             options={"ordering": ["name", "disabled"]},
         ),
+        migrations.RenameIndex(
+            model_name="visualizerconfig",
+            new_name="visualizers_python__8b1832_idx",
+            old_name="visualizers_python__2c4ded_idx",
+        ),
+        migrations.AddField(
+            model_name="visualizerconfig",
+            name="health_check_status",
+            field=models.BooleanField(default=True, editable=False),
+        ),
+        migrations.AddField(
+            model_name="visualizerconfig",
+            name="health_check_task",
+            field=models.OneToOneField(
+                blank=True,
+                editable=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="healthcheck_for_%(class)s",
+                to="django_celery_beat.periodictask",
+            ),
+        ),
+        migrations.AddField(
+            model_name="visualizerconfig",
+            name="routing_key",
+            field=models.CharField(default="default", max_length=50),
+        ),
+        migrations.AddField(
+            model_name="visualizerconfig",
+            name="soft_time_limit",
+            field=models.IntegerField(
+                default=60, validators=[django.core.validators.MinValueValidator(0)]
+            ),
+        ),
+        migrations.AddField(
+            model_name="visualizerreport",
+            name="sent_to_bi",
+            field=models.BooleanField(default=False, editable=False),
+        ),
+        migrations.AlterField(
+            model_name="visualizerconfig",
+            name="python_module",
+            field=models.ForeignKey(
+                limit_choices_to={
+                    "base_path__in": ["api_app.visualizers_manager.visualizers"]
+                },
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="%(class)ss",
+                to="api_app.pythonmodule",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="visualizerreport",
+            name="parameters",
+            field=models.JSONField(editable=False),
+        ),
+        migrations.AddIndex(
+            model_name="visualizerreport",
+            index=models.Index(
+                fields=["sent_to_bi", "-start_time"], name="visualizerreportsBISearch"
+            ),
+        ),
     ]

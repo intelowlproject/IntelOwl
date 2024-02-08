@@ -352,4 +352,15 @@ class Migration(migrations.Migration):
                 max_length=120,
             ),
         ),
+        migrations.AlterField(
+            model_name="pluginconfig",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
+        ),
     ]

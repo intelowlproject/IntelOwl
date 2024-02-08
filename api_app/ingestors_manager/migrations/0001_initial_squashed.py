@@ -84,14 +84,6 @@ class Migration(migrations.Migration):
                 ("description", models.TextField()),
                 ("disabled", models.BooleanField(default=False)),
                 (
-                    "disabled_in_organizations",
-                    models.ManyToManyField(
-                        blank=True,
-                        related_name="%(app_label)s_%(class)s_disabled",
-                        to="certego_saas_organization.organization",
-                    ),
-                ),
-                (
                     "health_check_status",
                     models.BooleanField(default=True, editable=False),
                 ),
@@ -233,5 +225,14 @@ class Migration(migrations.Migration):
             index=models.Index(
                 fields=["sent_to_bi", "-start_time"], name="ingestorreportsBISearch"
             ),
+        ),
+        migrations.AlterModelOptions(
+            name="ingestorreport",
+            options={"ordering": ["pk"]},
+        ),
+        migrations.AlterField(
+            model_name="ingestorreport",
+            name="parameters",
+            field=models.JSONField(editable=False),
         ),
     ]

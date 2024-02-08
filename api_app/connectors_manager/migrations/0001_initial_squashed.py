@@ -207,4 +207,9 @@ class Migration(migrations.Migration):
             name="connectorreport",
             unique_together={("config", "job")},
         ),
+        migrations.AlterField(
+            model_name="connectorreport",
+            name="parameters",
+            field=models.JSONField(editable=False),
+        ),
     ]

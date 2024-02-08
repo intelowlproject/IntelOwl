@@ -147,7 +147,6 @@ class Migration(migrations.Migration):
                             ("AMBER", "Amber"),
                             ("RED", "Red"),
                         ],
-                        default="AMBER",
                         max_length=8,
                     ),
                 ),

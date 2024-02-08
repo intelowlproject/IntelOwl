@@ -465,7 +465,6 @@ class Migration(migrations.Migration):
                 ("description", models.TextField(blank=True, default="")),
                 ("is_secret", models.BooleanField(db_index=True)),
                 ("required", models.BooleanField()),
-
                 (
                     "python_module",
                     models.ForeignKey(
@@ -532,6 +531,18 @@ class Migration(migrations.Migration):
                 editable=False,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
+                to="django_celery_beat.periodictask",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="pythonmodule",
+            name="update_task",
+            field=models.OneToOneField(
+                blank=True,
+                editable=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="update_for_%(class)s",
                 to="django_celery_beat.periodictask",
             ),
         ),

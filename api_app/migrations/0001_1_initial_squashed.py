@@ -465,16 +465,7 @@ class Migration(migrations.Migration):
                 ("description", models.TextField(blank=True, default="")),
                 ("is_secret", models.BooleanField(db_index=True)),
                 ("required", models.BooleanField()),
-                (
-                    "owner",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="+",
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
+
                 (
                     "python_module",
                     models.ForeignKey(

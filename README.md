@@ -14,7 +14,6 @@
 [![CodeQL](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml)
 [![Dependency Review](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
-[![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
 [![DeepSource](https://app.deepsource.com/gh/intelowlproject/IntelOwl.svg/?label=resolved+issues&token=BSvKHrnk875Y0Bykb79GNo8w)](https://app.deepsource.com/gh/intelowlproject/IntelOwl/?ref=repository-badge)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl/badge)](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7120/badge)](https://bestpractices.coreinfrastructure.org/projects/7120)

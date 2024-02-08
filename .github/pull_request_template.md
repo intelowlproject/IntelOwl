@@ -38,5 +38,4 @@ Please delete options that are not relevant.
 
 ### Important Rules
 - If you miss to compile the Checklist properly, your PR won't be reviewed by the maintainers.
-- If your changes decrease the overall tests coverage (you will know after the Codecov CI job is done), you should add the required tests to fix the problem
 - Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review. After being reviewed and received a "change request", you should explicitly ask for a review again once you have made the requested changes.

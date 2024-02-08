@@ -4352,9 +4352,6 @@ class Migration(migrations.Migration):
                 ('sent_to_bi', models.BooleanField(default=False, editable=False)),
                 ('parameters', models.JSONField(default={}, editable=False)),
             ],
-            options={
-                'unique_together': {('name', 'job')},
-            },
         ),
         migrations.CreateModel(
             name='AnalyzerConfig',

@@ -9,102 +9,44 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     replaces = [
-        ("connectors_manager", "0001_initial"),
-        ("connectors_manager", "0002_connectorreport_parent_playbook"),
-        ("connectors_manager", "0003_connectorconfig"),
-        ("connectors_manager", "0004_datamigration"),
-        ("connectors_manager", "0005_auto_20230301_1415"),
-        ("connectors_manager", "0006_connectorconfig_disabled_in_org"),
-        ("connectors_manager", "0007_alter_connectorreport_job"),
-        ("connectors_manager", "0008_auto_20230308_1623"),
-        ("connectors_manager", "0009_parent_playbook_foreign_key"),
-        ("connectors_manager", "0010_remove_parent_playbook"),
-        ("connectors_manager", "00011_remove_runtime_configuration"),
-        ("connectors_manager", "0012_slack"),
-        ("connectors_manager", "0013_tlp_clear"),
-        (
-            "connectors_manager",
-            "0014_alter_connectorconfig_disabled_in_organizations_and_more",
-        ),
-        ("connectors_manager", "0015_params"),
-        ("connectors_manager", "0016_alter_connectorconfig_name"),
-        ("connectors_manager", "0017_alter_connectorconfig_options"),
-        ("connectors_manager", "0018_alter_connectorconfig_name"),
-        (
-            "connectors_manager",
-            "0019_rename_connectors__python__0fb146_idx_connectors__python__f23fd8_idx_and_more",
-        ),
-        ("connectors_manager", "0020_alter_python_module"),
-        ("connectors_manager", "0021_alter_connectorconfig_python_module"),
-        ("connectors_manager", "0022_alter_connectorconfig_python_module"),
-        ("connectors_manager", "0023_connectorconfig_routing_key_and_more"),
-        ("connectors_manager", "0024_connectorconfig_health_check_task"),
-        ("connectors_manager", "0025_connectorconfig_health_check_status"),
-        ("connectors_manager", "0026_connectorreport_parameters"),
-        ("connectors_manager", "0027_connectorreport_sent_to_bi"),
-        ("connectors_manager", "0028_connectorreport_connectorreportsbisearch"),
+        # ("connectors_manager", "0001_initial"),
+        # ("connectors_manager", "0002_connectorreport_parent_playbook"),
+        # ("connectors_manager", "0003_connectorconfig"),
+        # ("connectors_manager", "0004_datamigration"),
+        # ("connectors_manager", "0005_auto_20230301_1415"),
+        # ("connectors_manager", "0006_connectorconfig_disabled_in_org"),
+        # ("connectors_manager", "0007_alter_connectorreport_job"),
+        # ("connectors_manager", "0008_auto_20230308_1623"),
+        # ("connectors_manager", "0009_parent_playbook_foreign_key"),
+        # ("connectors_manager", "0010_remove_parent_playbook"),
+        # ("connectors_manager", "00011_remove_runtime_configuration"),
+        # ("connectors_manager", "0012_slack"),
+        # ("connectors_manager", "0013_tlp_clear"),
+        # (
+        #     "connectors_manager",
+        #     "0014_alter_connectorconfig_disabled_in_organizations_and_more",
+        # ),
+        # ("connectors_manager", "0015_params"),
+        # ("connectors_manager", "0016_alter_connectorconfig_name"),
+        # ("connectors_manager", "0017_alter_connectorconfig_options"),
+        # ("connectors_manager", "0018_alter_connectorconfig_name"),
+        # (
+        #     "connectors_manager",
+        #     "0019_rename_connectors__python__0fb146_idx_connectors__python__f23fd8_idx_and_more",
+        # ),
+        # ("connectors_manager", "0020_alter_python_module"),
+        # ("connectors_manager", "0021_alter_connectorconfig_python_module"),
+        # ("connectors_manager", "0022_alter_connectorconfig_python_module"),
+        # ("connectors_manager", "0023_connectorconfig_routing_key_and_more"),
+        # ("connectors_manager", "0024_connectorconfig_health_check_task"),
+        # ("connectors_manager", "0025_connectorconfig_health_check_status"),
+        # ("connectors_manager", "0026_connectorreport_parameters"),
+        # ("connectors_manager", "0027_connectorreport_sent_to_bi"),
+        # ("connectors_manager", "0028_connectorreport_connectorreportsbisearch"),
     ]
 
     dependencies = [("api_app", "0001_1_initial_squashed")]
     operations = [
-        migrations.CreateModel(
-            name="ConnectorReport",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                (
-                    "status",
-                    models.CharField(
-                        choices=[
-                            ("FAILED", "Failed"),
-                            ("PENDING", "Pending"),
-                            ("RUNNING", "Running"),
-                            ("SUCCESS", "Success"),
-                            ("KILLED", "Killed"),
-                        ],
-                        max_length=50,
-                    ),
-                ),
-                ("report", models.JSONField(default=dict)),
-                (
-                    "errors",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=512),
-                        blank=True,
-                        default=list,
-                        size=None,
-                    ),
-                ),
-                ("start_time", models.DateTimeField(default=django.utils.timezone.now)),
-                ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
-                ("task_id", models.UUIDField()),
-                (
-                    "job",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="%(class)ss",
-                        to="api_app.job",
-                    ),
-                ),
-                ("sent_to_bi", models.BooleanField(default=False, editable=False)),
-                ("parameters", models.JSONField(default={}, editable=False)),
-                (
-                    "config",
-                    models.ForeignKey(
-                        "ConnectorConfig",
-                        related_name="reports",
-                        on_delete=models.CASCADE,
-                    ),
-                ),
-            ],
-        ),
         migrations.CreateModel(
             name="ConnectorConfig",
             fields=[
@@ -191,19 +133,77 @@ class Migration(migrations.Migration):
                 name="connectors__python__0fb146_idx",
             ),
         ),
-        migrations.AlterUniqueTogether(
-            name="connectorreport",
-            unique_together={("config", "job")},
-        ),
         migrations.RenameIndex(
             model_name="connectorconfig",
             new_name="connectors__python__f23fd8_idx",
             old_name="connectors__python__0fb146_idx",
+        ),
+        migrations.CreateModel(
+            name="ConnectorReport",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("FAILED", "Failed"),
+                            ("PENDING", "Pending"),
+                            ("RUNNING", "Running"),
+                            ("SUCCESS", "Success"),
+                            ("KILLED", "Killed"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("report", models.JSONField(default=dict)),
+                (
+                    "errors",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(max_length=512),
+                        blank=True,
+                        default=list,
+                        size=None,
+                    ),
+                ),
+                ("start_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("task_id", models.UUIDField()),
+                (
+                    "job",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)ss",
+                        to="api_app.job",
+                    ),
+                ),
+                ("sent_to_bi", models.BooleanField(default=False, editable=False)),
+                ("parameters", models.JSONField(default={}, editable=False)),
+                (
+                    "config",
+                    models.ForeignKey(
+                        "ConnectorConfig",
+                        related_name="reports",
+                        on_delete=models.CASCADE,
+                    ),
+                ),
+            ],
         ),
         migrations.AddIndex(
             model_name="connectorreport",
             index=models.Index(
                 fields=["sent_to_bi", "-start_time"], name="connectorreportsBISearch"
             ),
+        ),
+        migrations.AlterUniqueTogether(
+            name="connectorreport",
+            unique_together={("config", "job")},
         ),
     ]

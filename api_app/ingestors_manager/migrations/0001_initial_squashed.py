@@ -19,27 +19,27 @@ import api_app.interfaces
 
 class Migration(migrations.Migration):
     replaces = [
-        ("ingestors_manager", "0001_initial"),
-        (
-            "ingestors_manager",
-            "0002_remove_ingestorconfig_disabled_in_organizations_and_more",
-        ),
-        ("ingestors_manager", "0003_ingestor_config"),
-        ("ingestors_manager", "0004_alter_ingestorreport_name"),
-        (
-            "ingestors_manager",
-            "0005_rename_ingestors_m_python__5c8ce0_idx_ingestors_m_python__b7a859_idx_and_more",
-        ),
-        ("ingestors_manager", "0006_alter_python_module"),
-        ("ingestors_manager", "0007_alter_ingestorconfig_python_module"),
-        ("ingestors_manager", "0008_alter_ingestorconfig_python_module"),
-        ("ingestors_manager", "0009_ingestorconfig_maximum_jobs"),
-        ("ingestors_manager", "0010_ingestorconfig_routing_key_and_more"),
-        ("ingestors_manager", "0011_ingestorconfig_health_check_task"),
-        ("ingestors_manager", "0012_ingestorconfig_health_check_status"),
-        ("ingestors_manager", "0013_ingestorreport_parameters"),
-        ("ingestors_manager", "0014_ingestorreport_sent_to_bi"),
-        ("ingestors_manager", "0015_ingestorreport_ingestorreportsbisearch"),
+        # ("ingestors_manager", "0001_initial"),
+        # (
+        #     "ingestors_manager",
+        #     "0002_remove_ingestorconfig_disabled_in_organizations_and_more",
+        # ),
+        # ("ingestors_manager", "0003_ingestor_config"),
+        # ("ingestors_manager", "0004_alter_ingestorreport_name"),
+        # (
+        #     "ingestors_manager",
+        #     "0005_rename_ingestors_m_python__5c8ce0_idx_ingestors_m_python__b7a859_idx_and_more",
+        # ),
+        # ("ingestors_manager", "0006_alter_python_module"),
+        # ("ingestors_manager", "0007_alter_ingestorconfig_python_module"),
+        # ("ingestors_manager", "0008_alter_ingestorconfig_python_module"),
+        # ("ingestors_manager", "0009_ingestorconfig_maximum_jobs"),
+        # ("ingestors_manager", "0010_ingestorconfig_routing_key_and_more"),
+        # ("ingestors_manager", "0011_ingestorconfig_health_check_task"),
+        # ("ingestors_manager", "0012_ingestorconfig_health_check_status"),
+        # ("ingestors_manager", "0013_ingestorreport_parameters"),
+        # ("ingestors_manager", "0014_ingestorreport_sent_to_bi"),
+        # ("ingestors_manager", "0015_ingestorreport_ingestorreportsbisearch"),
     ]
 
     dependencies = [
@@ -48,71 +48,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name="IngestorReport",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("name", models.CharField(blank=True, default="", max_length=50)),
-                (
-                    "status",
-                    models.CharField(
-                        choices=[
-                            ("FAILED", "Failed"),
-                            ("PENDING", "Pending"),
-                            ("RUNNING", "Running"),
-                            ("SUCCESS", "Success"),
-                            ("KILLED", "Killed"),
-                        ],
-                        max_length=50,
-                    ),
-                ),
-                ("report", models.JSONField(default=list, validators=[])),
-                (
-                    "errors",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=512),
-                        blank=True,
-                        default=list,
-                        size=None,
-                    ),
-                ),
-                ("start_time", models.DateTimeField(default=django.utils.timezone.now)),
-                ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
-                ("task_id", models.UUIDField(null=True, blank=True)),
-                (
-                    "config",
-                    models.ForeignKey(
-                        "IngestorConfig",
-                        related_name="reports",
-                        on_delete=models.CASCADE,
-                    ),
-                ),
-                (
-                    "max_size_report",
-                    models.IntegerField(default=None, null=True, blank=True),
-                ),
-                (
-                    "job",
-                    models.ForeignKey(
-                        "api_app.Job",
-                        related_name="%(class)ss",
-                        on_delete=models.SET_NULL,
-                        null=True,
-                        blank=True,
-                    ),
-                ),
-                ("sent_to_bi", models.BooleanField(default=False, editable=False)),
-                ("parameters", models.JSONField(default={}, editable=False)),
-            ],
-        ),
         migrations.CreateModel(
             name="IngestorConfig",
             fields=[
@@ -226,6 +161,71 @@ class Migration(migrations.Migration):
             model_name="ingestorconfig",
             new_name="ingestors_m_python__b7a859_idx",
             old_name="ingestors_m_python__5c8ce0_idx",
+        ),
+        migrations.CreateModel(
+            name="IngestorReport",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, default="", max_length=50)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("FAILED", "Failed"),
+                            ("PENDING", "Pending"),
+                            ("RUNNING", "Running"),
+                            ("SUCCESS", "Success"),
+                            ("KILLED", "Killed"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("report", models.JSONField(default=list, validators=[])),
+                (
+                    "errors",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(max_length=512),
+                        blank=True,
+                        default=list,
+                        size=None,
+                    ),
+                ),
+                ("start_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("task_id", models.UUIDField(null=True, blank=True)),
+                (
+                    "config",
+                    models.ForeignKey(
+                        "IngestorConfig",
+                        related_name="reports",
+                        on_delete=models.CASCADE,
+                    ),
+                ),
+                (
+                    "max_size_report",
+                    models.IntegerField(default=None, null=True, blank=True),
+                ),
+                (
+                    "job",
+                    models.ForeignKey(
+                        "api_app.Job",
+                        related_name="%(class)ss",
+                        on_delete=models.SET_NULL,
+                        null=True,
+                        blank=True,
+                    ),
+                ),
+                ("sent_to_bi", models.BooleanField(default=False, editable=False)),
+                ("parameters", models.JSONField(default={}, editable=False)),
+            ],
         ),
         migrations.AddIndex(
             model_name="ingestorreport",

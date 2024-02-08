@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ("analyzers_manager", "0058_1_change_primary_key"),
         ("connectors_manager", "0029_1_change_primary_key"),
-        ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
-        ("visualizers_manager", "0035_visualizerreport_visualizerreportsbisearch"),
+        ("playbooks_manager", "0001_initial_squashed"),
+        ("visualizers_manager", "0001_initial_squashed"),
     ]
 
     operations = [

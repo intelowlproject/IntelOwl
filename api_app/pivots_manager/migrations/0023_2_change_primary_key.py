@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("analyzers_manager", "0058_1_change_primary_key"),
         ("connectors_manager", "0029_1_change_primary_key"),
-        ("pivots_manager", "0022_pivotreport_pivotreportsbisearch"),
+        ("pivots_manager", "0001_2_initial_squashed"),
     ]
 
     operations = [

@@ -7,7 +7,6 @@ import django.core.validators
 import django.db.migrations.operations.special
 import django.db.models.deletion
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import migrations, models
 
 import api_app.defaults
@@ -60,110 +59,6 @@ def reverse_migrate_module_pivot(apps, schema_editor):
     ).delete()
 
 
-def migrate_python_module(apps, schema_editor):
-    PythonModule = apps.get_model("api_app", "PythonModule")
-    Parameter = apps.get_model("api_app", "Parameter")
-    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
-    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
-    IngestorConfig = apps.get_model("ingestors_manager", "IngestorConfig")
-    for config in AnalyzerConfig.objects.all():
-        if config.type == "file" and not config.run_hash:
-            module = PythonModule.objects.get_or_create(
-                module=config.python_module,
-                base_path="api_app.analyzers_manager.file_analyzers",
-            )[0]
-            if "android" in config.supported_filetypes:
-                config.supported_filetypes.remove("android")
-                config.supported_filetypes.append(
-                    "application/vnd.android.package-archive"
-                )
-        else:
-            module = PythonModule.objects.get_or_create(
-                module=config.python_module,
-                base_path="api_app.analyzers_manager.observable_analyzers",
-            )[0]
-        config.python_module2 = module
-        config.full_clean()
-        config.save()
-    for config in ConnectorConfig.objects.all():
-        module = PythonModule.objects.get_or_create(
-            module=config.python_module,
-            base_path="api_app.connectors_manager.connectors",
-        )[0]
-        config.python_module2 = module
-        config.full_clean()
-        config.save()
-    for config in VisualizerConfig.objects.all():
-        module = PythonModule.objects.get_or_create(
-            module=config.python_module,
-            base_path="api_app.visualizers_manager.visualizers",
-        )[0]
-        config.python_module2 = module
-        config.full_clean()
-        config.save()
-    for config in IngestorConfig.objects.all():
-        module = PythonModule.objects.get_or_create(
-            module=config.python_module, base_path="api_app.ingestors_manager.ingestors"
-        )[0]
-        config.python_module2 = module
-        config.full_clean()
-        config.save()
-    saved_params = {}
-
-    for param in Parameter.objects.all():
-        config = (
-            param.analyzer_config
-            or param.connector_config
-            or param.visualizer_config
-            or param.ingestor_config
-        )
-        for plugin_config in param.values.all():
-            plugin_config.analyzer_config = param.analyzer_config
-            plugin_config.connector_config = param.connector_config
-            plugin_config.visualizer_config = param.visualizer_config
-            plugin_config.visualizer_config = param.visualizer_config
-            plugin_config.ingestor_config = param.ingestor_config
-            plugin_config.full_clean()
-            plugin_config.save()
-        param.python_module = config.python_module2
-        try:
-            param.full_clean()
-        except ValidationError:
-            for plugin_config in param.values.all():
-                plugin_config.analyzer_config = param.analyzer_config
-                plugin_config.connector_config = param.connector_config
-                plugin_config.visualizer_config = param.visualizer_config
-                plugin_config.visualizer_config = param.visualizer_config
-                plugin_config.ingestor_config = param.ingestor_config
-                plugin_config.parameter = saved_params[
-                    (param.name, param.python_module)
-                ]
-                try:
-                    plugin_config.full_clean()
-                except ValidationError:
-                    plugin_config.delete()
-                else:
-                    plugin_config.save()
-            param.delete()
-        else:
-            for plugin_config in param.values.all():
-                plugin_config.analyzer_config = param.analyzer_config
-                plugin_config.connector_config = param.connector_config
-                plugin_config.visualizer_config = param.visualizer_config
-                plugin_config.visualizer_config = param.visualizer_config
-                plugin_config.ingestor_config = param.ingestor_config
-                try:
-                    plugin_config.full_clean()
-                except ValidationError:
-                    plugin_config.delete()
-                else:
-                    plugin_config.save()
-                plugin_config.save()
-            param.save()
-            saved_params[(param.name, param.python_module)] = param
-
-
 def create_default_clients(apps, schema_editor):
     # We can't import the Client model directly as it may be a newer
     # version than this migration expects. We use the historical version.
@@ -182,42 +77,42 @@ def create_default_clients(apps, schema_editor):
 
 class Migration(migrations.Migration):
     replaces = [
-        ("api_app", "0001_initial"),
-        ("api_app", "0002_added_job_field"),
-        ("api_app", "0003_auto_20201020_1406"),
-        ("api_app", "0004_auto_20201112_0021"),
-        ("api_app", "0005_auto_20210610_1028"),
-        ("api_app", "0006_v3_release"),
-        ("api_app", "0007_alter_tag_color"),
-        ("api_app", "0008_job_user_field"),
-        ("api_app", "0009_datamigration"),
-        ("api_app", "0010_custom_config_playbooks"),
-        ("api_app", "0011_alter_organizationpluginstate_organization"),
-        ("api_app", "0012_auto_20221227_1543"),
-        ("api_app", "0013_alter_job_observable_classification"),
-        ("api_app", "0014_add_job_process_time"),
-        ("api_app", "0015_visualizer"),
-        ("api_app", "0016_add_index"),
-        ("api_app", "0017_delete_organizationpluginstate"),
-        ("api_app", "0018_tag_validation"),
-        ("api_app", "0019_mitm_configs"),
-        ("api_app", "0020_single_playbook_pre_migration"),
-        ("api_app", "0021_single_playbook_migration"),
-        ("api_app", "0022_single_playbook_post_migration"),
-        ("api_app", "0023_runtime_config"),
-        ("api_app", "0024_tlp"),
-        ("api_app", "0025_comment"),
-        ("api_app", "0026_pluginconfig_api_app_plu_organiz_0867bd_idx"),
-        ("api_app", "0027_parameter"),
-        ("api_app", "0028_plugin_config"),
-        ("api_app", "0029_parameter_api_app_par_analyze_1f1bee_idx_and_more"),
-        ("api_app", "0030_pluginconfig_repositories"),
-        ("api_app", "0031_job_playbookconfigordering"),
-        ("api_app", "0032_alter_job_status"),
-        ("api_app", "0033_alter_parameter_unique_together"),
-        ("api_app", "0034_job_scan_check_time_job_scan_mode"),
-        ("api_app", "0035_pluginconfig_repositories"),
-        ("api_app", "0036_alter_parameter_unique_together_and_more"),
+        # ("api_app", "0001_initial"),
+        # ("api_app", "0002_added_job_field"),
+        # ("api_app", "0003_auto_20201020_1406"),
+        # ("api_app", "0004_auto_20201112_0021"),
+        # ("api_app", "0005_auto_20210610_1028"),
+        # ("api_app", "0006_v3_release"),
+        # ("api_app", "0007_alter_tag_color"),
+        # ("api_app", "0008_job_user_field"),
+        # ("api_app", "0009_datamigration"),
+        # ("api_app", "0010_custom_config_playbooks"),
+        # ("api_app", "0011_alter_organizationpluginstate_organization"),
+        # ("api_app", "0012_auto_20221227_1543"),
+        # ("api_app", "0013_alter_job_observable_classification"),
+        # ("api_app", "0014_add_job_process_time"),
+        # ("api_app", "0015_visualizer"),
+        # ("api_app", "0016_add_index"),
+        # ("api_app", "0017_delete_organizationpluginstate"),
+        # ("api_app", "0018_tag_validation"),
+        # ("api_app", "0019_mitm_configs"),
+        # ("api_app", "0020_single_playbook_pre_migration"),
+        # ("api_app", "0021_single_playbook_migration"),
+        # ("api_app", "0022_single_playbook_post_migration"),
+        # ("api_app", "0023_runtime_config"),
+        # ("api_app", "0024_tlp"),
+        # ("api_app", "0025_comment"),
+        # ("api_app", "0026_pluginconfig_api_app_plu_organiz_0867bd_idx"),
+        # ("api_app", "0027_parameter"),
+        # ("api_app", "0028_plugin_config"),
+        # ("api_app", "0029_parameter_api_app_par_analyze_1f1bee_idx_and_more"),
+        # ("api_app", "0030_pluginconfig_repositories"),
+        # ("api_app", "0031_job_playbookconfigordering"),
+        # ("api_app", "0032_alter_job_status"),
+        # ("api_app", "0033_alter_parameter_unique_together"),
+        # ("api_app", "0034_job_scan_check_time_job_scan_mode"),
+        # ("api_app", "0035_pluginconfig_repositories"),
+        # ("api_app", "0036_alter_parameter_unique_together_and_more"),
         # ("api_app", "0037_pythonmodule_and_more"),
         # ("api_app", "0038_python_module_datamigration"),
         # ("api_app", "0039_remove_fields"),
@@ -240,7 +135,6 @@ class Migration(migrations.Migration):
         # ("api_app", "0053_job_sent_to_bi"),
         # ("api_app", "0054_job_jobbisearch"),
     ]
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("certego_saas_organization", "0001_initial"),
@@ -435,13 +329,6 @@ class Migration(migrations.Migration):
                 fields=["sent_to_bi", "-received_request_time"], name="JobBISearch"
             ),
         ),
-        migrations.AddIndex(
-            model_name="job",
-            index=models.Index(
-                fields=["playbook_to_execute", "finished_analysis_time", "user"],
-                name="PlaybookConfigOrdering",
-            ),
-        ),
         migrations.CreateModel(
             name="Comment",
             fields=[
@@ -504,20 +391,6 @@ class Migration(migrations.Migration):
                 (
                     "base_path",
                     models.CharField(
-                        choices=[
-                            (
-                                "api_app.analyzers_manager.observable_analyzers",
-                                "Observable Analyzer",
-                            ),
-                            (
-                                "api_app.analyzers_manager.file_analyzers",
-                                "File Analyzer",
-                            ),
-                            ("api_app.connectors_manager.connectors", "Connector"),
-                            ("api_app.ingestors_manager.ingestors", "Ingestor"),
-                            ("api_app.visualizers_manager.visualizers", "Visualizer"),
-                            ("api_app.pivots_manager.pivots", "Pivot"),
-                        ],
                         db_index=True,
                         max_length=120,
                     ),
@@ -615,7 +488,60 @@ class Migration(migrations.Migration):
                 "unique_together": {("name", "python_module")},
             },
         ),
-        migrations.RunPython(
-            code=migrate_python_module,
+        migrations.CreateModel(
+            name="OrganizationPluginConfiguration",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("object_id", models.IntegerField()),
+                ("disabled", models.BooleanField(default=False)),
+                ("disabled_comment", models.TextField(blank=True, default="")),
+                (
+                    "rate_limit_timeout",
+                    models.DurationField(
+                        blank=True,
+                        null=True,
+                        help_text="Expects data in the format 'DD HH:MM:SS'",
+                    ),
+                ),
+            ],
+        ),
+        migrations.AddField(
+            model_name="organizationpluginconfiguration",
+            name="content_type",
+            field=models.ForeignKey(
+                limit_choices_to={
+                    "model__endswith": "config",
+                    "app_label__endswith": "manager",
+                },
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
+            ),
+        ),
+        migrations.AddField(
+            model_name="organizationpluginconfiguration",
+            name="organization",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="certego_saas_organization.organization",
+            ),
+        ),
+        migrations.AddField(
+            model_name="organizationpluginconfiguration",
+            name="rate_limit_enable_task",
+            field=models.ForeignKey(
+                blank=True,
+                editable=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="django_celery_beat.periodictask",
+            ),
         ),
     ]

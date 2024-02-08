@@ -17,17 +17,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     replaces = [
-        ("pivots_manager", "0001_initial"),
-        (
-            "pivots_manager",
-            "0002_rename_pivot_manag_startin_21e74a_idx_pivots_mana_startin_694120_idx_and_more",
-        ),
-        ("pivots_manager", "0003_alter_pivot_ending_job_alter_pivot_starting_job"),
-        ("pivots_manager", "0004_alter_pivotconfig_analyzer_config_and_more"),
-        ("pivots_manager", "0005_pivotconfig_pivot_config_no_config_all_null"),
-        ("pivots_manager", "0006_alter_pivotconfig_analyzer_config_and_more"),
-        ("pivots_manager", "0007_pivotreport_rename_pivot_pivotmap_and_more"),
-        ("pivots_manager", "0008_data_migrate"),
+        # ("pivots_manager", "0001_initial"),
+        # (
+        #     "pivots_manager",
+        #     "0002_rename_pivot_manag_startin_21e74a_idx_pivots_mana_startin_694120_idx_and_more",
+        # ),
+        # ("pivots_manager", "0003_alter_pivot_ending_job_alter_pivot_starting_job"),
+        # ("pivots_manager", "0004_alter_pivotconfig_analyzer_config_and_more"),
+        # ("pivots_manager", "0005_pivotconfig_pivot_config_no_config_all_null"),
+        # ("pivots_manager", "0006_alter_pivotconfig_analyzer_config_and_more"),
+        # ("pivots_manager", "0007_pivotreport_rename_pivot_pivotmap_and_more"),
+        # ("pivots_manager", "0008_data_migrate"),
         # ("pivots_manager", "0009_alter_pivotconfig_python_module"),
         # ("pivots_manager", "0010_alter_pivotconfig_execute_on_python_module"),
         # ("pivots_manager", "0011_alter_pivotconfig_name"),
@@ -51,64 +51,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name="PivotReport",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                (
-                    "status",
-                    models.CharField(
-                        choices=[
-                            ("FAILED", "Failed"),
-                            ("PENDING", "Pending"),
-                            ("RUNNING", "Running"),
-                            ("SUCCESS", "Success"),
-                            ("KILLED", "Killed"),
-                        ],
-                        max_length=50,
-                    ),
-                ),
-                ("report", models.JSONField(default=dict)),
-                (
-                    "errors",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=512),
-                        blank=True,
-                        default=list,
-                        size=None,
-                    ),
-                ),
-                ("start_time", models.DateTimeField(default=django.utils.timezone.now)),
-                ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
-                ("task_id", models.UUIDField()),
-                ("sent_to_bi", models.BooleanField(default=False, editable=False)),
-                ("parameters", models.JSONField(default={}, editable=False)),
-                (
-                    "job",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="%(class)ss",
-                        to="api_app.job",
-                    ),
-                ),
-                (
-                    "config",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="reports",
-                        to="pivots_manager.pivotconfig",
-                    ),
-                ),
-            ],
-        ),
         migrations.CreateModel(
             name="PivotConfig",
             fields=[
@@ -207,6 +149,85 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
+        migrations.AlterModelOptions(
+            name="pivotconfig",
+            options={"ordering": ["name", "disabled"]},
+        ),
+        migrations.AddIndex(
+            model_name="pivotconfig",
+            index=models.Index(
+                fields=["python_module", "disabled"],
+                name="pivots_mana_python__75b643_idx",
+            ),
+        ),
+        migrations.CreateModel(
+            name="PivotReport",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("FAILED", "Failed"),
+                            ("PENDING", "Pending"),
+                            ("RUNNING", "Running"),
+                            ("SUCCESS", "Success"),
+                            ("KILLED", "Killed"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("report", models.JSONField(default=dict)),
+                (
+                    "errors",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(max_length=512),
+                        blank=True,
+                        default=list,
+                        size=None,
+                    ),
+                ),
+                ("start_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("task_id", models.UUIDField()),
+                ("sent_to_bi", models.BooleanField(default=False, editable=False)),
+                ("parameters", models.JSONField(default={}, editable=False)),
+                (
+                    "job",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)ss",
+                        to="api_app.job",
+                    ),
+                ),
+                (
+                    "config",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reports",
+                        to="pivots_manager.pivotconfig",
+                    ),
+                ),
+            ],
+        ),
+        migrations.AlterUniqueTogether(
+            name="pivotreport",
+            unique_together={("config", "job")},
+        ),
+        migrations.AddIndex(
+            model_name="pivotreport",
+            index=models.Index(
+                fields=["sent_to_bi", "-start_time"], name="pivotreportsBISearch"
+            ),
+        ),
         migrations.CreateModel(
             name="PivotMap",
             fields=[
@@ -253,26 +274,5 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name="pivotmap",
             unique_together={("starting_job", "pivot_config", "ending_job")},
-        ),
-        migrations.AlterUniqueTogether(
-            name="pivotreport",
-            unique_together={("config", "job")},
-        ),
-        migrations.AlterModelOptions(
-            name="pivotconfig",
-            options={"ordering": ["name", "disabled"]},
-        ),
-        migrations.AddIndex(
-            model_name="pivotconfig",
-            index=models.Index(
-                fields=["python_module", "disabled"],
-                name="pivots_mana_python__75b643_idx",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="pivotreport",
-            index=models.Index(
-                fields=["sent_to_bi", "-start_time"], name="pivotreportsBISearch"
-            ),
         ),
     ]

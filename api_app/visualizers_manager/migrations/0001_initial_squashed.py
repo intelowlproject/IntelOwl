@@ -28,31 +28,31 @@ import api_app.visualizers_manager.validators
 
 class Migration(migrations.Migration):
     replaces = [
-        ("visualizers_manager", "0001_initial"),
-        ("visualizers_manager", "0002_datamigration"),
-        ("visualizers_manager", "0003_auto_20230301_1415"),
-        ("visualizers_manager", "0004_alter_visualizerreport_report"),
-        ("visualizers_manager", "0005_visualizerconfig_disabled_in_org"),
-        ("visualizers_manager", "0006_alter_visualizerreport_job"),
-        ("visualizers_manager", "0007_auto_20230308_1623"),
-        ("visualizers_manager", "0008_parent_playbook_foreign_key"),
-        ("visualizers_manager", "0009_remove_parent_playbook"),
-        ("visualizers_manager", "00010_remove_runtime_configuration"),
-        ("visualizers_manager", "00011_dns_visualizer"),
-        (
-            "visualizers_manager",
-            "0012_alter_visualizerconfig_disabled_in_organizations_and_more",
-        ),
-        ("visualizers_manager", "0013_params"),
-        ("visualizers_manager", "0014_alter_visualizerreport_report"),
-        ("visualizers_manager", "0015_alter_visualizerreport_unique_together"),
-        ("visualizers_manager", "0016_visualizerreport_name"),
-        ("visualizers_manager", "0017_alter_visualizerreport_options"),
-        ("visualizers_manager", "0018_visualizer_config"),
-        ("visualizers_manager", "0019_dns_visualizer_change"),
-        ("visualizers_manager", "0020_visualizer_config"),
-        ("visualizers_manager", "0021_alter_visualizerconfig_options"),
-        ("visualizers_manager", "0022_remove_visualizerconfig_analyzers_and_more"),
+        # ("visualizers_manager", "0001_initial"),
+        # ("visualizers_manager", "0002_datamigration"),
+        # ("visualizers_manager", "0003_auto_20230301_1415"),
+        # ("visualizers_manager", "0004_alter_visualizerreport_report"),
+        # ("visualizers_manager", "0005_visualizerconfig_disabled_in_org"),
+        # ("visualizers_manager", "0006_alter_visualizerreport_job"),
+        # ("visualizers_manager", "0007_auto_20230308_1623"),
+        # ("visualizers_manager", "0008_parent_playbook_foreign_key"),
+        # ("visualizers_manager", "0009_remove_parent_playbook"),
+        # ("visualizers_manager", "00010_remove_runtime_configuration"),
+        # ("visualizers_manager", "00011_dns_visualizer"),
+        # (
+        #     "visualizers_manager",
+        #     "0012_alter_visualizerconfig_disabled_in_organizations_and_more",
+        # ),
+        # ("visualizers_manager", "0013_params"),
+        # ("visualizers_manager", "0014_alter_visualizerreport_report"),
+        # ("visualizers_manager", "0015_alter_visualizerreport_unique_together"),
+        # ("visualizers_manager", "0016_visualizerreport_name"),
+        # ("visualizers_manager", "0017_alter_visualizerreport_options"),
+        # ("visualizers_manager", "0018_visualizer_config"),
+        # ("visualizers_manager", "0019_dns_visualizer_change"),
+        # ("visualizers_manager", "0020_visualizer_config"),
+        # ("visualizers_manager", "0021_alter_visualizerconfig_options"),
+        # ("visualizers_manager", "0022_remove_visualizerconfig_analyzers_and_more"),
     ]
 
     dependencies = [
@@ -93,11 +93,10 @@ class Migration(migrations.Migration):
                 ("description", models.TextField()),
                 ("disabled", models.BooleanField(default=False)),
                 (
-                    "playbook",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                    "playbooks",
+                    models.ManyToManyField(
+                        "playbooks_manager.playbookconfig",
                         related_name="visualizers",
-                        to="playbooks_manager.playbookconfig",
                     ),
                 ),
                 (

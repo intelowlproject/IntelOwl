@@ -32,7 +32,7 @@ def migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
+        ("api_app", "0001_2_initial_squashed"),
         ("playbooks_manager", "0024_3_change_primary_key"),
         ("pivots_manager", "0024_2_change_primary_key"),
     ]

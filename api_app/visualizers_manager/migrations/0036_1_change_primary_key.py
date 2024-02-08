@@ -4,8 +4,8 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("visualizers_manager", "0035_visualizerreport_visualizerreportsbisearch"),
-        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
+        ("visualizers_manager", "0001_initial_squashed"),
+        ("api_app", "0001_2_initial_squashed"),
     ]
 
     operations = []

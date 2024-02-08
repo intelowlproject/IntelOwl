@@ -4351,6 +4351,14 @@ class Migration(migrations.Migration):
                 ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)ss', to='api_app.job')),
                 ('sent_to_bi', models.BooleanField(default=False, editable=False)),
                 ('parameters', models.JSONField(default={}, editable=False)),
+                (
+                    "config",
+                    models.ForeignKey(
+                        "AnalyzerConfig",
+                        related_name="reports",
+                        on_delete=models.CASCADE,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(

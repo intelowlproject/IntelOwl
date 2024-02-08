@@ -85,9 +85,9 @@ const tableProps = {
       maxWidth: 125,
       Cell: ({ value: plugin }) => (
         <div>
-          <DateHoverable noHover value={plugin?.start_time} format="pp" />
+          <DateHoverable value={plugin?.start_time} format="pp" />
           &nbsp;<span className="fw-bold text-muted">-</span>&nbsp;
-          <DateHoverable noHover value={plugin?.end_time} format="pp" />
+          <DateHoverable value={plugin?.end_time} format="pp" />
           &nbsp;
           <DateHoverable noHover value={plugin?.end_time} format="(z)" />
         </div>

@@ -141,7 +141,7 @@ class Migration(migrations.Migration):
         ("django_celery_beat", "0018_improve_crontab_helptext"),
         ("durin", "0002_client_throttlerate"),
     ]
-
+    initial = True
     operations = [
         migrations.CreateModel(
             name="Tag",

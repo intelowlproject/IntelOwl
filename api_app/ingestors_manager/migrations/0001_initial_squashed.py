@@ -18,6 +18,7 @@ import api_app.interfaces
 
 
 class Migration(migrations.Migration):
+    initial = True
     replaces = [
         # ("ingestors_manager", "0001_initial"),
         # (

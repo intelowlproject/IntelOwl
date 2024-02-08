@@ -16,6 +16,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    initial = True
     replaces = [
         # ("pivots_manager", "0001_initial"),
         # (

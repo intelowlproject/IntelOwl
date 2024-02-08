@@ -27,6 +27,7 @@ import api_app.visualizers_manager.validators
 
 
 class Migration(migrations.Migration):
+    initial = True
     replaces = [
         # ("visualizers_manager", "0001_initial"),
         # ("visualizers_manager", "0002_datamigration"),

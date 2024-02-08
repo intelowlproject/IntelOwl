@@ -30,6 +30,7 @@ import api_app.validators
 
 
 class Migration(migrations.Migration):
+    initial = True
     replaces = [
         # ("playbooks_manager", "0001_initial"),
         # ("playbooks_manager", "0002_alter_cachedplaybook_job"),

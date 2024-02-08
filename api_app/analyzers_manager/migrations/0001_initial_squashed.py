@@ -12,6 +12,7 @@ import api_app.validators
 
 
 class Migration(migrations.Migration):
+    initial = True
     replaces = [
         # ("analyzers_manager", "0001_initial"),
         # ("analyzers_manager", "0002_analyzerreport_parent_playbook"),

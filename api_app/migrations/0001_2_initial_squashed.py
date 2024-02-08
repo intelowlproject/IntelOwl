@@ -48,6 +48,7 @@ class Migration(migrations.Migration):
         # ("api_app", "0053_job_sent_to_bi"),
         # ("api_app", "0054_job_jobbisearch"),
     ]
+    initial = True
     dependencies = [
         ("api_app", "0001_1_initial_squashed"),
         ("analyzers_manager", "0001_initial_squashed"),

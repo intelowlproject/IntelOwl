@@ -8,6 +8,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    initial = True
     replaces = [
         # ("connectors_manager", "0001_initial"),
         # ("connectors_manager", "0002_connectorreport_parent_playbook"),

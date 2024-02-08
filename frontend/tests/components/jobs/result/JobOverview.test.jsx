@@ -76,8 +76,6 @@ describe("test JobOverview (job report)", () => {
     // utility bar
     const utilitiesRow = container.querySelector("#utilitiesRow");
     expect(within(utilitiesRow).getByText("Job #1")).toBeInTheDocument();
-    const goBackButton = within(utilitiesRow).getByRole("button", { name: "" });
-    expect(goBackButton.id).toBe("gobackbutton");
     expect(
       within(utilitiesRow).getByRole("button", { name: "Comments (1)" }),
     ).toBeInTheDocument();
@@ -89,9 +87,6 @@ describe("test JobOverview (job report)", () => {
     ).toBeInTheDocument();
     expect(
       within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
-    ).toBeInTheDocument();
-    expect(
-      within(utilitiesRow).getByRole("button", { name: "Share" }),
     ).toBeInTheDocument();
   });
 

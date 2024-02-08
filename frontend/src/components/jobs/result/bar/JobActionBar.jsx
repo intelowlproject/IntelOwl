@@ -4,12 +4,7 @@ import { Button } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { FaFileDownload } from "react-icons/fa";
 
-import {
-  ContentSection,
-  SocialShareBtn,
-  IconButton,
-  addToast,
-} from "@certego/certego-ui";
+import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
@@ -45,10 +40,6 @@ export function JobActionsBar({ job }) {
     // triggers the click event
     fileLink.click();
   };
-
-  const shareText = `Checkout this job (#${job.id}, ${
-    job.is_sample ? job.file_name : job.observable_name
-  }) on IntelOwl`;
 
   const handleRetry = async () => {
     if (job.is_sample) {
@@ -110,30 +101,18 @@ export function JobActionsBar({ job }) {
         Icon={retryJobIcon}
         onClick={handleRetry}
         color="light"
-        size="xs"
+        size="sm"
         title="Force run the same analysis"
         titlePlacement="top"
         className="me-2"
       />
-
       <SaveAsPlaybookButton job={job} />
       {job?.is_sample && (
-        <Button
-          size="sm"
-          color="secondary"
-          className="me-2"
-          onClick={onDownloadSampleBtnClick}
-        >
+        <Button size="sm" color="secondary" onClick={onDownloadSampleBtnClick}>
           <FaFileDownload />
           &nbsp;Sample
         </Button>
       )}
-      <SocialShareBtn
-        id="analysis-actions-share"
-        url={window.location.href}
-        text={shareText}
-        longtext={shareText}
-      />
     </ContentSection>
   );
 }

@@ -1,6 +1,7 @@
 from typing import Type
 
 from django.core.management import BaseCommand
+from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.recorder import MigrationRecorder
 
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -56,9 +57,17 @@ class Command(DumpPluginCommand):
                 return self.name_file[:-3]
 
     def _name_file(self, obj, app):
-        name = super()._name_file(obj, app)
-        name = name[:4] + str(self.migration_counter).rjust(4, '0') + name[5:]
-        return name
+        last_migration_number = MigrationAutodetector.parse_number(
+            self._get_last_migration(app)
+        )
+        if self.migration_counter == 0:
+            last_migration_number += 1
+        return (
+            f"{str(int(last_migration_number)).rjust(4, '0')}"
+            f"_{str(int(self.migration_counter)).rjust(4, '0')}"
+            f"_{obj.snake_case_name}_{obj.name.lower()}.py"
+        )
+
 
     def handle(self, *args, **options):
         config_class = options["plugin_class"]

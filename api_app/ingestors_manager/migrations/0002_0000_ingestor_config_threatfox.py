@@ -8,6 +8,28 @@ from django.db.models.fields.related_descriptors import (
 plugin = {
     "name": "ThreatFox",
     "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": {
+            "minute": "30",
+            "hour": "7",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "update_task": {
+            "crontab": {
+                "minute": "30",
+                "hour": "7",
+                "day_of_week": "*",
+                "day_of_month": "*",
+                "month_of_year": "*",
+            },
+            "name": "ThreatFoxIngestor",
+            "task": "intel_owl.tasks.execute_ingestor",
+            "kwargs": '{"config_pk": "ThreatFox"}',
+            "queue": "default",
+            "enabled": False,
+        },
         "module": "threatfox.ThreatFox",
         "base_path": "api_app.ingestors_manager.ingestors",
     },

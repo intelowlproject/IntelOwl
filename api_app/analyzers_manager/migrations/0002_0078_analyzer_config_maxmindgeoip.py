@@ -8,6 +8,28 @@ from django.db.models.fields.related_descriptors import (
 plugin = {
     "name": "MaxMindGeoIP",
     "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": {
+            "minute": "0",
+            "hour": "1",
+            "day_of_week": "3",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "update_task": {
+            "crontab": {
+                "minute": "0",
+                "hour": "1",
+                "day_of_week": "3",
+                "day_of_month": "*",
+                "month_of_year": "*",
+            },
+            "name": "api_app.analyzers_manager.observable_analyzers.maxmind.MaxmindUpdate",
+            "task": "intel_owl.tasks.update",
+            "kwargs": '{"python_module_pk": 64}',
+            "queue": "default",
+            "enabled": True,
+        },
         "module": "maxmind.Maxmind",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },

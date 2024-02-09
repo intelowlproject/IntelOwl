@@ -8,6 +8,28 @@ from django.db.models.fields.related_descriptors import (
 plugin = {
     "name": "TorProject",
     "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": {
+            "minute": "*/10",
+            "hour": "*",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "update_task": {
+            "crontab": {
+                "minute": "*/10",
+                "hour": "*",
+                "day_of_week": "*",
+                "day_of_month": "*",
+                "month_of_year": "*",
+            },
+            "name": "api_app.analyzers_manager.observable_analyzers.tor.TorUpdate",
+            "task": "intel_owl.tasks.update",
+            "kwargs": '{"python_module_pk": 101}',
+            "queue": "default",
+            "enabled": True,
+        },
         "module": "tor.Tor",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },

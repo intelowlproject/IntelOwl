@@ -8,6 +8,28 @@ from django.db.models.fields.related_descriptors import (
 plugin = {
     "name": "Yara",
     "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "update_task": {
+            "crontab": {
+                "minute": "0",
+                "hour": "0",
+                "day_of_week": "*",
+                "day_of_month": "*",
+                "month_of_year": "*",
+            },
+            "name": "api_app.analyzers_manager.file_analyzers.yara_scan.YaraScanUpdate",
+            "task": "intel_owl.tasks.update",
+            "kwargs": '{"python_module_pk": 122}',
+            "queue": "local",
+            "enabled": True,
+        },
         "module": "yara_scan.YaraScan",
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },

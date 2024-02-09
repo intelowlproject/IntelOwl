@@ -8,6 +8,28 @@ from django.db.models.fields.related_descriptors import (
 plugin = {
     "name": "Quark_Engine",
     "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "2,5",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "update_task": {
+            "crontab": {
+                "minute": "0",
+                "hour": "0",
+                "day_of_week": "2,5",
+                "day_of_month": "*",
+                "month_of_year": "*",
+            },
+            "name": "api_app.analyzers_manager.file_analyzers.quark_engine.QuarkEngineUpdate",
+            "task": "intel_owl.tasks.update",
+            "kwargs": '{"python_module_pk": 82}',
+            "queue": "long",
+            "enabled": True,
+        },
         "module": "quark_engine.QuarkEngine",
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },

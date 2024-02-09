@@ -8,6 +8,28 @@ from django.db.models.fields.related_descriptors import (
 plugin = {
     "name": "PhishingArmy",
     "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": {
+            "minute": "5",
+            "hour": "*/6",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "update_task": {
+            "crontab": {
+                "minute": "5",
+                "hour": "*/6",
+                "day_of_week": "*",
+                "day_of_month": "*",
+                "month_of_year": "*",
+            },
+            "name": "api_app.analyzers_manager.observable_analyzers.phishing_army.PhishingArmyUpdate",
+            "task": "intel_owl.tasks.update",
+            "kwargs": '{"python_module_pk": 75}',
+            "queue": "default",
+            "enabled": True,
+        },
         "module": "phishing_army.PhishingArmy",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },

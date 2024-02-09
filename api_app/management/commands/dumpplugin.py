@@ -56,21 +56,22 @@ class Command(BaseCommand):
         obj_data["model"] = f"{obj._meta.app_label}.{obj._meta.object_name}"
         params_data = []
         values_data = []
-        for parameter in obj.parameters.all():
-            params_data.append(ParameterCompleteSerializer(parameter).data)
-            try:
-                # default value
-                value = PluginConfig.objects.get(
-                    owner=None,
-                    for_organization=False,
-                    parameter=parameter,
-                    parameter__is_secret=False,
-                    **{f"{obj.snake_case_name}__pk": obj.pk},
-                )
-            except PluginConfig.DoesNotExist:
-                ...
-            else:
-                values_data.append(PluginConfigCompleteSerializer(value).data)
+        if hasattr(obj, "parameters"):
+            for parameter in obj.parameters.all():
+                params_data.append(ParameterCompleteSerializer(parameter).data)
+                try:
+                    # default value
+                    value = PluginConfig.objects.get(
+                        owner=None,
+                        for_organization=False,
+                        parameter=parameter,
+                        parameter__is_secret=False,
+                        **{f"{obj.snake_case_name}__pk": obj.pk},
+                    )
+                except PluginConfig.DoesNotExist:
+                    ...
+                else:
+                    values_data.append(PluginConfigCompleteSerializer(value).data)
         return obj_data, params_data, values_data
 
     @staticmethod

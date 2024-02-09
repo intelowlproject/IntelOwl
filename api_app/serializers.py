@@ -1245,7 +1245,7 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
 class AbstractConfigSerializerForMigration(AbstractConfigSerializer):
     class Meta:
-        exclude = ["id"]
+        exclude = []
 
 
 class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
@@ -1253,7 +1253,8 @@ class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = AbstractConfigSerializerForMigration.Meta.exclude
+        exclude = ["id"]
+
 
 
 class AbstractReportSerializerInterface(rfs.ModelSerializer):

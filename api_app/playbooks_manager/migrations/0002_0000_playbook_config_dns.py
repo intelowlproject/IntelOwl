@@ -107,6 +107,8 @@ class Migration(migrations.Migration):
         ("api_app", "0001_2_initial_squashed"),
         ("playbooks_manager", "0001_initial_squashed"),
         ("pivots_manager", "0001_2_initial_squashed"),
+        ("analyzers_manager", "0002_0146_analyzer_config_zoomeye"),
+        ("connectors_manager", "0002_0003_connector_config_yeti"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

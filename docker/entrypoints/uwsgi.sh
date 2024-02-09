@@ -20,7 +20,12 @@ python manage.py migrate visualizers_manager --fake-initial
 python manage.py migrate ingestors_manager --fake-initial
 python manage.py migrate pivots_manager --fake-initial
 python manage.py migrate playbooks_manager --fake-initial
-python manage.py migrate --check
+python manage.py migrate
+if ! python manage.py migrate --check
+ then
+    echo "Issue with migration exiting"
+    exit 1
+fi
 python manage.py createcachetable
 # Collect static files
 python manage.py collectstatic --noinput

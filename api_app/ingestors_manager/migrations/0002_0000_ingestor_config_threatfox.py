@@ -152,6 +152,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0001_2_initial_squashed"),
         ("ingestors_manager", "0001_initial_squashed"),
+        ("playbooks_manager", "0002_0004_playbook_config_sample_static_analysis"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

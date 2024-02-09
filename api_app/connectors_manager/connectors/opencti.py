@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from typing import Dict
+
 import pycti
 from django.conf import settings
 from pycti.api.opencti_api_client import File
@@ -104,6 +106,11 @@ class OpenCTI(classes.Connector):
             x_opencti_order=self.tlp["x_opencti_order"],
         )
         return md["id"]
+
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
+        if self.ssl_verify is None:
+            self.ssl_verify = False
 
     def run(self):
         # set up client

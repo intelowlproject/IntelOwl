@@ -93,3 +93,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]
+    atomic = False

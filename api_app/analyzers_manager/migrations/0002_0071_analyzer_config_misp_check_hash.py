@@ -5,15 +5,151 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'name': 'MISP_Check_Hash', 'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'description': 'check a file hash on a MISP instance', 'disabled': False, 'soft_time_limit': 30, 'routing_key': 'default', 'health_check_status': True, 'type': 'file', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': [], 'supported_filetypes': [], 'run_hash': True, 'run_hash_type': '', 'not_supported_filetypes': [], 'health_check_task': None, 'model': 'analyzers_manager.AnalyzerConfig'}
+plugin = {
+    "name": "MISP_Check_Hash",
+    "python_module": {
+        "module": "misp.MISP",
+        "base_path": "api_app.analyzers_manager.observable_analyzers",
+    },
+    "description": "check a file hash on a MISP instance",
+    "disabled": False,
+    "soft_time_limit": 30,
+    "routing_key": "default",
+    "health_check_status": True,
+    "type": "file",
+    "docker_based": False,
+    "maximum_tlp": "RED",
+    "observable_supported": [],
+    "supported_filetypes": [],
+    "run_hash": True,
+    "run_hash_type": "",
+    "not_supported_filetypes": [],
+    "health_check_task": None,
+    "model": "analyzers_manager.AnalyzerConfig",
+}
 
-params = [{'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'api_key_name', 'type': 'str', 'description': '', 'is_secret': True, 'required': True}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'url_key_name', 'type': 'str', 'description': '', 'is_secret': True, 'required': True}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'debug', 'type': 'bool', 'description': 'Enable debug logs.', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'limit', 'type': 'int', 'description': 'Limit the number of results returned', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'from_days', 'type': 'int', 'description': 'Check only events created in the past X days. 0 for no filter', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'ssl_check', 'type': 'bool', 'description': 'Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'strict_search', 'type': 'bool', 'description': 'Search strictly on the observable value (True) or search on attributes containing observable value (False)', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'filter_on_type', 'type': 'bool', 'description': 'Filter the search on the type of the observable.', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'enforce_warninglist', 'type': 'bool', 'description': 'Remove any attributes from the result that would cause a hit on a warninglist entry.', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'self_signed_certificate', 'type': 'bool', 'description': 'If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)', 'is_secret': False, 'required': False}]
+params = [
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "api_key_name",
+        "type": "str",
+        "description": "",
+        "is_secret": True,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "url_key_name",
+        "type": "str",
+        "description": "",
+        "is_secret": True,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "debug",
+        "type": "bool",
+        "description": "Enable debug logs.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "limit",
+        "type": "int",
+        "description": "Limit the number of results returned",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "from_days",
+        "type": "int",
+        "description": "Check only events created in the past X days. 0 for no filter",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "ssl_check",
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "strict_search",
+        "type": "bool",
+        "description": "Search strictly on the observable value (True) or search on attributes containing observable value (False)",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "filter_on_type",
+        "type": "bool",
+        "description": "Filter the search on the type of the observable.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "enforce_warninglist",
+        "type": "bool",
+        "description": "Remove any attributes from the result that would cause a hit on a warninglist entry.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "self_signed_certificate",
+        "type": "bool",
+        "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)",
+        "is_secret": False,
+        "required": False,
+    },
+]
 
 values = []
 
 
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
+    if (
+        type(getattr(Model, field))
+        in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]
+        and value
+    ):
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -26,13 +162,14 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get(pk=value)
     return value
 
+
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
     for field, value in data.items():
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            value = _get_real_obj(Model, field ,value)
+            value = _get_real_obj(Model, field, value)
             no_mtm[field] = value
     try:
         o = Model.objects.get(**no_mtm)
@@ -45,10 +182,11 @@ def _create_object(Model, data):
             attribute.set(value)
         return False
     return True
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     exists = _create_object(Model, plugin)
@@ -59,25 +197,16 @@ def migrate(apps, schema_editor):
             _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api_app', '0001_2_initial_squashed'),
-        ('analyzers_manager', '0002_0070_analyzer_config_mispfirst_check_hash'),
+        ("api_app", "0001_2_initial_squashed"),
+        ("analyzers_manager", "0002_0070_analyzer_config_mispfirst_check_hash"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-        
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

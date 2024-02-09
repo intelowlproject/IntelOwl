@@ -5,15 +5,96 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'name': 'ThreatFox', 'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'}, 'schedule': {'minute': '30', 'hour': '7', 'day_of_week': '*', 'day_of_month': '*', 'month_of_year': '*'}, 'periodic_task': {'crontab': {'minute': '30', 'hour': '7', 'day_of_week': '*', 'day_of_month': '*', 'month_of_year': '*'}, 'name': 'ThreatFoxIngestor', 'task': 'intel_owl.tasks.execute_ingestor', 'kwargs': '{"config_pk": "ThreatFox"}', 'queue': 'default', 'enabled': False}, 'user': {'username': 'ThreatFoxIngestor', 'first_name': '', 'last_name': '',  'email': ''}, 'description': 'Threatfox ingestor', 'disabled': True, 'soft_time_limit': 60, 'routing_key': 'default', 'health_check_status': True, 'maximum_jobs': 10, 'health_check_task': None, 'playbook_to_execute': 'Popular_IP_Reputation_Services', 'model': 'ingestors_manager.IngestorConfig'}
+plugin = {
+    "name": "ThreatFox",
+    "python_module": {
+        "module": "threatfox.ThreatFox",
+        "base_path": "api_app.ingestors_manager.ingestors",
+    },
+    "schedule": {
+        "minute": "30",
+        "hour": "7",
+        "day_of_week": "*",
+        "day_of_month": "*",
+        "month_of_year": "*",
+    },
+    "periodic_task": {
+        "crontab": {
+            "minute": "30",
+            "hour": "7",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "name": "ThreatFoxIngestor",
+        "task": "intel_owl.tasks.execute_ingestor",
+        "kwargs": '{"config_pk": "ThreatFox"}',
+        "queue": "default",
+        "enabled": False,
+    },
+    "user": {
+        "username": "ThreatFoxIngestor",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+    },
+    "description": "Threatfox ingestor",
+    "disabled": True,
+    "soft_time_limit": 60,
+    "routing_key": "default",
+    "health_check_status": True,
+    "maximum_jobs": 10,
+    "health_check_task": None,
+    "playbook_to_execute": "Popular_IP_Reputation_Services",
+    "model": "ingestors_manager.IngestorConfig",
+}
 
-params = [{'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'}, 'name': 'days', 'type': 'int', 'description': 'Days to check. From 1 to 7', 'is_secret': False, 'required': True}]
+params = [
+    {
+        "python_module": {
+            "module": "threatfox.ThreatFox",
+            "base_path": "api_app.ingestors_manager.ingestors",
+        },
+        "name": "days",
+        "type": "int",
+        "description": "Days to check. From 1 to 7",
+        "is_secret": False,
+        "required": True,
+    }
+]
 
-values = [{'parameter': {'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'}, 'name': 'days', 'type': 'int', 'description': 'Days to check. From 1 to 7', 'is_secret': False, 'required': True}, 'for_organization': False, 'value': 1, 'updated_at': '2024-02-09T10:52:22.088107Z', 'owner': None, 'analyzer_config': None, 'connector_config': None, 'visualizer_config': None, 'ingestor_config': 'ThreatFox', 'pivot_config': None}]
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "threatfox.ThreatFox",
+                "base_path": "api_app.ingestors_manager.ingestors",
+            },
+            "name": "days",
+            "type": "int",
+            "description": "Days to check. From 1 to 7",
+            "is_secret": False,
+            "required": True,
+        },
+        "for_organization": False,
+        "value": 1,
+        "updated_at": "2024-02-09T10:52:22.088107Z",
+        "owner": None,
+        "analyzer_config": None,
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": "ThreatFox",
+        "pivot_config": None,
+    }
+]
 
 
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
+    if (
+        type(getattr(Model, field))
+        in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]
+        and value
+    ):
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -26,13 +107,14 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get(pk=value)
     return value
 
+
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
     for field, value in data.items():
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            value = _get_real_obj(Model, field ,value)
+            value = _get_real_obj(Model, field, value)
             no_mtm[field] = value
     try:
         o = Model.objects.get(**no_mtm)
@@ -45,10 +127,11 @@ def _create_object(Model, data):
             attribute.set(value)
         return False
     return True
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     exists = _create_object(Model, plugin)
@@ -59,25 +142,16 @@ def migrate(apps, schema_editor):
             _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api_app', '0001_2_initial_squashed'),
-        ('ingestors_manager', '0001_initial_squashed'),
+        ("api_app", "0001_2_initial_squashed"),
+        ("ingestors_manager", "0001_initial_squashed"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-        
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

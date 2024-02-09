@@ -5,7 +5,28 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'name': 'Stratosphere_Blacklist', 'python_module': {'module': 'stratosphere.Stratos', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'description': 'Cross reference an IP in blacklist provided by Stratosphere lab', 'disabled': False, 'soft_time_limit': 120, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['ip'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'health_check_task': None, 'model': 'analyzers_manager.AnalyzerConfig'}
+plugin = {
+    "name": "Stratosphere_Blacklist",
+    "python_module": {
+        "module": "stratosphere.Stratos",
+        "base_path": "api_app.analyzers_manager.observable_analyzers",
+    },
+    "description": "Cross reference an IP in blacklist provided by Stratosphere lab",
+    "disabled": False,
+    "soft_time_limit": 120,
+    "routing_key": "default",
+    "health_check_status": True,
+    "type": "observable",
+    "docker_based": False,
+    "maximum_tlp": "RED",
+    "observable_supported": ["ip"],
+    "supported_filetypes": [],
+    "run_hash": False,
+    "run_hash_type": "",
+    "not_supported_filetypes": [],
+    "health_check_task": None,
+    "model": "analyzers_manager.AnalyzerConfig",
+}
 
 params = []
 
@@ -13,7 +34,11 @@ values = []
 
 
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
+    if (
+        type(getattr(Model, field))
+        in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]
+        and value
+    ):
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -26,13 +51,14 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get(pk=value)
     return value
 
+
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
     for field, value in data.items():
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            value = _get_real_obj(Model, field ,value)
+            value = _get_real_obj(Model, field, value)
             no_mtm[field] = value
     try:
         o = Model.objects.get(**no_mtm)
@@ -45,10 +71,11 @@ def _create_object(Model, data):
             attribute.set(value)
         return False
     return True
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     exists = _create_object(Model, plugin)
@@ -59,25 +86,16 @@ def migrate(apps, schema_editor):
             _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api_app', '0001_2_initial_squashed'),
-        ('analyzers_manager', '0002_0111_analyzer_config_stalkphish'),
+        ("api_app", "0001_2_initial_squashed"),
+        ("analyzers_manager", "0002_0111_analyzer_config_stalkphish"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-        
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

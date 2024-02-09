@@ -5,7 +5,21 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'name': 'DNS', 'python_module': {'module': 'dns.DNS', 'base_path': 'api_app.visualizers_manager.visualizers'}, 'description': 'Visualize information about DNS resolvers and DNS malicious detectors', 'disabled': False, 'soft_time_limit': 60, 'routing_key': 'default', 'health_check_status': True, 'health_check_task': None, 'playbooks': ['Dns'], 'model': 'visualizers_manager.VisualizerConfig'}
+plugin = {
+    "name": "DNS",
+    "python_module": {
+        "module": "dns.DNS",
+        "base_path": "api_app.visualizers_manager.visualizers",
+    },
+    "description": "Visualize information about DNS resolvers and DNS malicious detectors",
+    "disabled": False,
+    "soft_time_limit": 60,
+    "routing_key": "default",
+    "health_check_status": True,
+    "health_check_task": None,
+    "playbooks": ["Dns"],
+    "model": "visualizers_manager.VisualizerConfig",
+}
 
 params = []
 
@@ -13,7 +27,11 @@ values = []
 
 
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
+    if (
+        type(getattr(Model, field))
+        in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]
+        and value
+    ):
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -26,13 +44,14 @@ def _get_real_obj(Model, field, value):
             value = other_model.objects.get(pk=value)
     return value
 
+
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
     for field, value in data.items():
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            value = _get_real_obj(Model, field ,value)
+            value = _get_real_obj(Model, field, value)
             no_mtm[field] = value
     try:
         o = Model.objects.get(**no_mtm)
@@ -45,10 +64,11 @@ def _create_object(Model, data):
             attribute.set(value)
         return False
     return True
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     exists = _create_object(Model, plugin)
@@ -59,25 +79,16 @@ def migrate(apps, schema_editor):
             _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api_app', '0001_2_initial_squashed'),
-        ('visualizers_manager', '0001_initial_squashed'),
+        ("api_app", "0001_2_initial_squashed"),
+        ("visualizers_manager", "0001_initial_squashed"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-        
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

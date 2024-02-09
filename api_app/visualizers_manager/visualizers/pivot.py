@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Dict, List
 
 from api_app.models import Job
-from api_app.pivots_manager.models import PivotReport
+from api_app.pivots_manager.models import PivotConfig
 from api_app.visualizers_manager.classes import Visualizer
 
 logger = getLogger(__name__)
@@ -12,37 +12,44 @@ class Pivot(Visualizer):
     def run(self) -> List[Dict]:
         page = self.Page("Job Pivots")
 
-        children_job_list = []
-        children_report_list = PivotReport.objects.filter(
-            job=self._job,
-            config__name__in=self._job.pivots_to_execute.values_list("name", flat=True),
-        )
-        for child_report in children_report_list:
-            content = child_report.report
-            if content.get("create_job", False):
-                for job in Job.objects.filter(pk__in=content["jobs_id"]):
-                    children_job_list.append(self._create_job_ui_element(job))
+        children_element_list = []
+        for pivot_map in self._job.pivot_children.all():
+            pivot_map_report = pivot_map.report.report
+            children_element = []
+            if pivot_map_report.get("create_job", False):
+                children_element.extend(
+                    [
+                        self._create_job_ui_element(
+                            pivot_map.ending_job, pivot_map.pivot_config
+                        )
+                    ]
+                )
             else:
-                motivation = content.get(
-                    "motivation", f"Pivot {child_report.config.name} failed"
+                motivation = pivot_map_report.get(
+                    "motivation", f"Pivot {pivot_map.pivot_config.name} failed"
                 )
-                children_job_list.append(
-                    self.HList(
-                        value=[
-                            self.Base(
-                                value="",
-                                icon=self.Icon.WARNING,
-                                color=self.Color.WARNING,
-                                disable=False,
-                            ),
-                            self.Base(
-                                value=f"Job was not created: {motivation}",
-                                disable=False,
-                            ),
-                        ],
-                        alignment=self.Alignment.CENTER,
-                    )
+                children_element.extend(
+                    [
+                        self.Base(
+                            value="",
+                            icon=self.Icon.WARNING,
+                            color=self.Color.WARNING,
+                            disable=False,
+                        ),
+                        self.Base(
+                            value=f"Job was not created: {motivation}",
+                            description=pivot_map.pivot_config.description,
+                            disable=False,
+                        ),
+                    ]
                 )
+
+            children_element_list.append(
+                self.HList(
+                    value=children_element,
+                    alignment=self.Alignment.START,
+                )
+            )
 
         page.add_level(
             self.Level(
@@ -76,10 +83,10 @@ class Pivot(Visualizer):
                                 ),
                                 disable=False,
                             ),
-                            value=children_job_list,
+                            value=children_element_list,
                             size=self.Size.S_6,
                             start_open=True,
-                            disable=not bool(children_job_list),
+                            disable=not bool(children_element_list),
                         ),
                     ],
                 ),
@@ -88,12 +95,19 @@ class Pivot(Visualizer):
 
         return [page.to_dict()]
 
-    def _create_job_ui_element(self, job: Job) -> Visualizer.Base:
+    def _create_job_ui_element(
+        self, job: Job, pivot_config: PivotConfig = None
+    ) -> Visualizer.Base:
+        label = ""
+        if pivot_config:
+            label += f"{pivot_config.name}: "
+        label += (
+            f"Job #{job.pk} ({job.analyzed_object_name}, "
+            f"playbook: {job.playbook_to_execute})"
+        )
         return self.Base(
-            value=(
-                f"Job #{job.pk} ({job.analyzed_object_name}, "
-                f"playbook: {job.playbook_to_execute})"
-            ),
+            value=label,
             link=job.url,
+            description=pivot_config.description if pivot_config else "",
             disable=False,
         )

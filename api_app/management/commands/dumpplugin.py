@@ -117,17 +117,20 @@ def _create_object(Model, data):
         for field, value in mtm.items():
             attribute = getattr(o, field)
             attribute.set(value)
+        return False
+    return True
     
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")    
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    _create_object(Model, plugin)
-    for param in params:
-        _create_object(Parameter, param)
-    for value in values:
-        _create_object(PluginConfig, value)
+    exists = _create_object(Model, plugin)
+    if not exists:
+        for param in params:
+            _create_object(Parameter, param)
+        for value in values:
+            _create_object(PluginConfig, value)
 
 """  # noqa
 
@@ -140,7 +143,7 @@ def reverse_migrate(apps, schema_editor):
     Model.objects.get(name=plugin["name"]).delete()
 """
 
-    def _body_template(self, app):
+    def _get_boy_template(self):
         return """
 
 class Migration(migrations.Migration):
@@ -155,7 +158,11 @@ class Migration(migrations.Migration):
             migrate, reverse_migrate
         )
     ]
-""".format(
+        """
+
+
+    def _body_template(self, app):
+        return self._get_boy_template().format(
             self._get_last_migration("api_app"), app, self._get_last_migration(app)
         )
 
@@ -211,26 +218,34 @@ values = {3}
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
+    @property
+    def str_to_class(self):
+        return {
+            klass.__name__: klass for klass in [AnalyzerConfig, ConnectorConfig, VisualizerConfig, IngestorConfig, PivotConfig]
+        }
+
+    @property
+    def str_to_serializer(self):
+        return {
+            AnalyzerConfig.__name__: AnalyzerConfigSerializerForMigration,
+            ConnectorConfig.__name__: ConnectorConfigSerializerForMigration,
+            VisualizerConfig.__name__: VisualizerConfigSerializerForMigration,
+            IngestorConfig.__name__: IngestorConfigSerializerForMigration,
+            PivotConfig.__name__: PivotConfigSerializerForMigration,
+
+        }
+
     def handle(self, *args, **options):
         config_name = options["plugin_name"]
         config_class = options["plugin_class"]
+        class_ = self.str_to_class[config_class]
+        serializer_class = self.str_to_serializer[config_class]
 
-        class_, serializer_class = (
-            (AnalyzerConfig, AnalyzerConfigSerializerForMigration)
-            if config_class == AnalyzerConfig.__name__
-            else (ConnectorConfig, ConnectorConfigSerializerForMigration)
-            if config_class == ConnectorConfig.__name__
-            else (VisualizerConfig, VisualizerConfigSerializerForMigration)
-            if config_class == VisualizerConfig.__name__
-            else (IngestorConfig, IngestorConfigSerializerForMigration)
-            if config_class == IngestorConfig.__name__
-            else (PivotConfig, PivotConfigSerializerForMigration)
-        )
         obj: PythonConfig = class_.objects.get(name=config_name)
         app = obj._meta.app_label
         content = self._migration_file(obj, serializer_class, app)
-        name_file = self._name_file(obj, app)
-        self._save_file(name_file, content, app)
+        self.name_file = self._name_file(obj, app)
+        self._save_file(self.name_file, content, app)
         self.stdout.write(
-            self.style.SUCCESS(f"Migration {name_file} created with success")
+            self.style.SUCCESS(f"Migration {self.name_file} created with success")
         )

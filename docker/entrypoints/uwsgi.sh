@@ -19,7 +19,7 @@ python manage.py migrate visualizer_manager --fake-initial
 python manage.py migrate ingestors_manager --fake-initial
 python manage.py migrate pivots_manager --fake-initial
 python manage.py migrate playbooks_manager --fake-initial
-python manage.py migrate
+python manage.py migrate --drop
 python manage.py createcachetable
 # Collect static files
 python manage.py collectstatic --noinput

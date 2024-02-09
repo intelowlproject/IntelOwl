@@ -4,7 +4,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("ingestors_manager", "0001_initial_squashed"),
+        ("ingestors_manager", "0002_0000_ingestor_config_threatfox"),
         ("playbooks_manager", "0001_initial_squashed"),
         ("api_app", "0001_2_initial_squashed"),
     ]

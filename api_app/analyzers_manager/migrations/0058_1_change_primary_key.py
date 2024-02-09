@@ -4,7 +4,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0001_initial_squashed"),
+        ("analyzers_manager", "0002_0146_analyzer_config_zoomeye"),
         ("playbooks_manager", "0001_initial_squashed"),
         ("api_app", "0001_2_initial_squashed"),
     ]

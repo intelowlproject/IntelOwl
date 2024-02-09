@@ -36,29 +36,6 @@ def reverse_migrate_bi(apps, schema_editor):
     PeriodicTask.objects.filter(name="send_elastic_bi").delete()
 
 
-# todo mettere nel pivot
-def migrate_python_module_pivot(apps, schema_editor):
-    PythonModule = apps.get_model("api_app", "PythonModule")
-    PythonModule.objects.create(
-        module="self_analyzable.SelfAnalyzable",
-        base_path="api_app.pivots_manager.pivots",
-    )
-    PythonModule.objects.create(
-        module="base.Base", base_path="api_app.pivots_manager.pivots"
-    )
-
-
-def reverse_migrate_module_pivot(apps, schema_editor):
-    PythonModule = apps.get_model("api_app", "PythonModule")
-    PythonModule.objects.get(
-        module="self_analyzable.SelfAnalyzable",
-        base_path="api_app.pivots_manager.pivots",
-    ).delete()
-    PythonModule.objects.get(
-        module="base.Base", base_path="api_app.pivots_manager.pivots"
-    ).delete()
-
-
 def create_default_clients(apps, schema_editor):
     # We can't import the Client model directly as it may be a newer
     # version than this migration expects. We use the historical version.

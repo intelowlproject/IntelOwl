@@ -136,9 +136,9 @@ def migrate_{0}(apps, schema_editor):
         for value in values_{0}:
             _create_object(PluginConfig, value)
 
-""".format(
+""".format(  # noqa
             obj_name
-        )  # noqa
+        )
 
     @staticmethod
     def _reverse_migrate_template(obj_name):

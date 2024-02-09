@@ -164,7 +164,7 @@ class OpenCTI(classes.Connector):
         ).create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
-            url=f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",
+            url=f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
         )
         # Add the external reference to the report
         pycti.StixDomainObject(self.opencti_instance, File).add_external_reference(

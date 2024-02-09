@@ -26,7 +26,7 @@ class YETI(classes.Connector):
         # create context
         context = {
             "source": "IntelOwl",
-            "report": f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",
+            "report": f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
             "status": "analyzed",
             "date": str(self._job.finished_analysis_time),
             "description": "IntelOwl's analysis report for Job: "

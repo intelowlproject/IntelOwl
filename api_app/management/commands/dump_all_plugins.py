@@ -55,6 +55,11 @@ class Command(DumpPluginCommand):
             else:
                 return self.name_file[:-3]
 
+    def _name_file(self, obj, app):
+        name = super()._name_file(obj, app)
+        name = name[:4] + str(self.migration_counter).rjust(4, '0') + name[5:]
+        return name
+
     def handle(self, *args, **options):
         config_class = options["plugin_class"]
         class_: Type[PythonConfig] = self.str_to_class[config_class]

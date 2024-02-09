@@ -53,7 +53,6 @@ from .visualizers_manager.models import VisualizerConfig
 logger = logging.getLogger(__name__)
 
 
-
 class CrontabScheduleSerializer(rfs.ModelSerializer):
     class Meta:
         model = CrontabSchedule
@@ -1219,6 +1218,7 @@ class PythonModuleSerializer(rfs.ModelSerializer):
         model = PythonModule
         fields = ["module", "base_path"]
 
+
 class PythonModulSerializerComplete(rfs.ModelSerializer):
     health_check_schedule = CrontabScheduleSerializer()
     update_schedule = CrontabScheduleSerializer()
@@ -1227,6 +1227,7 @@ class PythonModulSerializerComplete(rfs.ModelSerializer):
     class Meta:
         model = PythonModule
         exclude = ["id"]
+
 
 class ParameterCompleteSerializer(rfs.ModelSerializer):
     python_module = PythonModuleSerializer(read_only=True)

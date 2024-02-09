@@ -31,7 +31,10 @@ class Migration(migrations.Migration):
         # ("pivots_manager", "0021_pivotreport_sent_to_bi"),
         # ("pivots_manager", "0022_pivotreport_pivotreportsbisearch"),
     ]
-    dependencies = [("pivots_manager", "0001_1_initial_squashed")]
+    dependencies = [
+        ("pivots_manager", "0001_1_initial_squashed"),
+        ("playbooks_manager", "0001_initial_squashed"),
+    ]
     operations = [
         migrations.AddField(
             model_name="pivotconfig",

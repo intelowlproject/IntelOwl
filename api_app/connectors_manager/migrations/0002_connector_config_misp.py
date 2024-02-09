@@ -5,15 +5,190 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'MISP', 'description': 'Automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl', 'disabled': False, 'soft_time_limit': 30, 'routing_key': 'default', 'health_check_status': True, 'maximum_tlp': 'CLEAR', 'run_on_failure': False, 'health_check_task': None, 'model': 'connectors_manager.ConnectorConfig'}
+plugin = {
+    "python_module": {
+        "module": "misp.MISP",
+        "base_path": "api_app.connectors_manager.connectors",
+    },
+    "name": "MISP",
+    "description": "Automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl",
+    "disabled": False,
+    "soft_time_limit": 30,
+    "routing_key": "default",
+    "health_check_status": True,
+    "maximum_tlp": "CLEAR",
+    "run_on_failure": False,
+    "health_check_task": None,
+    "model": "connectors_manager.ConnectorConfig",
+}
 
-params = [{'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'tlp', 'type': 'str', 'description': "Change this as per your organization's threat sharing conventions.", 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'debug', 'type': 'bool', 'description': 'Enable debug logs.', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'ssl_check', 'type': 'bool', 'description': 'Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled.', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'self_signed_certificate', 'type': 'bool', 'description': 'If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `<project_location>/configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)', 'is_secret': False, 'required': False}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'api_key_name', 'type': 'str', 'description': 'API key for your MISP instance', 'is_secret': True, 'required': True}, {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'url_key_name', 'type': 'str', 'description': 'URL of your MISP instance', 'is_secret': True, 'required': True}]
+params = [
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "tlp",
+        "type": "str",
+        "description": "Change this as per your organization's threat sharing conventions.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "debug",
+        "type": "bool",
+        "description": "Enable debug logs.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "ssl_check",
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "self_signed_certificate",
+        "type": "bool",
+        "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `<project_location>/configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "api_key_name",
+        "type": "str",
+        "description": "API key for your MISP instance",
+        "is_secret": True,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "misp.MISP",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "url_key_name",
+        "type": "str",
+        "description": "URL of your MISP instance",
+        "is_secret": True,
+        "required": True,
+    },
+]
 
-values = [{'parameter': {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'tlp', 'type': 'str', 'description': "Change this as per your organization's threat sharing conventions.", 'is_secret': False, 'required': False}, 'analyzer_config': None, 'connector_config': 'MISP', 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None, 'for_organization': False, 'value': 'clear', 'updated_at': '2024-02-09T08:57:30.585773Z', 'owner': None}, {'parameter': {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'debug', 'type': 'bool', 'description': 'Enable debug logs.', 'is_secret': False, 'required': False}, 'analyzer_config': None, 'connector_config': 'MISP', 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None, 'for_organization': False, 'value': False, 'updated_at': '2024-02-09T08:57:30.599604Z', 'owner': None}, {'parameter': {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'ssl_check', 'type': 'bool', 'description': 'Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled.', 'is_secret': False, 'required': False}, 'analyzer_config': None, 'connector_config': 'MISP', 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None, 'for_organization': False, 'value': True, 'updated_at': '2024-02-09T08:57:30.611326Z', 'owner': None}, {'parameter': {'python_module': {'module': 'misp.MISP', 'base_path': 'api_app.connectors_manager.connectors'}, 'name': 'self_signed_certificate', 'type': 'bool', 'description': 'If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `<project_location>/configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)', 'is_secret': False, 'required': False}, 'analyzer_config': None, 'connector_config': 'MISP', 'visualizer_config': None, 'ingestor_config': None, 'pivot_config': None, 'for_organization': False, 'value': False, 'updated_at': '2024-02-09T08:57:30.622861Z', 'owner': None}]
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "misp.MISP",
+                "base_path": "api_app.connectors_manager.connectors",
+            },
+            "name": "tlp",
+            "type": "str",
+            "description": "Change this as per your organization's threat sharing conventions.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": None,
+        "connector_config": "MISP",
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": "clear",
+        "updated_at": "2024-02-09T08:57:30.585773Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "misp.MISP",
+                "base_path": "api_app.connectors_manager.connectors",
+            },
+            "name": "debug",
+            "type": "bool",
+            "description": "Enable debug logs.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": None,
+        "connector_config": "MISP",
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": False,
+        "updated_at": "2024-02-09T08:57:30.599604Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "misp.MISP",
+                "base_path": "api_app.connectors_manager.connectors",
+            },
+            "name": "ssl_check",
+            "type": "bool",
+            "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": None,
+        "connector_config": "MISP",
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": True,
+        "updated_at": "2024-02-09T08:57:30.611326Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "misp.MISP",
+                "base_path": "api_app.connectors_manager.connectors",
+            },
+            "name": "self_signed_certificate",
+            "type": "bool",
+            "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `<project_location>/configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": None,
+        "connector_config": "MISP",
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": False,
+        "updated_at": "2024-02-09T08:57:30.622861Z",
+        "owner": None,
+    },
+]
 
 
 def _get_real_obj(Model, field, value):
-    if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
+    if (
+        type(getattr(Model, field))
+        in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]
+        and value
+    ):
         other_model = getattr(Model, field).get_queryset().model
         # in case is a dictionary, we have to retrieve the object with every key
         if isinstance(value, dict):
@@ -29,13 +204,14 @@ def _get_real_obj(Model, field, value):
                 value = other_model.objects.get(name=value)
     return value
 
+
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
     for field, value in data.items():
         if type(getattr(Model, field)) is ManyToManyDescriptor:
             mtm[field] = value
         else:
-            value = _get_real_obj(Model, field ,value)
+            value = _get_real_obj(Model, field, value)
             no_mtm[field] = value
     try:
         o = Model.objects.get(**no_mtm)
@@ -48,10 +224,11 @@ def _create_object(Model, data):
             attribute.set(value)
         return False
     return True
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     exists = _create_object(Model, plugin)
@@ -62,27 +239,16 @@ def migrate(apps, schema_editor):
             _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api_app', '0001_2_initial_squashed'),
-        ('connectors_manager', '0001_initial_squashed'),
+        ("api_app", "0001_2_initial_squashed"),
+        ("connectors_manager", "0001_initial_squashed"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-        
-        
-
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

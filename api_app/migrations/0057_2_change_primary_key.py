@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
         ("analyzers_manager", "0058_1_change_primary_key"),
         ("connectors_manager", "0029_1_change_primary_key"),
         ("ingestors_manager", "0016_1_change_primary_key"),
-        ("api_app", "0001_2_initial_squashed"),
+        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
     ]
 
     operations = [

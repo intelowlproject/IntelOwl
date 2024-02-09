@@ -348,16 +348,6 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "update_task",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="update_for_%(class)s",
-                        to="django_celery_beat.crontabschedule",
-                    ),
-                ),
-                (
-                    "update_schedule",
                     models.OneToOneField(
                         blank=True,
                         editable=False,
@@ -365,6 +355,16 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="update_for_%(class)s",
                         to="django_celery_beat.periodictask",
+                    ),
+                ),
+                (
+                    "update_schedule",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="update_for_%(class)s",
+                        to="django_celery_beat.crontabschedule",
                     ),
                 ),
             ],

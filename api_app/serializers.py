@@ -1256,7 +1256,6 @@ class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
         exclude = ["id"]
 
 
-
 class AbstractReportSerializerInterface(rfs.ModelSerializer):
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
     type = rfs.SerializerMethodField(read_only=True, method_name="get_type")

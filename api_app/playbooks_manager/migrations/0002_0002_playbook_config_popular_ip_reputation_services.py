@@ -6,19 +6,35 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "name": "DNS",
-    "python_module": {
-        "module": "dns.DNS",
-        "base_path": "api_app.visualizers_manager.visualizers",
-    },
-    "description": "Visualize information about DNS resolvers and DNS malicious detectors",
+    "name": "Popular_IP_Reputation_Services",
+    "analyzers": [
+        "AbuseIPDB",
+        "Crowdsec",
+        "FireHol_IPList",
+        "GreedyBear",
+        "GreyNoiseCommunity",
+        "InQuest_REPdb",
+        "OTXQuery",
+        "TalosReputation",
+        "ThreatFox",
+        "TorProject",
+        "URLhaus",
+        "VirusTotal_v3_Get_Observable",
+    ],
+    "connectors": [],
+    "pivots": [],
+    "for_organization": False,
+    "description": "Collection of the most popular and free reputation analyzers for IP addresses",
     "disabled": False,
-    "soft_time_limit": 60,
-    "routing_key": "default",
-    "health_check_status": True,
-    "health_check_task": None,
-    "playbooks": ["Dns"],
-    "model": "visualizers_manager.VisualizerConfig",
+    "type": ["ip"],
+    "runtime_configuration": {"analyzers": {}, "connectors": {}, "visualizers": {}},
+    "scan_mode": 2,
+    "scan_check_time": "1 00:00:00",
+    "tlp": "AMBER",
+    "owner": None,
+    "disabled_in_organizations": [],
+    "tags": [],
+    "model": "playbooks_manager.PlaybookConfig",
 }
 
 params = []
@@ -88,8 +104,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0001_2_initial_squashed"),
-        ("visualizers_manager", "0001_initial_squashed"),
-        ("playbooks_manager", "0002_0004_playbook_config_sample_static_analysis"),
+        ("playbooks_manager", "0002_0001_playbook_config_free_to_use_analyzers"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

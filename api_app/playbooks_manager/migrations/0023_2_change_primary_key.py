@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("analyzers_manager", "0058_1_change_primary_key"),
         ("connectors_manager", "0029_1_change_primary_key"),
-        ("playbooks_manager", "0001_initial_squashed"),
+        ("playbooks_manager", "0002_0004_playbook_config_sample_static_analysis"),
         ("visualizers_manager", "0001_initial_squashed"),
     ]
 

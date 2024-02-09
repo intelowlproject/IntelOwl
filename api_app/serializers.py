@@ -1243,14 +1243,17 @@ class PythonConfigSerializer(AbstractConfigSerializer):
         return result
 
 
-class PythonConfigSerializerForMigration(PythonConfigSerializer):
-    python_module = PythonModuleSerializer(read_only=True)
-
+class AbstractConfigSerializerForMigration(AbstractConfigSerializer):
     class Meta:
         exclude = ["id"]
 
-    def to_representation(self, instance):
-        return super(PythonConfigSerializer, self).to_representation(instance)
+
+class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
+    python_module = PythonModuleSerializer(read_only=True)
+    parameters = ParameterSerializer(write_only=True, many=True)
+
+    class Meta:
+        exclude = AbstractConfigSerializerForMigration.Meta.exclude
 
 
 class AbstractReportSerializerInterface(rfs.ModelSerializer):

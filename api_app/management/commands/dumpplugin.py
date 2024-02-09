@@ -14,6 +14,8 @@ from api_app.ingestors_manager.serializers import IngestorConfigSerializerForMig
 from api_app.models import PluginConfig, PythonConfig
 from api_app.pivots_manager.models import PivotConfig
 from api_app.pivots_manager.serializers import PivotConfigSerializerForMigration
+from api_app.playbooks_manager.models import PlaybookConfig
+from api_app.playbooks_manager.serializers import PlaybookConfigSerializerForMigration
 from api_app.serializers import (
     ParameterCompleteSerializer,
     PluginConfigCompleteSerializer,
@@ -39,6 +41,7 @@ class Command(BaseCommand):
                 VisualizerConfig.__name__,
                 IngestorConfig.__name__,
                 PivotConfig.__name__,
+                PlaybookConfig.__name__,
             ],
         )
         parser.add_argument(
@@ -160,7 +163,6 @@ class Migration(migrations.Migration):
     ]
         """
 
-
     def _body_template(self, app):
         return self._get_boy_template().format(
             self._get_last_migration("api_app"), app, self._get_last_migration(app)
@@ -221,7 +223,15 @@ values = {3}
     @property
     def str_to_class(self):
         return {
-            klass.__name__: klass for klass in [AnalyzerConfig, ConnectorConfig, VisualizerConfig, IngestorConfig, PivotConfig]
+            klass.__name__: klass
+            for klass in [
+                AnalyzerConfig,
+                ConnectorConfig,
+                VisualizerConfig,
+                IngestorConfig,
+                PivotConfig,
+                PlaybookConfig,
+            ]
         }
 
     @property
@@ -232,7 +242,7 @@ values = {3}
             VisualizerConfig.__name__: VisualizerConfigSerializerForMigration,
             IngestorConfig.__name__: IngestorConfigSerializerForMigration,
             PivotConfig.__name__: PivotConfigSerializerForMigration,
-
+            PlaybookConfig.__name__: PlaybookConfigSerializerForMigration,
         }
 
     def handle(self, *args, **options):

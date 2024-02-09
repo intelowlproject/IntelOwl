@@ -1,16 +1,15 @@
 from typing import Type
 
-from django.core.management import BaseCommand
 from django.db.migrations.autodetector import MigrationAutodetector
-from django.db.migrations.recorder import MigrationRecorder
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.ingestors_manager.models import IngestorConfig
+from api_app.management.commands.dumpplugin import Command as DumpPluginCommand
 from api_app.models import PythonConfig
 from api_app.pivots_manager.models import PivotConfig
+from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
-from api_app.management.commands.dumpplugin import Command as DumpPluginCommand
 
 
 class Command(DumpPluginCommand):
@@ -28,9 +27,9 @@ class Command(DumpPluginCommand):
                 VisualizerConfig.__name__,
                 IngestorConfig.__name__,
                 PivotConfig.__name__,
+                PlaybookConfig.__name__,
             ],
         )
-
 
     @property
     def migration_counter(self):
@@ -68,10 +67,9 @@ class Command(DumpPluginCommand):
             f"_{obj.snake_case_name}_{obj.name.lower()}.py"
         )
 
-
     def handle(self, *args, **options):
         config_class = options["plugin_class"]
         class_: Type[PythonConfig] = self.str_to_class[config_class]
         for name in class_.objects.values_list("name", flat=True):
             super().handle(plugin_name=name, plugin_class=config_class)
-            self.migration_counter +=1
+            self.migration_counter += 1

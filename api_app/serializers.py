@@ -53,6 +53,34 @@ from .visualizers_manager.models import VisualizerConfig
 logger = logging.getLogger(__name__)
 
 
+
+class CrontabScheduleSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = CrontabSchedule
+        fields = [
+            "minute",
+            "hour",
+            "day_of_week",
+            "day_of_month",
+            "month_of_year",
+        ]
+
+
+class PeriodicTaskSerializer(rfs.ModelSerializer):
+    crontab = CrontabScheduleSerializer(read_only=True)
+
+    class Meta:
+        model = PeriodicTask
+        fields = [
+            "crontab",
+            "name",
+            "task",
+            "kwargs",
+            "queue",
+            "enabled",
+        ]
+
+
 class TagSerializer(rfs.ModelSerializer):
     class Meta:
         model = Tag
@@ -1193,6 +1221,14 @@ class PythonModuleSerializer(rfs.ModelSerializer):
         model = PythonModule
         fields = ["module", "base_path"]
 
+class PythonModulSerializerComplete(rfs.ModelSerializer):
+    health_check_schedule = CrontabScheduleSerializer()
+    update_schedule = CrontabScheduleSerializer()
+    update_task = PeriodicTaskSerializer()
+
+    class Meta:
+        model = PythonModule
+        exclude = ["id"]
 
 class ParameterCompleteSerializer(rfs.ModelSerializer):
     python_module = PythonModuleSerializer(read_only=True)
@@ -1245,14 +1281,17 @@ class PythonConfigSerializer(AbstractConfigSerializer):
         return result
 
 
-class PythonConfigSerializerForMigration(PythonConfigSerializer):
-    python_module = PythonModuleSerializer(read_only=True)
+class AbstractConfigSerializerForMigration(AbstractConfigSerializer):
+    class Meta:
+        exclude = []
+
+
+class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
+    python_module = PythonModulSerializerComplete(read_only=True)
+    parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
         exclude = ["id"]
-
-    def to_representation(self, instance):
-        return super(PythonConfigSerializer, self).to_representation(instance)
 
 
 class AbstractReportSerializerInterface(rfs.ModelSerializer):
@@ -1374,30 +1413,3 @@ class AbstractReportSerializer(AbstractReportSerializerInterface):
         list_serializer_class = (
             AbstractReportSerializerInterface.Meta.list_serializer_class
         )
-
-
-class CrontabScheduleSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = CrontabSchedule
-        fields = [
-            "minute",
-            "hour",
-            "day_of_week",
-            "day_of_month",
-            "month_of_year",
-        ]
-
-
-class PeriodicTaskSerializer(rfs.ModelSerializer):
-    crontab = CrontabScheduleSerializer(read_only=True)
-
-    class Meta:
-        model = PeriodicTask
-        fields = [
-            "crontab",
-            "name",
-            "task",
-            "kwargs",
-            "queue",
-            "enabled",
-        ]

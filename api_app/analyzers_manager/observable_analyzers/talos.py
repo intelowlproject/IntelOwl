@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import datetime
 import logging
 import os
 
@@ -20,9 +21,8 @@ database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 class Talos(classes.ObservableAnalyzer):
     def run(self):
         result = {"found": False}
-        if not os.path.isfile(database_location):
-            if not self.update():
-                raise AnalyzerRunException("Failed extraction of talos db")
+        if not self.update():
+            raise AnalyzerRunException("Failed extraction of talos db")
 
         if not os.path.exists(database_location):
             raise AnalyzerRunException(
@@ -41,22 +41,27 @@ class Talos(classes.ObservableAnalyzer):
     @classmethod
     def update(cls) -> bool:
         try:
-            logger.info("starting download of db from talos")
-            url = "https://snort.org/downloads/ip-block-list"
-            r = requests.get(url)
-            r.raise_for_status()
+            if (not os.path.isfile(database_location)) or (
+                datetime.datetime.now().timestamp()
+                - os.path.getmtime(database_location)
+                > 86400
+            ):
+                logger.info("starting download of db from talos")
+                url = "https://snort.org/downloads/ip-block-list"
+                r = requests.get(url)
+                r.raise_for_status()
 
-            with open(database_location, "w", encoding="utf-8") as f:
-                f.write(r.content.decode())
+                with open(database_location, "w", encoding="utf-8") as f:
+                    f.write(r.content.decode())
 
-            if not os.path.exists(database_location):
-                return False
-            logger.info("ended download of db from talos")
-            return True
+                if not os.path.exists(database_location):
+                    return False
+                logger.info("ended download of db from talos")
+                return True
         except Exception as e:
             logger.exception(e)
 
-        return False
+        return True
 
     @classmethod
     def _monkeypatch(cls):

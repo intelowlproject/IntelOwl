@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import datetime
 import logging
 import os
 import re
@@ -21,7 +22,7 @@ database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 class Tor(classes.ObservableAnalyzer):
     def run(self):
         result = {"found": False}
-        if not os.path.isfile(database_location) and not self.update():
+        if not self.update():
             raise AnalyzerRunException("Failed extraction of tor db")
 
         if not os.path.exists(database_location):
@@ -41,24 +42,32 @@ class Tor(classes.ObservableAnalyzer):
     @classmethod
     def update(cls):
         try:
-            logger.info("starting download of db from tor project")
-            url = "https://check.torproject.org/exit-addresses"
-            r = requests.get(url)
-            r.raise_for_status()
+            if (not os.path.isfile(database_location)) or (
+                datetime.datetime.now().timestamp()
+                - os.path.getmtime(database_location)
+                > 86400
+            ):
+                logger.info("starting download of db from tor project")
+                url = "https://check.torproject.org/exit-addresses"
+                r = requests.get(url)
+                r.raise_for_status()
 
-            data_extracted = r.content.decode()
-            findings = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", data_extracted)
+                data_extracted = r.content.decode()
+                findings = re.findall(
+                    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", data_extracted
+                )
 
-            with open(database_location, "w", encoding="utf-8") as f:
-                for ip in findings:
-                    if ip:
-                        f.write(f"{ip}\n")
+                with open(database_location, "w", encoding="utf-8") as f:
+                    for ip in findings:
+                        if ip:
+                            f.write(f"{ip}\n")
 
-            if not os.path.exists(database_location):
-                return False
+                if not os.path.exists(database_location):
+                    return False
 
-            logger.info("ended download of db from tor project")
+                logger.info("ended download of db from tor project")
             return True
+
         except Exception as e:
             logger.exception(e)
 

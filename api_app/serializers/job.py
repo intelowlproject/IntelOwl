@@ -478,16 +478,17 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 owner=self.context["request"].user,
             )
             analysis.jobs.add(parent)
+            analysis.start_time = parent.received_request_time
         elif len(result) > 1:
             analysis = Analysis.objects.create(
                 name="Custom analysis", owner=self.context["request"].user
             )
             analysis.jobs.set(result)
+            analysis.start_time = now()
         else:
             return result
         analysis: Analysis
         analysis.name = analysis.name + f" #{analysis.id}"
-        analysis.start_time = parent.received_request_time
         analysis.status = analysis.Status.RUNNING.value
         analysis.for_organization = True
         analysis.save()

@@ -11,7 +11,6 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError

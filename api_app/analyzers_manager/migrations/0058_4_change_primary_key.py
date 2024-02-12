@@ -29,7 +29,7 @@ def migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
+        ("api_app", "0001_2_initial_squashed"),
         ("analyzers_manager", "0058_3_change_primary_key"),
     ]
 

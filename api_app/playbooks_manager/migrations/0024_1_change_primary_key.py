@@ -36,7 +36,7 @@ def migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0023_4_change_primary_key"),
-        ("pivots_manager", "0022_pivotreport_pivotreportsbisearch"),
+        ("pivots_manager", "0001_2_initial_squashed"),
         ("api_app", "0057_4_change_primary_key"),
     ]
 

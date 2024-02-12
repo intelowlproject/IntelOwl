@@ -14,6 +14,8 @@ from api_app.ingestors_manager.serializers import IngestorConfigSerializerForMig
 from api_app.models import PluginConfig, PythonConfig
 from api_app.pivots_manager.models import PivotConfig
 from api_app.pivots_manager.serializers import PivotConfigSerializerForMigration
+from api_app.playbooks_manager.models import PlaybookConfig
+from api_app.playbooks_manager.serializers import PlaybookConfigSerializerForMigration
 from api_app.serializers import (
     ParameterCompleteSerializer,
     PluginConfigCompleteSerializer,
@@ -39,6 +41,7 @@ class Command(BaseCommand):
                 VisualizerConfig.__name__,
                 IngestorConfig.__name__,
                 PivotConfig.__name__,
+                PlaybookConfig.__name__,
             ],
         )
         parser.add_argument(
@@ -53,21 +56,22 @@ class Command(BaseCommand):
         obj_data["model"] = f"{obj._meta.app_label}.{obj._meta.object_name}"
         params_data = []
         values_data = []
-        for parameter in obj.parameters.all():
-            params_data.append(ParameterCompleteSerializer(parameter).data)
-            try:
-                # default value
-                value = PluginConfig.objects.get(
-                    owner=None,
-                    for_organization=False,
-                    parameter=parameter,
-                    parameter__is_secret=False,
-                    **{f"{obj.snake_case_name}__pk": obj.pk},
-                )
-            except PluginConfig.DoesNotExist:
-                ...
-            else:
-                values_data.append(PluginConfigCompleteSerializer(value).data)
+        if hasattr(obj, "parameters"):
+            for parameter in obj.parameters.all():
+                params_data.append(ParameterCompleteSerializer(parameter).data)
+                try:
+                    # default value
+                    value = PluginConfig.objects.get(
+                        owner=None,
+                        for_organization=False,
+                        parameter=parameter,
+                        parameter__is_secret=False,
+                        **{f"{obj.snake_case_name}__pk": obj.pk},
+                    )
+                except PluginConfig.DoesNotExist:
+                    ...
+                else:
+                    values_data.append(PluginConfigCompleteSerializer(value).data)
         return obj_data, params_data, values_data
 
     @staticmethod
@@ -81,7 +85,7 @@ from django.db.models.fields.related_descriptors import (
 """
 
     @staticmethod
-    def _migrate_template():
+    def _migrate_template(obj_name):
         return """
 def _get_real_obj(Model, field, value):
     if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
@@ -117,34 +121,41 @@ def _create_object(Model, data):
         for field, value in mtm.items():
             attribute = getattr(o, field)
             attribute.set(value)
-    
-def migrate(apps, schema_editor):
+        return False
+    return True
+""" + """    
+def migrate_{0}(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")    
-    python_path = plugin.pop("model")
+    python_path = plugin_{0}.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    _create_object(Model, plugin)
-    for param in params:
-        _create_object(Parameter, param)
-    for value in values:
-        _create_object(PluginConfig, value)
+    exists = _create_object(Model, plugin)
+    if not exists:
+        for param in params_{0}:
+            _create_object(Parameter, param)
+        for value in values_{0}:
+            _create_object(PluginConfig, value)
 
-"""  # noqa
+""".format(  # noqa
+            obj_name
+        )
 
     @staticmethod
-    def _reverse_migrate_template():
+    def _reverse_migrate_template(obj_name):
         return """
-def reverse_migrate(apps, schema_editor):
-    python_path = plugin.pop("model")
+def reverse_migrate_{0}(apps, schema_editor):
+    python_path = plugin_{0}.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
-"""
+""".format(
+            obj_name
+        )
 
-    def _body_template(self, app):
+    def _get_body_template(self):
         return """
 
 class Migration(migrations.Migration):
-
+    atomic = False
     dependencies = [
         ('api_app', '{0}'),
         ('{1}', '{2}'),
@@ -152,11 +163,17 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            migrate, reverse_migrate
+            migrate_{3}, reverse_migrate_{3}
         )
     ]
-""".format(
-            self._get_last_migration("api_app"), app, self._get_last_migration(app)
+        """
+
+    def _body_template(self, app, obj_name):
+        return self._get_body_template().format(
+            self._get_last_migration("api_app"),
+            app,
+            self._get_last_migration(app),
+            obj_name,
         )
 
     @staticmethod
@@ -184,9 +201,9 @@ values = {3}
             str(json.loads(json.dumps(obj_data))),
             str(json.loads(json.dumps(param_data))),
             str(json.loads(json.dumps(values_data))),
-            self._migrate_template(),
-            self._reverse_migrate_template(),
-            self._body_template(app),
+            self._migrate_template(obj.name),
+            self._reverse_migrate_template(obj.name),
+            self._body_template(app, obj.name),
         )
 
     def _name_file(self, obj, app):
@@ -211,26 +228,42 @@ values = {3}
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
+    @property
+    def str_to_class(self):
+        return {
+            klass.__name__: klass
+            for klass in [
+                AnalyzerConfig,
+                ConnectorConfig,
+                VisualizerConfig,
+                IngestorConfig,
+                PivotConfig,
+                PlaybookConfig,
+            ]
+        }
+
+    @property
+    def str_to_serializer(self):
+        return {
+            AnalyzerConfig.__name__: AnalyzerConfigSerializerForMigration,
+            ConnectorConfig.__name__: ConnectorConfigSerializerForMigration,
+            VisualizerConfig.__name__: VisualizerConfigSerializerForMigration,
+            IngestorConfig.__name__: IngestorConfigSerializerForMigration,
+            PivotConfig.__name__: PivotConfigSerializerForMigration,
+            PlaybookConfig.__name__: PlaybookConfigSerializerForMigration,
+        }
+
     def handle(self, *args, **options):
         config_name = options["plugin_name"]
         config_class = options["plugin_class"]
+        class_ = self.str_to_class[config_class]
+        serializer_class = self.str_to_serializer[config_class]
 
-        class_, serializer_class = (
-            (AnalyzerConfig, AnalyzerConfigSerializerForMigration)
-            if config_class == AnalyzerConfig.__name__
-            else (ConnectorConfig, ConnectorConfigSerializerForMigration)
-            if config_class == ConnectorConfig.__name__
-            else (VisualizerConfig, VisualizerConfigSerializerForMigration)
-            if config_class == VisualizerConfig.__name__
-            else (IngestorConfig, IngestorConfigSerializerForMigration)
-            if config_class == IngestorConfig.__name__
-            else (PivotConfig, PivotConfigSerializerForMigration)
-        )
         obj: PythonConfig = class_.objects.get(name=config_name)
         app = obj._meta.app_label
         content = self._migration_file(obj, serializer_class, app)
-        name_file = self._name_file(obj, app)
-        self._save_file(name_file, content, app)
+        self.name_file = self._name_file(obj, app)
+        self._save_file(self.name_file, content, app)
         self.stdout.write(
-            self.style.SUCCESS(f"Migration {name_file} created with success")
+            self.style.SUCCESS(f"Migration {self.name_file} created with success")
         )

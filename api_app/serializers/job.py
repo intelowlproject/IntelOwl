@@ -11,6 +11,7 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
@@ -34,6 +35,39 @@ from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPer
 from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
+
+
+class CrontabScheduleSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = CrontabSchedule
+        fields = [
+            "minute",
+            "hour",
+            "day_of_week",
+            "day_of_month",
+            "month_of_year",
+        ]
+
+
+class PeriodicTaskSerializer(rfs.ModelSerializer):
+    crontab = CrontabScheduleSerializer(read_only=True)
+
+    class Meta:
+        model = PeriodicTask
+        fields = [
+            "crontab",
+            "name",
+            "task",
+            "kwargs",
+            "queue",
+            "enabled",
+        ]
+
+
+class TagSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = rfs.ALL_FIELDS
 
 
 class JobRecentScanSerializer(rfs.ModelSerializer):
@@ -168,6 +202,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def validate(self, attrs: dict) -> dict:
         if attrs.get("playbook_requested"):
             self.set_default_value_from_playbook(attrs)
+        # this TLP validation must be after the Playbook checks to avoid
+        # to overwrite the Playbook default TLP
         if "tlp" not in attrs:
             attrs["tlp"] = TLP.CLEAR.value
         if "scan_mode" not in attrs:
@@ -677,10 +713,14 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
 
     observables = rfs.ListField(required=True)
 
+    def update(self, instance, validated_data):
+        raise NotImplementedError("This serializer does not support update().")
+
     def to_internal_value(self, data):
         ret = []
         errors = []
         observables = data.pop("observables", [])
+        # TODO we could change the signature, but this means change frontend + clients
         for _, name in observables:
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future

@@ -305,6 +305,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
+* `Validin`:[Validin](https://app.validin.com/) investigates historic and current data describing the structure and composition of the internet.
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -354,7 +355,7 @@ The following is the list of the available connectors. You can also navigate the
 
 ### Pivots
 
-With Intel v5.2.0 we introduced the `Pivot` Plugin.
+With IntelOwl v5.2.0 we introduced the `Pivot` Plugin.
 
 Pivots are designed to create a job from another job. This plugin allows the user to set certain conditions that trigger the execution of one or more subsequent jobs, strictly connected to the first one.
 
@@ -388,7 +389,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 
 ### Ingestors
 
-With Intel v5.1.0 we introduced the `Ingestor` Plugin.
+With IntelOwl v5.1.0 we introduced the `Ingestor` Plugin.
 
 Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.

@@ -23,7 +23,7 @@ ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 ARG PYELASTIC_VERSION=7.4.1
-ARG PYCTI_VERSION=5.10.0
+ARG PYCTI_VERSION=5.12.29
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \

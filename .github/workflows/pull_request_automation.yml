@@ -114,19 +114,6 @@ jobs:
         run: |
           docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
 
-      - name: "Coverage: generate xml and transfer from docker container to host"
-        run: |
-          docker exec intelowl_uwsgi coverage combine
-          docker exec intelowl_uwsgi coverage xml
-          docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
-
-      - name: "Upload coverage to Codecov"
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: true
-          verbose: true
-
   frontend-tests:
     runs-on: ubuntu-latest
     needs: ["detect-changes"]

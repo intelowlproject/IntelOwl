@@ -294,9 +294,9 @@ def create_caches(user_pk: int):
     from api_app.ingestors_manager.serializers import IngestorConfigSerializer
     from api_app.pivots_manager.models import PivotConfig
     from api_app.pivots_manager.serializers import PivotConfigSerializer
+    from api_app.serializers.plugin import PythonConfigListSerializer
     from api_app.visualizers_manager.models import VisualizerConfig
     from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
-    from api_app.serializers.plugin import PythonConfigListSerializer
 
     for python_config_class, serializer_class in [
         (AnalyzerConfig, AnalyzerConfigSerializer),

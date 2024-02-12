@@ -211,7 +211,7 @@ function AppHeader() {
   );
 
   return (
-    <header className="fixed-top">
+    <header className="sticky-top">
       {/* top loading bar */}
       <AxiosLoadingBar axiosInstance={axios} />
       {/* nav bar */}

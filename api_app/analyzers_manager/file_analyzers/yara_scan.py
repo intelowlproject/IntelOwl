@@ -107,7 +107,6 @@ class YaraRepo:
 
     def _update_zip(self):
         logger.info(f"About to download zip file from {self.url} to {self.directory}")
-        logger.info(" ", self.url, self.directory)
         response = requests.get(self.url, stream=True)
         try:
             response.raise_for_status()

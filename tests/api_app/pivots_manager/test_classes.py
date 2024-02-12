@@ -18,7 +18,7 @@ class PivotTestCase(CustomTestCase):
 
         subclasses = Pivot.all_subclasses()
         for subclass in subclasses:
-            print("\n" f"Testing Connector {subclass.__name__}")
+            print("\n" f"Testing Pivot {subclass.__name__}")
             configs = PivotConfig.objects.filter(python_module=subclass.python_module)
             for config in configs:
                 timeout_seconds = config.soft_time_limit

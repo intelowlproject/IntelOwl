@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-from ..views import PluginActionViewSet, PythonConfigViewSet
+from ..views import PythonConfigViewSet, PythonReportActionViewSet
 from .filters import AnalyzerConfigFilter
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
@@ -21,7 +21,7 @@ class AnalyzerConfigViewSet(PythonConfigViewSet):
     filterset_class = AnalyzerConfigFilter
 
 
-class AnalyzerActionViewSet(PluginActionViewSet):
+class AnalyzerActionViewSet(PythonReportActionViewSet):
     @classmethod
     @property
     def report_model(cls):

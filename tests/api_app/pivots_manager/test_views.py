@@ -15,7 +15,7 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     def model_class(cls) -> Type[PivotMap]:
         return PivotMap
 
-    def get_plugin(self):
+    def get_object(self):
         return self.model_class.objects.order_by("?").first().pk
 
     def test_get(self):

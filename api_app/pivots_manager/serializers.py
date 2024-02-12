@@ -4,11 +4,13 @@ from rest_framework.exceptions import ValidationError
 from api_app.models import Job
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import (
-    AbstractReportBISerializer,
-    AbstractReportSerializer,
+from api_app.serializers.plugin import (
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
+)
+from api_app.serializers.report import (
+    AbstractReportBISerializer,
+    AbstractReportSerializer,
 )
 
 

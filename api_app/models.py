@@ -12,6 +12,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
 from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
+from treebeard.mp_tree import MP_Node
 
 from api_app.interfaces import OwnershipAbstractModel
 
@@ -207,7 +208,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Job(models.Model):
+class Job(MP_Node):
     objects = JobQuerySet.as_manager()
 
     class Meta:
@@ -230,7 +231,14 @@ class Job(models.Model):
     # constants
     TLP = TLP
     Status = Status
-
+    analysis = models.ForeignKey(
+        "analyses_manager.Analysis",
+        on_delete=models.PROTECT,
+        related_name="jobs",
+        null=True,
+        blank=True,
+        default=None,
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -426,6 +434,7 @@ class Job(models.Model):
                 self.status = self.Status.REPORTED_WITH_FAILS
 
         self.finished_analysis_time = get_now()
+
         logger.info(f"{self.__repr__()} setting status to {self.status}")
         self.save(
             update_fields=[
@@ -434,6 +443,9 @@ class Job(models.Model):
                 "finished_analysis_time",
             ]
         )
+        # we update the status of the analysis
+        if self.analysis:
+            self.analysis.set_correct_status(save=True)
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
@@ -1128,7 +1140,7 @@ class PythonConfig(AbstractConfig):
             cache.delete(key)
 
     def refresh_cache_keys(self, user: User = None):
-        from api_app.serializers import PythonListConfigSerializer
+        from api_app.serializers.plugin import PythonConfigListSerializer
 
         base_key = (
             f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
@@ -1137,12 +1149,12 @@ class PythonConfig(AbstractConfig):
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
         if user:
-            PythonListConfigSerializer(
+            PythonConfigListSerializer(
                 child=self.serializer_class()
             ).to_representation_single_plugin(self, user)
         else:
             for generic_user in User.objects.exclude(email=""):
-                PythonListConfigSerializer(
+                PythonConfigListSerializer(
                     child=self.serializer_class()
                 ).to_representation_single_plugin(self, generic_user)
 

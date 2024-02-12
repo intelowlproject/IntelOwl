@@ -11,11 +11,9 @@ from api_app.models import Tag
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.fields import DayDurationField
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import (
-    AbstractConfigSerializerForMigration,
-    ModelWithOwnershipSerializer,
-    TagSerializer,
-)
+from api_app.serializers import ModelWithOwnershipSerializer
+from api_app.serializers.job import TagSerializer
+from api_app.serializers.plugin import AbstractConfigSerializerForMigration
 
 
 class PlaybookConfigSerializerForMigration(AbstractConfigSerializerForMigration):

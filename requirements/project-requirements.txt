@@ -12,6 +12,7 @@ django-iam-dbauth==0.1.4
 django-prettyjson==0.4.1
 django-silk==5.1.0
 django-elasticsearch-dsl==8.0
+django-treebeard==4.7
 
 jsonschema==4.21.1
 # django rest framework libs

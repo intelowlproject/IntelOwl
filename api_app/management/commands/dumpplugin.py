@@ -16,7 +16,7 @@ from api_app.pivots_manager.models import PivotConfig
 from api_app.pivots_manager.serializers import PivotConfigSerializerForMigration
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.playbooks_manager.serializers import PlaybookConfigSerializerForMigration
-from api_app.serializers import (
+from api_app.serializers.plugin import (
     ParameterCompleteSerializer,
     PluginConfigCompleteSerializer,
 )

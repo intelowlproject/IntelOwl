@@ -3,7 +3,7 @@
 
 import logging
 
-from api_app.views import PluginActionViewSet, PythonConfigViewSet
+from api_app.views import PythonConfigViewSet, PythonReportActionViewSet
 from api_app.visualizers_manager.models import VisualizerReport
 from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
@@ -19,7 +19,7 @@ class VisualizerConfigViewSet(PythonConfigViewSet):
     serializer_class = VisualizerConfigSerializer
 
 
-class VisualizerActionViewSet(PluginActionViewSet):
+class VisualizerActionViewSet(PythonReportActionViewSet):
     @classmethod
     @property
     def report_model(cls):

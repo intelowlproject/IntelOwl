@@ -15,7 +15,7 @@ def migrate_python_module_pivot(apps, schema_editor):
         is_secret=False,
         required=True,
         defaults={
-            "description":"Dotted path to the field",
+            "description": "Dotted path to the field",
         },
     )
 

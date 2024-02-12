@@ -213,7 +213,7 @@ class ViewSetTestCaseMixin:
         self.assertEqual(response.status_code, 200, response.json())
 
     def test_get(self):
-        plugin = self.get_plugin()
+        plugin = self.get_object()
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 200, response.json())
 
@@ -229,11 +229,11 @@ class ViewSetTestCaseMixin:
         response = self.client.get(f"{self.URL}/NON_EXISTENT")
         self.assertEqual(response.status_code, 404, response.json())
 
-    def get_plugin(self):
+    def get_object(self):
         return self.model_class.objects.order_by("?").first().name
 
     def test_update(self):
-        plugin = self.get_plugin()
+        plugin = self.get_object()
         response = self.client.patch(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 405, response.json())
         self.client.force_authenticate(self.superuser)
@@ -241,7 +241,7 @@ class ViewSetTestCaseMixin:
         self.assertEqual(response.status_code, 405, response.json())
 
     def test_delete(self):
-        plugin = self.get_plugin()
+        plugin = self.get_object()
         response = self.client.delete(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 405, response.json())
         self.client.force_authenticate(self.superuser)

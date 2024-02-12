@@ -8,7 +8,7 @@ from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuer
 from api_app.queryset import PythonConfigQuerySet
 
 if typing.TYPE_CHECKING:
-    from api_app.serializers import PythonConfigSerializer
+    from api_app.serializers.plugin import PythonConfigSerializer
 
 from django.db import models
 from django.utils.functional import cached_property
@@ -47,10 +47,10 @@ class PivotMap(models.Model):
         default=None,
         null=True,
     )
-    ending_job = models.ForeignKey(
+    ending_job = models.OneToOneField(
         Job,
         on_delete=models.CASCADE,
-        related_name="pivot_parents",
+        related_name="pivot_parent",
         editable=False,
     )
 

@@ -6,7 +6,6 @@ from rest_framework.fields import Field
 from rest_framework.serializers import ModelSerializer
 
 from api_app.interfaces import OwnershipAbstractModel
-from api_app.models import Tag
 from certego_saas.apps.organization.organization import Organization
 
 
@@ -95,9 +94,3 @@ class ModelWithOwnershipSerializer(rfs.ModelSerializer):
         result = super().to_representation(instance)
         result["owner"] = instance.owner.username if instance.owner else None
         return result
-
-
-class TagSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = rfs.ALL_FIELDS

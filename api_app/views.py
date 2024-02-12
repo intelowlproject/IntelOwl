@@ -49,7 +49,6 @@ from .models import (
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
-from .serializers import TagSerializer
 from .serializers.job import (
     CommentSerializer,
     FileJobSerializer,
@@ -59,6 +58,7 @@ from .serializers.job import (
     JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
+    TagSerializer,
 )
 from .serializers.plugin import PluginConfigSerializer, PythonConfigSerializer
 

@@ -27,13 +27,19 @@ from api_app.defaults import default_runtime
 from api_app.helpers import calculate_md5, gen_random_colorhex
 from api_app.models import Comment, Job, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import AbstractBIInterface, TagSerializer
+from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
+
+
+class TagSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = rfs.ALL_FIELDS
 
 
 class JobRecentScanSerializer(rfs.ModelSerializer):

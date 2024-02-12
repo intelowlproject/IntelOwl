@@ -3,11 +3,14 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import json
 import logging
 import os
+import uuid
 from typing import Dict
 
 from celery import Celery
+from celery.schedules import crontab
 from django.conf import settings
 from kombu import Queue
 from kombu.common import Broadcast
@@ -122,6 +125,41 @@ app.conf.update(
     task_always_eager=settings.STAGE_CI,
 )
 
+app.conf.beat_schedule = {
+    "send_elastic_bi": {
+        "task": "intel_owl.tasks.send_bi_to_elastic",
+        "schedule": crontab(minute=12),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
+    "remove_old_jobs": {
+        "task": "intel_owl.tasks.remove_old_jobs",
+        "schedule": crontab(minute=10, hour=2),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
+    "check_stuck_analysis": {
+        "task": "intel_owl.tasks.check_stuck_analysis",
+        "schedule": crontab(minute="*/5"),
+        "kwargs": json.dumps({"check_pending": True}),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
+    "update_notifications_with_releases": {
+        "task": "intel_owl.tasks.update_notifications_with_releases",
+        "schedule": crontab(minute=0, hour=22),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
+}
 app.autodiscover_tasks()
 
 

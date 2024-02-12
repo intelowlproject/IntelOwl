@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
         ("contenttypes", "0002_remove_content_type_name"),
         ("django_celery_beat", "0018_improve_crontab_helptext"),
         ("certego_saas_organization", "0002_membership_is_admin"),
-        ("api_app", "0054_job_jobbisearch"),
+        ("api_app", "0001_2_initial_squashed"),
     ]
 
     operations = [

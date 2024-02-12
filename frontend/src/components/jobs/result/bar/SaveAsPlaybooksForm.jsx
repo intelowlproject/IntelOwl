@@ -140,7 +140,6 @@ export function SaveAsPlaybookButton({ job }) {
   return (
     <PopupFormButton
       id="saveasplaybook"
-      className="me-2"
       Form={SaveAsPlaybookForm}
       Icon={SaveAsPlaybookIcon}
       popOverPlacement="bottom"

@@ -12,7 +12,20 @@ sleep 3
 # The customization of the parameters is not applied until the migration is done
 python manage.py makemigrations durin
 python manage.py makemigrations rest_email_auth
+python manage.py migrate api_app --fake-initial
+python manage.py migrate analyzers_manager --fake-initial
+python manage.py migrate analyzers_manager --fake-initial
+python manage.py migrate connectors_manager --fake-initial
+python manage.py migrate visualizers_manager --fake-initial
+python manage.py migrate ingestors_manager --fake-initial
+python manage.py migrate pivots_manager --fake-initial
+python manage.py migrate playbooks_manager --fake-initial
 python manage.py migrate
+if ! python manage.py migrate --check
+ then
+    echo "Issue with migration exiting"
+    exit 1
+fi
 python manage.py createcachetable
 # Collect static files
 python manage.py collectstatic --noinput

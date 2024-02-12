@@ -14,7 +14,7 @@ from api_app.ingestors_manager.serializers import IngestorConfigSerializerForMig
 from api_app.models import PluginConfig, PythonConfig
 from api_app.pivots_manager.models import PivotConfig
 from api_app.pivots_manager.serializers import PivotConfigSerializerForMigration
-from api_app.serializers import (
+from api_app.serializers.plugin import (
     ParameterCompleteSerializer,
     PluginConfigCompleteSerializer,
 )

@@ -37,39 +37,6 @@ from intel_owl.celery import get_queue_name
 logger = logging.getLogger(__name__)
 
 
-class CrontabScheduleSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = CrontabSchedule
-        fields = [
-            "minute",
-            "hour",
-            "day_of_week",
-            "day_of_month",
-            "month_of_year",
-        ]
-
-
-class PeriodicTaskSerializer(rfs.ModelSerializer):
-    crontab = CrontabScheduleSerializer(read_only=True)
-
-    class Meta:
-        model = PeriodicTask
-        fields = [
-            "crontab",
-            "name",
-            "task",
-            "kwargs",
-            "queue",
-            "enabled",
-        ]
-
-
-class TagSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = rfs.ALL_FIELDS
-
-
 class JobRecentScanSerializer(rfs.ModelSerializer):
     playbook = rfs.CharField(
         source="playbook_to_execute.name", allow_null=True, read_only=True

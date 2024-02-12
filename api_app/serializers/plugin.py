@@ -12,6 +12,7 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.models import Parameter, PluginConfig, PythonConfig, PythonModule
 from api_app.serializers import ModelWithOwnershipSerializer
+from api_app.serializers.celery import CrontabScheduleSerializer, PeriodicTaskSerializer
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.user.models import User
 
@@ -218,6 +219,16 @@ class PythonConfigListSerializer(rfs.ListSerializer):
             yield self.to_representation_single_plugin(plugin, user)
 
 
+class PythonModulSerializerComplete(rfs.ModelSerializer):
+    health_check_schedule = CrontabScheduleSerializer()
+    update_schedule = CrontabScheduleSerializer()
+    update_task = PeriodicTaskSerializer()
+
+    class Meta:
+        model = PythonModule
+        exclude = ["id"]
+
+
 class PythonModuleSerializer(rfs.ModelSerializer):
     class Meta:
         model = PythonModule
@@ -270,11 +281,17 @@ class PythonConfigSerializer(AbstractConfigSerializer):
         return result
 
 
-class PythonConfigSerializerForMigration(PythonConfigSerializer):
-    python_module = PythonModuleSerializer(read_only=True)
+class AbstractConfigSerializerForMigration(AbstractConfigSerializer):
+    class Meta:
+        exclude = []
+
+
+class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
+    python_module = PythonModulSerializerComplete(read_only=True)
+    parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
         exclude = ["id"]
 
     def to_representation(self, instance):
-        return super(PythonConfigSerializer, self).to_representation(instance)
+        return super().to_representation(instance)

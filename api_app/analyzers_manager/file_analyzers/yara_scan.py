@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import dataclasses
+import datetime
 import io
 import logging
 import os
@@ -90,15 +91,23 @@ class YaraRepo:
         return self._directory
 
     def update(self):
-        logger.info(f"Starting update of {self.url}")
-        if self.is_zip():
-            # private url not supported at the moment for private
-            self._update_zip()
-        else:
-            self._update_git()
+        try:
+            if (not os.path.exists(self.directory)) or (
+                datetime.datetime.now().timestamp() - os.path.getmtime(self.directory)
+                > 86400
+            ):
+                logger.info(f"Starting update of {self.url}")
+                if self.is_zip():
+                    # private url not supported at the moment for private
+                    self._update_zip()
+                else:
+                    self._update_git()
+        except Exception as e:
+            logger.exception(e)
 
     def _update_zip(self):
         logger.info(f"About to download zip file from {self.url} to {self.directory}")
+        logger.info(" ", self.url, self.directory)
         response = requests.get(self.url, stream=True)
         try:
             response.raise_for_status()
@@ -181,8 +190,7 @@ class YaraRepo:
     @property
     def rules(self) -> List[yara.Rules]:
         if not self._rules:
-            if not self.directory.exists():
-                self.update()
+            self.update()
             for compiled_path in self.compiled_paths:
                 if compiled_path.exists():
                     self._rules.append(yara.load(str(compiled_path)))
@@ -424,6 +432,7 @@ class YaraScan(FileAnalyzer):
         logger.info(f"Urls are {storage}")
         for repo in storage.repos:
             logger.info(f"Going to update {repo.url} yara repo")
+
             repo.update()
             repo.compile()
         logger.info("Finished updating yara rules")

@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-from ..views import PythonReportActionViewSet, PythonConfigViewSet
+from ..views import PythonConfigViewSet, PythonReportActionViewSet
 from .filters import AnalyzerConfigFilter
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer

@@ -3,7 +3,7 @@
 
 import logging
 
-from ..views import PythonReportActionViewSet, PythonConfigViewSet
+from ..views import PythonConfigViewSet, PythonReportActionViewSet
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 

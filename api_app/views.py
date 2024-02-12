@@ -47,10 +47,7 @@ from .models import (
     PythonConfig,
     Tag,
 )
-from .permissions import (
-    IsObjectAdminPermission,
-    IsObjectOwnerPermission,
-)
+from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
 from .serializers import TagSerializer
 from .serializers.job import (

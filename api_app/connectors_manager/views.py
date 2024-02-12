@@ -3,7 +3,7 @@
 
 import logging
 
-from ..views import PluginActionViewSet, PythonConfigViewSet
+from ..views import PythonReportActionViewSet, PythonConfigViewSet
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 
@@ -20,7 +20,7 @@ class ConnectorConfigViewSet(PythonConfigViewSet):
     serializer_class = ConnectorConfigSerializer
 
 
-class ConnectorActionViewSet(PluginActionViewSet):
+class ConnectorActionViewSet(PythonReportActionViewSet):
     @classmethod
     @property
     def report_model(cls):

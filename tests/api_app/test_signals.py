@@ -2,7 +2,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.choices import PythonModuleBasePaths
 from api_app.models import Parameter, PythonModule
-from api_app.serializers import PythonListConfigSerializer
+from api_app.serializers.plugin import PythonConfigListSerializer
 from tests import CustomTestCase
 
 
@@ -21,12 +21,12 @@ class PreDeleteParameterTestCase(CustomTestCase):
             is_secret=False,
             required=False,
         )
-        data = PythonListConfigSerializer(
+        data = PythonConfigListSerializer(
             child=AnalyzerConfigSerializer()
         ).to_representation_single_plugin(ac, self.user)
         self.assertIn("test", dict(data)["params"])
         new_param.delete()
-        data = PythonListConfigSerializer(
+        data = PythonConfigListSerializer(
             child=AnalyzerConfigSerializer()
         ).to_representation_single_plugin(ac, self.user)
         self.assertNotIn("test", dict(data)["params"])

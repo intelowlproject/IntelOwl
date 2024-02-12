@@ -18,6 +18,7 @@ from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
 
 from api_app.choices import Status
+from api_app.serializers.plugin import PythonConfigListSerializer
 from intel_owl import secrets
 from intel_owl.celery import app, get_queue_name
 
@@ -294,7 +295,6 @@ def create_caches(user_pk: int):
     from api_app.ingestors_manager.serializers import IngestorConfigSerializer
     from api_app.pivots_manager.models import PivotConfig
     from api_app.pivots_manager.serializers import PivotConfigSerializer
-    from api_app.serializers import PythonListConfigSerializer
     from api_app.visualizers_manager.models import VisualizerConfig
     from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
@@ -306,7 +306,7 @@ def create_caches(user_pk: int):
         (IngestorConfig, IngestorConfigSerializer),
     ]:
         for plugin in python_config_class.objects.all():
-            PythonListConfigSerializer(
+            PythonConfigListSerializer(
                 child=serializer_class()
             ).to_representation_single_plugin(plugin, user)
 

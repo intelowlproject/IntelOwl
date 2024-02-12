@@ -49,7 +49,6 @@ from .models import (
 )
 from .permissions import (
     IsObjectAdminPermission,
-    IsObjectOwnerOrSameOrgPermission,
     IsObjectOwnerPermission,
 )
 from .pivots_manager.models import PivotConfig
@@ -680,9 +679,9 @@ def plugin_state_viewer(request):
     return Response(result)
 
 
-class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
+class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     permission_classes = [
-        IsObjectOwnerOrSameOrgPermission,
+        IsObjectUserOrSameOrgPermission,
     ]
 
     @classmethod

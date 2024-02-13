@@ -382,6 +382,21 @@ class JobListSerializer(_AbstractJobViewSerializer):
         )
 
     pivots_to_execute = rfs.SerializerMethodField(read_only=True)
+    analyzers_to_execute = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    connectors_to_execute = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    visualizers_to_execute = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    analyzers_requested = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    connectors_requested = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
 
     def get_pivots_to_execute(self, obj: Job):
         return obj.pivots_to_execute.all().values_list("name", flat=True)

@@ -51,6 +51,8 @@ def migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
+        ("pivots_manager", "0025_alter_pivotmap_ending_job"),
+        ("analyses_manager", "0001_initial"),
     ]
 
     operations = [
@@ -82,5 +84,11 @@ class Migration(migrations.Migration):
                 related_name="jobs",
                 to="analyses_manager.analysis",
             ),
+        ),
+        migrations.RunPython(migrate, migrations.RunPython.noop),
+        migrations.AlterField(
+            model_name="job",
+            name="path",
+            field=models.CharField(max_length=255, unique=True),
         ),
     ]

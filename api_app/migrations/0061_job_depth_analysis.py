@@ -50,7 +50,7 @@ def migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
+        ("api_app", "0060_job_depth_job_numchild_job_path"),
         ("pivots_manager", "0025_alter_pivotmap_ending_job"),
         ("analyses_manager", "0001_initial"),
     ]

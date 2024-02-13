@@ -11,8 +11,10 @@ import zipfile
 from re import sub
 from typing import Dict, List
 
+import olefile
 from defusedxml.ElementTree import fromstring
 from oletools import mraptor
+from oletools.common.clsid import KNOWN_CLSIDS
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
 
@@ -131,6 +133,7 @@ class DocInfo(FileAnalyzer):
                 self.vbaparser.close()
 
         results["olevba"] = self.olevba_results
+        results["cve"] = self.analyze_for_cve()
         if self.file_mimetype != MimeTypes.ONE_NOTE.value:
             results["msodde"] = self.analyze_msodde()
         if self.file_mimetype in [
@@ -167,6 +170,16 @@ class DocInfo(FileAnalyzer):
                         target = target.strip().lower()
                         hits += re.findall(r"mhtml:(https?://.*?)!", target)
         return hits
+
+    def analyze_for_cve(self):
+        cve = dict()
+        ole = olefile.OleFileIO(self.filename)
+        for entry in sorted(ole.listdir(storages=True)):
+            clsid = ole.getclsid(entry)
+            if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
+                if "CVE" in clsid_text:
+                    cve[clsid] = clsid_text
+        return cve
 
     def analyze_msodde(self):
         try:

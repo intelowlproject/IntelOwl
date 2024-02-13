@@ -85,8 +85,9 @@ from django.db.models.fields.related_descriptors import (
 """
 
     @staticmethod
-    def _migrate_template(obj_name):
-        return """
+    def _migrate_template():
+        return (
+            """
 def _get_real_obj(Model, field, value):
     if type(getattr(Model, field)) in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor] and value:
         other_model = getattr(Model, field).get_queryset().model
@@ -123,33 +124,31 @@ def _create_object(Model, data):
             attribute.set(value)
         return False
     return True
-""" + """    
-def migrate_{0}(apps, schema_editor):
+"""
+            + """    
+def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")    
-    python_path = plugin_{0}.pop("model")
+    python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     exists = _create_object(Model, plugin)
     if not exists:
-        for param in params_{0}:
+        for param in params:
             _create_object(Parameter, param)
-        for value in values_{0}:
+        for value in values:
             _create_object(PluginConfig, value)
 
-""".format(  # noqa
-            obj_name
+"""
         )
 
     @staticmethod
-    def _reverse_migrate_template(obj_name):
+    def _reverse_migrate_template():
         return """
-def reverse_migrate_{0}(apps, schema_editor):
+def reverse_migrate(apps, schema_editor):
     python_path = plugin_{0}.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
-""".format(
-            obj_name
-        )
+"""
 
     def _get_body_template(self):
         return """
@@ -201,8 +200,8 @@ values = {3}
             str(json.loads(json.dumps(obj_data))),
             str(json.loads(json.dumps(param_data))),
             str(json.loads(json.dumps(values_data))),
-            self._migrate_template(obj.name),
-            self._reverse_migrate_template(obj.name),
+            self._migrate_template(),
+            self._reverse_migrate_template(),
             self._body_template(app, obj.name),
         )
 

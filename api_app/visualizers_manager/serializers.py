@@ -24,6 +24,10 @@ class VisualizerConfigSerializer(PythonConfigSerializer):
 
 
 class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration):
+    playbooks = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), slug_field="name"
+    )
+
     class Meta:
         model = VisualizerConfig
         exclude = PythonConfigSerializerForMigration.Meta.exclude

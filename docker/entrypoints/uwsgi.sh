@@ -12,6 +12,7 @@ sleep 3
 # The customization of the parameters is not applied until the migration is done
 python manage.py makemigrations durin
 python manage.py makemigrations rest_email_auth
+# fake-initial does not fake the migration if the table does not exist
 python manage.py migrate api_app --fake-initial
 python manage.py migrate analyzers_manager --fake-initial
 python manage.py migrate analyzers_manager --fake-initial

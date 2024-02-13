@@ -502,7 +502,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
 
     def validate(self, attrs: dict) -> dict:
         # filter requests with more elements than this threshold
-        max_element_per_request_number = 2
+        max_element_per_request_number = 200
         if len(attrs) > max_element_per_request_number:
             raise ValidationError(
                 {

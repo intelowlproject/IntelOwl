@@ -245,6 +245,11 @@ class ParameterCompleteSerializer(rfs.ModelSerializer):
 
 class PluginConfigCompleteSerializer(rfs.ModelSerializer):
     parameter = ParameterCompleteSerializer(read_only=True)
+    analyzer_config = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    connector_config = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    visualizer_config = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    ingestor_config = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    pivot_config = rfs.SlugRelatedField(read_only=True, slug_field="name")
 
     class Meta:
         model = PluginConfig

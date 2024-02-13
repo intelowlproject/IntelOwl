@@ -162,7 +162,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            migrate_{3}, reverse_migrate_{3}
+            migrate, reverse_migrate
         )
     ]
         """
@@ -172,7 +172,6 @@ class Migration(migrations.Migration):
             self._get_last_migration("api_app"),
             app,
             self._get_last_migration(app),
-            obj_name,
         )
 
     @staticmethod

@@ -68,8 +68,6 @@ import {
 } from "../../utils/observables";
 import { SpinnerIcon } from "../common/SpinnerIcon";
 
-const ANALYZABLE_ELEMENT_THRESHOLD = 200;
-
 function DangerErrorMessage(fieldName) {
   return (
     <ErrorMessage
@@ -155,19 +153,13 @@ export default function ScanForm() {
           (values.files.length === 1 && values.files[0] === "")
         ) {
           errors.files = "required";
-        } else if (values.files?.length > ANALYZABLE_ELEMENT_THRESHOLD) {
-          errors.files = `maximum number of files in a single run is ${ANALYZABLE_ELEMENT_THRESHOLD}`;
         }
-      } else {
-        const observableNumber = [...new Set(values.observable_names)].filter(
-          (observable) => observable.length,
-        ).length;
-        if (observableNumber === 0) {
-          // we cannot return a list of errors (one for each observable), or isValid doesn't work
-          errors.observable_names = "observable(s) are required";
-        } else if (observableNumber > ANALYZABLE_ELEMENT_THRESHOLD) {
-          errors.observable_names = `maximum number of observables in a single run is ${ANALYZABLE_ELEMENT_THRESHOLD}`;
-        }
+      } else if (
+        values.observable_names.filter((observable) => observable.length)
+          .length === 0
+      ) {
+        // we cannot return a list of errors (one for each observable), or isValid doesn't work
+        errors.observable_names = "observable(s) are required";
       }
 
       // check playbook or analyzer selections based on the user selection

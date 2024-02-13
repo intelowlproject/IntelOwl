@@ -17,6 +17,13 @@ In some systems you could find pre-installed older versions. Please check this a
 </ul>
 </div>
 
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+The `start` script requires a `bash` version > 4 to run.
+
+Note that macOS is shipped with an older version of `bash`. Please ensure to upgrade before running the script. 
+</div>
+
 ## TL;DR
 Obviously we strongly suggest reading through all the page to configure IntelOwl in the most appropriate way.
 

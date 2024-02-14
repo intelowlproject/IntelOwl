@@ -184,7 +184,7 @@ class DocInfo(FileAnalyzer):
                         {
                             "clsid": clsid,
                             "info": clsid_text,
-                            "CVEs": [m for m in re.findall(pattern, clsid_text)],
+                            "CVEs": list(re.findall(pattern, clsid_text)),
                         }
                     )
         return results

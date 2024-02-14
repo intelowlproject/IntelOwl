@@ -179,27 +179,24 @@ class DocInfo(FileAnalyzer):
         for entry in sorted(ole.listdir(storages=True)):
             clsid = ole.getclsid(entry)
             if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
-                if "CVE" in clsid_text.lower():
-                    if matches := re.findall(pattern, clsid_text):
-                        for match in matches:
-                            if match in cve:
-                                if clsid in cve[match]:
-                                    cve[match][clsid].append(clsid_text)
-                                    cve[match][clsid] = list(
-                                        set(cve[match][clsid])
-                                    )  # uniq
-                                else:
-                                    cve[match][clsid] = [clsid_text]
+                if matches := re.findall(pattern, clsid_text):
+                    for match in matches:
+                        if match in cve:
+                            if clsid in cve[match]:
+                                cve[match][clsid].append(clsid_text)
+                                cve[match][clsid] = list(set(cve[match][clsid]))  # uniq
                             else:
-                                cve[match] = {clsid: [clsid_text]}
-                    else:
-                        if clsid in cve["id_not_present"]:
-                            cve["id_not_present"][clsid].append(clsid_text)
-                            cve["id_not_present"][clsid] = list(
-                                set(cve["id_not_present"][clsid])
-                            )  # uniq
+                                cve[match][clsid] = [clsid_text]
                         else:
-                            cve["id_not_present"][clsid] = [clsid_text]
+                            cve[match] = {clsid: [clsid_text]}
+                if "cve" in re.sub(pattern, "", clsid_text).lower():
+                    if clsid in cve["id_not_present"]:
+                        cve["id_not_present"][clsid].append(clsid_text)
+                        cve["id_not_present"][clsid] = list(
+                            set(cve["id_not_present"][clsid])
+                        )  # uniq
+                    else:
+                        cve["id_not_present"][clsid] = [clsid_text]
         return cve
 
     def analyze_msodde(self):

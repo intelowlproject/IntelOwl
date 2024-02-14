@@ -181,9 +181,13 @@ class DocInfo(FileAnalyzer):
                 if matches := re.findall(pattern, clsid_text):
                     for match in matches:
                         if match in cve:
-                            cve[match].append({"clsid": clsid, "info": clsid_text})
+                            if clsid in cve[match]:
+                                cve[match][clsid].append(clsid_text)
+                                cve[match][clsid] = list(set(cve[match][clsid]))  # uniq
+                            else:
+                                cve[match][clsid] = [clsid_text]
                         else:
-                            cve[match] = [{"clsid": clsid, "info": clsid_text}]
+                            cve[match] = {clsid: [clsid_text]}
         return cve
 
     def analyze_msodde(self):

@@ -171,14 +171,19 @@ class DocInfo(FileAnalyzer):
                         hits += re.findall(r"mhtml:(https?://.*?)!", target)
         return hits
 
-    def analyze_for_cve(self) -> List[dict]:
-        cve = []
+    def analyze_for_cve(self) -> Dict:
+        pattern = r"CVE-\d{4}-\d{4,7}"
+        cve = dict()
         ole = olefile.OleFileIO(self.filepath)
         for entry in sorted(ole.listdir(storages=True)):
             clsid = ole.getclsid(entry)
             if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
-                if "CVE" in clsid_text:
-                    cve.append({"clsid": clsid, "info": clsid_text})
+                if matches := re.findall(pattern, clsid_text):
+                    for match in matches:
+                        if match in cve:
+                            cve[match].append({"clsid": clsid, "info": clsid_text})
+                        else:
+                            cve[match] = [{"clsid": clsid, "info": clsid_text}]
         return cve
 
     def analyze_msodde(self):

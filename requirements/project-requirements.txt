@@ -45,7 +45,7 @@ intezer-sdk==1.19.4
 lief==0.14.0
 maxminddb==2.5.1
 mwdblib==4.5.0
-oletools==0.60
+git+https://github.com/decalage2/oletools.git@ccf99d1a8f85e552f5cc130fbaa504cfe5725a92
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0

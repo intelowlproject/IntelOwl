@@ -124,7 +124,7 @@ def _create_object(Model, data):
             attribute.set(value)
         return False
     return True
-"""
+"""  # noqa
             + """    
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
@@ -138,7 +138,7 @@ def migrate(apps, schema_editor):
         for value in values:
             _create_object(PluginConfig, value)
 
-"""
+"""  # noqa
         )
 
     @staticmethod
@@ -148,7 +148,7 @@ def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
-"""
+"""  # noqa
 
     def _get_body_template(self):
         return """
@@ -165,7 +165,7 @@ class Migration(migrations.Migration):
             migrate, reverse_migrate
         )
     ]
-        """
+        """  # noqa
 
     def _body_template(self, app):
         return self._get_body_template().format(

@@ -52,7 +52,7 @@ class CreateJobsFromPlaybookInterface:
 
         return ObservableAnalysisSerializer(
             data={
-                "playbooks_requested": [self.playbook_to_execute.name],
+                "playbook_requested": self.playbook_to_execute.name,
                 "observables": [(None, value) for value in values],
                 "tlp": tlp,
             },
@@ -74,7 +74,7 @@ class CreateJobsFromPlaybookInterface:
         ]
         query_dict = QueryDict(mutable=True)
         data = {
-            "playbooks_requested": self.playbook_to_execute.name,
+            "playbook_requested": self.playbook_to_execute.name,
             "tlp": tlp,
         }
         query_dict.update(data)

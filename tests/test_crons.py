@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import (
+    feodo_tracker,
     maxmind,
     phishing_army,
     talos,
@@ -97,6 +98,36 @@ class CronTests(CustomTestCase):
     def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor.update()
         self.assertTrue(os.path.exists(db_file_path))
+
+    @if_mock_connections(
+        patch(
+            "requests.get",
+            return_value=MockUpResponse(
+                {},
+                200,
+                content=b"""[
+                        {
+                            "ip_address": "192.9.135.73",
+                            "port": 1194,
+                            "status": "online",
+                            "hostname": null,
+                            "as_number": 31898,
+                            "as_name": "ORACLE-BMC-31898",
+                            "country": "US",
+                            "first_seen": "2023-05-23 17:51:44",
+                            "last_online": "2024-02-09",
+                            "malware": "Pikabot"
+                        },]""",
+            ),
+        )
+    )
+    def test_feodo_tracker_updater(self, mock_get=None):
+        feodo_tracker.Feodo_Tracker.update(
+            "some_url", f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json"
+        )
+        self.assertTrue(
+            os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json")
+        )
 
     def test_quark_updater(self):
         from quark.config import DIR_PATH

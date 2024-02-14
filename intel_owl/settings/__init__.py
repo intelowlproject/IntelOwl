@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     # rest framework libs
     "rest_framework",
     "rest_framework_filters",
+    'rest_framework.authtoken',
     "drf_spectacular",
     # certego libs
     "durin",

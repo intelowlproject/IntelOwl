@@ -3,15 +3,16 @@ import { create } from "zustand";
 
 import { addToast } from "@certego/certego-ui";
 
+import Cookies from "js-cookie";
 import { USERACCESS_URI, AUTH_BASE_URI } from "../constants/apiURLs";
 
 // constants
-const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";
+const CSRF_TOKEN = "csrftoken";
 
 // hook/ store see: https://github.com/pmndrs/zustand
 export const useAuthStore = create((set, get) => ({
   loading: false,
-  token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,
+  CSRFToken: Cookies.get(CSRF_TOKEN) || "",
   user: {
     username: "",
     full_name: "",
@@ -21,15 +22,9 @@ export const useAuthStore = create((set, get) => ({
     is_staff: false,
   },
   access: null,
-  isAuthenticated: () => !!get().token,
-  updateToken: (newValue) => {
-    localStorage.setItem(TOKEN_STORAGE_KEY, newValue.toString());
-    set({ token: newValue });
-  },
-  deleteToken: () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    set({ token: null });
-  },
+  isAuthenticated: () => !!get().CSRFToken,
+  updateToken: () => set({ CSRFToken: Cookies.get(CSRF_TOKEN)}),
+  deleteToken: () => set({ CSRFToken: "" }),
   service: {
     fetchUserAccess: async () => {
       try {
@@ -54,9 +49,7 @@ export const useAuthStore = create((set, get) => ({
         const resp = await axios.post(`${AUTH_BASE_URI}/login`, body, {
           certegoUIenableProgressBar: false,
         });
-        get().updateToken(resp.data.token, {
-          expires: new Date(resp.data.expiry),
-        });
+        get().updateToken();
         addToast("You've been logged in!", null, "success");
         return Promise.resolve(resp);
       } catch (err) {
@@ -70,6 +63,8 @@ export const useAuthStore = create((set, get) => ({
       set({ loading: true });
       const onLogoutCb = () => {
         get().deleteToken();
+        // rmeove from the browser or it will persist next time we open a tab
+        Cookies.remove(CSRF_TOKEN)
         set({ loading: false });
         addToast("Logged out!", null, "info");
       };

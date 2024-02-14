@@ -17,7 +17,6 @@ from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
-from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import Field, SerializerMethodField, empty
@@ -51,6 +50,12 @@ from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 
 logger = logging.getLogger(__name__)
+
+
+class UserSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username",)
 
 
 class TagSerializer(rfs.ModelSerializer):

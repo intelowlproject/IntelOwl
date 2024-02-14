@@ -19,7 +19,12 @@ else:
     WEB_CLIENT_URL = f"http://{WEB_CLIENT_DOMAIN}"
 
 CSRF_COOKIE_SAMESITE = "Strict"
-CSRF_COOKIE_HTTPONLY = True
+# TODO: change this
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost", "http://localhost/",
+    "http://localhost:80", "http://localhost:80/",
+    "http://localhost:3001", "http://localhost:3001/"
+]
 ALLOWED_HOSTS = ["*"]
 
 # https://docs.djangoproject.com/en/4.2/ref/settings/#data-upload-max-memory-size

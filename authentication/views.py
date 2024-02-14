@@ -11,11 +11,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect
-from django_user_agents.utils import get_user_agent
-from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.utils import extend_schema as add_docs
-from durin import views as durin_views
-from durin.models import Client
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
@@ -82,19 +78,17 @@ class ResendVerificationView(
     throttle_classes: List = [POSTUserRateThrottle]
 
 
-class LoginView(durin_views.LoginView, RecaptchaV2Mixin):
+class LoginView(RecaptchaV2Mixin):
+
+    authentication_classes: List = []
+    permission_classes: List = []
+    throttle_classes: List = [POSTUserRateThrottle]
+
     @staticmethod
     def validate_and_return_user(request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return serializer.validated_data["user"]
-
-    @staticmethod
-    def get_client_obj(request) -> Client:
-        user_agent = get_user_agent(request)
-        client_name = str(user_agent)
-        client, _ = Client.objects.get_or_create(name=client_name)
-        return client
 
     def post(self, request, *args, **kwargs):
         try:
@@ -102,17 +96,10 @@ class LoginView(durin_views.LoginView, RecaptchaV2Mixin):
         except AssertionError:
             # it will raise this bcz `serializer_class` is not defined
             pass
-        response = super().post(request, *args, **kwargs)
-        uname = request.user.username
-        logger.info(f"LoginView: received request from '{uname}'.")
-        if request.user.is_superuser:
-            try:
-                # pass admin user's session
-                login(request, request.user)
-                logger.info(f"administrator:'{uname}' was logged in.")
-            except Exception:
-                logger.exception(f"administrator:'{uname}' login failed.")
-        return response
+        user = self.validate_and_return_user(request=request)
+        logger.info(f"perform_login received request from '{user.username}''.")
+        login(request, user)
+        return Response({})
 
 
 class ChangePasswordView(APIView):
@@ -142,35 +129,12 @@ class ChangePasswordView(APIView):
         return Response({"message": "Password changed successfully"})
 
 
-class LogoutView(durin_views.LogoutView):
+class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
-        uname = request.user.username
-        logger.info(f"perform_logout received request from '{uname}''.")
-        if request.user.is_superuser:
-            try:
-                logout(request)
-                logger.info(f"administrator: '{uname}' was logged out.")
-            except Exception:
-                logger.exception(f"administrator: '{uname}' session logout failed.")
-        return super().post(request, format=None)
-
-
-APIAccessTokenView = durin_views.APIAccessTokenView
-TokenSessionsViewSet = durin_views.TokenSessionsViewSet
-
-
-class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
-    target_class = "durin.auth.CachedTokenAuthentication"
-    name = "durinAuth"
-
-    @staticmethod
-    def get_security_definition(auto_schema):
-        return {
-            "type": "apiKey",
-            "in": "header",
-            "name": "Authorization",
-            "description": "Token-based authentication with required prefix: Token",
-        }
+        user = request.user
+        logger.info(f"perform_logout received request from '{user.username}''.")
+        logout(request)
+        return Response({})
 
 
 @add_docs(

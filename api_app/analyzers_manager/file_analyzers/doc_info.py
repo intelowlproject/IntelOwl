@@ -46,6 +46,9 @@ class DocInfo(FileAnalyzer):
 
         self.passwords_to_check.extend(self.additional_passwords_to_check)
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         results = {}
 

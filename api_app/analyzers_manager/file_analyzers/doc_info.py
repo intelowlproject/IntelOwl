@@ -13,13 +13,13 @@ from typing import Dict, List
 
 import olefile
 from defusedxml.ElementTree import fromstring
+
+from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.analyzers_manager.models import MimeTypes
 from oletools import mraptor
 from oletools.common.clsid import KNOWN_CLSIDS
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
-
-from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.models import MimeTypes
 
 logger = logging.getLogger(__name__)
 
@@ -171,14 +171,14 @@ class DocInfo(FileAnalyzer):
                         hits += re.findall(r"mhtml:(https?://.*?)!", target)
         return hits
 
-    def analyze_for_cve(self):
-        cve = dict()
-        ole = olefile.OleFileIO(self.filename)
+    def analyze_for_cve(self) -> List[dict]:
+        cve = []
+        ole = olefile.OleFileIO(self.filepath)
         for entry in sorted(ole.listdir(storages=True)):
             clsid = ole.getclsid(entry)
             if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
                 if "CVE" in clsid_text:
-                    cve[clsid] = clsid_text
+                    cve.append({"clsid": clsid, "info": clsid_text})
         return cve
 
     def analyze_msodde(self):

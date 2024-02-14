@@ -145,7 +145,7 @@ def migrate(apps, schema_editor):
     def _reverse_migrate_template():
         return """
 def reverse_migrate(apps, schema_editor):
-    python_path = plugin_{0}.pop("model")
+    python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 """
@@ -167,7 +167,7 @@ class Migration(migrations.Migration):
     ]
         """
 
-    def _body_template(self, app, obj_name):
+    def _body_template(self, app):
         return self._get_body_template().format(
             self._get_last_migration("api_app"),
             app,
@@ -201,7 +201,7 @@ values = {3}
             str(json.loads(json.dumps(values_data))),
             self._migrate_template(),
             self._reverse_migrate_template(),
-            self._body_template(app, obj.name),
+            self._body_template(app),
         )
 
     def _name_file(self, obj, app):

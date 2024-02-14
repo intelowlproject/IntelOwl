@@ -121,7 +121,7 @@ class DocInfo(FileAnalyzer):
                             analyze_macro_results.append(analyze_macro_result)
                     self.olevba_results["analyze_macro"] = analyze_macro_results
 
-                results["cve"] = self.analyze_for_cve()
+                results["extracted_CVEs"] = self.analyze_for_cve()
 
         except CannotDecryptException as e:
             logger.info(e)
@@ -172,32 +172,22 @@ class DocInfo(FileAnalyzer):
                         hits += re.findall(r"mhtml:(https?://.*?)!", target)
         return hits
 
-    def analyze_for_cve(self) -> Dict:
+    def analyze_for_cve(self) -> List:
         pattern = r"CVE-\d{4}-\d{4,7}"
-        cve = {}
+        results = []
         ole = olefile.OleFileIO(self.filepath)
         for entry in sorted(ole.listdir(storages=True)):
             clsid = ole.getclsid(entry)
             if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
-                if matches := re.findall(pattern, clsid_text):
-                    for match in matches:
-                        if match in cve:
-                            if clsid in cve[match]:
-                                cve[match][clsid].append(clsid_text)
-                                cve[match][clsid] = list(set(cve[match][clsid]))  # uniq
-                            else:
-                                cve[match][clsid] = [clsid_text]
-                        else:
-                            cve[match] = {clsid: [clsid_text]}
-                if "cve" in re.sub(pattern, "", clsid_text).lower():
-                    if clsid in cve["id_not_present"]:
-                        cve["id_not_present"][clsid].append(clsid_text)
-                        cve["id_not_present"][clsid] = list(
-                            set(cve["id_not_present"][clsid])
-                        )  # uniq
-                    else:
-                        cve["id_not_present"][clsid] = [clsid_text]
-        return cve
+                if "cve" in clsid_text.lower():
+                    results.append(
+                        {
+                            "clsid": clsid,
+                            "info": clsid_text,
+                            "CVEs": [m for m in re.findall(pattern, clsid_text)],
+                        }
+                    )
+        return results
 
     def analyze_msodde(self):
         try:

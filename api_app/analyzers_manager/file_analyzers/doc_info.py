@@ -13,7 +13,6 @@ from typing import Dict, List
 
 import olefile
 from defusedxml.ElementTree import fromstring
-
 from oletools import mraptor
 from oletools.common.clsid import KNOWN_CLSIDS
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted

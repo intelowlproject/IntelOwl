@@ -34,7 +34,7 @@ print_help () {
   echo "    --nfs                       Uses the nfs.override.yml compose file."
   echo "    --traefik                   Uses the traefik.override.yml compose file."
   echo "    --use-external-database     Do not use postgres.override.yml compose file."
-  echo "    --use-external-broker       Do not use rabbitmq.override.yml compose file."
+  echo "    --rabbitmq                  Uses the rabbitmq.override.yml compose file."
   echo "    --flower                    Uses the flower.override.yml compose file."
   echo "    --custom                    Uses custom.override.yml to leverage your"
   echo "                                customized configuration."
@@ -172,8 +172,8 @@ while [[ $# -gt 0 ]]; do
     params["use_external_database"]=true
     shift 1
   ;;
-  --use-external-broker)
-    params["use_external_broker"]=true
+  --rabbitmq)
+    params["rabbitmq"]=true
     shift 1
   ;;
   --flower)
@@ -254,7 +254,7 @@ compose_files=("${path_mapping["default"]}")
 if ! [ "${params["use_external_database"]}" ]; then
   compose_files+=("${path_mapping["postgres"]}")
 fi
-if ! [ "${params["use_external_broker"]}" ]; then
+if [ "${params["rabbitmq"]}" ]; then
   compose_files+=("${path_mapping["rabbitmq"]}")
 fi
 if $is_test; then

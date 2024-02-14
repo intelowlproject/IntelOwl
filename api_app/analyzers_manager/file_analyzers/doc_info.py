@@ -14,12 +14,13 @@ from typing import Dict, List
 import olefile
 from defusedxml.ElementTree import fromstring
 
-from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.models import MimeTypes
 from oletools import mraptor
 from oletools.common.clsid import KNOWN_CLSIDS
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
+
+from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.analyzers_manager.models import MimeTypes
 
 logger = logging.getLogger(__name__)
 

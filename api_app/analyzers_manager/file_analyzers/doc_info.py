@@ -174,7 +174,7 @@ class DocInfo(FileAnalyzer):
 
     def analyze_for_cve(self) -> Dict:
         pattern = r"CVE-\d{4}-\d{4,7}"
-        cve = dict()
+        cve = {}
         ole = olefile.OleFileIO(self.filepath)
         for entry in sorted(ole.listdir(storages=True)):
             clsid = ole.getclsid(entry)

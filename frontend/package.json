@@ -17,7 +17,7 @@
     "react-dom": "^17.0.2",
     "react-error-boundary": "^4.0.11",
     "react-google-recaptcha": "^2.1.0",
-    "react-icons": "^5.0.1",
+    "react-icons": "^4.12.0",
     "react-joyride": "^2.7.2",
     "react-json-tree": "^0.18.0",
     "react-markdown": "^8.0.7",

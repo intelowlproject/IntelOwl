@@ -22,13 +22,16 @@ services:
     env_file:
       - env_file_app
       - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+
 
   daphne:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_daphne
     restart: unless-stopped
     volumes:
-      - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     entrypoint:
@@ -37,20 +40,21 @@ services:
       - "8011"
     env_file:
       - env_file_app
-      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
 
   redis:
-    image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
+    image: library/redis:6.2.7-alpine
     container_name: intelowl_redis
+    hostname: redis
     restart: unless-stopped
     volumes:
-      - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
-      - shared_files:/opt/deploy/files_required
     expose:
       - "6379"
-    env_file:
-      - env_file_app
+    healthcheck:
+      test: test $$(redis-cli -h '127.0.0.1' ping) = 'PONG'
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}

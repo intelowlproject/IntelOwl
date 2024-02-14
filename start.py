@@ -156,10 +156,10 @@ def start():
         help="Do not use postgres.override.yml compose file",
     )
     parser.add_argument(
-        "--use-external-broker",
+        "--rabbitmq",
         required=False,
         action="store_true",
-        help="Do not use rabbitmq.override.yml compose file",
+        help="Use rabbitmq.override.yml compose file",
     )
     parser.add_argument(
         "--flower",
@@ -254,7 +254,7 @@ def start():
     if not args.__dict__["use_external_database"]:
         compose_files.append(PATH_MAPPING["postgres"])
     # RabbitMQ
-    if not args.__dict__["use_external_broker"]:
+    if args.__dict__["rabbitmq"]:
         compose_files.append(PATH_MAPPING["rabbitmq"])
     # mode
     if is_test:

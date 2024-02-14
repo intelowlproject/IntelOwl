@@ -121,6 +121,8 @@ class DocInfo(FileAnalyzer):
                             analyze_macro_results.append(analyze_macro_result)
                     self.olevba_results["analyze_macro"] = analyze_macro_results
 
+                results["cve"] = self.analyze_for_cve()
+
         except CannotDecryptException as e:
             logger.info(e)
         except Exception as e:
@@ -133,7 +135,6 @@ class DocInfo(FileAnalyzer):
                 self.vbaparser.close()
 
         results["olevba"] = self.olevba_results
-        results["cve"] = self.analyze_for_cve()
         if self.file_mimetype != MimeTypes.ONE_NOTE.value:
             results["msodde"] = self.analyze_msodde()
         if self.file_mimetype in [

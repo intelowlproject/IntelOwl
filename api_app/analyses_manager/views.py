@@ -15,6 +15,7 @@ from ..mixins import PaginationMixin
 from ..models import Job
 from ..permissions import IsObjectOwnerOrSameOrgPermission
 from ..views import ModelWithOwnershipViewSet
+from .filters import AnalysisFilter
 from .models import Analysis
 from .serializers import AnalysisSerializer, AnalysisTreeSerializer
 
@@ -24,8 +25,13 @@ logger = logging.getLogger(__name__)
 class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
     serializer_class = AnalysisSerializer
-    ordering = ["name"]
+    ordering = ["-start_time"]
     queryset = Analysis.objects.all()
+    filterset_class = AnalysisFilter
+    ordering_fields = [
+        "start_time",
+        "end_time",
+    ]
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related("jobs")

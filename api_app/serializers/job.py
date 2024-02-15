@@ -515,6 +515,19 @@ class MultipleJobSerializer(rfs.ListSerializer):
         analysis.save()
         return result
 
+    def validate(self, attrs: dict) -> dict:
+        attrs = super().validate(attrs)
+        # filter requests with more elements than this threshold
+        max_element_per_request_number = 200
+        if len(attrs) > max_element_per_request_number:
+            raise ValidationError(
+                {
+                    "detail": "Exceed the threshold of "
+                    f"{max_element_per_request_number}  elements for a single analysis"
+                }
+            )
+        return attrs
+
 
 class MultipleFileJobSerializer(MultipleJobSerializer):
     """

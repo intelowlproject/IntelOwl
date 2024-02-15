@@ -762,7 +762,7 @@ describe("ScanForm adavanced use", () => {
     expect(secondObservableInputElement.value).toBe("1.1.1.1");
   });
 
-  test("test multiple observables of different types", async () => {
+  test("test multiple observables of different types and remove duplicates", async () => {
     const user = userEvent.setup();
     render(
       <BrowserRouter>
@@ -785,6 +785,14 @@ describe("ScanForm adavanced use", () => {
     })[1];
     // doubled braked are required by user-event library
     await user.type(secondObservableInputElement, "1.1.1.1");
+
+    // add third element (duplicate)
+    await user.click(addNewValueButton);
+    const thirdObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[2];
+    // doubled braked are required by user-event library
+    await user.type(thirdObservableInputElement, "1.1.1.1");
 
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();

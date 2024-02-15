@@ -8,6 +8,7 @@ services:
   uwsgi:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_uwsgi
+    hostname: uwsgi
     volumes:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
       - ../configuration:/opt/deploy/intel_owl/configuration
@@ -27,6 +28,7 @@ services:
   daphne:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_daphne
+    hostname: daphne
     restart: unless-stopped
     volumes:
       - generic_logs:/var/log/intel_owl
@@ -59,6 +61,7 @@ services:
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_beat
+    hostname: celery_beat
     restart: unless-stopped
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
@@ -77,6 +80,7 @@ services:
   celery_worker_default:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_default
+    hostname: celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m
     volumes:

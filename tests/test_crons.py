@@ -103,21 +103,33 @@ class CronTests(CustomTestCase):
         patch(
             "requests.get",
             return_value=MockUpResponse(
-                {},
+                [
+                    {
+                        "ip_address": "51.161.81.190",
+                        "port": 13721,
+                        "status": "offline",
+                        "hostname": None,
+                        "as_number": 16276,
+                        "as_name": "OVH",
+                        "country": "CA",
+                        "first_seen": "2023-12-18 18:29:21",
+                        "last_online": "2024-01-23",
+                        "malware": "Pikabot",
+                    },
+                    {
+                        "ip_address": "185.117.90.142",
+                        "port": 2222,
+                        "status": "offline",
+                        "hostname": None,
+                        "as_number": 59711,
+                        "as_name": "HZ-EU-AS",
+                        "country": "NL",
+                        "first_seen": "2024-01-17 18:58:25",
+                        "last_online": "2024-01-22",
+                        "malware": "QakBot",
+                    },
+                ],
                 200,
-                content=b"""[
-                        {
-                            "ip_address": "192.9.135.73",
-                            "port": 1194,
-                            "status": "online",
-                            "hostname": null,
-                            "as_number": 31898,
-                            "as_name": "ORACLE-BMC-31898",
-                            "country": "US",
-                            "first_seen": "2023-05-23 17:51:44",
-                            "last_online": "2024-02-09",
-                            "malware": "Pikabot"
-                        },]""",
             ),
         )
     )

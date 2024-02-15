@@ -47,6 +47,7 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
             for ip in db:
                 if ip["ip_address"] == self.observable_name:
                     result["found"] = True
+                    break
         except json.JSONDecodeError as e:
             raise AnalyzerRunException(f"Decode JSON in run: {e}")
         except FileNotFoundError as e:
@@ -58,7 +59,7 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
     @classmethod
     def update(cls, db_url, db_location) -> bool:
         """
-        Simply update the databse
+        Simply update the database
         """
         try:
             logger.info(f"starting download of db from {db_url}")

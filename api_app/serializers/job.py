@@ -291,7 +291,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def check_previous_jobs(self, validated_data: Dict) -> Job:
         logger.info("Checking previous jobs")
         if not validated_data["scan_check_time"]:
-            raise ValidationError("Scan check time can't be null")
+            raise ValidationError({"detail": "Scan check time can't be null"})
         status_to_exclude = [Job.Status.KILLED, Job.Status.FAILED]
         if not validated_data.get("playbook_to_execute", None):
             status_to_exclude.append(Job.Status.REPORTED_WITH_FAILS)

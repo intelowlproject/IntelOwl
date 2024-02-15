@@ -1138,9 +1138,6 @@ class PythonConfig(AbstractConfig):
         for key in cache.get_where(f"list_{base_key}").keys():
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
-        for key in cache.get_where(f"serializer_{cls.__name__}").keys():
-            logger.debug(f"Deleting cache key {key}")
-            cache.delete(key)
 
     def refresh_cache_keys(self, user: User = None):
         from api_app.serializers.plugin import PythonConfigListSerializer

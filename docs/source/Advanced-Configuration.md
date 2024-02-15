@@ -190,8 +190,7 @@ In that case, you should create new SQS queues in AWS called `intelowl-<environm
 Moreover, you must populate the `AWS_USER_NUMBER`. This is required to connect in the right way to the selected SQS queues.
 Only FIFO queues are supported.
 
-If you want to use a remote message broker (like an `ElasticCache` or `AmazonMQ` instance), you must use the option `--external-broker` when launching IntelOwl with the `./start` script.
-Moreover, you must populate the `BROKER_URL` environment variable.
+If you want to use a remote message broker (like an `ElasticCache` or `AmazonMQ` instance), you must populate the `BROKER_URL` environment variable.
 
 
 #### Websockets
@@ -202,8 +201,14 @@ Moreover, you must populate the `BROKER_URL` environment variable.
 
 For this reason, a `Redis` instance is **mandatory**.
 You can personalize IntelOwl in two different way:
-- with a local `Redis` instance. This is the default behaviour.
-- With a remote `Redis` instance. You must use the option `--use-external-redis` when launching IntelOwl with the `.start` script. Moreover, you need to populate the `WEBSOCKETS_URL` environment variable.
+- with a local `Redis` instance.
+
+This is the default behaviour.
+
+- With a remote `Redis` instance.
+
+You must use the option `--use-external-redis` when launching IntelOwl with the `.start` script.
+Moreover, you need to populate the `WEBSOCKETS_URL` environment variable. If you are using `Redis` as a message broker too, remember to populate the `BROKER_URL` environment variable 
 
 #### RDS
 

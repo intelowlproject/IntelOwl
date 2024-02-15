@@ -118,7 +118,6 @@ def post_delete_python_config_periodic_tasks(
 def post_save_python_config_cache(sender, instance: PythonConfig, *args, **kwargs):
     if issubclass(sender, PythonConfig):
         instance.delete_class_cache_keys()
-        instance.refresh_cache_keys()
 
 
 @receiver(models.signals.post_delete)
@@ -127,4 +126,3 @@ def post_delete_python_config_cache(
 ):
     if issubclass(sender, PythonConfig):
         instance.delete_class_cache_keys()
-        instance.refresh_cache_keys()

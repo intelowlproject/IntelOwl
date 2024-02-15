@@ -12,8 +12,8 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 import { RiLoader2Fill } from "react-icons/ri";
 
 import { UncontrolledTooltip } from "reactstrap";
-import { StatusColors } from "../../constants/colorConst";
-import { JobFinalStatuses } from "../../constants/jobConst";
+import { StatusColors } from "../../../constants/colorConst";
+import { JobFinalStatuses } from "../../../constants/jobConst";
 
 const STATUS_ICON_MAP = {
   pending: MdOutlinePending,
@@ -31,6 +31,7 @@ const STATUS_ICON_MAP = {
   success: MdCheckCircleOutline,
   killed: MdOutlineBlock,
   failed: IoMdCloseCircleOutline,
+  concluded: MdCheckCircleOutline,
 };
 
 export function StatusIcon(props) {

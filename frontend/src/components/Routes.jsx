@@ -13,16 +13,19 @@ const EmailVerification = React.lazy(() => import("./auth/EmailVerification"));
 const ResetPassword = React.lazy(() => import("./auth/ResetPassword"));
 const Organization = React.lazy(() => import("./organization/Organization"));
 const Sessions = React.lazy(() => import("./user/sessions/Sessions"));
-const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
 const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
-const CommentResult = React.lazy(
-  () => import("./jobs/result/bar/comment/CommentResult"),
+const CommentResult = React.lazy(() =>
+  import("./jobs/result/bar/comment/CommentResult"),
 );
 const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
 const UserConfig = React.lazy(() => import("./user/config/UserConfig"));
 const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
+const AnalysisResult = React.lazy(() =>
+  import("./analysis/result/AnalysisResult"),
+);
+const History = React.lazy(() => import("./History"));
 /*
 lazy imports to enable code splitting
 */
@@ -123,14 +126,6 @@ const authRoutesLazy = [
     ),
   },
   /* Jobs */
-  {
-    path: "/jobs",
-    element: (
-      <Suspense fallback={<FallBackLoading />}>
-        <JobsTable />
-      </Suspense>
-    ),
-  },
   // this is needed for retrocompatibility
   {
     path: `/jobs/:id`,
@@ -166,6 +161,24 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <CommentResult />
+      </Suspense>
+    ),
+  },
+  /* History */
+  {
+    path: "/history/*",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <History />
+      </Suspense>
+    ),
+  },
+  /* Analysis */
+  {
+    path: `/analysis/:id`,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <AnalysisResult />
       </Suspense>
     ),
   },

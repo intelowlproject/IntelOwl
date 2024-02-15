@@ -172,8 +172,16 @@ while [[ $# -gt 0 ]]; do
     params["use_external_database"]=true
     shift 1
   ;;
+  --use-external-redis)
+    params["use_external_redis"]=true
+    shift 1
+  ;;
   --rabbitmq)
     params["rabbitmq"]=true
+    shift 1
+  ;;
+  --sqs)
+    params["sqs"]=true
     shift 1
   ;;
   --flower)
@@ -254,9 +262,16 @@ compose_files=("${path_mapping["default"]}")
 if ! [ "${params["use_external_database"]}" ]; then
   compose_files+=("${path_mapping["postgres"]}")
 fi
+if ! [ "${params["use_external_redis"]}" ]; then
+  compose_files+=("${path_mapping["redis"]}")
+fi
+
 if [ "${params["rabbitmq"]}" ]; then
   compose_files+=("${path_mapping["rabbitmq"]}")
+elif [ "${params["sqs"]}" ]; then
+  compose_files+=("${path_mapping["sqs"]}")
 fi
+
 if $is_test; then
   compose_files+=("${path_mapping["$env_argument"]}")
 fi

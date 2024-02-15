@@ -1,0 +1,6 @@
+version: "3.8"
+services:
+  uwsgi:
+    environment:
+      AWS_SQS: True
+      BROKER_URL: "sqs://"

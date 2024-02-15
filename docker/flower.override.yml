@@ -1,6 +1,10 @@
 version: "3.8"
 
 services:
+  uwsgi:
+    environment:
+      BROKER_URL_API: "http://guest:guest@rabbitmq:15672/api/"
+
   rabbitmq:
     image: library/rabbitmq:3.11-management-alpine
     container_name: intelowl_rabbitmq

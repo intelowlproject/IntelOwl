@@ -22,9 +22,6 @@ services:
     env_file:
       - env_file_app
       - .env
-    depends_on:
-      redis:
-        condition: service_healthy
 
 
   daphne:
@@ -40,21 +37,6 @@ services:
       - "8011"
     env_file:
       - env_file_app
-    depends_on:
-      redis:
-        condition: service_healthy
-
-  redis:
-    image: library/redis:6.2.7-alpine
-    container_name: intelowl_redis
-    hostname: redis
-    restart: unless-stopped
-    volumes:
-      - generic_logs:/var/log/intel_owl
-    expose:
-      - "6379"
-    healthcheck:
-      test: test $$(redis-cli -h '127.0.0.1' ping) = 'PONG'
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}

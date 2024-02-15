@@ -3,6 +3,7 @@ import logging
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 
+from api_app.choices import Status
 from api_app.models import Job
 from api_app.serializers import JobSerializer
 
@@ -48,6 +49,9 @@ class JobConsumer(JsonWebsocketConsumer):
         job_data = event["job"]
         logger.debug(f"job data: {job_data}")
         self.send_json(content=job_data)
+        if job_data["status"] in Status.final_statuses():
+            logger.debug("job sent to the client and terminated, close ws")
+            self.close()
 
     @classmethod
     def generate_group_name(cls, job_id: int):

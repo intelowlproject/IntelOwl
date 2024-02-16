@@ -1010,13 +1010,6 @@ class AbstractConfig(ListCachable):
             )
         return not self.disabled
 
-    @classmethod
-    def delete_class_cache_keys(cls, user: User = None):
-        base_key = f"{cls.__name__}_{user.username if user else ''}"
-        for key in cache.get_where(f"list_{base_key}").keys():
-            logger.debug(f"Deleting cache key {key}")
-            cache.delete(key)
-
 
 class AbstractReport(models.Model):
     objects = AbstractReportQuerySet.as_manager()

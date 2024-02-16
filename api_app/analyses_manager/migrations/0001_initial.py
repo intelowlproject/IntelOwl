@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                             ("running", "Running"),
                             ("concluded", "Concluded"),
                         ],
-                        default="started",
+                        default="created",
                         max_length=20,
                     ),
                 ),

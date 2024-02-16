@@ -68,6 +68,14 @@ class PivotConfigSerializer(PythonConfigSerializer):
 
 
 class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):
+    related_analyzer_configs = rfs.SlugRelatedField(
+        read_only=True, many=True, slug_field="name"
+    )
+    related_connector_configs = rfs.SlugRelatedField(
+        read_only=True, many=True, slug_field="name"
+    )
+    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
+
     class Meta:
         model = PivotConfig
         exclude = PythonConfigSerializerForMigration.Meta.exclude

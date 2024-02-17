@@ -340,12 +340,12 @@ In the Pull Request remember to provide some real world examples (screenshots an
    3. *Type: list of types that are supported by the playbook
    4. *Analyzers: List of analyzers that will be run
    5. *Connectors: List of connectors that will be run
-2. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata playbooks_manager.PlaybookConfig --pks "<your playbook name>"`
-   2. Create a new migration file inside `/playbooks_manager/migrations/`
-      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
-      2. Remember to correctly set the `dependencies`
-      3. Remember to correctly set the `objects`
+
+### How to share your playbook with the community
+To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
+You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer (you will find it under `api_app/playbook_manager/migrations`).
+
+Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin PluginConfig <new_analyzer_name>`
 
 ## How to modify a plugin
 

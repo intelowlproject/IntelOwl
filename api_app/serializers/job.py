@@ -223,7 +223,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     ) -> List[VisualizerConfig]:
         if playbook_requested:
             visualizers = VisualizerConfig.objects.filter(
-                playbooks__in=[playbook_requested]
+                playbooks__in=[playbook_requested], disabled=False
             )
         else:
             visualizers = []

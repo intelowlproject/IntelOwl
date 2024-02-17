@@ -295,22 +295,35 @@ export function PluginData({
                                 </Col>
                                 {/* col for the attribute value */}
                                 <Col>
-                                  <Field
-                                    as={Input}
-                                    type="text"
-                                    name={`entry.${index}.value`}
-                                    className={disabledSuffix}
-                                    disabled={!configuration.edit}
-                                    placeholder={placeholder}
-                                    value={
-                                      additionalEntryData.config_type ===
-                                        PluginConfigTypesNumeric.SECRET &&
-                                      !configuration.edit
-                                        ? "**********"
-                                        : configuration.value
-                                    }
-                                  />
+                                  {placeholder === "true" ? (
+                                    <Field
+                                      as="select"
+                                      className={`form-select ${disabledSuffix}`}
+                                      disabled={!configuration.edit}
+                                      name={`entry[${index}].value`}
+                                    >
+                                      <option value="true">True</option>
+                                      <option value="false">False</option>
+                                    </Field>
+                                  ) : (
+                                    <Field
+                                      as={Input}
+                                      type="text"
+                                      name={`entry.${index}.value`}
+                                      className={disabledSuffix}
+                                      disabled={!configuration.edit}
+                                      placeholder={placeholder}
+                                      value={
+                                        additionalEntryData.config_type ===
+                                          PluginConfigTypesNumeric.SECRET &&
+                                        !configuration.edit
+                                          ? "**********"
+                                          : configuration.value
+                                      }
+                                    />
+                                  )}
                                 </Col>
+
                                 {/* col with the buttons to save/delete/modify the config */}
                                 {editable ? (
                                   <Button

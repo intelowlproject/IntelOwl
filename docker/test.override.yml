@@ -31,8 +31,18 @@ services:
     image: intelowlproject/intelowl:test
     volumes:
       - ../:/opt/deploy/intel_owl
+    environment:
+      - DEBUG=True
+      - DJANGO_TEST_SERVER=True
+      - DJANGO_WATCHMAN_TIMEOUT=20
+      - WATCHMAN=True
 
   celery_worker_default:
     image: intelowlproject/intelowl:test
     volumes:
       - ../:/opt/deploy/intel_owl
+    environment:
+      - DEBUG=True
+      - DJANGO_TEST_SERVER=True
+      - DJANGO_WATCHMAN_TIMEOUT=20
+      - WATCHMAN=True

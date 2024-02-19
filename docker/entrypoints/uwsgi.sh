@@ -13,15 +13,7 @@ sleep 3
 python manage.py makemigrations durin
 python manage.py makemigrations rest_email_auth
 # fake-initial does not fake the migration if the table does not exist
-python manage.py migrate api_app --fake-initial
-python manage.py migrate analyzers_manager --fake-initial
-python manage.py migrate analyzers_manager --fake-initial
-python manage.py migrate connectors_manager --fake-initial
-python manage.py migrate visualizers_manager --fake-initial
-python manage.py migrate ingestors_manager --fake-initial
-python manage.py migrate pivots_manager --fake-initial
-python manage.py migrate playbooks_manager --fake-initial
-python manage.py migrate
+python manage.py migrate --fake-initial
 if ! python manage.py migrate --check
  then
     echo "Issue with migration exiting"

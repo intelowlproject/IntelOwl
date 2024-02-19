@@ -23,6 +23,16 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
     def model_class(cls):
         return Analysis
 
+    def test_list(self):
+        super().test_list()
+        an = Analysis.objects.create(owner=self.user, name="test")
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.URL)
+        result = response.json()
+        self.assertEqual(result["count"], Analysis.objects.count())
+        self.assertEqual(len(result["results"]), Analysis.objects.count())
+        an.delete()
+
     def test_get(self):
         plugin = self.get_object()
         response = self.client.get(f"{self.URL}/{plugin}")

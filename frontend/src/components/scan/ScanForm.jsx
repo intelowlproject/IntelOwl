@@ -203,7 +203,7 @@ export default function ScanForm() {
       );
 
       if (jobIds.length > 1) {
-        setTimeout(() => navigate(`/jobs/`), 1000);
+        setTimeout(() => navigate(`/history/analysis`), 1000);
       } else {
         setTimeout(
           () => navigate(`/jobs/${jobIds[0]}/${JobResultSections.VISUALIZER}/`),

@@ -294,12 +294,13 @@ def migrate(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
-    exists = _create_object(Model, plugin)
-    if not exists:
-        for param in params:
-            _create_object(Parameter, param)
-        for value in values:
-            _create_object(PluginConfig, value)
+    if not Model.objects.filter(name=plugin["name"]).exists():
+        exists = _create_object(Model, plugin)
+        if not exists:
+            for param in params:
+                _create_object(Parameter, param)
+            for value in values:
+                _create_object(PluginConfig, value)
 
 
 def reverse_migrate(apps, schema_editor):

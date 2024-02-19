@@ -8,9 +8,10 @@ from api_app.analyses_manager.choices import AnalysisStatusChoices
 from api_app.analyses_manager.queryset import AnalysisQuerySet
 from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
+from api_app.models import ListCachable
 
 
-class Analysis(OwnershipAbstractModel):
+class Analysis(OwnershipAbstractModel, ListCachable):
     name = models.CharField(max_length=100)
     description = models.TextField(default="", blank=True)
 

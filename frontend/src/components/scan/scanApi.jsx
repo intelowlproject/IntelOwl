@@ -166,6 +166,7 @@ export async function createJob(
       tags: ${tags}, tlp: ${tlp}, ScanModesNumeric: ${_scanMode}, scanCheckTime: ${scanCheckTime}`,
     );
     const isSample = classification === JobTypes.FILE;
+    let analyzablesToSubmit = analyzables;
     let apiUrl = "";
     if (isSample) {
       if (playbook) {
@@ -173,14 +174,18 @@ export async function createJob(
       } else {
         apiUrl = ANALYZE_MULTIPLE_FILES_URI;
       }
-    } else if (playbook) {
-      apiUrl = PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI;
     } else {
-      apiUrl = ANALYZE_MULTIPLE_OBSERVABLE_URI;
+      // eliminate duplicates (only for obs, it seems to have no effect for files)
+      analyzablesToSubmit = [...new Set(analyzables)];
+      if (playbook) {
+        apiUrl = PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI;
+      } else {
+        apiUrl = ANALYZE_MULTIPLE_OBSERVABLE_URI;
+      }
     }
 
     const payload = createJobPayload(
-      analyzables,
+      analyzablesToSubmit,
       isSample,
       playbook,
       analyzers,

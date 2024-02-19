@@ -11,7 +11,14 @@ from django.dispatch import receiver
 
 from api_app.decorators import prevent_signal_recursion
 from api_app.helpers import calculate_md5
-from api_app.models import Job, Parameter, PluginConfig, PythonConfig, PythonModule
+from api_app.models import (
+    Job,
+    ListCachable,
+    Parameter,
+    PluginConfig,
+    PythonConfig,
+    PythonModule,
+)
 
 migrate_finished = dispatch.Signal()
 
@@ -115,14 +122,12 @@ def post_delete_python_config_periodic_tasks(
 
 
 @receiver(models.signals.post_save)
-def post_save_python_config_cache(sender, instance: PythonConfig, *args, **kwargs):
-    if issubclass(sender, PythonConfig):
+def post_save_python_config_cache(sender, instance, *args, **kwargs):
+    if issubclass(sender, ListCachable):
         instance.delete_class_cache_keys()
 
 
 @receiver(models.signals.post_delete)
-def post_delete_python_config_cache(
-    sender, instance: PythonConfig, using, origin, *args, **kwargs
-):
-    if issubclass(sender, PythonConfig):
+def post_delete_python_config_cache(sender, instance, using, origin, *args, **kwargs):
+    if issubclass(sender, ListCachable):
         instance.delete_class_cache_keys()

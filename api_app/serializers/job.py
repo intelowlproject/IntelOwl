@@ -223,7 +223,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     ) -> List[VisualizerConfig]:
         if playbook_requested:
             visualizers = VisualizerConfig.objects.filter(
-                playbooks__in=[playbook_requested]
+                playbooks__in=[playbook_requested], disabled=False
             )
         else:
             visualizers = []
@@ -291,7 +291,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def check_previous_jobs(self, validated_data: Dict) -> Job:
         logger.info("Checking previous jobs")
         if not validated_data["scan_check_time"]:
-            raise ValidationError("Scan check time can't be null")
+            raise ValidationError({"detail": "Scan check time can't be null"})
         status_to_exclude = [Job.Status.KILLED, Job.Status.FAILED]
         if not validated_data.get("playbook_to_execute", None):
             status_to_exclude.append(Job.Status.REPORTED_WITH_FAILS)
@@ -382,6 +382,21 @@ class JobListSerializer(_AbstractJobViewSerializer):
         )
 
     pivots_to_execute = rfs.SerializerMethodField(read_only=True)
+    analyzers_to_execute = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    connectors_to_execute = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    visualizers_to_execute = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    analyzers_requested = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
+    connectors_requested = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
 
     def get_pivots_to_execute(self, obj: Job):
         return obj.pivots_to_execute.all().values_list("name", flat=True)
@@ -500,6 +515,19 @@ class MultipleJobSerializer(rfs.ListSerializer):
         analysis.save()
         return result
 
+    def validate(self, attrs: dict) -> dict:
+        attrs = super().validate(attrs)
+        # filter requests with more elements than this threshold
+        max_element_per_request_number = 200
+        if len(attrs) > max_element_per_request_number:
+            raise ValidationError(
+                {
+                    "detail": "Exceed the threshold of "
+                    f"{max_element_per_request_number}  elements for a single analysis"
+                }
+            )
+        return attrs
+
 
 class MultipleFileJobSerializer(MultipleJobSerializer):
     """
@@ -556,35 +584,6 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
         return ret
 
 
-class MultiplePlaybooksMultipleFileJobSerializer(MultipleFileJobSerializer):
-    playbooks_requested = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True, slug_field="name"
-    )
-
-    def to_internal_value(self, data):
-        ret = []
-        playbook_requested = data.pop("playbooks_requested", [None])
-        # in case we have only one Playbook (multi-analysis Playbook is deprecated)
-        # we do not need to do a deepcopy which is very costly in terms of RAM
-        # and could trigger 500 errors for files bigger than 2.5MB
-        # see: https://docs.djangoproject.com/en/4.2/ref/settings
-        # /#std:setting-FILE_UPLOAD_MAX_MEMORY_SIZE
-        if len(playbook_requested) == 1:
-            results = self._generate_result(data, playbook_requested[0])
-            ret.extend(results)
-        else:
-            for playbook in playbook_requested:
-                item = copy.deepcopy(data)
-                results = self._generate_result(item, playbook)
-                ret.extend(results)
-        data["playbooks_requested"] = playbook_requested
-        return ret
-
-    def _generate_result(self, data, playbook):
-        data["playbook_requested"] = playbook
-        return super().to_internal_value(data)
-
-
 class FileJobSerializer(_AbstractJobCreateSerializer):
     """
     ``Job`` model's serializer for File Analysis.
@@ -603,18 +602,7 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
             "file_name",
             "file_mimetype",
         )
-
-    @classmethod
-    def many_init(cls, *args, **kwargs):
-        # Instantiate the child serializer.
-        data = kwargs["data"]
-        kwargs["child"] = cls()
-        if "playbooks_requested" in data:
-            list_serializer_class = MultiplePlaybooksMultipleFileJobSerializer
-        else:
-            list_serializer_class = MultipleFileJobSerializer
-        # Instantiate the parent list serializer.
-        return list_serializer_class(*args, **kwargs)
+        list_serializer_class = MultipleFileJobSerializer
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
@@ -711,23 +699,6 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
         return ret
 
 
-class MultiplePlaybooksMultipleObservableJobSerializer(MultipleObservableJobSerializer):
-    playbooks_requested = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True, slug_field="name"
-    )
-
-    def to_internal_value(self, data):
-        ret = []
-        playbooks = data.pop("playbooks_requested", [None])
-        for playbook in playbooks:
-            item = copy.deepcopy(data)
-            item["playbook_requested"] = playbook
-            results = super().to_internal_value(item)
-            ret.extend(results)
-        data["playbooks_requested"] = playbooks
-        return ret
-
-
 class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     """
     ``Job`` model's serializer for Observable Analysis.
@@ -744,18 +715,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "observable_name",
             "observable_classification",
         )
-
-    @classmethod
-    def many_init(cls, *args, **kwargs):
-        # Instantiate the child serializer.
-        data = kwargs["data"]
-        kwargs["child"] = cls()
-        if "playbooks_requested" in data:
-            list_serializer_class = MultiplePlaybooksMultipleObservableJobSerializer
-        else:
-            list_serializer_class = MultipleObservableJobSerializer
-        # Instantiate the parent list serializer.
-        return list_serializer_class(*args, **kwargs)
+        list_serializer_class = MultipleObservableJobSerializer
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")

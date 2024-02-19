@@ -46,7 +46,9 @@ class PivotMapSerializer(rfs.ModelSerializer):
             result["starting_job"].user.pk != self.context["request"].user.pk
             or result["ending_job"].user.pk != self.context["request"].user.pk
         ):
-            raise ValidationError("You do not have permission to pivot these two jobs")
+            raise ValidationError(
+                {"detail": "You do not have permission to pivot these two jobs"}
+            )
         return result
 
 
@@ -66,6 +68,14 @@ class PivotConfigSerializer(PythonConfigSerializer):
 
 
 class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):
+    related_analyzer_configs = rfs.SlugRelatedField(
+        read_only=True, many=True, slug_field="name"
+    )
+    related_connector_configs = rfs.SlugRelatedField(
+        read_only=True, many=True, slug_field="name"
+    )
+    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
+
     class Meta:
         model = PivotConfig
         exclude = PythonConfigSerializerForMigration.Meta.exclude

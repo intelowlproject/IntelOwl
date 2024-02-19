@@ -17,6 +17,7 @@ services:
       - DEBUG=True
       - DJANGO_TEST_SERVER=True
       - DJANGO_WATCHMAN_TIMEOUT=20
+      - WATCHMAN=True
 
   nginx:
     build:

@@ -22,7 +22,7 @@ from .serializers import AnalysisSerializer, AnalysisTreeSerializer
 logger = logging.getLogger(__name__)
 
 
-class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
+class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
     serializer_class = AnalysisSerializer
     ordering = ["-start_time"]

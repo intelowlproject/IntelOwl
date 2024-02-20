@@ -10,6 +10,24 @@ def migrate(apps, schema_editor):
 
     PivotMap = apps.get_model("pivots_manager", "PivotMap")
     Analysis = apps.get_model("analyses_manager", "Analysis")
+    # I have to use the import here because i really need the class methods
+    from api_app.models import Job as JobNonStoric
+
+    last_root = JobNonStoric.objects.order_by("pk").filter(pivot_parent=None).first()
+    if last_root:
+        last_root.path = last_root._get_path(None, 1, 1)
+        last_root.save()
+        # all the other roots
+        for job in (
+            JobNonStoric.objects.exclude(pk=last_root.pk)
+            .filter(pivot_parent=None)
+            .iterator()
+        ):
+            newpath = last_root._inc_path()
+            job.path = newpath
+            job.save()
+            last_root = job
+
     # we are now setting all the children
     for obj in PivotMap.objects.all().iterator():
         parent = obj.starting_job  # parent

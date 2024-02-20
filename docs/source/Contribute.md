@@ -293,7 +293,7 @@ The visualizers' python code could be not immediate, so a small digression on _h
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
 To do so, some utility classes have been made:
 
-|          **Class**          |                                                        **Description**                                                        |                            **Visual representation**                             |
+|          **Class**          |                                                        **Description**                                                        |                        **Visual representation/example**                         |
 |:---------------------------:|:-----------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
 |     `VisualizablePage`      |   A single page of the final report, made of different **levels**. Each page added is represented as a new tab in frontend.   |       ![Visualizable Page example](../static/visualizablePage_example.png)       |
 |     `VisualizableLevel`     | Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontalList`. |      ![Visualizable Level example](../static/visualizableLevel_example.png)      |

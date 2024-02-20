@@ -342,6 +342,7 @@ export function PluginData({
                                           )
                                         )
                                           return;
+
                                         const newConfiguration = {
                                           ...configuration,
                                           ...additionalEntryData,
@@ -360,17 +361,18 @@ export function PluginData({
                                             );
                                             refetchAll();
                                           });
-                                        else
-                                          updateCustomConfig(
-                                            newConfiguration.value,
-                                            newConfiguration.id,
-                                          ).then(() => {
-                                            setFieldValue(
-                                              `entry.${index}.edit`,
-                                              false,
-                                            );
-                                            refetchAll();
-                                          });
+                                        else console.debug("heavy debugging");
+                                        console.debug(newConfiguration.value);
+                                        updateCustomConfig(
+                                          newConfiguration.value,
+                                          newConfiguration.id,
+                                        ).then(() => {
+                                          setFieldValue(
+                                            `entry.${index}.edit`,
+                                            false,
+                                          );
+                                          refetchAll();
+                                        });
                                       } else
                                         setFieldValue(
                                           `entry.${index}.edit`,

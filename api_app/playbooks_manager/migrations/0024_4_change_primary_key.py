@@ -7,6 +7,7 @@ def migrate(apps, schema_editor):
     PivotConfig = apps.get_model("pivots_manager", "PivotConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
+    Organization = apps.get_model("certego_saas_organization", "Organization")
     Tag = apps.get_model("api_app", "Tag")
     for playbook in PlaybookConfig.objects.all():
         pivots = PivotConfig.objects.filter(name__in=playbook.pivots2).values_list(
@@ -32,7 +33,7 @@ def migrate(apps, schema_editor):
             for org in playbook.disabled2:
                 if org:
                     OrganizationPluginConfiguration.objects.create(
-                        organization=org,
+                        organization=Organization.objects.get(pk=org),
                         object_id=playbook.pk,
                         content_type=ct,
                         disabled=True,

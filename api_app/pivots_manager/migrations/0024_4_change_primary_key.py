@@ -6,6 +6,7 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     PivotConfig = apps.get_model("pivots_manager", "PivotConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    Organization = apps.get_model("certego_saas_organization", "Organization")
     PivotConfig.objects.update(
         playbook_to_execute2=models.Subquery(
             PlaybookConfig.objects.filter(
@@ -23,7 +24,7 @@ def migrate(apps, schema_editor):
             for org in config.disabled2:
                 if org:
                     OrganizationPluginConfiguration.objects.create(
-                        organization=org,
+                        organization=Organization.objects.get(pk=org),
                         object_id=config.pk,
                         content_type=ct,
                         disabled=True,

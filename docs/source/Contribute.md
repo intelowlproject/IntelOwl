@@ -293,12 +293,15 @@ The visualizers' python code could be not immediate, so a small digression on _h
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
 To do so, some utility classes have been made:
 
-- `VisualizablePage`: A single page of the final report, made of different **levels**. Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontaList` 
-- `VisualizableHorizontaList`: An horizontal list of visualizable elements that will be displayed as they are
-- `VisualizableVerticalList`: A vertical list made of a name, a title, and the list of elements.
-- `VisualizableBool`: The representation of a boolean value
-- `VisualizableTitle`: The representation of a tuple, composed of a title and a value
-- `VisualizableBase`: The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.
+|          **Class**          |                                                        **Description**                                                        |                            **Visual representation**                             |
+|:---------------------------:|:-----------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
+|     `VisualizablePage`      |   A single page of the final report, made of different **levels**. Each page added is represented as a new tab in frontend.   |       ![Visualizable Page example](../static/visualizablePage_example.png)       |
+|     `VisualizableLevel`     | Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontalList`. |      ![Visualizable Level example](../static/visualizableLevel_example.png)      |
+| `VisualizableHorizontaList` |          An horizontal list of visualizable elements. In the example there is an horizontal list of vertical lists.           | ![Visualizable Horizontal List Example](../static/visualizableHlist_example.png) |
+| `VisualizableVerticalList`  |                              A vertical list made of a name, a title, and the list of elements.                               |  ![Visualizable Vertical List Example](../static/visualizableVlist_example.png)  |
+|     `VisualizableBool`      |                       The representation of a boolean value. It can be enabled or disabled with colors.                       |       ![Visualizable Bool example](../static/visualizableBool_example.png)       |
+|     `VisualizableTitle`     |                                The representation of a tuple, composed of a title and a value.                                |      ![Visualizable Title example](../static/visualizableTitle_example.png)      |
+|     `VisualizableBase`      |  The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.   |              The title above is composed by two `VisualizableBase`               |
 
 Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
 At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.

@@ -14,16 +14,19 @@ get_asgi_application()
 
 # pylint: disable=wrong-import-position
 from api_app.websocket import JobConsumer  # noqa: E402
+from intel_owl.settings.middleware import WSAuthMiddleware  # noqa: E402
 
 application = ProtocolTypeRouter(
     {
         # WebSocket chat handler
         "websocket": AllowedHostsOriginValidator(
             AuthMiddlewareStack(
-                URLRouter(
-                    [
-                        path("ws/jobs/<int:job_id>", JobConsumer.as_asgi()),
-                    ]
+                WSAuthMiddleware(
+                    URLRouter(
+                        [
+                            path("ws/jobs/<int:job_id>", JobConsumer.as_asgi()),
+                        ]
+                    )
                 )
             )
         ),

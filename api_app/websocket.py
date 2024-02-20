@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class JobConsumer(JsonWebsocketConsumer):
     def connect(self):
+        logger.debug(f"{self.scope=}")
         user = self.scope["user"]
         job_id = self.scope["url_route"]["kwargs"]["job_id"]
         logger.info(f"user: {user} requested the analysis for the job {job_id}")

@@ -35,12 +35,6 @@ However, if you feel lazy, you could just install and test IntelOwl with the fol
 git clone https://github.com/intelowlproject/IntelOwl
 cd IntelOwl/
 
-# construct environment files from templates
-cp docker/env_file_app_template docker/env_file_app
-cp docker/env_file_postgres_template docker/env_file_postgres
-cp docker/env_file_integrations_template docker/env_file_integrations
-cp frontend/public/env_template.js frontend/public/env.js
-
 # verify installed dependencies and start the app
 ./start prod up
 # now the application is running on http://localhost:80
@@ -91,11 +85,6 @@ All these components are managed via `docker compose`.
 Open a terminal and execute below commands to construct new environment files from provided templates.
 
 ```bash
-cp docker/env_file_app_template docker/env_file_app
-cp docker/env_file_postgres_template docker/env_file_postgres
-cp docker/env_file_integrations_template docker/env_file_integrations
-cp frontend/public/env_template.js frontend/public/env.js
-
 ./initialize.sh
 ```
 

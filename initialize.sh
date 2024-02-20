@@ -50,7 +50,7 @@ check_django_secret () {
   # https://regex101.com/r/O778RQ/1
   if [ ! -e docker/env_file_app ] || ! ( tac docker/env_file_app | grep -qE "^DJANGO_SECRET=[a-z0-9\!\@\#\$\%\^\&\*\(\-\_\=\+\)]{50,}$" ); then
     echo "DJANGO_SECRET variable not found! Generating a new one."
-    python3 -c 'from django.core.management.utils import get_random_secret_key; print(f"DJANGO_SECRET={get_random_secret_key()}")' >> docker/env_file_app
+    python3 -c 'import secrets; print("DJANGO_SECRET="+"".join(secrets.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)))' >> docker/env_file_app
   fi
 }
 

@@ -10,9 +10,8 @@ def migrate(apps, schema_editor):
 
     PivotMap = apps.get_model("pivots_manager", "PivotMap")
     Analysis = apps.get_model("analyses_manager", "Analysis")
-
     # we are now setting all the children
-    for obj in PivotMap.objects.all():
+    for obj in PivotMap.objects.all().iterator():
         parent = obj.starting_job  # parent
         child = obj.ending_job
         parent.numchild += 1
@@ -20,14 +19,15 @@ def migrate(apps, schema_editor):
         child.depth = 2
         child.path = JobNonStoric._get_path(parent.path, child.depth, 1)
         child.save()
-        an = Analysis.objects.create(
-            name="Pivot analysis",
-            owner=parent.user,
-            start_time=parent.received_request_time,
-            end_time=child.finished_analysis_time,
-            status="concluded",
-        )
-        an.jobs.add(parent)
+        if parent.numchild == 1:
+            an = Analysis.objects.create(
+                name="Pivot analysis",
+                owner=parent.user,
+                start_time=parent.received_request_time,
+                end_time=child.finished_analysis_time,
+                status="concluded",
+            )
+            an.jobs.add(parent)
 
     Analysis.objects.update(
         name=Concat(F("name"), Value(" #"), F("pk"), output_field=CharField())

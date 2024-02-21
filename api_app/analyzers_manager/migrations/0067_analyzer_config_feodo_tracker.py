@@ -189,7 +189,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0061_job_depth_analysis"),
-        ("analyzers_manager", "0065_analyzer_config_validin"),
+        ("analyzers_manager", "0066_analyzer_config_phoneinfoga"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

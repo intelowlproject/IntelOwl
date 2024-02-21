@@ -4,7 +4,7 @@ services:
     phoneinfoga:
       container_name: phoneinfoga
       restart: unless-stopped
-      image: sundowndev/phoneinfoga:latest
+      image: sundowndev/phoneinfoga:v2.11.0
       command:
         - "serve"
         - "--no-client"

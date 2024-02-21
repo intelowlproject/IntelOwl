@@ -255,7 +255,15 @@ export async function createJob(
           10000,
         );
       }
-      return Promise.resolve(jobIdsAccepted.concat(jobIdsExists));
+      // get analysis id
+      let analysisId = null;
+      if (jobIdsAccepted.concat(jobIdsExists).length > 1) {
+        analysisId = parseInt(respData[0].analysis, 10);
+      }
+      return Promise.resolve({
+        jobIds: jobIdsAccepted.concat(jobIdsExists),
+        analysisIds: analysisId,
+      });
     }
     // else
     addToast("Failed!", respData?.message, "danger");

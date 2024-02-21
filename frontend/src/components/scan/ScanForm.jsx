@@ -185,7 +185,7 @@ export default function ScanForm() {
       return errors;
     },
     onSubmit: async (values) => {
-      const jobIds = await createJob(
+      const response = await createJob(
         values.observableType === JobTypes.OBSERVABLE
           ? values.observable_names.map((observable) =>
               sanitizeObservable(observable),
@@ -202,11 +202,14 @@ export default function ScanForm() {
         values.scan_check_time,
       );
 
-      if (jobIds.length > 1) {
-        setTimeout(() => navigate(`/history/analysis`), 1000);
+      if (response.jobIds.length > 1) {
+        setTimeout(() => navigate(`/analysis/${response.analysisIds}`), 1000);
       } else {
         setTimeout(
-          () => navigate(`/jobs/${jobIds[0]}/${JobResultSections.VISUALIZER}/`),
+          () =>
+            navigate(
+              `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
+            ),
           1000,
         );
       }

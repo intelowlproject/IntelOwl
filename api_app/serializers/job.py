@@ -836,6 +836,10 @@ class JobResponseSerializer(rfs.ModelSerializer):
         source="playbook_to_execute",
         slug_field="name",
     )
+    analysis = rfs.SlugRelatedField(
+        read_only=True,
+        slug_field="pk",
+    )
 
     class Meta:
         model = Job
@@ -845,6 +849,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
             "connectors_running",
             "visualizers_running",
             "playbook_running",
+            "analysis",
         ]
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer

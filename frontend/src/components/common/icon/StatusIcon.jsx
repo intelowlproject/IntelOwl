@@ -14,6 +14,7 @@ import { RiLoader2Fill } from "react-icons/ri";
 import { UncontrolledTooltip } from "reactstrap";
 import { StatusColors } from "../../../constants/colorConst";
 import { JobFinalStatuses } from "../../../constants/jobConst";
+import { AnalysisStatuses } from "../../../constants/analysisConst";
 
 const STATUS_ICON_MAP = {
   pending: MdOutlinePending,
@@ -43,6 +44,10 @@ export function StatusIcon(props) {
   const Icon = STATUS_ICON_MAP?.[statusLower] || MdCircle;
   const iconClassName = classnames(`text-${color}`, className);
 
+  const statuses = Object.values(JobFinalStatuses).concat(
+    Object.values(AnalysisStatuses),
+  );
+
   return (
     <>
       <Icon
@@ -50,7 +55,7 @@ export function StatusIcon(props) {
         className={iconClassName}
         {...rest}
       />
-      {Object.values(JobFinalStatuses).includes(statusLower) && (
+      {statuses.includes(statusLower) && (
         <UncontrolledTooltip
           target={`statusicon-${statusLower}`}
           trigger="hover"

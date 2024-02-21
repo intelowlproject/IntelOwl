@@ -8,8 +8,9 @@ import {
   Row,
   Col,
   UncontrolledTooltip,
+  Input,
 } from "reactstrap";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdRemoveRedEye } from "react-icons/md";
 
 import {
   ContentSection,
@@ -21,10 +22,22 @@ import {
 import { JobTag } from "../../common/JobTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
+import { updateAnalysis } from "./analysisApi";
 
 export function AnalysisInfoCard({ analysis }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
+
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [analysisName, setAnalysisName] = React.useState(analysis?.name);
+
+  const editAnalysisName = async () => {
+    if (analysis.name !== analysisName) {
+      const success = await updateAnalysis(analysis.id, { name: analysisName });
+      if (!success) return;
+    }
+    setIsEditing(false);
+  };
 
   return (
     <div id="AnalysisInfoCardSection">
@@ -35,16 +48,44 @@ export function AnalysisInfoCard({ analysis }) {
             sm={12}
             md={10}
           >
-            <h3>{analysis.name}</h3>
+            {!isEditing && <h3 className="">{analysisName}</h3>}
+            {isEditing && (
+              <Input
+                id="edit_analysis-input"
+                name="textArea"
+                type="textarea"
+                onChange={(event) => {
+                  setAnalysisName(event.target.value);
+                }}
+                value={analysisName}
+                style={{
+                  maxWidth: "600px",
+                  maxHeight: "20px",
+                  overflowX: "scroll",
+                }}
+                className="me-2 bg-dark"
+              />
+            )}
             <IconButton
               id="edit-analysis-name"
               Icon={MdEdit}
               color=""
-              className="me-2 text-secondary"
-              onClick={() => null}
+              className="text-secondary"
+              onClick={() => setIsEditing(true)}
               title="Edit name"
               titlePlacement="top"
             />
+            {isEditing && (
+              <IconButton
+                id="view-analysis-name"
+                Icon={MdRemoveRedEye}
+                color=""
+                className="text-secondary px-1"
+                onClick={editAnalysisName}
+                title="View name"
+                titlePlacement="top"
+              />
+            )}
           </Col>
           <Col sm={12} md={1} className="d-flex justify-content-end">
             <Button

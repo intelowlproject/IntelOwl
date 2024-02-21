@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Col, Row, Container } from "reactstrap";
-import { MdEdit } from "react-icons/md";
+import { Col, Row, Container, Input } from "reactstrap";
+import { MdEdit, MdRemoveRedEye } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 
 import { IconButton } from "@certego/certego-ui";
@@ -10,6 +10,7 @@ import { StatusIcon } from "../../common/icon/StatusIcon";
 import { AnalysisInfoCard } from "./AnalysisInfoCard";
 import { AnalysisIsRunningAlert } from "./AnalysisIsRunningAlert";
 import { AnalysisActionsBar } from "./AnalysisActionBar";
+import { updateAnalysis } from "./analysisApi";
 
 export function AnalysisOverview({ isRunningAnalysis, analysis }) {
   console.debug("AnalysisOverview rendered");
@@ -21,6 +22,21 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
       location?.state,
     )}`,
   );
+
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [analysisDescription, setAnalysisDescription] = React.useState(
+    analysis?.description,
+  );
+
+  const editAnalysisDescription = async () => {
+    if (analysis.description !== analysisDescription) {
+      const success = await updateAnalysis(analysis.id, {
+        description: analysisDescription,
+      });
+      if (!success) return;
+    }
+    setIsEditing(false);
+  };
 
   return (
     <Container fluid>
@@ -47,25 +63,57 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
       </Row>
       <Row className="g-0 mt-3">
         <div className="mb-2">
-          <span className="fw-bold text-light">Description</span>
+          <span className="fw-bold me-2 text-light">Description</span>
           <IconButton
             id="edit-analysis-description"
             Icon={MdEdit}
             size="sm"
             color=""
-            className="me-2 text-secondary"
-            onClick={() => null}
+            className="text-secondary"
+            onClick={() => setIsEditing(true)}
             title="Edit description"
             titlePlacement="top"
           />
-          <div
-            className={`bg-dark p-1 ${
-              analysis.description ? "text-light" : "text-gray"
-            }`}
-            style={{ minHeight: "100px" }}
-          >
-            {analysis.description ? analysis.description : "No description"}
-          </div>
+          {isEditing && (
+            <IconButton
+              id="view-analysis-description"
+              Icon={MdRemoveRedEye}
+              size="sm"
+              color=""
+              className="text-secondary"
+              onClick={editAnalysisDescription}
+              title="View description"
+              titlePlacement="top"
+            />
+          )}
+          {!isEditing && (
+            <div
+              className={`form-control bg-dark border-dark ${
+                analysisDescription ? "text-light" : "text-gray"
+              }`}
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                whiteSpace: "pre-line",
+              }}
+            >
+              {analysisDescription || "No description"}
+            </div>
+          )}
+          {isEditing && (
+            <Input
+              id="edit_analysis-input"
+              name="textArea"
+              type="textarea"
+              onChange={(event) => {
+                setAnalysisDescription(event.target.value);
+              }}
+              placeholder="Enter a description"
+              value={analysisDescription}
+              style={{ minHeight: "200px", overflowY: "auto" }}
+              className="bg-dark"
+            />
+          )}
         </div>
         {isRunningAnalysis && (
           <Row>

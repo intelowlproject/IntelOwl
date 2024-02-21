@@ -22,11 +22,16 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
     observable_name: str
     scanner_name: str
     name: str = "phoneinfoga"
+    # here is a list of pre declared api keys, user can put
+    # values as per their required scanner, by default it is null
+
+    numverifyapikey: str
+    googlecse_cx: str
+    googleapikey: str
 
     def run(self):
         response: None
         url: str = f"http://phoneinfoga:5000/api/v2/scanners/{self.scanner_name}/run"
-
         try:
             response = requests.post(
                 url,
@@ -34,7 +39,14 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
                     "Content-Type": "application/json",
                     "accept": "application/json",
                 },
-                json={"number": self.observable_name},
+                json={
+                    "number": self.observable_name,
+                    "options": {
+                        "NUMVERIFY_API_KEY": self.numverifyapikey,
+                        "GOOGLECSE_CX": self.googlecse_cx,
+                        "GOOGLE_API_KEY": self.googleapikey,
+                    },
+                },
             )
             response.raise_for_status()
         except requests.RequestException as e:

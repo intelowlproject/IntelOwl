@@ -39,7 +39,40 @@ params = [
         "description": "Scanner name for [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
         "is_secret": False,
         "required": False,
-    }
+    },
+    {
+        "python_module": {
+            "module": "phoneinfoga_scan.Phoneinfoga",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "NUMVERIFY_API_KEY",
+        "type": "str",
+        "description": "Numverify api key [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
+        "is_secret": True,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "phoneinfoga_scan.Phoneinfoga",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "GOOGLECSE_CX",
+        "type": "str",
+        "description": "Googlecse_cx api key [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
+        "is_secret": True,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "phoneinfoga_scan.Phoneinfoga",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "GOOGLE_API_KEY",
+        "type": "str",
+        "description": "Google api key [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
+        "is_secret": True,
+        "required": False,
+    },
 ]
 
 values = [
@@ -125,7 +158,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0059_alter_organizationpluginconfiguration_unique_together"),
+        ("api_app", "0061_job_depth_analysis.py"),
         (
             "analyzers_manager",
             "0065_analyzer_config_validin",

@@ -25,9 +25,9 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
     # here is a list of pre declared api keys, user can put
     # values as per their required scanner, by default it is null
 
-    _NUMVERIFY_API_KEY: str
-    _GOOGLECSE_CX: str
-    _GOOGLE_API_KEY: str
+    _NUMVERIFY_API_KEY: str = ""
+    _GOOGLECSE_CX: str = ""
+    _GOOGLE_API_KEY: str = ""
 
     def run(self):
         response: None

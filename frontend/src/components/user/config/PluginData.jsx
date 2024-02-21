@@ -162,6 +162,7 @@ export function PluginData({
                       {configurations.entry && configurations.entry.length > 0
                         ? configurations.entry.map((configuration, index) => {
                             let plugins = {};
+                            let isBoolParam = false;
                             let attributeList = [];
                             let placeholder = "";
                             if (
@@ -205,7 +206,7 @@ export function PluginData({
                               if (type === "str") placeholder = "string";
                               else if (type === "int") placeholder = "1234";
                               else if (type === "float") placeholder = "12.34";
-                              else if (type === "bool") placeholder = "true";
+                              else if (type === "bool") isBoolParam = true;
                               else if (type === "json")
                                 placeholder = '{"key": "value"}';
                               else if (type === "list") placeholder = "[...]";
@@ -295,13 +296,16 @@ export function PluginData({
                                 </Col>
                                 {/* col for the attribute value */}
                                 <Col>
-                                  {placeholder === "true" ? (
+                                  {isBoolParam ? (
                                     <Field
                                       as="select"
                                       className={`form-select ${disabledSuffix}`}
                                       disabled={!configuration.edit}
                                       name={`entry[${index}].value`}
                                     >
+                                      <option value="">
+                                        ---Select Value---
+                                      </option>
                                       <option value="true">True</option>
                                       <option value="false">False</option>
                                     </Field>

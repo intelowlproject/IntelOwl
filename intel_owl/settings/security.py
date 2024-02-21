@@ -5,7 +5,7 @@
 from django.core.management.utils import get_random_secret_key
 
 from ._util import get_secret
-from .commons import WEB_CLIENT_DOMAIN
+from .commons import STAGE_LOCAL, WEB_CLIENT_DOMAIN
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret("DJANGO_SECRET", None) or get_random_secret_key()
@@ -19,12 +19,10 @@ else:
     WEB_CLIENT_URL = f"http://{WEB_CLIENT_DOMAIN}"
 
 CSRF_COOKIE_SAMESITE = "Strict"
-# TODO: change this
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost", "http://localhost/",
-    "http://localhost:80", "http://localhost:80/",
-    "http://localhost:3001", "http://localhost:3001/"
-]
+
+if STAGE_LOCAL:
+    # required to allow requests from port 3001 (frontend development)
+    CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}:80/"]
 ALLOWED_HOSTS = ["*"]
 
 # https://docs.djangoproject.com/en/4.2/ref/settings/#data-upload-max-memory-size

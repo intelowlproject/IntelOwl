@@ -79,7 +79,6 @@ class ResendVerificationView(
 
 
 class LoginView(RecaptchaV2Mixin):
-
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -99,7 +98,7 @@ class LoginView(RecaptchaV2Mixin):
         user = self.validate_and_return_user(request=request)
         logger.info(f"perform_login received request from '{user.username}''.")
         login(request, user)
-        return Response({})
+        return Response()
 
 
 class ChangePasswordView(APIView):
@@ -134,7 +133,7 @@ class LogoutView(APIView):
         user = request.user
         logger.info(f"perform_logout received request from '{user.username}''.")
         logout(request)
-        return Response({})
+        return Response()
 
 
 @add_docs(

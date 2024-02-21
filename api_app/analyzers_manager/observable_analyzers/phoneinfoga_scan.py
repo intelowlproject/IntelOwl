@@ -25,9 +25,9 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
     # here is a list of pre declared api keys, user can put
     # values as per their required scanner, by default it is null
 
-    _numverifyapikey: str
-    _googlecse_cx: str
-    _googleapikey: str
+    _NUMVERIFY_API_KEY: str
+    _GOOGLECSE_CX: str
+    _GOOGLE_API_KEY: str
 
     def run(self):
         response: None
@@ -42,9 +42,9 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
                 json={
                     "number": self.observable_name,
                     "options": {
-                        "NUMVERIFY_API_KEY": self._numverifyapikey,
-                        "GOOGLECSE_CX": self._googlecse_cx,
-                        "GOOGLE_API_KEY": self._googleapikey,
+                        "NUMVERIFY_API_KEY": self._NUMVERIFY_API_KEY,
+                        "GOOGLECSE_CX": self._GOOGLECSE_CX,
+                        "GOOGLE_API_KEY": self._GOOGLE_API_KEY,
                     },
                 },
             )

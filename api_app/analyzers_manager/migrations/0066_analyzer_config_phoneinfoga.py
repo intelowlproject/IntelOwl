@@ -158,7 +158,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0061_job_depth_analysis.py"),
+        ("api_app", "0061_job_depth_analysis"),
         (
             "analyzers_manager",
             "0065_analyzer_config_validin",

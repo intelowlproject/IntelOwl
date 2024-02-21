@@ -26,7 +26,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0026_add_zippy_scan_to_free_to_use"),
-        ("analyzers_manager", "0066_analyzer_config_feodo_tracker"),
+        ("analyzers_manager", "0067_analyzer_config_feodo_tracker"),
     ]
 
     operations = [

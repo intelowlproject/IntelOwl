@@ -107,7 +107,7 @@ check_parameters "$@" && shift 2
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers")
+docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers" "phoneinfoga")
 
 for value in "${docker_analyzers[@]}"; do
   path_mapping["${value}"]+="integrations/${value}/compose.yml"
@@ -162,6 +162,11 @@ while [[ $# -gt 0 ]]; do
     ;;
   --pcap_analyzers)
     params["pcap_analyzers"]=true
+    shift 1
+    ;;
+
+  --phoneinfoga)
+    params["phoneinfoga"]=true
     shift 1
     ;;
   --multi_queue)

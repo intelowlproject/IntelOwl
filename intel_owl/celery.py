@@ -127,7 +127,7 @@ app.conf.update(
 
 app.conf.beat_schedule = {
     "send_elastic_bi": {
-        "task": "intel_owl.tasks.send_bi_to_elastic",
+        "task": "send_bi_to_elastic",
         "schedule": crontab(minute=12),
         "options": {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),

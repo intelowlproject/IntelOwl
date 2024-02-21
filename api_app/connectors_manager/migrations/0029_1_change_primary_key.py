@@ -4,9 +4,9 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("connectors_manager", "0028_connectorreport_connectorreportsbisearch"),
-        ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
-        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
+        ("connectors_manager", "0002_0003_connector_config_yeti"),
+        ("playbooks_manager", "0001_initial_squashed"),
+        ("api_app", "0001_2_initial_squashed"),
     ]
 
     operations = []

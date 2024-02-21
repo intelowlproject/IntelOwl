@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Generator, Type
 from django.conf import settings
 from django.contrib.postgres.expressions import ArraySubquery
 from django.core.paginator import Paginator
+from treebeard.mp_tree import MP_NodeQuerySet
 
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
@@ -144,10 +145,19 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         return self.annotate(runnable=Exists(qs))
 
 
-class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
+class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
+    def create(self, parent=None, **kwargs):
+        if parent:
+            return parent.add_child(**kwargs)
+        return self.model.add_root(**kwargs)
+
+    def delete(self, *args, **kwargs):
+        # just to be sure to call the correct method
+        return MP_NodeQuerySet.delete(self, *args, **kwargs)
+
     @classmethod
     def _get_bi_serializer_class(cls):
-        from api_app.serializers import JobBISerializer
+        from api_app.serializers.job import JobBISerializer
 
         return JobBISerializer
 

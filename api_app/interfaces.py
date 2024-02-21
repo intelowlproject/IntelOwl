@@ -47,12 +47,12 @@ class CreateJobsFromPlaybookInterface:
             return self._get_observable_serializer(values, tlp, user)
 
     def _get_observable_serializer(self, values: Iterable[Any], tlp: str, user: User):
-        from api_app.serializers import ObservableAnalysisSerializer
+        from api_app.serializers.job import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
         return ObservableAnalysisSerializer(
             data={
-                "playbooks_requested": [self.playbook_to_execute.name],
+                "playbook_requested": self.playbook_to_execute.name,
                 "observables": [(None, value) for value in values],
                 "tlp": tlp,
             },
@@ -63,7 +63,7 @@ class CreateJobsFromPlaybookInterface:
     def _get_file_serializer(
         self, values: Iterable[Union[bytes, File]], tlp: str, user: User
     ):
-        from api_app.serializers import FileAnalysisSerializer
+        from api_app.serializers.job import FileJobSerializer
         from tests.mock_utils import MockUpRequest
 
         files = [
@@ -74,19 +74,24 @@ class CreateJobsFromPlaybookInterface:
         ]
         query_dict = QueryDict(mutable=True)
         data = {
-            "playbooks_requested": self.playbook_to_execute.name,
+            "playbook_requested": self.playbook_to_execute.name,
             "tlp": tlp,
         }
         query_dict.update(data)
         query_dict.setlist("files", files)
-        return FileAnalysisSerializer(
+        return FileJobSerializer(
             data=query_dict,
             context={"request": MockUpRequest(user=user)},
             many=True,
         )
 
     def create_jobs(
-        self, value: Any, tlp: str, user: User, send_task: bool = True
+        self,
+        value: Any,
+        tlp: str,
+        user: User,
+        send_task: bool = True,
+        parent_job=None,
     ) -> Generator["Job", None, None]:
         try:
             serializer = self._get_serializer(value, tlp, user)
@@ -95,7 +100,7 @@ class CreateJobsFromPlaybookInterface:
             raise
         else:
             serializer.is_valid(raise_exception=True)
-            yield from serializer.save(send_task=send_task)
+            yield from serializer.save(send_task=send_task, parent=parent_job)
 
 
 class OwnershipAbstractModel(models.Model):

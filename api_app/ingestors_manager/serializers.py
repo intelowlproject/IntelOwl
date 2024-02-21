@@ -5,14 +5,12 @@ from rest_framework import serializers as rfs
 from certego_saas.apps.user.serializers import UserSerializer
 
 from ..playbooks_manager.models import PlaybookConfig
-from ..serializers import (
-    AbstractReportBISerializer,
-    AbstractReportSerializer,
-    CrontabScheduleSerializer,
-    PeriodicTaskSerializer,
+from ..serializers.celery import CrontabScheduleSerializer, PeriodicTaskSerializer
+from ..serializers.plugin import (
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
+from ..serializers.report import AbstractReportBISerializer, AbstractReportSerializer
 from .models import IngestorConfig, IngestorReport
 
 
@@ -38,7 +36,7 @@ class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
 
     class Meta:
         model = IngestorConfig
-        exclude = PythonConfigSerializerForMigration.Meta.exclude
+        exclude = []
 
     def to_internal_value(self, data):
         raise NotImplementedError()

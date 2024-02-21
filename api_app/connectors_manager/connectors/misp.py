@@ -89,7 +89,7 @@ class MISP(Connector):
         """
         obj = pymisp.MISPAttribute()
         obj.type = "link"
-        obj.value = f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}"
+        obj.value = f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}"
         obj.comment = "View Analysis on IntelOwl"
         obj.disable_correlation = True
 

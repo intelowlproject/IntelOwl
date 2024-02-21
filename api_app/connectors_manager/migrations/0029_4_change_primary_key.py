@@ -6,6 +6,7 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     ConnectorReport = apps.get_model("connectors_manager", "ConnectorReport")
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
+    Organization = apps.get_model("certego_saas_organization", "Organization")
     name = ConnectorConfig.objects.filter(
         name=models.OuterRef("old_config")
     ).values_list("pk")[:1]
@@ -20,7 +21,7 @@ def migrate(apps, schema_editor):
             for org in config.disabled2:
                 if org:
                     OrganizationPluginConfiguration.objects.create(
-                        organization=org,
+                        organization=Organization.objects.get(pk=org),
                         object_id=config.pk,
                         content_type=ct,
                         disabled=True,
@@ -29,7 +30,7 @@ def migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("api_app", "0056_alter_organizationpluginconfiguration_content_type"),
+        ("api_app", "0001_2_initial_squashed"),
         ("connectors_manager", "0029_3_change_primary_key"),
     ]
 

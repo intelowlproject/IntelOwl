@@ -12,6 +12,7 @@ django-iam-dbauth==0.1.4
 django-prettyjson==0.4.1
 django-silk==5.1.0
 django-elasticsearch-dsl==8.0
+django-treebeard==4.7
 
 jsonschema==4.21.1
 # django rest framework libs
@@ -36,7 +37,7 @@ flower==2.0.0
 # plugins
 GitPython==3.1.41
 checkdmarc==5.3.1
-dnspython==2.4.2
+dnspython==2.5.0
 dnstwist[full]==20240116
 google>=3.0.0
 google-cloud-webrisk==1.14.0
@@ -57,15 +58,15 @@ pyhashlookup==1.2.0
 pyimpfuzzy==0.5
 pymisp==2.4.172
 pyOneNote==0.0.2
-pypdns==2.1.0
+pypdns==2.2.1
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==23.12.1
+quark-engine==24.2.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
-yara-python==4.3.1
+yara-python==4.4.0
 pydragonfly==0.1.0
 greynoise==2.0.0
 XLMMacroDeobfuscator[secure]==0.2.3

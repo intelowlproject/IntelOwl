@@ -102,7 +102,7 @@ class PlaybookConfigViewSetTestCase(
         )
         self.client.force_authenticate(m_user_org2.user)
         response = self.client.delete(f"{self.URL}/{p_custom_org1.name}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
         # 8. owner/admin can't delete a playbook created by an admin of another org
         m_user_org2.is_owner = True
         m_user_org2.is_admin = True
@@ -111,7 +111,7 @@ class PlaybookConfigViewSetTestCase(
         p_custom_org1.owner = m_owner.user
         p_custom_org1.save()
         response = self.client.delete(f"{self.URL}/{p_custom_org1.name}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_create(self):
         ac, _ = AnalyzerConfig.objects.get_or_create(

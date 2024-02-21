@@ -5,7 +5,6 @@ import logging
 import uuid
 from abc import ABCMeta, abstractmethod
 
-from django.core.cache import cache
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
@@ -21,7 +20,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.organization.permissions import (
+    IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
+)
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerPermission as IsObjectUserPermission,
 )
@@ -35,6 +36,7 @@ from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
 from .decorators import deprecated_endpoint
 from .filters import JobFilter
+from .mixins import PaginationMixin
 from .models import (
     AbstractConfig,
     AbstractReport,
@@ -47,19 +49,18 @@ from .models import (
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
-from .serializers import (
+from .serializers.job import (
     CommentSerializer,
-    FileAnalysisSerializer,
+    FileJobSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
     JobRecentScanSerializer,
     JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
-    PluginConfigSerializer,
-    PythonConfigSerializer,
     TagSerializer,
 )
+from .serializers.plugin import PluginConfigSerializer, PythonConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -140,13 +141,13 @@ def ask_multi_analysis_availability(request):
 @add_docs(
     description="This endpoint allows to start a Job related for a single File."
     " Retained for retro-compatibility",
-    request=FileAnalysisSerializer,
+    request=FileJobSerializer,
     responses={200: JobResponseSerializer(many=True)},
 )
 @api_view(["POST"])
 def analyze_file(request):
     logger.info(f"received analyze_file from user {request.user}")
-    fas = FileAnalysisSerializer(data=request.data, context={"request": request})
+    fas = FileJobSerializer(data=request.data, context={"request": request})
     fas.is_valid(raise_exception=True)
     job = fas.save(send_task=True)
     jrs = JobResponseSerializer(job).data
@@ -178,9 +179,7 @@ def analyze_file(request):
 @api_view(["POST"])
 def analyze_multiple_files(request):
     logger.info(f"received analyze_multiple_files from user {request.user}")
-    fas = FileAnalysisSerializer(
-        data=request.data, context={"request": request}, many=True
-    )
+    fas = FileJobSerializer(data=request.data, context={"request": request}, many=True)
     fas.is_valid(raise_exception=True)
     jobs = fas.save(send_task=True)
     jrs = JobResponseSerializer(jobs, many=True).data
@@ -261,7 +260,7 @@ class CommentViewSet(ModelViewSet):
             permissions.append(IsObjectUserPermission())
         # the owner and anyone in the org can read the comment
         if self.action in ["retrieve"]:
-            permissions.append(IsObjectOwnerOrSameOrgPermission())
+            permissions.append(IsObjectUserOrSameOrgPermission())
 
         return permissions
 
@@ -298,7 +297,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.action in ["destroy", "kill"]:
-            permissions.append(IsObjectOwnerOrSameOrgPermission())
+            permissions.append(IsObjectUserOrSameOrgPermission())
         return permissions
 
     def get_queryset(self):
@@ -620,6 +619,12 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == "list":
+            return qs.visible_for_user(self.request.user)
+        return qs
+
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.action in ["destroy", "update"]:
@@ -639,14 +644,11 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
 class PluginConfigViewSet(ModelWithOwnershipViewSet):
     serializer_class = PluginConfigSerializer
     pagination_class = None
+    queryset = PluginConfig.objects.all()
 
     def get_queryset(self):
         # the .exclude is to remove the default values
-        return (
-            PluginConfig.objects.visible_for_user(self.request.user)
-            .exclude(owner__isnull=True)
-            .order_by("id")
-        )
+        return super().get_queryset().exclude(owner__isnull=True).order_by("id")
 
 
 @add_docs(
@@ -674,9 +676,9 @@ def plugin_state_viewer(request):
     return Response(result)
 
 
-class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
+class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     permission_classes = [
-        IsObjectOwnerOrSameOrgPermission,
+        IsObjectUserOrSameOrgPermission,
     ]
 
     @classmethod
@@ -800,7 +802,9 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
+class AbstractConfigViewSet(
+    PaginationMixin, viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta
+):
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
     lookup_field = "name"
@@ -854,43 +858,6 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         return self.serializer_class.Meta.model.objects.all().prefetch_related(
             "python_module__parameters"
         )
-
-    def list(self, request, *args, **kwargs):
-        cache_name = (
-            f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
-        )
-
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-
-        if page is not None:
-            page = self.serializer_class.Meta.model.objects.filter(
-                pk__in=[plugin.pk for plugin in page]
-            )
-            if "page" in request.query_params and "page_size" in request.query_params:
-                cache_name += (
-                    f"_{request.query_params['page']}_"
-                    f"{request.query_params['page_size']}"
-                )
-            cache_hit = cache.get(cache_name)
-            if cache_hit is None:
-                logger.debug(f"View {cache_name} cache not hit")
-                serializer = self.get_serializer(page, many=True)
-                data = serializer.data
-                cache.set(cache_name, value=data, timeout=24 * 7)
-            else:
-                logger.debug(f"View {cache_name} cache hit")
-                data = cache_hit
-            return self.get_paginated_response(data)
-        cache_hit = cache.get(cache_name)
-
-        if cache_hit is None:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
-        else:
-            data = cache_hit
-
-        return Response(data)
 
     @add_docs(
         description="Health Check: "

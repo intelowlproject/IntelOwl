@@ -12,7 +12,6 @@ import {
 } from "reactstrap";
 import { NavLink as RRNavLink, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
-import { SiHackaday } from "react-icons/si";
 import { MdHome, MdShare } from "react-icons/md";
 import {
   RiFileListFill,
@@ -22,6 +21,7 @@ import {
   RiTwitterXFill,
 } from "react-icons/ri";
 import { FaGithub, FaGoogle } from "react-icons/fa";
+import { IoSearch } from "react-icons/io5";
 
 // lib
 import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
@@ -64,7 +64,7 @@ const authLinks = (
     </NavItem>
     <NavItem>
       <NavLink className="d-flex-start-center" end to="/scan">
-        <SiHackaday />
+        <IoSearch />
         <span className="ms-1">Scan</span>
       </NavLink>
     </NavItem>
@@ -211,7 +211,7 @@ function AppHeader() {
   );
 
   return (
-    <header className="fixed-top">
+    <header className="sticky-top">
       {/* top loading bar */}
       <AxiosLoadingBar axiosInstance={axios} />
       {/* nav bar */}

@@ -4,12 +4,11 @@
 from rest_framework import serializers as rfs
 
 from ..playbooks_manager.models import PlaybookConfig
-from ..serializers import (
-    AbstractReportBISerializer,
-    AbstractReportSerializer,
+from ..serializers.plugin import (
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
+from ..serializers.report import AbstractReportBISerializer, AbstractReportSerializer
 from .models import VisualizerConfig, VisualizerReport
 
 
@@ -25,6 +24,10 @@ class VisualizerConfigSerializer(PythonConfigSerializer):
 
 
 class VisualizerConfigSerializerForMigration(PythonConfigSerializerForMigration):
+    playbooks = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), slug_field="name"
+    )
+
     class Meta:
         model = VisualizerConfig
         exclude = PythonConfigSerializerForMigration.Meta.exclude

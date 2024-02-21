@@ -11,7 +11,19 @@ from api_app.models import Tag
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.fields import DayDurationField
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import ModelWithOwnershipSerializer, TagSerializer
+from api_app.serializers import ModelWithOwnershipSerializer
+from api_app.serializers.job import TagSerializer
+from api_app.serializers.plugin import AbstractConfigSerializerForMigration
+
+
+class PlaybookConfigSerializerForMigration(AbstractConfigSerializerForMigration):
+    analyzers = rfs.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    connectors = rfs.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    pivots = rfs.SlugRelatedField(slug_field="name", many=True, read_only=True)
+
+    class Meta:
+        model = PlaybookConfig
+        exclude = AbstractConfigSerializerForMigration.Meta.exclude
 
 
 class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):

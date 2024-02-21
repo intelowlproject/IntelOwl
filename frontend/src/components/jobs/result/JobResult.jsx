@@ -68,7 +68,8 @@ export default function JobResult() {
     window.addEventListener("blur", () => setToNotify(true));
     getJob()
       .then((response) => setJob(response.data))
-      .catch((err) => setInitialError(err));
+      .catch((err) => setInitialError(err))
+      .finally((_) => setInitialLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -80,15 +81,6 @@ export default function JobResult() {
     })`,
     { restoreOnUnmount: true },
   );
-
-  useEffect(() => {
-    /* this is required because the first loading we don't have job data
-      and this is a problem for JobOverview that needs the UI sections names
-      so the first time the page has a spinner, after the first request
-      the spinner will be moved in the sections.
-    */
-    if (job) setInitialLoading(false);
-  }, [job]);
 
   /* SETUP WS:
   only in case the first request didn't get the job in a final status.

@@ -4,5 +4,3 @@
 
 # Applies to all integrations, choose from: INFO (recommended), ERROR, DEBUG.
 LOG_LEVEL=INFO
-# For phoneinfoga analyzer 
-# NUMVERIFY_API_KEY=

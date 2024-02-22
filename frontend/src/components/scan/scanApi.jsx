@@ -156,6 +156,7 @@ export async function createJob(
   tlp,
   _scanMode,
   scanCheckTime,
+  analysisIdParam,
 ) {
   try {
     console.debug(
@@ -256,8 +257,8 @@ export async function createJob(
         );
       }
       // get analysis id
-      let analysisId = null;
-      if (jobIdsAccepted.concat(jobIdsExists).length > 1) {
+      let analysisId = analysisIdParam;
+      if (jobIdsAccepted.concat(jobIdsExists).length > 1 && !analysisIdParam) {
         analysisId = parseInt(respData[0].analysis, 10);
       }
       return Promise.resolve({

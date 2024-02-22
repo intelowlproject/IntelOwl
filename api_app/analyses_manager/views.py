@@ -11,7 +11,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from ..mixins import PaginationMixin
 from ..models import Job
 from ..permissions import IsObjectOwnerOrSameOrgPermission
 from ..views import ModelWithOwnershipViewSet
@@ -44,7 +43,7 @@ class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
 
     def _get_job(self, request):
         try:
-            job_pk = request.POST["job"]
+            job_pk = request.data.get("job")
         except KeyError:
             raise BadRequest("You should set the `job` argument in the data")
         try:

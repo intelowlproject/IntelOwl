@@ -67,6 +67,7 @@ import {
   getObservableClassification,
 } from "../../utils/observables";
 import { SpinnerIcon } from "../common/icon/icons";
+import { addJob } from "../analysis/result/analysisApi";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -81,6 +82,7 @@ function DangerErrorMessage(fieldName) {
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
+  const analysisIdParam = searchParams.get("analysis");
   const { guideState, setGuideState } = useGuideContext();
 
   const { pluginsState: organizationPluginsState } = useOrganizationStore(
@@ -200,10 +202,16 @@ export default function ScanForm() {
         values.tlp,
         values.scan_mode,
         values.scan_check_time,
+        analysisIdParam,
       );
 
       if (response.jobIds.length > 1) {
         setTimeout(() => navigate(`/analysis/${response.analysisIds}`), 1000);
+      } else if (analysisIdParam) {
+        const success = await addJob(analysisIdParam, response.jobIds[0]);
+        if (success) {
+          setTimeout(() => navigate(`/analysis/${analysisIdParam}`), 1000);
+        }
       } else {
         setTimeout(
           () =>

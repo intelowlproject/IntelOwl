@@ -76,3 +76,68 @@ export async function updateAnalysis(analysisId, data) {
   }
   return success;
 }
+
+export async function addJob(analysisId, jobId) {
+  let success = false;
+  const data = { job: jobId };
+  try {
+    const response = await axios.post(
+      `${ANALYSIS_BASE_URI}/${analysisId}/add_job`,
+      data,
+    );
+    success = response.status === 200;
+    if (success) {
+      addToast(
+        <span>
+          Job #{jobId} added to the Analysis #{analysisId}
+        </span>,
+        null,
+        "success",
+      );
+    }
+  } catch (error) {
+    addToast(
+      <span>
+        Failed. Operation:{" "}
+        <em>
+          add job #{jobId} to the analysis #{analysisId}
+        </em>
+      </span>,
+      error.parsedMsg,
+      "warning",
+    );
+  }
+  return success;
+}
+
+export async function removeJob(analysisId, jobId) {
+  let success = false;
+  try {
+    const response = await axios.post(
+      `${ANALYSIS_BASE_URI}/${analysisId}/remove_job`,
+      { job: jobId },
+    );
+    success = response.status === 200;
+    if (success) {
+      addToast(
+        <span>
+          Job #{jobId} removed from the Analysis #{analysisId}
+        </span>,
+        null,
+        "success",
+      );
+    }
+  } catch (error) {
+    addToast(
+      <span>
+        Failed. Operation:{" "}
+        <em>
+          remove job #{jobId} from the analysis #{analysisId}
+        </em>
+      </span>,
+      error.parsedMsg,
+      "warning",
+    );
+  }
+  return success;
+}

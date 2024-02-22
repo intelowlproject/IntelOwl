@@ -11,6 +11,7 @@ import { AnalysisInfoCard } from "./AnalysisInfoCard";
 import { AnalysisIsRunningAlert } from "./AnalysisIsRunningAlert";
 import { AnalysisActionsBar } from "./AnalysisActionBar";
 import { updateAnalysis } from "./analysisApi";
+import { AnalysisFlow } from "../flow/AnalysisFlow";
 
 export function AnalysisOverview({ isRunningAnalysis, analysis }) {
   console.debug("AnalysisOverview rendered");
@@ -39,7 +40,7 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
   };
 
   return (
-    <Container fluid>
+    <Container fluid className="mb-4">
       {/* bar with analysis id and utilities buttons */}
       <Row
         className="g-0 d-flex-between-end align-items-center"
@@ -120,6 +121,12 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
             <AnalysisIsRunningAlert analysis={analysis} />
           </Row>
         )}
+      </Row>
+      <Row
+        className="g-0 mt-3"
+        style={{ width: "100%", height: "70%", border: "1px solid #0b2b38" }}
+      >
+        <AnalysisFlow analysis={analysis} />
       </Row>
     </Container>
   );

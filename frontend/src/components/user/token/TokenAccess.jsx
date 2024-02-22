@@ -15,7 +15,7 @@ import {
   confirm,
 } from "@certego/certego-ui";
 
-import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./APIPageApi";
+import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./tokenApi";
 
 function GenerateIcon() {
   return (
@@ -26,7 +26,7 @@ function GenerateIcon() {
   );
 }
 
-export default function APIAccess() {
+export default function TokenAccess() {
   console.debug("APIAccess rendered!");
 
   const [{ data: respData, loading, error }, refetch] = useAxios(

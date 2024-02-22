@@ -4,10 +4,10 @@ import useTitle from "react-use/lib/useTitle";
 
 import { ContentSection } from "@certego/certego-ui";
 
-import APIAccess from "./APIAccess";
+import TokenAccess from "./TokenAccess";
 import { PYINTELOWL_GH_URL } from "../../../constants/environment";
 
-export default function APIPage() {
+export default function TokenPage() {
   console.debug("APIPage rendered!");
 
   // page title
@@ -38,7 +38,7 @@ export default function APIPage() {
       {/* API Access */}
       <h6>API Access</h6>
       <ContentSection className="bg-body border border-dark">
-        <APIAccess />
+        <TokenAccess />
       </ContentSection>
     </Container>
   );

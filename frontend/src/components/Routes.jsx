@@ -13,7 +13,7 @@ const Register = React.lazy(() => import("./auth/Register"));
 const EmailVerification = React.lazy(() => import("./auth/EmailVerification"));
 const ResetPassword = React.lazy(() => import("./auth/ResetPassword"));
 const Organization = React.lazy(() => import("./organization/Organization"));
-const APIPage = React.lazy(() => import("./user/api/APIPage"));
+const TokenPage = React.lazy(() => import("./user/token/TokenPage"));
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
 const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
 const CommentResult = React.lazy(() =>
@@ -121,7 +121,7 @@ const authRoutesLazy = [
     path: "/me/api",
     element: (
       <Suspense fallback={<FallBackLoading />}>
-        <APIPage />
+        <TokenPage />
       </Suspense>
     ),
   },

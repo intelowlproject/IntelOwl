@@ -245,9 +245,6 @@ class TokenSerializer(rfs.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        """
-        :meta private:
-        """
         user = self.context["request"].user
         if Token.objects.filter(user=user).exists():
             raise rfs.ValidationError("An API token was already issued to you.")

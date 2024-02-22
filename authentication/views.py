@@ -13,8 +13,9 @@ from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect
 from drf_spectacular.utils import extend_schema as add_docs
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -30,6 +31,7 @@ from .serializers import (
     EmailVerificationSerializer,
     LoginSerializer,
     RegistrationSerializer,
+    TokenSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -129,6 +131,8 @@ class ChangePasswordView(APIView):
 
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         user = request.user
         logger.info(f"perform_logout received request from '{user.username}''.")
@@ -238,3 +242,41 @@ def checkConfiguration(request):
     return Response(
         status=status.HTTP_200_OK, data={"errors": errors} if errors else {}
     )
+
+
+class APIAccessTokenView(APIView):
+    """
+    - ``GET`` -> get token-client pair info
+    - ``POST`` -> create and get token-client pair info
+    - ``DELETE`` -> delete existing API access token
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        try:
+            instance = Token.objects.get(user__pk=self.request.user.pk)
+        except Token.DoesNotExist:
+            raise NotFound()
+
+        return instance
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        logger.info(f" user {request.user} request the API token")
+        serializer = TokenSerializer(instance)
+        return Response(serializer.data)
+
+    def post(self, request):
+        username = request.user.username
+        logger.info(f"user {username} send a request to create the API token")
+        serializer = TokenSerializer(data={}, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        logger.info(f"user {request.user} send a request to delete the API token")
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

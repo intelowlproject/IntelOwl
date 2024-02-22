@@ -4,15 +4,14 @@ import useTitle from "react-use/lib/useTitle";
 
 import { ContentSection } from "@certego/certego-ui";
 
-import SessionsList from "./SessionsList";
 import APIAccess from "./APIAccess";
 import { PYINTELOWL_GH_URL } from "../../../constants/environment";
 
-export default function Sessions() {
-  console.debug("Sessions rendered!");
+export default function APIPage() {
+  console.debug("APIPage rendered!");
 
   // page title
-  useTitle("IntelOwl | Sessions", {
+  useTitle("IntelOwl | API", {
     restoreOnUnmount: true,
   });
 
@@ -40,11 +39,6 @@ export default function Sessions() {
       <h6>API Access</h6>
       <ContentSection className="bg-body border border-dark">
         <APIAccess />
-      </ContentSection>
-      {/* Sessions List */}
-      <h6>Browser Sessions</h6>
-      <ContentSection className="bg-body border border-dark">
-        <SessionsList />
       </ContentSection>
     </Container>
   );

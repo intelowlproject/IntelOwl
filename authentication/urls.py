@@ -5,6 +5,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (
+    APIAccessTokenView,
     ChangePasswordView,
     EmailVerificationView,
     GoogleLoginCallbackView,
@@ -47,6 +48,7 @@ urlpatterns = [
     path("login", LoginView.as_view(), name="auth_login"),
     path("logout", LogoutView.as_view(), name="auth_logout"),
     path("changepassword", ChangePasswordView.as_view(), name="auth_changepassword"),
+    path("apiaccess", APIAccessTokenView.as_view(), name="auth_apiaccess"),
     path("google", google_login, name="oauth_google"),
     path(
         "google-callback",

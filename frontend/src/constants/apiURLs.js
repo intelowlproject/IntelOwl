@@ -43,7 +43,6 @@ export const NOTIFICATION_BASE_URI = `${API_BASE_URI}/notification`;
 
 // auth
 export const AUTH_BASE_URI = `${API_BASE_URI}/auth`;
-export const SESSIONS_BASE_URI = `${AUTH_BASE_URI}/sessions`;
 export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
 
 // WEBSOCKETS

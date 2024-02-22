@@ -15,7 +15,7 @@ import {
   confirm,
 } from "@certego/certego-ui";
 
-import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./sessionApi";
+import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./APIPageApi";
 
 function GenerateIcon() {
   return (
@@ -87,17 +87,7 @@ export default function APIAccess() {
                 id="apikey__created"
                 value={respData?.created}
                 format="hh:mm a MMM do, yyyy"
-                title="Session create date"
-                showAgo
-              />
-            </Col>
-            <Col sm={6} lg={3}>
-              <small className="text-muted me-1">Expires</small>
-              <DateHoverable
-                id="apikey__expires"
-                value={respData?.expiry}
-                format="hh:mm a MMM do, yyyy"
-                title="Session expiry date"
+                title="Token create date"
                 showAgo
               />
             </Col>
@@ -109,10 +99,10 @@ export default function APIAccess() {
                 {tokenVisible ? (
                   <CopyToClipboardButton
                     id="apiaccess__token"
-                    text={respData?.token}
+                    text={respData?.key}
                     showOnHover
                   >
-                    {respData?.token}
+                    {respData?.key}
                   </CopyToClipboardButton>
                 ) : (
                   <div className="blurry-text text-truncate">

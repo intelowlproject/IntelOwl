@@ -86,10 +86,10 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
         return super().validate_unique()
 
     def save(self, commit=True):
-        if self.instance.pk:
+        if not self.instance.pk:
             for field in self._plugins:
                 config = self.cleaned_data.get(field, None)
-                if field:
+                if config:
                     break
             else:
                 raise ValidationError("Config is required")

@@ -1,9 +1,15 @@
 from typing import Optional
 
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 from api_app.forms import ParameterInlineForm
-from api_app.models import Parameter, PluginConfig, PythonConfig
+from api_app.models import (
+    OrganizationPluginConfiguration,
+    Parameter,
+    PluginConfig,
+    PythonConfig,
+)
 
 
 class PluginConfigInlineForParameter(admin.TabularInline):
@@ -96,4 +102,20 @@ class ParameterInline(admin.TabularInline):
 
     @staticmethod
     def get_extra(request, obj: Parameter = None, **kwargs):
+        return 0
+
+
+class OrganizationPluginConfigurationInLine(GenericTabularInline):
+    model = OrganizationPluginConfiguration
+    list_display = [
+        "organization",
+        "rate_limit_timeout",
+        "disabled",
+        "disabled_comment",
+    ]
+    fields = list_display
+    show_change_link = True
+
+    @staticmethod
+    def get_extra(request, obj: OrganizationPluginConfiguration = None, **kwargs):
         return 0

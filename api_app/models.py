@@ -919,14 +919,18 @@ class OrganizationPluginConfiguration(models.Model):
     def disable_manually(self, user: User):
         self.disabled = True
         self.disabled_comment = (
-            f"Disabled by user {user.username} at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"Disabled by user {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         if self.rate_limit_enable_task:
             self.rate_limit_enable_task.delete()
         self.save()
 
     def enable_manually(self, user: User):
-        self.disabled_comment += f"\nEnabled back by {user.username} at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        self.disabled_comment += (
+            f"\nEnabled back by {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         self.enable()
 
     def enable(self):

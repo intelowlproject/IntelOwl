@@ -36,6 +36,9 @@ export default function TokenAccess() {
     { useCache: false },
   );
 
+  console.debug(`TokenAccess - respData: ${JSON.stringify(respData)}`);
+  console.debug(`TokenAccess - error: ${JSON.stringify(error)}`);
+
   // local state
   const [tokenVisible, setTokenVisible] = React.useState(false);
 

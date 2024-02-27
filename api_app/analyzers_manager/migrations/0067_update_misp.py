@@ -77,13 +77,21 @@ def migrate(apps, schema_editor):
 
 def reverse_migrate(apps, schema_editor):
     PythonModule = apps.get_model("api_app", "PythonModule")
+    Parameter = apps.get_model("api_app", "Parameter")
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
 
     pm = PythonModule.objects.get(
         module="misp.MISP", base_path="api_app.analyzers_manager.observable_analyzers"
     )
-    pm.analyzerconfig.all().delete()
-    pm.parameter.all().delete()
-    pm.delete()
+    parameters_to_remove = Parameter.objects.filter(
+        python_module=pm, name__in=["timeout", "published", "metadata"]
+    )
+
+    PluginConfig.objects.filter(
+        parameter__python_module=pm, parameter__in=parameters_to_remove
+    ).delete()
+
+    parameters_to_remove.delete()
 
 
 class Migration(migrations.Migration):

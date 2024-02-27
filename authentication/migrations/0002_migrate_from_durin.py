@@ -13,7 +13,7 @@ def move_token_from_durin(apps, schema_editor):
 
         for durin_token in AuthToken.objects.all():
             # export only CLI token (client name PyIntelOwl)
-            # only in case user didnìt have a rest framework token
+            # only in case user didn't have a rest framework token
             if durin_token.client.name == "PyIntelOwl":
                 if not Token.objects.filter(user_id=durin_token.user.id).exists():
                     Token.objects.create(
@@ -28,6 +28,8 @@ def move_token_from_durin(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("authentication", "0001_initial"),
+        ("authtoken", "0003_tokenproxy"),
+        ("api_app", "0054_job_jobbisearch"),
     ]
 
     operations = [

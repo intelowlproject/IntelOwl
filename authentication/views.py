@@ -183,22 +183,16 @@ class GoogleLoginCallbackView(LoginView):
                 email=user_email, username=user_name, password=None
             )
 
-    def get(self, *args, **kwargs):
-        return self.post(*args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
-        response = super().post(*args, **kwargs)
-        token = response.data["token"]
+    def post(self, request, *args, **kwargs):
+        user = self.validate_and_return_user(request=request)
+        logger.info(f"perform_login received request from '{user.username}''.")
+        login(request, user)
         # Uncomment this for local testing
-        # return redirect(f"http://localhost:3001/login?token={token}")
-        return redirect(self.request.build_absolute_uri(f"/login?token={token}"))
-
-    @staticmethod
-    def get_post_response_data(request, token_obj) -> dict:
-        data = {
-            "token": token_obj.token,
-        }
-        return data
+        # return redirect("http://localhost/login")
+        return redirect(self.request.build_absolute_uri("/login"))
 
 
 @api_view(["get"])

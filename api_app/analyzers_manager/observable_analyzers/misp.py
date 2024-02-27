@@ -52,12 +52,16 @@ class MISP(classes.ObservableAnalyzer):
         params = {
             "limit": self.limit,
             "enforce_warninglist": self.enforce_warninglist,
+            "published": self.published,
+            "metadata": self.metadata,
         }
+
         if self.strict_search:
             params["value"] = self.observable_name
         else:
             string_wildcard = f"%{self.observable_name}%"
             params["searchall"] = string_wildcard
+
         if self.from_days != 0:
             params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
         if self.filter_on_type:
@@ -85,10 +89,6 @@ class MISP(classes.ObservableAnalyzer):
                     f"Observable {self.observable_classification} not supported."
                     "Currently supported are: ip, domain, hash, url, generic."
                 )
-        if self.published:
-            params["published"] = True
-        if self.metadata:
-            params["metadata"] = True
 
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):

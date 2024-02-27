@@ -279,7 +279,7 @@ export function PlaybooksCollapse({ pluginList, pluginType_ }) {
         </small>
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
-      <Collapse isOpen={isOpen} id="PlaybooksCollapse" className="">
+      <Collapse isOpen={isOpen} id="PlaybooksCollapse">
         <ul className="d-flex flex-column align-items-start p-3 text-break ">
           {pluginList?.sort().map((pluginName) => (
             <li className="pb-2" key={pluginName}>

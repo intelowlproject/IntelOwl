@@ -4,10 +4,19 @@ import PropTypes from "prop-types";
 import truncateText from "../../utils/truncateText";
 
 export default function TableCellList(props) {
-  const { value = [], size = null, idPrefix = null, keyPrefix = null } = props;
+  const {
+    value = [],
+    size = null,
+    idPrefix = null,
+    keyPrefix = null,
+    ulKey = null,
+  } = props;
 
   return (
-    <ul className="d-flex flex-column align-items-start text-left text-truncate">
+    <ul
+      className="d-flex flex-column align-items-start text-left text-truncate"
+      key={ulKey}
+    >
       {value?.sort().map((val) => (
         <li
           className="mb-1 pb-2"
@@ -32,6 +41,7 @@ TableCellList.propTypes = {
   size: PropTypes.number,
   idPrefix: PropTypes.string,
   keyPrefix: PropTypes.string,
+  ulKey: PropTypes.string,
 };
 
 TableCellList.defaultProps = {
@@ -39,4 +49,5 @@ TableCellList.defaultProps = {
   size: null,
   idPrefix: null,
   keyPrefix: null,
+  ulKey: null,
 };

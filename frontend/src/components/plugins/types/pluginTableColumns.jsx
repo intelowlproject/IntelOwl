@@ -461,6 +461,7 @@ export const visualizerTableColumns = [
     accessor: (row) => row.playbooks,
     Cell: ({ value }) => (
       <TableCellList
+        ulKey={`visualizers-playbooks__${value}`}
         value={value}
         idPrefix="table-user-"
         keyPrefix="table-user-"

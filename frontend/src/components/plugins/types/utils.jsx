@@ -12,7 +12,11 @@ import {
   Collapse,
 } from "reactstrap";
 import { MdInfo } from "react-icons/md";
-import { BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
+import {
+  BooleanIcon,
+  ArrowToggleIcon,
+  CopyToClipboardButton,
+} from "@certego/certego-ui";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { JobTag } from "../../common/JobTag";
 import { TLPTag } from "../../common/TLPTag";
@@ -20,9 +24,11 @@ import { JobTypes } from "../../../constants/jobConst";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { ScanModesNumeric } from "../../../constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../utils/time";
+import truncateText from "../../../utils/truncateText";
 
 export function PluginInfoCard({ pluginInfo }) {
   console.debug(`pluginInfo: ${JSON.stringify(pluginInfo)}`);
+
   return (
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
@@ -273,11 +279,17 @@ export function PlaybooksCollapse({ pluginList, pluginType_ }) {
         </small>
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
-      <Collapse isOpen={isOpen} id="PlaybooksCollapse">
-        <ul className="d-flex flex-column align-items-start text-break p-3">
+      <Collapse isOpen={isOpen} id="PlaybooksCollapse" className="">
+        <ul className="d-flex flex-column align-items-start p-3 text-break ">
           {pluginList?.sort().map((pluginName) => (
             <li className="pb-2" key={pluginName}>
-              {pluginName}
+              <CopyToClipboardButton
+                showOnHover
+                text={pluginName}
+                className="d-block text-truncate"
+              >
+                {truncateText(pluginName, 12)}
+              </CopyToClipboardButton>
             </li>
           ))}
         </ul>

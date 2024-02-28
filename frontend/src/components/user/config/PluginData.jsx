@@ -313,6 +313,7 @@ export function PluginData({
                                     <Field
                                       as={Input}
                                       type="textarea"
+                                      row="1"
                                       name={`entry.${index}.value`}
                                       className={disabledSuffix}
                                       disabled={!configuration.edit}
@@ -361,18 +362,17 @@ export function PluginData({
                                             );
                                             refetchAll();
                                           });
-                                        else console.debug("heavy debugging");
-                                        console.debug(newConfiguration.value);
-                                        updateCustomConfig(
-                                          newConfiguration.value,
-                                          newConfiguration.id,
-                                        ).then(() => {
-                                          setFieldValue(
-                                            `entry.${index}.edit`,
-                                            false,
-                                          );
-                                          refetchAll();
-                                        });
+                                        else
+                                          updateCustomConfig(
+                                            newConfiguration.value,
+                                            newConfiguration.id,
+                                          ).then(() => {
+                                            setFieldValue(
+                                              `entry.${index}.edit`,
+                                              false,
+                                            );
+                                            refetchAll();
+                                          });
                                       } else
                                         setFieldValue(
                                           `entry.${index}.edit`,

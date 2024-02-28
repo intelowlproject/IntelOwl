@@ -43,14 +43,11 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
             except json.JSONDecodeError:
                 # this is to accept literal strings
                 data = f'"{data}"'
-
-                print(f"this is for testing data type {data}")
                 logger.debug(f"this is for testing data type {data}")
                 try:
                     data = json.dumps(data)
                     return json.loads(data)
                 except json.JSONDecodeError:
-                    print("is this still throwing error")
                     logger.info(f"value {data} ({type(data)}) raised ValidationError")
                     raise ValidationError({"detail": "Value is not JSON-compliant."})
 

@@ -32,7 +32,6 @@ async function updateCustomConfig(value, id) {
     addToast("Data updated successfully", null, "success", true);
     return resp;
   } catch (error) {
-    console.debug("failed in connfig api request");
     addToast("Failed!", error.parsedMsg.toString(), "danger", true);
     return Promise.reject(error);
   }

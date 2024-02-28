@@ -343,7 +343,6 @@ export function PluginData({
                                           )
                                         )
                                           return;
-
                                         const newConfiguration = {
                                           ...configuration,
                                           ...additionalEntryData,

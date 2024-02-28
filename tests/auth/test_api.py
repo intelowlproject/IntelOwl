@@ -15,27 +15,6 @@ api_uri = reverse("auth_apiaccess")
 
 @tag("api", "user")
 class TestUserAuth(CustomOAuthTestCase):
-    # def setUp(self):
-    #     # test data
-    #     self.testregisteruser = {
-    #         "email": "testregisteruser@test.com",
-    #         "username": "testregisteruser",
-    #         "first_name": "testregisteruser",
-    #         "last_name": "testregisteruser",
-    #         "password": "testregisteruser",
-    #         "profile": {
-    #             "company_name": "companytest",
-    #             "company_role": "intelowl test",
-    #             "twitter_handle": "@fake",
-    #             "discover_from": "other",
-    #         },
-    #     }
-    #     mail.outbox = []
-
-    # def tearDown(self):  # skipcq: PYL-R0201
-    #     # cache clear (for throttling)
-    #     cache.clear()
-
     def test_get_token_unauthorized(self):
         response = self.client.get(api_uri)
         self.assertEqual(response.status_code, 401)

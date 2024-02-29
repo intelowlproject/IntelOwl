@@ -205,7 +205,8 @@ export default function ScanForm() {
         analysisIdParam,
       );
 
-      if (response.jobIds.length > 1) {
+      console.debug(response.analysisIds);
+      if (response.jobIds.length > 1 || response.analysisIds?.length) {
         setTimeout(() => navigate(`/analysis/${response.analysisIds}`), 1000);
       } else if (analysisIdParam) {
         const success = await addJob(analysisIdParam, response.jobIds[0]);

@@ -409,7 +409,23 @@ class JobTreeSerializer(ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ["pk", "pivot_config"]
+        fields = [
+            "pk",
+            "pivot_config",
+            "observable_name",
+            "file_name",
+            "is_sample",
+            "playbook",
+            "status",
+        ]
+
+    playbook = rfs.SlugRelatedField(
+        source="playbook_to_execute",
+        slug_field="name",
+        queryset=PlaybookConfig.objects.all(),
+        many=False,
+        required=False,
+    )
 
     def to_representation(self, instance):
         instance: Job

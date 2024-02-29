@@ -19,12 +19,12 @@ export default function AnalysisResult() {
   const params = useParams();
   const analysisId = params.id;
 
-  // API to download the job data
+  // API to download the analysis data
   const [{ data: analysis, loading, error }, refetch] = useAxios({
     url: `${ANALYSIS_BASE_URI}/${analysisId}`,
   });
 
-  // in case the job is not running and started (the job is not undefined) it means it terminated.
+  // in case the analysis is not running and started (the analysis is not undefined) it means it terminated.
   const analysisConcluded = analysis !== undefined && !isRunning;
 
   console.debug(

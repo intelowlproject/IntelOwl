@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
+import useAxios from "axios-hooks";
 import { Col, Row, Container, Input } from "reactstrap";
 import { MdEdit, MdRemoveRedEye } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 
-import { IconButton } from "@certego/certego-ui";
+import { IconButton, Loader } from "@certego/certego-ui";
 import { StatusIcon } from "../../common/icon/StatusIcon";
 
 import { AnalysisInfoCard } from "./AnalysisInfoCard";
@@ -12,6 +13,7 @@ import { AnalysisIsRunningAlert } from "./AnalysisIsRunningAlert";
 import { AnalysisActionsBar } from "./AnalysisActionBar";
 import { updateAnalysis } from "./analysisApi";
 import { AnalysisFlow } from "../flow/AnalysisFlow";
+import { ANALYSIS_BASE_URI } from "../../../constants/apiURLs";
 
 export function AnalysisOverview({ isRunningAnalysis, analysis }) {
   console.debug("AnalysisOverview rendered");
@@ -24,11 +26,23 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
     )}`,
   );
 
+  // API to download analysis tree
+  const [{ data: analysisTree, loading, error }, refetchTree] = useAxios({
+    url: `${ANALYSIS_BASE_URI}/${analysis.id}/tree`,
+  });
+
+  // refetch tree after the analysis is complete
+  React.useEffect(() => {
+    refetchTree();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunningAnalysis]);
+
   const [isEditing, setIsEditing] = React.useState(false);
   const [analysisDescription, setAnalysisDescription] = React.useState(
     analysis?.description,
   );
 
+  // API to edit analysis description
   const editAnalysisDescription = async () => {
     if (analysis.description !== analysisDescription) {
       const success = await updateAnalysis(analysis.id, {
@@ -126,7 +140,17 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
         className="g-0 mt-3"
         style={{ width: "100%", height: "70%", border: "1px solid #0b2b38" }}
       >
-        <AnalysisFlow analysis={analysis} />
+        <Loader
+          loading={loading}
+          error={error}
+          render={() => (
+            <AnalysisFlow
+              analysisTree={analysisTree}
+              analysisId={analysis.id}
+              refetchTree={refetchTree}
+            />
+          )}
+        />
       </Row>
     </Container>
   );

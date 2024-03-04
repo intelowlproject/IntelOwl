@@ -75,7 +75,7 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
         number_plugins = sum(
             bool(self.cleaned_data.get(val, False)) for val in self._plugins
         )
-        if number_plugins != 1:
+        if number_plugins != 1 and not self.instance.pk:
             self.add_error(
                 field=None,
                 error={
@@ -86,14 +86,17 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
         return super().validate_unique()
 
     def save(self, commit=True):
-        for field in self._plugins:
-            config = self.cleaned_data.get(field, None)
-            if field:
-                break
+        if not self.instance.pk:
+            for field in self._plugins:
+                config = self.cleaned_data.get(field, None)
+                if config:
+                    break
+            else:
+                raise ValidationError("Config is required")
+            instance = super().save(commit=False)
+            instance.config = config
         else:
-            raise ValidationError("Config is required")
-        instance = super().save(commit=False)
-        instance.config = config
+            instance = super().save(commit=False)
         if commit:
             instance.save()
         return instance

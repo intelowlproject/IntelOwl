@@ -6,6 +6,7 @@ from django.db import migrations, models
 def migrate(apps, schema_editor):
     AnalyzerReport = apps.get_model("analyzers_manager", "AnalyzerReport")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    Organization = apps.get_model("certego_saas_organization", "Organization")
     name = AnalyzerConfig.objects.filter(
         name=models.OuterRef("old_config")
     ).values_list("pk")[:1]
@@ -20,7 +21,7 @@ def migrate(apps, schema_editor):
             for org in config.disabled2:
                 if org:
                     OrganizationPluginConfiguration.objects.create(
-                        organization=org,
+                        organization=Organization.objects.get(pk=org),
                         object_id=config.pk,
                         content_type=ct,
                         disabled=True,

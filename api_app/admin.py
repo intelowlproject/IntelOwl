@@ -19,6 +19,7 @@ from .models import (
     Tag,
 )
 from .tabulars import (
+    OrganizationPluginConfigurationInLine,
     ParameterInline,
     PluginConfigInlineForParameter,
     PluginConfigInlineForPythonConfig,
@@ -203,7 +204,7 @@ class AbstractConfigAdminView(CustomAdminView):
 
 class PythonConfigAdminView(AbstractConfigAdminView):
     list_display = AbstractConfigAdminView.list_display + ("routing_key",)
-    inlines = [PluginConfigInlineForPythonConfig]
+    inlines = [PluginConfigInlineForPythonConfig, OrganizationPluginConfigurationInLine]
     list_filter = ["routing_key"]
 
 

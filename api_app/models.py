@@ -133,7 +133,10 @@ class PythonModule(models.Model):
 
     @property
     def queue(self) -> str:
-        return self.configs.order_by("?").first().queue
+        try:
+            return self.configs.order_by("?").first().queue
+        except AttributeError:
+            return None
 
     def _clean_python_module(self):
         try:

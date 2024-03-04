@@ -895,7 +895,7 @@ class OrganizationPluginConfiguration(models.Model):
             f"{enabled_to.strftime('%d %m %Y: %H %M %s')}"
         )
         clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
-            1
+            0
         ]
         if not self.rate_limit_enable_task:
             from intel_owl.tasks import enable_configuration_for_org_for_rate_limit
@@ -906,13 +906,17 @@ class OrganizationPluginConfiguration(models.Model):
                 "RateLimitCleaner",
                 clocked=clock_schedule,
                 one_off=True,
+                enabled=True,
                 task=f"{enable_configuration_for_org_for_rate_limit.__name__}",
-                kwargs={
-                    "org_configuration_pk": self.pk,
-                },
+                kwargs=json.dumps(
+                    {
+                        "org_configuration_pk": self.pk,
+                    }
+                ),
             )
         else:
             self.rate_limit_enable_task.clocked = clock_schedule
+            self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
         self.save()
 
@@ -935,9 +939,9 @@ class OrganizationPluginConfiguration(models.Model):
 
     def enable(self):
         self.disabled = False
+        self.save()
         if self.rate_limit_enable_task:
             self.rate_limit_enable_task.delete()
-        self.save()
 
 
 class ListCachable(models.Model):

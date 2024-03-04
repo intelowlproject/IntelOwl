@@ -7,8 +7,8 @@ from django import dispatch
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
+from django_celery_beat.apps import BeatConfig
 
-from api_app.apps import ApiAppConfig
 from api_app.decorators import prevent_signal_recursion
 from api_app.helpers import calculate_md5
 from api_app.models import (
@@ -61,7 +61,7 @@ def post_migrate_beat(
 ):
     from django_celery_beat.models import PeriodicTask
 
-    if isinstance(sender, ApiAppConfig):
+    if isinstance(sender, BeatConfig):
         from intel_owl.tasks import update
 
         for module in PythonModule.objects.filter(health_check_schedule__isnull=False):

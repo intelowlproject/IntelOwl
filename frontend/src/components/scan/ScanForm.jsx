@@ -67,7 +67,7 @@ import {
   getObservableClassification,
 } from "../../utils/observables";
 import { SpinnerIcon } from "../common/icon/icons";
-import { addJob } from "../analysis/result/analysisApi";
+import { addJob, removeJob } from "../analysis/result/analysisApi";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -206,22 +206,50 @@ export default function ScanForm() {
       );
 
       console.debug(response.analysisIds);
-      if (response.jobIds.length > 1 || response.analysisIds?.length) {
-        setTimeout(() => navigate(`/analysis/${response.analysisIds}`), 1000);
-      } else if (analysisIdParam) {
-        const success = await addJob(analysisIdParam, response.jobIds[0]);
-        if (success) {
-          setTimeout(() => navigate(`/analysis/${analysisIdParam}`), 1000);
+
+      // no analysis id in param
+      if (!analysisIdParam) {
+        // multiple jobs or pivot
+        if (response.analysisIds.length) {
+          setTimeout(() => navigate(`/analysis/${response.analysisIds}`), 1000);
+        } else {
+          // single job
+          setTimeout(
+            () =>
+              navigate(
+                `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
+              ),
+            1000,
+          );
         }
-      } else {
-        setTimeout(
-          () =>
-            navigate(
-              `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
-            ),
-          1000,
-        );
       }
+
+      // analysis id in param
+      if (analysisIdParam) {
+        // multiple jobs or pivot
+        if (response.analysisIds.length) {
+          // needed to remove jobs from previous analysis
+          response.jobIds.forEach(async (jobId) => {
+            const jobRemoved = await removeJob(response.analysisIds, jobId);
+            if (jobRemoved) {
+              const success = await addJob(analysisIdParam, jobId);
+              if (success) {
+                setTimeout(
+                  () => navigate(`/analysis/${analysisIdParam}`),
+                  1000,
+                );
+              }
+            }
+          });
+        } else {
+          // single job
+          const success = await addJob(analysisIdParam, response.jobIds[0]);
+          if (success) {
+            setTimeout(() => navigate(`/analysis/${analysisIdParam}`), 1000);
+          }
+        }
+      }
+
       refetchQuota();
       formik.setSubmitting(false);
     },

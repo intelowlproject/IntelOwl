@@ -1,10 +1,10 @@
+import dagre from "@dagrejs/dagre";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 
 /* eslint-disable id-length */
-function addJobNode(nodes, job, analysisId, position, refetchTree) {
+function addJobNode(nodes, job, analysisId, refetchTree) {
   nodes.push({
     id: `job-${job.pk}`,
-    position,
     data: {
       id: job.pk,
       label: `job #${job.pk}`,
@@ -20,29 +20,8 @@ function addJobNode(nodes, job, analysisId, position, refetchTree) {
 
   // recursive call if there are children
   if (job.children) {
-    const xPosition = nodes[0].position.x + 310;
-    const numChildren = job.children.length;
-
-    job.children.forEach((child, index) => {
-      if (numChildren === 1)
-        addJobNode(
-          nodes,
-          child,
-          analysisId,
-          { x: xPosition, y: position.y },
-          refetchTree,
-        );
-      else {
-        const parentYPosition = position.y;
-        const yPosition = (index + 1) * parentYPosition;
-        addJobNode(
-          nodes,
-          child,
-          analysisId,
-          { x: xPosition, y: yPosition },
-          refetchTree,
-        );
-      }
+    job.children.forEach((child) => {
+      addJobNode(nodes, child, analysisId, refetchTree);
     });
   }
 }
@@ -63,8 +42,40 @@ function addEdge(edges, job, parentType, parentId) {
   }
 }
 
-export function calculateNodesAndEdges(analysisTree, analysisId, refetchTree) {
-  // analysis node (custom node)
+function getLayoutedElements(nodes, edges) {
+  // needed for graph layout
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+  const nodeWidth = 300;
+  const nodeHeight = 60;
+
+  dagreGraph.setGraph({ rankdir: "LR" });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  nodes.forEach((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    // eslint-disable-next-line no-param-reassign
+    node.position = {
+      x: nodeWithPosition.x - nodeWidth / 2 + 150,
+      y: nodeWithPosition.y - nodeHeight / 2 + 70,
+    };
+    return node;
+  });
+  return { nodes, edges };
+}
+
+export function getNodesAndEdges(analysisTree, analysisId, refetchTree) {
+  // analysis node
   const initialNode = [
     {
       id: `analysis-${analysisId}`,
@@ -80,7 +91,6 @@ export function calculateNodesAndEdges(analysisTree, analysisId, refetchTree) {
   ];
   // jobs nodes
   const jobsNodes = [];
-  let yPosition = initialNode[0].position.y;
 
   // edges
   const initialEdges = [];
@@ -88,17 +98,21 @@ export function calculateNodesAndEdges(analysisTree, analysisId, refetchTree) {
 
   if (analysisTree.jobs.length) {
     analysisTree.jobs.forEach((job) => {
-      yPosition += 120;
-      addJobNode(
-        jobsNodes,
-        job,
-        analysisId,
-        { x: initialNode[0].position.x + 170, y: yPosition },
-        refetchTree,
-      );
+      addJobNode(jobsNodes, job, analysisId, refetchTree);
       addEdge(jobsEdges, job, "analysis", analysisId);
     });
   }
 
-  return [initialNode.concat(jobsNodes), initialEdges.concat(jobsEdges)];
+  if (jobsEdges.length) {
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      jobsNodes,
+      jobsEdges,
+    );
+    return [
+      initialNode.concat(layoutedNodes),
+      initialEdges.concat(layoutedEdges),
+    ];
+  }
+
+  return [initialNode, initialEdges];
 }

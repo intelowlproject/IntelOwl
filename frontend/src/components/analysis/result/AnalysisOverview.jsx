@@ -9,7 +9,6 @@ import { IconButton, Loader } from "@certego/certego-ui";
 import { StatusIcon } from "../../common/icon/StatusIcon";
 
 import { AnalysisInfoCard } from "./AnalysisInfoCard";
-import { AnalysisIsRunningAlert } from "./AnalysisIsRunningAlert";
 import { AnalysisActionsBar } from "./AnalysisActionBar";
 import { updateAnalysis } from "./analysisApi";
 import { AnalysisFlow } from "../flow/AnalysisFlow";
@@ -33,7 +32,7 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
 
   // refetch tree after the analysis is complete
   React.useEffect(() => {
-    refetchTree();
+    if (!loading) refetchTree();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRunningAnalysis]);
 
@@ -130,11 +129,6 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
             />
           )}
         </div>
-        {isRunningAnalysis && (
-          <Row>
-            <AnalysisIsRunningAlert analysis={analysis} />
-          </Row>
-        )}
       </Row>
       <Row
         className="g-0 mt-3"

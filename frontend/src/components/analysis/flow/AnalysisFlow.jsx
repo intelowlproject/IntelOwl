@@ -12,7 +12,7 @@ import "reactflow/dist/style.css";
 
 import CustomAnalysisNode from "./CustomAnalysisNode";
 import CustomJobNode from "./CustomJobNode";
-import { calculateNodesAndEdges } from "./utils";
+import { getNodesAndEdges } from "./utils";
 
 // Important! This must be defined outside of the component
 const nodeTypes = {
@@ -35,7 +35,7 @@ export function AnalysisFlow({ analysisTree, analysisId, refetchTree }) {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   React.useEffect(() => {
-    const [initialNodes, initialEdges] = calculateNodesAndEdges(
+    const [initialNodes, initialEdges] = getNodesAndEdges(
       analysisTree,
       analysisId,
       refetchTree,

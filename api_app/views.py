@@ -21,6 +21,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerPermission as IsObjectUserPermission,
@@ -727,6 +728,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 
         job = Job.objects.get(pk=report.job.pk)
         job.set_final_status()
+        JobConsumer.serialize_and_send_job(job)
 
     @staticmethod
     def perform_retry(report: AbstractReport):

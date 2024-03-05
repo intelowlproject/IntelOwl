@@ -42,7 +42,7 @@ class VisualizerReportSerializer(AbstractReportSerializer):
 
     @classmethod
     def get_name(cls, instance: VisualizerReport):
-        return instance.name or instance.config.pk
+        return instance.name or instance.config.name
 
     class Meta:
         model = VisualizerReport

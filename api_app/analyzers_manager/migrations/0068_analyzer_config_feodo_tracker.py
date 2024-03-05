@@ -175,7 +175,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0061_job_depth_analysis"),
-        ("analyzers_manager", "0066_analyzer_config_phoneinfoga"),
+        ("analyzers_manager", "0067_update_misp"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

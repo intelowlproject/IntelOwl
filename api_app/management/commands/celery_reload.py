@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not settings.DEBUG:
-            self.stdout.write(self.style.ERROR(f"Not runnable if in production mode"))
+            self.stdout.write(self.style.ERROR("Not runnable if in production mode"))
 
         autoreload.run_with_reloader(self._restart_celery, argument=options["command"])
 

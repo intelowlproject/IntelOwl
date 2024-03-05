@@ -7,6 +7,7 @@ def migrate(apps, schema_editor):
     VisualizerReport = apps.get_model("visualizers_manager", "VisualizerReport")
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    Organization = apps.get_model("certego_saas_organization", "Organization")
     name = VisualizerConfig.objects.filter(
         name=models.OuterRef("old_config")
     ).values_list("pk")[:1]
@@ -22,7 +23,7 @@ def migrate(apps, schema_editor):
             for org in config.disabled2:
                 if org:
                     OrganizationPluginConfiguration.objects.create(
-                        organization=org,
+                        organization=Organization.objects.get(pk=org),
                         object_id=config.pk,
                         content_type=ct,
                         disabled=True,

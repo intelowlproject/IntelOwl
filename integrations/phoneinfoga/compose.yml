@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+    phoneinfoga:
+      container_name: phoneinfoga
+      restart: unless-stopped
+      image: sundowndev/phoneinfoga:v2.11.0
+      command:
+        - "serve"
+        - "--no-client"
+      expose:
+        - "5000"
+      env_file:
+      - env_file_integrations
+      depends_on:
+      - uwsgi

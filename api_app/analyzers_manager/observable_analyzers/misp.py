@@ -26,6 +26,12 @@ class MISP(classes.ObservableAnalyzer):
     enforce_warninglist: bool
     filter_on_type: bool
     strict_search: bool
+    timeout: int
+    published: bool
+    metadata: bool
+
+    def update(self):
+        pass
 
     def run(self):
         # this allows self-signed certificates to be used
@@ -39,19 +45,23 @@ class MISP(classes.ObservableAnalyzer):
             key=self._api_key_name,
             ssl=ssl_param,
             debug=self.debug,
-            timeout=5,
+            timeout=self.timeout,
         )
         now = datetime.datetime.now()
         date_from = now - datetime.timedelta(days=self.from_days)
         params = {
             "limit": self.limit,
             "enforce_warninglist": self.enforce_warninglist,
+            "published": self.published,
+            "metadata": self.metadata,
         }
+
         if self.strict_search:
             params["value"] = self.observable_name
         else:
             string_wildcard = f"%{self.observable_name}%"
             params["searchall"] = string_wildcard
+
         if self.from_days != 0:
             params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
         if self.filter_on_type:
@@ -79,6 +89,7 @@ class MISP(classes.ObservableAnalyzer):
                     f"Observable {self.observable_classification} not supported."
                     "Currently supported are: ip, domain, hash, url, generic."
                 )
+
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):
             errors = result_search.get("errors", [])

@@ -7,42 +7,51 @@ MINIMUM_DOCKER_COMPOSE_VERSION=2.3.4
 
 # Function to compare 2 semver version
 semantic_version_comp () {
-    if [[ $1 == $2 ]]; then
-        echo "equalTo"
-        return
-    fi
+  if [[ $1 == $2 ]]; then
+      echo "equalTo"
+      return
+  fi
 
-    # Remove "v" prefix if present
-    ver1=$(echo $1 | sed 's/^v//')
-    ver2=$(echo $2 | sed 's/^v//')
+  # Remove "v" prefix if present
+  ver1=$(echo $1 | sed 's/^v//')
+  ver2=$(echo $2 | sed 's/^v//')
 
-    # Convert version numbers to arrays
-    local IFS=.
-    local i ver1=($ver1) ver2=($ver2)
+  # Convert version numbers to arrays
+  local IFS=.
+  local i ver1=($ver1) ver2=($ver2)
 
-    # Fill empty fields in ver1 with zeros
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
-        ver1[i]=0
-    done
+  # Fill empty fields in ver1 with zeros
+  for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+      ver1[i]=0
+  done
 
-    # Compare version numbers
-    for ((i=0; i<${#ver1[@]}; i++)); do
-        if [[ -z ${ver2[i]} ]]; then
-            # Fill empty fields in ver2 with zeros
-            ver2[i]=0
-        fi
-        if ((10#${ver1[i]} > 10#${ver2[i]})); then
-            echo "greaterThan"
-            return
-        fi
-        if ((10#${ver1[i]} < 10#${ver2[i]})); then
-            echo "lessThan"
-            return
-        fi
-    done
+  # Compare version numbers
+  for ((i=0; i<${#ver1[@]}; i++)); do
+      if [[ -z ${ver2[i]} ]]; then
+          # Fill empty fields in ver2 with zeros
+          ver2[i]=0
+      fi
+      if ((10#${ver1[i]} > 10#${ver2[i]})); then
+          echo "greaterThan"
+          return
+      fi
+      if ((10#${ver1[i]} < 10#${ver2[i]})); then
+          echo "lessThan"
+          return
+      fi
+  done
 
-    # If we reach this point, the versions are equal
-    echo "equalTo"
+  # If we reach this point, the versions are equal
+  echo "equalTo"
+}
+
+# check if env file exists and DJANGO_SECRET has been set using approved characters in django source code
+check_django_secret () {
+  # https://regex101.com/r/O778RQ/1
+  if [ ! -e docker/env_file_app ] || ! ( tac docker/env_file_app | grep -qE "^DJANGO_SECRET=[a-z0-9\!\@\#\$\%\^\&\*\(\-\_\=\+\)]{50,}$" ); then
+    echo "DJANGO_SECRET variable not found! Generating a new one."
+    python3 -c 'import secrets; print("DJANGO_SECRET="+"".join(secrets.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)))' >> docker/env_file_app
+  fi
 }
 
 echo "This script will check (and possibly guide you through) the installation of dependencies for IntelOwl!"
@@ -116,6 +125,16 @@ else
     echo "Docker compose version $docker_compose_version detected"
   fi
 fi
+
+# construct environment files from templates
+echo "Adding environment files"
+cp -n docker/env_file_app_template docker/env_file_app
+cp -n docker/env_file_postgres_template docker/env_file_postgres
+cp -n docker/env_file_integrations_template docker/env_file_integrations
+cp -n frontend/public/env_template.js frontend/public/env.js
+echo "Added environment files"
+
+check_django_secret
 
 echo "Adding Logrotate configuration to Systems logrotate"
 cd ./docker/scripts

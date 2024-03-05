@@ -107,7 +107,7 @@ check_parameters "$@" && shift 2
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers")
+docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers" "phoneinfoga")
 
 for value in "${docker_analyzers[@]}"; do
   path_mapping["${value}"]+="integrations/${value}/compose.yml"
@@ -120,6 +120,8 @@ done
 if [[ ${test_mode["${env_argument}"]} ]]; then
   is_test=true
   test_appendix=".test"
+  # load relevant .env file
+  load_env "docker/.env.start.test"
 else
   is_test=false
   test_appendix=""
@@ -162,6 +164,11 @@ while [[ $# -gt 0 ]]; do
     ;;
   --pcap_analyzers)
     params["pcap_analyzers"]=true
+    shift 1
+    ;;
+
+  --phoneinfoga)
+    params["phoneinfoga"]=true
     shift 1
     ;;
   --multi_queue)
@@ -238,9 +245,6 @@ if [[ ( ! $env_argument == "test" || ! ${cmd_py_version[*]} =~ $cmd_argument ) &
     echo "the version of those library only during the build of a new Docker Image." >&2
     exit 11
 fi
-
-# load relevant .env file
-load_env "docker/.env.start${test_appendix}"
 
 # check if all_analyzers and other flags have been used
 for value in "${docker_analyzers[@]}"; do

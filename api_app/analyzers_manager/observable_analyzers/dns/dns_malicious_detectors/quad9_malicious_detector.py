@@ -73,9 +73,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
                 self.report.errors.append(msg)
                 timeout = True
                 return answer_found, timeout
-            elif quad9_response.status_code == 429:
-                self.disable_for_rate_limit()
-                quad9_response.raise_for_status()
+            quad9_response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
         else:

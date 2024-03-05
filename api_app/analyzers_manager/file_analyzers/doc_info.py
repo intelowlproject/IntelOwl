@@ -11,8 +11,10 @@ import zipfile
 from re import sub
 from typing import Dict, List
 
+import olefile
 from defusedxml.ElementTree import fromstring
 from oletools import mraptor
+from oletools.common.clsid import KNOWN_CLSIDS
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
 
@@ -43,6 +45,9 @@ class DocInfo(FileAnalyzer):
         self.passwords_to_check = []
 
         self.passwords_to_check.extend(self.additional_passwords_to_check)
+
+    def update(self) -> bool:
+        pass
 
     def run(self):
         results = {}
@@ -119,6 +124,8 @@ class DocInfo(FileAnalyzer):
                             analyze_macro_results.append(analyze_macro_result)
                     self.olevba_results["analyze_macro"] = analyze_macro_results
 
+                results["extracted_CVEs"] = self.analyze_for_cve()
+
         except CannotDecryptException as e:
             logger.info(e)
         except Exception as e:
@@ -168,6 +175,23 @@ class DocInfo(FileAnalyzer):
                         hits += re.findall(r"mhtml:(https?://.*?)!", target)
         return hits
 
+    def analyze_for_cve(self) -> List:
+        pattern = r"CVE-\d{4}-\d{4,7}"
+        results = []
+        ole = olefile.OleFileIO(self.filepath)
+        for entry in sorted(ole.listdir(storages=True)):
+            clsid = ole.getclsid(entry)
+            if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
+                if "cve" in clsid_text.lower():
+                    results.append(
+                        {
+                            "clsid": clsid,
+                            "info": clsid_text,
+                            "CVEs": list(re.findall(pattern, clsid_text)),
+                        }
+                    )
+        return results
+
     def analyze_msodde(self):
         try:
             msodde_result = msodde_process_maybe_encrypted(
@@ -212,12 +236,14 @@ class DocInfo(FileAnalyzer):
                 )
                 common_pwd_to_check.append(filename_without_extension)
                 self.passwords_to_check.extend(common_pwd_to_check)
-                decrypted_file_name = self.vbaparser.decrypt_file(
-                    self.passwords_to_check
+                decrypted_file_name, correct_password = self.vbaparser.decrypt_file(
+                    self.passwords_to_check,
                 )
                 self.olevba_results[
                     "additional_passwords_tried"
                 ] = self.passwords_to_check
+                if correct_password:
+                    self.olevba_results["correct_password"] = correct_password
                 if decrypted_file_name:
                     self.vbaparser = VBA_Parser(decrypted_file_name)
                 else:

@@ -894,14 +894,14 @@ class OrganizationPluginConfiguration(models.Model):
         self.disabled_comment = (
             "Disabled because rate limit hit at "
             f"{now().strftime('%d %m %Y: %H %M %s')}."
-            "Will be enabled at "
+            "Will be enabled back at "
             f"{enabled_to.strftime('%d %m %Y: %H %M %s')}"
         )
         clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
-            1
+            0
         ]
         if not self.rate_limit_enable_task:
-            from intel_owl.tasks import disable_configuration_for_org_for_rate_limit
+            from intel_owl.tasks import enable_configuration_for_org_for_rate_limit
 
             self.rate_limit_enable_task = PeriodicTask.objects.create(
                 name=f"{self.config.name}"
@@ -909,24 +909,42 @@ class OrganizationPluginConfiguration(models.Model):
                 "RateLimitCleaner",
                 clocked=clock_schedule,
                 one_off=True,
-                task=f"{disable_configuration_for_org_for_rate_limit.__module__}"
-                f".{disable_configuration_for_org_for_rate_limit.__name__}",
+                enabled=True,
+                task=f"{enable_configuration_for_org_for_rate_limit.__name__}",
+                kwargs=json.dumps(
+                    {
+                        "org_configuration_pk": self.pk,
+                    }
+                ),
             )
         else:
             self.rate_limit_enable_task.clocked = clock_schedule
+            self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
         self.save()
 
     def disable_manually(self, user: User):
         self.disabled = True
-        self.disabled_comment = f"Disabled by user {user.username}"
-        self.rate_limit_enable_task = None
+        self.disabled_comment = (
+            f"Disabled by user {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        if self.rate_limit_enable_task:
+            self.rate_limit_enable_task.delete()
         self.save()
 
-    def enable_manually(self, user):
+    def enable_manually(self, user: User):
+        self.disabled_comment += (
+            f"\nEnabled back by {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        self.enable()
+
+    def enable(self):
         self.disabled = False
-        self.disabled_comment += f"\nEnabled back by {user.username}"
         self.save()
+        if self.rate_limit_enable_task:
+            self.rate_limit_enable_task.delete()
 
 
 class ListCachable(models.Model):

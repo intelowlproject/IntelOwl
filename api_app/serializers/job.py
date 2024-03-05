@@ -494,12 +494,20 @@ class MultipleJobSerializer(rfs.ListSerializer):
     def save(self, parent: Job = None, **kwargs):
         result = super().save(**kwargs, parent=parent)
         if parent:
-            analysis = Analysis.objects.create(
-                name="Pivot analysis",
-                owner=self.context["request"].user,
-            )
-            analysis.jobs.add(parent)
-            analysis.start_time = parent.received_request_time
+            # the parent has already an analysis
+            # so we don't need to do anything because everything is already connected
+            if parent.analysis:
+                return result
+            # if we have a parent, it means we are pivoting from one job to another
+            else:
+                analysis = Analysis.objects.create(
+                    name="Pivot analysis",
+                    owner=self.context["request"].user,
+                )
+                analysis.jobs.add(parent)
+                analysis.start_time = parent.received_request_time
+        # if we do not have a parent, and we have multiple result,
+        # we are in the multiple input case
         elif len(result) > 1:
             analysis = Analysis.objects.create(
                 name="Custom analysis", owner=self.context["request"].user

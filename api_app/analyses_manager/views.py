@@ -100,6 +100,7 @@ class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
             raise BadRequest(f"You can't remove job {job.id} from analysis")
         job.analysis = None
         job.save()
+        analysis.refresh_from_db()
         # we are possibly changing the status of the analysis
         analysis.set_correct_status(save=True)
         return Response(

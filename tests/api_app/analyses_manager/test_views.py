@@ -118,7 +118,8 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         job2 = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
-            user=self.superuser,
+            user=self.user,
+            finished_analysis_time=get_now(),
         )
         self.analysis.jobs.add(job)
         self.analysis.jobs.add(job2)
@@ -136,5 +137,10 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
             f"{self.URL}/{analysis}/remove_job", data={"job": job.pk}
         )
         self.assertEqual(response.status_code, 400)
+        response = self.client.post(
+            f"{self.URL}/{analysis}/remove_job", data={"job": job2.pk}
+        )
+        self.assertEqual(response.status_code, 200)
+
         job.delete()
         job2.delete()

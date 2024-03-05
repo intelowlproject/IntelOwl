@@ -4,6 +4,7 @@
 """Check if the domains is reported as malicious in Quad9 database"""
 
 import logging
+from typing import Tuple
 from urllib.parse import urlparse
 
 import requests
@@ -27,9 +28,6 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     we can guess that the domain was in the Quad9 blacklist.
     """
 
-    class Quad9503StatusCode(Exception):
-        pass
-
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
@@ -48,7 +46,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
 
         return malicious_detector_response(self.observable_name, False, timeout)
 
-    def _quad9_dns_query(self, observable) -> (bool, bool):
+    def _quad9_dns_query(self, observable) -> Tuple[bool, bool]:
         """Perform a DNS query with Quad9 service, return True if Quad9 answer the
         DNS query with a non-empty response.
 
@@ -66,18 +64,20 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
 
             quad9_response = requests.get(url, headers=headers, params=params)
             if quad9_response.status_code == 503:
-                raise self.Quad9503StatusCode(
+                msg = (
                     "503 status code! "
                     "It may be normal for this service to"
                     " happen from time to time"
                 )
-            quad9_response.raise_for_status()
+                logger.info(msg)
+                self.report.errors.append(msg)
+                timeout = True
+                return answer_found, timeout
+            elif quad9_response.status_code == 429:
+                self.disable_for_rate_limit()
+                quad9_response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
-        except self.Quad9503StatusCode as e:
-            logger.info(e)
-            self.report.errors.append(str(e))
-            timeout = True
         else:
             answer_found = bool(quad9_response.json().get("Answer", None))
 

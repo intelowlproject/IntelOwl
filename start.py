@@ -220,6 +220,8 @@ def start():
     if args.mode in ["test", "ci"]:
         is_test = True
         test_appendix = ".test"
+        # load relevant .env file
+        load_dotenv("docker/.env.start.test")
 
     os.environ["PYELASTIC_VERSION"] = args.pyelastic_version
     os.environ["PYCTI_VERSION"] = args.pycti_version
@@ -235,9 +237,6 @@ def start():
             " the build of a new Docker Image."
         )
         sys.exit(11)
-
-    # load relevant .env file
-    load_dotenv("docker/.env.start" + test_appendix)
 
     docker_flags = [
         args.__dict__[docker_analyzer] for docker_analyzer in DOCKER_ANALYZERS

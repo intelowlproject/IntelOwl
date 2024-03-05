@@ -17,10 +17,20 @@ class AnalysisTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
+            status=Job.Status.REPORTED_WITH_FAILS
         )
         an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         self.assertEqual(an.status, "created")
+        an.set_correct_status()
+        self.assertEqual(an.status, "concluded")
+        job.add_child(
+            observable_name="test.com",
+            observable_classification="domain",
+            user=self.user,
+            status=Job.Status.PENDING
+        )
+        an.refresh_from_db()
         an.set_correct_status()
         self.assertEqual(an.status, "running")
         job.delete()

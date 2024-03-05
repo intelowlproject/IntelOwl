@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from ..serializers.celery import CrontabScheduleSerializer, PeriodicTaskSerializer
 from ..serializers.plugin import (
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
@@ -31,9 +30,6 @@ class AnalyzerConfigSerializer(PythonConfigSerializer):
 
 
 class AnalyzerConfigSerializerForMigration(PythonConfigSerializerForMigration):
-    update_schedule = CrontabScheduleSerializer(read_only=True)
-    update_task = PeriodicTaskSerializer(read_only=True)
-
     class Meta:
         model = AnalyzerConfig
         exclude = PythonConfigSerializerForMigration.Meta.exclude

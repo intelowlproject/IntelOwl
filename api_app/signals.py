@@ -3,11 +3,11 @@
 import logging
 from typing import Type
 
-import django_celery_beat.apps
 from django import dispatch
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
+from django_celery_beat.apps import BeatConfig
 
 from api_app.decorators import prevent_signal_recursion
 from api_app.helpers import calculate_md5
@@ -55,19 +55,28 @@ def post_delete_job(sender, instance: Job, **kwargs):
         instance.analysis.delete()
 
 
-@receiver(models.signals.post_migrate, sender=django_celery_beat.apps.BeatConfig)
+@receiver(models.signals.post_migrate)
 def post_migrate_beat(
     sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
 ):
     from django_celery_beat.models import PeriodicTask
 
-    from intel_owl.tasks import update
+    if isinstance(sender, BeatConfig):
+        from intel_owl.tasks import update
 
-    for task in PeriodicTask.objects.filter(
-        enabled=True, task=f"{update.__module__}.{update.__name__}"
-    ):
-        task.enabled &= settings.REPO_DOWNLOADER_ENABLED
-        task.save()
+        for module in PythonModule.objects.filter(health_check_schedule__isnull=False):
+            for config in module.configs.filter(health_check_task__isnull=True):
+                config.generate_health_check_periodic_task()
+        for module in PythonModule.objects.filter(
+            update_schedule__isnull=False, update_task__isnull=True
+        ):
+            module.generate_update_periodic_task()
+
+        for task in PeriodicTask.objects.filter(
+            enabled=True, task=f"{update.__module__}.{update.__name__}"
+        ):
+            task.enabled &= settings.REPO_DOWNLOADER_ENABLED
+            task.save()
 
 
 @receiver(models.signals.post_save, sender=PluginConfig)
@@ -92,8 +101,8 @@ def post_delete_parameter(sender, instance: Parameter, *args, **kwargs):
     instance.refresh_cache_keys()
 
 
-@receiver(models.signals.pre_save, sender=PythonModule)
-def pre_save_python_module_periodic_tasks(
+@receiver(models.signals.post_save, sender=PythonModule)
+def post_save_python_module_periodic_tasks(
     sender: Type[PythonModule], instance: PythonModule, *args, **kwargs
 ):
     instance.generate_update_periodic_task()

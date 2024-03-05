@@ -103,8 +103,10 @@ jobs:
           REPO_DOWNLOADER_ENABLED: false
 
       - name: Docker debug
+        if: always()
         run: |
           docker ps -a
+          docker logs intelowl_uwsgi
 
       - name: Setup coverage
         run: |

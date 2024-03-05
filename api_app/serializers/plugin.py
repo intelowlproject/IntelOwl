@@ -12,7 +12,7 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.models import Parameter, PluginConfig, PythonConfig, PythonModule
 from api_app.serializers import ModelWithOwnershipSerializer
-from api_app.serializers.celery import CrontabScheduleSerializer, PeriodicTaskSerializer
+from api_app.serializers.celery import CrontabScheduleSerializer
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.user.models import User
 
@@ -222,11 +222,10 @@ class PythonConfigListSerializer(rfs.ListSerializer):
 class PythonModulSerializerComplete(rfs.ModelSerializer):
     health_check_schedule = CrontabScheduleSerializer()
     update_schedule = CrontabScheduleSerializer()
-    update_task = PeriodicTaskSerializer()
 
     class Meta:
         model = PythonModule
-        exclude = ["id"]
+        exclude = ["id", "update_task", "health_check_task"]
 
 
 class PythonModuleSerializer(rfs.ModelSerializer):

@@ -16,18 +16,23 @@ class JobConsumer(JsonWebsocketConsumer):
         user = self.scope["user"]
         job_id = self.scope["url_route"]["kwargs"]["job_id"]
         logger.info(f"user: {user} requested the analysis for the job {job_id}")
-        self.accept()
-        job = Job.objects.get(id=job_id)
-        job_serializer = JobSerializer(job)
-        job_data = job_serializer.data
-        async_to_sync(self.channel_layer.group_add)(
-            JobConsumer.generate_group_name(job_id), self.channel_name
-        )
-        # send data
-        async_to_sync(self.channel_layer.group_send)(
-            JobConsumer.generate_group_name(job_id),
-            {"type": "send.job", "job": job_data},
-        )
+        try:
+            job = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            logger.error(f"user: {user} request the non-existing job: {job_id}")
+            self.close(code=4040)
+        else:
+            self.accept()
+            job_serializer = JobSerializer(job)
+            job_data = job_serializer.data
+            async_to_sync(self.channel_layer.group_add)(
+                JobConsumer.generate_group_name(job_id), self.channel_name
+            )
+            # send data
+            async_to_sync(self.channel_layer.group_send)(
+                JobConsumer.generate_group_name(job_id),
+                {"type": "send.job", "job": job_data},
+            )
 
     def disconnect(self, close_code):
         user = self.scope["user"]
@@ -38,7 +43,7 @@ class JobConsumer(JsonWebsocketConsumer):
         logger.info(
             f"user: {user} disconnected for the job: {job_id}. Close code: {close_code}"
         )
-        self.close()
+        self.close(code=close_code)
 
     def receive_json(self, content):
         user = self.scope["user"]

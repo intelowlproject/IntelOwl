@@ -9,12 +9,10 @@ import logging
 import typing
 import uuid
 
-from asgiref.sync import async_to_sync
 from celery import Task, shared_task, signals
 from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
 from celery.worker.request import Request
-from channels.layers import get_channel_layer
 from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
@@ -211,18 +209,12 @@ def update_notifications_with_releases():
 @app.task(name="job_set_final_status", soft_time_limit=30)
 def job_set_final_status(job_id: int):
     from api_app.models import Job
-    from api_app.serializers import JobSerializer
     from api_app.websocket import JobConsumer
 
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
     job.set_final_status()
-    channel_layer = get_channel_layer()
-    job_serializer = JobSerializer(job)
-    job_data = job_serializer.data
-    async_to_sync(channel_layer.group_send)(
-        JobConsumer.generate_group_name(job_id), {"type": "send.job", "job": job_data}
-    )
+    JobConsumer.serialize_and_send_job(job)
 
 
 @shared_task(base=FailureLoggedTask, name="job_set_pipeline_status", soft_time_limit=30)
@@ -268,7 +260,6 @@ def run_plugin(
 ):
     from api_app.classes import Plugin
     from api_app.models import Job, PythonModule
-    from api_app.serializers import JobSerializer
     from api_app.websocket import JobConsumer
 
     logger.info(
@@ -296,12 +287,7 @@ def run_plugin(
             status=plugin.report_model.Status.FAILED.value
         )
     job = Job.objects.get(pk=job_id)
-    channel_layer = get_channel_layer()
-    job_serializer = JobSerializer(job)
-    job_data = job_serializer.data
-    async_to_sync(channel_layer.group_send)(
-        JobConsumer.generate_group_name(job_id), {"type": "send.job", "job": job_data}
-    )
+    JobConsumer.serialize_and_send_job(job)
 
 
 @shared_task(base=FailureLoggedTask, name="create_caches", soft_time_limit=200)

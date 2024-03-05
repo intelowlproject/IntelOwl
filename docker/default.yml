@@ -39,6 +39,12 @@ services:
       - "8011"
     env_file:
       - env_file_app
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8011 || exit 1"]
+      interval: 10s
+      timeout: 2s
+      start_period: 90s
+      retries: 5
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}

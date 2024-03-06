@@ -1,5 +1,6 @@
-from intel_owl import secrets
 import socket
+
+from intel_owl import secrets
 
 websockets_url = secrets.get_secret("WEBSOCKETS_URL", None)
 if not websockets_url:

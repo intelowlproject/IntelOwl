@@ -207,7 +207,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `VirusTotal_v3_File`: check the file hash on VirusTotal. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
 - `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
-
+-  `Zippy_scan` : [Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated; takes in `lzma`,`zlib`,`brotli` as input based engines; `ensemble` being default.
 ##### Observable analyzers (ip, domain, url, hash)
 
 ###### Internal tools
@@ -239,6 +239,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `DNS0_rrsets_data`: Query billions of current and historical DNS resource records sets. Performs right-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DNS0_rrsets_name`: Query billions of current and historical DNS resource records sets. Performs left-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
+* `Feodo_Tracker`: [Feodo Tracker](https://feodotracker.abuse.ch/) offers various blocklists, helping network owners to protect their users from Dridex and Emotet/Heodo.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
 * `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
@@ -253,11 +254,13 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `IPApi`: Get information about IPs using [batch-endpoint](https://ip-api.com/docs/api:batch) and DNS using [DNS-endpoint](https://ip-api.com/docs/dns).
 * `IPInfo`: Location Information about an IP
+* `Ip2location`: [API Docs](https://www.ip2location.io/ip2location-documentation) IP2Location.io allows users to check IP address location in real time. (Supports both with or without key)
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in).
 * `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
@@ -265,6 +268,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MaxMindGeoIP`: extract GeoIP info for an observable
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
+* `Mmdb_server`: [Mmdb_server](https://github.com/adulau/mmdb-server) mmdb-server is an open source fast API server to lookup IP addresses for their geographic location, AS number. 
 * `Mnemonic_PassiveDNS` : Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 * `Netlas`: search an IP against [Netlas](https://netlas.io/api)
@@ -302,7 +306,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
-
+* `Validin`:[Validin](https://app.validin.com/) investigates historic and current data describing the structure and composition of the internet.
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -320,10 +324,12 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
 * `IntelX_Intelligent_Search`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `MISP`: scan an observable on a MISP instance
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 * `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify](https://yaraify.abuse.ch/)
+* `PhoneInfoga` : [PhoneInfoga](https://sundowndev.github.io/phoneinfoga/) is one of the most advanced tools to scan international phone numbers. 
 
 ##### Optional analyzers
 
@@ -351,7 +357,7 @@ The following is the list of the available connectors. You can also navigate the
 
 ### Pivots
 
-With Intel v5.2.0 we introduced the `Pivot` Plugin.
+With IntelOwl v5.2.0 we introduced the `Pivot` Plugin.
 
 Pivots are designed to create a job from another job. This plugin allows the user to set certain conditions that trigger the execution of one or more subsequent jobs, strictly connected to the first one.
 
@@ -385,7 +391,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 
 ### Ingestors
 
-With Intel v5.1.0 we introduced the `Ingestor` Plugin.
+With IntelOwl v5.1.0 we introduced the `Ingestor` Plugin.
 
 Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
@@ -452,7 +458,6 @@ The following are the most important fields that you can change without touching
 - `name`: Name of the analyzer
 - `description`: Description of the analyzer
 - `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `disabled_in_organization`: you can choose to disable analyzers in some organizations only.
 - `python_module`: Python path of the class that will be executed 
 - `maximum_tlp`: see [TLP Support](#tlp-support)
 - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.

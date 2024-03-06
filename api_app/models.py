@@ -8,8 +8,11 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
+from treebeard.mp_tree import MP_Node
 
 from api_app.interfaces import OwnershipAbstractModel
 
@@ -49,6 +52,7 @@ from api_app.queryset import (
     AbstractConfigQuerySet,
     AbstractReportQuerySet,
     JobQuerySet,
+    OrganizationPluginConfigurationQuerySet,
     ParameterQuerySet,
     PluginConfigQuerySet,
     PythonConfigQuerySet,
@@ -129,7 +133,10 @@ class PythonModule(models.Model):
 
     @property
     def queue(self) -> str:
-        return self.configs.order_by("?").first().queue
+        try:
+            return self.configs.order_by("?").first().queue
+        except AttributeError:
+            return None
 
     def _clean_python_module(self):
         try:
@@ -204,7 +211,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Job(models.Model):
+class Job(MP_Node):
     objects = JobQuerySet.as_manager()
 
     class Meta:
@@ -227,7 +234,14 @@ class Job(models.Model):
     # constants
     TLP = TLP
     Status = Status
-
+    analysis = models.ForeignKey(
+        "analyses_manager.Analysis",
+        on_delete=models.PROTECT,
+        related_name="jobs",
+        null=True,
+        blank=True,
+        default=None,
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -423,6 +437,7 @@ class Job(models.Model):
                 self.status = self.Status.REPORTED_WITH_FAILS
 
         self.finished_analysis_time = get_now()
+
         logger.info(f"{self.__repr__()} setting status to {self.status}")
         self.save(
             update_fields=[
@@ -431,6 +446,9 @@ class Job(models.Model):
                 "finished_analysis_time",
             ]
         )
+        # we update the status of the analysis
+        if self.analysis:
+            self.analysis.set_correct_status(save=True)
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
@@ -843,21 +861,118 @@ class PluginConfig(OwnershipAbstractModel):
         return "2" if self.is_secret() else "1"
 
 
-class AbstractConfig(models.Model):
+class OrganizationPluginConfiguration(models.Model):
+    objects = OrganizationPluginConfigurationQuerySet.as_manager()
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to={
+            "model__endswith": "config",
+            "app_label__endswith": "manager",
+        },
+    )
+    object_id = models.IntegerField()
+    config = GenericForeignKey("content_type", "object_id")
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+    disabled = models.BooleanField(default=False)
+    disabled_comment = models.TextField(default="", blank=True)
+
+    rate_limit_timeout = models.DurationField(
+        null=True, blank=True, help_text="Expects data in the format 'DD HH:MM:SS'"
+    )
+    rate_limit_enable_task = models.ForeignKey(
+        PeriodicTask, on_delete=models.SET_NULL, null=True, blank=True, editable=False
+    )
+
+    class Meta:
+        unique_together = [("object_id", "organization", "content_type")]
+
+    def disable_for_rate_limit(self):
+        self.disabled = True
+
+        enabled_to = now() + self.rate_limit_timeout
+        self.disabled_comment = (
+            "Disabled because rate limit hit at "
+            f"{now().strftime('%d %m %Y: %H %M %s')}."
+            "Will be enabled back at "
+            f"{enabled_to.strftime('%d %m %Y: %H %M %s')}"
+        )
+        clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
+            0
+        ]
+        if not self.rate_limit_enable_task:
+            from intel_owl.tasks import enable_configuration_for_org_for_rate_limit
+
+            self.rate_limit_enable_task = PeriodicTask.objects.create(
+                name=f"{self.config.name}"
+                f"-{self.organization.name}"
+                "RateLimitCleaner",
+                clocked=clock_schedule,
+                one_off=True,
+                enabled=True,
+                task=f"{enable_configuration_for_org_for_rate_limit.__name__}",
+                kwargs=json.dumps(
+                    {
+                        "org_configuration_pk": self.pk,
+                    }
+                ),
+            )
+        else:
+            self.rate_limit_enable_task.clocked = clock_schedule
+            self.rate_limit_enable_task.enabled = True
+            self.rate_limit_enable_task.save()
+        self.save()
+
+    def disable_manually(self, user: User):
+        self.disabled = True
+        self.disabled_comment = (
+            f"Disabled by user {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        if self.rate_limit_enable_task:
+            self.rate_limit_enable_task.delete()
+        self.save()
+
+    def enable_manually(self, user: User):
+        self.disabled_comment += (
+            f"\nEnabled back by {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        self.enable()
+
+    def enable(self):
+        self.disabled = False
+        self.save()
+        if self.rate_limit_enable_task:
+            self.rate_limit_enable_task.delete()
+
+
+class ListCachable(models.Model):
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def delete_class_cache_keys(cls, user: User = None):
+        base_key = f"{cls.__name__}_{user.username if user else ''}"
+        for key in cache.get_where(f"list_{base_key}").keys():
+            logger.debug(f"Deleting cache key {key}")
+            cache.delete(key)
+
+
+class AbstractConfig(ListCachable):
     objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,
         unique=True,
-        primary_key=True,
         validators=[plugin_name_validator],
     )
     description = models.TextField(null=False)
 
     disabled = models.BooleanField(null=False, default=False)
-    disabled_in_organizations = models.ManyToManyField(
-        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
-    )
+    orgs_configuration = GenericRelation(OrganizationPluginConfiguration)
 
     class Meta:
         indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
@@ -865,6 +980,27 @@ class AbstractConfig(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_or_create_org_configuration(
+        self, organization: Organization
+    ) -> OrganizationPluginConfiguration:
+        try:
+            org_configuration = self.orgs_configuration.get(organization=organization)
+        except OrganizationPluginConfiguration.DoesNotExist:
+            org_configuration = OrganizationPluginConfiguration.objects.create(
+                config=self, organization=organization
+            )
+        return org_configuration
+
+    @classmethod
+    def get_content_type(cls) -> ContentType:
+        return ContentType.objects.get(
+            model=cls._meta.model_name, app_label=cls._meta.app_label
+        )
+
+    @property
+    def disabled_in_organizations(self) -> QuerySet:
+        return self.orgs_configuration.filter(disabled=True)
 
     @classmethod
     @property
@@ -891,8 +1027,9 @@ class AbstractConfig(models.Model):
         if user.has_membership():
             return (
                 not self.disabled
-                and user.membership.organization
-                not in self.disabled_in_organizations.all()
+                and not self.orgs_configuration.filter(
+                    disabled=True, organization__pk=user.membership.organization_id
+                ).exists()
             )
         return not self.disabled
 
@@ -994,8 +1131,6 @@ class PythonConfig(AbstractConfig):
 
     @classmethod
     def get_subclasses(cls) -> typing.List["PythonConfig"]:
-        from django.contrib.contenttypes.models import ContentType
-
         child_models = [ct.model_class() for ct in ContentType.objects.all()]
         return [
             model
@@ -1032,15 +1167,8 @@ class PythonConfig(AbstractConfig):
             },
         )[0]
 
-    @classmethod
-    def delete_class_cache_keys(cls, user: User = None):
-        base_key = f"{cls.__name__}_{user.username if user else ''}"
-        for key in cache.get_where(f"list_{base_key}").keys():
-            logger.debug(f"Deleting cache key {key}")
-            cache.delete(key)
-
     def refresh_cache_keys(self, user: User = None):
-        from api_app.serializers import PythonListConfigSerializer
+        from api_app.serializers.plugin import PythonConfigListSerializer
 
         base_key = (
             f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
@@ -1049,12 +1177,12 @@ class PythonConfig(AbstractConfig):
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
         if user:
-            PythonListConfigSerializer(
+            PythonConfigListSerializer(
                 child=self.serializer_class()
             ).to_representation_single_plugin(self, user)
         else:
             for generic_user in User.objects.exclude(email=""):
-                PythonListConfigSerializer(
+                PythonConfigListSerializer(
                     child=self.serializer_class()
                 ).to_representation_single_plugin(self, generic_user)
 

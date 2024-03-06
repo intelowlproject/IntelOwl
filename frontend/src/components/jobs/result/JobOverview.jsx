@@ -15,7 +15,7 @@ import {
   Spinner,
 } from "reactstrap";
 
-import { GoBackButton, Loader } from "@certego/certego-ui";
+import { Loader } from "@certego/certego-ui";
 import { JSONTree } from "react-json-tree";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -300,15 +300,17 @@ export function JobOverview({
       render={() => (
         <Container fluid>
           {/* bar with job id and utilities buttons */}
-          <Row className="g-0 d-flex-between-end" id="utilitiesRow">
+          <Row
+            className="g-0 d-flex-between-end align-items-center"
+            id="utilitiesRow"
+          >
             <Col>
-              <GoBackButton onlyIcon color="gray" />
               <h2>
                 <span className="me-2 text-secondary">Job #{job.id}</span>
                 <StatusIcon status={job.status} className="small" />
               </h2>
             </Col>
-            <Col className="d-flex justify-content-end">
+            <Col className="d-flex justify-content-end mt-1">
               <JobActionsBar job={job} />
             </Col>
           </Row>

@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import (
+    feodo_tracker,
     maxmind,
     phishing_army,
     talos,
@@ -43,6 +44,9 @@ class CronTests(CustomTestCase):
         self.assertCountEqual(check_stuck_analysis(check_pending=False), [])
 
         self.assertCountEqual(check_stuck_analysis(check_pending=True), [_job.pk])
+        _job.status = Job.Status.ANALYZERS_RUNNING.value
+        _job.save()
+        self.assertCountEqual(check_stuck_analysis(check_pending=False), [_job.pk])
         _job.delete()
 
     def test_remove_old_jobs(self):
@@ -94,6 +98,48 @@ class CronTests(CustomTestCase):
     def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor.update()
         self.assertTrue(os.path.exists(db_file_path))
+
+    @if_mock_connections(
+        patch(
+            "requests.get",
+            return_value=MockUpResponse(
+                [
+                    {
+                        "ip_address": "51.161.81.190",
+                        "port": 13721,
+                        "status": "offline",
+                        "hostname": None,
+                        "as_number": 16276,
+                        "as_name": "OVH",
+                        "country": "CA",
+                        "first_seen": "2023-12-18 18:29:21",
+                        "last_online": "2024-01-23",
+                        "malware": "Pikabot",
+                    },
+                    {
+                        "ip_address": "185.117.90.142",
+                        "port": 2222,
+                        "status": "offline",
+                        "hostname": None,
+                        "as_number": 59711,
+                        "as_name": "HZ-EU-AS",
+                        "country": "NL",
+                        "first_seen": "2024-01-17 18:58:25",
+                        "last_online": "2024-01-22",
+                        "malware": "QakBot",
+                    },
+                ],
+                200,
+            ),
+        )
+    )
+    def test_feodo_tracker_updater(self, mock_get=None):
+        feodo_tracker.Feodo_Tracker.update(
+            "some_url", f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json"
+        )
+        self.assertTrue(
+            os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json")
+        )
 
     def test_quark_updater(self):
         from quark.config import DIR_PATH

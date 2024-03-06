@@ -240,6 +240,7 @@ class YaraRepo:
         logger.info(f"{self} starting analysis of {filename} for file path {file_path}")
         result = []
         for rule in self.rules:
+            rule: yara.Match
             try:
                 matches = rule.match(file_path, externals={"filename": filename})
             except yara.Error as e:
@@ -253,12 +254,30 @@ class YaraRepo:
                         raise e
                 else:
                     raise e
+
             for match in matches:
+                logger.info(
+                    f"{self} analyzing strings analysis of {filename} for match {match}"
+                )
+                strings = []
                 # limited to 20 strings reasons because it could be a very long list
+                for string in match.strings[:20]:
+                    string: yara.StringMatch
+                    entry = {
+                        "identifier": string.identifier,
+                        "plaintext": [str(i) for i in string.instances[:20]],
+                    }
+                    strings.append(entry)
+                    logger.debug(f"{strings=}")
+
+                logger.info(
+                    f"{self} found {len(strings)} strings for {filename}"
+                    f"for match {match}"
+                )
                 result.append(
                     {
                         "match": str(match),
-                        "strings": str(match.strings[:20]) if match else "",
+                        "strings": strings,
                         "tags": match.tags,
                         "meta": match.meta,
                         "path": match.namespace,

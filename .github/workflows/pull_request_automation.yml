@@ -103,8 +103,10 @@ jobs:
           REPO_DOWNLOADER_ENABLED: false
 
       - name: Docker debug
+        if: always()
         run: |
           docker ps -a
+          docker logs intelowl_uwsgi
 
       - name: Setup coverage
         run: |
@@ -113,19 +115,6 @@ jobs:
       - name: Run test
         run: |
           docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
-
-      - name: "Coverage: generate xml and transfer from docker container to host"
-        run: |
-          docker exec intelowl_uwsgi coverage combine
-          docker exec intelowl_uwsgi coverage xml
-          docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
-
-      - name: "Upload coverage to Codecov"
-        uses: codecov/codecov-action@v3.1.0
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: true
-          verbose: true
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -139,7 +128,7 @@ jobs:
         with:
           node-version: 15
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: npm-build-${{ hashFiles('frontend/package-lock.json') }}

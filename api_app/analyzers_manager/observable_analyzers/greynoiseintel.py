@@ -45,6 +45,7 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
         # greynoise library does provide empty messages in case of these errors...
         # so it's better to catch them and create custom management
         except RateLimitError as e:
+            self.disable_for_rate_limit()
             self.report.errors.append(e)
             self.report.save()
             raise AnalyzerRunException(f"Rate limit error: {e}")

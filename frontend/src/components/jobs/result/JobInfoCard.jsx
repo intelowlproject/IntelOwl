@@ -10,7 +10,6 @@ import {
   Col,
   UncontrolledTooltip,
 } from "reactstrap";
-import { VscGlobe, VscFile } from "react-icons/vsc";
 
 import {
   ContentSection,
@@ -24,6 +23,7 @@ import { JobTag } from "../../common/JobTag";
 import { PlaybookTag } from "../../common/PlaybookTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
+import { JobInfoIcon } from "./JobInfoIcon";
 
 export function JobInfoCard({ job }) {
   // local state
@@ -39,12 +39,7 @@ export function JobInfoCard({ job }) {
             md={10}
           >
             <h3>
-              {job.is_sample ? (
-                <VscFile className="me-1" />
-              ) : (
-                <VscGlobe className="me-1" />
-              )}
-
+              <JobInfoIcon job={job} />
               {job.is_sample ? (
                 <CopyToClipboardButton
                   showOnHover

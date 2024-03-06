@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.16 as backend-build
+FROM python:3.11.7 as backend-build
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
@@ -23,7 +23,7 @@ ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 ARG PYELASTIC_VERSION=7.4.1
-ARG PYCTI_VERSION=5.10.0
+ARG PYCTI_VERSION=5.12.29
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -35,8 +35,8 @@ RUN mkdir -p ${LOG_PATH} \
 # python3-psycopg2 is required to use PostgresSQL with Django
 # apache2-utils is required to execute htpasswd
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat \
-    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
+    && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
+    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip

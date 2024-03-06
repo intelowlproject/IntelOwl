@@ -10,10 +10,12 @@ export const useRecentScansStore = create((set, _get) => ({
   recentScansError: null,
   recentScansUser: [],
   recentScans: [],
-  fetchRecentScansUser: async () => {
+  fetchRecentScansUser: async (isSample) => {
     try {
       set({ loadingScansUser: true });
-      const resp = await axios.post(JOB_RECENT_SCANS_USER);
+      const resp = await axios.post(JOB_RECENT_SCANS_USER, {
+        is_sample: isSample,
+      });
       set({
         recentScansUser: resp.data,
         loadingScansUser: false,
@@ -22,10 +24,13 @@ export const useRecentScansStore = create((set, _get) => ({
       set({ recentScansUserError: error, loadingScansUser: false });
     }
   },
-  fetchRecentscans: async (md5) => {
+  fetchRecentScans: async (md5, isSample) => {
+    const body = {};
+    body.md5 = md5;
+    if (isSample) body.max_temporal_distance = 60;
     try {
       set({ loadingScansInsertedAnalyzable: true });
-      const resp = await axios.post(JOB_RECENT_SCANS, { md5 });
+      const resp = await axios.post(JOB_RECENT_SCANS, body);
       set({
         recentScans: resp.data,
         loadingScansInsertedAnalyzable: false,

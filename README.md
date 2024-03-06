@@ -14,7 +14,6 @@
 [![CodeQL](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml)
 [![Dependency Review](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
-[![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
 [![DeepSource](https://app.deepsource.com/gh/intelowlproject/IntelOwl.svg/?label=resolved+issues&token=BSvKHrnk875Y0Bykb79GNo8w)](https://app.deepsource.com/gh/intelowlproject/IntelOwl/?ref=repository-badge)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl/badge)](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7120/badge)](https://bestpractices.coreinfrastructure.org/projects/7120)
@@ -124,7 +123,7 @@ In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://
 
 Feel free to contact the main developers at any time on Twitter:
 
-- [Matteo Lodi](https://twitter.com/matte_lodi): Author and creator
-- [Eshaan Bansal](https://twitter.com/eshaan7_): Principal maintainer
-- [Simone Berni](https://twitter.com/0ssig3no): Key Contributor and Backend Maintainer
-- [Daniele Rosetti](https://github.com/drosetti): Key Contributor and Frontend Maintainer
+- [Matteo Lodi](https://twitter.com/matte_lodi): Author and principal maintainer
+- [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
+- [Daniele Rosetti](https://github.com/drosetti): Frontend Maintainer
+- [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor

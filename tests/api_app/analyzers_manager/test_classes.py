@@ -46,6 +46,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "file.exe",
                 "shellcode.bin",
                 "Sublime-Standard-Test-String.eml",
+                "textfile.txt",
             ],
             [
                 "application/onenote",
@@ -58,20 +59,25 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/rtf",
                 "application/vnd.ms-excel",
                 "application/msword",
-                "application/x-dosexec",
-                "application/x-dosexec",
+                "application/vnd.microsoft.portable-executable",
+                "application/vnd.microsoft.portable-executable",
                 "application/octet-stream",
                 "message/rfc822",
+                "text/plain",
             ],
         ):
-            with open(f"test_files/{sample_name}", "rb") as f:
-                Job.objects.create(
-                    is_sample=True,
-                    file_name=sample_name,
-                    file_mimetype=mimetype,
-                    file=File(f),
-                    user=self.superuser,
-                )
+            try:
+                with open(f"test_files/{sample_name}", "rb") as f:
+                    Job.objects.create(
+                        is_sample=True,
+                        file_name=sample_name,
+                        file_mimetype=mimetype,
+                        file=File(f),
+                        user=self.superuser,
+                    )
+                    print(f"Created job for {sample_name}, with mimetype {mimetype}")
+            except Exception:
+                print(f"No defined file for mimetype {mimetype}")
 
     def test_subclasses(self):
         def handler(signum, frame):

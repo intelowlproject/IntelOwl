@@ -4,6 +4,7 @@
 from logging import getLogger
 from typing import Optional
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -48,9 +49,8 @@ class MimeTypes(models.TextChoices):
     JAVA = "application/java-archive"
     RTF1 = "text/rtf"
     RTF2 = "application/rtf"
-    DOS = "application/x-dosexec"
     SHARED_LIB = "application/x-sharedlib"
-    EXE = "application/x-executable"
+    EXE = "application/vnd.microsoft.portable-executable"
     ELF = "application/x-elf"
     OCTET = "application/octet-stream"
     PCAP = "application/vnd.tcpdump.pcap"
@@ -167,6 +167,9 @@ class AnalyzerConfig(PythonConfig):
         models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
         default=list,
         blank=True,
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     @classmethod

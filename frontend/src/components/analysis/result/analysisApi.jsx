@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import { ANALYSIS_BASE_URI } from "../../../constants/apiURLs";
+import { ANALYSIS_BASE_URI, JOB_BASE_URI } from "../../../constants/apiURLs";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 export async function createAnalysis() {
@@ -33,8 +33,6 @@ export async function createAnalysis() {
 }
 
 export async function deleteAnalysis(analysisId) {
-  const sure = await areYouSureConfirmDialog(`delete analysis #${analysisId}`);
-  if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.delete(`${ANALYSIS_BASE_URI}/${analysisId}`);
@@ -140,4 +138,57 @@ export async function removeJob(analysisId, jobId) {
     );
   }
   return success;
+}
+
+export async function addExistingJob(jobToAdd, currentAnalysisId) {
+  let success = false;
+  let jobAnalysisId = null;
+  try {
+    const response = await axios.get(`${JOB_BASE_URI}/${jobToAdd}`);
+    success = response.status === 200;
+    if (success) {
+      jobAnalysisId = response.data.analysis;
+    }
+  } catch (error) {
+    addToast(
+      <span>
+        Failed. Operation: <em>add existing job</em>
+      </span>,
+      error.parsedMsg,
+      "warning",
+    );
+  }
+
+  // case 1 - Job is already part of this analysis
+  if (jobAnalysisId === currentAnalysisId) {
+    addToast(
+      <span>
+        Failed. Operation: <em>add existing job</em>
+      </span>,
+      "Job is already part of this analysis",
+      "warning",
+    );
+  }
+  // case 2 - job is already part of different analysis
+  else if (jobAnalysisId) {
+    const sure = await areYouSureConfirmDialog(
+      `Remove job #${jobToAdd} from analysis #${jobAnalysisId} and add into analysis #${currentAnalysisId}`,
+    );
+    if (sure) {
+      // remove job from previous analysis
+      const isJobRemoved = await removeJob(jobAnalysisId, jobToAdd);
+      if (isJobRemoved) {
+        // add job into current analysis
+        const isJobAdded = await addJob(currentAnalysisId, jobToAdd);
+        return isJobAdded;
+      }
+      return isJobRemoved;
+    }
+  }
+  // case 3 - job is not part of any analysis
+  else {
+    const isJobAdded = await addJob(currentAnalysisId, jobToAdd);
+    return isJobAdded;
+  }
+  return false;
 }

@@ -10,15 +10,16 @@ import {
 } from "reactstrap";
 import { FaSearchPlus } from "react-icons/fa";
 import { BsFillPlusCircleFill } from "react-icons/bs";
-import { addJob } from "../result/analysisApi";
+import { addExistingJob } from "../result/analysisApi";
 
 function CustomAnalysisNode({ data }) {
   // state
   const [jobToAdd, setJobToAdd] = React.useState(null);
 
-  const addExistingJob = async () => {
-    const success = await addJob(data.id, jobToAdd);
+  const onClick = async () => {
+    const success = await addExistingJob(jobToAdd, data.id);
     if (success) {
+      data.refetchAnalysis();
       data.refetchTree();
     }
     setJobToAdd(null);
@@ -74,7 +75,7 @@ function CustomAnalysisNode({ data }) {
                   size="sm"
                   id="addExistingJobBtn"
                   disabled={!jobToAdd}
-                  onClick={() => addExistingJob()}
+                  onClick={() => onClick()}
                 >
                   Add
                 </Button>

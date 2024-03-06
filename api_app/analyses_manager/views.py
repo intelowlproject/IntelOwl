@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-from django.core.exceptions import BadRequest
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.decorators import action
@@ -45,11 +44,17 @@ class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
         try:
             job_pk = request.data.get("job")
         except KeyError:
-            raise BadRequest("You should set the `job` argument in the data")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "You should set the `job` argument in the data"},
+            )
         try:
             job = Job.objects.get(pk=job_pk)
         except Job.DoesNotExist:
-            raise BadRequest(f"Job {job_pk} does not exist")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": f"Job {job_pk} does not exist"},
+            )
         return job
 
     def _check_job_and_analysis(self, job, analysis):
@@ -85,9 +90,15 @@ class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
             )
 
         elif job.analysis_id == analysis.id:
-            raise BadRequest("Job is already part of this analysis")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "Job is already part of this analysis"},
+            )
         else:
-            raise BadRequest("Job is already part of different analysis")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "Job is already part of different analysis"},
+            )
 
     @action(methods=["POST"], url_name="remove_job", detail=True)
     def remove_job(self, request, pk):
@@ -96,7 +107,10 @@ class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
         job: Job = self._get_job(request)
         self._check_job_and_analysis(job, analysis)
         if job.analysis_id != analysis.pk:
-            raise BadRequest(f"You can't remove job {job.id} from analysis")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": f"You can't remove job {job.id} from analysis"},
+            )
         job.analysis = None
         job.save()
         analysis.refresh_from_db()

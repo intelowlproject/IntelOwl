@@ -2,7 +2,14 @@ import dagre from "@dagrejs/dagre";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 
 /* eslint-disable id-length */
-function addJobNode(nodes, job, analysisId, refetchTree) {
+function addJobNode(
+  nodes,
+  job,
+  analysisId,
+  refetchTree,
+  refetchAnalysis,
+  isFirstLevel,
+) {
   nodes.push({
     id: `job-${job.pk}`,
     data: {
@@ -14,6 +21,8 @@ function addJobNode(nodes, job, analysisId, refetchTree) {
       children: job.children || [],
       status: job.status,
       refetchTree,
+      refetchAnalysis,
+      isFirstLevel: isFirstLevel || false,
     },
     type: "jobNode",
   });
@@ -74,7 +83,12 @@ function getLayoutedElements(nodes, edges) {
   return { nodes, edges };
 }
 
-export function getNodesAndEdges(analysisTree, analysisId, refetchTree) {
+export function getNodesAndEdges(
+  analysisTree,
+  analysisId,
+  refetchTree,
+  refetchAnalysis,
+) {
   // analysis node
   const initialNode = [
     {
@@ -84,6 +98,7 @@ export function getNodesAndEdges(analysisTree, analysisId, refetchTree) {
         id: analysisId,
         label: analysisTree.name,
         refetchTree,
+        refetchAnalysis,
       },
       type: "analysisNode",
       draggable: false,
@@ -98,7 +113,14 @@ export function getNodesAndEdges(analysisTree, analysisId, refetchTree) {
 
   if (analysisTree.jobs.length) {
     analysisTree.jobs.forEach((job) => {
-      addJobNode(jobsNodes, job, analysisId, refetchTree);
+      addJobNode(
+        jobsNodes,
+        job,
+        analysisId,
+        refetchTree,
+        refetchAnalysis,
+        true,
+      );
       addEdge(jobsEdges, job, "analysis", analysisId);
     });
   }

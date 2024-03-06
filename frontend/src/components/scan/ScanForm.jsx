@@ -67,7 +67,11 @@ import {
   getObservableClassification,
 } from "../../utils/observables";
 import { SpinnerIcon } from "../common/icon/icons";
-import { addJob, removeJob } from "../analysis/result/analysisApi";
+import {
+  addJob,
+  removeJob,
+  deleteAnalysis,
+} from "../analysis/result/analysisApi";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -202,18 +206,15 @@ export default function ScanForm() {
         values.tlp,
         values.scan_mode,
         values.scan_check_time,
-        analysisIdParam,
       );
 
-      console.debug(response.analysisIds);
-
-      // no analysis id in param
+      // case 1 - new scan
       if (!analysisIdParam) {
-        // multiple jobs or pivot
-        if (response.analysisIds.length) {
-          setTimeout(() => navigate(`/analysis/${response.analysisIds}`), 1000);
+        // multiple jobs
+        if (response.analysisId) {
+          setTimeout(() => navigate(`/analysis/${response.analysisId}`), 1000);
         } else {
-          // single job
+          // single job or pivot
           setTimeout(
             () =>
               navigate(
@@ -224,16 +225,20 @@ export default function ScanForm() {
         }
       }
 
-      // analysis id in param
+      // case 2 - analysis id in GET param
       if (analysisIdParam) {
         // multiple jobs or pivot
-        if (response.analysisIds.length) {
-          // needed to remove jobs from previous analysis
-          response.jobIds.forEach(async (jobId) => {
-            const jobRemoved = await removeJob(response.analysisIds, jobId);
+        if (response.analysisId) {
+          // remove jobs from new analysis
+          let success = false;
+          response.jobIds.forEach(async (jobId, index) => {
+            const jobRemoved = await removeJob(response.analysisId, jobId);
             if (jobRemoved) {
-              const success = await addJob(analysisIdParam, jobId);
-              if (success) {
+              // add job into analysis given in the param
+              success = await addJob(analysisIdParam, jobId);
+              if (success && response.jobIds.length === index + 1) {
+                // delete analysis
+                await deleteAnalysis(response.analysisId);
                 setTimeout(
                   () => navigate(`/analysis/${analysisIdParam}`),
                   1000,

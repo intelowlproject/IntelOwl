@@ -7,6 +7,7 @@ import ReactFlow, {
   MarkerType,
   useNodesState,
   useEdgesState,
+  Panel,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -28,7 +29,12 @@ const defaultEdgeOptions = {
   },
 };
 
-export function AnalysisFlow({ analysisTree, analysisId, refetchTree }) {
+export function AnalysisFlow({
+  analysisTree,
+  analysisId,
+  refetchTree,
+  refetchAnalysis,
+}) {
   console.debug("AnalysisFlow rendered");
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -39,6 +45,7 @@ export function AnalysisFlow({ analysisTree, analysisId, refetchTree }) {
       analysisTree,
       analysisId,
       refetchTree,
+      refetchAnalysis,
     );
     setNodes(initialNodes);
     setEdges(initialEdges);
@@ -61,6 +68,38 @@ export function AnalysisFlow({ analysisTree, analysisId, refetchTree }) {
       >
         <MiniMap pannable />
         <Controls />
+        <Panel position="top-right">
+          <div
+            className="px-3 py-1 bg-dark d-flex flex-column"
+            style={{
+              minWidth: "230px",
+            }}
+          >
+            Edges:
+            <div className="d-flex justify-content-between">
+              <hr
+                style={{
+                  width: "45px",
+                  borderTop: "3px solid white",
+                  opacity: 1,
+                }}
+              />
+              <span>job is concluded</span>
+            </div>
+            <div className="d-flex justify-content-between">
+              <hr
+                className="bg-dark"
+                style={{
+                  width: "45px",
+                  borderTop: "3px dashed white",
+                  borderStyle: "dashed",
+                  opacity: 1,
+                }}
+              />
+              <span>job is running</span>
+            </div>
+          </div>
+        </Panel>
       </ReactFlow>
     </div>
   );
@@ -70,4 +109,5 @@ AnalysisFlow.propTypes = {
   analysisId: PropTypes.number.isRequired,
   analysisTree: PropTypes.object.isRequired,
   refetchTree: PropTypes.func.isRequired,
+  refetchAnalysis: PropTypes.func.isRequired,
 };

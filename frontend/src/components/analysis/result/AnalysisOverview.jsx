@@ -14,7 +14,11 @@ import { updateAnalysis } from "./analysisApi";
 import { AnalysisFlow } from "../flow/AnalysisFlow";
 import { ANALYSIS_BASE_URI } from "../../../constants/apiURLs";
 
-export function AnalysisOverview({ isRunningAnalysis, analysis }) {
+export function AnalysisOverview({
+  isRunningAnalysis,
+  analysis,
+  refetchAnalysis,
+}) {
   console.debug("AnalysisOverview rendered");
 
   // state
@@ -142,6 +146,7 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
               analysisTree={analysisTree}
               analysisId={analysis.id}
               refetchTree={refetchTree}
+              refetchAnalysis={refetchAnalysis}
             />
           )}
         />
@@ -153,4 +158,5 @@ export function AnalysisOverview({ isRunningAnalysis, analysis }) {
 AnalysisOverview.propTypes = {
   isRunningAnalysis: PropTypes.bool.isRequired,
   analysis: PropTypes.object.isRequired,
+  refetchAnalysis: PropTypes.func.isRequired,
 };

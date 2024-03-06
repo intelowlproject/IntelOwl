@@ -6,6 +6,7 @@ import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
 
 import { deleteAnalysis } from "./analysisApi";
 import { DeleteIcon } from "../../common/icon/icons";
+import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 export function AnalysisActionsBar({ analysis }) {
   // routers
@@ -13,10 +14,15 @@ export function AnalysisActionsBar({ analysis }) {
 
   // callbacks
   const onDeleteBtnClick = async () => {
+    const sure = await areYouSureConfirmDialog(
+      `delete analysis #${analysis.id}`,
+    );
+    if (!sure) return Promise.reject();
     const success = await deleteAnalysis(analysis.id);
-    if (!success) return;
+    if (!success) return Promise.reject();
     addToast("Redirecting...", null, "secondary");
     setTimeout(() => navigate(-1), 250);
+    return null;
   };
 
   return (

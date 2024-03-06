@@ -20,7 +20,7 @@ export default function AnalysisResult() {
   const analysisId = params.id;
 
   // API to download the analysis data
-  const [{ data: analysis, loading, error }, refetch] = useAxios({
+  const [{ data: analysis, loading, error }, refetchAnalysis] = useAxios({
     url: `${ANALYSIS_BASE_URI}/${analysisId}`,
   });
 
@@ -34,7 +34,7 @@ export default function AnalysisResult() {
 
   // HTTP polling only in case the analysis is running
   useInterval(
-    refetch,
+    refetchAnalysis,
     isRunning ? 5 * 1000 : null, // 5 seconds
   );
 
@@ -60,7 +60,11 @@ export default function AnalysisResult() {
       loading={initialLoading}
       error={error}
       render={() => (
-        <AnalysisOverview isRunningAnalysis={isRunning} analysis={analysis} />
+        <AnalysisOverview
+          isRunningAnalysis={isRunning}
+          analysis={analysis}
+          refetchAnalysis={refetchAnalysis}
+        />
       )}
     />
   );

@@ -12,6 +12,7 @@ function CustomJobNode({ data }) {
   const onClick = async () => {
     const success = await removeJob(data.analysis, data.id);
     if (success) {
+      data.refetchAnalysis();
       data.refetchTree();
     }
   };
@@ -39,14 +40,16 @@ function CustomJobNode({ data }) {
           >
             <AiOutlineLink /> Link
           </Button>
-          <Button
-            id="analysis-removejobbtn"
-            className="mx-1 p-2"
-            size="sm"
-            onClick={() => onClick()}
-          >
-            <MdOutlineCancel color="red" /> Remove Job
-          </Button>
+          {data.isFirstLevel && (
+            <Button
+              id="analysis-removejobbtn"
+              className="mx-1 p-2"
+              size="sm"
+              onClick={() => onClick()}
+            >
+              <MdOutlineCancel color="red" /> Remove Job
+            </Button>
+          )}
         </div>
         <div className="p-2 px-3 my-2 mx-2 d-flex flex-column bg-body">
           <div className="d-flex justify-content-between">

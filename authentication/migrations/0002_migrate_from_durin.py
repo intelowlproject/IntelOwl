@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("authentication", "0001_initial"),
         ("authtoken", "0003_tokenproxy"),
-        ("api_app", "0054_job_jobbisearch"),
+        ("api_app", "0061_job_depth_analysis"),
     ]
 
     operations = [

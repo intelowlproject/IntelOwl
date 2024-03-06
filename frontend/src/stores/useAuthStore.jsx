@@ -23,7 +23,7 @@ export const useAuthStore = create((set, get) => ({
   },
   access: null,
   isAuthenticated: () => !!get().CSRFToken,
-  updateToken: () => set({ CSRFToken: Cookies.get(CSRF_TOKEN)}),
+  updateToken: () => set({ CSRFToken: Cookies.get(CSRF_TOKEN) }),
   deleteToken: () => set({ CSRFToken: "" }),
   service: {
     fetchUserAccess: async () => {
@@ -64,7 +64,7 @@ export const useAuthStore = create((set, get) => ({
       const onLogoutCb = () => {
         get().deleteToken();
         // rmeove from the browser or it will persist next time we open a tab
-        Cookies.remove(CSRF_TOKEN)
+        Cookies.remove(CSRF_TOKEN);
         set({ loading: false });
         addToast("Logged out!", null, "info");
       };

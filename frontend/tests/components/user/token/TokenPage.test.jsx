@@ -12,7 +12,7 @@ useAxios.mockReturnValue([
   {
     data: {
       key: "123456789",
-      created: "2024-02-22T15:48:18.257944Z",
+      created: "2024-02-22T15:48:18.257944",
     },
   },
 ]);
@@ -22,6 +22,6 @@ describe("test TokenPage", () => {
     render(<TokenPage />);
     expect(screen.getByText("API Access")).toBeInTheDocument();
     expect(screen.getByText("Created")).toBeInTheDocument();
-    expect(screen.getByText("04:48 PM Feb 22nd, 2024")).toBeInTheDocument();
+    expect(screen.getByText("03:48 PM Feb 22nd, 2024")).toBeInTheDocument();
   });
 });

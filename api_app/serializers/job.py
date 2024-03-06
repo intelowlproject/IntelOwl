@@ -31,6 +31,7 @@ from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
@@ -90,6 +91,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "tags_labels",
             "scan_mode",
             "scan_check_time",
+            "analysis",
         )
 
     md5 = rfs.HiddenField(default=None)
@@ -106,7 +108,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     )
     runtime_configuration = rfs.JSONField(required=False, write_only=True)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
-
+    analysis = rfs.PrimaryKeyRelatedField(
+        queryset=Analysis.objects.all(), many=False, required=False, default=None
+    )
     connectors_requested = rfs.SlugRelatedField(
         slug_field="name",
         queryset=ConnectorConfig.objects.all(),
@@ -125,6 +129,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         many=False,
         required=False,
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filter_warnings = []
 
     def validate_runtime_configuration(self, runtime_config: Dict):
         from api_app.validators import validate_runtime_configuration
@@ -149,10 +157,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             return TLP.CLEAR.value
         return tlp
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.filter_warnings = []
-
     def run_validation(self, data=empty):
         result = super().run_validation(data=data)
         self.filter_warnings.clear()
@@ -171,7 +175,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             if attribute not in attrs:
                 attrs[attribute] = getattr(playbook, attribute)
 
+    def _validate_analysis(self, user: User, analysis: Analysis = None):
+        if analysis and analysis.user_can_edit(self.user):
+            raise ValidationError({"detail": "You can't create a job to this analysis"})
+
     def validate(self, attrs: dict) -> dict:
+        self._validate_analysis(attrs["user"], attrs["analysis"])
         if attrs.get("playbook_requested"):
             self.set_default_value_from_playbook(attrs)
         # this TLP validation must be after the Playbook checks to avoid
@@ -492,12 +501,12 @@ class MultipleJobSerializer(rfs.ListSerializer):
         raise NotImplementedError("This serializer does not support update().")
 
     def save(self, parent: Job = None, **kwargs):
-        result = super().save(**kwargs, parent=parent)
+        jobs = super().save(**kwargs, parent=parent)
         if parent:
             # the parent has already an analysis
             # so we don't need to do anything because everything is already connected
             if parent.analysis:
-                return result
+                return jobs
             # if we have a parent, it means we are pivoting from one job to another
             else:
                 analysis = Analysis.objects.create(
@@ -506,22 +515,22 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 )
                 analysis.jobs.add(parent)
                 analysis.start_time = parent.received_request_time
-        # if we do not have a parent, and we have multiple result,
+        # if we do not have a parent, and we have multiple jobs,
         # we are in the multiple input case
-        elif len(result) > 1:
+        elif len(jobs) > 1:
             analysis = Analysis.objects.create(
                 name="Custom analysis", owner=self.context["request"].user
             )
-            analysis.jobs.set(result)
+            analysis.jobs.set([job for job in jobs if not job.analysis])
             analysis.start_time = now()
         else:
-            return result
+            return jobs
         analysis: Analysis
         analysis.name = analysis.name + f" #{analysis.id}"
         analysis.status = analysis.Status.RUNNING.value
         analysis.for_organization = True
         analysis.save()
-        return result
+        return jobs
 
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)

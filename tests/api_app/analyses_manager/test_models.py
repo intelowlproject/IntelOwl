@@ -17,7 +17,7 @@ class AnalysisTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
-            status=Job.Status.REPORTED_WITH_FAILS
+            status=Job.Status.REPORTED_WITH_FAILS,
         )
         an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
@@ -28,7 +28,7 @@ class AnalysisTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
-            status=Job.Status.PENDING
+            status=Job.Status.PENDING,
         )
         an.refresh_from_db()
         an.set_correct_status()

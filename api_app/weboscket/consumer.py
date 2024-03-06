@@ -54,7 +54,7 @@ class JobConsumer(JsonWebsocketConsumer):
             self.close()
 
     @classmethod
-    def _generate_group_name(self, job_id: int) -> str:
+    def _generate_group_name(cls, job_id: int) -> str:
         return f"job-{job_id}"
 
     @classmethod

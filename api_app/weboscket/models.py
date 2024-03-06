@@ -12,10 +12,9 @@ class JobChannel(models.Model):
     * user is used to get the permission to kill or delete the job
     """
 
-    job_id = models.PositiveIntegerField(null=False)
+    job_id = models.PositiveIntegerField()
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        null=False,
     )
     channel_name = models.CharField()

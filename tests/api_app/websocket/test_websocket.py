@@ -13,6 +13,7 @@ from api_app.analyzers_manager.constants import ObservableTypes, TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import ParamTypes
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
+from api_app.weboscket.models import JobChannel
 from intel_owl.asgi import application
 from intel_owl.tasks import job_set_final_status, run_plugin
 
@@ -64,13 +65,16 @@ class JobConsumerTestCase(WebsocketTestCase):
         )
 
     async def test_job_unauthorized(self):
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1027).count)(), 1)
         async with self.connect_communicator(1027) as (_, connected, subprotocol):
             self.assertFalse(connected)
             self.assertEqual(subprotocol, 1008)
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
 
     async def test_job_not_exist(self):
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1028).count)(), 0)
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
         async with self.connect_communicator(1028, self.user) as (
             _,
             connected,
@@ -78,8 +82,10 @@ class JobConsumerTestCase(WebsocketTestCase):
         ):
             self.assertFalse(connected)
             self.assertEqual(subprotocol, 4040)
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
 
     async def test_job_terminated(self):
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1027).count)(), 1)
         async with self.connect_communicator(1027, self.user) as (
             communicator,
@@ -93,6 +99,7 @@ class JobConsumerTestCase(WebsocketTestCase):
             self.assertEqual(
                 job_report["status"], Job.Status.REPORTED_WITHOUT_FAILS.value
             )
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
 
     async def test_job_running(self):
         # Note: Sometimes reading from ws (receive_json_from) is too fast:
@@ -100,6 +107,8 @@ class JobConsumerTestCase(WebsocketTestCase):
         # The test will be blocked waiting a response from ws that already happened.
         # we need a sleep to wait.
         # in this test happens for the functions: run_plugin set_final_status.
+
+        # setup db
         job = await sync_to_async(Job.objects.create)(
             id=1029,
             user=self.user,
@@ -155,19 +164,23 @@ class JobConsumerTestCase(WebsocketTestCase):
             parameter_id=query_type_param.id,
         )
         await sync_to_async(plugin_config.save)()
+
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
         async with self.connect_communicator(1029, self.user) as (
             communicator,
             connected,
             _,
         ):
             self.assertTrue(connected)
+            time.sleep(1)
+            self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 1)
             job_report_running = await communicator.receive_json_from()
             self.assertEqual(job_report_running["id"], 1029)
             self.assertEqual(job_report_running["observable_name"], "test.com")
             self.assertEqual(job_report_running["status"], Job.Status.PENDING.value)
             self.assertEqual(job_report_running["analyzer_reports"], [])
             self.assertIsNone(job_report_running["finished_analysis_time"])
-            time.sleep(5)
+            time.sleep(1)
             # run plugin
             await sync_to_async(run_plugin)(
                 job_id=1029,
@@ -176,9 +189,9 @@ class JobConsumerTestCase(WebsocketTestCase):
                 runtime_configuration={},
                 task_id=10,
             )
-            time.sleep(5)
+            time.sleep(1)
             job_analyzer_terminated = await communicator.receive_json_from()
-            time.sleep(5)
+            time.sleep(1)
             self.assertEqual(job_analyzer_terminated["id"], 1029)
             self.assertEqual(job_analyzer_terminated["observable_name"], "test.com")
             self.assertEqual(
@@ -190,9 +203,9 @@ class JobConsumerTestCase(WebsocketTestCase):
             job.status = Job.Status.REPORTED_WITHOUT_FAILS
             await sync_to_async(job.save)()
             await sync_to_async(job_set_final_status)(1029)
-            time.sleep(5)
+            time.sleep(1)
             job_report_terminated = await communicator.receive_json_from()
-            time.sleep(5)
+            time.sleep(1)
             self.assertEqual(job_report_terminated["id"], 1029)
             self.assertEqual(job_report_terminated["observable_name"], "test.com")
             self.assertEqual(
@@ -200,3 +213,41 @@ class JobConsumerTestCase(WebsocketTestCase):
             )
             self.assertIsNotNone(job_report_terminated["analyzer_reports"])
             self.assertIsNotNone(job_report_terminated["finished_analysis_time"])
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
+
+    async def test_job_killed(self):
+        await sync_to_async(Job.objects.create)(
+            id=1030,
+            user=self.user,
+            status=Job.Status.RUNNING.value,
+            observable_name="test.com",
+            observable_classification=ObservableTypes.DOMAIN,
+            received_request_time=datetime.datetime.now(),
+        )
+
+        await sync_to_async(self.client.force_login)(self.user)
+
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)
+        time.sleep(1)
+        async with self.connect_communicator(1030, self.user) as (
+            communicator,
+            connected,
+            _,
+        ):
+            self.assertTrue(connected)
+            time.sleep(1)
+            job_running = await communicator.receive_json_from()
+            self.assertEqual(job_running["id"], 1030)
+            self.assertEqual(job_running["observable_name"], "test.com")
+            self.assertEqual(job_running["status"], Job.Status.RUNNING.value)
+
+            time.sleep(1)
+            await sync_to_async(self.client.patch)("/api/jobs/1030/kill")
+
+            time.sleep(1)
+            job_killed = await communicator.receive_json_from()
+            self.assertEqual(job_killed["id"], 1030)
+            self.assertEqual(job_killed["observable_name"], "test.com")
+            self.assertEqual(job_killed["status"], Job.Status.KILLED.value)
+
+        self.assertEqual(await sync_to_async(JobChannel.objects.all().count)(), 0)

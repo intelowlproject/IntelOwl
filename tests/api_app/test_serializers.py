@@ -17,10 +17,10 @@ from api_app.serializers import (
     FileAnalysisSerializer,
     JobRecentScanSerializer,
     JobResponseSerializer,
-    JobSerializer,
     ObservableAnalysisSerializer,
     PluginConfigSerializer,
     PythonListConfigSerializer,
+    RestJobSerializer,
     _AbstractJobCreateSerializer,
 )
 from api_app.visualizers_manager.models import VisualizerConfig
@@ -179,14 +179,14 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         org.delete()
 
 
-class JobSerializerTestCase(CustomTestCase):
+class RestJobSerializerTestCase(CustomTestCase):
     def test_validate(self):
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
         )
-        js = JobSerializer(job)
+        js = RestJobSerializer(job)
         self.assertIn("analyzer_reports", js.data)
         self.assertIn("connector_reports", js.data)
         self.assertIn("visualizer_reports", js.data)

@@ -21,7 +21,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api_app.websocket import JobConsumer
+from api_app.weboscket.consumer import JobConsumer
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerPermission as IsObjectUserPermission,
@@ -54,10 +54,10 @@ from .serializers import (
     JobListSerializer,
     JobRecentScanSerializer,
     JobResponseSerializer,
-    JobSerializer,
     ObservableAnalysisSerializer,
     PluginConfigSerializer,
     PythonConfigSerializer,
+    RestJobSerializer,
     TagSerializer,
 )
 
@@ -283,9 +283,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     queryset = (
         Job.objects.prefetch_related("tags").order_by("-received_request_time").all()
     )
-    serializer_class = JobSerializer
+    serializer_class = RestJobSerializer
     serializer_action_classes = {
-        "retrieve": JobSerializer,
+        "retrieve": RestJobSerializer,
         "list": JobListSerializer,
     }
     filterset_class = JobFilter

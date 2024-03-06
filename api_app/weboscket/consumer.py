@@ -6,7 +6,8 @@ from channels.layers import get_channel_layer
 
 from api_app.choices import Status
 from api_app.models import Job
-from api_app.serializers import JobSerializer
+from api_app.serializers import WsJobSerializer
+from api_app.weboscket.models import JobChannel
 
 logger = logging.getLogger(__name__)
 
@@ -24,17 +25,15 @@ class JobConsumer(JsonWebsocketConsumer):
             self.close(code=4040)
         else:
             self.accept()
-            async_to_sync(self.channel_layer.group_add)(
-                JobConsumer._generate_group_name(job_id), self.channel_name
+            JobChannel.objects.create(
+                job_id=job_id, user=user, channel_name=self.channel_name
             )
             JobConsumer.serialize_and_send_job(job)
 
     def disconnect(self, close_code) -> None:
         user = self.scope["user"]
         job_id = self.scope["url_route"]["kwargs"]["job_id"]
-        async_to_sync(self.channel_layer.group_discard)(
-            JobConsumer._generate_group_name(job_id), self.channel_name
-        )
+        JobChannel.objects.filter(channel_name=self.channel_name).delete()
         logger.info(
             f"user: {user} disconnected for the job: {job_id}. Close code: {close_code}"
         )
@@ -60,11 +59,17 @@ class JobConsumer(JsonWebsocketConsumer):
 
     @classmethod
     def serialize_and_send_job(cls, job: Job) -> None:
-        job_serializer = JobSerializer(job)
-        job_data = job_serializer.data
         # send data
         channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            cls._generate_group_name(job.id),
-            {"type": "send.job", "job": job_data},
-        )
+        for channel in JobChannel.objects.filter(job_id=job.id):
+            logger.debug(
+                f"send data for the job: {job.id} "
+                f"to the user: {channel.user.username} "
+                f"over the channel: {channel.channel_name}"
+            )
+            job_serializer = WsJobSerializer(job, context={"channel": channel})
+            job_data = job_serializer.data
+            async_to_sync(channel_layer.send)(
+                channel.channel_name,
+                {"type": "send.job", "job": job_data},
+            )

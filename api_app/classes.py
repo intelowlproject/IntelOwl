@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import cached_property
+from requests import HTTPError
 
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from certego_saas.apps.user.models import User
@@ -133,6 +134,13 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
+        if isinstance(e, HTTPError):
+            if (
+                e.response
+                and hasattr(e.response, "status_code")
+                and e.response.status_code == 429
+            ):
+                self.disable_for_rate_limit()
         if settings.STAGE_CI:
             raise e
 

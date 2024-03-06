@@ -239,6 +239,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `DNS0_rrsets_data`: Query billions of current and historical DNS resource records sets. Performs right-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DNS0_rrsets_name`: Query billions of current and historical DNS resource records sets. Performs left-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
+* `Feodo_Tracker`: [Feodo Tracker](https://feodotracker.abuse.ch/) offers various blocklists, helping network owners to protect their users from Dridex and Emotet/Heodo.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
 * `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB

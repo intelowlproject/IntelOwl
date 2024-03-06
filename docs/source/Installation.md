@@ -6,13 +6,13 @@ The project leverages `docker compose` with a custom Bash script and you need to
 * [docker-compose](https://docs.docker.com/compose/install/) - v2.3.4+
 
 In some systems you could find pre-installed older versions. Please check this and install a supported version before attempting the installation. Otherwise it would fail.
-**Note:** We've added a new script `initialize.sh` that will check compatibility with your system and attempt to install the required dependencies.
+**Note:** We've added a new Bash script `initialize.sh` that will check compatibility with your system and attempt to install the required dependencies.
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul>
 <li>The project uses public docker images that are available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
-<li>IntelOwl is tested and supported to work in a Linux-based OS. It <i>may</i> also run on windows, but that is not officially supported yet.</li>
+<li>IntelOwl is tested and supported to work in a Debian distro. Other Linux-based OS <i>should</i> work but that has not been tested much. It <i>may</i> also run on Windows, but that is not officially supported.</li>
 <li>Before installing remember that you must comply with the <a href="https://github.com/certego/IntelOwl/blob/master/LICENSE">LICENSE</a> and the <a href="https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md">Legal Terms</a></li>
 </ul>
 </div>

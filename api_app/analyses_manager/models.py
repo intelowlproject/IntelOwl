@@ -48,9 +48,13 @@ class Analysis(OwnershipAbstractModel, ListCachable):
         # if I have some jobs
         if self.jobs.exists():
             # and at least one is running
-            if self.jobs.exclude(status__in=Job.Status.final_statuses()).count() > 0:
-                self.status = self.Status.RUNNING.value
-                self.end_time = None
+            for job in self.jobs.all():
+                job: Job
+                jobs = job.get_tree(job)
+                if jobs.exclude(status__in=Job.Status.final_statuses()).count() > 0:
+                    self.status = self.Status.RUNNING.value
+                    self.end_time = None
+                    break
             # and they are all completed
             else:
                 self.status = self.Status.CONCLUDED.value

@@ -22,11 +22,12 @@ from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
-db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
+db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb", "GeoLite2-ASN.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
     _api_key_name: str
+    _account_id_name: str
 
     def run(self):
         maxmind_final_result = {}
@@ -69,23 +70,31 @@ class Maxmind(classes.ObservableAnalyzer):
             if plugin.value:
                 return plugin.value
         return None
-
+    
     @classmethod
-    def _update_db(cls, db: str, api_key: str) -> bool:
-        if not api_key:
+    def _get_account_id(cls) -> Optional[str]:
+        for plugin in PluginConfig.objects.filter(
+            parameter__python_module=cls.python_module,
+            parameter__is_secret=True,
+            parameter__name="account_id_name",
+        ):
+            if plugin.value:
+                return plugin.value
+        return None
+    
+    @classmethod
+    def _update_db(cls, db: str, api_key: str, account_id: str) -> bool:
+        if not api_key or not account_id:
             raise AnalyzerConfigurationException(
-                f"Unable to find api key for {cls.__name__}"
+                f"Unable to find api key or account ID for {cls.__name__}"
             )
 
         db_location = _get_db_location(db)
         try:
             db_name_wo_ext = db[:-5]
             logger.info(f"starting download of db {db_name_wo_ext} from maxmind")
-            url = (
-                "https://download.maxmind.com/app/geoip_download?edition_id="
-                f"{db_name_wo_ext}&license_key={api_key}&suffix=tar.gz"
-            )
-            r = requests.get(url)
+            url = f'https://download.maxmind.com/geoip/databases/{db_name_wo_ext}/download?suffix=tar.gz'
+            r = requests.get(url, auth=(api_key, account_id))
             if r.status_code >= 300:
                 raise AnalyzerRunException(
                     f"failed request for new maxmind db {db_name_wo_ext}."
@@ -141,7 +150,8 @@ class Maxmind(classes.ObservableAnalyzer):
     @classmethod
     def update(cls) -> bool:
         api_key = cls._get_api_key()
-        return all(cls._update_db(db, api_key) for db in db_names)
+        account_id = cls._get_account_id()
+        return all(cls._update_db(db, api_key, account_id) for db in db_names)
 
     @classmethod
     def _monkeypatch(cls):

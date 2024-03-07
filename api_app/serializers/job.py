@@ -460,7 +460,7 @@ class JobSerializer(_AbstractJobViewSerializer):
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     permissions = rfs.SerializerMethodField()
 
-    def get_pivots_to_execute(self, obj: Job):
+    def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
 

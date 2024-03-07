@@ -14,11 +14,10 @@ def move_token_from_durin(apps, schema_editor):
         for durin_token in AuthToken.objects.all():
             # export only CLI token (client name PyIntelOwl)
             # only in case user didn't have a rest framework token
-            if durin_token.client.name == "PyIntelOwl":
-                if not Token.objects.filter(user_id=durin_token.user.id).exists():
-                    Token.objects.create(
-                        key=durin_token.token, user_id=durin_token.user.pk
-                    )
+            if durin_token.client.name == "PyIntelOwl" and not Token.objects.filter(user_id=durin_token.user.id).exists():
+                Token.objects.create(
+                    key=durin_token.token, user_id=durin_token.user.pk
+                )
 
         # delete durin db data
         AuthToken.objects.all().delete()

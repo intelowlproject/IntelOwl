@@ -55,28 +55,27 @@ def post_delete_job(sender, instance: Job, **kwargs):
         instance.analysis.delete()
 
 
-@receiver(models.signals.post_migrate)
+@receiver(models.signals.post_migrate, sender=BeatConfig)
 def post_migrate_beat(
     sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
 ):
     from django_celery_beat.models import PeriodicTask
 
-    if isinstance(sender, BeatConfig):
-        from intel_owl.tasks import update
+    from intel_owl.tasks import update
 
-        for module in PythonModule.objects.filter(health_check_schedule__isnull=False):
-            for config in module.configs.filter(health_check_task__isnull=True):
-                config.generate_health_check_periodic_task()
-        for module in PythonModule.objects.filter(
-            update_schedule__isnull=False, update_task__isnull=True
-        ):
-            module.generate_update_periodic_task()
+    for module in PythonModule.objects.filter(health_check_schedule__isnull=False):
+        for config in module.configs.filter(health_check_task__isnull=True):
+            config.generate_health_check_periodic_task()
+    for module in PythonModule.objects.filter(
+        update_schedule__isnull=False, update_task__isnull=True
+    ):
+        module.generate_update_periodic_task()
 
-        for task in PeriodicTask.objects.filter(
-            enabled=True, task=f"{update.__module__}.{update.__name__}"
-        ):
-            task.enabled &= settings.REPO_DOWNLOADER_ENABLED
-            task.save()
+    for task in PeriodicTask.objects.filter(
+        enabled=True, task=f"{update.__module__}.{update.__name__}"
+    ):
+        task.enabled &= settings.REPO_DOWNLOADER_ENABLED
+        task.save()
 
 
 @receiver(models.signals.post_save, sender=PluginConfig)

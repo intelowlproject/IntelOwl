@@ -61,7 +61,6 @@ class JobConsumerTestCase(WebsocketTestCase):
             status=Job.Status.REPORTED_WITHOUT_FAILS.value,
             observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
-            received_request_time=datetime.datetime.now(),
         )
 
     async def test_job_unauthorized(self):
@@ -115,7 +114,6 @@ class JobConsumerTestCase(WebsocketTestCase):
             status=Job.Status.PENDING.value,
             observable_name="test.com",
             observable_classification=ObservableTypes.DOMAIN,
-            received_request_time=datetime.datetime.now(),
         )
         class_dns_python_module, _ = await sync_to_async(
             PythonModule.objects.get_or_create
@@ -222,7 +220,6 @@ class JobConsumerTestCase(WebsocketTestCase):
             status=Job.Status.RUNNING.value,
             observable_name="test.com",
             observable_classification=ObservableTypes.DOMAIN,
-            received_request_time=datetime.datetime.now(),
         )
 
         await sync_to_async(self.client.force_login)(self.user)

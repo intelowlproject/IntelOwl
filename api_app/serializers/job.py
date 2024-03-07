@@ -404,7 +404,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
         read_only=True, slug_field="name", many=True
     )
 
-    def get_pivots_to_execute(self, obj: Job):
+    def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         return obj.pivots_to_execute.all().values_list("name", flat=True)
 
 

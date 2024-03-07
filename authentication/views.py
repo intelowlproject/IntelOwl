@@ -133,7 +133,7 @@ class ChangePasswordView(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # skipcq: PYL-R0201
         user = request.user
         logger.info(f"perform_logout received request from '{user.username}''.")
         logout(request)
@@ -261,7 +261,7 @@ class APIAccessTokenView(APIView):
         serializer = TokenSerializer(instance)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request):  # skipcq: PYL-R0201
         username = request.user.username
         logger.info(f"user {username} send a request to create the API token")
         serializer = TokenSerializer(data={}, context={"request": request})

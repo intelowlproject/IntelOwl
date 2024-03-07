@@ -13,7 +13,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 get_asgi_application()
 
 # pylint: disable=wrong-import-position
-from api_app.weboscket.consumer import JobConsumer  # noqa: E402
+from api_app.websocket.consumer import JobConsumer  # noqa: E402
 from intel_owl.middleware import WSAuthMiddleware  # noqa: E402
 
 application = ProtocolTypeRouter(

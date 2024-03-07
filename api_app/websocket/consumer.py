@@ -7,7 +7,7 @@ from channels.layers import get_channel_layer
 from api_app.choices import Status
 from api_app.models import Job
 from api_app.serializers.job import WsJobSerializer
-from api_app.weboscket.models import JobChannel
+from api_app.websocket.models import JobChannel
 
 logger = logging.getLogger(__name__)
 

@@ -12,7 +12,7 @@ from api_app.analyzers_manager.constants import ObservableTypes, TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import ParamTypes
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
-from api_app.weboscket.models import JobChannel
+from api_app.websocket.models import JobChannel
 from intel_owl.asgi import application
 from intel_owl.tasks import job_set_final_status, run_plugin
 

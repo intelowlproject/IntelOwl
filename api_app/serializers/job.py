@@ -501,7 +501,7 @@ class RestJobSerializer(JobSerializer):
 
 class WsJobSerializer(JobSerializer):
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
-        from api_app.weboscket.models import JobChannel
+        from api_app.websocket.models import JobChannel
 
         has_perm = False
         channel: JobChannel = self.context.get("channel", None)

@@ -204,7 +204,7 @@ def update_notifications_with_releases():
 @app.task(name="job_set_final_status", soft_time_limit=30)
 def job_set_final_status(job_id: int):
     from api_app.models import Job
-    from api_app.weboscket.consumer import JobConsumer
+    from api_app.websocket.consumer import JobConsumer
 
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
@@ -255,7 +255,7 @@ def run_plugin(
 ):
     from api_app.classes import Plugin
     from api_app.models import Job, PythonModule
-    from api_app.weboscket.consumer import JobConsumer
+    from api_app.websocket.consumer import JobConsumer
 
     logger.info(
         f"Configuring plugin {plugin_config_pk} for job {job_id} with task {task_id}"

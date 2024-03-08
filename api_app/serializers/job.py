@@ -501,17 +501,7 @@ class RestJobSerializer(JobSerializer):
 
 class WsJobSerializer(JobSerializer):
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
-        from api_app.websocket.models import JobChannel
-
-        has_perm = False
-        channel: JobChannel = self.context.get("channel", None)
-        if channel:
-            # channel user has the perm in case is the job owner or is in the same org
-            # same logic of IsObjectOwnerOrSameOrgPermission defined in certego_saas
-            has_perm = (
-                channel.user == obj.user
-                or obj.user.membership.organization.user_has_membership(channel.user)
-            )
+        has_perm = self.context.get("permissions", False)
         return {
             "kill": has_perm,
             "delete": has_perm,

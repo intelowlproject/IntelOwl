@@ -492,7 +492,7 @@ class Job(MP_Node):
         from api_app.analyzers_manager.models import AnalyzerConfig
         from api_app.connectors_manager.models import ConnectorConfig
         from api_app.visualizers_manager.models import VisualizerConfig
-        from api_app.websocket.consumer import JobConsumer
+        from api_app.websocket import JobConsumer
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:

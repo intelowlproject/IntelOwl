@@ -56,16 +56,8 @@ class BGPRanking(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        response = {
-            "key": "191.121.10.0",
-            "effective_opts": {"type": "ip4", "limit": 100, "wildcard": False},
-            "status": "finished",
-            "query_key": "191.121.10.0",
-            "records": {},
-            "records_returned": 0,
-            "limited": False,
-            "error": None,
-        }
+        response = {'meta': {'ip': '143.255.153.0/24'}, 'response': {'2024-03-07T12:00:00': {'asn': '264643', 'prefix': '143.255.153.0/24', 'source': 'caida'}}}
+
         patches = [
             if_mock_connections(
                 patch(

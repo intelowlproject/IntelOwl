@@ -330,6 +330,14 @@ class AbstractReportQuerySet(SendToBiQuerySet):
     def filter_completed(self):
         return self.filter(status__in=self.model.Status.final_statuses())
 
+    def filter_retryable(self):
+        return self.filter(
+            status__in=[self.model.Status.FAILED.value, self.model.Status.PENDING.value]
+        )
+
+    def get_configurations(self) -> AbstractConfigQuerySet:
+        return self.model.config.objects.filter(pk__in=self.values("config__pk"))
+
 
 class ModelWithOwnershipQuerySet:
     def default_values(self):

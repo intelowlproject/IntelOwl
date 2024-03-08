@@ -379,36 +379,12 @@ class Job(MP_Node):
     def retry(self):
         self.status = self.Status.RUNNING
         self.save(update_fields=["status"])
-        failed_analyzers = self.analyzerreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
-        failed_connector = self.connectorreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
-        failed_pivot = self.pivotreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
 
-        failed_visualizer = self.visualizerreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
         runner = self._get_pipeline(
-            self.analyzers_to_execute.filter(pk__in=failed_analyzers),
-            self.pivots_to_execute.filter(pk__in=failed_pivot),
-            self.connectors_to_execute.filter(pk__in=failed_connector),
-            self.visualizers_to_execute.filter(pk__in=failed_visualizer),
+            analyzers=self.analyzerreports.filter_retryable().get_configurations(),
+            pivots=self.pivotreports.filter_retryable().get_configurations(),
+            connectors=self.connectorreports.filter_retryable().get_configurations(),
+            visualizers=self.visualizerreports.filter_retryable().get_configurations(),
         )
 
         runner.apply_async(

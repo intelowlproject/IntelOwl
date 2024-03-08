@@ -74,6 +74,8 @@ class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
         analysis: Analysis = self.get_object()
         job: Job = self._get_job(request)
         self._check_job_and_analysis(job, analysis)
+        if not job.is_root():
+            raise PermissionDenied("You can add to an analysis only primary jobs")
         if job.analysis is None:
             job.analysis = analysis
             job.save()

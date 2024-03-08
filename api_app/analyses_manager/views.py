@@ -61,6 +61,8 @@ class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
             raise PermissionDenied(
                 "You do not have permissions to add this job to the analysis"
             )
+        if not job.is_root():
+            raise PermissionDenied("You can add to an analysis only primary jobs")
         if job.analysis is None:
             job.analysis = analysis
             job.save()

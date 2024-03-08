@@ -447,8 +447,8 @@ class Job(MP_Node):
             ]
         )
         # we update the status of the analysis
-        if self.analysis:
-            self.analysis.set_correct_status(save=True)
+        if root_analysis := self.get_root().analysis:
+            root_analysis.set_correct_status(save=True)
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")

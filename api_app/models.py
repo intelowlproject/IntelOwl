@@ -1161,7 +1161,9 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
-                "parameters": self._get_params(job.user, job.runtime_configuration),
+                "parameters": self._get_params(
+                    job.user, job.get_config_runtime_configuration(self)
+                ),
             },
         )[0]
 

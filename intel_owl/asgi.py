@@ -18,7 +18,7 @@ from intel_owl.middleware import WSAuthMiddleware  # noqa: E402
 
 application = ProtocolTypeRouter(
     {
-        # WebSocket chat handler
+        # websocket protocol routing
         "websocket": AllowedHostsOriginValidator(
             AuthMiddlewareStack(
                 WSAuthMiddleware(

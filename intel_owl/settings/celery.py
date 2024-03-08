@@ -9,10 +9,11 @@ from .aws import AWS_SQS, AWS_USER_NUMBER
 
 RESULT_BACKEND = "django-db"
 BROKER_URL = get_secret("BROKER_URL", None)
-if not BROKER_URL and AWS_SQS:
-    BROKER_URL = "sqs://"
-else:
-    BROKER_URL = "redis://redis:6379/1"  # 0 is used by channels
+if not BROKER_URL:
+    if AWS_SQS:
+        BROKER_URL = "sqs://"
+    else:
+        BROKER_URL = "redis://redis:6379/1"  # 0 is used by channels
 
 DEFAULT_QUEUE = "default"
 BROADCAST_QUEUE = "broadcast"

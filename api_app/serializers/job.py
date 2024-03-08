@@ -31,7 +31,6 @@ from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
-from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
@@ -175,12 +174,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             if attribute not in attrs:
                 attrs[attribute] = getattr(playbook, attribute)
 
-    def _validate_analysis(self, user: User, analysis: Analysis = None):
-        if analysis and analysis.user_can_edit(self.user):
+    def validate_analysis(self, analysis: Analysis = None):
+        if analysis and not analysis.user_can_edit(self.context["request"].user):
             raise ValidationError({"detail": "You can't create a job to this analysis"})
 
     def validate(self, attrs: dict) -> dict:
-        self._validate_analysis(attrs["user"], attrs["analysis"])
         if attrs.get("playbook_requested"):
             self.set_default_value_from_playbook(attrs)
         # this TLP validation must be after the Playbook checks to avoid

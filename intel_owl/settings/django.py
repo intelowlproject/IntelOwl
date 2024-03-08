@@ -19,7 +19,7 @@ MIDDLEWARE = [
 ]
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 90  # seconds * minutes * hours * days
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # seconds * minutes * hours * days
 
 if DEBUG:
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")

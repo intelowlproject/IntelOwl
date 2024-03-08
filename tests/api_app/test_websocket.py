@@ -61,13 +61,13 @@ class JobConsumerTestCase(WebsocketTestCase):
             observable_classification=ObservableTypes.IP,
         )
 
-    async def test_job_unauthorized(self):
+    async def test_job_unauthorized(self, *args, **kwargs):
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1027).count)(), 1)
         async with self.connect_communicator(1027) as (_, connected, subprotocol):
             self.assertFalse(connected)
             self.assertEqual(subprotocol, 1008)
 
-    async def test_job_not_exist(self):
+    async def test_job_not_exist(self, *args, **kwargs):
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1028).count)(), 0)
         async with self.connect_communicator(1028, self.user) as (
             _,
@@ -77,7 +77,7 @@ class JobConsumerTestCase(WebsocketTestCase):
             self.assertFalse(connected)
             self.assertEqual(subprotocol, 4040)
 
-    async def test_job_terminated(self):
+    async def test_job_terminated(self, *args, **kwargs):
         self.assertEqual(await sync_to_async(Job.objects.filter(id=1027).count)(), 1)
         async with self.connect_communicator(1027, self.user) as (
             communicator,
@@ -92,7 +92,7 @@ class JobConsumerTestCase(WebsocketTestCase):
                 job_report["status"], Job.Status.REPORTED_WITHOUT_FAILS.value
             )
 
-    async def test_job_running(self):
+    async def test_job_running(self, *args, **kwargs):
         # Note: Sometimes reading from ws (receive_json_from) is too fast:
         # it happens before other part of code send data.
         # The test will be blocked waiting a response from ws that already happened.
@@ -202,7 +202,7 @@ class JobConsumerTestCase(WebsocketTestCase):
             self.assertIsNotNone(job_report_terminated["analyzer_reports"])
             self.assertIsNotNone(job_report_terminated["finished_analysis_time"])
 
-    async def test_job_killed(self):
+    async def test_job_killed(self, *args, **kwargs):
         await sync_to_async(Job.objects.create)(
             id=1030,
             user=self.user,

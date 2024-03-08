@@ -81,17 +81,11 @@ class JobConsumer(JsonWebsocketConsumer):
                 subscribed_group,
                 self.channel_name,
             )
-        logger.info(
+        logger.debug(
             f"user: {user} disconnected from the group: {subscribed_group}. "
             f"Close code: {close_code}"
         )
         self.close(code=close_code)
-
-    def receive_json(self, content) -> None:
-        user: User = self.scope["user"]
-        logger.warning(
-            f"user {user} send {content} to the websocket, this shouldn't happen"
-        )
 
     def send_job(self, event) -> None:
         job_data = event["job"]

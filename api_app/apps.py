@@ -9,3 +9,6 @@ logger = getLogger(__name__)
 
 class ApiAppConfig(AppConfig):
     name = "api_app"
+
+    def ready(self):  # skipcq: PYL-R0201
+        from . import signals  # noqa

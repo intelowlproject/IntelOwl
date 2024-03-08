@@ -264,7 +264,7 @@ class APIAccessTokenView(APIView):
     def post(self, request):  # skipcq: PYL-R0201
         username = request.user.username
         logger.info(f"user {username} send a request to create the API token")
-        serializer = TokenSerializer(data={}, context={"request": request})
+        serializer = TokenSerializer(data={}, context={"user": request.user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)

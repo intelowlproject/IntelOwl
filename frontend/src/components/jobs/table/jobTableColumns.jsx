@@ -8,6 +8,7 @@ import {
   SelectOptionsFilter,
   LinkOpenViewIcon,
   DateHoverable,
+  CopyToClipboardButton,
 } from "@certego/certego-ui";
 
 import { JobTag } from "../../common/JobTag";
@@ -206,10 +207,19 @@ export const jobTableColumns = [
 
       return (
         <div className="d-flex justify-content-between">
-          <span className="d-block text-break">
-            {playbooks.find(
-              (playbook) => playbook.id === job.playbook_to_execute,
-            )?.name || "Custom Analysis"}
+          <span className="d-block text-truncate">
+            <CopyToClipboardButton
+              showOnHover
+              text={
+                playbooks?.find(
+                  (playbook) => playbook.id === job.playbook_to_execute,
+                )?.name || "Custom Analysis"
+              }
+            >
+              {playbooks?.find(
+                (playbook) => playbook.id === job.playbook_to_execute,
+              )?.name || "Custom Analysis"}
+            </CopyToClipboardButton>
           </span>
           <PlaybookInfoPopoverIcon job={job} />
         </div>

@@ -302,7 +302,9 @@ export const pivotTableColumns = [
     Header: "Playbook to execute",
     id: "playbook",
     accessor: "playbook_to_execute",
-    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    Cell: ({ value }) => (
+      <TableCell isCopyToClipboard isTruncate value={value} />
+    ),
     Filter: SelectColumnFilter,
     maxWidth: 145,
   },
@@ -519,7 +521,9 @@ export const ingestorTableColumns = [
     Header: "Playbook to execute",
     id: "playbook",
     accessor: "playbook_to_execute",
-    Cell: ({ value }) => <TableCell isCopyToClipboard value={value} />,
+    Cell: ({ value }) => (
+      <TableCell isCopyToClipboard isTruncate value={value} />
+    ),
     Filter: SelectColumnFilter,
     maxWidth: 200,
   },

@@ -1265,7 +1265,7 @@ class PythonConfig(AbstractConfig):
                     "kwargs": json.dumps(
                         {
                             "python_module_pk": self.python_module_id,
-                            "python_config_pk": self.pk,
+                            "plugin_config_pk": self.pk,
                         }
                     ),
                 },

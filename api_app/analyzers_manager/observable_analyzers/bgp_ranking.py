@@ -15,6 +15,9 @@ class BGPRanking(classes.ObservableAnalyzer):
     wrapper for https://github.com/D4-project/BGP-Ranking
     """
 
+    getASN: str = "https://bgpranking-ng.circl.lu/ipasn_history/?ip="
+    getASNRank: str = "https://bgpranking-ng.circl.lu/json/asn"
+    getASNHistory: str = "https://bgpranking-ng.circl.lu/json/asn_history"
     observable_name: str
     period: int  # optional
 
@@ -23,16 +26,12 @@ class BGPRanking(classes.ObservableAnalyzer):
 
     def run(self):
         logger.info("Running BGP_Ranking")
-        urls = {
-            "getASN": "https://bgpranking-ng.circl.lu/ipasn_history/?ip=",
-            "getASNRank": "https://bgpranking-ng.circl.lu/json/asn",
-            "getASNHistory": "https://bgpranking-ng.circl.lu/json/asn_history",
-        }
+
         finalresposne = {}
 
         # get ASN from ip
         try:
-            response = requests.get(urls["getASN"] + self.observable_name)
+            response = requests.get(self.getASN + self.observable_name)
             response.raise_for_status()
             response = response.json()
             finalresposne["asn"] = response["response"][
@@ -43,7 +42,7 @@ class BGPRanking(classes.ObservableAnalyzer):
             # get ASN rank from extracted ASN
 
             response = requests.post(
-                urls["getASNRank"], data=json.dumps({"asn": finalresposne["asn"]})
+                self.getASNRank, data=json.dumps({"asn": finalresposne["asn"]})
             )
             response.raise_for_status()
             response = response.json()
@@ -55,7 +54,7 @@ class BGPRanking(classes.ObservableAnalyzer):
             if self.period:
                 # get ASN history from extracted ASN
                 response = requests.post(
-                    urls["getASNHistory"],
+                    self.getASNHistory,
                     data=json.dumps(
                         {"asn": finalresposne["asn"], "period": self.period}
                     ),

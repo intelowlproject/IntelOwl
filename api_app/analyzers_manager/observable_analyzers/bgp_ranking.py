@@ -87,51 +87,56 @@ class BGPRanking(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        response1 = {
-            "meta": {"ip": "143.255.153.0/24"},
-            "response": {
-                "2024-03-07T12:00:00": {
-                    "asn": "264643",
-                    "prefix": "143.255.153.0/24",
-                    "source": "caida",
-                }
-            },
-        }
-        response2 = {
-            "meta": {"asn": "5577"},
-            "response": {
-                "asn_description": "ROOT, LU",
-                "ranking": {
-                    "rank": 0.0004720052083333333,
-                    "position": 7084,
-                    "total_known_asns": 15375,
-                },
-            },
-        }
-        response3 = {
-            "meta": {"asn": "5577", "period": 5},
-            "response": {
-                "asn_history": [
-                    ["2019-11-10", 0.00036458333333333335],
-                    ["2019-11-11", 0.00036168981481481485],
-                    ["2019-11-12", 0.0003761574074074074],
-                    ["2019-11-13", 0.0003530092592592593],
-                    ["2019-11-14", 0.0003559027777777778],
-                ]
-            },
-        }
-
         patches = [
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse(response1, 200),
+                    return_value=MockUpResponse(
+                        {
+                            "meta": {"ip": "143.255.153.0/24"},
+                            "response": {
+                                "2024-03-07T12:00:00": {
+                                    "asn": "264643",
+                                    "prefix": "143.255.153.0/24",
+                                    "source": "caida",
+                                }
+                            },
+                        },
+                        200,
+                    ),
                 ),
                 patch(
                     "requests.post",
                     side_effect=[
-                        MockUpResponse(response2, 200),
-                        MockUpResponse(response3, 200),
+                        MockUpResponse(
+                            {
+                                "meta": {"asn": "5577"},
+                                "response": {
+                                    "asn_description": "ROOT, LU",
+                                    "ranking": {
+                                        "rank": 0.0004720052083333333,
+                                        "position": 7084,
+                                        "total_known_asns": 15375,
+                                    },
+                                },
+                            },
+                            200,
+                        ),
+                        MockUpResponse(
+                            {
+                                "meta": {"asn": "5577", "period": 5},
+                                "response": {
+                                    "asn_history": [
+                                        ["2019-11-10", 0.00036458333333333335],
+                                        ["2019-11-11", 0.00036168981481481485],
+                                        ["2019-11-12", 0.0003761574074074074],
+                                        ["2019-11-13", 0.0003530092592592593],
+                                        ["2019-11-14", 0.0003559027777777778],
+                                    ]
+                                },
+                            },
+                            200,
+                        ),
                     ],
                 ),
             )

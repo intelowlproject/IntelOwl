@@ -35,8 +35,6 @@ class DatabaseCacheExtended(DatabaseCache):
         return self.get_many([row[0] for row in rows], version=version)
 
 
-DJANGO_REDIS_IGNORE_EXCEPTIONS = True
-
 CACHES = {
     "default": {
         "BACKEND": "intel_owl.settings.cache.DatabaseCacheExtended",

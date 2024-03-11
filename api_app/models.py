@@ -868,10 +868,10 @@ class OrganizationPluginConfiguration(models.Model):
 
         enabled_to = now() + self.rate_limit_timeout
         self.disabled_comment = (
-            "Disabled because rate limit hit at "
-            f"{now().strftime('%d %m %Y: %H %M %s')}."
+            "Rate limit hit at "
+            f"{now().strftime('%d %m %Y: %H %M %S')}.\n"
             "Will be enabled back at "
-            f"{enabled_to.strftime('%d %m %Y: %H %M %s')}"
+            f"{enabled_to.strftime('%d %m %Y: %H %M %S')}"
         )
         clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
             0

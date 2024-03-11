@@ -106,8 +106,8 @@ jobs:
         if: always()
         run: |
           docker ps -a
-          docker logs intelowl_daphne
           docker logs intelowl_uwsgi
+          docker logs intelowl_daphne
 
       - name: Setup coverage
         run: |

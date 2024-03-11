@@ -45,6 +45,9 @@ services:
       timeout: 2s
       start_period: 90s
       retries: 5
+    depends_on:
+      uwsgi:
+        condition: service_healthy
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}

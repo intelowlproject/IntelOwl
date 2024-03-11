@@ -27,55 +27,63 @@ class BGPRanking(classes.ObservableAnalyzer):
     def run(self):
         logger.info("Running BGP_Ranking")
 
-        finalresposne = {}
+        final_response = {}
 
         # get ASN from ip
         try:
+            logger.info(f"Extracting ASN from IP: {self.observable_name}")
             response = requests.get(self.getASN + self.observable_name)
             response.raise_for_status()
             response = response.json()
-            finalresposne["asn"] = response["response"][
-                list(response["response"].keys())[0]
-            ]["asn"]
-            logger.info("ASN extracted from IP")
+            asn = response.get("response", {}).popitem()[1].get("asn", None)
+            if not asn:
+                raise AnalyzerRunException("ASN not found in response")
+            logger.info(f"ASN {asn} extracted from {self.observable_name}")
 
             # get ASN rank from extracted ASN
-
-            response = requests.post(
-                self.getASNRank, data=json.dumps({"asn": finalresposne["asn"]})
-            )
+            logger.info(f"Extracting ASN rank and position from ASN: {asn}")
+            response = requests.post(self.getASNRank, data=json.dumps({"asn": asn}))
             response.raise_for_status()
             response = response.json()
-            finalresposne["asn_description"] = response["response"]["asn_description"]
-            finalresposne["asn_rank"] = response["response"]["ranking"]["rank"]
-            finalresposne["asn_position"] = response["response"]["ranking"]["position"]
-            logger.info("ASN rank and position extracted from ASN")
+            final_response["asn_description"] = response["response"].get(
+                "asn_description", None
+            )
+            final_response["asn_rank"] = response["response"]["ranking"].get(
+                "rank", None
+            )
+            final_response["asn_position"] = response["response"]["ranking"].get(
+                "position", None
+            )
+            if final_response["asn_rank"] is None:
+                raise AnalyzerRunException("ASN rank not found in response")
+
+            logger.info(
+                f"""ASN rank: {final_response['asn_rank']},
+                position: {final_response['asn_position']}"""
+            )
 
             if self.period:
                 # get ASN history from extracted ASN
+                logger.info(f"Extracting ASN history for period: {self.period}")
                 response = requests.post(
                     self.getASNHistory,
-                    data=json.dumps(
-                        {"asn": finalresposne["asn"], "period": self.period}
-                    ),
+                    data=json.dumps({"asn": asn, "period": self.period}),
                 )
                 response.raise_for_status()
                 response = response.json()
-                finalresposne["asn_history"] = response["response"]["asn_history"]
-                logger.info("ASN history extracted from ASN")
-
+                final_response["asn_history"] = response["response"]["asn_history"]
+                logger.info(f"ASN history: {final_response['asn_history']}")
+            # we are using the ASN in a variable
+            # initially to avoid repetitive calculations
+            final_response["asn"] = asn
         except (
             requests.exceptions.RequestException,
-            TypeError,
             json.JSONDecodeError,
-            KeyError,
-            AttributeError,
         ) as e:
-            # Handle various specific exceptions
             logger.error(f"Exception: {e}")
             raise AnalyzerRunException(f"AnalyzerRunException: {e}")
 
-        return finalresposne
+        return final_response
 
     @classmethod
     def _monkeypatch(cls):

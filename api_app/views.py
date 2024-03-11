@@ -633,9 +633,9 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
                 raise PermissionDenied()
             # code quality checker marks this as error, but it works correctly
             permissions.append(
-                (
+                (  # skipcq: PYL-E1102
                     IsObjectAdminPermission | IsObjectOwnerPermission
-                )()  # skipcq: PYL-E1102
+                )()
             )
 
         return permissions

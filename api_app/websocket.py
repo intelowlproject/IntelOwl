@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 from api_app.choices import Status
 from api_app.models import Job
 from api_app.serializers.job import WsJobSerializer
+from certego_saas.apps.organization.membership import Membership
 
 User = get_user_model()
 
@@ -35,12 +36,15 @@ class JobConsumer(JsonWebsocketConsumer):
             return [self.job_group_name, self.job_group_perm_name]
 
         def get_group_for_user(self, user: User) -> str:
+            try:
+                is_member = self._job.user.membership.organization.user_has_membership(
+                    user
+                )
+            except Membership.DoesNotExist:
+                is_member = False
             return (
                 self.job_group_perm_name
-                if (
-                    self._job.user == user
-                    or self._job.user.membership.organization.user_has_membership(user)
-                )
+                if self._job.user == user or is_member
                 else self.job_group_name
             )
 

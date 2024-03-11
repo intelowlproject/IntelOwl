@@ -15,9 +15,7 @@ class BGPRanking(classes.ObservableAnalyzer):
     wrapper for https://github.com/D4-project/BGP-Ranking
     """
 
-    getASN: str = "https://bgpranking-ng.circl.lu/ipasn_history/?ip="
-    getASNRank: str = "https://bgpranking-ng.circl.lu/json/asn"
-    getASNHistory: str = "https://bgpranking-ng.circl.lu/json/asn_history"
+    base_url: str = "https://bgpranking-ng.circl.lu"
     observable_name: str
     period: int  # optional
 
@@ -25,14 +23,14 @@ class BGPRanking(classes.ObservableAnalyzer):
         pass
 
     def run(self):
-        logger.info("Running BGP_Ranking")
-
         final_response = {}
 
         # get ASN from ip
         try:
             logger.info(f"Extracting ASN from IP: {self.observable_name}")
-            response = requests.get(self.getASN + self.observable_name)
+            response = requests.get(
+                self.base_url + "/ipasn_history/?ip=" + self.observable_name
+            )
             response.raise_for_status()
             response = response.json()
             asn = response.get("response", {}).popitem()[1].get("asn", None)
@@ -42,7 +40,9 @@ class BGPRanking(classes.ObservableAnalyzer):
 
             # get ASN rank from extracted ASN
             logger.info(f"Extracting ASN rank and position from ASN: {asn}")
-            response = requests.post(self.getASNRank, data=json.dumps({"asn": asn}))
+            response = requests.post(
+                self.base_url + "/json/asn", data=json.dumps({"asn": asn})
+            )
             response.raise_for_status()
             response = response.json()
             final_response["asn_description"] = response["response"].get(
@@ -59,14 +59,15 @@ class BGPRanking(classes.ObservableAnalyzer):
 
             logger.info(
                 f"""ASN rank: {final_response['asn_rank']},
-                position: {final_response['asn_position']}"""
+                position: {final_response['asn_position']},
+                from {self.observable_name}"""
             )
 
             if self.period:
                 # get ASN history from extracted ASN
                 logger.info(f"Extracting ASN history for period: {self.period}")
                 response = requests.post(
-                    self.getASNHistory,
+                    self.base_url + "/json/asn_history",
                     data=json.dumps({"asn": asn, "period": self.period}),
                 )
                 response.raise_for_status()
@@ -76,7 +77,10 @@ class BGPRanking(classes.ObservableAnalyzer):
                 )
                 if final_response["asn_history"] is None:
                     raise AnalyzerRunException(f"ASN history not found in {response}")
-                logger.info(f"ASN history: {final_response['asn_history']}")
+                logger.info(
+                    f"""ASN history: {final_response['asn_history']}
+                    for {self.observable_name}"""
+                )
             # we are using the ASN in a variable
             # initially to avoid repetitive calculations
             final_response["asn"] = asn

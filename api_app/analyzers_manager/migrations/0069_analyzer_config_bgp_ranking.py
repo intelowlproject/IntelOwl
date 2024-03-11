@@ -37,7 +37,7 @@ params = [
         },
         "name": "period",
         "type": "int",
-        "description": "period for bgp-ranking",
+        "description": "period for bgp-ranking in days",
         "is_secret": False,
         "required": False,
     }
@@ -52,7 +52,7 @@ values = [
             },
             "name": "period",
             "type": "int",
-            "description": "period for bgp-ranking",
+            "description": "period for bgp-ranking in days",
             "is_secret": False,
             "required": False,
         },

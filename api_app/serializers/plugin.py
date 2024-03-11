@@ -41,8 +41,6 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
             try:
                 return json.loads(data)
             except json.JSONDecodeError:
-                # this is to accept literal strings
-                data = f'"{data}"'
                 try:
                     data = json.dumps(data)
                     return json.loads(data)

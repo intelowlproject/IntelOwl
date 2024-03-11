@@ -177,9 +177,9 @@ Then you need to configure permission access to the chosen S3 bucket.
 #### Message Broker
 
 IntelOwl at the moment supports 3 different message brokers:
+- Redis (default)
 - RabbitMQ
 - Aws SQS
-- Redis
 
 The default broker, if nothing is specified, is `Redis`.
 

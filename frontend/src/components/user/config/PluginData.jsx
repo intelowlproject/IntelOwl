@@ -312,7 +312,8 @@ export function PluginData({
                                   ) : (
                                     <Field
                                       as={Input}
-                                      type="text"
+                                      type="textarea"
+                                      rows="1"
                                       name={`entry.${index}.value`}
                                       className={disabledSuffix}
                                       disabled={!configuration.edit}

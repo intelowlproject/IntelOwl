@@ -631,7 +631,10 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
         if self.action in ["destroy", "update"]:
             if self.request.method == "PUT":
                 raise PermissionDenied()
-            permissions.append((IsObjectAdminPermission | IsObjectOwnerPermission)())
+            # code quality checker marks this as error, but it works correctly
+            permissions.append(
+                (IsObjectAdminPermission | IsObjectOwnerPermission)()
+            )  # skipcq: PYL-E1102
 
         return permissions
 

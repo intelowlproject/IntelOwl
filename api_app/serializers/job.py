@@ -132,7 +132,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         required=False,
     )
 
-    def validate_runtime_configuration(self, runtime_config: Dict):
+    def validate_runtime_configuration(self, runtime_config: Dict):  # skipcq: PYL-R0201
         from api_app.validators import validate_runtime_configuration
 
         if not runtime_config:
@@ -144,13 +144,13 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             raise ValidationError({"detail": "Runtime Configuration Validation Failed"})
         return runtime_config
 
-    def validate_tags_labels(self, tags_labels):
+    def validate_tags_labels(self, tags_labels):  # skipcq: PYL-R0201
         for label in tags_labels:
             yield Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
             )[0]
 
-    def validate_tlp(self, tlp: str):
+    def validate_tlp(self, tlp: str):  # skipcq: PYL-R0201
         if tlp == "WHITE":
             return TLP.CLEAR.value
         return tlp

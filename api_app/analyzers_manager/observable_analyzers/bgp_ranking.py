@@ -37,7 +37,7 @@ class BGPRanking(classes.ObservableAnalyzer):
             response = response.json()
             asn = response.get("response", {}).popitem()[1].get("asn", None)
             if not asn:
-                raise AnalyzerRunException("ASN not found in response")
+                raise AnalyzerRunException(f"ASN not found in {response}")
             logger.info(f"ASN {asn} extracted from {self.observable_name}")
 
             # get ASN rank from extracted ASN
@@ -55,7 +55,7 @@ class BGPRanking(classes.ObservableAnalyzer):
                 "position", None
             )
             if final_response["asn_rank"] is None:
-                raise AnalyzerRunException("ASN rank not found in response")
+                raise AnalyzerRunException(f"ASN rank not found in {response}")
 
             logger.info(
                 f"""ASN rank: {final_response['asn_rank']},
@@ -71,7 +71,11 @@ class BGPRanking(classes.ObservableAnalyzer):
                 )
                 response.raise_for_status()
                 response = response.json()
-                final_response["asn_history"] = response["response"]["asn_history"]
+                final_response["asn_history"] = response["response"].get(
+                    "asn_history", None
+                )
+                if final_response["asn_history"] is None:
+                    raise AnalyzerRunException(f"ASN history not found in {response}")
                 logger.info(f"ASN history: {final_response['asn_history']}")
             # we are using the ASN in a variable
             # initially to avoid repetitive calculations

@@ -70,7 +70,6 @@ class BGPRanking(classes.ObservableAnalyzer):
             TypeError,
             json.JSONDecodeError,
             KeyError,
-            ValueError,
             AttributeError,
         ) as e:
             # Handle various specific exceptions

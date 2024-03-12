@@ -259,7 +259,7 @@ class Plugin(metaclass=ABCMeta):
         if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
             return True
         url = self._get_health_check_url(user)
-        if url.startswith("http"):
+        if url and url.startswith("http"):
             logger.info(f"Checking url {url} for plugin {self.name}")
             try:
                 # momentarily set this to False to

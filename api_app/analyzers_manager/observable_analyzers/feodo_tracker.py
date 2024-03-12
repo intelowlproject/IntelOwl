@@ -4,7 +4,6 @@
 import json
 import logging
 import os
-from functools import cached_property
 from typing import Tuple
 
 import requests
@@ -28,14 +27,14 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
     update_on_run: bool = True
 
     @classmethod
-    @cached_property
+    @property
     def recommend_locations(cls) -> Tuple[str, str]:
         db_name = "feodotracker_abuse_ipblocklist.json"
         url = "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json"
         return f"{settings.MEDIA_ROOT}/{db_name}", url
 
     @classmethod
-    @cached_property
+    @property
     def default_locations(cls) -> Tuple[str, str]:
         db_name = "feodotracker_abuse_ipblocklist_recommended.json"
         url = "https://feodotracker.abuse.ch/downloads/ipblocklist.json"

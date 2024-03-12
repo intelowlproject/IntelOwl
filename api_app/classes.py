@@ -256,10 +256,10 @@ class Plugin(metaclass=ABCMeta):
         return None
 
     def health_check(self, user: User = None) -> bool:
-        if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-            return True
         url = self._get_health_check_url(user)
         if url and url.startswith("http"):
+            if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+                return True
             logger.info(f"Checking url {url} for plugin {self.name}")
             try:
                 # momentarily set this to False to

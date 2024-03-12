@@ -328,6 +328,11 @@ class Job(MP_Node):
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
 
+    def get_root(self):
+        if self.is_root():
+            return self
+        return super().get_root()
+
     @property
     def analyzed_object_name(self):
         return self.file_name if self.is_sample else self.observable_name

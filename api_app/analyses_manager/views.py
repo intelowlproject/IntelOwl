@@ -48,32 +48,21 @@ class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
         except KeyError:
             raise BadRequest("You should set the `job` argument in the data")
         try:
-            job = Job.objects.get(pk=job_pk)
+            job = Job.objects.visible_for_user(self.request.user).get(pk=job_pk)
         except Job.DoesNotExist:
             raise BadRequest(f"Job {job_pk} does not exist")
         return job
-
-    def _check_job_and_analysis(self, job, analysis):
-        if (
-            # same organization if analysis is at org level
-            analysis.for_organization
-            and (
-                job.user.has_membership()
-                and analysis.owner.has_membership()
-                and job.user.organization == analysis.owner.organization
-            )
-            # or same user
-        ) or job.user == analysis.owner:
-            return True
-        raise PermissionDenied(
-            "You do not have permissions to add this job to the analysis"
-        )
 
     @action(methods=["POST"], url_name="add_job", detail=True)
     def add_job(self, request, pk):
         analysis: Analysis = self.get_object()
         job: Job = self._get_job(request)
-        self._check_job_and_analysis(job, analysis)
+        if not analysis.user_can_edit(job.user):
+            raise PermissionDenied(
+                "You do not have permissions to add this job to the analysis"
+            )
+        if not job.is_root():
+            raise PermissionDenied("You can add to an analysis only primary jobs")
         if job.analysis is None:
             job.analysis = analysis
             job.save()
@@ -95,7 +84,10 @@ class AnalysisViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
         analysis: Analysis = self.get_object()
         request: HttpRequest
         job: Job = self._get_job(request)
-        self._check_job_and_analysis(job, analysis)
+        if not analysis.user_can_edit(job.user):
+            raise PermissionDenied(
+                "You do not have permissions to edit this analysis with that job"
+            )
         if job.analysis_id != analysis.pk:
             raise BadRequest(f"You can't remove job {job.id} from analysis")
         job.analysis = None

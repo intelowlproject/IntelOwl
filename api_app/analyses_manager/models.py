@@ -9,6 +9,7 @@ from api_app.analyses_manager.queryset import AnalysisQuerySet
 from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
 from api_app.models import ListCachable
+from certego_saas.apps.user.models import User
 
 
 class Analysis(OwnershipAbstractModel, ListCachable):
@@ -41,6 +42,20 @@ class Analysis(OwnershipAbstractModel, ListCachable):
             f" jobs {', '.join([str(job.pk) for job in self.jobs.all()])} "
             f"-> {self.status}"
         )
+
+    def user_can_edit(self, user: User) -> bool:
+        if (
+            # same organization if analysis is at org level
+            self.for_organization
+            and (
+                user.has_membership()
+                and self.owner.has_membership()
+                and user.organization == self.owner.organization
+            )
+            # or same user
+        ) or user == self.owner:
+            return True
+        return False
 
     def set_correct_status(self, save: bool = True):
         from api_app.models import Job

@@ -108,10 +108,6 @@ export function JobIsRunningAlert({ job }) {
             className="mt-2"
           />
         )}
-        <div className="text-gray">
-          The page will auto-refresh once the analysis completes. You can either
-          wait here or come back later and check.
-        </div>
       </IconAlert>
     </Fade>
   );

@@ -1,7 +1,6 @@
 import axios from "axios";
 import React from "react";
 import { AiOutlineInfoCircle } from "react-icons/ai";
-import { useSearchParams } from "react-router-dom";
 import {
   FormGroup,
   Label,
@@ -84,10 +83,6 @@ export default function Login() {
     React.useCallback((state) => state.service.loginUser, []),
   );
 
-  const updateToken = useAuthStore(
-    React.useCallback((state) => state.updateToken, []),
-  );
-
   // callbacks
   const onSubmit = React.useCallback(
     async (values, _formik) => {
@@ -99,9 +94,6 @@ export default function Login() {
     },
     [loginUser],
   );
-
-  const [searchParams] = useSearchParams();
-  if (searchParams.get("token")) updateToken(searchParams.get("token"));
 
   return (
     <ContentSection className="bg-body">

@@ -2,10 +2,7 @@ import axios from "axios";
 
 import { addToast } from "@certego/certego-ui";
 
-import {
-  APIACCESS_BASE_URI,
-  SESSIONS_BASE_URI,
-} from "../../../constants/apiURLs";
+import { APIACCESS_BASE_URI } from "../../../constants/apiURLs";
 
 // API Access
 
@@ -31,23 +28,4 @@ async function deleteToken() {
   }
 }
 
-// Sessions
-
-async function deleteTokenById(id, clientName) {
-  try {
-    const resp = await axios.delete(`${SESSIONS_BASE_URI}/${id}`);
-    addToast(`Revoked Session (${clientName}).`, null, "success", true, 6000);
-    return resp;
-  } catch (error) {
-    addToast("Failed!", error.parsedMsg.toString(), "danger", true);
-    return Promise.reject(error);
-  }
-}
-
-export {
-  APIACCESS_BASE_URI,
-  SESSIONS_BASE_URI,
-  createNewToken,
-  deleteToken,
-  deleteTokenById,
-};
+export { APIACCESS_BASE_URI, createNewToken, deleteToken };

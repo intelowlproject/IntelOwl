@@ -2,10 +2,10 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.contrib.auth import get_user_model
+from django.contrib.sessions.models import Session
 from django.core import mail
 from django.core.cache import cache
 from django.test import tag
-from durin.models import AuthToken, Client
 from rest_email_auth.models import EmailConfirmation, PasswordResetToken
 from rest_framework.reverse import reverse
 
@@ -44,45 +44,27 @@ class TestUserAuth(CustomOAuthTestCase):
     def tearDown(self):  # skipcq: PYL-R0201
         # cache clear (for throttling)
         cache.clear()
-        # db clean
-        AuthToken.objects.all().delete()
-        Client.objects.all().delete()
 
     def test_login_200(self):
-        self.assertEqual(AuthToken.objects.count(), 0)
+        self.assertEqual(Session.objects.count(), 0)
         body = {
             **self.creds,
             "recaptcha": "testkey",
         }
 
         response = self.client.post(login_uri, body)
-        content = response.json()
-        msg = (response, content)
-
-        self.assertEqual(response.status_code, 200, msg=msg)
-        self.assertIn("token", response.data, msg=msg)
-        self.assertIn("expiry", response.data, msg=msg)
-        self.assertIn("user", response.data, msg=msg)
-        self.assertIn(self.user.USERNAME_FIELD, response.data["user"], msg=msg)
-
-        self.assertEqual(AuthToken.objects.count(), 1)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Session.objects.count(), 1)
+        session = Session.objects.all().first()
+        session_data = session.get_decoded()
+        self.assertIsNotNone(session_data)
+        self.assertIn("_auth_user_id", session_data.keys())
+        self.assertEqual(str(self.user.pk), session_data["_auth_user_id"])
 
     def test_logout_204(self):
-        self.assertEqual(AuthToken.objects.count(), 0)
-
-        token = AuthToken.objects.create(
-            user=self.user,
-            client=Client.objects.create(name="test_logout_deletes_keys"),
-        )
-        self.assertEqual(AuthToken.objects.count(), 1)
-
-        self.client.credentials(HTTP_AUTHORIZATION=("Token %s" % token.token))
+        self.client.force_authenticate(user=self.user)
         response = self.client.post(logout_uri)
-
-        self.assertEqual(response.status_code, 204, msg=(response))
-        self.assertEqual(
-            AuthToken.objects.count(), 0, "other tokens should remain after logout"
-        )
+        self.assertEqual(response.status_code, 200)
 
     def test_register_username_taken_400(self):
         current_users = User.objects.count()

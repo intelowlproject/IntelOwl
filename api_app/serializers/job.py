@@ -11,7 +11,6 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
-from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
@@ -31,9 +30,16 @@ from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
+
+
+class UserSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username",)
 
 
 class TagSerializer(rfs.ModelSerializer):
@@ -133,7 +139,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
 
-    def validate_runtime_configuration(self, runtime_config: Dict):
+    def validate_runtime_configuration(self, runtime_config: Dict):  # skipcq: PYL-R0201
         from api_app.validators import validate_runtime_configuration
 
         if not runtime_config:
@@ -145,13 +151,13 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             raise ValidationError({"detail": "Runtime Configuration Validation Failed"})
         return runtime_config
 
-    def validate_tags_labels(self, tags_labels):
+    def validate_tags_labels(self, tags_labels):  # skipcq: PYL-R0201
         for label in tags_labels:
             yield Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
             )[0]
 
-    def validate_tlp(self, tlp: str):
+    def validate_tlp(self, tlp: str):  # skipcq: PYL-R0201
         if tlp == "WHITE":
             return TLP.CLEAR.value
         return tlp
@@ -405,7 +411,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
         read_only=True, slug_field="name", many=True
     )
 
-    def get_pivots_to_execute(self, obj: Job):
+    def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         return obj.pivots_to_execute.all().values_list("name", flat=True)
 
 
@@ -461,6 +467,10 @@ class JobSerializer(_AbstractJobViewSerializer):
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     permissions = rfs.SerializerMethodField()
 
+    def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
+        # this cast is required or serializer doesn't work with websocket
+        return list(obj.pivots_to_execute.all().values_list("name", flat=True))
+
     def get_fields(self):
         # this method override is required for a cyclic import
         from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
@@ -479,19 +489,31 @@ class JobSerializer(_AbstractJobViewSerializer):
             )
         return super().get_fields()
 
+
+class RestJobSerializer(JobSerializer):
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
         request = self.context.get("request", None)
         view = self.context.get("view", None)
+        has_perm = False
         if request and view:
             has_perm = IsObjectOwnerOrSameOrgPermission().has_object_permission(
                 request, view, obj
             )
-            return {
-                "kill": has_perm,
-                "delete": has_perm,
-                "plugin_actions": has_perm,
-            }
-        return {}
+        return {
+            "kill": has_perm,
+            "delete": has_perm,
+            "plugin_actions": has_perm,
+        }
+
+
+class WsJobSerializer(JobSerializer):
+    def get_permissions(self, obj: Job) -> Dict[str, bool]:
+        has_perm = self.context.get("permissions", False)
+        return {
+            "kill": has_perm,
+            "delete": has_perm,
+            "plugin_actions": has_perm,
+        }
 
 
 class MultipleJobSerializer(rfs.ListSerializer):

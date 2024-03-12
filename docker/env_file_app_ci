@@ -56,8 +56,8 @@ DJANGO_SETTINGS_MODULE=intel_owl.settings
 COVERAGE_PROCESS_START=.coveragerc
 
 # broker configuration
-BROKER_URL=amqp://guest:guest@rabbitmq:5672
-
+BROKER_URL=redis://redis:6379
+WEBSOCKETS_URL=redis://redis:6379
 
 # drf-recaptcha
 USE_RECAPTCHA=False

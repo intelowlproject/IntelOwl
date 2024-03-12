@@ -473,6 +473,7 @@ class Job(MP_Node):
         from api_app.analyzers_manager.models import AnalyzerConfig
         from api_app.connectors_manager.models import ConnectorConfig
         from api_app.visualizers_manager.models import VisualizerConfig
+        from api_app.websocket import JobConsumer
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
@@ -492,6 +493,7 @@ class Job(MP_Node):
 
         self.status = self.Status.KILLED
         self.save(update_fields=["status"])
+        JobConsumer.serialize_and_send_job(self)
 
     def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model

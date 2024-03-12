@@ -294,9 +294,27 @@ Below you can find the additional process required to upgrade from each major ve
 IntelOwl v6 introduced some major changes regarding how the project is started.
 Before upgrading, some important things should be checked by the administrator:
 * Docker Compose V1 support has been dropped project-wide. If you are still using a Compose version prior to v2.3.4, please [upgrade](https://docs.docker.com/compose/migrate/) to a newer version or install Docker Compose V2.
-* IntelOwl is now started with the new Bash `start` script that has the same options as the old Python `start.py` script but is more manageable and has decreased the overall project dependencies. The `start.py` script has now been removed.
+* IntelOwl is now started with the new Bash `start` script that has the same options as the old Python `start.py` script but is more manageable and has decreased the overall project dependencies. The `start.py` script has now been removed. Please use the new `start` script instead.
+* The default message broker is now Redis. We have replaced Rabbit-MQ for Redis to allow support for Websockets in the application:
+  * This change is transparent if you use our `start` script to run IntelOwl. That would spawn a Redis instance instead of a Rabbit-MQ one locally.
+  * If you were using an external broker like AWS SQS or a managed Rabbit-MQ, they are still supported but we suggest to move to a Redis supported service to simplify the architecture (because Redis is now mandatory for Websockets)
+* We upgraded the base PostgreSQL image from version 12 to version 16. You have 2 choice:
+  * remove your actual database and start from scratch with a new one
+  * maintain your database and do not update Postgres. This could break the application at anytime because we do not support it anymore.
+  * if you want to keep your old DB, follow the migration procedure you can find below
 
-The migration procedure is as follows:
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+CARE! We are providing this database migration procedure to help the users to migrate to a new PostgreSQL version. 
+
+Upgrading PostgreSQL is outside the scope of the IntelOwl project so we do not guarantee that everything will work as intended. 
+
+In case of doubt, please check the official PostgreSQL documentation.
+
+Upgrade at your own risk.
+</div>
+
+The database migration procedure is as follows:
 - You have IntelOwl version 5.x.x up and running
 - Bring down the application (you can use the start script or manually concatenate your docker compose configuration )
 - Go inside the docker folder `cd docker`
@@ -308,7 +326,7 @@ The migration procedure is as follows:
 - Add the data to the volume `cat /tmp/dump_postgres.sql| docker exec -i intelowl_postgres_16 psql -U $POSTGRES_USER -d $POSTGRES_PASSWORD`
 - Remove the intermediary container `docker rm intelowl_postgres_16`
 - Update IntelOwl to the latest version
-- Bring up the application back again  (you can use the start script or manually concatenate your docker compose configuration )
+- Bring up the application back again (you can use the start script or manually concatenate your docker compose configuration)
 
 
 #### Updating to >=5.0.0 from a 4.x.x version

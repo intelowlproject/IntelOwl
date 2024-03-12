@@ -1,8 +1,13 @@
 version: "3.8"
 
 services:
+  uwsgi:
+    environment:
+      - BROKER_URL_API=http://guest:guest@rabbitmq:15672/api/
+
   rabbitmq:
     image: library/rabbitmq:3.11-management-alpine
+    hostname: rabbitmq
     container_name: intelowl_rabbitmq
     logging:
       driver: none
@@ -12,6 +17,7 @@ services:
   flower:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_flower
+    hostname: flower
     restart: unless-stopped
     stop_grace_period: 3m
     volumes:

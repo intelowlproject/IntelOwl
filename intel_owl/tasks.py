@@ -204,10 +204,12 @@ def update_notifications_with_releases():
 @app.task(name="job_set_final_status", soft_time_limit=30)
 def job_set_final_status(job_id: int):
     from api_app.models import Job
+    from api_app.websocket import JobConsumer
 
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
     job.set_final_status()
+    JobConsumer.serialize_and_send_job(job)
 
 
 @shared_task(base=FailureLoggedTask, name="job_set_pipeline_status", soft_time_limit=30)
@@ -252,7 +254,8 @@ def run_plugin(
     task_id: int,
 ):
     from api_app.classes import Plugin
-    from api_app.models import PythonModule
+    from api_app.models import Job, PythonModule
+    from api_app.websocket import JobConsumer
 
     logger.info(
         f"Configuring plugin {plugin_config_pk} for job {job_id} with task {task_id}"
@@ -278,6 +281,8 @@ def run_plugin(
         config.reports.filter(job__pk=job_id).update(
             status=plugin.report_model.Status.FAILED.value
         )
+    job = Job.objects.get(pk=job_id)
+    JobConsumer.serialize_and_send_job(job)
 
 
 @shared_task(base=FailureLoggedTask, name="create_caches", soft_time_limit=200)

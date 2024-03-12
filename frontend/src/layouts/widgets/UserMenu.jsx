@@ -76,8 +76,8 @@ export default function UserMenu(props) {
           )}
         </DropdownNavLink>
         {/* API Access/Sessions */}
-        <DropdownNavLink to="/me/sessions">
-          <IoMdKey className="me-2" /> API Access/ Sessions
+        <DropdownNavLink to="/me/api">
+          <IoMdKey className="me-2" /> API Access
         </DropdownNavLink>
         {/* Change Password */}
         <DropdownNavLink to="/change-password">

@@ -16,7 +16,7 @@ class BGPRanking(classes.ObservableAnalyzer):
     """
 
     base_url: str = "https://bgpranking-ng.circl.lu"
-    observable_name: str
+
     period: int  # optional
 
     def update(self) -> bool:

@@ -7,7 +7,13 @@ from django.db.models.fields.related_descriptors import (
 
 plugin = {
     "python_module": {
-        "health_check_schedule": None,
+        "health_check_schedule": {
+            "minute": "0",
+            "hour": "0",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
         "update_schedule": None,
         "module": "bgp_ranking.BGPRanking",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
@@ -40,7 +46,18 @@ params = [
         "description": "period for bgp-ranking in days",
         "is_secret": False,
         "required": False,
-    }
+    },
+    {
+        "python_module": {
+            "module": "bgp_ranking.BGPRanking",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "timeout",
+        "type": "int",
+        "description": "timeout for bgp-ranking",
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
 values = [
@@ -65,7 +82,29 @@ values = [
         "value": 0,
         "updated_at": "2024-03-08T20:11:01.950838Z",
         "owner": None,
-    }
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "bgp_ranking.BGPRanking",
+                "base_path": "api_app.analyzers_manager.observable_analyzers",
+            },
+            "name": "timeout",
+            "type": "int",
+            "description": "timeout for bgp-ranking",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "BGP_Ranking",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 5,
+        "updated_at": "2024-03-08T20:11:01.950838Z",
+        "owner": None,
+    },
 ]
 
 

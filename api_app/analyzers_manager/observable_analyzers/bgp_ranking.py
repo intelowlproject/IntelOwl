@@ -16,7 +16,7 @@ class BGPRanking(classes.ObservableAnalyzer):
     """
 
     base_url: str = "https://bgpranking-ng.circl.lu"
-
+    timeout: int
     period: int  # optional
 
     def update(self) -> bool:
@@ -29,7 +29,8 @@ class BGPRanking(classes.ObservableAnalyzer):
 
         logger.info(f"Extracting ASN from IP: {self.observable_name}")
         response = requests.get(
-            self.base_url + "/ipasn_history/?ip=" + self.observable_name
+            self.base_url + "/ipasn_history/?ip=" + self.observable_name,
+            timeout=self.timeout,
         )
         response.raise_for_status()
         response = response.json()
@@ -41,7 +42,9 @@ class BGPRanking(classes.ObservableAnalyzer):
         # get ASN rank from extracted ASN
         logger.info(f"Extracting ASN rank and position from ASN: {asn}")
         response = requests.post(
-            self.base_url + "/json/asn", data=json.dumps({"asn": asn})
+            self.base_url + "/json/asn",
+            data=json.dumps({"asn": asn}),
+            timeout=self.timeout,
         )
         response.raise_for_status()
         response = response.json()
@@ -67,6 +70,7 @@ class BGPRanking(classes.ObservableAnalyzer):
             response = requests.post(
                 self.base_url + "/json/asn_history",
                 data=json.dumps({"asn": asn, "period": self.period}),
+                timeout=self.timeout,
             )
             response.raise_for_status()
             response = response.json()
@@ -84,6 +88,19 @@ class BGPRanking(classes.ObservableAnalyzer):
         final_response["asn"] = asn
 
         return final_response
+
+    def health_check(self) -> bool:
+        """
+        basic health check: if instance is up or not
+        """
+        try:
+            requests.head(self.base_url, timeout=self.timeout)
+        except requests.exceptions.RequestException:
+            # health_status = False
+            return False
+
+        # health_status = True
+        return True
 
     @classmethod
     def _monkeypatch(cls):

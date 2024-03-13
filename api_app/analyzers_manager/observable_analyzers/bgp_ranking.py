@@ -15,7 +15,7 @@ class BGPRanking(classes.ObservableAnalyzer):
     wrapper for https://github.com/D4-project/BGP-Ranking
     """
 
-    base_url: str = "https://bgpranking-ng.circl.lu"
+    url: str
     timeout: int
     period: int  # optional
 
@@ -29,7 +29,7 @@ class BGPRanking(classes.ObservableAnalyzer):
 
         logger.info(f"Extracting ASN from IP: {self.observable_name}")
         response = requests.get(
-            self.base_url + "/ipasn_history/?ip=" + self.observable_name,
+            self.url + "/ipasn_history/?ip=" + self.observable_name,
             timeout=self.timeout,
         )
         response.raise_for_status()
@@ -42,7 +42,7 @@ class BGPRanking(classes.ObservableAnalyzer):
         # get ASN rank from extracted ASN
         logger.info(f"Extracting ASN rank and position from ASN: {asn}")
         response = requests.post(
-            self.base_url + "/json/asn",
+            self.url + "/json/asn",
             data=json.dumps({"asn": asn}),
             timeout=self.timeout,
         )
@@ -68,7 +68,7 @@ class BGPRanking(classes.ObservableAnalyzer):
             # get ASN history from extracted ASN
             logger.info(f"Extracting ASN history for period: {self.period}")
             response = requests.post(
-                self.base_url + "/json/asn_history",
+                self.url + "/json/asn_history",
                 data=json.dumps({"asn": asn, "period": self.period}),
                 timeout=self.timeout,
             )
@@ -88,17 +88,6 @@ class BGPRanking(classes.ObservableAnalyzer):
         final_response["asn"] = asn
 
         return final_response
-
-    def health_check(self) -> bool:
-        """
-        basic health check: if instance is up or not
-        """
-        try:
-            requests.head(self.base_url, timeout=self.timeout)
-        except requests.exceptions.RequestException:
-            return False
-
-        return True
 
     @classmethod
     def _monkeypatch(cls):

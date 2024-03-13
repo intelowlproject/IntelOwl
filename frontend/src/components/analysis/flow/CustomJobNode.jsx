@@ -29,6 +29,7 @@ function CustomJobNode({ data }) {
         style={{
           background: "#000f12",
         }}
+        id={`toolbar-job-${data.id}`}
       >
         <div className="p-1 my-2 d-flex justify-content-start">
           <Button
@@ -51,7 +52,10 @@ function CustomJobNode({ data }) {
             </Button>
           )}
         </div>
-        <div className="p-2 px-3 my-2 mx-2 d-flex flex-column bg-body">
+        <div
+          className="p-2 px-3 my-2 mx-2 d-flex flex-column bg-body"
+          id={`job${data.id}-info`}
+        >
           <div className="d-flex justify-content-between">
             <span className="me-2">Job:</span>
             <span className="text-accent">#{data.id}</span>

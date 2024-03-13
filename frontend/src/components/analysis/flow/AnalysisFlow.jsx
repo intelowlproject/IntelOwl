@@ -29,13 +29,10 @@ const defaultEdgeOptions = {
   },
 };
 
-export function AnalysisFlow({
-  analysisTree,
-  analysisId,
-  refetchTree,
-  refetchAnalysis,
-}) {
+export function AnalysisFlow(props) {
   console.debug("AnalysisFlow rendered");
+  const { analysisTree, analysisId, refetchTree, refetchAnalysis, ...rest } =
+    props;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -65,6 +62,7 @@ export function AnalysisFlow({
         deleteKeyCode={null}
         preventScrolling={false}
         zoomOnDoubleClick={false}
+        {...rest}
       >
         <MiniMap pannable />
         <Controls />

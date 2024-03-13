@@ -2,29 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import { NodeToolbar, Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
-import {
-  Button,
-  UncontrolledTooltip,
-  UncontrolledPopover,
-  Input,
-} from "reactstrap";
+import { Button, UncontrolledTooltip } from "reactstrap";
 import { FaSearchPlus } from "react-icons/fa";
-import { BsFillPlusCircleFill } from "react-icons/bs";
-import { addExistingJob } from "../result/analysisApi";
+import { AddExistingJobPopover } from "./analysisActions";
 
 function CustomAnalysisNode({ data }) {
-  // state
-  const [jobToAdd, setJobToAdd] = React.useState(null);
-
-  const onClick = async () => {
-    const success = await addExistingJob(jobToAdd, data.id);
-    if (success) {
-      data.refetchAnalysis();
-      data.refetchTree();
-    }
-    setJobToAdd(null);
-  };
-
   return (
     <>
       <NodeToolbar
@@ -32,6 +14,7 @@ function CustomAnalysisNode({ data }) {
         style={{
           background: "#000f12",
         }}
+        id={`toolbar-analysis-${data.id}`}
       >
         <div className="p-1 my-2 d-flex justify-content-start">
           <div>
@@ -49,39 +32,7 @@ function CustomAnalysisNode({ data }) {
               Scan a new observable or a file to add to this analysis
             </UncontrolledTooltip>
           </div>
-          <div>
-            <Button className="mx-1 p-2" size="sm" id="addExistingJobBtn">
-              <BsFillPlusCircleFill /> Add existing job
-            </Button>
-            <UncontrolledPopover
-              trigger="click"
-              delay={{ show: 0, hide: 100 }}
-              target="addExistingJobBtn"
-              popperClassName="p-0"
-              style={{ maxWidth: "70vh" }}
-            >
-              <div className="d-flex">
-                <Input
-                  id="add_existing_job-input"
-                  name="textArea"
-                  type="textarea"
-                  onChange={(event) => setJobToAdd(event.target.value)}
-                  placeholder="Enter a job id"
-                  style={{ maxHeight: "40px", maxWidth: "60vh" }}
-                  className="bg-dark"
-                />
-                <Button
-                  className="mx-1 p-2"
-                  size="sm"
-                  id="addExistingJobBtn"
-                  disabled={!jobToAdd}
-                  onClick={() => onClick()}
-                >
-                  Add
-                </Button>
-              </div>
-            </UncontrolledPopover>
-          </div>
+          <AddExistingJobPopover data={data} />
         </div>
       </NodeToolbar>
       <div

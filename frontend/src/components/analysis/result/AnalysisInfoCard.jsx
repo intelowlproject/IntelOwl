@@ -66,15 +66,17 @@ export function AnalysisInfoCard({ analysis }) {
                 className="me-2 bg-dark"
               />
             )}
-            <IconButton
-              id="edit-analysis-name"
-              Icon={MdEdit}
-              color=""
-              className="text-secondary"
-              onClick={() => setIsEditing(true)}
-              title="Edit name"
-              titlePlacement="top"
-            />
+            {!isEditing && (
+              <IconButton
+                id="edit-analysis-name"
+                Icon={MdEdit}
+                color=""
+                className="text-secondary"
+                onClick={() => setIsEditing(true)}
+                title="Edit name"
+                titlePlacement="top"
+              />
+            )}
             {isEditing && (
               <IconButton
                 id="view-analysis-name"

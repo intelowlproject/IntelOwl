@@ -1,0 +1,87 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { Button, Input, UncontrolledPopover } from "reactstrap";
+import { MdOutlineCancel } from "react-icons/md";
+import { BsFillPlusCircleFill } from "react-icons/bs";
+
+import { removeJob, addExistingJob } from "../result/analysisApi";
+
+export function AddExistingJobPopover({ data }) {
+  // state
+  const [jobToAdd, setJobToAdd] = React.useState(null);
+
+  const onClick = async () => {
+    const success = await addExistingJob(jobToAdd, data.id);
+    if (success) {
+      data.refetchAnalysis();
+      data.refetchTree();
+    }
+    setJobToAdd(null);
+  };
+
+  return (
+    <div>
+      <Button className="mx-1 p-2" size="sm" id="addExistingJobBtn">
+        <BsFillPlusCircleFill /> Add existing job
+      </Button>
+      <UncontrolledPopover
+        trigger="click"
+        delay={{ show: 0, hide: 100 }}
+        target="addExistingJobBtn"
+        popperClassName="p-0"
+        style={{ maxWidth: "70vh" }}
+        id="add_existing_job-popover"
+      >
+        <div className="d-flex">
+          <Input
+            id="add_existing_job-input"
+            name="textArea"
+            type="textarea"
+            onChange={(event) => setJobToAdd(event.target.value)}
+            placeholder="Enter a job id"
+            style={{ maxHeight: "40px", maxWidth: "60vh" }}
+            className="bg-dark"
+          />
+          <Button
+            className="mx-1 p-2"
+            size="sm"
+            id="addExistingJob-Btn"
+            disabled={!jobToAdd}
+            onClick={() => onClick()}
+          >
+            Add
+          </Button>
+        </div>
+      </UncontrolledPopover>
+    </div>
+  );
+}
+
+AddExistingJobPopover.propTypes = {
+  data: PropTypes.object.isRequired,
+};
+
+export function RemoveJob({ data }) {
+  const onClick = async () => {
+    const success = await removeJob(data.analysis, data.id);
+    if (success) {
+      data.refetchAnalysis();
+      data.refetchTree();
+    }
+  };
+
+  return (
+    <Button
+      id="analysis-removejobbtn"
+      className="mx-1 p-2"
+      size="sm"
+      onClick={() => onClick()}
+    >
+      <MdOutlineCancel color="red" /> Remove Job
+    </Button>
+  );
+}
+
+RemoveJob.propTypes = {
+  data: PropTypes.object.isRequired,
+};

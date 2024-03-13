@@ -82,16 +82,18 @@ export function AnalysisOverview({
       <Row className="g-0 mt-3">
         <div className="mb-2">
           <span className="fw-bold me-2 text-light">Description</span>
-          <IconButton
-            id="edit-analysis-description"
-            Icon={MdEdit}
-            size="sm"
-            color=""
-            className="text-secondary"
-            onClick={() => setIsEditing(true)}
-            title="Edit description"
-            titlePlacement="top"
-          />
+          {!isEditing && (
+            <IconButton
+              id="edit-analysis-description"
+              Icon={MdEdit}
+              size="sm"
+              color=""
+              className="text-secondary"
+              onClick={() => setIsEditing(true)}
+              title="Edit description"
+              titlePlacement="top"
+            />
+          )}
           {isEditing && (
             <IconButton
               id="view-analysis-description"

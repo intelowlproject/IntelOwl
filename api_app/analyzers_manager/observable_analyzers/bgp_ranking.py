@@ -96,10 +96,8 @@ class BGPRanking(classes.ObservableAnalyzer):
         try:
             requests.head(self.base_url, timeout=self.timeout)
         except requests.exceptions.RequestException:
-            # health_status = False
             return False
 
-        # health_status = True
         return True
 
     @classmethod

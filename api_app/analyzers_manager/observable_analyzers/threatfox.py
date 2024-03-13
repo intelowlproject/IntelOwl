@@ -14,6 +14,9 @@ class ThreatFox(classes.ObservableAnalyzer):
     base_url: str = "https://threatfox-api.abuse.ch/api/v1/"
     disable: bool = False  # optional
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         if self.disable:
             return {"disabled": True}

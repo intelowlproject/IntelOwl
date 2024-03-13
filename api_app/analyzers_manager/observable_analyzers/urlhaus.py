@@ -12,6 +12,9 @@ class URLHaus(classes.ObservableAnalyzer):
     base_url = "https://urlhaus-api.abuse.ch/v1/"
     disable: bool = False  # optional
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         if self.disable:
             return {"disabled": True}

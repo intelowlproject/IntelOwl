@@ -78,7 +78,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0061_job_depth_analysis"),
-        ("analyzers_manager", "0068_analyzer_config_feodo_tracker"),
+        ("analyzers_manager", "0069_analyzer_config_bgp_ranking"),
     ]
     operations = [
         migrations.RunPython(migrate, reverse_migrate),

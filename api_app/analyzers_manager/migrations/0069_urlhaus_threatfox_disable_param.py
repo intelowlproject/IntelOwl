@@ -59,25 +59,18 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     PythonModule = apps.get_model("api_app", "PythonModule")
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")
 
     pm = PythonModule.objects.get(
         module="urlhaus.URLHaus",
         base_path="api_app.analyzers_manager.observable_analyzers",
     )
     Parameter.objects.get(name="disable", python_module=pm).delete()
-    PluginConfig.objects.filter(
-        parameter__python_module=pm, parameter="disable"
-    ).delete()
 
     pm = PythonModule.objects.get(
         module="threatfox.ThreatFox",
         base_path="api_app.analyzers_manager.observable_analyzers",
     )
     Parameter.objects.get(name="disable", python_module=pm).delete()
-    PluginConfig.objects.filter(
-        parameter__python_module=pm, parameter="disable"
-    ).delete()
 
 
 class Migration(migrations.Migration):

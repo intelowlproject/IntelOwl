@@ -14,9 +14,7 @@ class URLHaus(classes.ObservableAnalyzer):
 
     def run(self):
         if self.disable:
-            raise AnalyzerRunException(
-                "URLHaus was manually disabled from the runtime configuration"
-            )
+            return {"disabled": True}
 
         headers = {"Accept": "application/json"}
         if self.observable_classification in [

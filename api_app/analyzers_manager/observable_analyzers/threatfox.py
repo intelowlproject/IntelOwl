@@ -16,9 +16,7 @@ class ThreatFox(classes.ObservableAnalyzer):
 
     def run(self):
         if self.disable:
-            raise AnalyzerRunException(
-                "ThreatFox was manually disabled from the runtime configuration"
-            )
+            return {"disabled": True}
 
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 

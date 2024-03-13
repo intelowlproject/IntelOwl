@@ -9,7 +9,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": {
             "minute": "0",
-            "hour": "0",
+            "hour": "*",
             "day_of_week": "*",
             "day_of_month": "*",
             "month_of_year": "*",

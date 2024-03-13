@@ -6,7 +6,8 @@ def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     pm = PythonModule.objects.get(
-        module="urlhaus.URLHaus", base_path="api_app.analyzers_manager.analyzers"
+        module="urlhaus.URLHaus",
+        base_path="api_app.analyzers_manager.observable_analyzers",
     )
     p = Parameter(
         name="disable",
@@ -31,7 +32,8 @@ def migrate(apps, schema_editor):
         pc1.save()
 
     pm = PythonModule.objects.get(
-        module="threatfox.ThreatFox", base_path="api_app.analyzers_manager.analyzers"
+        module="threatfox.ThreatFox",
+        base_path="api_app.analyzers_manager.observable_analyzers",
     )
     p = Parameter(
         name="disable",

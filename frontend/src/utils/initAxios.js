@@ -3,16 +3,6 @@ import axios from "axios";
 import { isObject, objToString } from "@certego/certego-ui";
 import { useAuthStore } from "../stores/useAuthStore";
 
-const shouldInjectToken = (url) => {
-  if (url === "/api/auth/login" || url === "/api/auth/register") {
-    return false;
-  }
-  if (url.startsWith("/api/")) {
-    return true;
-  }
-  return false;
-};
-
 export default function initAxios() {
   // base config
   axios.defaults.headers.common["Content-Type"] = "application/json";
@@ -20,11 +10,8 @@ export default function initAxios() {
   axios.defaults.certegoUIenableProgressBar = true;
   // request interceptor
   axios.interceptors.request.use((req) => {
-    // filter requests deciding whether to inject token or not
-    const { token } = useAuthStore.getState();
-    if (token && shouldInjectToken(req.url)) {
-      req.headers.Authorization = `Token ${token}`;
-    }
+    const { CSRFToken } = useAuthStore.getState();
+    req.headers["X-CSRFToken"] = CSRFToken;
     return req;
   });
   // response interceptor

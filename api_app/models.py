@@ -328,6 +328,11 @@ class Job(MP_Node):
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
 
+    def get_root(self):
+        if self.is_root():
+            return self
+        return super().get_root()
+
     @property
     def analyzed_object_name(self):
         return self.file_name if self.is_sample else self.observable_name
@@ -379,36 +384,12 @@ class Job(MP_Node):
     def retry(self):
         self.status = self.Status.RUNNING
         self.save(update_fields=["status"])
-        failed_analyzers = self.analyzerreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
-        failed_connector = self.connectorreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
-        failed_pivot = self.pivotreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
 
-        failed_visualizer = self.visualizerreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
         runner = self._get_pipeline(
-            self.analyzers_to_execute.filter(pk__in=failed_analyzers),
-            self.pivots_to_execute.filter(pk__in=failed_pivot),
-            self.connectors_to_execute.filter(pk__in=failed_connector),
-            self.visualizers_to_execute.filter(pk__in=failed_visualizer),
+            analyzers=self.analyzerreports.filter_retryable().get_configurations(),
+            pivots=self.pivotreports.filter_retryable().get_configurations(),
+            connectors=self.connectorreports.filter_retryable().get_configurations(),
+            visualizers=self.visualizerreports.filter_retryable().get_configurations(),
         )
 
         runner.apply_async(
@@ -447,8 +428,8 @@ class Job(MP_Node):
             ]
         )
         # we update the status of the analysis
-        if self.analysis:
-            self.analysis.set_correct_status(save=True)
+        if root_analysis := self.get_root().analysis:
+            root_analysis.set_correct_status(save=True)
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
@@ -492,6 +473,7 @@ class Job(MP_Node):
         from api_app.analyzers_manager.models import AnalyzerConfig
         from api_app.connectors_manager.models import ConnectorConfig
         from api_app.visualizers_manager.models import VisualizerConfig
+        from api_app.websocket import JobConsumer
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
@@ -511,6 +493,7 @@ class Job(MP_Node):
 
         self.status = self.Status.KILLED
         self.save(update_fields=["status"])
+        JobConsumer.serialize_and_send_job(self)
 
     def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
@@ -892,10 +875,10 @@ class OrganizationPluginConfiguration(models.Model):
 
         enabled_to = now() + self.rate_limit_timeout
         self.disabled_comment = (
-            "Disabled because rate limit hit at "
-            f"{now().strftime('%d %m %Y: %H %M %s')}."
+            "Rate limit hit at "
+            f"{now().strftime('%d %m %Y: %H %M %S')}.\n"
             "Will be enabled back at "
-            f"{enabled_to.strftime('%d %m %Y: %H %M %s')}"
+            f"{enabled_to.strftime('%d %m %Y: %H %M %S')}"
         )
         clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
             0
@@ -1161,7 +1144,9 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
-                "parameters": self._get_params(job.user, job.runtime_configuration),
+                "parameters": self._get_params(
+                    job.user, job.get_config_runtime_configuration(self)
+                ),
             },
         )[0]
 
@@ -1287,7 +1272,7 @@ class PythonConfig(AbstractConfig):
                     "kwargs": json.dumps(
                         {
                             "python_module_pk": self.python_module_id,
-                            "python_config_pk": self.pk,
+                            "plugin_config_pk": self.pk,
                         }
                     ),
                 },

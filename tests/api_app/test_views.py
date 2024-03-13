@@ -36,7 +36,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         # logged out
         self.client.logout()
         response = self.client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 401, response.json())
 
         param = Parameter.objects.create(
             is_secret=True,

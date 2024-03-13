@@ -11,7 +11,6 @@ from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.timezone import now
-from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
@@ -31,9 +30,16 @@ from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
+
+
+class UserSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username",)
 
 
 class TagSerializer(rfs.ModelSerializer):
@@ -90,6 +96,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "tags_labels",
             "scan_mode",
             "scan_check_time",
+            "analysis",
         )
 
     md5 = rfs.HiddenField(default=None)
@@ -106,7 +113,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     )
     runtime_configuration = rfs.JSONField(required=False, write_only=True)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
-
+    analysis = rfs.PrimaryKeyRelatedField(
+        queryset=Analysis.objects.all(), many=False, required=False, default=None
+    )
     connectors_requested = rfs.SlugRelatedField(
         slug_field="name",
         queryset=ConnectorConfig.objects.all(),
@@ -126,7 +135,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         required=False,
     )
 
-    def validate_runtime_configuration(self, runtime_config: Dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filter_warnings = []
+
+    def validate_runtime_configuration(self, runtime_config: Dict):  # skipcq: PYL-R0201
         from api_app.validators import validate_runtime_configuration
 
         if not runtime_config:
@@ -138,20 +151,16 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             raise ValidationError({"detail": "Runtime Configuration Validation Failed"})
         return runtime_config
 
-    def validate_tags_labels(self, tags_labels):
+    def validate_tags_labels(self, tags_labels):  # skipcq: PYL-R0201
         for label in tags_labels:
             yield Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
             )[0]
 
-    def validate_tlp(self, tlp: str):
+    def validate_tlp(self, tlp: str):  # skipcq: PYL-R0201
         if tlp == "WHITE":
             return TLP.CLEAR.value
         return tlp
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.filter_warnings = []
 
     def run_validation(self, data=empty):
         result = super().run_validation(data=data)
@@ -170,6 +179,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         ]:
             if attribute not in attrs:
                 attrs[attribute] = getattr(playbook, attribute)
+
+    def validate_analysis(self, analysis: Analysis = None):
+        if analysis and not analysis.user_can_edit(self.context["request"].user):
+            raise ValidationError({"detail": "You can't create a job to this analysis"})
 
     def validate(self, attrs: dict) -> dict:
         if attrs.get("playbook_requested"):
@@ -398,7 +411,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
         read_only=True, slug_field="name", many=True
     )
 
-    def get_pivots_to_execute(self, obj: Job):
+    def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         return obj.pivots_to_execute.all().values_list("name", flat=True)
 
 
@@ -470,6 +483,10 @@ class JobSerializer(_AbstractJobViewSerializer):
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     permissions = rfs.SerializerMethodField()
 
+    def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
+        # this cast is required or serializer doesn't work with websocket
+        return list(obj.pivots_to_execute.all().values_list("name", flat=True))
+
     def get_fields(self):
         # this method override is required for a cyclic import
         from api_app.analyzers_manager.serializers import AnalyzerReportSerializer
@@ -488,19 +505,31 @@ class JobSerializer(_AbstractJobViewSerializer):
             )
         return super().get_fields()
 
+
+class RestJobSerializer(JobSerializer):
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
         request = self.context.get("request", None)
         view = self.context.get("view", None)
+        has_perm = False
         if request and view:
             has_perm = IsObjectOwnerOrSameOrgPermission().has_object_permission(
                 request, view, obj
             )
-            return {
-                "kill": has_perm,
-                "delete": has_perm,
-                "plugin_actions": has_perm,
-            }
-        return {}
+        return {
+            "kill": has_perm,
+            "delete": has_perm,
+            "plugin_actions": has_perm,
+        }
+
+
+class WsJobSerializer(JobSerializer):
+    def get_permissions(self, obj: Job) -> Dict[str, bool]:
+        has_perm = self.context.get("permissions", False)
+        return {
+            "kill": has_perm,
+            "delete": has_perm,
+            "plugin_actions": has_perm,
+        }
 
 
 class MultipleJobSerializer(rfs.ListSerializer):
@@ -508,12 +537,12 @@ class MultipleJobSerializer(rfs.ListSerializer):
         raise NotImplementedError("This serializer does not support update().")
 
     def save(self, parent: Job = None, **kwargs):
-        result = super().save(**kwargs, parent=parent)
+        jobs = super().save(**kwargs, parent=parent)
         if parent:
             # the parent has already an analysis
             # so we don't need to do anything because everything is already connected
             if parent.analysis:
-                return result
+                return jobs
             # if we have a parent, it means we are pivoting from one job to another
             else:
                 analysis = Analysis.objects.create(
@@ -522,22 +551,22 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 )
                 analysis.jobs.add(parent)
                 analysis.start_time = parent.received_request_time
-        # if we do not have a parent, and we have multiple result,
+        # if we do not have a parent, and we have multiple jobs,
         # we are in the multiple input case
-        elif len(result) > 1:
+        elif len(jobs) > 1:
             analysis = Analysis.objects.create(
                 name="Custom analysis", owner=self.context["request"].user
             )
-            analysis.jobs.set(result)
+            analysis.jobs.set([job for job in jobs if not job.analysis])
             analysis.start_time = now()
         else:
-            return result
+            return jobs
         analysis: Analysis
         analysis.name = analysis.name + f" #{analysis.id}"
         analysis.status = analysis.Status.RUNNING.value
         analysis.for_organization = True
         analysis.save()
-        return result
+        return jobs
 
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)

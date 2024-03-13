@@ -15,13 +15,11 @@ from .views import (
     PasswordResetView,
     RegistrationView,
     ResendVerificationView,
-    TokenSessionsViewSet,
     checkConfiguration,
     google_login,
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register(r"sessions", TokenSessionsViewSet, basename="auth_tokensessions")
 
 urlpatterns = [
     # django-rest-email-auth

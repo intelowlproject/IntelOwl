@@ -4,6 +4,7 @@ import { Navigate, useParams } from "react-router-dom";
 
 import AuthGuard from "../wrappers/AuthGuard";
 import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
+import { JobResultSections } from "../constants/miscConst";
 
 const Home = React.lazy(() => import("./home/Home"));
 const Login = React.lazy(() => import("./auth/Login"));
@@ -12,7 +13,7 @@ const Register = React.lazy(() => import("./auth/Register"));
 const EmailVerification = React.lazy(() => import("./auth/EmailVerification"));
 const ResetPassword = React.lazy(() => import("./auth/ResetPassword"));
 const Organization = React.lazy(() => import("./organization/Organization"));
-const Sessions = React.lazy(() => import("./user/sessions/Sessions"));
+const TokenPage = React.lazy(() => import("./user/token/TokenPage"));
 const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
 const CommentResult = React.lazy(() =>
   import("./jobs/result/bar/comment/CommentResult"),
@@ -33,7 +34,9 @@ lazy imports to enable code splitting
 function JobRedirect() {
   const params = useParams();
   const { id } = params;
-  return <Navigate to={`/jobs/${id}/visualizer`} replace />;
+  return (
+    <Navigate to={`/jobs/${id}/${JobResultSections.VISUALIZER}`} replace />
+  );
 }
 
 // public components
@@ -116,12 +119,12 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
-  /* API Access/Sessions Management */
+  /* API Access */
   {
-    path: "/me/sessions",
+    path: "/me/api",
     element: (
       <Suspense fallback={<FallBackLoading />}>
-        <Sessions />
+        <TokenPage />
       </Suspense>
     ),
   },

@@ -41,9 +41,8 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
             try:
                 return json.loads(data)
             except json.JSONDecodeError:
-                # this is to accept literal strings
-                data = f'"{data}"'
                 try:
+                    data = json.dumps(data)
                     return json.loads(data)
                 except json.JSONDecodeError:
                     logger.info(f"value {data} ({type(data)}) raised ValidationError")
@@ -225,7 +224,7 @@ class PythonModulSerializerComplete(rfs.ModelSerializer):
 
     class Meta:
         model = PythonModule
-        exclude = ["id", "update_task", "health_check_task"]
+        exclude = ["id", "update_task"]
 
 
 class PythonModuleSerializer(rfs.ModelSerializer):
@@ -295,7 +294,7 @@ class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = ["id"]
+        exclude = ["id", "health_check_task"]
 
     def to_representation(self, instance):
         return super().to_representation(instance)

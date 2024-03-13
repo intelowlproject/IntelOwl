@@ -20,6 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
 )
@@ -56,8 +57,8 @@ from .serializers.job import (
     JobListSerializer,
     JobRecentScanSerializer,
     JobResponseSerializer,
-    JobSerializer,
     ObservableAnalysisSerializer,
+    RestJobSerializer,
     TagSerializer,
 )
 from .serializers.plugin import PluginConfigSerializer, PythonConfigSerializer
@@ -282,9 +283,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     queryset = (
         Job.objects.prefetch_related("tags").order_by("-received_request_time").all()
     )
-    serializer_class = JobSerializer
+    serializer_class = RestJobSerializer
     serializer_action_classes = {
-        "retrieve": JobSerializer,
+        "retrieve": RestJobSerializer,
         "list": JobListSerializer,
     }
     filterset_class = JobFilter
@@ -630,7 +631,12 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
         if self.action in ["destroy", "update"]:
             if self.request.method == "PUT":
                 raise PermissionDenied()
-            permissions.append((IsObjectAdminPermission | IsObjectOwnerPermission)())
+            # code quality checker marks this as error, but it works correctly
+            permissions.append(
+                (  # skipcq: PYL-E1102
+                    IsObjectAdminPermission | IsObjectOwnerPermission
+                )()
+            )
 
         return permissions
 
@@ -721,6 +727,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 
         job = Job.objects.get(pk=report.job.pk)
         job.set_final_status()
+        JobConsumer.serialize_and_send_job(job)
 
     @staticmethod
     def perform_retry(report: AbstractReport):

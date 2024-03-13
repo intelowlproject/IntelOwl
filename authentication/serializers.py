@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, transaction
 from rest_framework import serializers as rfs
+from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from slack_sdk.errors import SlackApiError
 
@@ -229,3 +230,23 @@ class LoginSerializer(AuthTokenSerializer):
                     )
             # else
             raise exc
+
+
+class TokenSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Token
+        fields = [
+            "key",
+            "created",
+        ]
+        read_only_fields = [
+            "key",
+            "created",
+        ]
+
+    def validate(self, data):
+        user = self.context["user"]
+        if Token.objects.filter(user=user).exists():
+            raise rfs.ValidationError("An API token was already issued to you.")
+        data["user"] = user
+        return data

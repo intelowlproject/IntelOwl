@@ -19,6 +19,11 @@ services:
       - DJANGO_WATCHMAN_TIMEOUT=20
       - WATCHMAN=True
 
+  daphne:
+    image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl
+
   nginx:
     build:
       context: ..

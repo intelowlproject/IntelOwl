@@ -14,19 +14,7 @@ jest.mock("../../../src/constants/environment", () => ({
 
 describe("Login component", () => {
   // mock login request
-  axios.post.mockImplementation({
-    data: {
-      expiry: "2023-02-09T14:52:04.877168Z",
-      token: "12345a6680364c7bf58b54b8c3d59b93",
-      user: {
-        email: "test@test.com",
-        first_name: "test",
-        full_name: "test user",
-        last_name: "user",
-        username: "test_user",
-      },
-    },
-  });
+  axios.post.mockImplementation({});
 
   test("User login", async () => {
     // mock user interaction: reccomanded to put this at the start of the test

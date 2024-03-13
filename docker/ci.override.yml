@@ -14,6 +14,11 @@ services:
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
+  
+  daphne:
+    image: intelowlproject/intelowl:ci
+    env_file:
+      - env_file_app_ci
 
   nginx:
     build:
@@ -33,9 +38,4 @@ services:
     env_file:
       - env_file_app_ci
 
-volumes:
-  postgres_data:
-  nginx_logs:
-  generic_logs:
-  shared_files:
 

@@ -1,3 +1,4 @@
+// HTTP(S)
 // api/ auth
 export const API_BASE_URI = "/api";
 
@@ -43,5 +44,9 @@ export const NOTIFICATION_BASE_URI = `${API_BASE_URI}/notification`;
 
 // auth
 export const AUTH_BASE_URI = `${API_BASE_URI}/auth`;
-export const SESSIONS_BASE_URI = `${AUTH_BASE_URI}/sessions`;
 export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
+
+// WEBSOCKETS
+export const WEBSOCKET_BASE_URI = "ws";
+
+export const WEBSOCKET_JOBS_URI = `${WEBSOCKET_BASE_URI}/jobs`;

@@ -15,7 +15,7 @@ import {
   confirm,
 } from "@certego/certego-ui";
 
-import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./sessionApi";
+import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./tokenApi";
 
 function GenerateIcon() {
   return (
@@ -26,7 +26,7 @@ function GenerateIcon() {
   );
 }
 
-export default function APIAccess() {
+export default function TokenAccess() {
   console.debug("APIAccess rendered!");
 
   const [{ data: respData, loading, error }, refetch] = useAxios(
@@ -35,6 +35,9 @@ export default function APIAccess() {
     },
     { useCache: false },
   );
+
+  console.debug(`TokenAccess - respData: ${JSON.stringify(respData)}`);
+  console.debug(`TokenAccess - error: ${JSON.stringify(error)}`);
 
   // local state
   const [tokenVisible, setTokenVisible] = React.useState(false);
@@ -87,17 +90,7 @@ export default function APIAccess() {
                 id="apikey__created"
                 value={respData?.created}
                 format="hh:mm a MMM do, yyyy"
-                title="Session create date"
-                showAgo
-              />
-            </Col>
-            <Col sm={6} lg={3}>
-              <small className="text-muted me-1">Expires</small>
-              <DateHoverable
-                id="apikey__expires"
-                value={respData?.expiry}
-                format="hh:mm a MMM do, yyyy"
-                title="Session expiry date"
+                title="Token create date"
                 showAgo
               />
             </Col>
@@ -109,10 +102,10 @@ export default function APIAccess() {
                 {tokenVisible ? (
                   <CopyToClipboardButton
                     id="apiaccess__token"
-                    text={respData?.token}
+                    text={respData?.key}
                     showOnHover
                   >
-                    {respData?.token}
+                    {respData?.key}
                   </CopyToClipboardButton>
                 ) : (
                   <div className="blurry-text text-truncate">

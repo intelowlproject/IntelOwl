@@ -57,11 +57,19 @@ def post_delete_job(sender, instance: Job, **kwargs):
 
 @receiver(models.signals.post_migrate)
 def post_migrate_beat(
-    sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
+    sender,
+    app_config,
+    verbosity,
+    interactive,
+    stdout=None,
+    using=None,
+    plan=None,
+    apps=None,
+    **kwargs,
 ):
-    from django_celery_beat.models import PeriodicTask
-
     if isinstance(sender, BeatConfig):
+        from django_celery_beat.models import PeriodicTask
+
         from intel_owl.tasks import update
 
         for module in PythonModule.objects.filter(health_check_schedule__isnull=False):

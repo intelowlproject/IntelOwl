@@ -144,7 +144,7 @@ export function ConnectorsReportTable({ job, refetch }) {
   );
 }
 export function PivotsReportTable({ job, refetch }) {
-  console.debug("ConnectorsReportTable rendered");
+  console.debug("PivotsReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
@@ -156,7 +156,7 @@ export function PivotsReportTable({ job, refetch }) {
   );
 }
 export function VisualizersReportTable({ job, refetch }) {
-  console.debug("AnalyzersReportTable rendered");
+  console.debug("VisualizersReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable

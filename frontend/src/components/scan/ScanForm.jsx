@@ -330,8 +330,8 @@ export default function ScanForm() {
           currentAnalyzer.isDisabled === nextAnalyzer.isDisabled
             ? 0
             : currentAnalyzer.isDisabled
-              ? 1
-              : -1,
+            ? 1
+            : -1,
         ),
     [analyzersGrouped, formik.values.classification],
   );
@@ -363,8 +363,8 @@ export default function ScanForm() {
           currentConnector.isDisabled === nextConnector.isDisabled
             ? 0
             : currentConnector.isDisabled
-              ? 1
-              : -1,
+            ? 1
+            : -1,
         ),
     [connectors],
   );
@@ -588,7 +588,7 @@ export default function ScanForm() {
           <Form onSubmit={formik.handleSubmit}>
             <Row>
               <div className="col-sm-3 col-form-label" />
-              <FormGroup className="mb-0 mt-2 d-flex col-sm-8">
+              <FormGroup className="ps-3 mt-2 d-flex col-sm-8">
                 {[JobTypes.OBSERVABLE, JobTypes.FILE].map((jobType) => (
                   <FormGroup check inline key={`observableType__${jobType}`}>
                     <Col>
@@ -679,7 +679,7 @@ export default function ScanForm() {
                                   className="py-2 d-flex"
                                   key={`observable_names.${index + 0}`}
                                 >
-                                  <Col sm={11} className="pe-3">
+                                  <Col sm={11} className="ps-1 pe-3">
                                     <Field
                                       as={Input}
                                       type="text"

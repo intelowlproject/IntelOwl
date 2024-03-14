@@ -168,7 +168,9 @@ export const analyzersTableColumns = [
       }
       return supported;
     },
-    Cell: ({ value }) => <TableCellList value={value} size={25} />,
+    Cell: ({ value }) => (
+      <TableCellList value={value} ulKey={value} size={25} />
+    ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
     minWidth: 200,
@@ -350,7 +352,9 @@ export const playbookTableColumns = [
     Header: "Supported types",
     id: "supported_types",
     accessor: "type",
-    Cell: ({ value }) => <TableCellList value={value} size={20} />,
+    Cell: ({ value }) => (
+      <TableCellList value={value} ulKey={value} size={20} />
+    ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
     maxWidth: 120,

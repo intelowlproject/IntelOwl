@@ -70,7 +70,7 @@ export const jobTableColumns = [
     id: "user",
     accessor: "user.username",
     Cell: ({ value, row: { original: job } }) => (
-      <TableCell job={job} isCopyToClipboard value={value} />
+      <TableCell job={job} isCopyToClipboard isTruncate value={value} />
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,

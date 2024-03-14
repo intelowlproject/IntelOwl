@@ -10,13 +10,16 @@ export default function TableCell(props) {
     job,
   } = props;
 
+  const tableId = job ? `table-user-${job.id}` : `table-user-${value}`;
+  const tableKey = job ? `table-user-${job.id}` : `table-user-${value}`;
+
   return (
     <div>
-      {isCopyToClipboard && (
+      {isCopyToClipboard ? (
         <CopyToClipboardButton
           showOnHover
-          id={`table-user-${job ? job.id : value}`}
-          key={`table-user-${job ? job.id : value}`}
+          id={tableId}
+          key={tableKey}
           text={value}
           className={`d-block p-2 ${
             isTruncate ? `text-truncate` : `text-break`
@@ -24,15 +27,9 @@ export default function TableCell(props) {
         >
           {value}
         </CopyToClipboardButton>
-      )}
-
-      {!isCopyToClipboard && (
+      ) : (
         <div className="d-flex justify-content-center">
-          <span
-            className="d-block text-break pb-2"
-            id={`table-user-${job ? job.id : value}`}
-            key={`table-user-${job ? job.id : value}`}
-          >
+          <span className="d-block text-break pb-2" id={tableId} key={tableKey}>
             {value}
           </span>
         </div>

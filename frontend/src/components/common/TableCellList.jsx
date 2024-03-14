@@ -17,7 +17,7 @@ export default function TableCellList(props) {
             <CopyToClipboardButton
               showOnHover
               text={val}
-              className="d-block text-truncate"
+              className="d-block text-break"
             >
               {val}
             </CopyToClipboardButton>

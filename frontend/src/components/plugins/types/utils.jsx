@@ -24,7 +24,6 @@ import { JobTypes } from "../../../constants/jobConst";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { ScanModesNumeric } from "../../../constants/advancedSettingsConst";
 import { parseScanCheckTime } from "../../../utils/time";
-import truncateText from "../../../utils/truncateText";
 
 export function PluginInfoCard({ pluginInfo }) {
   console.debug(`pluginInfo: ${JSON.stringify(pluginInfo)}`);
@@ -280,15 +279,15 @@ export function PlaybooksCollapse({ pluginList, pluginType_ }) {
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
       <Collapse isOpen={isOpen} id="PlaybooksCollapse">
-        <ul className="d-flex flex-column align-items-start p-3 text-break ">
+        <ul className="d-flex flex-column align-items-start p-3">
           {pluginList?.sort().map((pluginName) => (
             <li className="pb-2" key={pluginName}>
               <CopyToClipboardButton
                 showOnHover
                 text={pluginName}
-                className="d-block text-truncate"
+                className="d-block text-break"
               >
-                {truncateText(pluginName, 12)}
+                {pluginName}
               </CopyToClipboardButton>
             </li>
           ))}

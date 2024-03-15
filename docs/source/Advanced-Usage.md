@@ -108,7 +108,7 @@ Some analyzers provide the chance to customize the performed analysis based on p
 
 ##### from the GUI
 
-You can click on "**Runtime Configuration**" button in the "Scan" page and add the runtime configuration in the form of a dictionary.
+You can click on "**Runtime Configuration**" ![img.png](../static/runtime_config.png) button in the "Scan" page and add the runtime configuration in the form of a dictionary.
 Example:
 
 ```javascript

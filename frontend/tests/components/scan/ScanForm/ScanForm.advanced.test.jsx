@@ -665,9 +665,9 @@ describe("ScanForm adavanced use", () => {
       name: "Save & Close",
     });
     expect(saveButton).toBeInTheDocument();
-    // await 500ms before continuing further
+    // await 2000ms before continuing further (we need to wait the lib to update the validation)
     await new Promise((res) => {
-      setTimeout(res, 500);
+      setTimeout(res, 2000);
     });
     user.click(saveButton);
 
@@ -691,7 +691,9 @@ describe("ScanForm adavanced use", () => {
             scan_mode: 1,
             runtime_configuration: {
               analyzers: {
-                TEST_ANALYZER: { query_type: "A" },
+                TEST_ANALYZER: {
+                  query_type: "A",
+                },
               },
               connectors: {},
               visualizers: {},

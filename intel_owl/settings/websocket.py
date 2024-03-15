@@ -2,7 +2,7 @@ import socket
 
 from intel_owl import secrets
 
-websockets_url = secrets.get_secret("WEBSOCKETS_URL", "redis://redis:6379")
+websockets_url = secrets.get_secret("WEBSOCKETS_URL", "redis://redis:6379/0")
 if not websockets_url:
     if socket.gethostname() in ["uwsgi", "daphne"]:
         raise RuntimeError("Unable to configure websockets. Please set WEBSOCKETS_URL")
@@ -12,7 +12,7 @@ else:
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [f"{websockets_url}/0"],
+                "hosts": [websockets_url],
             },
         },
     }

@@ -432,7 +432,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 
 You can create new playbooks in different ways, based on the users you want to share them with:
 
-If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`-
+If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`.
 
 If you want share them to yourself or your organization only, you need to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
 In this way, after you have done an analysis, you can save the configuration of the Plugins you executed for re-use with a single click.
@@ -450,39 +450,53 @@ If you want to create completely new Plugins (not based on already existing pyth
 
 On the contrary, if you would like to just customize the already existing plugins, this is the place.
 
+#### SuperUser customization
+
 If you are an IntelOwl superuser, you can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at:
 - for analyzers: `/admin/analyzers_manager/analyzerconfig/`.
 - for connectors: `/admin/connectors_manager/connectorconfig/`.
 - ...and so on for all the Plugin types.
 
 The following are the most important fields that you can change without touching the source code:
-- `name`: Name of the analyzer
-- `description`: Description of the analyzer
-- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `python_module`: Python path of the class that will be executed 
-- `maximum_tlp`: see [TLP Support](#tlp-support)
-- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `routing_key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
-Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
-A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
-
+- `Name`: Name of the analyzer
+- `Description`: Description of the analyzer
+- `Disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+- `Python Module`: Python path of the class that will be executed. This should not be changed most of the times.
+- `Maximum TLP`: see [TLP Support](#tlp-support)
+- `Soft Time Limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+- `Routing Key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 For analyzers only:
-- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+- `Supported Filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+- `Not Supported Filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+- `Observable Supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
 
 For connectors only:
-- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
+- `Run on Failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
 
 For visualizers only:
-- `playbooks`: list of playbooks that trigger the specified visualizer execution.
+- `Playbooks`: list of playbooks that trigger the specified visualizer execution.
+
+Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
+A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 Changing other keys can break a plugin. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
+
+Other options can be added at the "Python module" level and not at the Plugin level. To do that, go to: `admin/api_app/pythonmodule/` and select the Python module used by the Plugin that you want to change.
+For example, the analyzer `AbuseIPDB` uses the Python module `abuseipdb.AbuseIPDB`.
+
+![img.png](../static/python_module_abuseipdb.png)
+
+Once there, you'll get this screen:
+
+![img.png](../static/abuseipdb.png)
+
+There you can change the following values:
+- `Update Schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
+- `Health Check Schedule`: if the analyzer has implemented a Health Check, you can specify the crontab schedule to check whether the service works or not.
 
 #### Parameters
 Each Plugin could have one or more parameters available to be configured. These parameters allow the users to customize the Plugin behavior.
@@ -495,14 +509,38 @@ There are 2 types of Parameters:
 To see the list of these parameters:
 
 - You can view the "Plugin" Section in IntelOwl to have a complete and updated view of all the options available
-- You can view the parameters by exploring the Django Admin Interface.
+- You can view the parameters by exploring the Django Admin Interface:
+  - `admin/api_app/parameter/`
+  - or at the very end of each Plugin configuration like `/admin/analyzers_manager/analyzerconfig/`
 
-You can change the Plugin Parameters at 4 different levels:
+You can change the Plugin Parameters at 5 different levels:
 * if you are an IntelOwl superuser, you can go in the Django Admin Interface and change the default values of the parameters for every plugin you like. This option would change the default behavior for every user in the platform.
 * if you are either Owner or Admin of an org, you can customize the default values of the parameters for every member of the organization by leveraging the GUI in the "Organization Config" section. This overrides the previous option. 
 * if you are a normal user, you can customize the default values of the parameters for your analysis only by leveraging the GUI in the "Plugin config" section. This overrides the previous option. 
 * You can choose to provide runtime configuration when requesting an analysis that will override the previous options. This override is done only for the specific analysis. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
 
+<div class="admonition note">
+<p class="admonition-title">Playbook Exception</p>
+Please remember that, if you are executing a Playbook, the "Runtime configuration" of the Playbook take precedence over the Plugin Configuration.
+</div>
+
+<div class="admonition note">
+<p class="admonition-title">Plugin Configuration Order</p>
+Due to the multiple chances that are given to customize the parameters of the Plugins that are executed, it may be easy to confuse the order and launch Plugins without the awereness of what you are doing.
+
+This is the order to define which values are used for the parameters, starting by the most important element:
+* Runtime Configuration at Time of Request.
+* Runtime Configuration of the Playbook (if a Playbook is used and the Runtime Configuration at Time of Request is empty)
+* Plugin Configuration of the User
+* Plugin Configuration of the Organization
+* Default Plugin Configuration of the Parameter
+
+
+If you are using the GUI, please remember that you can always check the Parameters before starting a "Scan" by clicking at the "Runtime configuration" ![img.png](../static/runtime_config.png) button.
+
+Example:
+![img.png](../static/runtime_config_2.png)
+</div>
 
 ### Enabling or Disabling Plugins
 By default, each available plugin is configured as either disabled or not. The majority of them are enabled by default, while others may be disabled to avoid potential problems in the application usability for first time users.

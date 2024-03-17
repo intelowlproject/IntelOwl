@@ -204,21 +204,15 @@ export const jobTableColumns = [
       If playbooks is initialized in the top of the file is done before the loading in the table job
       and does not contain data */
       const { playbooks } = usePluginConfigurationStore.getState();
+      const playbookResults =
+        playbooks?.find((playbook) => playbook.id === job.playbook_to_execute)
+          ?.name || "Custom Analysis";
 
       return (
         <div className="d-flex justify-content-between">
           <span className="d-block text-truncate">
-            <CopyToClipboardButton
-              showOnHover
-              text={
-                playbooks?.find(
-                  (playbook) => playbook.id === job.playbook_to_execute,
-                )?.name || "Custom Analysis"
-              }
-            >
-              {playbooks?.find(
-                (playbook) => playbook.id === job.playbook_to_execute,
-              )?.name || "Custom Analysis"}
+            <CopyToClipboardButton showOnHover text={playbookResults}>
+              {playbookResults}
             </CopyToClipboardButton>
           </span>
           <PlaybookInfoPopoverIcon job={job} />

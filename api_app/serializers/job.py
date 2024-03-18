@@ -16,7 +16,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.serializers import ModelSerializer
 
-from api_app.investigations_manager.models import Investigation
 from api_app.analyzers_manager.constants import ObservableTypes, TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
 from api_app.choices import TLP, ScanMode
@@ -24,6 +23,7 @@ from api_app.connectors_manager.exceptions import NotRunnableConnector
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.defaults import default_runtime
 from api_app.helpers import calculate_md5, gen_random_colorhex
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import AbstractBIInterface

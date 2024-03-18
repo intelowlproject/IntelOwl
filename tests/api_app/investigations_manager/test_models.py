@@ -1,5 +1,5 @@
-from api_app.investigations_manager.models import Investigation
 from api_app.helpers import gen_random_colorhex
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Job, Tag
 from tests import CustomTestCase
 

@@ -1,5 +1,5 @@
-from api_app.investigations_manager.models import Investigation
 from api_app.interfaces import CreateJobsFromPlaybookInterface
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.job import (

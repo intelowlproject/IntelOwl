@@ -96,12 +96,14 @@ class InvestigationViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelView
         # we are possibly changing the status of the investigation
         investigation.set_correct_status(save=True)
         return Response(
-            status=status.HTTP_200_OK, data=InvestigationSerializer(instance=investigation).data
+            status=status.HTTP_200_OK,
+            data=InvestigationSerializer(instance=investigation).data,
         )
 
     @action(methods=["GET"], url_name="graph", detail=True)
     def tree(self, request, pk):
         obj: Investigation = self.get_object()
         return Response(
-            status=status.HTTP_200_OK, data=InvestigationTreeSerializer(instance=obj).data
+            status=status.HTTP_200_OK,
+            data=InvestigationTreeSerializer(instance=obj).data,
         )

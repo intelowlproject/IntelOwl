@@ -4,10 +4,10 @@ from typing import List
 from django.conf import settings
 from django.db import models
 
-from api_app.investigations_manager.choices import InvestigationStatusChoices
-from api_app.investigations_manager.queryset import InvestigationQuerySet
 from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
+from api_app.investigations_manager.choices import InvestigationStatusChoices
+from api_app.investigations_manager.queryset import InvestigationQuerySet
 from api_app.models import ListCachable
 from certego_saas.apps.user.models import User
 

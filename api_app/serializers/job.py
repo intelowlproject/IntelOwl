@@ -183,6 +183,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def validate_analysis(self, analysis: Analysis = None):
         if analysis and not analysis.user_can_edit(self.context["request"].user):
             raise ValidationError({"detail": "You can't create a job to this analysis"})
+        return analysis
 
     def validate(self, attrs: dict) -> dict:
         if attrs.get("playbook_requested"):
@@ -551,16 +552,24 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 )
                 analysis.jobs.add(parent)
                 analysis.start_time = parent.received_request_time
-        # if we do not have a parent, and we have multiple jobs,
-        # we are in the multiple input case
-        elif len(jobs) > 1:
-            analysis = Analysis.objects.create(
-                name="Custom analysis", owner=self.context["request"].user
-            )
-            analysis.jobs.set([job for job in jobs if not job.analysis])
-            analysis.start_time = now()
         else:
-            return jobs
+            # if we do not have a parent but we have an analysis
+            # set analysis into running status
+            if jobs[0].analysis:
+                analysis = jobs[0].analysis
+                analysis.status = analysis.Status.RUNNING.value
+                analysis.save()
+                return jobs
+            # if we do not have a parent or an analysis, and we have multiple jobs,
+            # we are in the multiple input case
+            elif len(jobs) > 1:
+                analysis = Analysis.objects.create(
+                    name="Custom analysis", owner=self.context["request"].user
+                )
+                analysis.jobs.set([job for job in jobs])
+                analysis.start_time = now()
+            else:
+                return jobs
         analysis: Analysis
         analysis.name = analysis.name + f" #{analysis.id}"
         analysis.status = analysis.Status.RUNNING.value

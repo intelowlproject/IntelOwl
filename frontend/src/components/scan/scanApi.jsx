@@ -32,6 +32,7 @@ function createJobPayload(
   tlp,
   _scanMode,
   scanCheckTime,
+  analysisIdParam,
 ) {
   let payload = {};
   /* we add a custom function to the object to reuse the code:
@@ -100,6 +101,10 @@ function createJobPayload(
   if (_scanMode === ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS) {
     payload.append("scan_check_time", `${scanCheckTime}:00:00`);
   }
+  // analysis id in param
+  if (analysisIdParam) {
+    payload.append("analysis", analysisIdParam);
+  }
   // remove custom method in order to avoid to send it to the backend
   if (!isSample) delete payload.append;
   console.debug("job request params:");
@@ -156,6 +161,7 @@ export async function createJob(
   tlp,
   _scanMode,
   scanCheckTime,
+  analysisIdParam,
 ) {
   try {
     console.debug(
@@ -195,6 +201,7 @@ export async function createJob(
       tlp,
       _scanMode,
       scanCheckTime,
+      analysisIdParam,
     );
     const resp = await axios.post(apiUrl, payload, {
       headers: {

@@ -157,6 +157,7 @@ export async function addExistingJob(jobToAdd, currentAnalysisId) {
       error.parsedMsg,
       "warning",
     );
+    return success;
   }
 
   // case 1 - Job is already part of this analysis

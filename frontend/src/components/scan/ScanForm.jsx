@@ -67,11 +67,6 @@ import {
   getObservableClassification,
 } from "../../utils/observables";
 import { SpinnerIcon } from "../common/icon/icons";
-import {
-  addJob,
-  removeJob,
-  deleteAnalysis,
-} from "../analysis/result/analysisApi";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -86,7 +81,7 @@ function DangerErrorMessage(fieldName) {
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
-  const analysisIdParam = searchParams.get("analysis");
+  const analysisIdParam = searchParams.get("analysis") || null;
   const { guideState, setGuideState } = useGuideContext();
 
   const { pluginsState: organizationPluginsState } = useOrganizationStore(
@@ -206,53 +201,21 @@ export default function ScanForm() {
         values.tlp,
         values.scan_mode,
         values.scan_check_time,
+        analysisIdParam,
       );
 
-      // case 1 - new scan
-      if (!analysisIdParam) {
-        // multiple jobs
-        if (response.analysisId) {
-          setTimeout(() => navigate(`/analysis/${response.analysisId}`), 1000);
-        } else {
-          // single job or pivot
-          setTimeout(
-            () =>
-              navigate(
-                `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
-              ),
-            1000,
-          );
-        }
-      }
-
-      // case 2 - analysis id in GET param
-      if (analysisIdParam) {
-        // multiple jobs or pivot
-        if (response.analysisId) {
-          // remove jobs from new analysis
-          let success = false;
-          response.jobIds.forEach(async (jobId, index) => {
-            const jobRemoved = await removeJob(response.analysisId, jobId);
-            if (jobRemoved) {
-              // add job into analysis given in the param
-              success = await addJob(analysisIdParam, jobId);
-              if (success && response.jobIds.length === index + 1) {
-                // delete analysis
-                await deleteAnalysis(response.analysisId);
-                setTimeout(
-                  () => navigate(`/analysis/${analysisIdParam}`),
-                  1000,
-                );
-              }
-            }
-          });
-        } else {
-          // single job
-          const success = await addJob(analysisIdParam, response.jobIds[0]);
-          if (success) {
-            setTimeout(() => navigate(`/analysis/${analysisIdParam}`), 1000);
-          }
-        }
+      // multiple job or analysis id in GET param
+      if (response.analysisId) {
+        setTimeout(() => navigate(`/analysis/${response.analysisId}`), 1000);
+      } else {
+        // single job or pivot
+        setTimeout(
+          () =>
+            navigate(
+              `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
+            ),
+          1000,
+        );
       }
 
       refetchQuota();

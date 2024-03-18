@@ -5,7 +5,7 @@ import logging
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -41,20 +41,15 @@ class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
         return obj
 
     def _get_job(self, request):
-        try:
-            job_pk = request.data.get("job")
-        except KeyError:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={"error": "You should set the `job` argument in the data"},
+        if "job" not in request.data:
+            raise ValidationError(
+                {"detail": "You should set the `job` argument in the data"}
             )
+        job_pk = request.data.get("job")
         try:
             job = Job.objects.visible_for_user(self.request.user).get(pk=job_pk)
         except Job.DoesNotExist:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={"error": f"Job {job_pk} does not exist"},
-            )
+            raise NotFound(detail=f"Job {job_pk} does not exist")
         return job
 
     @action(methods=["POST"], url_name="add_job", detail=True)

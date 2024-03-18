@@ -81,6 +81,58 @@ describe("ScanForm adavanced use", () => {
     expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
   });
 
+  test("test scan page with an analysis in the GET parameters", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/scan?analysis=1"]}>
+        <Routes>
+          <Route path="/scan" element={<ScanForm />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    // select an observable and start scan
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    await user.type(firstObservableInputElement, "google.com");
+
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
+
+    // start scan button
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+
+    await waitFor(() => {
+      expect(axios.post.mock.calls[0]).toEqual(
+        // axios call
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "google.com"]],
+            playbook_requested: "TEST_PLAYBOOK_DOMAIN",
+            tlp: "CLEAR",
+            scan_mode: 2,
+            scan_check_time: "48:00:00",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
+            analysis: "1",
+          },
+          { headers: { "Content-Type": "application/json" } },
+        ],
+      );
+    });
+  });
+
   test("test playbooks advanced change time", async () => {
     const user = userEvent.setup();
 

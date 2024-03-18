@@ -292,17 +292,63 @@ After having written the new python module, you have to remember to:
 The visualizers' python code could be not immediate, so a small digression on _how_ it works is necessary.
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
 To do so, some utility classes have been made:
-
-|          **Class**          |                                                        **Description**                                                        |                        **Visual representation/example**                         |
-|:---------------------------:|:-----------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
-|     `VisualizablePage`      |   A single page of the final report, made of different **levels**. Each page added is represented as a new tab in frontend.   |       ![Visualizable Page example](../static/visualizablePage_example.png)       |
-|     `VisualizableLevel`     | Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontalList`. |      ![Visualizable Level example](../static/visualizableLevel_example.png)      |
-| `VisualizableHorizontaList` |          An horizontal list of visualizable elements. In the example there is an horizontal list of vertical lists.           | ![Visualizable Horizontal List Example](../static/visualizableHlist_example.png) |
-| `VisualizableVerticalList`  |                              A vertical list made of a name, a title, and the list of elements.                               |  ![Visualizable Vertical List Example](../static/visualizableVlist_example.png)  |
-|     `VisualizableBool`      |                       The representation of a boolean value. It can be enabled or disabled with colors.                       |       ![Visualizable Bool example](../static/visualizableBool_example.png)       |
-|     `VisualizableTitle`     |                                The representation of a tuple, composed of a title and a value.                                |      ![Visualizable Title example](../static/visualizableTitle_example.png)      |
-|     `VisualizableBase`      |  The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.   |              The title above is composed by two `VisualizableBase`               |
-
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-7n4c{border-color:inherit;font-family:"Courier New", Courier, monospace !important;text-align:center;vertical-align:top}
+.tg .tg-zh46{border-color:inherit;font-family:"Courier New", Courier, monospace !important;text-align:left;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-c3ow"><span style="font-weight:bold">Class</span></th>
+    <th class="tg-c3ow"><span style="font-weight:bold">Description</span></th>
+    <th class="tg-c3ow"><span style="font-weight:bold">Visual representation/example</span></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-7n4c">VisualizablePage</td>
+    <td class="tg-0pky">A single page of the final report, made of different <span style="font-weight:bold">levels</span>. Each page added is represented as a new tab in frontend.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableLevel_example.png" alt="Visualizable Page example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableLevel</td>
+    <td class="tg-0pky">Each level corresponds to a line in the final frontend visualizations. Every level is made of a <span class="tg-zh46">VisualizableHorizontalList</span>.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableLevel_example.png" alt="Visualizable Level example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableHorizontalList</td>
+    <td class="tg-0pky">An horizontal list of visualizable elements. In the example there is an horizontal list of vertical lists.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableHlist_example.png" alt="Visualizable Horizontal List Example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableVerticalList</td>
+    <td class="tg-0pky">A vertical list made of a name, a title, and the list of elements.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableVlist_example.png" alt="Visualizable Vertical List Example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableBool</td>
+    <td class="tg-0pky">The representation of a boolean value. It can be enabled or disabled with colors.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableBool_example.png" alt="Visualizable Bool example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableTitle</td>
+    <td class="tg-0pky">The representation of a tuple, composed of a title and a value.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableTitle_example.png" alt="Visualizable Title example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableBase</td>
+    <td class="tg-0pky">The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.</td>
+    <td class="tg-0pky">The title above is composed by two `VisualizableBase`</td>
+  </tr>
+</tbody>
+</table>
 Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
 At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
 

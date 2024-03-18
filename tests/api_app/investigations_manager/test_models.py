@@ -1,12 +1,12 @@
-from api_app.analyses_manager.models import Analysis
+from api_app.investigations_manager.models import Investigation
 from api_app.helpers import gen_random_colorhex
 from api_app.models import Job, Tag
 from tests import CustomTestCase
 
 
-class AnalysisTestCase(CustomTestCase):
+class InvetigationTestCase(CustomTestCase):
     def test_set_correct_status_created(self):
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         self.assertEqual(an.status, "created")
         an.set_correct_status()
         self.assertEqual(an.status, "created")
@@ -19,7 +19,7 @@ class AnalysisTestCase(CustomTestCase):
             user=self.user,
             status=Job.Status.REPORTED_WITH_FAILS,
         )
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         self.assertEqual(an.status, "created")
         an.set_correct_status()
@@ -48,7 +48,7 @@ class AnalysisTestCase(CustomTestCase):
             user=self.user,
             status="killed",
         )
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         an.jobs.add(job2)
         an.set_correct_status()
@@ -64,7 +64,7 @@ class AnalysisTestCase(CustomTestCase):
             user=self.user,
             status="killed",
         )
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         self.assertEqual(an.status, "created")
         an.set_correct_status()
@@ -85,7 +85,7 @@ class AnalysisTestCase(CustomTestCase):
             user=self.user,
             status="killed",
         )
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         an.refresh_from_db()
         self.assertEqual(an.total_jobs, 2)
@@ -108,7 +108,7 @@ class AnalysisTestCase(CustomTestCase):
             user=self.user,
             tlp="RED",
         )
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         self.assertEqual(an.tlp.value, "CLEAR")
         an.jobs.add(job2)
@@ -140,7 +140,7 @@ class AnalysisTestCase(CustomTestCase):
         )
         job.tags.add(tag1)
         job2.tags.add(tag2)
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
         an.refresh_from_db()
         self.assertCountEqual(an.tags, [tag1.label])

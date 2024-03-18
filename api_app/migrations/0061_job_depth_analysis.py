@@ -9,7 +9,7 @@ def migrate(apps, schema_editor):
     from api_app.models import Job as JobNonStoric
 
     PivotMap = apps.get_model("pivots_manager", "PivotMap")
-    Analysis = apps.get_model("analyses_manager", "Analysis")
+    Investigation = apps.get_model("investigations_manager", "Investigation")
     # I have to use the import here because i really need the class methods
     from api_app.models import Job as JobNonStoric
 
@@ -38,8 +38,8 @@ def migrate(apps, schema_editor):
         child.path = JobNonStoric._get_path(parent.path, child.depth, 1)
         child.save()
         if parent.numchild == 1:
-            an = Analysis.objects.create(
-                name="Pivot analysis",
+            an = Investigation.objects.create(
+                name="Pivot investigation",
                 owner=parent.user,
                 start_time=parent.received_request_time,
                 end_time=child.finished_analysis_time,
@@ -47,7 +47,7 @@ def migrate(apps, schema_editor):
             )
             an.jobs.add(parent)
 
-    Analysis.objects.update(
+    Investigation.objects.update(
         name=Concat(F("name"), Value(" #"), F("pk"), output_field=CharField())
     )
 
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0060_job_depth_job_numchild_job_path"),
         ("pivots_manager", "0025_alter_pivotmap_ending_job"),
-        ("analyses_manager", "0001_initial"),
+        ("investigations_manager", "0001_initial"),
     ]
 
     operations = [

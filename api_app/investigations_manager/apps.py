@@ -4,8 +4,8 @@
 from django.apps import AppConfig
 
 
-class AnalysesManagerConfig(AppConfig):
-    name = "api_app.analyses_manager"
+class InvestigationManagerConfig(AppConfig):
+    name = "api_app.investigations_manager"
 
     @staticmethod
     def ready() -> None:

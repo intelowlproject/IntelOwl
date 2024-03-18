@@ -1,17 +1,17 @@
 from django.contrib import admin
 
 from api_app.admin import CustomAdminView
-from api_app.analyses_manager.models import Analysis
+from api_app.investigations_manager.models import Investigation
 
 
-@admin.register(Analysis)
-class AnalysisAdminView(CustomAdminView):
+@admin.register(Investigation)
+class InvestigationAdminView(CustomAdminView):
     list_display = ["name", "start_time", "status", "owner", "get_jobs", "total_jobs"]
     list_filter = ["owner", "status"]
     search_fields = ["name"]
 
     @admin.display(description="Total Jobs")
-    def total_jobs(self, instance: Analysis):
+    def total_jobs(self, instance: Investigation):
         from api_app.models import Job
 
         string = ""
@@ -23,5 +23,5 @@ class AnalysisAdminView(CustomAdminView):
         return string
 
     @admin.display(description="Jobs at first level")
-    def get_jobs(self, instance: Analysis):
+    def get_jobs(self, instance: Investigation):
         return list(instance.jobs.all().values_list("pk", flat=True))

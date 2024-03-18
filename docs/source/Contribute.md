@@ -300,6 +300,7 @@ To do so, some utility classes have been made:
   font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
 .tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
 .tg .tg-7n4c{border-color:inherit;font-family:"Courier New", Courier, monospace !important;text-align:center;vertical-align:top}
+.tg .tg-zh46{border-color:inherit;font-family:"Courier New", Courier, monospace !important;text-align:left;vertical-align:top}
 .tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
 </style>
 <table class="tg">
@@ -313,12 +314,12 @@ To do so, some utility classes have been made:
 <tbody>
   <tr>
     <td class="tg-7n4c">VisualizablePage</td>
-    <td class="tg-0pky">A single page of the final report, made of different **levels**. Each page added is represented as a new tab in frontend.</td>
+    <td class="tg-0pky">A single page of the final report, made of different <span style="font-weight:bold">levels</span>. Each page added is represented as a new tab in frontend.</td>
     <td class="tg-c3ow"><img src="../static/visualizableLevel_example.png" alt="Visualizable Page example"/></td>
   </tr>
   <tr>
     <td class="tg-7n4c">VisualizableLevel</td>
-    <td class="tg-0pky">Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontalList`.</td>
+    <td class="tg-0pky">Each level corresponds to a line in the final frontend visualizations. Every level is made of a <span class="tg-zh46">VisualizableHorizontalList</span>.</td>
     <td class="tg-c3ow"><img src="../static/visualizableLevel_example.png" alt="Visualizable Level example"/></td>
   </tr>
   <tr>

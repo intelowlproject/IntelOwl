@@ -1,5 +1,5 @@
-from api_app.investigations_manager.models import Investigation
 from api_app.helpers import get_now
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
 from tests import CustomViewSetTestCase, ViewSetTestCaseMixin
 

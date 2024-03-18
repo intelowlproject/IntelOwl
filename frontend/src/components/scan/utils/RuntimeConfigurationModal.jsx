@@ -113,13 +113,11 @@ export function RuntimeConfigurationModal(props) {
         // add empty dict in editableConfig for plugin that have not params
         editableConfig[pluginType][pluginName] = {};
         // for each param (dict) extract the value of the "value" key
-        Object.entries(pluginParams).forEach(
-          ([paramName, { value: paramValue }]) => {
-            editableConfig[pluginType][pluginName] = {
-              [paramName]: paramValue,
-            };
-          },
-        );
+        Object.entries(pluginParams)
+          .filter(([_, { value: paramValue }]) => paramValue)
+          .forEach(([paramName, { value: paramValue }]) => {
+            editableConfig[pluginType][pluginName][paramName] = paramValue;
+          });
       },
     );
     // override config saved in formik
@@ -188,7 +186,12 @@ export function RuntimeConfigurationModal(props) {
             id="edit_runtime_configuration-modal"
             placeholder={editableConfig}
             onChange={setJsonInput}
-            waitAfterKeyPress={100}
+            /* waitAfterKeyPress=1000 is the default value and we cannot change it:
+              with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
+              If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
+              The library auto refresh and move the cursor too fast to make it editable.
+            */
+            waitAfterKeyPress={1000}
             height="500px"
             width="450px"
           />

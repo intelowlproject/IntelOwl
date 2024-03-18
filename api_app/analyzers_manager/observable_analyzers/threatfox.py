@@ -12,8 +12,15 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 class ThreatFox(classes.ObservableAnalyzer):
     base_url: str = "https://threatfox-api.abuse.ch/api/v1/"
+    disable: bool = False  # optional
+
+    def update(self) -> bool:
+        pass
 
     def run(self):
+        if self.disable:
+            return {"disabled": True}
+
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
         try:

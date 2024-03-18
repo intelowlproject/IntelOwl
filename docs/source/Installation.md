@@ -19,9 +19,9 @@ In some systems you could find pre-installed older versions. Please check this a
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-The `start` script requires a `bash` version > 4 to run.
+The <code>start</code> script requires a `bash` version > 4 to run.
 
-Note that macOS is shipped with an older version of `bash`. Please ensure to upgrade before running the script. 
+Note that macOS is shipped with an older version of <code>bash</code>. Please ensure to upgrade before running the script. 
 </div>
 
 ## TL;DR
@@ -65,10 +65,11 @@ IntelOwl is composed of various different technologies, namely:
 * React: Frontend, using [CRA](https://create-react-app.dev/) and [certego-ui](https://github.com/certego/certego-ui)
 * Django: Backend
 * PostgreSQL: Database
-* Rabbit-MQ: Message Broker
+* Redis: Message Broker
 * Celery: Task Queue
 * Nginx: Reverse proxy for the Django API and web asssets.
 * Uwsgi: Application Server
+* Daphne: Asgi Server for WebSockets
 * Elastic Search (*optional*): Auto-sync indexing of analysis' results.
 * Kibana (*optional*): GUI for Elastic Search. We provide a saved configuration with dashboards and visualizations.
 * Flower (*optional*): Celery Management Web Interface
@@ -210,7 +211,7 @@ $ ./start prod up
 You can add the `docker` options `-d` to run the application in the background. 
 <div class="admonition note">
 <p class="admonition-title">Important Info</p>
-All `docker` and `docker compose` specific options must be passed at the end of the script, after a `--` token.
+All <code>docker</code> and <code>docker compose</code> specific options must be passed at the end of the script, after a <code>--</code> token.
 This token indicates the end of IntelOwl's options and the beginning of Docker options.
 
 Example:

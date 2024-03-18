@@ -49,12 +49,13 @@ export default function NotificationsList({ notifications, refetchFn }) {
             {notif?.read === false && (
               <IconButton
                 size="xs"
+                id={`notification-read-btn-${notif.id}`}
                 Icon={IoCheckmarkDoneSharp}
                 title="mark as read"
                 className="ms-auto text-success"
                 color="dark"
                 outline
-                onClick={() => markAsReadCb(notif?.id)}
+                onClick={() => markAsReadCb(notif.id)}
               />
             )}
           </div>

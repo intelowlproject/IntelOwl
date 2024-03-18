@@ -13,21 +13,24 @@ class Pivot(Visualizer):
         page = self.Page("Job Pivots")
 
         children_element_list = []
-        for pivot_map in self._job.pivot_children.all():
-            pivot_map_report = pivot_map.report.report
+        for pivot_report in self._job.pivotreports.all():
+            pivot_report_report = pivot_report.report
             children_element = []
-            if pivot_map_report.get("create_job", False):
+            logger.debug(f"{pivot_report_report=}")
+            logger.debug(f"{type(pivot_report.config)=}")
+            if pivot_report_report.get("create_job", False):
                 children_element.extend(
                     [
                         self._create_job_ui_element(
-                            pivot_map.ending_job, pivot_map.pivot_config
+                            job=Job.objects.get(id=pivot_report_report["jobs_id"][0]),
+                            pivot_config=pivot_report.config,
                         )
                     ]
                 )
             else:
-                motivation = pivot_map_report.get(
-                    "motivation", f"Pivot {pivot_map.pivot_config.name} failed"
-                )
+                motivation = pivot_report_report.get("motivation", "")
+                if motivation:
+                    motivation = f"({motivation})"
                 children_element.extend(
                     [
                         self.Base(
@@ -37,8 +40,11 @@ class Pivot(Visualizer):
                             disable=False,
                         ),
                         self.Base(
-                            value=f"Job was not created: {motivation}",
-                            description=pivot_map.pivot_config.description,
+                            value=(
+                                f"{pivot_report.config.name}: "
+                                f"Job was not created {motivation}"
+                            ),
+                            description=pivot_report.config.description,
                             disable=False,
                         ),
                     ]

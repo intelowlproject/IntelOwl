@@ -134,9 +134,7 @@ class CronTests(CustomTestCase):
         )
     )
     def test_feodo_tracker_updater(self, mock_get=None):
-        feodo_tracker.Feodo_Tracker.update(
-            "some_url", f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json"
-        )
+        feodo_tracker.Feodo_Tracker.update()
         self.assertTrue(
             os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json")
         )

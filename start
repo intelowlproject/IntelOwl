@@ -282,7 +282,7 @@ elif [ "${params["sqs"]}" ]; then
   compose_files+=("${path_mapping["sqs"]}")
 fi
 
-if $is_test; then
+if [ "$is_test" = true ]; then
   compose_files+=("${path_mapping["$env_argument"]}")
 fi
 

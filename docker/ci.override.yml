@@ -21,8 +21,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory:  3000M
+          cpus: '1.50'
+          memory:  3500M
 
   
   daphne:
@@ -33,7 +33,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 250M
+          memory: 200M
 
   nginx:
     build:
@@ -46,7 +46,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 250M
+          memory: 200M
 
   celery_beat:
     image: intelowlproject/intelowl:ci
@@ -56,7 +56,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 250M
+          memory: 200M
 
   celery_worker_default:
     image: intelowlproject/intelowl:ci
@@ -66,11 +66,11 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 250M
+          memory: 200M
 
   redis:
     deploy:
       resources:
         limits:
           cpus: '0.50'
-          memory: 250M
+          memory: 200M

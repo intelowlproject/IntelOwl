@@ -19,10 +19,10 @@ services:
   uwsgi:
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_started
 
 
   celery_worker_default:
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_started

@@ -18,11 +18,6 @@ services:
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
-    deploy:
-      resources:
-        limits:
-          cpus: '1.50'
-          memory:  3500M
 
   
   daphne:

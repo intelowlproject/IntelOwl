@@ -4,7 +4,11 @@ services:
   postgres:
     env_file:
       - env_file_postgres_template
-
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
   uwsgi:
     build:
       context: ..
@@ -14,11 +18,22 @@ services:
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory:  2000M
+
   
   daphne:
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
 
   nginx:
     build:
@@ -27,15 +42,35 @@ services:
     image: intelowlproject/intelowl_nginx:ci
     volumes:
       - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
 
   celery_beat:
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
 
   celery_worker_default:
     image: intelowlproject/intelowl:ci
     env_file:
       - env_file_app_ci
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
 
-
+  redis:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M

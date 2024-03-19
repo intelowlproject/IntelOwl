@@ -23,6 +23,12 @@ services:
     env_file:
       - env_file_app
       - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8001 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      start_period: 120s
+      retries: 3
 
 
   daphne:
@@ -43,11 +49,11 @@ services:
       test: ["CMD-SHELL", "nc -z localhost 8011 || exit 1"]
       interval: 10s
       timeout: 2s
-      start_period: 90s
+      start_period: 30s
       retries: 5
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}

@@ -3,7 +3,7 @@ services:
   uwsgi:
     depends_on:
       redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - BROKER_URL=redis://redis:6379/1
       - WEBSOCKETS_URL=redis://redis:6379/0
@@ -11,7 +11,7 @@ services:
   daphne:
     depends_on:
       redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - BROKER_URL=redis://redis:6379/1
       - WEBSOCKETS_URL=redis://redis:6379/0

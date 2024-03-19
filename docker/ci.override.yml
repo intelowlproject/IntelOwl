@@ -22,7 +22,7 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory:  1500M
+          memory:  3000M
 
   
   daphne:

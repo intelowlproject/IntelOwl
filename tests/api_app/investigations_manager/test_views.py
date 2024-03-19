@@ -1,36 +1,36 @@
-from api_app.analyses_manager.models import Analysis
 from api_app.helpers import get_now
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
 from tests import CustomViewSetTestCase, ViewSetTestCaseMixin
 
 
-class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
+class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
     fixtures = [
         "api_app/fixtures/0001_user.json",
     ]
-    URL = "/api/analysis"
+    URL = "/api/investigation"
 
     def setUp(self):
         super().setUp()
-        self.analysis = Analysis.objects.create(owner=self.user, name="test")
+        self.investigation = Investigation.objects.create(owner=self.user, name="test")
 
     def tearDown(self) -> None:
         super().tearDown()
-        self.analysis.delete()
+        self.investigation.delete()
 
     @classmethod
     @property
     def model_class(cls):
-        return Analysis
+        return Investigation
 
     def test_list(self):
         super().test_list()
-        an = Analysis.objects.create(owner=self.user, name="test")
+        an = Investigation.objects.create(owner=self.user, name="test")
         self.client.force_authenticate(self.user)
         response = self.client.get(self.URL)
         result = response.json()
-        self.assertEqual(result["count"], Analysis.objects.count())
-        self.assertEqual(len(result["results"]), Analysis.objects.count())
+        self.assertEqual(result["count"], Investigation.objects.count())
+        self.assertEqual(len(result["results"]), Investigation.objects.count())
         an.delete()
 
     def test_get(self):
@@ -56,14 +56,14 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         self.assertEqual(response.status_code, 403, response.json())
 
     def test_delete(self):
-        analysis = self.get_object()
+        investigation = self.get_object()
         self.client.force_authenticate(user=self.superuser)
-        response = self.client.delete(f"{self.URL}/{analysis}")
+        response = self.client.delete(f"{self.URL}/{investigation}")
         self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(user=self.user)
-        response = self.client.delete(f"{self.URL}/{analysis}")
+        response = self.client.delete(f"{self.URL}/{investigation}")
         self.assertEqual(response.status_code, 204)
-        response = self.client.delete(f"{self.URL}/{analysis}")
+        response = self.client.delete(f"{self.URL}/{investigation}")
         self.assertEqual(response.status_code, 404)
 
     def test_create(self):
@@ -73,16 +73,16 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
             f"{self.URL}", data={"name": "Test2", "description": "test desc"}
         )
         self.assertEqual(response.status_code, 201)
-        an = Analysis.objects.get(pk=response.json()["id"])
+        an = Investigation.objects.get(pk=response.json()["id"])
         self.assertEqual(an.name, "Test2")
         self.assertEqual(an.description, "test desc")
 
     def get_object(self):
-        return self.analysis.pk
+        return self.investigation.pk
 
     def test_add_job(self):
-        analysis = self.get_object()
-        response = self.client.post(f"{self.URL}/{analysis}/add_job", data={})
+        investigation = self.get_object()
+        response = self.client.post(f"{self.URL}/{investigation}/add_job", data={})
         self.assertEqual(response.status_code, 400)
         job = Job.objects.create(
             observable_name="test.com",
@@ -90,24 +90,24 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
             user=self.superuser,
         )
         response = self.client.post(
-            f"{self.URL}/{analysis}/add_job", data={"job": job.pk}
+            f"{self.URL}/{investigation}/add_job", data={"job": job.pk}
         )
         self.assertEqual(response.status_code, 403)
         job.user = self.user
         job.save()
         response = self.client.post(
-            f"{self.URL}/{analysis}/add_job", data={"job": job.pk}
+            f"{self.URL}/{investigation}/add_job", data={"job": job.pk}
         )
         self.assertEqual(response.status_code, 200)
         response = self.client.post(
-            f"{self.URL}/{analysis}/add_job", data={"job": job.pk}
+            f"{self.URL}/{investigation}/add_job", data={"job": job.pk}
         )
         self.assertEqual(response.status_code, 400)
         job.delete()
 
     def test_remove_job(self):
-        analysis = self.get_object()
-        response = self.client.post(f"{self.URL}/{analysis}/remove_job", data={})
+        investigation = self.get_object()
+        response = self.client.post(f"{self.URL}/{investigation}/remove_job", data={})
         self.assertEqual(response.status_code, 400)
         job = Job.objects.create(
             observable_name="test.com",
@@ -121,24 +121,24 @@ class AnalysisViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
             user=self.user,
             finished_analysis_time=get_now(),
         )
-        self.analysis.jobs.add(job)
-        self.analysis.jobs.add(job2)
+        self.investigation.jobs.add(job)
+        self.investigation.jobs.add(job2)
         response = self.client.post(
-            f"{self.URL}/{analysis}/remove_job", data={"job": job.pk}
+            f"{self.URL}/{investigation}/remove_job", data={"job": job.pk}
         )
         self.assertEqual(response.status_code, 403)
         job.user = self.user
         job.save()
         response = self.client.post(
-            f"{self.URL}/{analysis}/remove_job", data={"job": job.pk}
+            f"{self.URL}/{investigation}/remove_job", data={"job": job.pk}
         )
         self.assertEqual(response.status_code, 200)
         response = self.client.post(
-            f"{self.URL}/{analysis}/remove_job", data={"job": job.pk}
+            f"{self.URL}/{investigation}/remove_job", data={"job": job.pk}
         )
         self.assertEqual(response.status_code, 400)
         response = self.client.post(
-            f"{self.URL}/{analysis}/remove_job", data={"job": job2.pk}
+            f"{self.URL}/{investigation}/remove_job", data={"job": job2.pk}
         )
         self.assertEqual(response.status_code, 200)
 

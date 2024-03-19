@@ -28,14 +28,14 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="job",
-            name="analysis",
+            name="investigation",
             field=models.ForeignKey(
                 blank=True,
                 default=None,
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="jobs",
-                to="analyses_manager.analysis",
+                to="investigations_manager.investigation",
             ),
         ),
     ]

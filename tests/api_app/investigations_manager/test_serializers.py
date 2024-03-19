@@ -1,13 +1,13 @@
-from api_app.analyses_manager.models import Analysis
-from api_app.analyses_manager.serializers import (
-    AnalysisSerializer,
-    AnalysisTreeSerializer,
+from api_app.investigations_manager.models import Investigation
+from api_app.investigations_manager.serializers import (
+    InvestigationSerializer,
+    InvestigationTreeSerializer,
 )
 from api_app.models import Job
 from tests import CustomTestCase
 
 
-class AnalysisSerializerTestCase(CustomTestCase):
+class InvestigationSerializerTestCase(CustomTestCase):
     def test_to_representation(self):
         job = Job.objects.create(
             observable_name="test.com",
@@ -21,9 +21,9 @@ class AnalysisSerializerTestCase(CustomTestCase):
             user=self.user,
             status="killed",
         )
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
-        result = AnalysisSerializer(instance=an).data
+        result = InvestigationSerializer(instance=an).data
         self.assertIn("total_jobs", result)
         self.assertEqual(result["total_jobs"], 2)
         self.assertIn("tags", result)
@@ -37,7 +37,7 @@ class AnalysisSerializerTestCase(CustomTestCase):
         an.delete()
 
 
-class AnalysisTreeSerializerTestCase(CustomTestCase):
+class InvestigationTreeSerializerTestCase(CustomTestCase):
     def test_to_representation(self):
         job = Job.objects.create(
             observable_name="test.com",
@@ -51,9 +51,9 @@ class AnalysisTreeSerializerTestCase(CustomTestCase):
             user=self.user,
             status="killed",
         )
-        an: Analysis = Analysis.objects.create(name="Test", owner=self.user)
+        an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
-        result = AnalysisTreeSerializer(instance=an).data
+        result = InvestigationTreeSerializer(instance=an).data
         self.assertIn("jobs", result)
         self.assertEqual(1, len(result["jobs"]))
         self.assertEqual(result["jobs"][0]["pk"], job.pk)

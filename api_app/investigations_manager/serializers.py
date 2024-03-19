@@ -2,12 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
 
-from api_app.analyses_manager.models import Analysis
+from api_app.investigations_manager.models import Investigation
 from api_app.serializers import ModelWithOwnershipSerializer
 from api_app.serializers.job import JobTreeSerializer
 
 
-class AnalysisSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
+class InvestigationSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     tags = rfs.ListField(
         child=rfs.CharField(read_only=True), read_only=True, default=[]
     )
@@ -18,13 +18,13 @@ class AnalysisSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
 
     class Meta:
-        model = Analysis
+        model = Investigation
         fields = rfs.ALL_FIELDS
 
 
-class AnalysisTreeSerializer(rfs.ModelSerializer):
+class InvestigationTreeSerializer(rfs.ModelSerializer):
     class Meta:
-        model = Analysis
+        model = Investigation
         fields = ["name", "owner", "jobs"]
 
     jobs = JobTreeSerializer(many=True)

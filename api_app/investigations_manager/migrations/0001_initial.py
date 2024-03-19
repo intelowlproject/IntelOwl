@@ -16,8 +16,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="Analysis",
-            options={"verbose_name_plural": "analyses"},
+            name="Investigation",
+            options={"verbose_name_plural": "investigations"},
             fields=[
                 (
                     "id",
@@ -49,16 +49,16 @@ class Migration(migrations.Migration):
                     "owner",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="analyses",
+                        related_name="investigations",
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],
         ),
         migrations.AddIndex(
-            model_name="analysis",
+            model_name="investigation",
             index=models.Index(
-                fields=["start_time"], name="analyses_ma_start_t_6a1f30_idx"
+                fields=["start_time"], name="investigati_start_t_8c993d_idx"
             ),
         ),
     ]

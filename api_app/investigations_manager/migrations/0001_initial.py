@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="investigation",
             index=models.Index(
-                fields=["start_time"], name="investigations_ma_start_t_6a1f30_idx"
+                fields=["start_time"], name="investigati_start_t_8c993d_idx"
             ),
         ),
     ]

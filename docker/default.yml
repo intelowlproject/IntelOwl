@@ -8,7 +8,6 @@ services:
   uwsgi:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_uwsgi
-    hostname: uwsgi
     volumes:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
       - ../configuration:/opt/deploy/intel_owl/configuration
@@ -34,7 +33,6 @@ services:
   daphne:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_daphne
-    hostname: daphne
     restart: unless-stopped
     volumes:
       - generic_logs:/var/log/intel_owl
@@ -53,13 +51,12 @@ services:
       retries: 5
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_nginx
     restart: unless-stopped
-    hostname: nginx
     volumes:
       - ../configuration/nginx/websocket.conf:/etc/nginx/websocket.conf
       - ../configuration/nginx/errors.conf:/etc/nginx/errors.conf
@@ -71,12 +68,11 @@ services:
       - "80:80"
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_beat
-    hostname: celery_beat
     restart: unless-stopped
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
@@ -88,14 +84,13 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
     <<: *no-healthcheck
 
 
   celery_worker_default:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_default
-    hostname: celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m
     volumes:
@@ -113,7 +108,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
     <<: *no-healthcheck
 
 

@@ -5,7 +5,6 @@ services:
   postgres:
     image: library/postgres:16-alpine
     container_name: intelowl_postgres
-    hostname: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -19,10 +18,10 @@ services:
   uwsgi:
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
 
 
   celery_worker_default:
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy

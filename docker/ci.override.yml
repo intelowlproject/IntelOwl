@@ -4,6 +4,11 @@ services:
   postgres:
     env_file:
       - env_file_postgres_template
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2000M
   uwsgi:
     build:
       context: ..
@@ -16,7 +21,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.50'
+          cpus: '1'
           memory:  2000M
 
   

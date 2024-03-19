@@ -26,7 +26,7 @@ services:
       test: [ "CMD-SHELL", "nc -z localhost 8001 || exit 1" ]
       interval: 10s
       timeout: 5s
-      start_period: 120s
+      start_period: 90s
       retries: 3
 
 
@@ -51,7 +51,7 @@ services:
       retries: 5
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
@@ -68,7 +68,7 @@ services:
       - "80:80"
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -84,7 +84,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
     <<: *no-healthcheck
 
 
@@ -108,7 +108,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
     <<: *no-healthcheck
 
 

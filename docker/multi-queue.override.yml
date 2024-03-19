@@ -25,7 +25,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
     <<: *no-healthcheck
 
   celery_worker_long:
@@ -44,7 +44,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
     <<: *no-healthcheck
 
   celery_worker_ingestor:
@@ -63,5 +63,5 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
     <<: *no-healthcheck

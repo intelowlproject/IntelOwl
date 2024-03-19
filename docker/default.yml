@@ -71,7 +71,7 @@ services:
       - "80:80"
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -88,7 +88,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
     <<: *no-healthcheck
 
 
@@ -113,7 +113,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_healthy
+        condition: service_started
     <<: *no-healthcheck
 
 

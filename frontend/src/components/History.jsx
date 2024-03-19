@@ -9,8 +9,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { createAnalysis } from "./analysis/result/analysisApi";
 
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
-const AnalysisTable = React.lazy(() =>
-  import("./analysis/table/AnalysisTable"),
+const AnalysisTable = React.lazy(
+  () => import("./analysis/table/AnalysisTable"),
 );
 /*
 lazy imports to enable code splitting

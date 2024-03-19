@@ -15,16 +15,16 @@ const ResetPassword = React.lazy(() => import("./auth/ResetPassword"));
 const Organization = React.lazy(() => import("./organization/Organization"));
 const TokenPage = React.lazy(() => import("./user/token/TokenPage"));
 const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
-const CommentResult = React.lazy(() =>
-  import("./jobs/result/bar/comment/CommentResult"),
+const CommentResult = React.lazy(
+  () => import("./jobs/result/bar/comment/CommentResult"),
 );
 const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
 const UserConfig = React.lazy(() => import("./user/config/UserConfig"));
 const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
-const AnalysisResult = React.lazy(() =>
-  import("./analysis/result/AnalysisResult"),
+const AnalysisResult = React.lazy(
+  () => import("./analysis/result/AnalysisResult"),
 );
 const History = React.lazy(() => import("./History"));
 /*

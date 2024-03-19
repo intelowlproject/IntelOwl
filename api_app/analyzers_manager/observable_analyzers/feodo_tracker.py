@@ -4,6 +4,7 @@
 import json
 import logging
 import os
+from typing import Tuple
 
 import requests
 from django.conf import settings
@@ -22,26 +23,35 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
     users from Dridex and Emotet/Heodo.
     """
 
-    # change the file name in cron tests as well if modified here
-    db_name: str = "feodotracker_abuse_ipblocklist.json"
-    database_location: str = f"{settings.MEDIA_ROOT}/{db_name}"
     use_recommended_url: bool
-    update_on_run: bool
+    update_on_run: bool = True
+
+    @classmethod
+    @property
+    def recommend_locations(cls) -> Tuple[str, str]:
+        db_name = "feodotracker_abuse_ipblocklist.json"
+        url = "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json"
+        return f"{settings.MEDIA_ROOT}/{db_name}", url
+
+    @classmethod
+    @property
+    def default_locations(cls) -> Tuple[str, str]:
+        db_name = "feodotracker_abuse_ipblocklist_recommended.json"
+        url = "https://feodotracker.abuse.ch/downloads/ipblocklist.json"
+        return f"{settings.MEDIA_ROOT}/{db_name}", url
 
     def run(self):
         result = {"found": False}
-        # default url :
-        url = "https://feodotracker.abuse.ch/downloads/ipblocklist.json"
-        if self.use_recommended_url:
-            self.db_name = "feodotracker_abuse_ipblocklist_recommended.json"
-            self.database_location = f"{settings.MEDIA_ROOT}/{self.db_name}"
-            url = "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json"
-
-        if self.update_on_run or not os.path.exists(self.database_location):
-            self.update(db_url=url, db_location=self.database_location)
-        db = {}
+        db_location, url = (
+            self.recommend_locations
+            if self.use_recommended_url
+            else self.default_locations
+        )
+        if self.update_on_run or not os.path.exists(db_location):
+            if not self.update():
+                raise AnalyzerRunException("Unable to update database")
         try:
-            with open(self.database_location, "r", encoding="utf-8") as f:
+            with open(db_location, "r", encoding="utf-8") as f:
                 db = json.load(f)
             # db is a list of dictionaries
             for ip in db:
@@ -57,21 +67,25 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
         return result
 
     @classmethod
-    def update(cls, db_url, db_location) -> bool:
+    def update(cls) -> bool:
         """
         Simply update the database
         """
-        try:
+        for db_location, db_url in [cls.default_locations, cls.recommend_locations]:
             logger.info(f"starting download of db from {db_url}")
-            r = requests.get(db_url)
-            r.raise_for_status()
+
+            try:
+                r = requests.get(db_url)
+                r.raise_for_status()
+            except requests.RequestException:
+                return False
             with open(db_location, "w", encoding="utf-8") as f:
-                json.dump(r.json(), f)
-            logger.info(f"ended download of db from Feodo Tracker at {db_location}")
-        except json.JSONDecodeError as e:
-            raise AnalyzerRunException(f"Decode JSON in update failed: {e}")
-        except requests.RequestException as e:
-            raise AnalyzerRunException(f"Request in update failed: {e}")
+                try:
+                    json.dump(r.json(), f)
+                except json.JSONDecodeError:
+                    return False
+                logger.info(f"ended download of db from Feodo Tracker at {db_location}")
+        return True
 
     @classmethod
     def _monkeypatch(cls):

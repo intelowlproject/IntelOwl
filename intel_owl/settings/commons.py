@@ -15,7 +15,7 @@ BASE_STATIC_PATH = PROJECT_LOCATION / "static"
 MEDIA_ROOT = BASE_DIR / "files_required"
 CONFIG_ROOT = PROJECT_LOCATION / "configuration"
 YARA_RULES_PATH = MEDIA_ROOT / "yara"
-LOG_DIR = Path("/") / "var" / "log" / "intel_owl"
+
 # test / ci
 MOCK_CONNECTIONS = get_secret("MOCK_CONNECTIONS", False) == "True"
 STAGE = get_secret("STAGE", "local")

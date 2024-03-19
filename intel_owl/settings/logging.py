@@ -1,20 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import os
 
 from intel_owl import secrets
 
-from ._util import set_permissions
-from .commons import DEBUG, LOG_DIR
-
-DJANGO_LOG_DIRECTORY = LOG_DIR / "django"
-UWSGI_LOG_DIRECTORY = LOG_DIR / "uwsgi"
-ASGI_LOG_DIRECTORY = LOG_DIR / "asgi"
-for path in [DJANGO_LOG_DIRECTORY, UWSGI_LOG_DIRECTORY, ASGI_LOG_DIRECTORY]:
-    os.makedirs(path, exist_ok=True)
-    set_permissions(path)
+from .commons import DEBUG
 
 DISABLE_LOGGING_TEST = secrets.get_secret("DISABLE_LOGGING_TEST", False) == "True"
+DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOG_MSG_FORMAT = "%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s"
 

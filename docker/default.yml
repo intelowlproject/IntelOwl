@@ -51,7 +51,7 @@ services:
       retries: 5
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
@@ -68,7 +68,7 @@ services:
       - "80:80"
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -84,7 +84,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
     <<: *no-healthcheck
 
 
@@ -108,7 +108,7 @@ services:
       - env_file_app
     depends_on:
       uwsgi:
-        condition: service_started
+        condition: service_healthy
     <<: *no-healthcheck
 
 

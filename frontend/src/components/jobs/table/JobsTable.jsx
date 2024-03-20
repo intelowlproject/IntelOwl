@@ -43,8 +43,11 @@ export default function JobsTable() {
   // consume zustand store
   const { range, fromTimeIsoStr, onTimeIntervalChange } = useTimePickerStore();
 
+  // state
+  const [initialLoading, setInitialLoading] = React.useState(true);
+
   // API/ Table
-  const [data, tableNode, refetch] = useDataTable(
+  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
     {
       url: JOB_BASE_URI,
       params: {
@@ -57,6 +60,10 @@ export default function JobsTable() {
     toPassTableProps,
   );
 
+  React.useEffect(() => {
+    if (!loadingTable) setInitialLoading(false);
+  }, [loadingTable]);
+
   const { guideState, setGuideState } = useGuideContext();
 
   React.useEffect(() => {
@@ -68,16 +75,10 @@ export default function JobsTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* This useEffect cause an error in local development (axios CanceledError) because it is called twice.
-    The first call is trying to update state asynchronously, 
-    but the update couldn't happen when the component is unmounted
-
-    Attention! we cannot remove it: this update the job list after the user start a new scan
-  */
   React.useEffect(() => {
-    refetch();
+    if (!initialLoading) refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialLoading]);
 
   return (
     // this loader is required to correctly get the name of the playbook executed

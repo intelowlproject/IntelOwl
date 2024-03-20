@@ -4,7 +4,7 @@ import { Button, Input, UncontrolledPopover } from "reactstrap";
 import { MdOutlineCancel } from "react-icons/md";
 import { BsFillPlusCircleFill } from "react-icons/bs";
 
-import { removeJob, addExistingJob } from "../result/analysisApi";
+import { removeJob, addExistingJob } from "../result/investigationApi";
 
 export function AddExistingJobPopover({ data }) {
   // state
@@ -13,7 +13,7 @@ export function AddExistingJobPopover({ data }) {
   const onClick = async () => {
     const success = await addExistingJob(jobToAdd, data.id);
     if (success) {
-      data.refetchAnalysis();
+      data.refetchInvestigation();
       data.refetchTree();
     }
     setJobToAdd(null);
@@ -63,16 +63,16 @@ AddExistingJobPopover.propTypes = {
 
 export function RemoveJob({ data }) {
   const onClick = async () => {
-    const success = await removeJob(data.analysis, data.id);
+    const success = await removeJob(data.investigation, data.id);
     if (success) {
-      data.refetchAnalysis();
+      data.refetchInvestigation();
       data.refetchTree();
     }
   };
 
   return (
     <Button
-      id="analysis-removejobbtn"
+      id="investigation-removejobbtn"
       className="mx-1 p-2"
       size="sm"
       onClick={() => onClick()}

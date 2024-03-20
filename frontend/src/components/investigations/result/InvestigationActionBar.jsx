@@ -4,21 +4,21 @@ import { useNavigate } from "react-router-dom";
 
 import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
 
-import { deleteAnalysis } from "./analysisApi";
+import { deleteInvestigation } from "./investigationApi";
 import { DeleteIcon } from "../../common/icon/icons";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
-export function AnalysisActionsBar({ analysis }) {
+export function InvestigationActionsBar({ investigation }) {
   // routers
   const navigate = useNavigate();
 
   // callbacks
   const onDeleteBtnClick = async () => {
     const sure = await areYouSureConfirmDialog(
-      `delete analysis #${analysis.id}`,
+      `delete investigation #${investigation.id}`,
     );
     if (!sure) return null;
-    const success = await deleteAnalysis(analysis.id);
+    const success = await deleteInvestigation(investigation.id);
     if (!success) return null;
     addToast("Redirecting...", null, "secondary");
     setTimeout(() => navigate(-1), 250);
@@ -33,13 +33,13 @@ export function AnalysisActionsBar({ analysis }) {
         size="sm"
         color="darker"
         onClick={onDeleteBtnClick}
-        title="Delete Analysis"
+        title="Delete Investigation"
         titlePlacement="top"
       />
     </ContentSection>
   );
 }
 
-AnalysisActionsBar.propTypes = {
-  analysis: PropTypes.object.isRequired,
+InvestigationActionsBar.propTypes = {
+  investigation: PropTypes.object.isRequired,
 };

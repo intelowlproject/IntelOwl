@@ -80,7 +80,7 @@ class InvestigationViewSet(ModelWithOwnershipViewSet, ModelViewSet):
         else:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={"error": "Job is already part of different analysis"},
+                data={"error": "Job is already part of different investigation"},
             )
 
     @action(methods=["POST"], url_name="remove_job", detail=True)

@@ -13,9 +13,9 @@ import { JobTag } from "../../common/JobTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
 import { TlpChoices } from "../../../constants/advancedSettingsConst";
-import { AnalysisStatuses } from "../../../constants/analysisConst";
+import { InvestigationStatuses } from "../../../constants/investigationConst";
 
-export const analysisTableColumns = [
+export const investigationTableColumns = [
   {
     Header: () => "ID", // No header
     id: "id",
@@ -27,8 +27,8 @@ export const analysisTableColumns = [
         <p>#{id}</p>
         <LinkOpenViewIcon
           id={id}
-          href={`/analysis/${id}`}
-          tooltip="View Analysis Report"
+          href={`/investigation/${id}`}
+          tooltip="View investigation report"
         />
       </div>
     ),
@@ -47,11 +47,11 @@ export const analysisTableColumns = [
     Header: "User",
     id: "owner",
     accessor: "owner",
-    Cell: ({ value, row: { original: analysis } }) => (
+    Cell: ({ value, row: { original: investigation } }) => (
       <CopyToClipboardButton
         showOnHover
-        id={`table-user-${analysis?.id}`}
-        key={`table-user-${analysis?.id}`}
+        id={`table-user-${investigation?.id}`}
+        key={`table-user-${investigation?.id}`}
         text={value}
         className="d-block text-truncate"
       >
@@ -66,11 +66,11 @@ export const analysisTableColumns = [
     Header: "Name",
     id: "name",
     accessor: "name",
-    Cell: ({ value, row: { original: analysis } }) => (
+    Cell: ({ value, row: { original: investigation } }) => (
       <CopyToClipboardButton
         showOnHover
-        id={`table-name-${analysis?.id}`}
-        key={`table-name-${analysis?.id}`}
+        id={`table-name-${investigation?.id}`}
+        key={`table-name-${investigation?.id}`}
         text={value}
         className="d-block text-truncate"
       >
@@ -125,7 +125,7 @@ export const analysisTableColumns = [
     Cell: ({ value }) => <StatusTag status={value} />,
     disableSortBy: true,
     Filter: SelectOptionsFilter,
-    selectOptions: Object.values(AnalysisStatuses),
+    selectOptions: Object.values(InvestigationStatuses),
     maxWidth: 110,
   },
 ];

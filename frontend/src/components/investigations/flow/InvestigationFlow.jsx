@@ -11,13 +11,13 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import CustomAnalysisNode from "./CustomAnalysisNode";
+import CustomInvestigationNode from "./CustomInvestigationNode";
 import CustomJobNode from "./CustomJobNode";
 import { getNodesAndEdges } from "./utils";
 
 // Important! This must be defined outside of the component
 const nodeTypes = {
-  analysisNode: CustomAnalysisNode,
+  investigationNode: CustomInvestigationNode,
   jobNode: CustomJobNode,
 };
 
@@ -29,25 +29,30 @@ const defaultEdgeOptions = {
   },
 };
 
-export function AnalysisFlow(props) {
-  console.debug("AnalysisFlow rendered");
-  const { analysisTree, analysisId, refetchTree, refetchAnalysis, ...rest } =
-    props;
+export function InvestigationFlow(props) {
+  console.debug("InvestigationFlow rendered");
+  const {
+    investigationTree,
+    investigationId,
+    refetchTree,
+    refetchInvestigation,
+    ...rest
+  } = props;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   React.useEffect(() => {
     const [initialNodes, initialEdges] = getNodesAndEdges(
-      analysisTree,
-      analysisId,
+      investigationTree,
+      investigationId,
       refetchTree,
-      refetchAnalysis,
+      refetchInvestigation,
     );
     setNodes(initialNodes);
     setEdges(initialEdges);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [analysisTree]);
+  }, [investigationTree]);
 
   return (
     <div className="bg-body" style={{ width: "100vw", height: "65vh" }}>
@@ -103,9 +108,9 @@ export function AnalysisFlow(props) {
   );
 }
 
-AnalysisFlow.propTypes = {
-  analysisId: PropTypes.number.isRequired,
-  analysisTree: PropTypes.object.isRequired,
+InvestigationFlow.propTypes = {
+  investigationId: PropTypes.number.isRequired,
+  investigationTree: PropTypes.object.isRequired,
   refetchTree: PropTypes.func.isRequired,
-  refetchAnalysis: PropTypes.func.isRequired,
+  refetchInvestigation: PropTypes.func.isRequired,
 };

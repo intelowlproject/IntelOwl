@@ -5,20 +5,21 @@ import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { AnalysisOverview } from "../../../../src/components/analysis/result/AnalysisOverview";
-import { ANALYSIS_BASE_URI } from "../../../../src/constants/apiURLs";
+import { InvestigationOverview } from "../../../../src/components/investigations/result/InvestigationOverview";
+import { INVESTIGATION_BASE_URI } from "../../../../src/constants/apiURLs";
 
 jest.mock("axios");
 jest.mock("axios-hooks");
 // mock flow component
-jest.mock("../../../../src/components/analysis/flow/AnalysisFlow", () =>
-  jest.fn(),
+jest.mock(
+  "../../../../src/components/investigations/flow/InvestigationFlow",
+  () => jest.fn(),
 );
 
-describe("test AnalysisOverview", () => {
+describe("test InvestigationOverview", () => {
   beforeAll(() => {
     // mock useAxios call
-    const analysisTree = {
+    const investigationTree = {
       name: "My test",
       owner: 2,
       jobs: [
@@ -38,17 +39,17 @@ describe("test AnalysisOverview", () => {
     const refetchTree = () => jest.fn();
 
     useAxios.mockImplementation(() => [
-      { analysisTree, loading, error },
+      { investigationTree, loading, error },
       refetchTree,
     ]);
   });
 
-  test("AnalysisOverview components", () => {
+  test("InvestigationOverview components", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisOverview
-          isRunningAnalysis={false}
-          analysis={{
+        <InvestigationOverview
+          isRunningInvestigation={false}
+          investigation={{
             id: 1,
             name: "My test",
             jobs: [1, 2],
@@ -59,13 +60,13 @@ describe("test AnalysisOverview", () => {
             end_time: "2024-05-06T08:19:04.484684",
             tags: [null],
           }}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
         />
       </BrowserRouter>,
     );
     // Page title
     expect(
-      screen.getByRole("heading", { name: "Analysis #1" }),
+      screen.getByRole("heading", { name: "Investigation #1" }),
     ).toBeInTheDocument();
     // status
     expect(
@@ -76,13 +77,15 @@ describe("test AnalysisOverview", () => {
       screen.getByRole("heading", { name: "My test" }),
     ).toBeInTheDocument();
     // edit name icon
-    expect(container.querySelector("#edit-analysis-name")).toBeInTheDocument();
+    expect(
+      container.querySelector("#edit-investigation-name"),
+    ).toBeInTheDocument();
     // description
     expect(screen.getByText("Description")).toBeInTheDocument();
     expect(screen.getByText("test description")).toBeInTheDocument();
     // edit description icon
     expect(
-      container.querySelector("#edit-analysis-description"),
+      container.querySelector("#edit-investigation-description"),
     ).toBeInTheDocument();
   });
 
@@ -90,9 +93,9 @@ describe("test AnalysisOverview", () => {
     axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
     const { container } = render(
       <BrowserRouter>
-        <AnalysisOverview
-          isRunningAnalysis={false}
-          analysis={{
+        <InvestigationOverview
+          isRunningInvestigation={false}
+          investigation={{
             id: 1,
             name: "My test",
             jobs: [1, 2],
@@ -103,14 +106,14 @@ describe("test AnalysisOverview", () => {
             end_time: "2024-05-06T08:19:04.484684",
             tags: [null],
           }}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
         />
       </BrowserRouter>,
     );
     const user = userEvent.setup();
     // Page title
     expect(
-      screen.getByRole("heading", { name: "Analysis #1" }),
+      screen.getByRole("heading", { name: "Investigation #1" }),
     ).toBeInTheDocument();
     // status
     expect(
@@ -121,27 +124,29 @@ describe("test AnalysisOverview", () => {
       screen.getByRole("heading", { name: "My test" }),
     ).toBeInTheDocument();
     // edit name icon
-    const editNameButton = container.querySelector("#edit-analysis-name");
+    const editNameButton = container.querySelector("#edit-investigation-name");
     expect(editNameButton).toBeInTheDocument();
     // description
     expect(screen.getByText("Description")).toBeInTheDocument();
     expect(screen.getByText("test description")).toBeInTheDocument();
     // edit description icon
     expect(
-      container.querySelector("#edit-analysis-description"),
+      container.querySelector("#edit-investigation-description"),
     ).toBeInTheDocument();
 
     await user.click(editNameButton);
-    const editNameInput = container.querySelector("#edit_analysis-input");
+    const editNameInput = container.querySelector(
+      "#edit-investigation-name-input",
+    );
     expect(editNameInput).toBeInTheDocument();
-    const viewName = container.querySelector("#view-analysis-name");
+    const viewName = container.querySelector("#save-investigation-name");
     expect(viewName).toBeInTheDocument();
 
     await user.type(editNameInput, " - edited name");
     await user.click(viewName);
     await waitFor(() => {
       expect(axios.patch.mock.calls.length).toBe(1);
-      expect(axios.patch).toHaveBeenCalledWith(`${ANALYSIS_BASE_URI}/1`, {
+      expect(axios.patch).toHaveBeenCalledWith(`${INVESTIGATION_BASE_URI}/1`, {
         name: "My test - edited name",
       });
     });
@@ -151,9 +156,9 @@ describe("test AnalysisOverview", () => {
     axios.patch.mockImplementation(() => Promise.resolve({ data: {} }));
     const { container } = render(
       <BrowserRouter>
-        <AnalysisOverview
-          isRunningAnalysis={false}
-          analysis={{
+        <InvestigationOverview
+          isRunningInvestigation={false}
+          investigation={{
             id: 1,
             name: "My test",
             jobs: [1, 2],
@@ -164,14 +169,14 @@ describe("test AnalysisOverview", () => {
             end_time: "2024-05-06T08:19:04.484684",
             tags: [null],
           }}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
         />
       </BrowserRouter>,
     );
     const user = userEvent.setup();
     // Page title
     expect(
-      screen.getByRole("heading", { name: "Analysis #1" }),
+      screen.getByRole("heading", { name: "Investigation #1" }),
     ).toBeInTheDocument();
     // status
     expect(
@@ -182,24 +187,24 @@ describe("test AnalysisOverview", () => {
       screen.getByRole("heading", { name: "My test" }),
     ).toBeInTheDocument();
     // edit name icon
-    const editNameButton = container.querySelector("#edit-analysis-name");
+    const editNameButton = container.querySelector("#edit-investigation-name");
     expect(editNameButton).toBeInTheDocument();
     // description
     expect(screen.getByText("Description")).toBeInTheDocument();
     expect(screen.getByText("test description")).toBeInTheDocument();
     // edit description icon
     const editDescriptionButton = container.querySelector(
-      "#edit-analysis-description",
+      "#edit-investigation-description",
     );
     expect(editDescriptionButton).toBeInTheDocument();
 
     await user.click(editDescriptionButton);
     const editDescriptionInput = container.querySelector(
-      "#edit_analysis-input",
+      "#edit-investigation-description-input",
     );
     expect(editDescriptionInput).toBeInTheDocument();
     const viewDescription = container.querySelector(
-      "#view-analysis-description",
+      "#save-investigation-description",
     );
     expect(viewDescription).toBeInTheDocument();
 
@@ -207,7 +212,7 @@ describe("test AnalysisOverview", () => {
     await user.click(viewDescription);
     await waitFor(() => {
       expect(axios.patch.mock.calls.length).toBe(1);
-      expect(axios.patch).toHaveBeenCalledWith(`${ANALYSIS_BASE_URI}/1`, {
+      expect(axios.patch).toHaveBeenCalledWith(`${INVESTIGATION_BASE_URI}/1`, {
         description: "test description - edited description",
       });
     });

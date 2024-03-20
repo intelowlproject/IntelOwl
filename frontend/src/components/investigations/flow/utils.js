@@ -5,9 +5,9 @@ import { JobFinalStatuses } from "../../../constants/jobConst";
 function addJobNode(
   nodes,
   job,
-  analysisId,
+  investigationId,
   refetchTree,
-  refetchAnalysis,
+  refetchInvestigation,
   isFirstLevel,
 ) {
   nodes.push({
@@ -17,11 +17,11 @@ function addJobNode(
       label: `job #${job.pk}`,
       name: job.analyzed_object_name,
       playbook: job.playbook,
-      analysis: analysisId,
+      investigation: investigationId,
       children: job.children || [],
       status: job.status,
       refetchTree,
-      refetchAnalysis,
+      refetchInvestigation,
       isFirstLevel: isFirstLevel || false,
     },
     type: "jobNode",
@@ -30,7 +30,7 @@ function addJobNode(
   // recursive call if there are children
   if (job.children) {
     job.children.forEach((child) => {
-      addJobNode(nodes, child, analysisId, refetchTree);
+      addJobNode(nodes, child, investigationId, refetchTree);
     });
   }
 }
@@ -84,23 +84,23 @@ function getLayoutedElements(nodes, edges) {
 }
 
 export function getNodesAndEdges(
-  analysisTree,
-  analysisId,
+  investigationTree,
+  investigationId,
   refetchTree,
-  refetchAnalysis,
+  refetchInvestigation,
 ) {
-  // analysis node
+  // investigation node
   const initialNode = [
     {
-      id: `analysis-${analysisId}`,
+      id: `investigation-${investigationId}`,
       position: { x: 2, y: 2 },
       data: {
-        id: analysisId,
-        label: analysisTree.name,
+        id: investigationId,
+        label: investigationTree.name,
         refetchTree,
-        refetchAnalysis,
+        refetchInvestigation,
       },
-      type: "analysisNode",
+      type: "investigationNode",
       draggable: false,
     },
   ];
@@ -111,17 +111,17 @@ export function getNodesAndEdges(
   const initialEdges = [];
   const jobsEdges = [];
 
-  if (analysisTree.jobs.length) {
-    analysisTree.jobs.forEach((job) => {
+  if (investigationTree.jobs.length) {
+    investigationTree.jobs.forEach((job) => {
       addJobNode(
         jobsNodes,
         job,
-        analysisId,
+        investigationId,
         refetchTree,
-        refetchAnalysis,
+        refetchInvestigation,
         true,
       );
-      addEdge(jobsEdges, job, "analysis", analysisId);
+      addEdge(jobsEdges, job, "investigation", investigationId);
     });
   }
 

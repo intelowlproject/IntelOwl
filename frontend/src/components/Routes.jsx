@@ -23,8 +23,8 @@ const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
 const UserConfig = React.lazy(() => import("./user/config/UserConfig"));
 const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
-const AnalysisResult = React.lazy(
-  () => import("./analysis/result/AnalysisResult"),
+const InvestigationResult = React.lazy(
+  () => import("./investigations/result/InvestigationResult"),
 );
 const History = React.lazy(() => import("./History"));
 /*
@@ -176,12 +176,12 @@ const authRoutesLazy = [
       </Suspense>
     ),
   },
-  /* Analysis */
+  /* Investigation */
   {
-    path: `/analysis/:id`,
+    path: `/investigation/:id`,
     element: (
       <Suspense fallback={<FallBackLoading />}>
-        <AnalysisResult />
+        <InvestigationResult />
       </Suspense>
     ),
   },

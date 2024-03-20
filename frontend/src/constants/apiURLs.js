@@ -4,7 +4,7 @@ export const API_BASE_URI = "/api";
 
 // intelowl core
 export const JOB_BASE_URI = `${API_BASE_URI}/jobs`;
-export const ANALYSIS_BASE_URI = `${API_BASE_URI}/analysis`;
+export const INVESTIGATION_BASE_URI = `${API_BASE_URI}/investigation`;
 export const COMMENT_BASE_URI = `${API_BASE_URI}/comments`;
 export const TAG_BASE_URI = `${API_BASE_URI}/tags`;
 export const ASK_MULTI_ANALYSIS_AVAILABILITY_URI = `${API_BASE_URI}/ask_multi_analysis_availability`;

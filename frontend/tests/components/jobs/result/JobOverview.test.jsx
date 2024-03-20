@@ -210,7 +210,7 @@ describe("test JobOverview (job report)", () => {
     ).toBeInTheDocument();
   });
 
-  test("analysis overview button", () => {
+  test("investigation overview button", () => {
     const { container } = render(
       <BrowserRouter>
         <JobOverview
@@ -272,7 +272,7 @@ describe("test JobOverview (job report)", () => {
             visualizer_reports: [],
             playbook_requested: "TestPlaybook",
             playbook_to_execute: "TestPlaybook",
-            analysis: 1,
+            investigation: 1,
           }}
         />
       </BrowserRouter>,
@@ -281,14 +281,14 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
-    const AnalysisOverviewButton = within(JobInfoCardSection).getByRole(
+    const InvestigationOverviewButton = within(JobInfoCardSection).getByRole(
       "button",
       {
-        name: "Analysis Overview",
+        name: "Investigation Overview",
       },
     );
-    expect(AnalysisOverviewButton.id).toBe("analysisOverviewBtn");
-    expect(AnalysisOverviewButton).toBeInTheDocument();
+    expect(InvestigationOverviewButton.id).toBe("investigationOverviewBtn");
+    expect(InvestigationOverviewButton).toBeInTheDocument();
   });
 
   test("move from raw to visualizer-Test page", async () => {

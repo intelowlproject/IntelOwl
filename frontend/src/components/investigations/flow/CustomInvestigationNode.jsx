@@ -4,9 +4,9 @@ import { NodeToolbar, Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
 import { Button, UncontrolledTooltip } from "reactstrap";
 import { FaSearchPlus } from "react-icons/fa";
-import { AddExistingJobPopover } from "./analysisActions";
+import { AddExistingJobPopover } from "./investigationActions";
 
-function CustomAnalysisNode({ data }) {
+function CustomInvestigationNode({ data }) {
   return (
     <>
       <NodeToolbar
@@ -14,14 +14,14 @@ function CustomAnalysisNode({ data }) {
         style={{
           background: "#000f12",
         }}
-        id={`toolbar-analysis-${data.id}`}
+        id={`toolbar-investigation-${data.id}`}
       >
         <div className="p-1 my-2 d-flex justify-content-start">
           <div>
             <Button
               className="mx-1 p-2"
               size="sm"
-              href={`/scan?analysis=${data.id}`}
+              href={`/scan?investigation=${data.id}`}
               target="_blank"
               rel="noreferrer"
               id="createJobBtn"
@@ -29,7 +29,7 @@ function CustomAnalysisNode({ data }) {
               <FaSearchPlus /> Create Job
             </Button>
             <UncontrolledTooltip placement="top" target="createJobBtn">
-              Scan a new observable or a file to add to this analysis
+              Scan a new observable or a file to add to this investigation
             </UncontrolledTooltip>
           </div>
           <AddExistingJobPopover data={data} />
@@ -37,7 +37,7 @@ function CustomAnalysisNode({ data }) {
       </NodeToolbar>
       <div
         className="react-flow__node-input"
-        id={`analysis-${data.id}`}
+        id={`investigation-${data.id}`}
         style={{
           background: "#0b2b38",
           color: "#D6D5E6",
@@ -50,15 +50,15 @@ function CustomAnalysisNode({ data }) {
       <Handle
         type="source"
         position={Position.Bottom}
-        id={`analysisHandle-${data.id}`}
+        id={`investigationHandle-${data.id}`}
         isConnectable
       />
     </>
   );
 }
 
-CustomAnalysisNode.propTypes = {
+CustomInvestigationNode.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
-export default React.memo(CustomAnalysisNode);
+export default React.memo(CustomInvestigationNode);

@@ -6,11 +6,11 @@ import { Button, Col } from "reactstrap";
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { createAnalysis } from "./analysis/result/analysisApi";
+import { createInvestigation } from "./investigations/result/investigationApi";
 
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
-const AnalysisTable = React.lazy(
-  () => import("./analysis/table/AnalysisTable"),
+const InvestigationTable = React.lazy(
+  () => import("./investigations/table/InvestigationTable"),
 );
 /*
 lazy imports to enable code splitting
@@ -33,17 +33,17 @@ const historyRoutes = [
     ),
   },
   {
-    key: "history-analysis",
-    location: "analysis",
+    key: "history-investigations",
+    location: "investigations",
     Title: () => (
-      <span id="Analysis">
+      <span id="Investigations">
         <DiGitMerge />
-        &nbsp;Analysis
+        &nbsp;Investigations
       </span>
     ),
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
-        <AnalysisTable />
+        <InvestigationTable />
       </Suspense>
     ),
   },
@@ -59,10 +59,10 @@ export default function History() {
       navigate("/scan");
     } else {
       try {
-        const analysisId = await createAnalysis();
-        if (analysisId) navigate(`/analysis/${analysisId}`);
+        const investigationId = await createInvestigation();
+        if (investigationId) navigate(`/investigation/${investigationId}`);
       } catch {
-        // handle inside createAnalysis
+        // handle inside createInvestigation
       }
     }
   };
@@ -71,7 +71,7 @@ export default function History() {
     <Col className="d-flex justify-content-end">
       <Button id="createbutton" size="sm" color="darker" onClick={onClick}>
         <BsFillPlusCircleFill />
-        &nbsp;Create {isJobsTablePage ? "job" : "analysis"}
+        &nbsp;Create {isJobsTablePage ? "job" : "investigation"}
       </Button>
     </Col>
   );

@@ -3,11 +3,11 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { AnalysisFlow } from "../../../../src/components/analysis/flow/AnalysisFlow";
+import { InvestigationFlow } from "../../../../src/components/investigations/flow/InvestigationFlow";
 
 jest.mock("reactflow/dist/style.css", () => {});
 
-describe("test AnalysisFlow", () => {
+describe("test InvestigationFlow", () => {
   // mock needed for testing flow https://reactflow.dev/learn/advanced-use/testing#using-jest
   beforeEach(() => {
     let MockObserverInstance = typeof ResizeObserver;
@@ -53,23 +53,23 @@ describe("test AnalysisFlow", () => {
     });
   });
 
-  test("AnalysisFlow - only root", () => {
+  test("InvestigationFlow - only root", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisFlow
-          analysisTree={{
+        <InvestigationFlow
+          investigationTree={{
             name: "My test",
             owner: 2,
             jobs: [],
           }}
-          analysisId={1}
+          investigationId={1}
           refetchTree={() => jest.fn()}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
         />
       </BrowserRouter>,
     );
     // Root node
-    const rootNode = container.querySelector("#analysis-1");
+    const rootNode = container.querySelector("#investigation-1");
     expect(rootNode).toBeInTheDocument();
     expect(rootNode.textContent).toBe("My test");
 
@@ -78,11 +78,11 @@ describe("test AnalysisFlow", () => {
     expect(screen.getByText("job is running")).toBeInTheDocument();
   });
 
-  test("AnalysisFlow - root and 1 child", () => {
+  test("InvestigationFlow - root and 1 child", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisFlow
-          analysisTree={{
+        <InvestigationFlow
+          investigationTree={{
             name: "My test",
             owner: 2,
             jobs: [
@@ -95,14 +95,14 @@ describe("test AnalysisFlow", () => {
               },
             ],
           }}
-          analysisId={1}
+          investigationId={1}
           refetchTree={() => jest.fn()}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
         />
       </BrowserRouter>,
     );
     // Root node
-    const rootNode = container.querySelector("#analysis-1");
+    const rootNode = container.querySelector("#investigation-1");
     expect(rootNode).toBeInTheDocument();
     expect(rootNode.textContent).toBe("My test");
 
@@ -112,11 +112,11 @@ describe("test AnalysisFlow", () => {
     expect(jobNode.textContent).toBe("test1.com");
   });
 
-  test("AnalysisFlow - root and 2 children", () => {
+  test("InvestigationFlow - root and 2 children", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisFlow
-          analysisTree={{
+        <InvestigationFlow
+          investigationTree={{
             name: "My test",
             owner: 2,
             jobs: [
@@ -136,14 +136,14 @@ describe("test AnalysisFlow", () => {
               },
             ],
           }}
-          analysisId={1}
+          investigationId={1}
           refetchTree={() => jest.fn()}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
         />
       </BrowserRouter>,
     );
     // Root node
-    const rootNode = container.querySelector("#analysis-1");
+    const rootNode = container.querySelector("#investigation-1");
     expect(rootNode).toBeInTheDocument();
     expect(rootNode.textContent).toBe("My test");
 
@@ -158,11 +158,11 @@ describe("test AnalysisFlow", () => {
     expect(secondJobNode.textContent).toBe("test2.com");
   });
 
-  test("AnalysisFlow - root and 1 child + 1 pivot", () => {
+  test("InvestigationFlow - root and 1 child + 1 pivot", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisFlow
-          analysisTree={{
+        <InvestigationFlow
+          investigationTree={{
             name: "My test",
             owner: 2,
             jobs: [
@@ -183,14 +183,14 @@ describe("test AnalysisFlow", () => {
               },
             ],
           }}
-          analysisId={1}
+          investigationId={1}
           refetchTree={() => jest.fn()}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
         />
       </BrowserRouter>,
     );
     // Root node
-    const rootNode = container.querySelector("#analysis-1");
+    const rootNode = container.querySelector("#investigation-1");
     expect(rootNode).toBeInTheDocument();
     expect(rootNode.textContent).toBe("My test");
 
@@ -205,31 +205,31 @@ describe("test AnalysisFlow", () => {
     expect(secondJobNode.textContent).toBe("test11.com");
   });
 
-  test("AnalysisFlow - root toolbar", () => {
+  test("InvestigationFlow - root toolbar", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisFlow
-          analysisTree={{
+        <InvestigationFlow
+          investigationTree={{
             name: "My test",
             owner: 2,
             jobs: [],
           }}
-          analysisId={1}
+          investigationId={1}
           refetchTree={() => jest.fn()}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
           nodesDraggable={false}
         />
       </BrowserRouter>,
     );
     // Root node
-    const rootNode = container.querySelector("#analysis-1");
+    const rootNode = container.querySelector("#investigation-1");
     expect(rootNode).toBeInTheDocument();
     expect(rootNode.textContent).toBe("My test");
 
     fireEvent.click(rootNode);
 
     // root tollbar
-    const rootTollbar = container.querySelector("#toolbar-analysis-1");
+    const rootTollbar = container.querySelector("#toolbar-investigation-1");
     expect(rootTollbar).toBeInTheDocument();
     const addJobButton = screen.getByRole("button", {
       name: "Add existing job",
@@ -237,15 +237,15 @@ describe("test AnalysisFlow", () => {
     expect(addJobButton).toBeInTheDocument();
     const createJobButton = screen.getByRole("link", { name: "Create Job" });
     expect(createJobButton).toBeInTheDocument();
-    // link to scan page with analysis id in the param
-    expect(createJobButton.href).toContain("/scan?analysis=1");
+    // link to scan page with investigation id in the param
+    expect(createJobButton.href).toContain("/scan?investigation=1");
   });
 
-  test("AnalysisFlow - job toolbar", () => {
+  test("InvestigationFlow - job toolbar", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisFlow
-          analysisTree={{
+        <InvestigationFlow
+          investigationTree={{
             name: "My test",
             owner: 2,
             jobs: [
@@ -266,15 +266,15 @@ describe("test AnalysisFlow", () => {
               },
             ],
           }}
-          analysisId={1}
+          investigationId={1}
           refetchTree={() => jest.fn()}
-          refetchAnalysis={() => jest.fn()}
+          refetchInvestigation={() => jest.fn()}
           nodesDraggable={false}
         />
       </BrowserRouter>,
     );
     // Root node
-    const rootNode = container.querySelector("#analysis-1");
+    const rootNode = container.querySelector("#investigation-1");
     expect(rootNode).toBeInTheDocument();
     expect(rootNode.textContent).toBe("My test");
 
@@ -310,7 +310,7 @@ describe("test AnalysisFlow", () => {
     const secondJobTollbar = container.querySelector("#toolbar-job-11");
     expect(secondJobTollbar).toBeInTheDocument();
     const removeSecondJobButton = container.querySelector(
-      "#analysis-removejobbtn",
+      "#investigation-removejobbtn",
     );
     expect(removeSecondJobButton).toBeNull(); // no remove button in pivot
     const linkSecondJobButton = screen.getByRole("link", { name: "Link" });

@@ -180,10 +180,14 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             if attribute not in attrs:
                 attrs[attribute] = getattr(playbook, attribute)
 
-    def validate_analysis(self, analysis: Investigation = None):
-        if analysis and not analysis.user_can_edit(self.context["request"].user):
-            raise ValidationError({"detail": "You can't create a job to this analysis"})
-        return analysis
+    def validate_investigation(self, investigation: Investigation = None):
+        if investigation and not investigation.user_can_edit(
+            self.context["request"].user
+        ):
+            raise ValidationError(
+                {"detail": "You can't create a job to this investigation"}
+            )
+        return investigation
 
     def validate(self, attrs: dict) -> dict:
         if attrs.get("playbook_requested"):
@@ -538,7 +542,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
     def save(self, parent: Job = None, **kwargs):
         jobs = super().save(**kwargs, parent=parent)
         if parent:
-            # the parent has already an analysis
+            # the parent has already an investigation
             # so we don't need to do anything because everything is already connected
             if parent.investigation:
                 return jobs
@@ -551,14 +555,14 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 investigation.jobs.add(parent)
                 investigation.start_time = parent.received_request_time
         else:
-            # if we do not have a parent but we have an analysis
-            # set analysis into running status
+            # if we do not have a parent but we have an investigation
+            # set investigation into running status
             if jobs[0].investigation:
                 investigation = jobs[0].investigation
                 investigation.status = investigation.Status.RUNNING.value
                 investigation.save()
                 return jobs
-            # if we do not have a parent or an analysis, and we have multiple jobs,
+            # if we do not have a parent or an investigation, and we have multiple jobs,
             # we are in the multiple input case
             elif len(jobs) > 1:
                 investigation = Investigation.objects.create(
@@ -896,7 +900,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
         source="playbook_to_execute",
         slug_field="name",
     )
-    analysis = rfs.SlugRelatedField(
+    investigation = rfs.SlugRelatedField(
         read_only=True,
         slug_field="pk",
     )
@@ -909,7 +913,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
             "connectors_running",
             "visualizers_running",
             "playbook_running",
-            "analysis",
+            "investigation",
         ]
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer

@@ -81,10 +81,10 @@ describe("ScanForm adavanced use", () => {
     expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
   });
 
-  test("test scan page with an analysis in the GET parameters", async () => {
+  test("test scan page with an investigation in the GET parameters", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={["/scan?analysis=1"]}>
+      <MemoryRouter initialEntries={["/scan?investigation=1"]}>
         <Routes>
           <Route path="/scan" element={<ScanForm />} />
         </Routes>
@@ -125,7 +125,7 @@ describe("ScanForm adavanced use", () => {
               connectors: {},
               visualizers: {},
             },
-            analysis: "1",
+            investigation: "1",
           },
           { headers: { "Content-Type": "application/json" } },
         ],

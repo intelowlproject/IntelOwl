@@ -12,12 +12,12 @@ import {
 
 import useTitle from "react-use/lib/useTitle";
 
-import { ANALYSIS_BASE_URI } from "../../../constants/apiURLs";
-import { analysisTableColumns } from "./analysisTableColumns";
+import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
+import { investigationTableColumns } from "./investigationTableColumns";
 
 // constants
 const toPassTableProps = {
-  columns: analysisTableColumns,
+  columns: investigationTableColumns,
   tableEmptyNode: (
     <>
       <h4>No Data</h4>
@@ -27,11 +27,11 @@ const toPassTableProps = {
 };
 
 // component
-export default function AnalysisTable() {
-  console.debug("AnalysisTable rendered!");
+export default function InvestigationTable() {
+  console.debug("InvestigationTable rendered!");
 
   // page title
-  useTitle("IntelOwl | Analysis History", { restoreOnUnmount: true });
+  useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
 
   // consume zustand store
   const { range, fromTimeIsoStr, onTimeIntervalChange } = useTimePickerStore();
@@ -39,7 +39,7 @@ export default function AnalysisTable() {
   // API/ Table
   const [data, tableNode, refetch] = useDataTable(
     {
-      url: ANALYSIS_BASE_URI,
+      url: INVESTIGATION_BASE_URI,
       params: {
         start_time__gte: fromTimeIsoStr,
       },
@@ -55,7 +55,7 @@ export default function AnalysisTable() {
     The first call is trying to update state asynchronously, 
     but the update couldn't happen when the component is unmounted
 
-    Attention! we cannot remove it: this update the analysis list after the user start a new scan
+    Attention! we cannot remove it: this update the investigation list after the user start a new scan
   */
   React.useEffect(() => {
     refetch();
@@ -67,8 +67,8 @@ export default function AnalysisTable() {
       {/* Basic */}
       <Row className="mb-2">
         <Col>
-          <h1 id="analysisHistory">
-            Analysis History&nbsp;
+          <h1 id="investigationHistory">
+            Investigation History&nbsp;
             <small className="text-muted">{data?.count} total</small>
           </h1>
         </Col>

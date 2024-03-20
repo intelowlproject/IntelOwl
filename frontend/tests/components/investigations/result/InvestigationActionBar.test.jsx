@@ -4,19 +4,19 @@ import "@testing-library/jest-dom";
 import { render, within, waitFor, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { AnalysisActionsBar } from "../../../../src/components/analysis/result/AnalysisActionBar";
-import { ANALYSIS_BASE_URI } from "../../../../src/constants/apiURLs";
+import { InvestigationActionsBar } from "../../../../src/components/investigations/result/InvestigationActionBar";
+import { INVESTIGATION_BASE_URI } from "../../../../src/constants/apiURLs";
 
 jest.mock("axios");
 
-describe("test AnalysisActionBar", () => {
+describe("test InvestigationActionsBar", () => {
   test("delete button", async () => {
     axios.delete.mockImplementation(() => Promise.resolve({ status: 204 }));
 
     const { container } = render(
       <BrowserRouter>
-        <AnalysisActionsBar
-          analysis={{
+        <InvestigationActionsBar
+          investigation={{
             id: 1,
             name: "My test",
             jobs: [1, 2],
@@ -43,7 +43,7 @@ describe("test AnalysisActionBar", () => {
 
     await waitFor(() => {
       expect(axios.delete.mock.calls.length).toBe(1);
-      expect(axios.delete).toHaveBeenCalledWith(`${ANALYSIS_BASE_URI}/1`);
+      expect(axios.delete).toHaveBeenCalledWith(`${INVESTIGATION_BASE_URI}/1`);
     });
   });
 });

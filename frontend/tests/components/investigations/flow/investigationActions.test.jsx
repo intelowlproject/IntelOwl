@@ -7,9 +7,9 @@ import userEvent from "@testing-library/user-event";
 import {
   AddExistingJobPopover,
   RemoveJob,
-} from "../../../../src/components/analysis/flow/analysisActions";
+} from "../../../../src/components/investigations/flow/investigationActions";
 import {
-  ANALYSIS_BASE_URI,
+  INVESTIGATION_BASE_URI,
   JOB_BASE_URI,
 } from "../../../../src/constants/apiURLs";
 import Toast from "../../../../src/layouts/Toast";
@@ -17,9 +17,9 @@ import Toast from "../../../../src/layouts/Toast";
 jest.mock("axios");
 
 describe("test AddExistingJobPopover", () => {
-  test("job is not part of any analysis", async () => {
+  test("job is not part of any investigation", async () => {
     axios.get.mockImplementation(() =>
-      Promise.resolve({ status: 200, data: { id: 1, analysis: null } }),
+      Promise.resolve({ status: 200, data: { id: 1, investigation: null } }),
     );
     axios.post.mockImplementation(() => Promise.resolve({ status: 200 }));
 
@@ -29,7 +29,7 @@ describe("test AddExistingJobPopover", () => {
           data={{
             id: 1,
             refetchTree: () => jest.fn(),
-            refetchAnalysis: () => jest.fn(),
+            refetchInvestigation: () => jest.fn(),
           }}
         />
         <Toast />
@@ -55,17 +55,19 @@ describe("test AddExistingJobPopover", () => {
       expect(axios.post.mock.calls.length).toBe(1);
       expect(axios.get).toHaveBeenCalledWith(`${JOB_BASE_URI}/1`);
       expect(axios.post).toHaveBeenCalledWith(
-        `${ANALYSIS_BASE_URI}/1/add_job`,
+        `${INVESTIGATION_BASE_URI}/1/add_job`,
         { job: "1" },
       );
-      const toastInfo = screen.getByText("Job #1 added to the Analysis #1");
+      const toastInfo = screen.getByText(
+        "Job #1 added to the Investigation #1",
+      );
       expect(toastInfo).toBeInTheDocument();
     });
   });
 
-  test("Job is already part of this analysis", async () => {
+  test("Job is already part of this investigation", async () => {
     axios.get.mockImplementation(() =>
-      Promise.resolve({ status: 200, data: { id: 2, analysis: 1 } }),
+      Promise.resolve({ status: 200, data: { id: 2, investigation: 1 } }),
     );
 
     const { container } = render(
@@ -74,7 +76,7 @@ describe("test AddExistingJobPopover", () => {
           data={{
             id: 1,
             refetchTree: () => jest.fn(),
-            refetchAnalysis: () => jest.fn(),
+            refetchInvestigation: () => jest.fn(),
           }}
         />
         <Toast />
@@ -99,15 +101,15 @@ describe("test AddExistingJobPopover", () => {
       expect(axios.get.mock.calls.length).toBe(1);
       expect(axios.get).toHaveBeenCalledWith(`${JOB_BASE_URI}/2`);
       const toastWarning = screen.getByText(
-        "Job is already part of this analysis",
+        "Job is already part of this investigation",
       );
       expect(toastWarning).toBeInTheDocument();
     });
   });
 
-  test("job is already part of different analysis", async () => {
+  test("job is already part of different investigation", async () => {
     axios.get.mockImplementation(() =>
-      Promise.resolve({ status: 200, data: { id: 3, analysis: 4 } }),
+      Promise.resolve({ status: 200, data: { id: 3, investigation: 4 } }),
     );
     axios.post.mockImplementation(() => Promise.resolve({ status: 200 }));
     axios.post.mockImplementation(() => Promise.resolve({ status: 200 }));
@@ -118,7 +120,7 @@ describe("test AddExistingJobPopover", () => {
           data={{
             id: 1,
             refetchTree: () => jest.fn(),
-            refetchAnalysis: () => jest.fn(),
+            refetchInvestigation: () => jest.fn(),
           }}
         />
         <Toast />
@@ -150,18 +152,20 @@ describe("test AddExistingJobPopover", () => {
       expect(axios.post.mock.calls.length).toBe(2);
       expect(axios.get).toHaveBeenCalledWith(`${JOB_BASE_URI}/3`);
       expect(axios.post).toHaveBeenCalledWith(
-        `${ANALYSIS_BASE_URI}/4/remove_job`,
+        `${INVESTIGATION_BASE_URI}/4/remove_job`,
         { job: "3" },
       );
       const toastWarning = screen.getByText(
-        "Job #3 removed from the Analysis #4",
+        "Job #3 removed from the Investigation #4",
       );
       expect(toastWarning).toBeInTheDocument();
       expect(axios.post).toHaveBeenCalledWith(
-        `${ANALYSIS_BASE_URI}/1/add_job`,
+        `${INVESTIGATION_BASE_URI}/1/add_job`,
         { job: "3" },
       );
-      const toastInfo = screen.getByText("Job #3 added to the Analysis #1");
+      const toastInfo = screen.getByText(
+        "Job #3 added to the Investigation #1",
+      );
       expect(toastInfo).toBeInTheDocument();
     });
   });
@@ -176,9 +180,9 @@ describe("test RemoveJob", () => {
         <RemoveJob
           data={{
             id: 1,
-            analysis: 3,
+            investigation: 3,
             refetchTree: () => jest.fn(),
-            refetchAnalysis: () => jest.fn(),
+            refetchInvestigation: () => jest.fn(),
           }}
         />
         <Toast />
@@ -194,10 +198,12 @@ describe("test RemoveJob", () => {
     await waitFor(() => {
       expect(axios.post.mock.calls.length).toBe(1);
       expect(axios.post).toHaveBeenCalledWith(
-        `${ANALYSIS_BASE_URI}/3/remove_job`,
+        `${INVESTIGATION_BASE_URI}/3/remove_job`,
         { job: 1 },
       );
-      const toastInfo = screen.getByText("Job #1 removed from the Analysis #3");
+      const toastInfo = screen.getByText(
+        "Job #1 removed from the Investigation #3",
+      );
       expect(toastInfo).toBeInTheDocument();
     });
   });

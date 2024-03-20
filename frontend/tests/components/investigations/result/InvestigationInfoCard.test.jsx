@@ -2,14 +2,14 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, within } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { AnalysisInfoCard } from "../../../../src/components/analysis/result/AnalysisInfoCard";
+import { InvestigationInfoCard } from "../../../../src/components/investigations/result/InvestigationInfoCard";
 
-describe("test AnalysisInfoCard (analysis report)", () => {
+describe("test InvestigationInfoCard (investigation report)", () => {
   test("metadata section", () => {
     const { container } = render(
       <BrowserRouter>
-        <AnalysisInfoCard
-          analysis={{
+        <InvestigationInfoCard
+          investigation={{
             id: 1,
             name: "My test",
             jobs: [1, 2],
@@ -25,12 +25,14 @@ describe("test AnalysisInfoCard (analysis report)", () => {
     );
 
     // metadata
-    const InfoCardSection = container.querySelector("#AnalysisInfoCardSection");
+    const InfoCardSection = container.querySelector(
+      "#InvestigationInfoCardSection",
+    );
     expect(within(InfoCardSection).getByText("My test")).toBeInTheDocument();
-    const editNameButton = container.querySelector("#edit-analysis-name");
+    const editNameButton = container.querySelector("#edit-investigation-name");
     expect(editNameButton).toBeInTheDocument();
     const InfoCardDropDown = container.querySelector(
-      "#AnalysisInfoCardDropDown",
+      "#InvestigationInfoCardDropDown",
     );
     expect(InfoCardDropDown).toBeInTheDocument();
     expect(within(InfoCardSection).getByText("Status")).toBeInTheDocument();

@@ -9,18 +9,18 @@ import { useLocation } from "react-router-dom";
 import { IconButton, Loader } from "@certego/certego-ui";
 import { StatusIcon } from "../../common/icon/StatusIcon";
 
-import { AnalysisInfoCard } from "./AnalysisInfoCard";
-import { AnalysisActionsBar } from "./AnalysisActionBar";
-import { updateAnalysis } from "./analysisApi";
-import { AnalysisFlow } from "../flow/AnalysisFlow";
-import { ANALYSIS_BASE_URI } from "../../../constants/apiURLs";
+import { InvestigationInfoCard } from "./InvestigationInfoCard";
+import { InvestigationActionsBar } from "./InvestigationActionBar";
+import { updateInvestigation } from "./investigationApi";
+import { InvestigationFlow } from "../flow/InvestigationFlow";
+import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 
-export function AnalysisOverview({
-  isRunningAnalysis,
-  analysis,
-  refetchAnalysis,
+export function InvestigationOverview({
+  isRunningInvestigation,
+  investigation,
+  refetchInvestigation,
 }) {
-  console.debug("AnalysisOverview rendered");
+  console.debug("InvestigationOverview rendered");
 
   // state
   const location = useLocation();
@@ -30,27 +30,26 @@ export function AnalysisOverview({
     )}`,
   );
 
-  // API to download analysis tree
-  const [{ data: analysisTree, loading, error }, refetchTree] = useAxios({
-    url: `${ANALYSIS_BASE_URI}/${analysis.id}/tree`,
+  // API to download investigation tree
+  const [{ data: investigationTree, loading, error }, refetchTree] = useAxios({
+    url: `${INVESTIGATION_BASE_URI}/${investigation.id}/tree`,
   });
 
-  // refetch tree after the analysis is complete
+  // refetch tree after the investigation is complete
   React.useEffect(() => {
     if (!loading) refetchTree();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRunningAnalysis]);
+  }, [isRunningInvestigation]);
 
   const [isEditing, setIsEditing] = React.useState(false);
-  const [analysisDescription, setAnalysisDescription] = React.useState(
-    analysis?.description,
-  );
+  const [investigationDescription, setInvestigationDescription] =
+    React.useState(investigation?.description);
 
-  // API to edit analysis description
-  const editAnalysisDescription = async () => {
-    if (analysis.description !== analysisDescription) {
-      const success = await updateAnalysis(analysis.id, {
-        description: analysisDescription,
+  // API to edit investigation description
+  const editInvestigationDescription = async () => {
+    if (investigation.description !== investigationDescription) {
+      const success = await updateInvestigation(investigation.id, {
+        description: investigationDescription,
       });
       if (!success) return;
     }
@@ -59,25 +58,27 @@ export function AnalysisOverview({
 
   return (
     <Container fluid className="mb-4">
-      {/* bar with analysis id and utilities buttons */}
+      {/* bar with investigation id and utilities buttons */}
       <Row
         className="g-0 d-flex-between-end align-items-center"
         id="utilitiesRow"
       >
         <Col>
           <h2>
-            <span className="me-2 text-secondary">Analysis #{analysis.id}</span>
-            <StatusIcon status={analysis.status} className="small" />
+            <span className="me-2 text-secondary">
+              Investigation #{investigation.id}
+            </span>
+            <StatusIcon status={investigation.status} className="small" />
           </h2>
         </Col>
         <Col className="d-flex justify-content-end mt-1">
-          <AnalysisActionsBar analysis={analysis} />
+          <InvestigationActionsBar investigation={investigation} />
         </Col>
       </Row>
-      {/* analysis metadata card */}
+      {/* investigation metadata card */}
       <Row className="g-0">
         <Col>
-          <AnalysisInfoCard analysis={analysis} />
+          <InvestigationInfoCard investigation={investigation} />
         </Col>
       </Row>
       <Row className="g-0 mt-3">
@@ -86,22 +87,22 @@ export function AnalysisOverview({
           {isEditing ? (
             <>
               <IconButton
-                id="view-analysis-description"
+                id="save-investigation-description"
                 Icon={BsFillCheckSquareFill}
                 size="sm"
                 color=""
                 className="text-secondary"
-                onClick={editAnalysisDescription}
+                onClick={editInvestigationDescription}
               />
               <Input
-                id="edit_analysis-input"
+                id="edit-investigation-description-input"
                 name="textArea"
                 type="textarea"
                 onChange={(event) => {
-                  setAnalysisDescription(event.target.value);
+                  setInvestigationDescription(event.target.value);
                 }}
                 placeholder="Enter a description"
-                value={analysisDescription}
+                value={investigationDescription}
                 style={{ minHeight: "200px", overflowY: "auto" }}
                 className="bg-dark"
               />
@@ -109,7 +110,7 @@ export function AnalysisOverview({
           ) : (
             <>
               <IconButton
-                id="edit-analysis-description"
+                id="edit-investigation-description"
                 Icon={MdEdit}
                 size="sm"
                 color=""
@@ -120,7 +121,7 @@ export function AnalysisOverview({
               />
               <div
                 className={`form-control bg-dark border-dark ${
-                  analysisDescription ? "text-light" : "text-gray"
+                  investigationDescription ? "text-light" : "text-gray"
                 }`}
                 style={{
                   maxHeight: "200px",
@@ -128,7 +129,7 @@ export function AnalysisOverview({
                   whiteSpace: "pre-line",
                 }}
               >
-                {analysisDescription || "No description"}
+                {investigationDescription || "No description"}
               </div>
             </>
           )}
@@ -142,11 +143,11 @@ export function AnalysisOverview({
           loading={loading}
           error={error}
           render={() => (
-            <AnalysisFlow
-              analysisTree={analysisTree}
-              analysisId={analysis.id}
+            <InvestigationFlow
+              investigationTree={investigationTree}
+              investigationId={investigation.id}
               refetchTree={refetchTree}
-              refetchAnalysis={refetchAnalysis}
+              refetchInvestigation={refetchInvestigation}
             />
           )}
         />
@@ -155,8 +156,8 @@ export function AnalysisOverview({
   );
 }
 
-AnalysisOverview.propTypes = {
-  isRunningAnalysis: PropTypes.bool.isRequired,
-  analysis: PropTypes.object.isRequired,
-  refetchAnalysis: PropTypes.func.isRequired,
+InvestigationOverview.propTypes = {
+  isRunningInvestigation: PropTypes.bool.isRequired,
+  investigation: PropTypes.object.isRequired,
+  refetchInvestigation: PropTypes.func.isRequired,
 };

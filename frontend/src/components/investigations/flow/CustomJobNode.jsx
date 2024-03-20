@@ -6,13 +6,13 @@ import { Button } from "reactstrap";
 import { AiOutlineLink } from "react-icons/ai";
 import { MdOutlineCancel } from "react-icons/md";
 
-import { removeJob } from "../result/analysisApi";
+import { removeJob } from "../result/investigationApi";
 
 function CustomJobNode({ data }) {
   const onClick = async () => {
-    const success = await removeJob(data.analysis, data.id);
+    const success = await removeJob(data.investigation, data.id);
     if (success) {
-      data.refetchAnalysis();
+      data.refetchInvestigation();
       data.refetchTree();
     }
   };
@@ -43,7 +43,7 @@ function CustomJobNode({ data }) {
           </Button>
           {data.isFirstLevel && (
             <Button
-              id="analysis-removejobbtn"
+              id="investigation-removejobbtn"
               className="mx-1 p-2"
               size="sm"
               onClick={() => onClick()}

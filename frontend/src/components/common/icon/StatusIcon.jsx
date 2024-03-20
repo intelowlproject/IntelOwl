@@ -14,7 +14,7 @@ import { RiLoader2Fill } from "react-icons/ri";
 import { UncontrolledTooltip } from "reactstrap";
 import { StatusColors } from "../../../constants/colorConst";
 import { JobFinalStatuses } from "../../../constants/jobConst";
-import { AnalysisStatuses } from "../../../constants/analysisConst";
+import { InvestigationStatuses } from "../../../constants/investigationConst";
 
 const STATUS_ICON_MAP = {
   pending: MdOutlinePending,
@@ -45,7 +45,7 @@ export function StatusIcon(props) {
   const iconClassName = classnames(`text-${color}`, className);
 
   const statuses = Object.values(JobFinalStatuses).concat(
-    Object.values(AnalysisStatuses),
+    Object.values(InvestigationStatuses),
   );
 
   return (

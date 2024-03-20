@@ -23,25 +23,29 @@ import {
 import { JobTag } from "../../common/JobTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
-import { updateAnalysis } from "./analysisApi";
+import { updateInvestigation } from "./investigationApi";
 
-export function AnalysisInfoCard({ analysis }) {
+export function InvestigationInfoCard({ investigation }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
 
   const [isEditing, setIsEditing] = React.useState(false);
-  const [analysisName, setAnalysisName] = React.useState(analysis?.name);
+  const [investigationName, setInvestigationName] = React.useState(
+    investigation?.name,
+  );
 
-  const editAnalysisName = async () => {
-    if (analysis.name !== analysisName) {
-      const success = await updateAnalysis(analysis.id, { name: analysisName });
+  const editInvestigationName = async () => {
+    if (investigation.name !== investigationName) {
+      const success = await updateInvestigation(investigation.id, {
+        name: investigationName,
+      });
       if (!success) return;
     }
     setIsEditing(false);
   };
 
   return (
-    <div id="AnalysisInfoCardSection">
+    <div id="InvestigationInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
           <Col
@@ -52,13 +56,13 @@ export function AnalysisInfoCard({ analysis }) {
             {isEditing ? (
               <>
                 <Input
-                  id="edit_analysis-input"
+                  id="edit-investigation-name-input"
                   name="textArea"
                   type="textarea"
                   onChange={(event) => {
-                    setAnalysisName(event.target.value);
+                    setInvestigationName(event.target.value);
                   }}
-                  value={analysisName}
+                  value={investigationName}
                   style={{
                     maxWidth: "600px",
                     maxHeight: "20px",
@@ -67,18 +71,18 @@ export function AnalysisInfoCard({ analysis }) {
                   className="me-2 bg-dark"
                 />
                 <IconButton
-                  id="view-analysis-name"
+                  id="save-investigation-name"
                   Icon={BsFillCheckSquareFill}
                   color=""
                   className="text-secondary px-1"
-                  onClick={editAnalysisName}
+                  onClick={editInvestigationName}
                 />
               </>
             ) : (
               <>
-                <h3 className="">{analysisName}</h3>
+                <h3 className="">{investigationName}</h3>
                 <IconButton
-                  id="edit-analysis-name"
+                  id="edit-investigation-name"
                   Icon={MdEdit}
                   color=""
                   className="text-secondary"
@@ -93,43 +97,43 @@ export function AnalysisInfoCard({ analysis }) {
             <Button
               className="bg-darker border-0"
               onClick={() => setIsOpen(!isOpen)}
-              id="AnalysisInfoCardDropDown"
+              id="InvestigationInfoCardDropDown"
             >
               <ArrowToggleIcon isExpanded={isOpen} />
             </Button>
             <UncontrolledTooltip
               placement="left"
-              target="AnalysisInfoCardDropDown"
+              target="InvestigationInfoCardDropDown"
             >
-              Toggle Analysis Metadata
+              Toggle Investigation Metadata
             </UncontrolledTooltip>
           </Col>
         </Row>
       </ContentSection>
-      <Collapse isOpen={isOpen} id="AnalysisInfoCardCollapse">
+      <Collapse isOpen={isOpen} id="InvestigationInfoCardCollapse">
         <ContentSection className="border-top-0 bg-body ps-0 pe-1 py-1">
           <ListGroup
             horizontal
             className="align-items-start flex-wrap flex-lg-nowrap"
           >
             {[
-              ["Status", <StatusTag status={analysis.status} />],
-              ["TLP", <TLPTag value={analysis.tlp} />],
+              ["Status", <StatusTag status={investigation.status} />],
+              ["TLP", <TLPTag value={investigation.tlp} />],
               [
                 "Tags",
-                analysis.tags.map(
+                investigation.tags.map(
                   (tag) =>
                     tag !== null && (
                       <JobTag key={tag.label} tag={tag} className="me-2" />
                     ),
                 ),
               ],
-              ["User", analysis.owner],
+              ["User", investigation.owner],
               [
                 "Start Time",
                 <DateHoverable
-                  id={`overview-start_time__${analysis.id}`}
-                  value={analysis.start_time}
+                  id={`overview-start_time__${investigation.id}`}
+                  value={investigation.start_time}
                   format="hh:mm:ss a MMM do, yyyy"
                 />,
               ],
@@ -146,6 +150,6 @@ export function AnalysisInfoCard({ analysis }) {
   );
 }
 
-AnalysisInfoCard.propTypes = {
-  analysis: PropTypes.object.isRequired,
+InvestigationInfoCard.propTypes = {
+  investigation: PropTypes.object.isRequired,
 };

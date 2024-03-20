@@ -60,8 +60,8 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         self.assertIsNotNone(parent_job.investigation)
         parent_job.delete()
 
-    def test__multiple_jobs_analysis(self):
-        analysis_count = Investigation.objects.count()
+    def test__multiple_jobs_investigations(self):
+        investigation_count = Investigation.objects.count()
         parent_job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -83,21 +83,21 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
             [job1.pk, job2.pk],
         )
         self.assertIsNotNone(parent_job.investigation)
-        self.assertEqual(analysis_count + 1, Investigation.objects.count())
+        self.assertEqual(investigation_count + 1, Investigation.objects.count())
         parent_job.delete()
         job1.delete()
         job2.delete()
 
-    def test__multiple_jobs_analysis_with_parent_in_analysis(self):
-        analysis = Investigation.objects.create(owner=self.user, name="test")
-        analysis_count = Investigation.objects.count()
+    def test__multiple_jobs_investigation_with_parent_in_investigation(self):
+        investigation = Investigation.objects.create(owner=self.user, name="test")
+        investigation_count = Investigation.objects.count()
         parent_job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
         )
-        analysis.jobs.set([parent_job])
-        # the parent has an analysis
+        investigation.jobs.set([parent_job])
+        # the parent has an investigation
         self.assertIsNotNone(parent_job.investigation)
         serializer = self.c._get_observable_serializer(
             ["google.com", "google2.com"], tlp="CLEAR", user=self.user
@@ -113,15 +113,15 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
             list(parent_job.get_children().values_list("pk", flat=True)),
             [job1.pk, job2.pk],
         )
-        # number of analysis should not change
-        self.assertEqual(analysis_count, Investigation.objects.count())
+        # number of investigation should not change
+        self.assertEqual(investigation_count, Investigation.objects.count())
         # same children
         self.assertCountEqual(
-            list(analysis.jobs.values_list("pk", flat=True)), [parent_job.pk]
+            list(investigation.jobs.values_list("pk", flat=True)), [parent_job.pk]
         )
         self.assertCountEqual(
             list(parent_job.get_children().values_list("pk", flat=True)),
             [job1.pk, job2.pk],
         )
         parent_job.delete()
-        analysis.delete()
+        investigation.delete()

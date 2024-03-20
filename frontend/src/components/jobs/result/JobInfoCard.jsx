@@ -36,20 +36,22 @@ export function JobInfoCard({ job }) {
       <ContentSection className="mb-0 bg-darker">
         <Row>
           <Col sm={12} md={2} className="d-flex justify-content-start">
-            {job.analysis && (
+            {job.investigation && (
               <>
                 <Button
                   className="bg-darker border-1"
-                  onClick={() => navigate(`/analysis/${job.analysis}`)}
-                  id="analysisOverviewBtn"
+                  onClick={() =>
+                    navigate(`/investigation/${job.investigation}`)
+                  }
+                  id="investigationOverviewBtn"
                 >
-                  Analysis Overview
+                  Investigation Overview
                 </Button>
                 <UncontrolledTooltip
                   placement="top"
-                  target="analysisOverviewBtn"
+                  target="investigationOverviewBtn"
                 >
-                  This job is part of the analysis #{job.analysis}
+                  This job is part of the investigation #{job.investigation}
                 </UncontrolledTooltip>
               </>
             )}

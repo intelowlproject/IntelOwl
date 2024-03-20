@@ -296,7 +296,7 @@ class DNSdb(classes.ObservableAnalyzer):
             self._config, user
         ).annotate_value_for_user(self._config, user)
         server = params.get(name="server")
-        api_version = self._get_version_endpoint(params.get(name="api_version"))
+        api_version = self._get_version_endpoint(params.get(name="api_version").value)
 
         return f"https://{server}{api_version}"
 

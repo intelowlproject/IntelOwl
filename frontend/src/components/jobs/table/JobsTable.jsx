@@ -47,7 +47,7 @@ export default function JobsTable() {
   const [initialLoading, setInitialLoading] = React.useState(true);
 
   // API/ Table
-  const [data, tableNode, refetch, , loadingTable] = useDataTable(
+  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
     {
       url: JOB_BASE_URI,
       params: {

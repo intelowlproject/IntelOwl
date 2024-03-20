@@ -49,7 +49,7 @@ urlpatterns = [
     path("", include("api_app.ingestors_manager.urls")),
     path("", include("api_app.pivots_manager.urls")),
     path("", include("api_app.playbooks_manager.urls")),
-    path("", include("api_app.analyses_manager.urls")),
+    path("", include("api_app.investigations_manager.urls")),
     # auth
     path("auth/", include("authentication.urls")),
     # certego_saas:

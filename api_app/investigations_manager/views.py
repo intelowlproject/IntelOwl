@@ -13,19 +13,19 @@ from rest_framework.viewsets import ModelViewSet
 from ..models import Job
 from ..permissions import IsObjectOwnerOrSameOrgPermission
 from ..views import ModelWithOwnershipViewSet
-from .filters import AnalysisFilter
-from .models import Analysis
-from .serializers import AnalysisSerializer, AnalysisTreeSerializer
+from .filters import InvestigationFilter
+from .models import Investigation
+from .serializers import InvestigationSerializer, InvestigationTreeSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
+class InvestigationViewSet(ModelWithOwnershipViewSet, ModelViewSet):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
-    serializer_class = AnalysisSerializer
+    serializer_class = InvestigationSerializer
     ordering = ["-start_time"]
-    queryset = Analysis.objects.all()
-    filterset_class = AnalysisFilter
+    queryset = Investigation.objects.all()
+    filterset_class = InvestigationFilter
     ordering_fields = [
         "start_time",
         "end_time",
@@ -54,29 +54,28 @@ class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
 
     @action(methods=["POST"], url_name="add_job", detail=True)
     def add_job(self, request, pk):
-        analysis: Analysis = self.get_object()
+        investigation: Investigation = self.get_object()
         job: Job = self._get_job(request)
-        if not analysis.user_can_edit(job.user):
+        if not investigation.user_can_edit(job.user):
             raise PermissionDenied(
-                "You do not have permissions to add this job to the analysis"
+                "You do not have permissions to add this job to the investigation"
             )
         if not job.is_root():
-            raise PermissionDenied("You can add to an analysis only primary jobs")
-        if job.analysis is None:
-            job.analysis = analysis
+            raise PermissionDenied("You can add to an investigation only primary jobs")
+        if job.investigation is None:
+            job.investigation = investigation
             job.save()
-            # we are possibly changing the status of the analysis
-            job.analysis.set_correct_status(save=True)
+            # we are possibly changing the status of the investigation
+            job.investigation.set_correct_status(save=True)
 
             return Response(
                 status=status.HTTP_200_OK,
-                data=AnalysisSerializer(instance=analysis).data,
+                data=InvestigationSerializer(instance=investigation).data,
             )
-
-        elif job.analysis_id == analysis.id:
+        elif job.investigation_id == investigation.id:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={"error": "Job is already part of this analysis"},
+                data={"error": "Job is already part of this investigation"},
             )
         else:
             return Response(
@@ -86,30 +85,32 @@ class AnalysisViewSet(ModelWithOwnershipViewSet, ModelViewSet):
 
     @action(methods=["POST"], url_name="remove_job", detail=True)
     def remove_job(self, request, pk):
-        analysis: Analysis = self.get_object()
+        investigation: Investigation = self.get_object()
         request: HttpRequest
         job: Job = self._get_job(request)
-        if not analysis.user_can_edit(job.user):
+        if not investigation.user_can_edit(job.user):
             raise PermissionDenied(
-                "You do not have permissions to edit this analysis with that job"
+                "You do not have permissions to edit this investigation with that job"
             )
-        if job.analysis_id != analysis.pk:
+        if job.investigation_id != investigation.pk:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={"error": f"You can't remove job {job.id} from analysis"},
+                data={"error": f"You can't remove job {job.id} from investigation"},
             )
-        job.analysis = None
+        job.investigation = None
         job.save()
-        analysis.refresh_from_db()
-        # we are possibly changing the status of the analysis
-        analysis.set_correct_status(save=True)
+        investigation.refresh_from_db()
+        # we are possibly changing the status of the investigation
+        investigation.set_correct_status(save=True)
         return Response(
-            status=status.HTTP_200_OK, data=AnalysisSerializer(instance=analysis).data
+            status=status.HTTP_200_OK,
+            data=InvestigationSerializer(instance=investigation).data,
         )
 
     @action(methods=["GET"], url_name="graph", detail=True)
     def tree(self, request, pk):
-        obj: Analysis = self.get_object()
+        obj: Investigation = self.get_object()
         return Response(
-            status=status.HTTP_200_OK, data=AnalysisTreeSerializer(instance=obj).data
+            status=status.HTTP_200_OK,
+            data=InvestigationTreeSerializer(instance=obj).data,
         )

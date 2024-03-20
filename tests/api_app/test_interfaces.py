@@ -1,5 +1,5 @@
-from api_app.analyses_manager.models import Analysis
 from api_app.interfaces import CreateJobsFromPlaybookInterface
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.job import (
@@ -34,8 +34,8 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         self.assertEqual(job.playbook_to_execute, self.c.playbook_to_execute)
         self.assertEqual(job.tlp, "CLEAR")
         self.assertEqual(job.file.read(), b"test")
-        self.assertIsNone(job.analysis)
-        self.assertIsNotNone(parent_job.analysis)
+        self.assertIsNone(job.investigation)
+        self.assertIsNotNone(parent_job.investigation)
         parent_job.delete()
 
     def test__get_observable_serializer(self):
@@ -56,18 +56,18 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         self.assertEqual(job.playbook_to_execute, self.c.playbook_to_execute)
         self.assertEqual(job.tlp, "CLEAR")
         self.assertEqual(job.observable_classification, "domain")
-        self.assertIsNone(job.analysis)
-        self.assertIsNotNone(parent_job.analysis)
+        self.assertIsNone(job.investigation)
+        self.assertIsNotNone(parent_job.investigation)
         parent_job.delete()
 
     def test__multiple_jobs_analysis(self):
-        analysis_count = Analysis.objects.count()
+        analysis_count = Investigation.objects.count()
         parent_job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
         )
-        self.assertIsNone(parent_job.analysis)
+        self.assertIsNone(parent_job.investigation)
         serializer = self.c._get_observable_serializer(
             ["google.com", "google2.com"], tlp="CLEAR", user=self.user
         )
@@ -76,21 +76,21 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         jobs = serializer.save(send_task=False, parent=parent_job)
         self.assertEqual(len(jobs), 2)
         job1, job2 = jobs
-        self.assertIsNone(job1.analysis)
-        self.assertIsNone(job2.analysis)
+        self.assertIsNone(job1.investigation)
+        self.assertIsNone(job2.investigation)
         self.assertCountEqual(
             list(parent_job.get_children().values_list("pk", flat=True)),
             [job1.pk, job2.pk],
         )
-        self.assertIsNotNone(parent_job.analysis)
-        self.assertEqual(analysis_count + 1, Analysis.objects.count())
+        self.assertIsNotNone(parent_job.investigation)
+        self.assertEqual(analysis_count + 1, Investigation.objects.count())
         parent_job.delete()
         job1.delete()
         job2.delete()
 
     def test__multiple_jobs_analysis_with_parent_in_analysis(self):
-        analysis = Analysis.objects.create(owner=self.user, name="test")
-        analysis_count = Analysis.objects.count()
+        analysis = Investigation.objects.create(owner=self.user, name="test")
+        analysis_count = Investigation.objects.count()
         parent_job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -98,7 +98,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         )
         analysis.jobs.set([parent_job])
         # the parent has an analysis
-        self.assertIsNotNone(parent_job.analysis)
+        self.assertIsNotNone(parent_job.investigation)
         serializer = self.c._get_observable_serializer(
             ["google.com", "google2.com"], tlp="CLEAR", user=self.user
         )
@@ -107,14 +107,14 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         jobs = serializer.save(send_task=False, parent=parent_job)
         self.assertEqual(len(jobs), 2)
         job1, job2 = jobs
-        self.assertIsNone(job1.analysis)
-        self.assertIsNone(job2.analysis)
+        self.assertIsNone(job1.investigation)
+        self.assertIsNone(job2.investigation)
         self.assertCountEqual(
             list(parent_job.get_children().values_list("pk", flat=True)),
             [job1.pk, job2.pk],
         )
         # number of analysis should not change
-        self.assertEqual(analysis_count, Analysis.objects.count())
+        self.assertEqual(analysis_count, Investigation.objects.count())
         # same children
         self.assertCountEqual(
             list(analysis.jobs.values_list("pk", flat=True)), [parent_job.pk]

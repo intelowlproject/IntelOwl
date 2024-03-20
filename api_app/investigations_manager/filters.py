@@ -1,11 +1,11 @@
 import rest_framework_filters as filters
 
-from api_app.analyses_manager.models import Analysis
+from api_app.investigations_manager.models import Investigation
 
 
-class AnalysisFilter(filters.FilterSet):
+class InvestigationFilter(filters.FilterSet):
     class Meta:
-        model = Analysis
+        model = Investigation
         fields = {
             "start_time": ["lte", "gte"],
             "end_time": ["lte", "gte"],

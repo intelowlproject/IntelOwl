@@ -5,16 +5,17 @@ services:
   postgres:
     image: library/postgres:16-alpine
     container_name: intelowl_postgres
-    hostname: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./env_file_postgres
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 5s
+
 
   uwsgi:
     depends_on:

@@ -16,7 +16,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.serializers import ModelSerializer
 
-from api_app.analyses_manager.models import Analysis
 from api_app.analyzers_manager.constants import ObservableTypes, TypeChoices
 from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
 from api_app.choices import TLP, ScanMode
@@ -24,6 +23,7 @@ from api_app.connectors_manager.exceptions import NotRunnableConnector
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.defaults import default_runtime
 from api_app.helpers import calculate_md5, gen_random_colorhex
+from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Tag
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import AbstractBIInterface
@@ -96,7 +96,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "tags_labels",
             "scan_mode",
             "scan_check_time",
-            "analysis",
+            "investigation",
         )
 
     md5 = rfs.HiddenField(default=None)
@@ -113,8 +113,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     )
     runtime_configuration = rfs.JSONField(required=False, write_only=True)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], required=False)
-    analysis = rfs.PrimaryKeyRelatedField(
-        queryset=Analysis.objects.all(), many=False, required=False, default=None
+    investigation = rfs.PrimaryKeyRelatedField(
+        queryset=Investigation.objects.all(), many=False, required=False, default=None
     )
     connectors_requested = rfs.SlugRelatedField(
         slug_field="name",
@@ -180,7 +180,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             if attribute not in attrs:
                 attrs[attribute] = getattr(playbook, attribute)
 
-    def validate_analysis(self, analysis: Analysis = None):
+    def validate_analysis(self, analysis: Investigation = None):
         if analysis and not analysis.user_can_edit(self.context["request"].user):
             raise ValidationError({"detail": "You can't create a job to this analysis"})
         return analysis
@@ -540,39 +540,39 @@ class MultipleJobSerializer(rfs.ListSerializer):
         if parent:
             # the parent has already an analysis
             # so we don't need to do anything because everything is already connected
-            if parent.analysis:
+            if parent.investigation:
                 return jobs
             # if we have a parent, it means we are pivoting from one job to another
             else:
-                analysis = Analysis.objects.create(
-                    name="Pivot analysis",
+                investigation = Investigation.objects.create(
+                    name="Pivot investigation",
                     owner=self.context["request"].user,
                 )
-                analysis.jobs.add(parent)
-                analysis.start_time = parent.received_request_time
+                investigation.jobs.add(parent)
+                investigation.start_time = parent.received_request_time
         else:
             # if we do not have a parent but we have an analysis
             # set analysis into running status
-            if jobs[0].analysis:
-                analysis = jobs[0].analysis
-                analysis.status = analysis.Status.RUNNING.value
-                analysis.save()
+            if jobs[0].investigation:
+                investigation = jobs[0].investigation
+                investigation.status = investigation.Status.RUNNING.value
+                investigation.save()
                 return jobs
             # if we do not have a parent or an analysis, and we have multiple jobs,
             # we are in the multiple input case
             elif len(jobs) > 1:
-                analysis = Analysis.objects.create(
-                    name="Custom analysis", owner=self.context["request"].user
+                investigation = Investigation.objects.create(
+                    name="Custom investigation", owner=self.context["request"].user
                 )
-                analysis.jobs.set(list(jobs))
-                analysis.start_time = now()
+                investigation.jobs.set(list(jobs))
+                investigation.start_time = now()
             else:
                 return jobs
-        analysis: Analysis
-        analysis.name = analysis.name + f" #{analysis.id}"
-        analysis.status = analysis.Status.RUNNING.value
-        analysis.for_organization = True
-        analysis.save()
+        investigation: Investigation
+        investigation.name = investigation.name + f" #{investigation.id}"
+        investigation.status = investigation.Status.RUNNING.value
+        investigation.for_organization = True
+        investigation.save()
         return jobs
 
     def validate(self, attrs: dict) -> dict:

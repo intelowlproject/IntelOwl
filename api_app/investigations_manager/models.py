@@ -4,15 +4,15 @@ from typing import List
 from django.conf import settings
 from django.db import models
 
-from api_app.analyses_manager.choices import AnalysisStatusChoices
-from api_app.analyses_manager.queryset import AnalysisQuerySet
 from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
+from api_app.investigations_manager.choices import InvestigationStatusChoices
+from api_app.investigations_manager.queryset import InvestigationQuerySet
 from api_app.models import ListCachable
 from certego_saas.apps.user.models import User
 
 
-class Analysis(OwnershipAbstractModel, ListCachable):
+class Investigation(OwnershipAbstractModel, ListCachable):
     name = models.CharField(max_length=100)
     description = models.TextField(default="", blank=True)
 
@@ -21,19 +21,19 @@ class Analysis(OwnershipAbstractModel, ListCachable):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="analyses",
+        related_name="investigations",
     )
     status = models.CharField(
-        choices=AnalysisStatusChoices.choices,
+        choices=InvestigationStatusChoices.choices,
         max_length=20,
-        default=AnalysisStatusChoices.CREATED.value,
+        default=InvestigationStatusChoices.CREATED.value,
     )
-    Status = AnalysisStatusChoices
+    Status = InvestigationStatusChoices
 
-    objects = AnalysisQuerySet.as_manager()
+    objects = InvestigationQuerySet.as_manager()
 
     class Meta:
-        verbose_name_plural = "analyses"
+        verbose_name_plural = "investigations"
         indexes = [models.Index(fields=["start_time"])]
 
     def __str__(self):
@@ -45,7 +45,7 @@ class Analysis(OwnershipAbstractModel, ListCachable):
 
     def user_can_edit(self, user: User) -> bool:
         if (
-            # same organization if analysis is at org level
+            # same organization if investigation is at org level
             self.for_organization
             and (
                 user.has_membership()

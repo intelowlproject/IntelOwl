@@ -7,10 +7,10 @@ export default function TableCellList(props) {
 
   return (
     <ul className="d-flex flex-column text-left" key={ulKey}>
-      {value?.sort().map((val) => (
+      {value?.sort().map((val, index) => (
         <li
           className="mb-1 pb-2"
-          key={keyPrefix ? `${keyPrefix}${val}` : val}
+          key={keyPrefix ? `${keyPrefix}${index}` : index}
           id={idPrefix ? `${idPrefix}${val}` : val}
         >
           <div className="d-flex align-items-start">

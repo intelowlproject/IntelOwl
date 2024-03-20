@@ -15,7 +15,7 @@ function addJobNode(
     data: {
       id: job.pk,
       label: `job #${job.pk}`,
-      name: job.isSample ? job.file_name : job.observable_name,
+      name: job.analyzed_object_name,
       playbook: job.playbook,
       analysis: analysisId,
       children: job.children || [],

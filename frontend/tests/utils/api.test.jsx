@@ -66,4 +66,30 @@ describe("prettify errors", () => {
       </ul>,
     );
   });
+  test("model validation error", () => {
+    const error = {
+      message: "Request failed with status code 400",
+      name: "AxiosError",
+      code: "ERR_BAD_REQUEST",
+      config: {},
+      request: {},
+      response: {
+        data: {
+          errors: {
+            test_key: ["error"],
+            name: ["This field is required.", "another error"],
+          },
+        },
+      },
+    };
+    expect(prettifyErrors(error)).toEqual(
+      <ul>
+        <strong>test_key</strong>
+        <li>error</li>
+        <strong>name</strong>
+        <li>This field is required.</li>
+        <li>another error</li>
+      </ul>,
+    );
+  });
 });

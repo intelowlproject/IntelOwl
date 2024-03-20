@@ -5,6 +5,7 @@ import { addToast } from "@certego/certego-ui";
 
 import { ANALYSIS_BASE_URI, JOB_BASE_URI } from "../../../constants/apiURLs";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
+import { prettifyErrors } from "../../../utils/api";
 
 export async function createAnalysis() {
   let success = false;
@@ -21,13 +22,7 @@ export async function createAnalysis() {
       return response.data.id;
     }
   } catch (error) {
-    addToast(
-      <span>
-        Failed. Operation: <em>create new analysis</em>
-      </span>,
-      error.parsedMsg,
-      "warning",
-    );
+    addToast("Failed to create new analysis", prettifyErrors(error), "warning");
   }
   return success;
 }
@@ -42,10 +37,8 @@ export async function deleteAnalysis(analysisId) {
     }
   } catch (error) {
     addToast(
-      <span>
-        Failed. Operation: <em>delete analysis #{analysisId}</em>
-      </span>,
-      error.parsedMsg,
+      `Failed to delete analysis #${analysisId}`,
+      prettifyErrors(error),
       "warning",
     );
   }
@@ -65,10 +58,8 @@ export async function updateAnalysis(analysisId, data) {
     }
   } catch (error) {
     addToast(
-      <span>
-        Failed. Operation: <em>update analysis #{analysisId}</em>
-      </span>,
-      error.parsedMsg,
+      `Failed to update analysis #${analysisId}`,
+      prettifyErrors(error),
       "warning",
     );
   }
@@ -95,13 +86,8 @@ export async function addJob(analysisId, jobId) {
     }
   } catch (error) {
     addToast(
-      <span>
-        Failed. Operation:{" "}
-        <em>
-          add job #{jobId} to the analysis #{analysisId}
-        </em>
-      </span>,
-      error.parsedMsg,
+      `Failed to add job #${jobId} to the analysis #${analysisId}`,
+      prettifyErrors(error),
       "warning",
     );
   }
@@ -127,13 +113,8 @@ export async function removeJob(analysisId, jobId) {
     }
   } catch (error) {
     addToast(
-      <span>
-        Failed. Operation:{" "}
-        <em>
-          remove job #{jobId} from the analysis #{analysisId}
-        </em>
-      </span>,
-      error.parsedMsg,
+      `Failed to remove job #${jobId} from the analysis #${analysisId}`,
+      prettifyErrors(error),
       "warning",
     );
   }
@@ -151,10 +132,8 @@ export async function addExistingJob(jobToAdd, currentAnalysisId) {
     }
   } catch (error) {
     addToast(
-      <span>
-        Failed. Operation: <em>add existing job</em>
-      </span>,
-      error.parsedMsg,
+      `Failed to add job #${jobToAdd} to the analysis #${currentAnalysisId}`,
+      prettifyErrors(error),
       "warning",
     );
     return success;
@@ -163,9 +142,7 @@ export async function addExistingJob(jobToAdd, currentAnalysisId) {
   // case 1 - Job is already part of this analysis
   if (jobAnalysisId === currentAnalysisId) {
     addToast(
-      <span>
-        Failed. Operation: <em>add existing job</em>
-      </span>,
+      `Failed to add job #${jobToAdd} to the analysis #${currentAnalysisId}`,
       "Job is already part of this analysis",
       "warning",
     );

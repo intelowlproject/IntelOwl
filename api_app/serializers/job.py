@@ -425,10 +425,8 @@ class JobTreeSerializer(ModelSerializer):
         model = Job
         fields = [
             "pk",
+            "analyzed_object_name",
             "pivot_config",
-            "observable_name",
-            "file_name",
-            "is_sample",
             "playbook",
             "status",
         ]
@@ -566,7 +564,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 analysis = Analysis.objects.create(
                     name="Custom analysis", owner=self.context["request"].user
                 )
-                analysis.jobs.set([job for job in jobs])
+                analysis.jobs.set(list(jobs))
                 analysis.start_time = now()
             else:
                 return jobs

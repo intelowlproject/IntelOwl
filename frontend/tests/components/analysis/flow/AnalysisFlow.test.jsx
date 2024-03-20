@@ -88,9 +88,7 @@ describe("test AnalysisFlow", () => {
             jobs: [
               {
                 pk: 10,
-                observable_name: "test1.com",
-                file_name: "",
-                is_sample: false,
+                analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
                 children: [],
@@ -124,18 +122,14 @@ describe("test AnalysisFlow", () => {
             jobs: [
               {
                 pk: 10,
-                observable_name: "test1.com",
-                file_name: "",
-                is_sample: false,
+                analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
                 children: [],
               },
               {
                 pk: 20,
-                observable_name: "test2.com",
-                file_name: "",
-                is_sample: false,
+                analyzed_object_name: "test2.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
                 children: [],
@@ -174,17 +168,13 @@ describe("test AnalysisFlow", () => {
             jobs: [
               {
                 pk: 10,
-                observable_name: "test1.com",
-                file_name: "",
-                is_sample: false,
+                analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
                 children: [
                   {
                     pk: 11,
-                    observable_name: "test11.com",
-                    file_name: "",
-                    is_sample: false,
+                    analyzed_object_name: "test11.com",
                     playbook: "Dns",
                     status: "reported_without_fails",
                     children: [],
@@ -261,17 +251,13 @@ describe("test AnalysisFlow", () => {
             jobs: [
               {
                 pk: 10,
-                observable_name: "test1.com",
-                file_name: "",
-                is_sample: false,
+                analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
                 children: [
                   {
                     pk: 11,
-                    observable_name: "test11.com",
-                    file_name: "",
-                    is_sample: false,
+                    analyzed_object_name: "test11.com",
                     playbook: "Dns",
                     status: "reported_without_fails",
                     children: [],

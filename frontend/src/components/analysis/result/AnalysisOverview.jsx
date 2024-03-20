@@ -2,7 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import useAxios from "axios-hooks";
 import { Col, Row, Container, Input } from "reactstrap";
-import { MdEdit, MdRemoveRedEye } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
+import { BsFillCheckSquareFill } from "react-icons/bs";
 import { useLocation } from "react-router-dom";
 
 import { IconButton, Loader } from "@certego/certego-ui";
@@ -82,57 +83,54 @@ export function AnalysisOverview({
       <Row className="g-0 mt-3">
         <div className="mb-2">
           <span className="fw-bold me-2 text-light">Description</span>
-          {!isEditing && (
-            <IconButton
-              id="edit-analysis-description"
-              Icon={MdEdit}
-              size="sm"
-              color=""
-              className="text-secondary"
-              onClick={() => setIsEditing(true)}
-              title="Edit description"
-              titlePlacement="top"
-            />
-          )}
-          {isEditing && (
-            <IconButton
-              id="view-analysis-description"
-              Icon={MdRemoveRedEye}
-              size="sm"
-              color=""
-              className="text-secondary"
-              onClick={editAnalysisDescription}
-              title="View description"
-              titlePlacement="top"
-            />
-          )}
-          {!isEditing && (
-            <div
-              className={`form-control bg-dark border-dark ${
-                analysisDescription ? "text-light" : "text-gray"
-              }`}
-              style={{
-                maxHeight: "200px",
-                overflowY: "auto",
-                whiteSpace: "pre-line",
-              }}
-            >
-              {analysisDescription || "No description"}
-            </div>
-          )}
-          {isEditing && (
-            <Input
-              id="edit_analysis-input"
-              name="textArea"
-              type="textarea"
-              onChange={(event) => {
-                setAnalysisDescription(event.target.value);
-              }}
-              placeholder="Enter a description"
-              value={analysisDescription}
-              style={{ minHeight: "200px", overflowY: "auto" }}
-              className="bg-dark"
-            />
+          {isEditing ? (
+            <>
+              <IconButton
+                id="view-analysis-description"
+                Icon={BsFillCheckSquareFill}
+                size="sm"
+                color=""
+                className="text-secondary"
+                onClick={editAnalysisDescription}
+              />
+              <Input
+                id="edit_analysis-input"
+                name="textArea"
+                type="textarea"
+                onChange={(event) => {
+                  setAnalysisDescription(event.target.value);
+                }}
+                placeholder="Enter a description"
+                value={analysisDescription}
+                style={{ minHeight: "200px", overflowY: "auto" }}
+                className="bg-dark"
+              />
+            </>
+          ) : (
+            <>
+              <IconButton
+                id="edit-analysis-description"
+                Icon={MdEdit}
+                size="sm"
+                color=""
+                className="text-secondary"
+                onClick={() => setIsEditing(true)}
+                title="Edit description"
+                titlePlacement="top"
+              />
+              <div
+                className={`form-control bg-dark border-dark ${
+                  analysisDescription ? "text-light" : "text-gray"
+                }`}
+                style={{
+                  maxHeight: "200px",
+                  overflowY: "auto",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {analysisDescription || "No description"}
+              </div>
+            </>
           )}
         </div>
       </Row>

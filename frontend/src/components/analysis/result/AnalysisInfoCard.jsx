@@ -10,7 +10,8 @@ import {
   UncontrolledTooltip,
   Input,
 } from "reactstrap";
-import { MdEdit, MdRemoveRedEye } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
+import { BsFillCheckSquareFill } from "react-icons/bs";
 
 import {
   ContentSection,
@@ -48,45 +49,44 @@ export function AnalysisInfoCard({ analysis }) {
             sm={12}
             md={10}
           >
-            {!isEditing && <h3 className="">{analysisName}</h3>}
-            {isEditing && (
-              <Input
-                id="edit_analysis-input"
-                name="textArea"
-                type="textarea"
-                onChange={(event) => {
-                  setAnalysisName(event.target.value);
-                }}
-                value={analysisName}
-                style={{
-                  maxWidth: "600px",
-                  maxHeight: "20px",
-                  overflowX: "scroll",
-                }}
-                className="me-2 bg-dark"
-              />
-            )}
-            {!isEditing && (
-              <IconButton
-                id="edit-analysis-name"
-                Icon={MdEdit}
-                color=""
-                className="text-secondary"
-                onClick={() => setIsEditing(true)}
-                title="Edit name"
-                titlePlacement="top"
-              />
-            )}
-            {isEditing && (
-              <IconButton
-                id="view-analysis-name"
-                Icon={MdRemoveRedEye}
-                color=""
-                className="text-secondary px-1"
-                onClick={editAnalysisName}
-                title="View name"
-                titlePlacement="top"
-              />
+            {isEditing ? (
+              <>
+                <Input
+                  id="edit_analysis-input"
+                  name="textArea"
+                  type="textarea"
+                  onChange={(event) => {
+                    setAnalysisName(event.target.value);
+                  }}
+                  value={analysisName}
+                  style={{
+                    maxWidth: "600px",
+                    maxHeight: "20px",
+                    overflowX: "scroll",
+                  }}
+                  className="me-2 bg-dark"
+                />
+                <IconButton
+                  id="view-analysis-name"
+                  Icon={BsFillCheckSquareFill}
+                  color=""
+                  className="text-secondary px-1"
+                  onClick={editAnalysisName}
+                />
+              </>
+            ) : (
+              <>
+                <h3 className="">{analysisName}</h3>
+                <IconButton
+                  id="edit-analysis-name"
+                  Icon={MdEdit}
+                  color=""
+                  className="text-secondary"
+                  onClick={() => setIsEditing(true)}
+                  title="Edit name"
+                  titlePlacement="top"
+                />
+              </>
             )}
           </Col>
           <Col sm={12} md={1} className="d-flex justify-content-end">
@@ -133,10 +133,10 @@ export function AnalysisInfoCard({ analysis }) {
                   format="hh:mm:ss a MMM do, yyyy"
                 />,
               ],
-            ].map(([key, value]) => (
-              <ListGroupItem key={key}>
-                <small className="fw-bold text-light">{key}</small>
-                <div className="bg-dark p-1 text-light">{value}</div>
+            ].map(([jobFieldName, jobFieldValue]) => (
+              <ListGroupItem key={jobFieldName}>
+                <small className="fw-bold text-light">{jobFieldName}</small>
+                <div className="bg-dark p-1 text-light">{jobFieldValue}</div>
               </ListGroupItem>
             ))}
           </ListGroup>

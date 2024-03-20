@@ -17,9 +17,9 @@ export function AnalysisActionsBar({ analysis }) {
     const sure = await areYouSureConfirmDialog(
       `delete analysis #${analysis.id}`,
     );
-    if (!sure) return Promise.reject();
+    if (!sure) return null;
     const success = await deleteAnalysis(analysis.id);
-    if (!success) return Promise.reject();
+    if (!success) return null;
     addToast("Redirecting...", null, "secondary");
     setTimeout(() => navigate(-1), 250);
     return null;

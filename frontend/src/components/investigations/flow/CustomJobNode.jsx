@@ -2,21 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { NodeToolbar, Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
-import { Button, UncontrolledTooltip } from "reactstrap";
+import { Button } from "reactstrap";
 import { AiOutlineLink } from "react-icons/ai";
-import { MdOutlineCancel } from "react-icons/md";
 
-import { removeJob } from "../result/investigationApi";
+import { RemoveJob } from "./investigationActions";
 
 function CustomJobNode({ data }) {
-  const onClick = async () => {
-    const success = await removeJob(data.investigation, data.id);
-    if (success) {
-      data.refetchInvestigation();
-      data.refetchTree();
-    }
-  };
-
   return (
     <>
       {/* Number of children */}
@@ -41,26 +32,7 @@ function CustomJobNode({ data }) {
           >
             <AiOutlineLink /> Link
           </Button>
-          {data.isFirstLevel && (
-            <>
-              <Button
-                id="investigation-removejobbtn"
-                className="mx-1 p-2"
-                size="sm"
-                onClick={() => onClick()}
-              >
-                <MdOutlineCancel color="red" /> Remove Branch
-              </Button>
-              <UncontrolledTooltip
-                target="investigation-removejobbtn"
-                placement="top"
-                fade={false}
-              >
-                Remove job #{data.id} and all its children from the
-                investigation
-              </UncontrolledTooltip>
-            </>
-          )}
+          {data.isFirstLevel && <RemoveJob data={data} />}
         </div>
         <div
           className="p-2 px-3 my-2 mx-2 d-flex flex-column bg-body"

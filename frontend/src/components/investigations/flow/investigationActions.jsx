@@ -1,6 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Input, UncontrolledPopover } from "reactstrap";
+import {
+  Button,
+  Input,
+  UncontrolledPopover,
+  UncontrolledTooltip,
+} from "reactstrap";
 import { MdOutlineCancel } from "react-icons/md";
 import { BsFillPlusCircleFill } from "react-icons/bs";
 
@@ -71,14 +76,23 @@ export function RemoveJob({ data }) {
   };
 
   return (
-    <Button
-      id="investigation-removejobbtn"
-      className="mx-1 p-2"
-      size="sm"
-      onClick={() => onClick()}
-    >
-      <MdOutlineCancel color="red" /> Remove Job
-    </Button>
+    <>
+      <Button
+        id="investigation-removejobbtn"
+        className="mx-1 p-2"
+        size="sm"
+        onClick={() => onClick()}
+      >
+        <MdOutlineCancel color="red" /> Remove Branch
+      </Button>
+      <UncontrolledTooltip
+        target="investigation-removejobbtn"
+        placement="top"
+        fade={false}
+      >
+        Remove job #{data.id} and all its children from the investigation
+      </UncontrolledTooltip>
+    </>
   );
 }
 

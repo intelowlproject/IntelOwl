@@ -297,10 +297,10 @@ describe("ScanForm adavanced use", () => {
       }
     } else {
       expect(
-        screen.getByText("Created new Job with ID(s) #5!"),
+        screen.getByText("Created new Job with ID(s) #7!"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Reported existing Job with ID(s) #6!"),
+        screen.getByText("Reported existing Job with ID(s) #8!"),
       ).toBeInTheDocument();
     }
   });

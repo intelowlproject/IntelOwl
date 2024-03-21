@@ -292,7 +292,7 @@ describe("test InvestigationFlow", () => {
     // first job tollbar
     const jobTollbar = container.querySelector("#toolbar-job-10");
     expect(jobTollbar).toBeInTheDocument();
-    const removeJobButton = screen.getByRole("button", { name: "Remove Job" });
+    const removeJobButton = screen.getByRole("button", { name: "Remove Branch" });
     expect(removeJobButton).toBeInTheDocument();
     const linkFirstJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkFirstJobButton).toBeInTheDocument();

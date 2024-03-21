@@ -171,8 +171,8 @@ describe("test AddExistingJobPopover", () => {
   });
 });
 
-describe("test RemoveJob", () => {
-  test("remove job button", async () => {
+describe("test RemoveBranch", () => {
+  test("remove branch button", async () => {
     axios.post.mockImplementation(() => Promise.resolve({ status: 200 }));
 
     render(
@@ -190,10 +190,10 @@ describe("test RemoveJob", () => {
     );
     const user = userEvent.setup();
 
-    const removeJobButton = screen.getByRole("button", { name: "Remove Job" });
-    expect(removeJobButton).toBeInTheDocument();
+    const removeBranchButton = screen.getByRole("button", { name: "Remove Branch" });
+    expect(removeBranchButton).toBeInTheDocument();
 
-    await user.click(removeJobButton);
+    await user.click(removeBranchButton);
 
     await waitFor(() => {
       expect(axios.post.mock.calls.length).toBe(1);

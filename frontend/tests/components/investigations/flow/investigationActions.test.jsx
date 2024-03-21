@@ -190,7 +190,9 @@ describe("test RemoveBranch", () => {
     );
     const user = userEvent.setup();
 
-    const removeBranchButton = screen.getByRole("button", { name: "Remove Branch" });
+    const removeBranchButton = screen.getByRole("button", {
+      name: "Remove Branch",
+    });
     expect(removeBranchButton).toBeInTheDocument();
 
     await user.click(removeBranchButton);

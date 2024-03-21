@@ -9,6 +9,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -86,6 +87,13 @@ class GreynoiseLabs(ObservableAnalyzer):
         return result
 
     @classmethod
+    def _get_observable_name(cls):
+        config = AnalyzerConfig.objects.filter(python_module=cls.python_module).first()
+        if config:
+            return config.name
+        return None
+
+    @classmethod
     def _get_auth_token(cls):
         for plugin in PluginConfig.objects.filter(
             parameter__python_module=cls.python_module,
@@ -104,7 +112,9 @@ class GreynoiseLabs(ObservableAnalyzer):
         }
 
         try:
-            logger.info("Fetching data from greynoise API (Greynoise_Labs).....")
+            logger.info(
+                f"Fetching data from greynoise API ({cls._get_observable_name()})....."
+            )
             response = requests.post(
                 headers=headers,
                 json={"query": queries["topc2s"]["query_string"]},
@@ -122,7 +132,9 @@ class GreynoiseLabs(ObservableAnalyzer):
             if not os.path.exists(db_location):
                 return False
 
-            logger.info("Data fetched from greynoise API (Greynoise_Labs).....")
+            logger.info(
+                f"Data fetched from greynoise API ({cls._get_observable_name()})....."
+            )
             return True
         except Exception as e:
             logger.exception(e)

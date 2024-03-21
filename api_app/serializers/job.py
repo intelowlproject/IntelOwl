@@ -557,7 +557,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
         else:
             # if we do not have a parent but we have an investigation
             # set investigation into running status
-            if jobs[0].investigation:
+            if len(jobs) >= 1 and jobs[0].investigation:
                 investigation = jobs[0].investigation
                 investigation.status = investigation.Status.RUNNING.value
                 investigation.save()

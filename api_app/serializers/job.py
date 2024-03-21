@@ -404,6 +404,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
     visualizers_to_execute = rfs.SlugRelatedField(
         read_only=True, slug_field="name", many=True
     )
+    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     analyzers_requested = rfs.SlugRelatedField(
         read_only=True, slug_field="name", many=True
     )

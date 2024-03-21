@@ -24,7 +24,6 @@ import {
 import { JobResultSections } from "../../../constants/miscConst";
 import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
 import { processTimeMMSS } from "../../../utils/time";
-import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import TableCell from "../../common/TableCell";
 
 export const jobTableColumns = [
@@ -199,26 +198,16 @@ export const jobTableColumns = [
     Header: "Playbook Executed",
     id: "playbook_to_execute",
     accessor: (job) => job,
-    Cell: ({ value: job }) => {
-      /* Don't move from here!
-      If playbooks is initialized in the top of the file is done before the loading in the table job
-      and does not contain data */
-      const { playbooks } = usePluginConfigurationStore.getState();
-      const playbookResults =
-        playbooks?.find((playbook) => playbook.id === job.playbook_to_execute)
-          ?.name || "Custom Analysis";
-
-      return (
-        <div className="d-flex justify-content-between">
-          <span className="d-block text-truncate">
-            <CopyToClipboardButton showOnHover text={playbookResults}>
-              {playbookResults}
-            </CopyToClipboardButton>
-          </span>
-          <PlaybookInfoPopoverIcon job={job} />
-        </div>
-      );
-    },
+    Cell: ({ value: job }) => (
+      <div className="d-flex justify-content-between">
+        <span className="d-block text-truncate">
+          <CopyToClipboardButton showOnHover text={job.playbook_to_execute}>
+            {job.playbook_to_execute}
+          </CopyToClipboardButton>
+        </span>
+        <PlaybookInfoPopoverIcon job={job} />
+      </div>
+    ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
     maxWidth: 180,

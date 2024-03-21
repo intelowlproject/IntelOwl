@@ -2,7 +2,6 @@ import React from "react";
 
 import { useAuthStore } from "../stores/useAuthStore";
 import { usePluginConfigurationStore } from "../stores/usePluginConfigurationStore";
-import initAxios from "../utils/initAxios";
 
 /**
  * Higher Order Component (HoC) -> https://reactjs.org/docs/higher-order-components.html
@@ -26,10 +25,6 @@ function withAuth(WrappedComponent) {
     const [fetchPluginsConf] = usePluginConfigurationStore(
       React.useCallback((state) => [state.hydrate], []),
     );
-
-    React.useLayoutEffect(() => {
-      initAxios();
-    }, []); // axios req & resp interceptor
 
     React.useEffect(() => {
       if (isAuthenticated) {

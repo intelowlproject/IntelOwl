@@ -10,7 +10,7 @@ plugin = {
         "health_check_schedule": None,
         "update_schedule": {
             "minute": "0",
-            "hour": "*/6",
+            "hour": "*",
             "day_of_week": "*",
             "day_of_month": "*",
             "month_of_year": "*",
@@ -19,7 +19,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "Greynoise_Labs",
-    "description": "scan an IP against the (Greynoise Labs API)[https://www.greynoise.io/] (requires authentication token obtained from cookies on greynoise website)",
+    "description": "scan an IP against the Greynoise Labs API (requires authentication token obtained from cookies on greynoise website)",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

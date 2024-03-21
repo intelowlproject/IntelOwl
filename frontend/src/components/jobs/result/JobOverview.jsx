@@ -15,7 +15,7 @@ import {
   Spinner,
 } from "reactstrap";
 
-import { GoBackButton, Loader } from "@certego/certego-ui";
+import { Loader } from "@certego/certego-ui";
 import { JSONTree } from "react-json-tree";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -66,7 +66,7 @@ export function JobOverview({
   const rawElements = React.useMemo(
     () => [
       {
-        id: "analyzer",
+        name: "analyzer",
         nav: (
           <div className="d-flex-center">
             <strong>Analyzers Report</strong>
@@ -83,7 +83,7 @@ export function JobOverview({
         report: <AnalyzersReportTable job={job} refetch={refetch} />,
       },
       {
-        id: "connector",
+        name: "connector",
         nav: (
           <div className="d-flex-center">
             <strong>Connectors Report</strong>
@@ -100,7 +100,7 @@ export function JobOverview({
         report: <ConnectorsReportTable job={job} refetch={refetch} />,
       },
       {
-        id: "pivot",
+        name: "pivot",
         nav: (
           <div className="d-flex-center">
             <strong>Pivots Report</strong>
@@ -117,7 +117,7 @@ export function JobOverview({
         report: <PivotsReportTable job={job} refetch={refetch} />,
       },
       {
-        id: "visualizer",
+        name: "visualizer",
         nav: (
           <div className="d-flex-center">
             <strong>Visualizers Report</strong>
@@ -138,7 +138,7 @@ export function JobOverview({
         report: <VisualizersReportTable job={job} refetch={refetch} />,
       },
       {
-        id: "full",
+        name: "full",
         nav: (
           <div className="d-flex-center">
             <strong>Full Report</strong>
@@ -158,7 +158,7 @@ export function JobOverview({
         ),
       },
     ],
-    [job, refetch],
+    [job],
   );
 
   // state
@@ -172,6 +172,65 @@ export function JobOverview({
   );
 
   useEffect(() => {
+    console.debug("JobOverview - check to set default visualizer");
+    let visualizerSections = [];
+    if (Object.values(JobFinalStatuses).includes(job.status)) {
+      const pageList = job.visualizer_reports.map((report) => report.name);
+      if (pageList.length > 0) {
+        visualizerSections = pageList;
+      } else {
+        visualizerSections = [NO_VISUALIZER_UI_ELEMENT_CODE];
+      }
+    } else {
+      visualizerSections = [LOADING_VISUALIZER_UI_ELEMENT_CODE];
+    }
+    console.debug(`visualizerSections: ${JSON.stringify(visualizerSections)}`);
+
+    // check visualizers have been loaded and user didn't changed page
+    if (visualizerSections !== 0 && !location.state?.userChanged) {
+      console.debug("updated visualizers");
+      if (!subSection) {
+        console.debug(
+          `[AUTO REDIRECT] navigate to visualizer: ${
+            visualizerSections[0]
+          }, encoded: ${encodeURIComponent(visualizerSections[0])}`,
+        );
+        // in case no section is selected (ex: from start scan) redirect to a visualizer
+        navigate(
+          `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
+            visualizerSections[0],
+          )}`,
+          { replace: true },
+        );
+      } else if (
+        subSection === LOADING_VISUALIZER_UI_ELEMENT_CODE &&
+        visualizerSections[0] !== LOADING_VISUALIZER_UI_ELEMENT_CODE
+      ) {
+        console.debug(
+          `[AUTO REDIRECT] navigate to visualizer: ${
+            visualizerSections[0].id
+          }, encoded: ${encodeURIComponent(visualizerSections[0])}`,
+        );
+        // in case we are in the loading page and we update the visualizer change page (if they are different from loading)
+        navigate(
+          `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
+            visualizerSections[0],
+          )}`,
+          { replace: true },
+        );
+      } else if (subSection === NO_VISUALIZER_UI_ELEMENT_CODE) {
+        console.debug("[AUTO REDIRECT] navigate to raw data - analyzer");
+        // in case there is no visualizer redirect to raw data
+        navigate(
+          `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,
+          { replace: true },
+        );
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [job]);
+
+  useEffect(() => {
     // this store the ui elements when the frontend download them
     console.debug("JobOverview - create/update visualizer components");
     console.debug(job);
@@ -183,7 +242,7 @@ export function JobOverview({
       job.visualizers_to_execute.length > 0
     ) {
       newUIElements = job.visualizer_reports.map((visualizerReport) => ({
-        id: visualizerReport.name,
+        name: visualizerReport.name,
         nav: (
           <div className="d-flex-center">
             <strong>{visualizerReport.name}</strong>
@@ -202,7 +261,7 @@ export function JobOverview({
       job.visualizers_to_execute.length > 0
     ) {
       newUIElements.push({
-        id: LOADING_VISUALIZER_UI_ELEMENT_CODE,
+        name: LOADING_VISUALIZER_UI_ELEMENT_CODE,
         nav: null,
         report: (
           <div
@@ -218,7 +277,7 @@ export function JobOverview({
     // 3) in case there are no visualizers add a "no data" visualizer
     if (job.visualizers_to_execute.length === 0) {
       newUIElements.push({
-        id: NO_VISUALIZER_UI_ELEMENT_CODE,
+        name: NO_VISUALIZER_UI_ELEMENT_CODE,
         nav: null,
         report: (
           <p className="text-center">
@@ -233,53 +292,6 @@ export function JobOverview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
-  useEffect(() => {
-    console.debug("JobOverview - check to set default visualizer");
-    // check visualizers have been loaded and user didn't changed page
-    console.debug(`Ui elements number: ${UIElements.length}`);
-    if (UIElements.length !== 0 && !location.state?.userChanged) {
-      console.debug("updated visualizers");
-      if (!subSection) {
-        console.debug(
-          `[AUTO REDIRECT] navigate to visualizer: ${
-            UIElements[0].id
-          }, encoded: ${encodeURIComponent(UIElements[0].id)}`,
-        );
-        // in case no section is selected (ex: from start scan) redirect to a visualizer
-        navigate(
-          `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
-            UIElements[0].id,
-          )}`,
-          { replace: true },
-        );
-      } else if (
-        subSection === LOADING_VISUALIZER_UI_ELEMENT_CODE &&
-        UIElements[0].id !== LOADING_VISUALIZER_UI_ELEMENT_CODE
-      ) {
-        console.debug(
-          `[AUTO REDIRECT] navigate to visualizer: ${
-            UIElements[0].id
-          }, encoded: ${encodeURIComponent(UIElements[0].id)}`,
-        );
-        // in case we are in the loading page and we update the visualizer change page (if they are different from loading)
-        navigate(
-          `/jobs/${job.id}/${JobResultSections.VISUALIZER}/${encodeURIComponent(
-            UIElements[0].id,
-          )}`,
-          { replace: true },
-        );
-      } else if (subSection === NO_VISUALIZER_UI_ELEMENT_CODE) {
-        console.debug("[AUTO REDIRECT] navigate to raw data - analyzer");
-        // in case there is no visualizer redirect to raw data
-        navigate(
-          `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].id}`,
-          { replace: true },
-        );
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [UIElements]);
-
   const elementsToShow = isSelectedUI ? UIElements : rawElements;
 
   return (
@@ -288,15 +300,17 @@ export function JobOverview({
       render={() => (
         <Container fluid>
           {/* bar with job id and utilities buttons */}
-          <Row className="g-0 d-flex-between-end" id="utilitiesRow">
+          <Row
+            className="g-0 d-flex-between-end align-items-center"
+            id="utilitiesRow"
+          >
             <Col>
-              <GoBackButton onlyIcon color="gray" />
               <h2>
                 <span className="me-2 text-secondary">Job #{job.id}</span>
                 <StatusIcon status={job.status} className="small" />
               </h2>
             </Col>
-            <Col className="d-flex justify-content-end">
+            <Col className="d-flex justify-content-end mt-1">
               <JobActionsBar job={job} />
             </Col>
           </Row>
@@ -322,7 +336,7 @@ export function JobOverview({
                     navigate(
                       `/jobs/${job.id}/${
                         JobResultSections.VISUALIZER
-                      }/${encodeURIComponent(UIElements[0].id)}`,
+                      }/${encodeURIComponent(UIElements[0].name)}`,
                       { state: { userChanged: true } },
                     )
                   }
@@ -335,7 +349,7 @@ export function JobOverview({
                   color={!isSelectedUI ? "primary" : "tertiary"}
                   onClick={() =>
                     navigate(
-                      `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].id}`,
+                      `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,
                       { state: { userChanged: true } },
                     )
                   }
@@ -354,8 +368,8 @@ export function JobOverview({
                           <NavLink
                             className={`${
                               // ignore the loading id or the "active" class create an empty block in the navbar
-                              subSection === componentsObject.id &&
-                              componentsObject.id !== ""
+                              subSection === componentsObject.name &&
+                              componentsObject.name !== ""
                                 ? "active"
                                 : ""
                             }`}
@@ -364,7 +378,7 @@ export function JobOverview({
                                 `/jobs/${
                                   job.id
                                 }/${section}/${encodeURIComponent(
-                                  componentsObject.id,
+                                  componentsObject.name,
                                 )}`,
                                 { state: { userChanged: true } },
                               )
@@ -382,8 +396,8 @@ export function JobOverview({
             <TabContent activeTab={subSection}>
               {elementsToShow.sort().map((componentsObject) => (
                 <TabPane
-                  tabId={componentsObject.id}
-                  id={`jobReportTab${componentsObject.id}`}
+                  tabId={componentsObject.name}
+                  id={`jobReportTab${componentsObject.name}`}
                 >
                   {componentsObject.report}
                 </TabPane>

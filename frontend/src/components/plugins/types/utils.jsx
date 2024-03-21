@@ -12,7 +12,11 @@ import {
   Collapse,
 } from "reactstrap";
 import { MdInfo } from "react-icons/md";
-import { BooleanIcon, ArrowToggleIcon } from "@certego/certego-ui";
+import {
+  BooleanIcon,
+  ArrowToggleIcon,
+  CopyToClipboardButton,
+} from "@certego/certego-ui";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { JobTag } from "../../common/JobTag";
 import { TLPTag } from "../../common/TLPTag";
@@ -23,6 +27,7 @@ import { parseScanCheckTime } from "../../../utils/time";
 
 export function PluginInfoCard({ pluginInfo }) {
   console.debug(`pluginInfo: ${JSON.stringify(pluginInfo)}`);
+
   return (
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
@@ -274,9 +279,17 @@ export function PlaybooksCollapse({ pluginList, pluginType_ }) {
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
       <Collapse isOpen={isOpen} id="PlaybooksCollapse">
-        <ul className="d-flex flex-column align-items-start">
+        <ul className="d-flex flex-column align-items-start p-3">
           {pluginList?.sort().map((pluginName) => (
-            <li key={pluginName}>{pluginName}</li>
+            <li className="pb-2" key={pluginName}>
+              <CopyToClipboardButton
+                showOnHover
+                text={pluginName}
+                className="d-block text-break"
+              >
+                {pluginName}
+              </CopyToClipboardButton>
+            </li>
           ))}
         </ul>
       </Collapse>

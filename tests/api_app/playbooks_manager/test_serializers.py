@@ -71,7 +71,7 @@ class PlaybookConfigSerializerTestCase(CustomTestCase):
     def test_create(self):
         pccs = PlaybookConfigSerializer(
             data={
-                "analyzers": [AnalyzerConfig.objects.first().pk],
+                "analyzers": [AnalyzerConfig.objects.first().name],
                 "connectors": [],
                 "runtime_configuration": {},
                 "pivots": [],
@@ -90,7 +90,7 @@ class PlaybookConfigSerializerTestCase(CustomTestCase):
         org = Organization.objects.create(name="test")
         pccs = PlaybookConfigSerializer(
             data={
-                "analyzers": [AnalyzerConfig.objects.first().pk],
+                "analyzers": [AnalyzerConfig.objects.first().name],
                 "connectors": [],
                 "runtime_configuration": {},
                 "pivots": [],

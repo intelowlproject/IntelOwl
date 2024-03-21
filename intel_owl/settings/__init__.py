@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     # rest framework libs
     "rest_framework",
     "rest_framework_filters",
+    "rest_framework.authtoken",
     "drf_spectacular",
     # certego libs
     "durin",
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "api_app.playbooks_manager",
     "api_app.pivots_manager",
     "api_app.ingestors_manager",
+    "api_app.investigations_manager",
     # auth
     "rest_email_auth",
     "drf_recaptcha",
@@ -47,6 +49,10 @@ INSTALLED_APPS = [
     "silk",
     # celery
     "django_celery_beat",
+    # websocket
+    "channels",
+    # tree structure
+    "treebeard",
 ]
 
 from .auth import *  # lgtm [py/polluting-import]
@@ -65,3 +71,4 @@ from .mail import *  # lgtm [py/polluting-import]
 from .rest import *  # lgtm [py/polluting-import]
 from .security import *  # lgtm [py/polluting-import]
 from .storage import *  # lgtm [py/polluting-import]
+from .websocket import *  # lgtm [py/polluting-import]

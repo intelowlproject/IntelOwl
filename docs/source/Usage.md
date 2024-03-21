@@ -207,7 +207,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `VirusTotal_v3_File`: check the file hash on VirusTotal. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
 - `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
-
+-  `Zippy_scan` : [Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated; takes in `lzma`,`zlib`,`brotli` as input based engines; `ensemble` being default.
 ##### Observable analyzers (ip, domain, url, hash)
 
 ###### Internal tools
@@ -219,6 +219,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 ###### External services
 
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
+* `BGP Ranking`: [BGP-Ranking](https://github.com/D4-project/BGP-Ranking) provides a way to collect such malicious activities, aggregate the information per ASN and provide a ranking model to rank the ASN from the most malicious to the less malicious ASN.
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `Auth0`: scan an IP against the Auth0 API
 * `BinaryEdge`: Details about an Host. List of recent events for the specified host, including details of exposed ports and services using [IP query](https://docs.binaryedge.io/api-v2/#v2queryiptarget) and return list of subdomains known from the target domains using [domain query](https://docs.binaryedge.io/api-v2/#v2querydomainssubdomaintarget)
@@ -239,6 +240,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `DNS0_rrsets_data`: Query billions of current and historical DNS resource records sets. Performs right-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DNS0_rrsets_name`: Query billions of current and historical DNS resource records sets. Performs left-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
+* `Feodo_Tracker`: [Feodo Tracker](https://feodotracker.abuse.ch/) offers various blocklists, helping network owners to protect their users from Dridex and Emotet/Heodo.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
 * `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
@@ -253,11 +255,13 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `IPApi`: Get information about IPs using [batch-endpoint](https://ip-api.com/docs/api:batch) and DNS using [DNS-endpoint](https://ip-api.com/docs/dns).
 * `IPInfo`: Location Information about an IP
+* `Ip2location`: [API Docs](https://www.ip2location.io/ip2location-documentation) IP2Location.io allows users to check IP address location in real time. (Supports both with or without key)
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in).
 * `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
@@ -265,6 +269,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MaxMindGeoIP`: extract GeoIP info for an observable
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
+* `Mmdb_server`: [Mmdb_server](https://github.com/adulau/mmdb-server) mmdb-server is an open source fast API server to lookup IP addresses for their geographic location, AS number. 
 * `Mnemonic_PassiveDNS` : Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 * `Netlas`: search an IP against [Netlas](https://netlas.io/api)
@@ -302,7 +307,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
-
+* `Validin`:[Validin](https://app.validin.com/) investigates historic and current data describing the structure and composition of the internet.
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -320,10 +325,12 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
 * `IntelX_Intelligent_Search`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `MISP`: scan an observable on a MISP instance
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 * `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify](https://yaraify.abuse.ch/)
+* `PhoneInfoga` : [PhoneInfoga](https://sundowndev.github.io/phoneinfoga/) is one of the most advanced tools to scan international phone numbers. 
 
 ##### Optional analyzers
 
@@ -351,7 +358,7 @@ The following is the list of the available connectors. You can also navigate the
 
 ### Pivots
 
-With Intel v5.2.0 we introduced the `Pivot` Plugin.
+With IntelOwl v5.2.0 we introduced the `Pivot` Plugin.
 
 Pivots are designed to create a job from another job. This plugin allows the user to set certain conditions that trigger the execution of one or more subsequent jobs, strictly connected to the first one.
 
@@ -385,7 +392,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 
 ### Ingestors
 
-With Intel v5.1.0 we introduced the `Ingestor` Plugin.
+With IntelOwl v5.1.0 we introduced the `Ingestor` Plugin.
 
 Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
@@ -425,7 +432,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 
 You can create new playbooks in different ways, based on the users you want to share them with:
 
-If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`-
+If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`.
 
 If you want share them to yourself or your organization only, you need to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
 In this way, after you have done an analysis, you can save the configuration of the Plugins you executed for re-use with a single click.
@@ -443,40 +450,53 @@ If you want to create completely new Plugins (not based on already existing pyth
 
 On the contrary, if you would like to just customize the already existing plugins, this is the place.
 
+#### SuperUser customization
+
 If you are an IntelOwl superuser, you can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at:
 - for analyzers: `/admin/analyzers_manager/analyzerconfig/`.
 - for connectors: `/admin/connectors_manager/connectorconfig/`.
 - ...and so on for all the Plugin types.
 
 The following are the most important fields that you can change without touching the source code:
-- `name`: Name of the analyzer
-- `description`: Description of the analyzer
-- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `disabled_in_organization`: you can choose to disable analyzers in some organizations only.
-- `python_module`: Python path of the class that will be executed 
-- `maximum_tlp`: see [TLP Support](#tlp-support)
-- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `routing_key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
-Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
-A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
-
+- `Name`: Name of the analyzer
+- `Description`: Description of the analyzer
+- `Disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+- `Python Module`: Python path of the class that will be executed. This should not be changed most of the times.
+- `Maximum TLP`: see [TLP Support](#tlp-support)
+- `Soft Time Limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+- `Routing Key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 For analyzers only:
-- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+- `Supported Filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+- `Not Supported Filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+- `Observable Supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
 
 For connectors only:
-- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
+- `Run on Failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
 
 For visualizers only:
-- `playbooks`: list of playbooks that trigger the specified visualizer execution.
+- `Playbooks`: list of playbooks that trigger the specified visualizer execution.
+
+Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
+A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 Changing other keys can break a plugin. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
+
+Other options can be added at the "Python module" level and not at the Plugin level. To do that, go to: `admin/api_app/pythonmodule/` and select the Python module used by the Plugin that you want to change.
+For example, the analyzer `AbuseIPDB` uses the Python module `abuseipdb.AbuseIPDB`.
+
+![img.png](../static/python_module_abuseipdb.png)
+
+Once there, you'll get this screen:
+
+![img.png](../static/abuseipdb.png)
+
+There you can change the following values:
+- `Update Schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
+- `Health Check Schedule`: if the analyzer has implemented a Health Check, you can specify the crontab schedule to check whether the service works or not.
 
 #### Parameters
 Each Plugin could have one or more parameters available to be configured. These parameters allow the users to customize the Plugin behavior.
@@ -489,14 +509,38 @@ There are 2 types of Parameters:
 To see the list of these parameters:
 
 - You can view the "Plugin" Section in IntelOwl to have a complete and updated view of all the options available
-- You can view the parameters by exploring the Django Admin Interface.
+- You can view the parameters by exploring the Django Admin Interface:
+  - `admin/api_app/parameter/`
+  - or at the very end of each Plugin configuration like `/admin/analyzers_manager/analyzerconfig/`
 
-You can change the Plugin Parameters at 4 different levels:
+You can change the Plugin Parameters at 5 different levels:
 * if you are an IntelOwl superuser, you can go in the Django Admin Interface and change the default values of the parameters for every plugin you like. This option would change the default behavior for every user in the platform.
 * if you are either Owner or Admin of an org, you can customize the default values of the parameters for every member of the organization by leveraging the GUI in the "Organization Config" section. This overrides the previous option. 
 * if you are a normal user, you can customize the default values of the parameters for your analysis only by leveraging the GUI in the "Plugin config" section. This overrides the previous option. 
 * You can choose to provide runtime configuration when requesting an analysis that will override the previous options. This override is done only for the specific analysis. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
 
+<div class="admonition note">
+<p class="admonition-title">Playbook Exception</p>
+Please remember that, if you are executing a Playbook, the "Runtime configuration" of the Playbook take precedence over the Plugin Configuration.
+</div>
+
+<div class="admonition note">
+<p class="admonition-title">Plugin Configuration Order</p>
+Due to the multiple chances that are given to customize the parameters of the Plugins that are executed, it may be easy to confuse the order and launch Plugins without the awereness of what you are doing.
+
+This is the order to define which values are used for the parameters, starting by the most important element:
+* Runtime Configuration at Time of Request.
+* Runtime Configuration of the Playbook (if a Playbook is used and the Runtime Configuration at Time of Request is empty)
+* Plugin Configuration of the User
+* Plugin Configuration of the Organization
+* Default Plugin Configuration of the Parameter
+
+
+If you are using the GUI, please remember that you can always check the Parameters before starting a "Scan" by clicking at the "Runtime configuration" ![img.png](../static/runtime_config.png) button.
+
+Example:
+![img.png](../static/runtime_config_2.png)
+</div>
 
 ### Enabling or Disabling Plugins
 By default, each available plugin is configured as either disabled or not. The majority of them are enabled by default, while others may be disabled to avoid potential problems in the application usability for first time users.

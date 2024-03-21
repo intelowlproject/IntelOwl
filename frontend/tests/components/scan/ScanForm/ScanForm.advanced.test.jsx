@@ -665,7 +665,11 @@ describe("ScanForm adavanced use", () => {
       name: "Save & Close",
     });
     expect(saveButton).toBeInTheDocument();
-    await user.click(saveButton);
+    // await 2000ms before continuing further (we need to wait the lib to update the validation)
+    await new Promise((res) => {
+      setTimeout(res, 2000);
+    });
+    user.click(saveButton);
 
     const startScanButton = screen.getByRole("button", {
       name: "Start Scan",
@@ -673,9 +677,6 @@ describe("ScanForm adavanced use", () => {
     expect(startScanButton).toBeInTheDocument();
     expect(startScanButton.className).not.toContain("disabled");
     await user.click(startScanButton);
-
-    /* IMPORTANT! Only in the test, editing and saving of the configuration 
-    were performed incorrectly so the "runtime_configuration" field is empty */
 
     await waitFor(() => {
       // no call to the API to check old analysis (one of the advanced settings)
@@ -688,13 +689,15 @@ describe("ScanForm adavanced use", () => {
             analyzers_requested: ["TEST_ANALYZER"],
             tlp: "AMBER",
             scan_mode: 1,
-            // runtime_configuration: {
-            //   analyzers: {
-            //     TEST_ANALYZER: {query_type: 'A'}
-            //   },
-            //   connectors: {},
-            //   visualizers: {},
-            // }
+            runtime_configuration: {
+              analyzers: {
+                TEST_ANALYZER: {
+                  query_type: "A",
+                },
+              },
+              connectors: {},
+              visualizers: {},
+            },
           },
           { headers: { "Content-Type": "application/json" } },
         ],
@@ -702,7 +705,66 @@ describe("ScanForm adavanced use", () => {
     });
   });
 
-  test("test multiple observables of different types", async () => {
+  test("test add multiple observables", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    // modal button
+    const multipleObservablesButton = container.querySelector(
+      `#scanform-multipleobservables-btn`,
+    );
+    expect(multipleObservablesButton).toBeInTheDocument();
+    await user.click(multipleObservablesButton);
+    // modal
+    const modalInfo = screen.getByText(
+      "Enter any text to extract observables for further lookup.",
+    );
+    expect(modalInfo).toBeInTheDocument();
+    // editable text area
+    const editableTextAreaSection = modalInfo.closest("div");
+    const editableTextArea = editableTextAreaSection.querySelector(
+      "#load_multiple_observables-textArea",
+    );
+    expect(editableTextArea).toBeInTheDocument();
+    // side section with extracted observables
+    expect(screen.getByText("No observable found.")).toBeInTheDocument();
+    // type some text
+    await user.type(editableTextArea, "1.1.1.1, test.it prova");
+    expect(
+      screen.getByRole("heading", { name: "domain:" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ip:" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "url:" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "hash:" })).toBeInTheDocument();
+    expect(screen.getByText("1.1.1.1")).toBeInTheDocument();
+    expect(screen.getByText("test.it")).toBeInTheDocument();
+
+    // extract observables
+    const extractButton = screen.getByRole("button", {
+      name: "Extract",
+    });
+    expect(extractButton).toBeInTheDocument();
+    await user.click(extractButton);
+
+    // scan page
+    const firstObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[0];
+    expect(firstObservableInputElement).toBeInTheDocument();
+    expect(firstObservableInputElement.value).toBe("test.it");
+    const secondObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[1];
+    expect(secondObservableInputElement).toBeInTheDocument();
+    expect(secondObservableInputElement.value).toBe("1.1.1.1");
+  });
+
+  test("test multiple observables of different types and remove duplicates", async () => {
     const user = userEvent.setup();
     render(
       <BrowserRouter>
@@ -725,6 +787,14 @@ describe("ScanForm adavanced use", () => {
     })[1];
     // doubled braked are required by user-event library
     await user.type(secondObservableInputElement, "1.1.1.1");
+
+    // add third element (duplicate)
+    await user.click(addNewValueButton);
+    const thirdObservableInputElement = screen.getAllByRole("textbox", {
+      name: "",
+    })[2];
+    // doubled braked are required by user-event library
+    await user.type(thirdObservableInputElement, "1.1.1.1");
 
     const startScanButton = screen.getByRole("button", { name: "Start Scan" });
     expect(startScanButton).toBeInTheDocument();

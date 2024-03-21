@@ -17,6 +17,20 @@ class IsObjectOwnerPermission(BasePermission):
         return obj_owner == request.user
 
 
+class IsObjectSameOrgPermission(BasePermission):
+    @staticmethod
+    def has_object_permission(request, view, obj):
+        return (
+            obj.owner.has_membership()
+            and request.user.has_membership()
+            and obj.owner.membership.organization_id
+            == request.user.membership.organization_id
+        )
+
+
+IsObjectOwnerOrSameOrgPermission = IsObjectSameOrgPermission | IsObjectOwnerPermission
+
+
 class IsObjectAdminPermission(BasePermission):
     @staticmethod
     def has_object_permission(request, view, obj):

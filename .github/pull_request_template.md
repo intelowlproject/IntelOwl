@@ -25,7 +25,8 @@ Please delete options that are not relevant.
     - [ ] If a File analyzer was added and it supports a mimetype which is not already supported, you added a sample of that type inside the archive `test_files.zip` and you added the default tests for that mimetype in [test_classes.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_classes.py).
     - [ ] If you created a new analyzer and it is free (does not require API keys), please add it in the `FREE_TO_USE_ANALYZERS` playbook by following [this guide](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-modify-a-plugin).
     - [ ] Check if it could make sense to add that analyzer/connector to other [freely available playbooks](https://intelowl.readthedocs.io/en/develop/Usage.html#list-of-pre-built-playbooks).
-    - [ ] I have provided the resulting raw JSON of a finished analysis and a screenshot of the results.
+    - [ ] I have provided the resulting raw JSON of a finished analysis and a screenshot of the results. 
+    - [ ] I have added that raw JSON sample to the `MockUpResponse` of the `_monkeypatch()` method. This serves us to provide a valid sample for testing.
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
 - [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
 - [ ] I have added tests for the feature/bug I solved (see `tests` folder). All the tests (new and old ones) gave 0 errors.
@@ -33,8 +34,8 @@ Please delete options that are not relevant.
 - [ ] If the GUI has been modified:
     - [ ] I have a provided a screenshot of the result in the PR.
     - [ ] I have created new frontend tests for the new component or updated existing ones.
+- [ ] After you had submitted the PR, if `DeepSource`, `Django Doctors` or other third-party linters have triggered any alerts during the CI checks, I have solved those alerts.
 
 ### Important Rules
 - If you miss to compile the Checklist properly, your PR won't be reviewed by the maintainers.
-- If your changes decrease the overall tests coverage (you will know after the Codecov CI job is done), you should add the required tests to fix the problem
 - Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review. After being reviewed and received a "change request", you should explicitly ask for a review again once you have made the requested changes.

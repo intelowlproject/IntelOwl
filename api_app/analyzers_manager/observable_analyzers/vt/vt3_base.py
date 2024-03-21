@@ -11,6 +11,7 @@ import requests
 
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.choices import ObservableClassification
 
 logger = logging.getLogger(__name__)
 
@@ -228,8 +229,19 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             self._vt_get_relationships(
                 observable_name, relationships_requested, uri, result
             )
-
-        result["link"] = f"https://www.virustotal.com/gui/{obs_clfn}/{observable_name}"
+        if self._job.observable_classification == ObservableClassification.DOMAIN.value:
+            uri_prefix = "domain"
+            uri_postfix = self._job.observable_name
+        elif self._job.observable_classification == ObservableClassification.IP.value:
+            uri_prefix = "ip-address"
+            uri_postfix = self._job.observable_name
+        elif self._job.observable_classification == ObservableClassification.URL.value:
+            uri_prefix = "url"
+            uri_postfix = self._job.sha256
+        else:  # hash
+            uri_prefix = "search"
+            uri_postfix = self._job.observable_name
+        result["link"] = f"https://www.virustotal.com/gui/{uri_prefix}/{uri_postfix}"
 
         return result
 

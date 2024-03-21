@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Generator, Type
 from django.conf import settings
 from django.contrib.postgres.expressions import ArraySubquery
 from django.core.paginator import Paginator
+from treebeard.mp_tree import MP_NodeQuerySet
 
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
@@ -44,21 +45,19 @@ class SendToBiQuerySet(models.QuerySet):
 
     @staticmethod
     def _create_index_template():
-        if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
-            name=settings.ELASTICSEARCH_BI_INDEX
-        ):
-            with open(
-                settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
-            ) as f:
-                body = json.load(f)
-                body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
-                settings.ELASTICSEARCH_CLIENT.indices.put_template(
-                    name=settings.ELASTICSEARCH_BI_INDEX, body=body
-                )
+        with open(
+            settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
+        ) as f:
+            body = json.load(f)
+            body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
+            settings.ELASTICSEARCH_CLIENT.indices.put_template(
+                name=settings.ELASTICSEARCH_BI_INDEX, body=body
+            )
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
         from elasticsearch.helpers import bulk
 
+        self._create_index_template()
         BULK_MAX_SIZE = 1000
         found_errors = False
 
@@ -84,7 +83,6 @@ class SendToBiQuerySet(models.QuerySet):
                 self.model.objects.filter(
                     pk__in=objects.values_list("pk", flat=True)
                 ).update(sent_to_bi=True)
-        self._create_index_template()
         return found_errors
 
 
@@ -113,7 +111,27 @@ class CleanOnCreateQuerySet(models.QuerySet):
         )
 
 
+class OrganizationPluginConfigurationQuerySet(models.QuerySet):
+    def filter_for_config(self, config_class, config_pk: str):
+        return self.filter(
+            content_type=config_class.get_content_type(), object_id=config_pk
+        )
+
+
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
+    def alias_disabled_in_organization(self, organization):
+        from api_app.models import OrganizationPluginConfiguration
+
+        opc = OrganizationPluginConfiguration.objects.filter(organization=organization)
+
+        return self.alias(
+            disabled_in_organization=Exists(
+                opc.filter_for_config(
+                    config_class=self.model, config_pk=OuterRef("pk")
+                ).filter(disabled=True)
+            )
+        )
+
     def annotate_runnable(self, user: User = None) -> QuerySet:
         # the plugin is runnable IF
         # - it is not disabled
@@ -121,20 +139,30 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         qs = self.filter(
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
-
         if user and user.has_membership():
-            qs = qs.exclude(
-                disabled_in_organizations=user.membership.organization,
-            )
+            qs = qs.alias_disabled_in_organization(user.membership.organization)
+            qs = qs.exclude(disabled_in_organization=True)
         return self.annotate(runnable=Exists(qs))
 
 
-class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
+class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
+    def create(self, parent=None, **kwargs):
+        if parent:
+            return parent.add_child(**kwargs)
+        return self.model.add_root(**kwargs)
+
+    def delete(self, *args, **kwargs):
+        # just to be sure to call the correct method
+        return MP_NodeQuerySet.delete(self, *args, **kwargs)
+
     @classmethod
     def _get_bi_serializer_class(cls):
-        from api_app.serializers import JobBISerializer
+        from api_app.serializers.job import JobBISerializer
 
         return JobBISerializer
+
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
 
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
@@ -196,6 +224,17 @@ class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
             ._annotate_importance_user(user)
             .annotate(importance=F("date_weight") + F("user_weight"))
         )
+
+    def running(
+        self, check_pending: bool = False, minutes_ago: int = 25
+    ) -> "JobQuerySet":
+        qs = self.exclude(
+            status__in=[status.value for status in self.model.Status.final_statuses()]
+        )
+        if not check_pending:
+            qs = qs.exclude(status=self.model.Status.PENDING.value)
+        difference = now() - datetime.timedelta(minutes=minutes_ago)
+        return qs.filter(received_request_time__lte=difference)
 
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
@@ -288,7 +327,16 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
 
 
 class AbstractReportQuerySet(SendToBiQuerySet):
-    ...
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
+
+    def filter_retryable(self):
+        return self.filter(
+            status__in=[self.model.Status.FAILED.value, self.model.Status.PENDING.value]
+        )
+
+    def get_configurations(self) -> AbstractConfigQuerySet:
+        return self.model.config.objects.filter(pk__in=self.values("config__pk"))
 
 
 class ModelWithOwnershipQuerySet:

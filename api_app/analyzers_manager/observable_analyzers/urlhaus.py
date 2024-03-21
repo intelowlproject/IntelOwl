@@ -10,8 +10,15 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 class URLHaus(classes.ObservableAnalyzer):
     base_url = "https://urlhaus-api.abuse.ch/v1/"
+    disable: bool = False  # optional
+
+    def update(self) -> bool:
+        pass
 
     def run(self):
+        if self.disable:
+            return {"disabled": True}
+
         headers = {"Accept": "application/json"}
         if self.observable_classification in [
             self.ObservableTypes.DOMAIN,

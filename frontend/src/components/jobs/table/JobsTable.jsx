@@ -3,6 +3,7 @@ import React from "react";
 import { Container, Row, Col } from "reactstrap";
 
 import {
+  Loader,
   ElasticTimePicker,
   SyncButton,
   TableHintIcon,
@@ -15,6 +16,7 @@ import { jobTableColumns } from "./jobTableColumns";
 
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { useGuideContext } from "../../../contexts/GuideContext";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 // constants
 const toPassTableProps = {
@@ -29,6 +31,10 @@ const toPassTableProps = {
 
 // component
 export default function JobsTable() {
+  const [playbooksLoading, playbooksError] = usePluginConfigurationStore(
+    (state) => [state.playbooksLoading, state.playbooksError],
+  );
+
   console.debug("JobsTable rendered!");
 
   // page title
@@ -37,8 +43,11 @@ export default function JobsTable() {
   // consume zustand store
   const { range, fromTimeIsoStr, onTimeIntervalChange } = useTimePickerStore();
 
+  // state
+  const [initialLoading, setInitialLoading] = React.useState(true);
+
   // API/ Table
-  const [data, tableNode, refetch] = useDataTable(
+  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
     {
       url: JOB_BASE_URI,
       params: {
@@ -51,6 +60,10 @@ export default function JobsTable() {
     toPassTableProps,
   );
 
+  React.useEffect(() => {
+    if (!loadingTable) setInitialLoading(false);
+  }, [loadingTable]);
+
   const { guideState, setGuideState } = useGuideContext();
 
   React.useEffect(() => {
@@ -62,45 +75,46 @@ export default function JobsTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* This useEffect cause an error in local development (axios CanceledError) because it is called twice.
-    The first call is trying to update state asynchronously, 
-    but the update couldn't happen when the component is unmounted
-
-    Attention! we cannot remove it: this update the job list after the user start a new scan
-  */
   React.useEffect(() => {
-    refetch();
+    if (!initialLoading) refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialLoading]);
 
   return (
-    <Container fluid>
-      {/* Basic */}
-      <Row className="mb-2">
-        <Col>
-          <h1 id="jobsHistory">
-            Jobs History&nbsp;
-            <small className="text-muted">{data?.count} total</small>
-          </h1>
-        </Col>
-        <Col className="align-self-center">
-          <ElasticTimePicker
-            className="float-end"
-            size="sm"
-            defaultSelected={range}
-            onChange={onTimeIntervalChange}
-          />
-        </Col>
-      </Row>
-      {/* Actions */}
-      <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
-        <TableHintIcon />
-        <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
-      </div>
-      <div style={{ height: "80vh", overflow: "scroll" }}>
-        {/* Table */}
-        {tableNode}
-      </div>
-    </Container>
+    // this loader is required to correctly get the name of the playbook executed
+    <Loader
+      loading={playbooksLoading}
+      error={playbooksError}
+      render={() => (
+        <Container fluid>
+          {/* Basic */}
+          <Row className="mb-2">
+            <Col>
+              <h1 id="jobsHistory">
+                Jobs History&nbsp;
+                <small className="text-muted">{data?.count} total</small>
+              </h1>
+            </Col>
+            <Col className="align-self-center">
+              <ElasticTimePicker
+                className="float-end"
+                size="sm"
+                defaultSelected={range}
+                onChange={onTimeIntervalChange}
+              />
+            </Col>
+          </Row>
+          {/* Actions */}
+          <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
+            <TableHintIcon />
+            <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
+          </div>
+          <div style={{ height: "80vh", overflowY: "scroll" }}>
+            {/* Table */}
+            {tableNode}
+          </div>
+        </Container>
+      )}
+    />
   );
 }

@@ -7,9 +7,9 @@ from pathlib import PosixPath
 import requests
 from billiard.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
-from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import cached_property
+from requests import HTTPError
 
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from certego_saas.apps.user.models import User
@@ -80,11 +80,10 @@ class Plugin(metaclass=ABCMeta):
     def __repr__(self):
         return f"({self.__class__.__name__}, job: #{self.job_id})"
 
-    def _get_params(self, runtime_configuration: typing.Dict) -> typing.Dict:
-        return self._config.read_params(self._user, runtime_configuration)
-
     def config(self, runtime_configuration: typing.Dict):
-        for param, value in self._get_params(runtime_configuration).items():
+        for param, value in self._config.read_params(
+            self._user, runtime_configuration
+        ).items():
             attribute_name = f"_{param.name}" if param.is_secret else param.name
             setattr(self, attribute_name, value)
             logger.debug(
@@ -133,6 +132,13 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
+        if isinstance(e, HTTPError):
+            if (
+                e.response
+                and hasattr(e.response, "status_code")
+                and e.response.status_code == 429
+            ):
+                self.disable_for_rate_limit()
         if settings.STAGE_CI:
             raise e
 
@@ -233,38 +239,56 @@ class Plugin(metaclass=ABCMeta):
     def update(cls) -> bool:
         raise NotImplementedError("No update implemented")
 
-    def health_check(self, user: User = None) -> bool:
-        for param in (
-            self._config.parameters.filter(
-                Q(name__startswith="url") | Q(name__startswith="_url")
-            )
-            .annotate_configured(self._config, user)
+    def _get_health_check_url(self, user: User = None) -> typing.Optional[str]:
+        params = (
+            self._config.parameters.annotate_configured(self._config, user)
             .annotate_value_for_user(self._config, user)
-        ):
+            .filter(name__icontains="url")
+        )
+        for param in params:
             if not param.configured or not param.value:
                 continue
             url = param.value
             logger.info(
                 f"Url retrieved to verify is {param.name} for plugin {self.name}"
             )
+            return url
+        return None
 
-            if url.startswith("http"):
-                logger.info(f"Checking url {url} for plugin {self.name}")
-                if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-                    return True
-                try:
-                    # momentarily set this to False to
-                    # avoid fails for https services
-                    requests.head(url, timeout=10, verify=False)
-                except (
-                    requests.exceptions.ConnectionError,
-                    requests.exceptions.Timeout,
-                ) as e:
-                    logger.info(
-                        f"Health check failed: url {url}"
-                        f" for plugin {self.name}. Error: {e}"
-                    )
-                    return False
-                else:
-                    return True
+    def health_check(self, user: User = None) -> bool:
+        url = self._get_health_check_url(user)
+        if url and url.startswith("http"):
+            if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+                return True
+            logger.info(f"Checking url {url} for plugin {self.name}")
+            try:
+                # momentarily set this to False to
+                # avoid fails for https services
+                requests.head(url, timeout=10, verify=False)
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+            ) as e:
+                logger.info(
+                    f"Health check failed: url {url}"
+                    f" for plugin {self.name}. Error: {e}"
+                )
+                return False
+            else:
+                return True
         raise NotImplementedError()
+
+    def disable_for_rate_limit(self):
+        if self._user.has_membership():
+            org_configuration = self._config.get_or_create_org_configuration(
+                self._user.membership.organization
+            )
+            if org_configuration.rate_limit_timeout is not None:
+                org_configuration.disable_for_rate_limit()
+            else:
+                logger.warning(
+                    f"You are trying to disable {self.name}"
+                    " for rate limit without specifying a timeout."
+                )
+        else:
+            logger.info(f"User {self._user.username} is not in organization.")

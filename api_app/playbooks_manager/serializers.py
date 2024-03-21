@@ -11,28 +11,44 @@ from api_app.models import Tag
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.fields import DayDurationField
 from api_app.playbooks_manager.models import PlaybookConfig
-from api_app.serializers import ModelWithOwnershipSerializer, TagSerializer
+from api_app.serializers import ModelWithOwnershipSerializer
+from api_app.serializers.job import TagSerializer
+from api_app.serializers.plugin import AbstractConfigSerializerForMigration
+
+
+class PlaybookConfigSerializerForMigration(AbstractConfigSerializerForMigration):
+    analyzers = rfs.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    connectors = rfs.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    pivots = rfs.SlugRelatedField(slug_field="name", many=True, read_only=True)
+
+    class Meta:
+        model = PlaybookConfig
+        exclude = AbstractConfigSerializerForMigration.Meta.exclude
 
 
 class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     class Meta:
         model = PlaybookConfig
-        exclude = ["disabled_in_organizations"]
+        fields = rfs.ALL_FIELDS
 
     type = rfs.ListField(child=rfs.CharField(read_only=True), read_only=True)
-    analyzers = rfs.PrimaryKeyRelatedField(
+    analyzers = rfs.SlugRelatedField(
         many=True,
         queryset=AnalyzerConfig.objects.all(),
         required=True,
         allow_empty=False,
+        slug_field="name",
     )
-    connectors = rfs.PrimaryKeyRelatedField(
-        many=True, queryset=ConnectorConfig.objects.all(), required=True
+    connectors = rfs.SlugRelatedField(
+        many=True,
+        queryset=ConnectorConfig.objects.all(),
+        required=True,
+        slug_field="name",
     )
     pivots = rfs.SlugRelatedField(
         many=True, queryset=PivotConfig.objects.all(), required=True, slug_field="name"
     )
-    visualizers = rfs.PrimaryKeyRelatedField(read_only=True, many=True)
+    visualizers = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
 
     runtime_configuration = rfs.DictField(required=True)
 

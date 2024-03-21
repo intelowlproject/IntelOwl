@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.16 as backend-build
+FROM python:3.11.7 as backend-build
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
@@ -23,19 +23,20 @@ ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 ARG PYELASTIC_VERSION=7.4.1
-ARG PYCTI_VERSION=5.10.0
+ARG PYCTI_VERSION=5.12.29
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
+    ${LOG_PATH}/asgi \
     /opt/deploy/files_required /opt/deploy/files_required/yara /opt/deploy/configuration
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
 # apache2-utils is required to execute htpasswd
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat \
-    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
+    && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
+    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
@@ -64,6 +65,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/django_auth_ldap.log ${LOG_PATH}/django/django_errors.log \
     && touch ${LOG_PATH}/django/certego_saas.log ${LOG_PATH}/django/certego_saas_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
+    && touch ${LOG_PATH}/asgi/daphne.log \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local \
@@ -82,4 +84,3 @@ COPY --from=frontend-build /build /var/www/reactapp
 # so we have to set the home env variable to allow to reate its directory
 ENV HOME ${PYTHONPATH}
 
-HEALTHCHECK --interval=10s --timeout=2s --start-period=90s --retries=5 CMD nc -z localhost 8001 || exit 1

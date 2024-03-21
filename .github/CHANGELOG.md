@@ -2,6 +2,21 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v6.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.0)
+This release contains an upgrade to both Python and Postgres versions:
+
+Python has been updated from version `3.9` to version `3.11`. This does not require any change for the user.
+
+Postgres has been updated from version `12` to version `16`. This update requires to apply a [migration procedure](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-version-6) before you can safely upgrade your IntelOwl application.
+
+**Breaking Changes**
+
+Support for multiple jobs with multiple playbooks has been removed. Every IOC in the request will be processed by a single playbook. 
+
+
+
+
+
 ## [v5.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.3)
 
 This release mainly contains bug fixing, dependencies upgrades and adjustments.

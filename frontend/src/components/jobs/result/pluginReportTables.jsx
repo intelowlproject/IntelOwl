@@ -85,9 +85,9 @@ const tableProps = {
       maxWidth: 125,
       Cell: ({ value: plugin }) => (
         <div>
-          <DateHoverable noHover value={plugin?.start_time} format="pp" />
+          <DateHoverable value={plugin?.start_time} format="pp" />
           &nbsp;<span className="fw-bold text-muted">-</span>&nbsp;
-          <DateHoverable noHover value={plugin?.end_time} format="pp" />
+          <DateHoverable value={plugin?.end_time} format="pp" />
           &nbsp;
           <DateHoverable noHover value={plugin?.end_time} format="(z)" />
         </div>
@@ -144,7 +144,7 @@ export function ConnectorsReportTable({ job, refetch }) {
   );
 }
 export function PivotsReportTable({ job, refetch }) {
-  console.debug("ConnectorsReportTable rendered");
+  console.debug("PivotsReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
@@ -156,7 +156,7 @@ export function PivotsReportTable({ job, refetch }) {
   );
 }
 export function VisualizersReportTable({ job, refetch }) {
-  console.debug("AnalyzersReportTable rendered");
+  console.debug("VisualizersReportTable rendered");
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable

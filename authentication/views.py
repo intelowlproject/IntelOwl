@@ -11,14 +11,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect
-from django_user_agents.utils import get_user_agent
-from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.utils import extend_schema as add_docs
-from durin import views as durin_views
-from durin.models import Client
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -34,6 +31,7 @@ from .serializers import (
     EmailVerificationSerializer,
     LoginSerializer,
     RegistrationSerializer,
+    TokenSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -82,19 +80,16 @@ class ResendVerificationView(
     throttle_classes: List = [POSTUserRateThrottle]
 
 
-class LoginView(durin_views.LoginView, RecaptchaV2Mixin):
+class LoginView(RecaptchaV2Mixin):
+    authentication_classes: List = []
+    permission_classes: List = []
+    throttle_classes: List = [POSTUserRateThrottle]
+
     @staticmethod
     def validate_and_return_user(request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return serializer.validated_data["user"]
-
-    @staticmethod
-    def get_client_obj(request) -> Client:
-        user_agent = get_user_agent(request)
-        client_name = str(user_agent)
-        client, _ = Client.objects.get_or_create(name=client_name)
-        return client
 
     def post(self, request, *args, **kwargs):
         try:
@@ -102,17 +97,10 @@ class LoginView(durin_views.LoginView, RecaptchaV2Mixin):
         except AssertionError:
             # it will raise this bcz `serializer_class` is not defined
             pass
-        response = super().post(request, *args, **kwargs)
-        uname = request.user.username
-        logger.info(f"LoginView: received request from '{uname}'.")
-        if request.user.is_superuser:
-            try:
-                # pass admin user's session
-                login(request, request.user)
-                logger.info(f"administrator:'{uname}' was logged in.")
-            except Exception:
-                logger.exception(f"administrator:'{uname}' login failed.")
-        return response
+        user = self.validate_and_return_user(request=request)
+        logger.info(f"perform_login received request from '{user.username}''.")
+        login(request, user)
+        return Response()
 
 
 class ChangePasswordView(APIView):
@@ -142,35 +130,14 @@ class ChangePasswordView(APIView):
         return Response({"message": "Password changed successfully"})
 
 
-class LogoutView(durin_views.LogoutView):
-    def post(self, request, *args, **kwargs):
-        uname = request.user.username
-        logger.info(f"perform_logout received request from '{uname}''.")
-        if request.user.is_superuser:
-            try:
-                logout(request)
-                logger.info(f"administrator: '{uname}' was logged out.")
-            except Exception:
-                logger.exception(f"administrator: '{uname}' session logout failed.")
-        return super().post(request, format=None)
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
 
-
-APIAccessTokenView = durin_views.APIAccessTokenView
-TokenSessionsViewSet = durin_views.TokenSessionsViewSet
-
-
-class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
-    target_class = "durin.auth.CachedTokenAuthentication"
-    name = "durinAuth"
-
-    @staticmethod
-    def get_security_definition(auto_schema):
-        return {
-            "type": "apiKey",
-            "in": "header",
-            "name": "Authorization",
-            "description": "Token-based authentication with required prefix: Token",
-        }
+    def post(self, request, *args, **kwargs):  # skipcq: PYL-R0201
+        user = request.user
+        logger.info(f"perform_logout received request from '{user.username}''.")
+        logout(request)
+        return Response()
 
 
 @add_docs(
@@ -216,22 +183,16 @@ class GoogleLoginCallbackView(LoginView):
                 email=user_email, username=user_name, password=None
             )
 
-    def get(self, *args, **kwargs):
-        return self.post(*args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
-        response = super().post(*args, **kwargs)
-        token = response.data["token"]
+    def post(self, request, *args, **kwargs):
+        user = self.validate_and_return_user(request=request)
+        logger.info(f"perform_login received request from '{user.username}''.")
+        login(request, user)
         # Uncomment this for local testing
-        # return redirect(f"http://localhost:3001/login?token={token}")
-        return redirect(self.request.build_absolute_uri(f"/login?token={token}"))
-
-    @staticmethod
-    def get_post_response_data(request, token_obj) -> dict:
-        data = {
-            "token": token_obj.token,
-        }
-        return data
+        # return redirect("http://localhost/login")
+        return redirect(self.request.build_absolute_uri("/login"))
 
 
 @api_view(["get"])
@@ -275,3 +236,41 @@ def checkConfiguration(request):
     return Response(
         status=status.HTTP_200_OK, data={"errors": errors} if errors else {}
     )
+
+
+class APIAccessTokenView(APIView):
+    """
+    - ``GET`` -> get token-client pair info
+    - ``POST`` -> create and get token-client pair info
+    - ``DELETE`` -> delete existing API access token
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        try:
+            instance = Token.objects.get(user__pk=self.request.user.pk)
+        except Token.DoesNotExist:
+            raise NotFound()
+
+        return instance
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        logger.info(f" user {request.user} request the API token")
+        serializer = TokenSerializer(instance)
+        return Response(serializer.data)
+
+    def post(self, request):  # skipcq: PYL-R0201
+        username = request.user.username
+        logger.info(f"user {username} send a request to create the API token")
+        serializer = TokenSerializer(data={}, context={"user": request.user})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        logger.info(f"user {request.user} send a request to delete the API token")
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

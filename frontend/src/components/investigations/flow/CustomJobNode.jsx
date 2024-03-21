@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { NodeToolbar, Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
-import { Button } from "reactstrap";
+import { Button, UncontrolledTooltip } from "reactstrap";
 import { AiOutlineLink } from "react-icons/ai";
 import { MdOutlineCancel } from "react-icons/md";
 
@@ -42,14 +42,24 @@ function CustomJobNode({ data }) {
             <AiOutlineLink /> Link
           </Button>
           {data.isFirstLevel && (
-            <Button
-              id="investigation-removejobbtn"
-              className="mx-1 p-2"
-              size="sm"
-              onClick={() => onClick()}
-            >
-              <MdOutlineCancel color="red" /> Remove Job
-            </Button>
+            <>
+              <Button
+                id="investigation-removejobbtn"
+                className="mx-1 p-2"
+                size="sm"
+                onClick={() => onClick()}
+              >
+                <MdOutlineCancel color="red" /> Remove Branch
+              </Button>
+              <UncontrolledTooltip
+                target="investigation-removejobbtn"
+                placement="top"
+                fade={false}
+              >
+                Remove job #{data.id} and all its children from the
+                investigation
+              </UncontrolledTooltip>
+            </>
           )}
         </div>
         <div

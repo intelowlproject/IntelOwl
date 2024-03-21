@@ -568,7 +568,10 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 investigation = Investigation.objects.create(
                     name="Custom investigation", owner=self.context["request"].user
                 )
-                investigation.jobs.set(list(jobs))
+                for job in jobs:
+                    job: Job
+                    job.investigation = investigation
+                    job.save()
                 investigation.start_time = now()
             else:
                 return jobs

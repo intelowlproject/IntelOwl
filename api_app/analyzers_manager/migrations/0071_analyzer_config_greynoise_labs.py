@@ -8,7 +8,13 @@ from django.db.models.fields.related_descriptors import (
 plugin = {
     "python_module": {
         "health_check_schedule": None,
-        "update_schedule": None,
+        "update_schedule": {
+            "minute": "0",
+            "hour": "*",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
         "module": "greynoise_labs.GreynoiseLabs",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },

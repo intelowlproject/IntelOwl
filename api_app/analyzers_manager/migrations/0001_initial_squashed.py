@@ -6,7 +6,6 @@ import django.db.models.deletion
 import django.utils.timezone
 from django.db import migrations, models
 
-import api_app.defaults
 import api_app.fields
 import api_app.validators
 

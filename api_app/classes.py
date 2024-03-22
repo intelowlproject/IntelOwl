@@ -135,13 +135,12 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
-        if isinstance(e, HTTPError):
-            if (
-                e.response
-                and hasattr(e.response, "status_code")
-                and e.response.status_code == 429
-            ):
-                self.disable_for_rate_limit()
+        if isinstance(e, HTTPError) and (
+            e.response
+            and hasattr(e.response, "status_code")
+            and e.response.status_code == 429
+        ):
+            self.disable_for_rate_limit()
         if settings.STAGE_CI:
             raise e
 

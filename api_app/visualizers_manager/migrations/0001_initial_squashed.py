@@ -6,55 +6,11 @@ import django.db.models.deletion
 import django.utils.timezone
 from django.db import migrations, models
 
-import api_app.defaults
-import api_app.validators
 import api_app.visualizers_manager.validators
-
-# Functions from the following migrations need manual copying.
-# Move them and any dependencies into this file, then update the
-# RunPython operations to refer to the local versions:
-# api_app.visualizers_manager.migrations.00011_dns_visualizer
-# api_app.visualizers_manager.migrations.0002_datamigration
-# api_app.visualizers_manager.migrations.0005_visualizerconfig_disabled_in_org
-# api_app.visualizers_manager.migrations.0007_auto_20230308_1623
-# api_app.visualizers_manager.migrations.0008_parent_playbook_foreign_key
-# api_app.visualizers_manager.migrations.0009_remove_parent_playbook
-# api_app.visualizers_manager.migrations.0013_params
-# api_app.visualizers_manager.migrations.0018_visualizer_config
-# api_app.visualizers_manager.migrations.0019_dns_visualizer_change
-# api_app.visualizers_manager.migrations.0020_visualizer_config
-# api_app.visualizers_manager.migrations.0022_remove_visualizerconfig_analyzers_and_more
 
 
 class Migration(migrations.Migration):
     initial = True
-    replaces = [
-        # ("visualizers_manager", "0001_initial"),
-        # ("visualizers_manager", "0002_datamigration"),
-        # ("visualizers_manager", "0003_auto_20230301_1415"),
-        # ("visualizers_manager", "0004_alter_visualizerreport_report"),
-        # ("visualizers_manager", "0005_visualizerconfig_disabled_in_org"),
-        # ("visualizers_manager", "0006_alter_visualizerreport_job"),
-        # ("visualizers_manager", "0007_auto_20230308_1623"),
-        # ("visualizers_manager", "0008_parent_playbook_foreign_key"),
-        # ("visualizers_manager", "0009_remove_parent_playbook"),
-        # ("visualizers_manager", "00010_remove_runtime_configuration"),
-        # ("visualizers_manager", "00011_dns_visualizer"),
-        # (
-        #     "visualizers_manager",
-        #     "0012_alter_visualizerconfig_disabled_in_organizations_and_more",
-        # ),
-        # ("visualizers_manager", "0013_params"),
-        # ("visualizers_manager", "0014_alter_visualizerreport_report"),
-        # ("visualizers_manager", "0015_alter_visualizerreport_unique_together"),
-        # ("visualizers_manager", "0016_visualizerreport_name"),
-        # ("visualizers_manager", "0017_alter_visualizerreport_options"),
-        # ("visualizers_manager", "0018_visualizer_config"),
-        # ("visualizers_manager", "0019_dns_visualizer_change"),
-        # ("visualizers_manager", "0020_visualizer_config"),
-        # ("visualizers_manager", "0021_alter_visualizerconfig_options"),
-        # ("visualizers_manager", "0022_remove_visualizerconfig_analyzers_and_more"),
-    ]
 
     dependencies = [
         ("api_app", "0001_1_initial_squashed"),

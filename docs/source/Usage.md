@@ -2,7 +2,7 @@
 
 This page includes the most important things to know and understand when using IntelOwl.
 
-- [Client](#client)
+- [How to interact with IntelOwl](#how-to-interact-with-intelowl)
 - [Plugins Framework](#plugins-framework)
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
@@ -572,4 +572,7 @@ Things to know about the framework:
 If you want to add a job to an Investigation, you should click to the root block of the Investigation (see following image):
 
 ![img_1.png](../static/add_job_to_investigation.png)
+
+
+
 

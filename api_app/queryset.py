@@ -265,7 +265,8 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
                 .visible_for_user_owned(user)
-                .values("value")[:1]
+                .values("value")[:1],
+                output_field=JSONField(),
             )
         )
 
@@ -281,10 +282,10 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 )
                 .visible_for_user_by_org(user)
                 .values("value")[:1],
-                output_field=JSONField(null=True, blank=True),
+                output_field=JSONField(),
             )
             if user and user.has_membership()
-            else Value(None, output_field=JSONField(null=True, blank=True)),
+            else Value(None, output_field=JSONField()),
         )
 
     def _alias_default_value(self, config: "PythonConfig") -> "ParameterQuerySet":
@@ -297,7 +298,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 )
                 .default_values()
                 .values("value")[:1],
-                output_field=JSONField(null=True, blank=True),
+                output_field=JSONField(),
             )
         )
 
@@ -307,7 +308,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         return self.alias(
             runtime_value=Value(
                 runtime_config.get(F("name"), None),
-                output_field=JSONField(null=True, blank=True),
+                output_field=JSONField(),
             )
         )
 
@@ -316,24 +317,31 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
             return self.alias(
                 test_value=Value(
                     None,
-                    output_field=JSONField(null=True, blank=True),
                 )
             )
-        return self.alias(
+        return self.annotate(
             test_value=Case(
-                When(name__icontains="url", then=Value("https://intelowl.com")),
-                When(name="pdns_credentials", then=Value("user|pwd")),
-                When(name__contains="test", then=Value(None)),
-                When(type=ParamTypes.INT.value, then=Value(10)),
-                default=Value("test"),
-                output_field=JSONField(null=True, blank=True),
+                When(
+                    name__icontains="url",
+                    then=Value("https://intelowl.com", output_field=JSONField()),
+                ),
+                When(
+                    name="pdns_credentials",
+                    then=Value("user|pwd", output_field=JSONField()),
+                ),
+                When(name__contains="test", then=Value(None, output_field=JSONField())),
+                When(
+                    type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())
+                ),
+                default=Value("test", output_field=JSONField()),
+                output_field=JSONField(),
             )
         )
 
     def annotate_value_for_user(
         self, config: "PythonConfig", user: User = None, runtime_config=None
     ) -> "ParameterQuerySet":
-        return (
+        res = (
             self.prefetch_related("values")
             ._alias_owner_value_for_user(config, user)
             ._alias_org_value_for_user(config, user)
@@ -348,12 +356,26 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 # 4. (if TEST environment) test value
                 # 5. default value
                 value=Case(
-                    When(runtime_value__isnull=False, then=F("runtime_value")),
-                    When(owner_value__isnull=False, then=F("owner_value")),
-                    When(org_value__isnull=False, then=F("org_value")),
-                    When(test_value__isnull=False, then=F("test_value")),
-                    default=F("default_value"),
-                    output_field=JSONField(null=True, blank=True),
+                    When(
+                        runtime_value__isnull=False,
+                        then=Cast(F("runtime_value"), output_field=JSONField()),
+                    ),
+                    When(
+                        owner_value__isnull=False,
+                        then=Cast(F("owner_value"), output_field=JSONField()),
+                    ),
+                    When(
+                        org_value__isnull=False,
+                        then=Cast(F("org_value"), output_field=JSONField()),
+                    ),
+                    # Yeah, I can't use isnull=False here
+                    # because _reasons_ of the JsonField in conjunction with the Case clause
+                    When(
+                        ~Q(test_value__exact=None),
+                        then=Cast(F("test_value"), output_field=JSONField()),
+                    ),
+                    default=Cast(F("default_value"), output_field=JSONField()),
+                    output_field=JSONField(),
                 ),
                 is_from_org=Case(
                     When(
@@ -366,6 +388,8 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 ),
             )
         )
+        print(res.query)
+        return res
 
 
 class AbstractReportQuerySet(SendToBiQuerySet):

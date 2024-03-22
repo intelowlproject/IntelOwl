@@ -330,7 +330,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 When(
                     type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())
                 ),
-                default=Value(F("default_value"), output_field=JSONField()),
+                default="default_value",
                 output_field=JSONField(),
             )
         )

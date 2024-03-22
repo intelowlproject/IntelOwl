@@ -81,14 +81,17 @@ class Plugin(metaclass=ABCMeta):
         return f"({self.__class__.__name__}, job: #{self.job_id})"
 
     def config(self, runtime_configuration: typing.Dict):
-        for param, value in self._config.read_params(
+        self.__parameters = self._config.read_configured_params(
             self._user, runtime_configuration
-        ).items():
-            attribute_name = f"_{param.name}" if param.is_secret else param.name
-            setattr(self, attribute_name, value)
+        )
+        for parameter in self.__parameters:
+            attribute_name = (
+                f"_{parameter.name}" if parameter.is_secret else parameter.name
+            )
+            setattr(self, attribute_name, parameter.value)
             logger.debug(
                 f"Adding to {self.__class__.__name__} "
-                f"param {attribute_name} with value {value} "
+                f"param {attribute_name} with value {parameter.value} "
             )
 
     def before_run(self):

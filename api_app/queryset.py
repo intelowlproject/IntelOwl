@@ -33,7 +33,7 @@ from django.db.models.functions import Cast, Coalesce
 from django.db.models.lookups import Exact
 from django.utils.timezone import now
 
-from api_app.choices import TLP
+from api_app.choices import TLP, ParamTypes
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
 
@@ -280,10 +280,11 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
                 .visible_for_user_by_org(user)
-                .values("value")[:1]
+                .values("value")[:1],
+                output_field=JSONField(null=True, blank=True),
             )
             if user and user.has_membership()
-            else Value(None, output_field=JSONField()),
+            else Value(None, output_field=JSONField(null=True, blank=True)),
         )
 
     def _alias_default_value(self, config: "PythonConfig") -> "ParameterQuerySet":
@@ -295,27 +296,68 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
                 .default_values()
-                .values("value")[:1]
+                .values("value")[:1],
+                output_field=JSONField(null=True, blank=True),
+            )
+        )
+
+    def _alias_runtime_config(self, runtime_config=None):
+        if not runtime_config:
+            runtime_config = {}
+        return self.alias(
+            runtime_value=Value(
+                runtime_config.get(F("name"), None),
+                output_field=JSONField(null=True, blank=True),
+            )
+        )
+
+    def _alias_for_test(self):
+        if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
+            return self.alias(
+                test_value=Value(
+                    None,
+                    output_field=JSONField(null=True, blank=True),
+                )
+            )
+        return self.alias(
+            test_value=Case(
+                When(name__icontains="url", then=Value("https://intelowl.com")),
+                When(name="pdns_credentials", then=Value("user|pwd")),
+                When(name__contains="test", then=Value(None)),
+                When(type=ParamTypes.INT.value, then=Value(10)),
+                default=Value("test"),
+                output_field=JSONField(null=True, blank=True),
             )
         )
 
     def annotate_value_for_user(
-        self, config: "PythonConfig", user: User = None
+        self, config: "PythonConfig", user: User = None, runtime_config=None
     ) -> "ParameterQuerySet":
         return (
             self.prefetch_related("values")
             ._alias_owner_value_for_user(config, user)
             ._alias_org_value_for_user(config, user)
             ._alias_default_value(config)
+            ._alias_runtime_config(runtime_config)
+            ._alias_for_test()
             # importance order
             .annotate(
+                # 1. runtime
+                # 2. owner
+                # 3. organization
+                # 4. (if TEST environment) test value
+                # 5. default value
                 value=Case(
+                    When(runtime_value__isnull=False, then=F("runtime_value")),
                     When(owner_value__isnull=False, then=F("owner_value")),
                     When(org_value__isnull=False, then=F("org_value")),
+                    When(test_value__isnull=False, then=F("test_value")),
                     default=F("default_value"),
+                    output_field=JSONField(null=True, blank=True),
                 ),
                 is_from_org=Case(
                     When(
+                        runtime_value__isnull=True,
                         org_value__isnull=True,
                         owner_value__isnull=False,
                         then=Value(True),

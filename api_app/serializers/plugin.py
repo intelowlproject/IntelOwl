@@ -209,7 +209,7 @@ class PythonConfigListSerializer(rfs.ListSerializer):
                 "missing_secrets": parameter_required_not_configured,
             }
             logger.info(f"Setting cache {cache_name}")
-            cache.set(cache_name, plugin_representation, timeout=24 * 7)
+            cache.set(cache_name, plugin_representation, timeout=60 * 60 * 24 * 7)
         return cache.get(cache_name)
 
     def to_representation(self, data):

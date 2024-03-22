@@ -330,7 +330,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 When(
                     type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())
                 ),
-                default="default_value",
+                default=Value("test", output_field=JSONField()),
                 output_field=JSONField(),
             )
         )
@@ -350,8 +350,9 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 # 1. runtime
                 # 2. owner
                 # 3. organization
-                # 4. (if TEST environment) test value
-                # 5. default value
+                # 4. default value
+                # 5. (if TEST environment) test value
+                # 5. (if NOT TEST environment) None
                 value=Case(
                     When(
                         runtime_value__isnull=False,
@@ -365,14 +366,11 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                         org_value__isnull=False,
                         then=Cast(F("org_value"), output_field=JSONField()),
                     ),
-                    # Yeah, I can't use isnull=False here
-                    # because _reasons_ of the JsonField in conjunction with
-                    # the Case clause
                     When(
-                        ~Q(test_value__exact=None),
-                        then=Cast(F("test_value"), output_field=JSONField()),
+                        default_value__isnull=False,
+                        then=Cast(F("default_value"), output_field=JSONField()),
                     ),
-                    default=Cast(F("default_value"), output_field=JSONField()),
+                    default=Cast(F("test_value"), output_field=JSONField()),
                     output_field=JSONField(),
                 ),
                 is_from_org=Case(

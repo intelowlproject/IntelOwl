@@ -11,53 +11,9 @@ import api_app.defaults
 import api_app.fields
 import api_app.validators
 
-# Functions from the following migrations need manual copying.
-# Move them and any dependencies into this file, then update the
-# RunPython operations to refer to the local versions:
-# api_app.playbooks_manager.migrations.0004_datamigration
-# api_app.playbooks_manager.migrations.0005_static_analysis
-# api_app.playbooks_manager.migrations.0006_rename_static_analysis
-# api_app.playbooks_manager.migrations.0007_fix_static_analysis
-# api_app.playbooks_manager.migrations.0008_fix_free_to_use_playbook
-# api_app.playbooks_manager.migrations.0010_domain_reputation_playbook
-# api_app.playbooks_manager.migrations.0011_fix_static_analysis
-# api_app.playbooks_manager.migrations.0012_ip_reputation_playbook
-# api_app.playbooks_manager.migrations.0014_remove_old_playbook
-# api_app.playbooks_manager.migrations.0015_dns_playbook
-# api_app.playbooks_manager.migrations.0018_playbookconfig_scan_check_time_and_more
-# api_app.playbooks_manager.migrations.0019_update_static_analysis
-# api_app.playbooks_manager.migrations.0022_add_dns0_to_free_playbook
-
 
 class Migration(migrations.Migration):
     initial = True
-    replaces = [
-        # ("playbooks_manager", "0001_initial"),
-        # ("playbooks_manager", "0002_alter_cachedplaybook_job"),
-        # ("playbooks_manager", "0003_playbook"),
-        # ("playbooks_manager", "0004_datamigration"),
-        # ("playbooks_manager", "0005_static_analysis"),
-        # ("playbooks_manager", "0006_rename_static_analysis"),
-        # ("playbooks_manager", "0007_fix_static_analysis"),
-        # ("playbooks_manager", "0008_fix_free_to_use_playbook"),
-        # ("playbooks_manager", "0009_alter_playbookconfig_name"),
-        # ("playbooks_manager", "0010_domain_reputation_playbook"),
-        # ("playbooks_manager", "0011_fix_static_analysis"),
-        # ("playbooks_manager", "0012_ip_reputation_playbook"),
-        # ("playbooks_manager", "0013_alter_playbookconfig_options"),
-        # ("playbooks_manager", "0014_remove_old_playbook"),
-        # ("playbooks_manager", "0015_dns_playbook"),
-        # ("playbooks_manager", "0016_playbookconfig_disabled_in_organizations"),
-        # ("playbooks_manager", "0017_playbookconfig_pivots"),
-        # ("playbooks_manager", "0018_playbookconfig_scan_check_time_and_more"),
-        # ("playbooks_manager", "0019_update_static_analysis"),
-        # (
-        #     "playbooks_manager",
-        #     "0020_playbookconfig_for_organization_playbookconfig_owner_and_more",
-        # ),
-        # ("playbooks_manager", "0021_alter_playbookconfig_name_and_more"),
-        # ("playbooks_manager", "0022_add_dns0_to_free_playbook"),
-    ]
 
     dependencies = [
         ("api_app", "0001_1_initial_squashed"),

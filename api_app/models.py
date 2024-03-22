@@ -652,20 +652,6 @@ class Parameter(models.Model):
             config: PythonConfig
             config.refresh_cache_keys()
 
-    def get_valid_value_for_test(self):
-        if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
-            raise PluginConfig.DoesNotExist
-        if "url" in self.name:
-            return "https://intelowl.com"
-        elif "pdns_credentials" == self.name:
-            return "user|pwd"
-        elif "test" in self.name:
-            raise PluginConfig.DoesNotExist
-        elif self.type == ParamTypes.INT.value:
-            return 10
-        else:
-            return "test"
-
     @cached_property
     def config_class(self) -> Type["PythonConfig"]:
         return self.python_module.python_class.config_model
@@ -1128,10 +1114,8 @@ class PythonConfig(AbstractConfig):
 
     def _get_params(self, user: User, runtime_configuration: Dict) -> Dict[str, Any]:
         return {
-            parameter.name: value
-            for parameter, value in self.read_params(
-                user, runtime_configuration
-            ).items()
+            parameter.name: parameter.value
+            for parameter in self.read_configured_params(user, runtime_configuration)
             if not parameter.is_secret
         }
 
@@ -1227,33 +1211,22 @@ class PythonConfig(AbstractConfig):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def read_params(
+    def read_configured_params(
         self, user: User = None, config_runtime: Dict = None
-    ) -> Dict[Parameter, Any]:
-        # priority
-        # 1 - Runtime config
-        # 2 - Value inside the db
-        result = {}
-        for param in self.parameters.annotate_configured(
+    ) -> ParameterQuerySet:
+        params = self.parameters.annotate_configured(
             self, user
-        ).annotate_value_for_user(self, user):
-            param: Parameter
-            if param.name in config_runtime:
-                result[param] = config_runtime[param.name]
-            else:
-                if param.configured:
-                    result[param] = param.value
-                else:
-                    if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-                        result[param] = param.get_valid_value_for_test()
-                        continue
-                    if param.required:
-                        raise TypeError(
-                            f"Required param {param.name} "
-                            f"of plugin {param.python_module.module}"
-                            " does not have a valid value"
-                        )
-        return result
+        ).annotate_value_for_user(self, user, config_runtime)
+        not_configured_params = params.filter(required=True, value__isnull=True)
+        if not_configured_params.exists():
+            param = not_configured_params.first()
+            raise TypeError(
+                f"Required param {param.name} "
+                f"of plugin {param.python_module.module}"
+                " does not have a valid value"
+            )
+
+        return params
 
     def generate_health_check_periodic_task(self):
         from intel_owl.tasks import health_check

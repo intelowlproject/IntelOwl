@@ -20,10 +20,10 @@ class Ip2location(classes.ObservableAnalyzer):
         try:
             payload = {"ip": self.observable_name}
 
-            """ There are two free versions of the service:
-                1. keyless : Requires No API key and has a daily limit of 500 queries
-                2. keyed: Requires API key.
-            """
+            # There are two free versions of the service:
+            #    1. keyless : Requires No API key and has a daily limit of 500 queries
+            #    2. keyed: Requires API key.
+
             if self.api_version == "keyed":
                 payload["key"] = self._api_key_name
 

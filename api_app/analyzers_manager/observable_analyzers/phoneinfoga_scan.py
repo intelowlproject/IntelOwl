@@ -3,9 +3,6 @@ import logging
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import (  # AnalyzerConfigurationException
-    AnalyzerRunException,
-)
 from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)
@@ -30,28 +27,23 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
     _GOOGLE_API_KEY: str = ""
 
     def run(self):
-        response: None
         url: str = f"http://phoneinfoga:5000/api/v2/scanners/{self.scanner_name}/run"
-        try:
-            response = requests.post(
-                url,
-                headers={
-                    "Content-Type": "application/json",
-                    "accept": "application/json",
+        response = requests.post(
+            url,
+            headers={
+                "Content-Type": "application/json",
+                "accept": "application/json",
+            },
+            json={
+                "number": self.observable_name,
+                "options": {
+                    "NUMVERIFY_API_KEY": self._NUMVERIFY_API_KEY,
+                    "GOOGLECSE_CX": self._GOOGLECSE_CX,
+                    "GOOGLE_API_KEY": self._GOOGLE_API_KEY,
                 },
-                json={
-                    "number": self.observable_name,
-                    "options": {
-                        "NUMVERIFY_API_KEY": self._NUMVERIFY_API_KEY,
-                        "GOOGLECSE_CX": self._GOOGLECSE_CX,
-                        "GOOGLE_API_KEY": self._GOOGLE_API_KEY,
-                    },
-                },
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            logger.exception("Error while querying phoneinfoga analyzer: {e}")
-            raise AnalyzerRunException(e)
+            },
+        )
+        response.raise_for_status()
         return response.json()
 
     @staticmethod

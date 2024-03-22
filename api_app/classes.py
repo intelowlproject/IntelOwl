@@ -81,14 +81,17 @@ class Plugin(metaclass=ABCMeta):
         return f"({self.__class__.__name__}, job: #{self.job_id})"
 
     def config(self, runtime_configuration: typing.Dict):
-        for param, value in self._config.read_params(
+        self.__parameters = self._config.read_configured_params(
             self._user, runtime_configuration
-        ).items():
-            attribute_name = f"_{param.name}" if param.is_secret else param.name
-            setattr(self, attribute_name, value)
+        )
+        for parameter in self.__parameters:
+            attribute_name = (
+                f"_{parameter.name}" if parameter.is_secret else parameter.name
+            )
+            setattr(self, attribute_name, parameter.value)
             logger.debug(
                 f"Adding to {self.__class__.__name__} "
-                f"param {attribute_name} with value {value} "
+                f"param {attribute_name} with value {parameter.value} "
             )
 
     def before_run(self):
@@ -132,13 +135,12 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
-        if isinstance(e, HTTPError):
-            if (
-                e.response
-                and hasattr(e.response, "status_code")
-                and e.response.status_code == 429
-            ):
-                self.disable_for_rate_limit()
+        if isinstance(e, HTTPError) and (
+            e.response
+            and hasattr(e.response, "status_code")
+            and e.response.status_code == 429
+        ):
+            self.disable_for_rate_limit()
         if settings.STAGE_CI:
             raise e
 
@@ -284,7 +286,12 @@ class Plugin(metaclass=ABCMeta):
                 self._user.membership.organization
             )
             if org_configuration.rate_limit_timeout is not None:
-                org_configuration.disable_for_rate_limit()
+                api_key_parameter = self.__parameters.filter(
+                    name__contains="api_key"
+                ).first()
+                # if we do not have api keys OR the api key was org based
+                if not api_key_parameter or api_key_parameter.is_from_org:
+                    org_configuration.disable_for_rate_limit()
             else:
                 logger.warning(
                     f"You are trying to disable {self.name}"

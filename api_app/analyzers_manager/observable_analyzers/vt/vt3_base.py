@@ -5,7 +5,7 @@ import base64
 import logging
 import time
 from datetime import datetime, timedelta
-from typing import Dict
+from typing import Dict, Tuple
 
 import requests
 
@@ -229,6 +229,12 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             self._vt_get_relationships(
                 observable_name, relationships_requested, uri, result
             )
+        uri_prefix, uri_postfix = self._get_url_prefix_postfix()
+        result["link"] = f"https://www.virustotal.com/gui/{uri_prefix}/{uri_postfix}"
+
+        return result
+
+    def _get_url_prefix_postfix(self) -> Tuple[str, str]:
         if self._job.observable_classification == ObservableClassification.DOMAIN.value:
             uri_prefix = "domain"
             uri_postfix = self._job.observable_name
@@ -241,9 +247,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
         else:  # hash
             uri_prefix = "search"
             uri_postfix = self._job.observable_name
-        result["link"] = f"https://www.virustotal.com/gui/{uri_prefix}/{uri_postfix}"
-
-        return result
+        return uri_prefix, uri_postfix
 
     def _vt_scan_file(self, md5: str, rescan_instead: bool = False) -> dict:
         if rescan_instead:

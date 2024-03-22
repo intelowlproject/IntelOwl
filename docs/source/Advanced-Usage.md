@@ -3,6 +3,9 @@
 This page includes details about some advanced features that Intel Owl provides which can be **optionally** enabled. Namely,
 
 - [Advanced Usage](#advanced-usage)
+  - [Organizations and User Management](#organizations-and-user-management)
+    - [Multi Tenancy](#multi-tenancy)
+    - [Registration](#registration)
   - [Optional Analyzers](#optional-analyzers)
   - [Customize analyzer execution](#customize-analyzer-execution)
     - [from the GUI](#from-the-gui)
@@ -10,8 +13,67 @@ This page includes details about some advanced features that Intel Owl provides 
     - [CyberChef](#cyberchef)
     - [PhoneInfoga](#phoneinfoga)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
-  - [Organizations and data sharing](#organizations-and-data-sharing)
   - [Notifications](#notifications)
+
+
+## Organizations and User management
+
+Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
+
+### Multi Tenancy
+
+Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
+Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.
+
+#### Manage organizations
+
+You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
+
+Once you create an organization, you are the unique "Owner" of that organization. So you are the only one who can delete the organization and promote/demote/kick users.
+Another role, which is called "Admin", can be set to a user (via the Django Admin interface only for now).
+Owners and admins share the following powers: they can manage invitations and the organization's plugin configuration.
+
+#### Accept Invites
+
+Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
+
+![img.png](../static/accept_invite.png)
+
+#### Plugins Params and Secrets
+
+From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
+This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
+Only Owners and Admins of the organization can set, change and delete them.
+
+#### Disable Plugins at Org level
+
+The org admin can disable a specific plugin for all the users in a specific org.
+To do that, Org Admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the plugin that they want to disable.
+
+![img.png](../static/disable_org.png)
+
+### Registration
+Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
+
+After a user registration has been made, an email is sent to the user to verify their email address. If necessary, there are buttons on the login page to resend the verification email and to reset the password.
+
+Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
+If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
+
+To have the "Registration" page to work correctly, you must configure some variables before starting IntelOwl. See [Optional Environment Configuration](/Installation.md#other-optional-configuration-to-enable-specific-services-features)
+
+In a development environment the emails that would be sent are written to the standard output.
+
+#### Recaptcha configuration
+The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
+
+If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE).
+
+Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY` value in the `env_file_app` file.
+
+Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `frontend/public/env.js` file.
+In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
+
 
 ## Optional Analyzers
 
@@ -176,18 +238,6 @@ Some analyzers could require a special configuration:
   - Both these analyzers have a default parameter named `direction` that is used to dispatch the type of query to run.
     - The value `right` for this parameter runs the query using `data` API parameter. Otherwise, if the parameter value is `left` it runs the query using the `name` API parameter. 
   - This parameter should not be changed from default value.
-
-## Organizations and data sharing
-
-Organizations are a great way to share data and analysis only with the members of your team. Invite the people you work with in your organization!
-
-Thanks to the "Organization" feature, you can restrict the people who can see the analysis that you made.
-By default, analysis (jobs) are executed with a level of TLP that is `AMBER`. This means that these jobs are shared with the other members of your community only.
-
-If you want to share a job with everyone and make it public (every IntelOwl user can see them), you should set the TLP as `CLEAR`.
-
-How you can do that?
-You can select the TLP for the analysis at the time of request.
 
 ## Notifications
 

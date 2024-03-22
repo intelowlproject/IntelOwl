@@ -3,18 +3,34 @@
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
 ## [v6.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.0)
-This release contains an upgrade to both Python and Postgres versions:
+This major release is another important milestone for this project! We have been working hard to transform IntelOwl from a *Data Extraction Platform* to a complete *Investigation Platform*!
 
-Python has been updated from version `3.9` to version `3.11`. This does not require any change for the user.
+One of the most noticeable feature is the addition of the [**Investigation** framework](https://intelowl.readthedocs.io/en/latest/Usage.md#investigations-framework)!
+ 
+Thanks to the this new feature, analysts can leverage IntelOwl as the starting point of their "Investigations", register their findings, correlate the information found, and collaborate...all in a single place.
 
-Postgres has been updated from version `12` to version `16`. This update requires to apply a [migration procedure](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-version-6) before you can safely upgrade your IntelOwl application.
+Come and join us at the [Honeynet Workshop](https://denmark2024.honeynet.org/) in the Denmark this May to learn more about this new Major version and to meet the maintainers. :)
 
 **Breaking Changes**
 
-Support for multiple jobs with multiple playbooks has been removed. Every IOC in the request will be processed by a single playbook. 
+Many breaking changes have been introduced with this major release due to dependencies upgrades and architectural changes.
 
+You can find more details in the [Upgrade Guide](https://intelowl.readthedocs.io/en/latest/Installation.html#updating-to-6-0-0-from-a-5-x-x-version). Please read it and follow it carefully before upgrading your IntelOwl instance to this Major version.
 
+**New analyzers**
 
+As usual, we add new analyzers. This release brings a lot of new ones:
+* [Zippy](https://github.com/thinkst/zippy)
+* [Mmdb_server](https://github.com/adulau/mmdb-server)
+* [BGP-Ranking](https://github.com/D4-project/BGP-Ranking)
+* [Feodo Tracker](https://feodotracker.abuse.ch/)
+* [IPQualityscore](https://www.ipqualityscore.com/)
+* [IP2Location.io](https://www.ip2location.io/ip2location-documentation)
+* [Validin](https://app.validin.com/)
+* [PhoneInfoga](https://sundowndev.github.io/phoneinfoga/)
+* [DNS0](https://docs.dns0.eu)
+* [Greynoise Labs](https://api.labs.greynoise.io/)
+* [TweetFeed](https://tweetfeed.live/)
 
 
 ## [v5.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.3)

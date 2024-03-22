@@ -7,41 +7,11 @@ import django.utils.timezone
 from django.conf import settings
 from django.db import migrations, models
 
-import api_app.defaults
 import api_app.interfaces
-
-# Functions from the following migrations need manual copying.
-# Move them and any dependencies into this file, then update the
-# RunPython operations to refer to the local versions:
-# api_app.ingestors_manager.migrations.0003_ingestor_config
-# api_app.ingestors_manager.migrations.0010_ingestorconfig_routing_key_and_more
 
 
 class Migration(migrations.Migration):
     initial = True
-    replaces = [
-        # ("ingestors_manager", "0001_initial"),
-        # (
-        #     "ingestors_manager",
-        #     "0002_remove_ingestorconfig_disabled_in_organizations_and_more",
-        # ),
-        # ("ingestors_manager", "0003_ingestor_config"),
-        # ("ingestors_manager", "0004_alter_ingestorreport_name"),
-        # (
-        #     "ingestors_manager",
-        #     "0005_rename_ingestors_m_python__5c8ce0_idx_ingestors_m_python__b7a859_idx_and_more",
-        # ),
-        # ("ingestors_manager", "0006_alter_python_module"),
-        # ("ingestors_manager", "0007_alter_ingestorconfig_python_module"),
-        # ("ingestors_manager", "0008_alter_ingestorconfig_python_module"),
-        # ("ingestors_manager", "0009_ingestorconfig_maximum_jobs"),
-        # ("ingestors_manager", "0010_ingestorconfig_routing_key_and_more"),
-        # ("ingestors_manager", "0011_ingestorconfig_health_check_task"),
-        # ("ingestors_manager", "0012_ingestorconfig_health_check_status"),
-        # ("ingestors_manager", "0013_ingestorreport_parameters"),
-        # ("ingestors_manager", "0014_ingestorreport_sent_to_bi"),
-        # ("ingestors_manager", "0015_ingestorreport_ingestorreportsbisearch"),
-    ]
 
     dependencies = [
         ("api_app", "0001_1_initial_squashed"),

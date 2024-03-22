@@ -6,7 +6,6 @@ from django.db.models.functions import Concat
 
 def migrate(apps, schema_editor):
     # I have to use the import here because i really need the class methods
-    from api_app.models import Job as JobNonStoric
 
     PivotMap = apps.get_model("pivots_manager", "PivotMap")
     Investigation = apps.get_model("investigations_manager", "Investigation")

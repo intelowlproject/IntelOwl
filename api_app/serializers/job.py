@@ -397,6 +397,16 @@ class JobListSerializer(_AbstractJobViewSerializer):
         exclude = (
             "file",
             "errors",
+            "scan_mode",
+            "scan_check_time",
+            "runtime_configuration",
+            "sent_to_bi",
+            "warnings",
+            "analyzers_requested",
+            "connectors_requested",
+            "path",
+            "numchild",
+            "depth",
         )
 
     pivots_to_execute = rfs.SerializerMethodField(read_only=True)
@@ -409,12 +419,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
     visualizers_to_execute = rfs.SlugRelatedField(
         read_only=True, slug_field="name", many=True
     )
-    analyzers_requested = rfs.SlugRelatedField(
-        read_only=True, slug_field="name", many=True
-    )
-    connectors_requested = rfs.SlugRelatedField(
-        read_only=True, slug_field="name", many=True
-    )
+    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         return obj.pivots_to_execute.all().values_list("name", flat=True)
@@ -461,7 +466,15 @@ class JobSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file",)
+        exclude = (
+            "file",
+            "depth",
+            "path",
+            "numchild",
+            "sent_to_bi",
+            "scan_mode",
+            "scan_check_time",
+        )
 
     comments = CommentSerializer(many=True, read_only=True)
     pivots_to_execute = rfs.SlugRelatedField(

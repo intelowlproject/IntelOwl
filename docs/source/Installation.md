@@ -242,7 +242,7 @@ This is a destructive operation but can be useful to start again the project fro
 ### Users creation
 You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
-To manage users, organizations and their visibility please refer to this [section](/Usage.md#organizations-and-user-management)
+To manage users, organizations and their visibility please refer to this [section](/Advanced-Usage.md#organizations-and-user-management)
 
 ## Update and Rebuild
 
@@ -299,6 +299,7 @@ Before upgrading, some important things should be checked by the administrator:
 * The default message broker is now Redis. We have replaced Rabbit-MQ for Redis to allow support for Websockets in the application:
   * This change is transparent if you use our `start` script to run IntelOwl. That would spawn a Redis instance instead of a Rabbit-MQ one locally.
   * If you were using an external broker like AWS SQS or a managed Rabbit-MQ, they are still supported but we suggest to move to a Redis supported service to simplify the architecture (because Redis is now mandatory for Websockets)
+* Support for multiple jobs with multiple playbooks has been removed. Every Observable or File in the request will be processed by a single playbook. 
 * We upgraded the base PostgreSQL image from version 12 to version 16. You have 2 choice:
   * remove your actual database and start from scratch with a new one
   * maintain your database and do not update Postgres. This could break the application at anytime because we do not support it anymore.
@@ -358,7 +359,7 @@ So, to migrate to the new major version you would need to delete your DB. To do 
 ```bash
 python3 start.py prod down -v
 ```
-Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides an easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).
+Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides an easier way to add, invite and manage users from the application itself. See [the Organization section](./Advanced-Usage.md#organizations-and-user-management).
 
 
 #### Updating to >=2.0.0 from a 1.x.x version

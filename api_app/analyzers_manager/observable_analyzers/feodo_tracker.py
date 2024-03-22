@@ -42,14 +42,13 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
 
     def run(self):
         result = {"found": False}
-        db_location, url = (
+        db_location, _ = (
             self.recommend_locations
             if self.use_recommended_url
             else self.default_locations
         )
-        if self.update_on_run or not os.path.exists(db_location):
-            if not self.update():
-                raise AnalyzerRunException("Unable to update database")
+        if self.update_on_run or not os.path.exists(db_location) and not self.update():
+            raise AnalyzerRunException("Unable to update database")
         try:
             with open(db_location, "r", encoding="utf-8") as f:
                 db = json.load(f)

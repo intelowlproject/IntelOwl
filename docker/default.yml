@@ -25,9 +25,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "nc -z localhost 8001 || exit 1" ]
       interval: 10s
-      timeout: 5s
-      start_period: 90s
-      retries: 3
+      timeout: 2s
+      start_period: 10s
+      retries: 12
 
 
   daphne:
@@ -45,9 +45,9 @@ services:
       - env_file_app
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 8011 || exit 1"]
-      interval: 10s
+      interval: 5s
       timeout: 2s
-      start_period: 30s
+      start_period: 5s
       retries: 5
     depends_on:
       uwsgi:

@@ -2,11 +2,8 @@
 
 This page includes the most important things to know and understand when using IntelOwl.
 
-- [Client](#client)
-- [Organizations and User Management](#organizations-and-user-management)
-  - [Multi Tenancy](#multi-tenancy)
-  - [Registration](#registration)
-- [Plugins](#plugins)
+- [How to interact with IntelOwl](#how-to-interact-with-intelowl)
+- [Plugins Framework](#plugins-framework)
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Pivots](#pivots)
@@ -17,8 +14,9 @@ This page includes the most important things to know and understand when using I
   - [Enabling or Disabling Plugins](#enabling-or-disabling-plugins)
   - [Special Plugins operations](#special-plugins-operations)
   - [TLP Support](#tlp-support)
+- [Investigations Framework](#investigations-framework)
 
-## Client
+## How to interact with IntelOwl
 
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
@@ -27,8 +25,7 @@ There are multiple ways to interact with the Intel Owl APIs,
 1. Web Interface
 
    - Built-in Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, tags management and more features
-   - Built with [Create React App](https://create-react-app.dev/) and based on [certego-ui](https://github.com/certego/certego-ui).
-
+   
 2. pyIntelOwl (CLI/SDK)
 
    - Official Python client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
@@ -49,65 +46,7 @@ The server authentication is managed by API tokens. So, if you want to interact 
 Afterwards you can leverage the created tokens with the Intel Owl Client.
 </div>
 
-## Organizations and User management
-
-Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
-
-### Multi Tenancy
-
-Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
-Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.
-
-#### Manage organizations
-
-You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
-
-Once you create an organization, you are the unique "Owner" of that organization. So you are the only one who can delete the organization and promote/demote/kick users.
-Another role, which is called "Admin", can be set to a user (via the Django Admin interface only for now).
-Owners and admins share the following powers: they can manage invitations and the organization's plugin configuration.
-
-#### Accept Invites
-
-Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
-
-![img.png](../static/accept_invite.png)
-
-#### Plugins Params and Secrets
-
-From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
-This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
-Only Owners and Admins of the organization can set, change and delete them.
-
-#### Disable Plugins at Org level
-
-The org admin can disable a specific plugin for all the users in a specific org.
-To do that, Org Admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the plugin that they want to disable.
-
-![img.png](../static/disable_org.png)
-
-### Registration
-Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
-
-After a user registration has been made, an email is sent to the user to verify their email address. If necessary, there are buttons on the login page to resend the verification email and to reset the password.
-
-Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
-If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
-
-To have the "Registration" page to work correctly, you must configure some variables before starting IntelOwl. See [Optional Environment Configuration](/Installation.md#other-optional-configuration-to-enable-specific-services-features)
-
-In a development environment the emails that would be sent are written to the standard output.
-
-#### Recaptcha configuration
-The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
-
-If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE).
-
-Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY` value in the `env_file_app` file.
-
-Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `frontend/public/env.js` file.
-In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
-
-## Plugins
+## Plugins Framework
 
 Plugins are the core modular components of IntelOwl that can be easily added, changed and customized.
 There are several types of plugins:
@@ -605,9 +544,35 @@ Based on that value, IntelOwl understands if the specific plugin is allowed or n
 These is how every available TLP value behaves once selected for an analysis execution:
 1. `CLEAR`: no restriction (`WHITE` was replaced by `CLEAR` in TLP v2.0, but `WHITE` is supported for retrocompatibility)
 2. `GREEN`: disable analyzers that could impact privacy
-3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
-4. `RED` (default): disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
+3. `AMBER` (default): disable analyzers that could impact privacy and limit view permissions to my group
+4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
 
----
 
-To contribute to the project, see [Contribute](./Contribute.md).
+## Investigations Framework
+
+*Investigations* are a new framework introduced in IntelOwl v6 with the goal to allow the users to connect the analysis they do with each other.
+
+In this way the analysts can use IntelOwl as the starting point of their "Investigations", register their findings, correlate the information found, and collaborate...all in a single place.
+
+Things to know about the framework:
+* an *Investigation* is a superset of IntelOwl Jobs. It can have attached one or more existing IntelOwl Jobs
+* an *Investigation* contains a "description" section that can be changed and updated at anytime with new information from the analysts.
+* modification to the Investigation (description, jobs, etc) can be done by every member of the Organization where the creator of the Investigation belongs. However only they creator can delete an Investigation.
+
+### Create and populate an investigation
+
+*Investigations* are created in 2 ways:
+  * automatically:
+    * if you scan multiple observables at the same time, a new investigation will be created by default and all the observables they will be automatically connected to the same investigation.
+    * if you run a Job with a Playbook which contains a Pivot that triggers another Job, a new investigation will be created and both the Jobs will be added to the same investigation.
+  * manually: by clicking on the button in the "History" section you can create an Investigation from scratch without any job attached (see following image)
+
+![img.png](../static/create_investigation.png)
+
+If you want to add a job to an Investigation, you should click to the root block of the Investigation (see following image):
+
+![img_1.png](../static/add_job_to_investigation.png)
+
+
+
+

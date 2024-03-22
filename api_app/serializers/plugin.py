@@ -209,8 +209,11 @@ class PythonConfigListSerializer(rfs.ListSerializer):
                 "missing_secrets": parameter_required_not_configured,
             }
             logger.info(f"Setting cache {cache_name}")
-            cache.set(cache_name, plugin_representation, timeout=24 * 7)
-        return cache.get(cache_name)
+            cache.set(cache_name, plugin_representation, timeout=60 * 60 * 24 * 7)
+            return plugin_representation
+        else:
+            cache.touch(cache_name, timeout=60 * 60 * 24 * 7)
+            return cache_hit
 
     def to_representation(self, data):
         user = self.context["request"].user

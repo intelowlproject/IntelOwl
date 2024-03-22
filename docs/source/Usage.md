@@ -293,6 +293,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
 * `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
 * `Threatminer`: retrieve data from [Threatminer](https://www.threatminer.org/) API
+* `TorNodesDanMeUk`: check if an IP is a Tor Node
 * `TorProject`: check if an IP is a Tor Exit Node
 * `Triage_Search`: Search for reports of observables or upload from URL on triage cloud
 * `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list

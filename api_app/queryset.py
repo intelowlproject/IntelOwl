@@ -369,7 +369,8 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                         then=Cast(F("org_value"), output_field=JSONField()),
                     ),
                     # Yeah, I can't use isnull=False here
-                    # because _reasons_ of the JsonField in conjunction with the Case clause
+                    # because _reasons_ of the JsonField in conjunction with
+                    # the Case clause
                     When(
                         ~Q(test_value__exact=None),
                         then=Cast(F("test_value"), output_field=JSONField()),

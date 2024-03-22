@@ -287,7 +287,12 @@ class Plugin(metaclass=ABCMeta):
                 self._user.membership.organization
             )
             if org_configuration.rate_limit_timeout is not None:
-                org_configuration.disable_for_rate_limit()
+                api_key_parameter = self.__parameters.filter(
+                    name__contains="api_key"
+                ).first()
+                # if we do not have api keys OR the api key was org based
+                if not api_key_parameter or api_key_parameter.is_from_org:
+                    org_configuration.disable_for_rate_limit()
             else:
                 logger.warning(
                     f"You are trying to disable {self.name}"

@@ -266,7 +266,6 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 )
                 .visible_for_user_owned(user)
                 .values("value")[:1],
-                output_field=JSONField(),
             )
         )
 
@@ -282,7 +281,6 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 )
                 .visible_for_user_by_org(user)
                 .values("value")[:1],
-                output_field=JSONField(),
             )
             if user and user.has_membership()
             else Value(None, output_field=JSONField()),
@@ -298,7 +296,6 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 )
                 .default_values()
                 .values("value")[:1],
-                output_field=JSONField(),
             )
         )
 
@@ -319,7 +316,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     None,
                 )
             )
-        return self.annotate(
+        return self.alias(
             test_value=Case(
                 When(
                     name__icontains="url",
@@ -333,7 +330,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 When(
                     type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())
                 ),
-                default=Value("test", output_field=JSONField()),
+                default=Value(F("default_value"), output_field=JSONField()),
                 output_field=JSONField(),
             )
         )

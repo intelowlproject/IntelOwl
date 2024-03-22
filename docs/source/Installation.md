@@ -242,7 +242,7 @@ This is a destructive operation but can be useful to start again the project fro
 ### Users creation
 You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
-To manage users, organizations and their visibility please refer to this [section](/Usage.md#organizations-and-user-management)
+To manage users, organizations and their visibility please refer to this [section](/Advanced-Usage.md#organizations-and-user-management)
 
 ## Update and Rebuild
 
@@ -358,7 +358,7 @@ So, to migrate to the new major version you would need to delete your DB. To do 
 ```bash
 python3 start.py prod down -v
 ```
-Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides an easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).
+Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides an easier way to add, invite and manage users from the application itself. See [the Organization section](./Advanced-Usage.md#organizations-and-user-management).
 
 
 #### Updating to >=2.0.0 from a 1.x.x version

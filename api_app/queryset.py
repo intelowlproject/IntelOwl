@@ -341,7 +341,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def annotate_value_for_user(
         self, config: "PythonConfig", user: User = None, runtime_config=None
     ) -> "ParameterQuerySet":
-        res = (
+        return (
             self.prefetch_related("values")
             ._alias_owner_value_for_user(config, user)
             ._alias_org_value_for_user(config, user)
@@ -389,8 +389,6 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 ),
             )
         )
-        print(res.query)
-        return res
 
 
 class AbstractReportQuerySet(SendToBiQuerySet):

@@ -4,7 +4,6 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -27,16 +26,13 @@ class YETI(classes.ObservableAnalyzer):
         url = f"{self._url_key_name}/observablesearch/"
 
         # search for observables
-        try:
-            resp = requests.post(
-                url=url,
-                headers=headers,
-                json=payload,
-                verify=self.verify_ssl,
-            )
-            resp.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        resp = requests.post(
+            url=url,
+            headers=headers,
+            json=payload,
+            verify=self.verify_ssl,
+        )
+        resp.raise_for_status()
 
         return resp.json()
 

@@ -46,25 +46,19 @@ class VirusheeFileUpload(FileAnalyzer):
 
     def __check_report_for_hash(self) -> Optional[dict]:
         response_json = None
-        try:
-            response = self.__session.get(f"{self.base_url}/file/hash/{self.md5}")
-            if response.status_code == 404:  # hash not found in db
-                return response_json
-            response.raise_for_status()
-            response_json = response.json()
-        except requests.RequestException as exc:
-            raise AnalyzerRunException(str(exc))
+        response = self.__session.get(f"{self.base_url}/file/hash/{self.md5}")
+        if response.status_code == 404:  # hash not found in db
+            return response_json
+        response.raise_for_status()
+        response_json = response.json()
 
         return response_json
 
     def __upload_file(self, binary: bytes) -> str:
         name_to_send = self.filename if self.filename else self.md5
         files = {"file": (name_to_send, binary)}
-        try:
-            response = self.__session.post(f"{self.base_url}/file/upload", files=files)
-            response.raise_for_status()
-        except requests.RequestException as exc:
-            raise AnalyzerRunException(str(exc))
+        response = self.__session.post(f"{self.base_url}/file/upload", files=files)
+        response.raise_for_status()
         return response.json()["task"]
 
     def __poll_status_and_result(self, task_id: str) -> dict:
@@ -72,11 +66,8 @@ class VirusheeFileUpload(FileAnalyzer):
         url = f"{self.base_url}/file/task/{task_id}"
         for chance in range(self.max_tries):
             logger.info(f"Polling try#{chance+1}")
-            try:
-                response = self.__session.get(url)
-                response.raise_for_status()
-            except requests.RequestException as exc:
-                raise AnalyzerRunException(str(exc))
+            response = self.__session.get(url)
+            response.raise_for_status()
             response_json = response.json()
             if response.status_code == 200:
                 break

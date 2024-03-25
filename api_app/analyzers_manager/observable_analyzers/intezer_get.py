@@ -43,7 +43,7 @@ class IntezerGet(ObservableAnalyzer):
         except intezer_errors.IntezerError as e:
             raise AnalyzerRunException(e)
         except TimeoutError as e:
-            raise AnalyzerRunException(e)
+            raise e
         else:
             result.update(analysis.result(), hash_found=True)
 

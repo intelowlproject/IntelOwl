@@ -81,10 +81,7 @@ class DNSdb(classes.ObservableAnalyzer):
         if self.api_version == 1 and response.status_code == 404:
             self.no_results_found = True
         else:
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError as e:
-                raise AnalyzerRunException(f"HTTPError: {e}")
+            response.raise_for_status()
 
         # validate output
         return self._parse_result(response.text)

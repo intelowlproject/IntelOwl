@@ -53,9 +53,6 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
         return self._session
 
     def manage_submission_response(self):
-        if self.response.status_code != 200:
-            raise AnalyzerRunException("max retry attempts exceeded")
-
         sample_id = self.response.json().get("id", None)
         if sample_id is None:
             raise AnalyzerRunException("error sending sample")

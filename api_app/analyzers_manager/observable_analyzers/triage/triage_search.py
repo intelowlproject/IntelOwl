@@ -62,6 +62,7 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
             time.sleep(self.poll_distance)
 
         if self.response:
+            self.response.raise_for_status()
             self.manage_submission_response()
         else:
             raise AnalyzerRunException(

@@ -34,13 +34,8 @@ class URLHaus(classes.ObservableAnalyzer):
                 f"not supported observable type {self.observable_classification}."
             )
 
-        try:
-            response = requests.post(
-                self.base_url + uri, data=post_data, headers=headers
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(self.base_url + uri, data=post_data, headers=headers)
+        response.raise_for_status()
 
         return response.json()
 

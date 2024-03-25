@@ -20,16 +20,13 @@ class CheckPhish(classes.ObservableAnalyzer):
     _api_key_name: str
 
     def run(self):
-        try:
-            json_data = {
-                "apiKey": self._api_key_name,
-                "urlInfo": {"url": self.observable_name},
-            }
+        json_data = {
+            "apiKey": self._api_key_name,
+            "urlInfo": {"url": self.observable_name},
+        }
 
-            response = requests.post(CheckPhish.base_url, json=json_data)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(CheckPhish.base_url, json=json_data)
+        response.raise_for_status()
 
         job_id = response.json().get("jobID")
         if job_id is None:
@@ -51,12 +48,8 @@ class CheckPhish(classes.ObservableAnalyzer):
         for chance in range(self.polling_tries):
             if chance != 0:
                 time.sleep(self.polling_time)
-            try:
-                response = requests.post(CheckPhish.status_url, json=json_data)
-                response.raise_for_status()
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
-
+            response = requests.post(CheckPhish.status_url, json=json_data)
+            response.raise_for_status()
             result = response.json()
             status_json = result.get("status", "")
             error = result.get("error", False)

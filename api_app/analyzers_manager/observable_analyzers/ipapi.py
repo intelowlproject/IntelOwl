@@ -5,7 +5,6 @@ from typing import Dict
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -27,15 +26,11 @@ class IPApi(classes.ObservableAnalyzer):
         ]
 
     def run(self):
-        try:
-            response_batch = requests.post(self.batch_url, json=self.IP)
-            response_batch.raise_for_status()
+        response_batch = requests.post(self.batch_url, json=self.IP)
+        response_batch.raise_for_status()
 
-            response_dns = requests.get(self.dns_url)
-            response_dns.raise_for_status()
-
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response_dns = requests.get(self.dns_url)
+        response_dns.raise_for_status()
 
         response = {"ip_info": response_batch.json(), "dns_info": response_dns.json()}
 

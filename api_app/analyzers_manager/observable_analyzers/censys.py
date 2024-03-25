@@ -32,17 +32,14 @@ class Censys(classes.ObservableAnalyzer):
                 f"not supported observable type {self.observable_classification}."
                 "Supported is IP"
             )
-        try:
-            response = requests.get(
-                self.base_url + uri,
-                auth=(self._api_id_name, self._api_secret_name),
-                headers={
-                    "Accept": "application/json",
-                },
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.get(
+            self.base_url + uri,
+            auth=(self._api_id_name, self._api_secret_name),
+            headers={
+                "Accept": "application/json",
+            },
+        )
+        response.raise_for_status()
 
         return response.json()
 

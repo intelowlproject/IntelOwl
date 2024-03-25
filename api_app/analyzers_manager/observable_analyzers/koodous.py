@@ -4,7 +4,6 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -20,17 +19,13 @@ class Koodous(classes.ObservableAnalyzer):
         )
 
     def run(self):
-        try:
-            common_url = self.base_url + self.observable_name
+        common_url = self.base_url + self.observable_name
 
-            apk_info = self.get_response(common_url)
-            apk_info.raise_for_status()
+        apk_info = self.get_response(common_url)
+        apk_info.raise_for_status()
 
-            apk_analysis = self.get_response(common_url + self.query_analysis)
-            apk_analysis.raise_for_status()
-
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        apk_analysis = self.get_response(common_url + self.query_analysis)
+        apk_analysis.raise_for_status()
 
         response = {
             "apk_info": apk_info.json(),

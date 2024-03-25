@@ -51,11 +51,8 @@ class PhishStats(ObservableAnalyzer):
 
     def run(self):
         api_url = self.__build_phishstats_url()
-        try:
-            response = requests.get(api_url)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.get(api_url)
+        response.raise_for_status()
 
         return {"api_url": api_url, "results": response.json()}
 

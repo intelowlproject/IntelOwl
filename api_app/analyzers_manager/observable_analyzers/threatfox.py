@@ -6,7 +6,6 @@ import json
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -23,11 +22,8 @@ class ThreatFox(classes.ObservableAnalyzer):
 
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
-        try:
-            response = requests.post(self.base_url, data=json.dumps(payload))
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(self.base_url, data=json.dumps(payload))
+        response.raise_for_status()
 
         result = response.json()
         data = result.get("data", {})

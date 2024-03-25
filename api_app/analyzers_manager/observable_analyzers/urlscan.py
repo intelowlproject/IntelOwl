@@ -45,15 +45,12 @@ class UrlScan(ObservableAnalyzer):
     def __urlscan_submit(self) -> str:
         data = {"url": self.observable_name, "visibility": self.visibility}
         uri = "/scan/"
-        try:
-            response = self.session.post(self.base_url + uri, json=data)
-            # catch error description to help users to understand why it did not work
-            if response.status_code == 400:
-                error_description = response.json().get("description", "")
-                raise requests.HTTPError(error_description)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = self.session.post(self.base_url + uri, json=data)
+        # catch error description to help users to understand why it did not work
+        if response.status_code == 400:
+            error_description = response.json().get("description", "")
+            raise requests.HTTPError(error_description)
+        response.raise_for_status()
         return response.json().get("api", "")
 
     def __poll_for_result(self, url):
@@ -81,14 +78,9 @@ class UrlScan(ObservableAnalyzer):
         }
         if self.observable_classification == self.ObservableTypes.URL:
             params["q"] = "page." + params["q"]
-        try:
-            resp = self.session.get(self.base_url + "/search/", params=params)
-            resp.raise_for_status()
-
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
-        else:
-            result = resp.json()
+        resp = self.session.get(self.base_url + "/search/", params=params)
+        resp.raise_for_status()
+        result = resp.json()
         return result
 
     @classmethod

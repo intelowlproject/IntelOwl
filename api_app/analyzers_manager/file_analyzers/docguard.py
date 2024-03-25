@@ -30,15 +30,12 @@ class DocGuardUpload(FileAnalyzer):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        try:
-            response = requests.post(
-                self.base_url + "/FileAnalyzing/AnalyzeFile",
-                headers=headers,
-                files={"file": (self.filename, binary)},
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(
+            self.base_url + "/FileAnalyzing/AnalyzeFile",
+            headers=headers,
+            files={"file": (self.filename, binary)},
+        )
+        response.raise_for_status()
 
         return response.json()
 

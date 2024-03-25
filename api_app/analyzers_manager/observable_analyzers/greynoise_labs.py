@@ -57,11 +57,10 @@ class GreynoiseLabs(ObservableAnalyzer):
             for key, value in queries.items():
                 if not value["ip_required"]:
                     if not os.path.isfile(value["db_location"]) and not self.update():
-                        logger.error(f"Failed extraction from {key} db")
-                    if not os.path.exists(value["db_location"]):
-                        raise AnalyzerRunException(
-                            f"database location {value['db_location']} does not exist"
-                        )
+                        error_message = f"Failed extraction from {key} db"
+                        self.report.errors.append(error_message)
+                        self.report.save()
+                        logger.error(error_message)
 
                     with open(value["db_location"], "r", encoding="utf-8") as f:
                         db = f.read()

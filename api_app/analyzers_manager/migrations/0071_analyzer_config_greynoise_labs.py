@@ -129,7 +129,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0061_job_depth_analysis"),
-        ("analyzers_manager", "0070_urlhaus_threatfox_disable_param"),
+        ("analyzers_manager", "0071_analyzer_config_tor_nodes_danmeuk"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

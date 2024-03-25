@@ -19,6 +19,13 @@ db_name = "topc2s_ips.txt"
 db_location = f"{settings.MEDIA_ROOT}/{db_name}"
 
 queries = {
+    "topc2s": {
+        "query_string": "query TopC2s { topC2s { queryInfo \
+        { resultsAvailable resultsLimit } c2s { source_ip c2_ips \
+        c2_domains payload hits pervasiveness } } } ",
+        "ip_required": False,
+        "db_location": db_location,
+    },
     "noiserank": {
         "query_string": "query NoiseRank($ip: String) { noiseRank(ip: $ip) \
             { queryInfo { resultsAvailable resultsLimit } ips { ip noise_score \
@@ -32,13 +39,6 @@ queries = {
             last_seen source_ip knock_port title favicon_mmh3_32 \
             favicon_mmh3_128 jarm ips emails links tor_exit headers apps } } } ",
         "ip_required": True,
-    },
-    "topc2s": {
-        "query_string": "query TopC2s { topC2s { queryInfo \
-            { resultsAvailable resultsLimit } c2s { source_ip c2_ips \
-            c2_domains payload hits pervasiveness } } } ",
-        "ip_required": False,
-        "db_location": db_location,
     },
 }
 

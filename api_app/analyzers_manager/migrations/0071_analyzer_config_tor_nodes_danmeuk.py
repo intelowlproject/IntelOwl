@@ -5,7 +5,7 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'python_module': {'health_check_schedule': None, 'update_schedule': {'minute': '0', 'hour': '*', 'day_of_week': '*', 'day_of_month': '*', 'month_of_year': '*'}, 'module': 'tor_nodes_danmeuk.TorNodesDanMeUK', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'Tor_Nodes_DanMeUk', 'description': 'check if an IP is a Tor Node', 'disabled': False, 'soft_time_limit': 30, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['ip'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'model': 'analyzers_manager.AnalyzerConfig'}
+plugin = {'python_module': {'health_check_schedule': None, 'update_schedule': {'minute': '0', 'hour': '*/6', 'day_of_week': '*', 'day_of_month': '*', 'month_of_year': '*'}, 'module': 'tor_nodes_danmeuk.TorNodesDanMeUK', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'Tor_Nodes_DanMeUk', 'description': 'check if an IP is a Tor Node', 'disabled': False, 'soft_time_limit': 30, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['ip'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'model': 'analyzers_manager.AnalyzerConfig'}
 
 params = []
 

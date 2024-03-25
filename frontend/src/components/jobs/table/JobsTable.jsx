@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
+import { MdInfoOutline } from "react-icons/md";
 
 import {
   Loader,
@@ -89,11 +90,24 @@ export default function JobsTable() {
         <Container fluid>
           {/* Basic */}
           <Row className="mb-2">
-            <Col>
+            <Col className="d-flex align-items-center">
               <h1 id="jobsHistory">
                 Jobs History&nbsp;
-                <small className="text-muted">{data?.count} total</small>
+                <small className="text-gray">{data?.count} total</small>
               </h1>
+              <div className="ms-2">
+                <MdInfoOutline id="jobstable-infoicon" fontSize="20" />
+                <UncontrolledTooltip
+                  trigger="hover"
+                  delay={{ show: 0, hide: 500 }}
+                  target="jobstable-infoicon"
+                  placement="right"
+                  fade={false}
+                  innerClassName="p-2 text-start text-nowrap md-fit-content"
+                >
+                  Jobs are simple analysis of an observable or a file.
+                </UncontrolledTooltip>
+              </div>
             </Col>
             <Col className="align-self-center">
               <ElasticTimePicker

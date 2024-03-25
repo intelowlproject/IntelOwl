@@ -30,7 +30,7 @@ import {
   reportedVisualizerNumber,
   ReportedPluginTooltip,
 } from "./utils/reportedPlugins";
-import { StatusIcon } from "../../common/StatusIcon";
+import { StatusIcon } from "../../common/icon/StatusIcon";
 import VisualizerReport from "./visualizer/visualizer";
 import { JobFinalStatuses } from "../../../constants/jobConst";
 import { PluginStatuses } from "../../../constants/pluginConst";

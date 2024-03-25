@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import {
   Button,
@@ -26,6 +27,7 @@ import { TLPTag } from "../../common/TLPTag";
 import { JobInfoIcon } from "./JobInfoIcon";
 
 export function JobInfoCard({ job }) {
+  const navigate = useNavigate();
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -33,10 +35,31 @@ export function JobInfoCard({ job }) {
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
+          <Col sm={12} md={2} className="d-flex justify-content-start">
+            {job.investigation && (
+              <>
+                <Button
+                  className="bg-darker border-1"
+                  onClick={() =>
+                    navigate(`/investigation/${job.investigation}`)
+                  }
+                  id="investigationOverviewBtn"
+                >
+                  Investigation Overview
+                </Button>
+                <UncontrolledTooltip
+                  placement="top"
+                  target="investigationOverviewBtn"
+                >
+                  This job is part of the investigation #{job.investigation}
+                </UncontrolledTooltip>
+              </>
+            )}
+          </Col>
           <Col
-            className="d-flex-start-start justify-content-center offset-md-1"
+            className="d-flex-start-start justify-content-center"
             sm={12}
-            md={10}
+            md={8}
           >
             <h3>
               <JobInfoIcon job={job} />
@@ -64,7 +87,7 @@ export function JobInfoCard({ job }) {
                 : job.observable_classification}
             </Badge>
           </Col>
-          <Col sm={12} md={1} className="d-flex justify-content-end">
+          <Col sm={12} md={2} className="d-flex justify-content-end">
             <Button
               className="bg-darker border-0"
               onClick={() => setIsOpen(!isOpen)}

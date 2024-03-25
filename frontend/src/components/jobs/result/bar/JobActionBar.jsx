@@ -17,7 +17,7 @@ import {
   CommentIcon,
   retryJobIcon,
   downloadReportIcon,
-} from "../utils/icons";
+} from "../../../common/icon/icons";
 
 export function JobActionsBar({ job }) {
   // routers

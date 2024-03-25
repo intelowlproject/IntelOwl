@@ -84,7 +84,7 @@ module.exports = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    "\\.(css|scss)$": "<rootDir>/tests/styleMock",
+    // "\\.(css|scss)$": "<rootDir>/tests/styleMock",
     "^certego(.*)$": "<rootDir>/src$1",
     "^test-utils$": "<rootDir>/tests/testing-utils",
     "^lodash-es$": "lodash",

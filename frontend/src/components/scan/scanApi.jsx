@@ -32,6 +32,7 @@ function createJobPayload(
   tlp,
   _scanMode,
   scanCheckTime,
+  investigationIdParam,
 ) {
   let payload = {};
   /* we add a custom function to the object to reuse the code:
@@ -100,6 +101,10 @@ function createJobPayload(
   if (_scanMode === ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS) {
     payload.append("scan_check_time", `${scanCheckTime}:00:00`);
   }
+  // investigation id in param
+  if (investigationIdParam) {
+    payload.append("investigation", investigationIdParam);
+  }
   // remove custom method in order to avoid to send it to the backend
   if (!isSample) delete payload.append;
   console.debug("job request params:");
@@ -156,6 +161,7 @@ export async function createJob(
   tlp,
   _scanMode,
   scanCheckTime,
+  investigationIdParam,
 ) {
   try {
     console.debug(
@@ -195,6 +201,7 @@ export async function createJob(
       tlp,
       _scanMode,
       scanCheckTime,
+      investigationIdParam,
     );
     const resp = await axios.post(apiUrl, payload, {
       headers: {
@@ -255,7 +262,10 @@ export async function createJob(
           10000,
         );
       }
-      return Promise.resolve(jobIdsAccepted.concat(jobIdsExists));
+      return Promise.resolve({
+        jobIds: jobIdsAccepted.concat(jobIdsExists),
+        investigationId: parseInt(respData[0].investigation, 10) || null,
+      });
     }
     // else
     addToast("Failed!", respData?.message, "danger");

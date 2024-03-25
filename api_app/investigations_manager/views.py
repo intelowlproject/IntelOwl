@@ -2,16 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
-from django.core.exceptions import BadRequest
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from ..mixins import PaginationMixin
 from ..models import Job
 from ..permissions import IsObjectOwnerOrSameOrgPermission
 from ..views import ModelWithOwnershipViewSet
@@ -22,7 +20,7 @@ from .serializers import InvestigationSerializer, InvestigationTreeSerializer
 logger = logging.getLogger(__name__)
 
 
-class InvestigationViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelViewSet):
+class InvestigationViewSet(ModelWithOwnershipViewSet, ModelViewSet):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
     serializer_class = InvestigationSerializer
     ordering = ["-start_time"]
@@ -43,14 +41,15 @@ class InvestigationViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelView
         return obj
 
     def _get_job(self, request):
-        try:
-            job_pk = request.POST["job"]
-        except KeyError:
-            raise BadRequest("You should set the `job` argument in the data")
+        if "job" not in request.data:
+            raise ValidationError(
+                {"detail": "You should set the `job` argument in the data"}
+            )
+        job_pk = request.data.get("job")
         try:
             job = Job.objects.visible_for_user(self.request.user).get(pk=job_pk)
         except Job.DoesNotExist:
-            raise BadRequest(f"Job {job_pk} does not exist")
+            raise NotFound(detail=f"Job {job_pk} does not exist")
         return job
 
     @action(methods=["POST"], url_name="add_job", detail=True)
@@ -73,11 +72,16 @@ class InvestigationViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelView
                 status=status.HTTP_200_OK,
                 data=InvestigationSerializer(instance=investigation).data,
             )
-
         elif job.investigation_id == investigation.id:
-            raise BadRequest("Job is already part of this investigation")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "Job is already part of this investigation"},
+            )
         else:
-            raise BadRequest("Job is already part of different investigation")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "Job is already part of different investigation"},
+            )
 
     @action(methods=["POST"], url_name="remove_job", detail=True)
     def remove_job(self, request, pk):
@@ -89,7 +93,10 @@ class InvestigationViewSet(PaginationMixin, ModelWithOwnershipViewSet, ModelView
                 "You do not have permissions to edit this investigation with that job"
             )
         if job.investigation_id != investigation.pk:
-            raise BadRequest(f"You can't remove job {job.id} from investigation")
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": f"You can't remove job {job.id} from investigation"},
+            )
         job.investigation = None
         job.save()
         investigation.refresh_from_db()

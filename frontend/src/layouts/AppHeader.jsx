@@ -14,7 +14,6 @@ import { NavLink as RRNavLink, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { MdHome, MdShare } from "react-icons/md";
 import {
-  RiFileListFill,
   RiPlugFill,
   RiBookReadFill,
   RiGuideLine,
@@ -22,6 +21,7 @@ import {
 } from "react-icons/ri";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
+import { TbReport } from "react-icons/tb";
 
 // lib
 import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
@@ -51,9 +51,9 @@ const authLinks = (
       </NavLink>
     </NavItem>
     <NavItem>
-      <NavLink className="d-flex-start-center" end to="/jobs">
-        <RiFileListFill />
-        <span className="ms-1">Jobs</span>
+      <NavLink className="d-flex-start-center" end to="/history">
+        <TbReport />
+        <span className="ms-1">History</span>
       </NavLink>
     </NavItem>
     <NavItem>

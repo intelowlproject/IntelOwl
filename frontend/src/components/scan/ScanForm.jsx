@@ -66,7 +66,7 @@ import {
   sanitizeObservable,
   getObservableClassification,
 } from "../../utils/observables";
-import { SpinnerIcon } from "../common/SpinnerIcon";
+import { SpinnerIcon } from "../common/icon/icons";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -81,6 +81,7 @@ function DangerErrorMessage(fieldName) {
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
+  const investigationIdParam = searchParams.get("investigation") || null;
   const { guideState, setGuideState } = useGuideContext();
 
   const { pluginsState: organizationPluginsState } = useOrganizationStore(
@@ -185,7 +186,7 @@ export default function ScanForm() {
       return errors;
     },
     onSubmit: async (values) => {
-      const jobIds = await createJob(
+      const response = await createJob(
         values.observableType === JobTypes.OBSERVABLE
           ? values.observable_names.map((observable) =>
               sanitizeObservable(observable),
@@ -200,16 +201,26 @@ export default function ScanForm() {
         values.tlp,
         values.scan_mode,
         values.scan_check_time,
+        investigationIdParam,
       );
 
-      if (jobIds.length > 1) {
-        setTimeout(() => navigate(`/jobs/`), 1000);
-      } else {
+      // multiple job or investigation id in GET param
+      if (response.investigationId) {
         setTimeout(
-          () => navigate(`/jobs/${jobIds[0]}/${JobResultSections.VISUALIZER}/`),
+          () => navigate(`/investigation/${response.investigationId}`),
+          1000,
+        );
+      } else {
+        // single job or pivot
+        setTimeout(
+          () =>
+            navigate(
+              `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
+            ),
           1000,
         );
       }
+
       refetchQuota();
       formik.setSubmitting(false);
     },

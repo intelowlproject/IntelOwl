@@ -48,6 +48,27 @@ export function prettifyErrors(errorResponse) {
   if (errorResponse.response.data?.detail) {
     return errorResponse.response.data.detail;
   }
+  // model validation errors
+  /**
+    "errors":{
+      "test_key": ["error"],
+      "another_key": ["error", "another error"],
+    }
+  */
+  if (errorResponse.response.data?.errors) {
+    const prettyHTMLList = [];
+    Object.entries(errorResponse.response.data?.errors).forEach(
+      ([errorField, errorItem]) => {
+        prettyHTMLList.push(<strong>{errorField}</strong>);
+        if (Array.isArray(errorItem)) {
+          errorItem.forEach((error) => prettyHTMLList.push(<li>{error}</li>));
+        } else {
+          prettyHTMLList.push(<li>{errorItem}</li>);
+        }
+      },
+    );
+    return <ul>{prettyHTMLList}</ul>;
+  }
 
   return JSON.stringify(errorResponse.response.data);
 }

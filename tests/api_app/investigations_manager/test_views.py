@@ -84,6 +84,10 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         investigation = self.get_object()
         response = self.client.post(f"{self.URL}/{investigation}/add_job", data={})
         self.assertEqual(response.status_code, 400)
+        result = response.json()
+        self.assertEqual(
+            result["errors"]["detail"], "You should set the `job` argument in the data"
+        )
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -109,6 +113,10 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
         investigation = self.get_object()
         response = self.client.post(f"{self.URL}/{investigation}/remove_job", data={})
         self.assertEqual(response.status_code, 400)
+        result = response.json()
+        self.assertEqual(
+            result["errors"]["detail"], "You should set the `job` argument in the data"
+        )
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",

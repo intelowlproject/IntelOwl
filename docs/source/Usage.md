@@ -15,6 +15,7 @@ This page includes the most important things to know and understand when using I
   - [Special Plugins operations](#special-plugins-operations)
   - [TLP Support](#tlp-support)
 - [Investigations Framework](#investigations-framework)
+  - [Create and populate an Investigation](#create-and-populate-an-investigation)
 
 ## How to interact with IntelOwl
 
@@ -572,6 +573,15 @@ Things to know about the framework:
 If you want to add a job to an Investigation, you should click to the root block of the Investigation (see following image):
 
 ![img_1.png](../static/add_job_to_investigation.png)
+
+Once a job has been added, you'll have something like this:
+
+![img.png](../static/simple_investigation.png)
+
+If you want to remove a Job, you can click on the Job block and click "Remove branch". On the contrary, if you just want to see Job Results, you can click in the "Link" button. (check next image)
+
+![img.png](../static/job_options.png)
+
 
 
 

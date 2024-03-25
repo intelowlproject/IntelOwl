@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
+import { MdInfoOutline } from "react-icons/md";
 
 import {
   ElasticTimePicker,
@@ -27,8 +28,8 @@ const toPassTableProps = {
 };
 
 // component
-export default function InvestigationTable() {
-  console.debug("InvestigationTable rendered!");
+export default function InvestigationsTable() {
+  console.debug("InvestigationsTable rendered!");
 
   // page title
   useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
@@ -66,11 +67,25 @@ export default function InvestigationTable() {
     <Container fluid>
       {/* Basic */}
       <Row className="mb-2">
-        <Col>
+        <Col className="d-flex align-items-center">
           <h1 id="investigationHistory">
-            Investigation History&nbsp;
-            <small className="text-muted">{data?.count} total</small>
+            Investigations History&nbsp;
+            <small className="text-gray">{data?.count} total</small>
           </h1>
+          <div className="ms-2">
+            <MdInfoOutline id="investigationstable-infoicon" fontSize="20" />
+            <UncontrolledTooltip
+              trigger="hover"
+              target="investigationstable-infoicon"
+              placement="right"
+              fade={false}
+              innerClassName="p-2 text-start text-nowrap md-fit-content"
+            >
+              Investigations are a framework to connect jobs with each other,
+              correlate the findings and collaborate with teammates to reach
+              common goals.
+            </UncontrolledTooltip>
+          </div>
         </Col>
         <Col className="align-self-center">
           <ElasticTimePicker

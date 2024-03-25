@@ -9,8 +9,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { createInvestigation } from "./investigations/result/investigationApi";
 
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
-const InvestigationTable = React.lazy(
-  () => import("./investigations/table/InvestigationTable"),
+const InvestigationsTable = React.lazy(
+  () => import("./investigations/table/InvestigationsTable"),
 );
 /*
 lazy imports to enable code splitting
@@ -43,7 +43,7 @@ const historyRoutes = [
     ),
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
-        <InvestigationTable />
+        <InvestigationsTable />
       </Suspense>
     ),
   },

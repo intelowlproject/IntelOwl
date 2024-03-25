@@ -10,6 +10,7 @@ from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import (
     feodo_tracker,
+    greynoise_labs,
     maxmind,
     phishing_army,
     talos,
@@ -148,3 +149,50 @@ class CronTests(CustomTestCase):
     def test_yara_updater(self):
         yara_scan.YaraScan.update()
         self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))
+
+    @if_mock_connections(
+        patch(
+            "requests.post",
+            return_value=MockUpResponse(
+                [
+                    {
+                        "data": {
+                            "topC2s": {
+                                "queryInfo": {
+                                    "resultsAvailable": 1914,
+                                    "resultsLimit": 191,
+                                },
+                                "c2s": [
+                                    {
+                                        "source_ip": "91.92.247.12",
+                                        "c2_ips": ["103.245.236.120"],
+                                        "c2_domains": [],
+                                        "hits": 11608,
+                                        "pervasiveness": 94,
+                                    },
+                                    {
+                                        "source_ip": "14.225.208.190",
+                                        "c2_ips": ["14.225.213.142"],
+                                        "c2_domains": [],
+                                        "hits": 2091,
+                                        "pervasiveness": 26,
+                                    },
+                                    {
+                                        "source_ip": "157.10.53.101",
+                                        "c2_ips": ["14.225.208.190"],
+                                        "c2_domains": [],
+                                        "hits": 1193,
+                                        "pervasiveness": 23,
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                200,
+            ),
+        )
+    )
+    def test_greynoise_labs_updater(self):
+        greynoise_labs.GreynoiseLabs.update()
+        self.assertTrue(os.path.exists(f"{settings.MEDIA_ROOT}/topc2s_ips.txt"))

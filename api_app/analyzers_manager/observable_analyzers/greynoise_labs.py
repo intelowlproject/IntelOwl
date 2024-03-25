@@ -57,7 +57,7 @@ class GreynoiseLabs(ObservableAnalyzer):
             for key, value in queries.items():
                 if not value["ip_required"]:
                     if not os.path.isfile(value["db_location"]) and not self.update():
-                        raise AnalyzerRunException(f"Failed extraction from {key} db")
+                        logger.error(f"Failed extraction from {key} db")
                     if not os.path.exists(value["db_location"]):
                         raise AnalyzerRunException(
                             f"database location {value['db_location']} does not exist"

@@ -198,16 +198,19 @@ export const jobTableColumns = [
     Header: "Playbook Executed",
     id: "playbook_to_execute",
     accessor: (job) => job,
-    Cell: ({ value: job }) => (
-      <div className="d-flex justify-content-between">
-        <span className="d-block text-truncate">
-          <CopyToClipboardButton showOnHover text={job.playbook_to_execute}>
-            {job.playbook_to_execute}
-          </CopyToClipboardButton>
-        </span>
-        <PlaybookInfoPopoverIcon job={job} />
-      </div>
-    ),
+    Cell: ({ value: job }) => {
+      const playbookName = job.playbook_to_execute || "Custom analysis";
+      return (
+        <div className="d-flex justify-content-between">
+          <span className="d-block text-truncate">
+            <CopyToClipboardButton showOnHover text={playbookName}>
+              {playbookName}
+            </CopyToClipboardButton>
+          </span>
+          <PlaybookInfoPopoverIcon job={job} />
+        </div>
+      );
+    },
     disableSortBy: true,
     Filter: DefaultColumnFilter,
     maxWidth: 180,

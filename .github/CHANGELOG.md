@@ -31,6 +31,7 @@ As usual, we add new analyzers. This release brings a lot of new ones:
 * [DNS0](https://docs.dns0.eu)
 * [Greynoise Labs](https://api.labs.greynoise.io/)
 * [TweetFeed](https://tweetfeed.live/)
+* [Tor Nodes DanMeUk](https://www.dan.me.uk/tornodes)
 
 
 ## [v5.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.3)

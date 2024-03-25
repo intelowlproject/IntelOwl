@@ -10,7 +10,6 @@ from requests.structures import CaseInsensitiveDict
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.constants import ObservableTypes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -91,21 +90,17 @@ class DehashedSearch(ObservableAnalyzer):
 
         total_entries = []
         for page_no in range(1, self.pages + 1):
-            try:
-                logger.info(
-                    f"{self.__repr__()} -> fetching search results for page #{page_no}"
-                )
-                resp = requests.get(f"{url}&page={page_no}", headers=headers)
-                resp.raise_for_status()
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
+            logger.info(
+                f"{self.__repr__()} -> fetching search results for page #{page_no}"
+            )
+            resp = requests.get(f"{url}&page={page_no}", headers=headers)
+            resp.raise_for_status()
+            entries_fetched = resp.json().get("entries", None)
+            if not entries_fetched:
+                entries_fetched = []
             else:
-                entries_fetched = resp.json().get("entries", None)
-                if not entries_fetched:
-                    entries_fetched = []
-                else:
-                    total_entries.extend(entries_fetched)
-                logger.info(f"{self.__repr__()} -> got {len(entries_fetched)} entries")
+                total_entries.extend(entries_fetched)
+            logger.info(f"{self.__repr__()} -> got {len(entries_fetched)} entries")
 
         return total_entries
 

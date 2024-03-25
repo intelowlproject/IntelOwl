@@ -4,7 +4,6 @@
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -24,12 +23,8 @@ class MalpediaScan(FileAnalyzer):
         # construct req
         headers = {"Authorization": f"APIToken {self._api_key_name}"}
         files = {"file": binary}
-
-        try:
-            response = requests.post(self.url, headers=headers, files=files)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(self.url, headers=headers, files=files)
+        response.raise_for_status()
 
         result = response.json()
         return result

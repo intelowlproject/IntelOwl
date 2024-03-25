@@ -4,10 +4,7 @@ from typing import Dict
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers.dns0.dns0_base import DNS0Mixin
 from api_app.models import Parameter, PluginConfig
@@ -47,10 +44,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
         response = requests.get(
             self.base_url + self.endpoint, params=params, headers=headers
         )
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            raise AnalyzerRunException(e)
+        response.raise_for_status()
 
         return response.json()
 

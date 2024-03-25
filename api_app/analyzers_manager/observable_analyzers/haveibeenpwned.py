@@ -4,7 +4,6 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -26,13 +25,10 @@ class HaveIBeenPwned(classes.ObservableAnalyzer):
 
         headers = {"hibp-api-key": self._api_key_name}
 
-        try:
-            response = requests.get(
-                self.base_url + self.observable_name, params=params, headers=headers
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.get(
+            self.base_url + self.observable_name, params=params, headers=headers
+        )
+        response.raise_for_status()
 
         result = response.json()
         return result

@@ -61,6 +61,7 @@ class GreynoiseLabs(ObservableAnalyzer):
                         self.report.errors.append(error_message)
                         self.report.save()
                         logger.error(error_message)
+                        continue
 
                     with open(value["db_location"], "r", encoding="utf-8") as f:
                         db = f.read()

@@ -110,7 +110,7 @@ class TweetFeeds(ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        response = {
+        response = [
             {
                 "date": "2024-03-19 00:31:36",
                 "user": "Metemcyber",
@@ -127,7 +127,7 @@ class TweetFeeds(ObservableAnalyzer):
                 "tags": ["#phishing"],
                 "tweet": "https://twitter.com/Metemcyber/status/1769884392477077774",
             },
-        }
+        ]
         patches = [
             if_mock_connections(
                 patch(

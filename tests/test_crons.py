@@ -144,20 +144,22 @@ class CronTests(CustomTestCase):
         patch(
             "requests.get",
             return_value=MockUpResponse(
-                {
-                    "date": "2024-03-19 00:31:36",
-                    "user": "Metemcyber",
-                    "type": "url",
-                    "value": "http://210.56.49.214",
-                    "tags": ["#phishing"],
-                },
-                {
-                    "date": "2024-03-19 00:31:36",
-                    "user": "Metemcyber",
-                    "type": "url",
-                    "value": "https://www.bhafulp.cn",
-                    "tags": ["#phishing"],
-                },
+                [
+                    {
+                        "date": "2024-03-19 00:31:36",
+                        "user": "Metemcyber",
+                        "type": "url",
+                        "value": "http://210.56.49.214",
+                        "tags": ["#phishing"],
+                    },
+                    {
+                        "date": "2024-03-19 00:31:36",
+                        "user": "Metemcyber",
+                        "type": "url",
+                        "value": "https://www.bhafulp.cn",
+                        "tags": ["#phishing"],
+                    },
+                ],
                 200,
             ),
         ),

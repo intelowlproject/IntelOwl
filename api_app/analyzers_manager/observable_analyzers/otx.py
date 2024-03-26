@@ -6,6 +6,7 @@ from typing import List
 from urllib.parse import urlparse
 
 import OTXv2
+import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -25,6 +26,15 @@ class OTXv2Extended(OTXv2.OTXv2):
     def __init__(self, *args, timeout=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.timeout = timeout
+
+    def session(self):
+        # modified version where retries are not implemented.
+        # this was needed because, otherwise, the analyzer could last too much time
+        # and become the bottleneck of all the application
+        if self.request_session is None:
+            self.request_session = requests.Session()
+
+        return self.request_session
 
     def get(self, url, **kwargs):
         try:
@@ -161,6 +171,10 @@ class OTX(classes.ObservableAnalyzer):
 
         result = {}
         for section in self.sections:
+            logger.info(
+                f"requesting OTX info for indicator "
+                f"{to_analyze_observable} and section {section}"
+            )
             try:
                 details = otx.get_indicator_details_by_section(
                     indicator_type=otx_type,

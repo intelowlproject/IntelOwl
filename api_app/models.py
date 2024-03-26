@@ -1217,7 +1217,7 @@ class PythonConfig(AbstractConfig):
         params = self.parameters.annotate_configured(
             self, user
         ).annotate_value_for_user(self, user, config_runtime)
-        not_configured_params = params.filter(required=True, value__isnull=True)
+        not_configured_params = params.filter(required=True, configured=False)
         if not_configured_params.exists():
             param = not_configured_params.first()
             raise TypeError(
@@ -1226,7 +1226,7 @@ class PythonConfig(AbstractConfig):
                 " does not have a valid value"
             )
 
-        return params
+        return params.filter(configured=True)
 
     def generate_health_check_periodic_task(self):
         from intel_owl.tasks import health_check

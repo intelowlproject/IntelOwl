@@ -14,6 +14,7 @@ from api_app.analyzers_manager.observable_analyzers import (
     phishing_army,
     talos,
     tor,
+    tweetfeeds,
 )
 from api_app.models import Job
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
@@ -138,6 +139,34 @@ class CronTests(CustomTestCase):
         self.assertTrue(
             os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json")
         )
+
+    @if_mock_connections(
+        patch(
+            "requests.get",
+            return_value=MockUpResponse(
+                [
+                    {
+                        "date": "2024-03-19 00:31:36",
+                        "user": "Metemcyber",
+                        "type": "url",
+                        "value": "http://210.56.49.214",
+                        "tags": ["#phishing"],
+                    },
+                    {
+                        "date": "2024-03-19 00:31:36",
+                        "user": "Metemcyber",
+                        "type": "url",
+                        "value": "https://www.bhafulp.cn",
+                        "tags": ["#phishing"],
+                    },
+                ],
+                200,
+            ),
+        ),
+    )
+    def test_tweetfeed_updater(self, mock_get=None):
+        tweetfeeds.TweetFeeds.update()
+        self.assertTrue(os.path.exists(f"{settings.MEDIA_ROOT}/tweetfeed_month.json"))
 
     def test_quark_updater(self):
         from quark.config import DIR_PATH

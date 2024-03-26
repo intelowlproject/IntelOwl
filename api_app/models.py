@@ -427,9 +427,14 @@ class Job(MP_Node):
                 "finished_analysis_time",
             ]
         )
-        # we update the status of the analysis
-        if root_investigation := self.get_root().investigation:
-            root_investigation.set_correct_status(save=True)
+        try:
+            # we update the status of the analysis
+            if root_investigation := self.get_root().investigation:
+                root_investigation.set_correct_status(save=True)
+        except Exception as e:
+            logger.exception(
+                f"investigation status not updated. Job: {self.pk}. Error: {e}"
+            )
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")

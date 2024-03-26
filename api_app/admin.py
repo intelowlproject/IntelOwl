@@ -196,7 +196,7 @@ class AbstractConfigAdminView(CustomAdminView):
     @admin.display(description="Disabled in orgs")
     def disabled_in_orgs(self, instance: AbstractConfig):
         return list(
-            instance.orgs_configuration.all().values_list(
+            instance.orgs_configuration.filter(disabled=True).values_list(
                 "organization__name", flat=True
             )
         )

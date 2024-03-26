@@ -194,5 +194,4 @@ class CronTests(CustomTestCase):
         )
     )
     def test_greynoise_labs_updater(self, mock_post=None):
-        greynoise_labs.GreynoiseLabs.update()
-        self.assertTrue(os.path.exists(f"{settings.MEDIA_ROOT}/topc2s_ips.txt"))
+        self.assertTrue(greynoise_labs.GreynoiseLabs.update())

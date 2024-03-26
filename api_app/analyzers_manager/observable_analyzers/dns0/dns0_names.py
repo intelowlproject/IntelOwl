@@ -66,8 +66,13 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
 
     def _validate_params(self):
         super()._validate_params()
-        if hasattr(self, "fuzzy") and any(
-            fuzzy_params not in _supported_fuzzy_params for fuzzy_params in self.fuzzy
+        if (
+            hasattr(self, "fuzzy")
+            and self.fuzzy
+            and any(
+                fuzzy_params not in _supported_fuzzy_params
+                for fuzzy_params in self.fuzzy
+            )
         ):
             raise AnalyzerConfigurationException(
                 "Fuzzy type not supported! "
@@ -75,7 +80,11 @@ class DNS0Names(classes.ObservableAnalyzer, DNS0Mixin):
                 "https://docs.dns0.eu/dns-api/names#fuzziness"
             )
 
-        if hasattr(self, "format") and self.format not in _supported_format_types:
+        if (
+            hasattr(self, "format")
+            and self.format
+            and self.format not in _supported_format_types
+        ):
             raise AnalyzerConfigurationException(
                 f"Format type {self.format} not supported! "
                 f"Available format types are: {_supported_format_types}"

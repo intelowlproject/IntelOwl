@@ -53,10 +53,18 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
 
     def _validate_params(self):
         super()._validate_params()
-        if hasattr(self, "direction") and self.direction not in _supported_directions:
+        if (
+            hasattr(self, "direction")
+            and self.direction
+            and self.direction not in _supported_directions
+        ):
             raise AnalyzerConfigurationException("Matching direction not specified!")
 
-        if hasattr(self, "format") and self.format not in _supported_format_types:
+        if (
+            hasattr(self, "format")
+            and self.format
+            and self.format not in _supported_format_types
+        ):
             raise AnalyzerConfigurationException(
                 f"Format type {self.format} not supported! "
                 f"Available format types are: {_supported_format_types}"

@@ -86,7 +86,11 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
             return False
 
     def _validate_params(self):
-        if hasattr(self, "sort") and self.sort not in _supported_sort_types:
+        if (
+            hasattr(self, "sort")
+            and self.sort
+            and self.sort not in _supported_sort_types
+        ):
             raise AnalyzerConfigurationException(
                 f"Sort type {self.sort} not supported! "
                 f"Available sort types are: {_supported_sort_types}"
@@ -94,6 +98,7 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         if (
             hasattr(self, "limit")
+            and self.limit
             and not _min_limit_value < self.limit <= _max_limit_value
         ):
             raise AnalyzerConfigurationException(
@@ -101,7 +106,7 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
                 f"Max value is {_max_limit_value}, min value is {_min_limit_value}"
             )
 
-        if hasattr(self, "offset") and self.offset < _min_offset_value:
+        if hasattr(self, "offset") and self.offset and self.offset < _min_offset_value:
             raise AnalyzerConfigurationException(
                 f"{self.offset} can't be below {_min_offset_value}"
             )

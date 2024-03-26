@@ -5,7 +5,35 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-plugin = {'python_module': {'health_check_schedule': None, 'update_schedule': {'minute': '0', 'hour': '*/6', 'day_of_week': '*', 'day_of_month': '*', 'month_of_year': '*'}, 'module': 'tor_nodes_danmeuk.TorNodesDanMeUK', 'base_path': 'api_app.analyzers_manager.observable_analyzers'}, 'name': 'Tor_Nodes_DanMeUk', 'description': 'check if an IP is a Tor Node', 'disabled': False, 'soft_time_limit': 30, 'routing_key': 'default', 'health_check_status': True, 'type': 'observable', 'docker_based': False, 'maximum_tlp': 'RED', 'observable_supported': ['ip'], 'supported_filetypes': [], 'run_hash': False, 'run_hash_type': '', 'not_supported_filetypes': [], 'model': 'analyzers_manager.AnalyzerConfig'}
+plugin = {
+    "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": {
+            "minute": "0",
+            "hour": "*/6",
+            "day_of_week": "*",
+            "day_of_month": "*",
+            "month_of_year": "*",
+        },
+        "module": "tor_nodes_danmeuk.TorNodesDanMeUK",
+        "base_path": "api_app.analyzers_manager.observable_analyzers",
+    },
+    "name": "Tor_Nodes_DanMeUk",
+    "description": "check if an IP is a Tor Node",
+    "disabled": False,
+    "soft_time_limit": 30,
+    "routing_key": "default",
+    "health_check_status": True,
+    "type": "observable",
+    "docker_based": False,
+    "maximum_tlp": "RED",
+    "observable_supported": ["ip"],
+    "supported_filetypes": [],
+    "run_hash": False,
+    "run_hash_type": "",
+    "not_supported_filetypes": [],
+    "model": "analyzers_manager.AnalyzerConfig",
+}
 
 params = []
 
@@ -42,6 +70,7 @@ def _get_real_obj(Model, field, value):
         value = [_get_obj(Model, other_model, val) for val in value]
     return value
 
+
 def _create_object(Model, data):
     mtm, no_mtm = {}, {}
     for field, value in data.items():
@@ -62,10 +91,11 @@ def _create_object(Model, data):
                 attribute.set(value)
         return False
     return True
-    
+
+
 def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")    
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     if not Model.objects.filter(name=plugin["name"]).exists():
@@ -77,25 +107,17 @@ def migrate(apps, schema_editor):
                 _create_object(PluginConfig, value)
 
 
-
 def reverse_migrate(apps, schema_editor):
     python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
     Model.objects.get(name=plugin["name"]).delete()
 
 
-
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ('api_app', '0061_job_depth_analysis'),
-        ('analyzers_manager', '0070_urlhaus_threatfox_disable_param'),
+        ("api_app", "0061_job_depth_analysis"),
+        ("analyzers_manager", "0070_urlhaus_threatfox_disable_param"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-        
-        
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

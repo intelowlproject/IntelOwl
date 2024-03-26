@@ -50,7 +50,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
             and (
                 user.has_membership()
                 and self.owner.has_membership()
-                and user.organization == self.owner.organization
+                and user.membership.organization == self.owner.mermbership.organization
             )
             # or same user
         ) or user == self.owner:

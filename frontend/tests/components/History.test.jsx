@@ -86,6 +86,7 @@ describe("test History component", () => {
       expect(axios.post).toHaveBeenCalledWith(INVESTIGATION_BASE_URI, {
         name: "Custom investigation",
         description: "",
+        for_organization: true,
       });
     });
   });

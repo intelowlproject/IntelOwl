@@ -12,7 +12,11 @@ import { prettifyErrors } from "../../../utils/api";
 
 export async function createInvestigation() {
   let success = false;
-  const data = { name: "Custom investigation", description: "" };
+  const data = {
+    name: "Custom investigation",
+    description: "",
+    for_organization: true,
+  };
   try {
     const response = await axios.post(`${INVESTIGATION_BASE_URI}`, data);
     success = response.status === 201;

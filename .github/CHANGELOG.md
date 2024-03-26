@@ -13,7 +13,6 @@ Come and join us at the [Honeynet Workshop](https://denmark2024.honeynet.org/) i
 
 You can also find us in [Fukuoka at the next FIRSTCON](https://www.first.org/conference/2024) event.
 
-
 **Breaking Changes**
 
 Many breaking changes have been introduced with this major release due to dependencies upgrades and architectural changes.

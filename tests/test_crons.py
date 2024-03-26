@@ -154,41 +154,39 @@ class CronTests(CustomTestCase):
         patch(
             "requests.post",
             return_value=MockUpResponse(
-                [
-                    {
-                        "data": {
-                            "topC2s": {
-                                "queryInfo": {
-                                    "resultsAvailable": 1914,
-                                    "resultsLimit": 191,
-                                },
-                                "c2s": [
-                                    {
-                                        "source_ip": "91.92.247.12",
-                                        "c2_ips": ["103.245.236.120"],
-                                        "c2_domains": [],
-                                        "hits": 11608,
-                                        "pervasiveness": 94,
-                                    },
-                                    {
-                                        "source_ip": "14.225.208.190",
-                                        "c2_ips": ["14.225.213.142"],
-                                        "c2_domains": [],
-                                        "hits": 2091,
-                                        "pervasiveness": 26,
-                                    },
-                                    {
-                                        "source_ip": "157.10.53.101",
-                                        "c2_ips": ["14.225.208.190"],
-                                        "c2_domains": [],
-                                        "hits": 1193,
-                                        "pervasiveness": 23,
-                                    },
-                                ],
+                {
+                    "data": {
+                        "topC2s": {
+                            "queryInfo": {
+                                "resultsAvailable": 1914,
+                                "resultsLimit": 191,
                             },
+                            "c2s": [
+                                {
+                                    "source_ip": "91.92.247.12",
+                                    "c2_ips": ["103.245.236.120"],
+                                    "c2_domains": [],
+                                    "hits": 11608,
+                                    "pervasiveness": 94,
+                                },
+                                {
+                                    "source_ip": "14.225.208.190",
+                                    "c2_ips": ["14.225.213.142"],
+                                    "c2_domains": [],
+                                    "hits": 2091,
+                                    "pervasiveness": 26,
+                                },
+                                {
+                                    "source_ip": "157.10.53.101",
+                                    "c2_ips": ["14.225.208.190"],
+                                    "c2_domains": [],
+                                    "hits": 1193,
+                                    "pervasiveness": 23,
+                                },
+                            ],
                         },
                     },
-                ],
+                },
                 200,
             ),
         )

@@ -130,9 +130,7 @@ class GreynoiseLabs(ObservableAnalyzer):
     @classmethod
     def update(cls):
         auth_token = cls._get_auth_token()
-        if auth_token:
-            return cls._update_db(auth_token=auth_token)
-        return False
+        return cls._update_db(auth_token=auth_token)
 
     @classmethod
     def _monkeypatch(cls):

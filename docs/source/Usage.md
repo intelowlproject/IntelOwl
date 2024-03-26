@@ -585,7 +585,8 @@ If you want to remove a Job, you can click on the Job block and click "Remove br
 
 ![img.png](../static/job_options.png)
 
+### Example output of a complex investigation
 
-
+![investigation_screen.png](../static/investigation_screen.png)
 
 

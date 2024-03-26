@@ -172,7 +172,7 @@ class OTX(classes.ObservableAnalyzer):
         result = {}
         for section in self.sections:
             logger.info(
-                f"requesting OTX info for indicator "
+                "requesting OTX info for indicator "
                 f"{to_analyze_observable} and section {section}"
             )
             try:

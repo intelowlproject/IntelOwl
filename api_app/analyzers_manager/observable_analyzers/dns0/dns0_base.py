@@ -10,6 +10,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
+from certego_saas.apps.user.models import User
 
 _supported_sort_types = [
     "first_seen",
@@ -127,3 +128,6 @@ class DNS0Mixin(BaseAnalyzerMixin, metaclass=ABCMeta):
                 params[p] = getattr(self, p)
 
         return params
+
+    def _get_health_check_url(self, user: User = None) -> typing.Optional[str]:
+        return self.base_url

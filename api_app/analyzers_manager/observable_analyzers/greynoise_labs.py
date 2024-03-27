@@ -184,7 +184,6 @@ class GreynoiseLabs(ObservableAnalyzer):
                                                 "c2_ips": ["103.245.236.120"],
                                                 "c2_domains": [],
                                                 "hits": 11608,
-                                                "pervasiveness": 94,
                                             },
                                             {
                                                 "source_ip": "14.225.208.190",

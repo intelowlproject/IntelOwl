@@ -861,6 +861,9 @@ class OrganizationPluginConfiguration(models.Model):
     class Meta:
         unique_together = [("object_id", "organization", "content_type")]
 
+    def __str__(self):
+        return f"{self.config} ({self.organization})"
+
     def disable_for_rate_limit(self):
         self.disabled = True
 
@@ -895,6 +898,7 @@ class OrganizationPluginConfiguration(models.Model):
             self.rate_limit_enable_task.clocked = clock_schedule
             self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
+        logger.info(f"Disabling {self} for rate limit")
         self.save()
 
     def disable_manually(self, user: User):

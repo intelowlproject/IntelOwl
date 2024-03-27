@@ -331,7 +331,12 @@ class Job(MP_Node):
     def get_root(self):
         if self.is_root():
             return self
-        return super().get_root()
+        try:
+            return super().get_root()
+        except self.MultipleObjectsReturned:
+            # django treebeard is not thread safe
+            # this is not a really valid solution, but it will work for now
+            return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
 
     @property
     def analyzed_object_name(self):

@@ -1232,6 +1232,7 @@ class PythonConfig(AbstractConfig):
             self, user
         ).annotate_value_for_user(self, user, config_runtime)
         not_configured_params = params.filter(required=True, configured=False)
+        # TODO to optimize
         if not_configured_params.exists():
             param = not_configured_params.first()
             if not settings.STAGE_CI or settings.STAGE_CI and not param.value:
@@ -1240,7 +1241,8 @@ class PythonConfig(AbstractConfig):
                     f"of plugin {param.python_module.module}"
                     " does not have a valid value"
                 )
-
+        if settings.STAGE_CI:
+            return params.filter(Q(configured=True) | Q(value__isnull=False))
         return params.filter(configured=True)
 
     def generate_health_check_periodic_task(self):

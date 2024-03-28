@@ -78,10 +78,13 @@ class Plugin(metaclass=ABCMeta):
         return self._job.user
 
     def __repr__(self):
-        return f"({self.__class__.__name__}, job: #{self.job_id})"
+        return str(self)
 
     def __str__(self):
-        return f"({self.__class__.__name__}, job: #{self.job_id})"
+        try:
+            return f"({self.__class__.__name__}, job: #{self.job_id})"
+        except AttributeError:
+            return f"({self.__class__.__name__}"
 
     def config(self, runtime_configuration: typing.Dict):
         self.__parameters = self._config.read_configured_params(

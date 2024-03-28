@@ -1234,11 +1234,12 @@ class PythonConfig(AbstractConfig):
         not_configured_params = params.filter(required=True, configured=False)
         if not_configured_params.exists():
             param = not_configured_params.first()
-            raise TypeError(
-                f"Required param {param.name} "
-                f"of plugin {param.python_module.module}"
-                " does not have a valid value"
-            )
+            if not settings.CI or settings.CI and not param.value:
+                raise TypeError(
+                    f"Required param {param.name} "
+                    f"of plugin {param.python_module.module}"
+                    " does not have a valid value"
+                )
 
         return params.filter(configured=True)
 

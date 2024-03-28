@@ -645,7 +645,7 @@ class Parameter(models.Model):
     is_secret = models.BooleanField(db_index=True)
     required = models.BooleanField(null=False)
     python_module = models.ForeignKey(
-        PythonModule, related_name="parameters", on_delete=models.PROTECT
+        PythonModule, related_name="parameters", on_delete=models.CASCADE
     )
 
     class Meta:

@@ -20,7 +20,7 @@ class TweetFeeds(ObservableAnalyzer):
 
     url = "https://api.tweetfeed.live/v1/"
     filter1: str = ""
-    time: str
+    time: str = ""
 
     @classmethod
     def location(cls) -> Tuple[str, str]:

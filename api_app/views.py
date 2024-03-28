@@ -5,7 +5,6 @@ import logging
 import uuid
 from abc import ABCMeta, abstractmethod
 
-from django.core.cache import cache
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
@@ -21,7 +20,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from api_app.websocket import JobConsumer
+from certego_saas.apps.organization.permissions import (
+    IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
+)
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerPermission as IsObjectUserPermission,
 )
@@ -35,30 +37,31 @@ from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
 from .decorators import deprecated_endpoint
 from .filters import JobFilter
+from .mixins import PaginationMixin
 from .models import (
     AbstractConfig,
     AbstractReport,
     Comment,
     Job,
+    OrganizationPluginConfiguration,
     PluginConfig,
     PythonConfig,
     Tag,
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
-from .serializers import (
+from .serializers.job import (
     CommentSerializer,
-    FileAnalysisSerializer,
+    FileJobSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
     JobRecentScanSerializer,
     JobResponseSerializer,
-    JobSerializer,
     ObservableAnalysisSerializer,
-    PluginConfigSerializer,
-    PythonConfigSerializer,
+    RestJobSerializer,
     TagSerializer,
 )
+from .serializers.plugin import PluginConfigSerializer, PythonConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -139,13 +142,13 @@ def ask_multi_analysis_availability(request):
 @add_docs(
     description="This endpoint allows to start a Job related for a single File."
     " Retained for retro-compatibility",
-    request=FileAnalysisSerializer,
+    request=FileJobSerializer,
     responses={200: JobResponseSerializer(many=True)},
 )
 @api_view(["POST"])
 def analyze_file(request):
     logger.info(f"received analyze_file from user {request.user}")
-    fas = FileAnalysisSerializer(data=request.data, context={"request": request})
+    fas = FileJobSerializer(data=request.data, context={"request": request})
     fas.is_valid(raise_exception=True)
     job = fas.save(send_task=True)
     jrs = JobResponseSerializer(job).data
@@ -177,9 +180,7 @@ def analyze_file(request):
 @api_view(["POST"])
 def analyze_multiple_files(request):
     logger.info(f"received analyze_multiple_files from user {request.user}")
-    fas = FileAnalysisSerializer(
-        data=request.data, context={"request": request}, many=True
-    )
+    fas = FileJobSerializer(data=request.data, context={"request": request}, many=True)
     fas.is_valid(raise_exception=True)
     jobs = fas.save(send_task=True)
     jrs = JobResponseSerializer(jobs, many=True).data
@@ -260,7 +261,7 @@ class CommentViewSet(ModelViewSet):
             permissions.append(IsObjectUserPermission())
         # the owner and anyone in the org can read the comment
         if self.action in ["retrieve"]:
-            permissions.append(IsObjectOwnerOrSameOrgPermission())
+            permissions.append(IsObjectUserOrSameOrgPermission())
 
         return permissions
 
@@ -282,9 +283,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     queryset = (
         Job.objects.prefetch_related("tags").order_by("-received_request_time").all()
     )
-    serializer_class = JobSerializer
+    serializer_class = RestJobSerializer
     serializer_action_classes = {
-        "retrieve": JobSerializer,
+        "retrieve": RestJobSerializer,
         "list": JobListSerializer,
     }
     filterset_class = JobFilter
@@ -297,7 +298,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.action in ["destroy", "kill"]:
-            permissions.append(IsObjectOwnerOrSameOrgPermission())
+            permissions.append(IsObjectUserOrSameOrgPermission())
         return permissions
 
     def get_queryset(self):
@@ -329,8 +330,11 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     @action(detail=False, methods=["post"])
     def recent_scans_user(self, request):
         limit = request.data.get("limit", 5)
+        if "is_sample" not in request.data:
+            raise ValidationError({"detail": "is_sample is required"})
         jobs = (
             Job.objects.filter(user__pk=request.user.pk)
+            .filter(is_sample=request.data["is_sample"])
             .annotate_importance(request.user)
             .order_by("-importance", "-finished_analysis_time")[:limit]
         )
@@ -616,12 +620,23 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == "list":
+            return qs.visible_for_user(self.request.user)
+        return qs
+
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.action in ["destroy", "update"]:
             if self.request.method == "PUT":
                 raise PermissionDenied()
-            permissions.append((IsObjectAdminPermission | IsObjectOwnerPermission)())
+            # code quality checker marks this as error, but it works correctly
+            permissions.append(
+                (  # skipcq: PYL-E1102
+                    IsObjectAdminPermission | IsObjectOwnerPermission
+                )()
+            )
 
         return permissions
 
@@ -635,14 +650,11 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
 class PluginConfigViewSet(ModelWithOwnershipViewSet):
     serializer_class = PluginConfigSerializer
     pagination_class = None
+    queryset = PluginConfig.objects.all()
 
     def get_queryset(self):
         # the .exclude is to remove the default values
-        return (
-            PluginConfig.objects.visible_for_user(self.request.user)
-            .exclude(owner__isnull=True)
-            .order_by("id")
-        )
+        return super().get_queryset().exclude(owner__isnull=True).order_by("id")
 
 
 @add_docs(
@@ -659,32 +671,20 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
 )
 @api_view(["GET"])
 def plugin_state_viewer(request):
-    from api_app.analyzers_manager.models import AnalyzerConfig
-    from api_app.connectors_manager.models import ConnectorConfig
-    from api_app.playbooks_manager.models import PlaybookConfig
-    from api_app.visualizers_manager.models import VisualizerConfig
-
     if not request.user.has_membership():
         raise PermissionDenied()
 
     result = {"data": {}}
-
-    classes = [AnalyzerConfig, ConnectorConfig, VisualizerConfig, PlaybookConfig]
-    for Class_ in classes:
-        for plugin in Class_.objects.all():
-            plugin: AbstractConfig
-            if plugin.disabled_in_organizations.filter(
-                pk=request.user.membership.organization.pk
-            ).exists():
-                result["data"][plugin.name] = {
-                    "disabled": True,
-                }
+    for opc in OrganizationPluginConfiguration.objects.filter(disabled=True):
+        result["data"][opc.config.name] = {
+            "disabled": True,
+        }
     return Response(result)
 
 
-class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
+class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     permission_classes = [
-        IsObjectOwnerOrSameOrgPermission,
+        IsObjectUserOrSameOrgPermission,
     ]
 
     @classmethod
@@ -727,6 +727,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 
         job = Job.objects.get(pk=report.job.pk)
         job.set_final_status()
+        JobConsumer.serialize_and_send_job(job)
 
     @staticmethod
     def perform_retry(report: AbstractReport):
@@ -808,10 +809,12 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
+class AbstractConfigViewSet(
+    PaginationMixin, viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta
+):
     permission_classes = [IsAuthenticated]
     ordering = ["name"]
-    lookup_field = "pk"
+    lookup_field = "name"
 
     @add_docs(
         description="Disable/Enable plugin for your organization",
@@ -823,8 +826,8 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         detail=True,
         url_path="organization",
     )
-    def disable_in_org(self, request, pk=None):
-        logger.info(f"get disable_in_org from user {request.user}, name {pk}")
+    def disable_in_org(self, request, name=None):
+        logger.info(f"get disable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
             if not request.user.membership.is_admin:
@@ -832,14 +835,15 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already disabled"})
-        obj.disabled_in_organizations.add(organization)
+        org_configuration.disable_manually(request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     @disable_in_org.mapping.delete
-    def enable_in_org(self, request, pk=None):
-        logger.info(f"get enable_in_org from user {request.user}, name {pk}")
+    def enable_in_org(self, request, name=None):
+        logger.info(f"get enable_in_org from user {request.user}, name {name}")
         obj: AbstractConfig = self.get_object()
         if request.user.has_membership():
             if not request.user.membership.is_admin:
@@ -847,9 +851,10 @@ class AbstractConfigViewSet(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         else:
             raise PermissionDenied()
         organization = request.user.membership.organization
-        if not obj.disabled_in_organizations.filter(pk=organization.pk).exists():
+        org_configuration = obj.get_or_create_org_configuration(organization)
+        if not org_configuration.disabled:
             raise ValidationError({"detail": f"Plugin {obj.name} already enabled"})
-        obj.disabled_in_organizations.remove(organization)
+        org_configuration.enable_manually(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -860,43 +865,6 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         return self.serializer_class.Meta.model.objects.all().prefetch_related(
             "python_module__parameters"
         )
-
-    def list(self, request, *args, **kwargs):
-        cache_name = (
-            f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
-        )
-
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-
-        if page is not None:
-            page = self.serializer_class.Meta.model.objects.filter(
-                pk__in=[plugin.pk for plugin in page]
-            )
-            if "page" in request.query_params and "page_size" in request.query_params:
-                cache_name += (
-                    f"_{request.query_params['page']}_"
-                    f"{request.query_params['page_size']}"
-                )
-            cache_hit = cache.get(cache_name)
-            if cache_hit is None:
-                logger.debug(f"View {cache_name} cache not hit")
-                serializer = self.get_serializer(page, many=True)
-                data = serializer.data
-                cache.set(cache_name, value=data, timeout=24 * 7)
-            else:
-                logger.debug(f"View {cache_name} cache hit")
-                data = cache_hit
-            return self.get_paginated_response(data)
-        cache_hit = cache.get(cache_name)
-
-        if cache_hit is None:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
-        else:
-            data = cache_hit
-
-        return Response(data)
 
     @add_docs(
         description="Health Check: "
@@ -916,14 +884,14 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         detail=True,
         url_path="health_check",
     )
-    def health_check(self, request, pk=None):
-        logger.info(f"get healthcheck from user {request.user}, name {pk}")
+    def health_check(self, request, name=None):
+        logger.info(f"get healthcheck from user {request.user}, name {name}")
         config: PythonConfig = self.get_object()
         python_obj = config.python_module.python_class(config)
         try:
             health_status = python_obj.health_check(request.user)
         except NotImplementedError as e:
-            logger.info(f"NotImplementedError {e}, user {request.user}, name {pk}")
+            logger.info(f"NotImplementedError {e}, user {request.user}, name {name}")
             raise ValidationError({"detail": "No healthcheck implemented"})
         except Exception as e:
             logger.exception(e)
@@ -938,8 +906,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         detail=True,
         url_path="pull",
     )
-    def pull(self, request, pk=None):
-        logger.info(f"post pull from user {request.user}, name {pk}")
+    def pull(self, request, name=None):
+        logger.info(f"post pull from user {request.user}, name {name}")
         obj: PythonConfig = self.get_object()
         python_obj = obj.python_module.python_class(obj)
         try:

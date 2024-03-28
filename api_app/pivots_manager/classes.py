@@ -71,7 +71,9 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
         if to_run:
             content = self.get_value_to_pivot_to()
             logger.info(f"Creating jobs from {content}")
-            for job in self._config.create_jobs(content, self._job.tlp, self._user):
+            for job in self._config.create_jobs(
+                content, self._job.tlp, self._user, parent_job=self._job
+            ):
                 report["jobs_id"].append(job.pk)
                 PivotMap.objects.create(
                     starting_job=self._job, ending_job=job, pivot_config=self._config

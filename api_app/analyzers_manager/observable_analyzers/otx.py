@@ -6,9 +6,11 @@ from typing import List
 from urllib.parse import urlparse
 
 import OTXv2
+import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.helpers import get_hash_type
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -24,6 +26,15 @@ class OTXv2Extended(OTXv2.OTXv2):
     def __init__(self, *args, timeout=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.timeout = timeout
+
+    def session(self):
+        # modified version where retries are not implemented.
+        # this was needed because, otherwise, the analyzer could last too much time
+        # and become the bottleneck of all the application
+        if self.request_session is None:
+            self.request_session = requests.Session()
+
+        return self.request_session
 
     def get(self, url, **kwargs):
         try:
@@ -76,7 +87,15 @@ class OTX(classes.ObservableAnalyzer):
         elif observable_classification == self.ObservableTypes.DOMAIN:
             otx_type = OTXv2.IndicatorTypes.DOMAIN
         elif observable_classification == self.ObservableTypes.HASH:
-            otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
+            matched_type = get_hash_type(self.observable_name)
+            if matched_type == "md5":
+                otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
+            elif matched_type == "sha-1":
+                otx_type = OTXv2.IndicatorTypes.FILE_HASH_SHA1
+            elif matched_type == "sha-256":
+                otx_type = OTXv2.IndicatorTypes.FILE_HASH_SHA256
+            else:
+                raise AnalyzerRunException(f"hash {matched_type} not supported")
         else:
             raise AnalyzerRunException(
                 f"not supported observable classification {observable_classification}"
@@ -142,13 +161,20 @@ class OTX(classes.ObservableAnalyzer):
             )
         )
         if not_supported_requested_section_list:
-            raise AnalyzerRunException(
-                f"Sections: {not_supported_requested_section_list} are not supported "
-                f"for indicator type: {otx_type}"
+            logger.warning(
+                f"Sections: {not_supported_requested_section_list}"
+                f" are not supported for indicator type: {otx_type}. "
+                "We remove them from the search."
             )
+            for not_supported in not_supported_requested_section_list:
+                self.sections.remove(not_supported)
 
         result = {}
         for section in self.sections:
+            logger.info(
+                "requesting OTX info for indicator "
+                f"{to_analyze_observable} and section {section}"
+            )
             try:
                 details = otx.get_indicator_details_by_section(
                     indicator_type=otx_type,

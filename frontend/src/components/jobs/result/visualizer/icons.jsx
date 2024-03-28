@@ -19,7 +19,7 @@ import {
   BsShieldFillCheck,
   BsTwitter,
 } from "react-icons/bs";
-import { FaBiohazard, FaLock } from "react-icons/fa";
+import { FaBiohazard, FaLock, FaLockOpen } from "react-icons/fa";
 import { HiMagnifyingGlassCircle } from "react-icons/hi2";
 import { ImExit } from "react-icons/im";
 import { SiVirustotal, SiVirtualbox, SiVmware } from "react-icons/si";
@@ -60,7 +60,8 @@ const generalIcons = Object.freeze({
   controller: <GiRetroController />,
   exit: <ImExit />,
   connection: <MdSignalWifiStatusbarConnectedNoInternet2 />,
-  locker: <FaLock />,
+  lock: <FaLock />,
+  lockOpen: <FaLockOpen />,
   virtualHost: <SiVirtualbox />,
   networkNode: <TbNetwork />,
   vmware: <SiVmware style={{ width: "40px", height: "24px" }} />,
@@ -151,7 +152,12 @@ export function getIcon(iconCode) {
    we would need to known the code of all flags and it's too expensive
   */
   if (!selectedIcon) {
-    return <span className={` mx-1 fi fi-${iconCode.toLowerCase()}`} />;
+    return (
+      <span
+        id={`Icon-${iconCode.toLowerCase()}`}
+        className={` mx-1 fi fi-${iconCode.toLowerCase()}`}
+      />
+    );
   }
   return selectedIcon;
 }

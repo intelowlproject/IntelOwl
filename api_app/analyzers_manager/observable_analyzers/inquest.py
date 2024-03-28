@@ -104,11 +104,8 @@ class InQuest(ObservableAnalyzer):
                 "Supported are: 'dfi_search', 'iocdb_search', 'repdb_search'."
             )
 
-        try:
-            response = requests.get(self.base_url + uri, headers=headers, timeout=30)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.get(self.base_url + uri, headers=headers, timeout=30)
+        response.raise_for_status()
         result = response.json()
         if (
             self.inquest_analysis == "dfi_search"

@@ -8,8 +8,11 @@ import typing
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
+from treebeard.mp_tree import MP_Node
 
 from api_app.interfaces import OwnershipAbstractModel
 
@@ -49,6 +52,7 @@ from api_app.queryset import (
     AbstractConfigQuerySet,
     AbstractReportQuerySet,
     JobQuerySet,
+    OrganizationPluginConfigurationQuerySet,
     ParameterQuerySet,
     PluginConfigQuerySet,
     PythonConfigQuerySet,
@@ -129,7 +133,10 @@ class PythonModule(models.Model):
 
     @property
     def queue(self) -> str:
-        return self.configs.order_by("?").first().queue
+        try:
+            return self.configs.order_by("?").first().queue
+        except AttributeError:
+            return None
 
     def _clean_python_module(self):
         try:
@@ -204,7 +211,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Job(models.Model):
+class Job(MP_Node):
     objects = JobQuerySet.as_manager()
 
     class Meta:
@@ -227,7 +234,14 @@ class Job(models.Model):
     # constants
     TLP = TLP
     Status = Status
-
+    investigation = models.ForeignKey(
+        "investigations_manager.Investigation",
+        on_delete=models.PROTECT,
+        related_name="jobs",
+        null=True,
+        blank=True,
+        default=None,
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -314,6 +328,16 @@ class Job(models.Model):
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
 
+    def get_root(self):
+        if self.is_root():
+            return self
+        try:
+            return super().get_root()
+        except self.MultipleObjectsReturned:
+            # django treebeard is not thread safe
+            # this is not a really valid solution, but it will work for now
+            return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
+
     @property
     def analyzed_object_name(self):
         return self.file_name if self.is_sample else self.observable_name
@@ -365,36 +389,12 @@ class Job(models.Model):
     def retry(self):
         self.status = self.Status.RUNNING
         self.save(update_fields=["status"])
-        failed_analyzers = self.analyzerreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
-        failed_connector = self.connectorreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
-        failed_pivot = self.pivotreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
 
-        failed_visualizer = self.visualizerreports.filter(
-            status__in=[
-                AbstractReport.Status.FAILED.value,
-                AbstractReport.Status.PENDING.value,
-            ]
-        ).values_list("config__pk", flat=True)
         runner = self._get_pipeline(
-            self.analyzers_to_execute.filter(pk__in=failed_analyzers),
-            self.pivots_to_execute.filter(pk__in=failed_pivot),
-            self.connectors_to_execute.filter(pk__in=failed_connector),
-            self.visualizers_to_execute.filter(pk__in=failed_visualizer),
+            analyzers=self.analyzerreports.filter_retryable().get_configurations(),
+            pivots=self.pivotreports.filter_retryable().get_configurations(),
+            connectors=self.connectorreports.filter_retryable().get_configurations(),
+            visualizers=self.visualizerreports.filter_retryable().get_configurations(),
         )
 
         runner.apply_async(
@@ -423,6 +423,7 @@ class Job(models.Model):
                 self.status = self.Status.REPORTED_WITH_FAILS
 
         self.finished_analysis_time = get_now()
+
         logger.info(f"{self.__repr__()} setting status to {self.status}")
         self.save(
             update_fields=[
@@ -431,6 +432,14 @@ class Job(models.Model):
                 "finished_analysis_time",
             ]
         )
+        try:
+            # we update the status of the analysis
+            if root_investigation := self.get_root().investigation:
+                root_investigation.set_correct_status(save=True)
+        except Exception as e:
+            logger.exception(
+                f"investigation status not updated. Job: {self.pk}. Error: {e}"
+            )
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
@@ -474,6 +483,7 @@ class Job(models.Model):
         from api_app.analyzers_manager.models import AnalyzerConfig
         from api_app.connectors_manager.models import ConnectorConfig
         from api_app.visualizers_manager.models import VisualizerConfig
+        from api_app.websocket import JobConsumer
         from intel_owl.celery import app as celery_app
 
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
@@ -493,6 +503,7 @@ class Job(models.Model):
 
         self.status = self.Status.KILLED
         self.save(update_fields=["status"])
+        JobConsumer.serialize_and_send_job(self)
 
     def _get_signatures(self, queryset: PythonConfigQuerySet) -> Signature:
         config_class: PythonConfig = queryset.model
@@ -650,20 +661,6 @@ class Parameter(models.Model):
         ):
             config: PythonConfig
             config.refresh_cache_keys()
-
-    def get_valid_value_for_test(self):
-        if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
-            raise PluginConfig.DoesNotExist
-        if "url" in self.name:
-            return "https://intelowl.com"
-        elif "pdns_credentials" == self.name:
-            return "user|pwd"
-        elif "test" in self.name:
-            raise PluginConfig.DoesNotExist
-        elif self.type == ParamTypes.INT.value:
-            return 10
-        else:
-            return "test"
 
     @cached_property
     def config_class(self) -> Type["PythonConfig"]:
@@ -841,21 +838,122 @@ class PluginConfig(OwnershipAbstractModel):
         return "2" if self.is_secret() else "1"
 
 
-class AbstractConfig(models.Model):
+class OrganizationPluginConfiguration(models.Model):
+    objects = OrganizationPluginConfigurationQuerySet.as_manager()
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to={
+            "model__endswith": "config",
+            "app_label__endswith": "manager",
+        },
+    )
+    object_id = models.IntegerField()
+    config = GenericForeignKey("content_type", "object_id")
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+    disabled = models.BooleanField(default=False)
+    disabled_comment = models.TextField(default="", blank=True)
+
+    rate_limit_timeout = models.DurationField(
+        null=True, blank=True, help_text="Expects data in the format 'DD HH:MM:SS'"
+    )
+    rate_limit_enable_task = models.ForeignKey(
+        PeriodicTask, on_delete=models.SET_NULL, null=True, blank=True, editable=False
+    )
+
+    class Meta:
+        unique_together = [("object_id", "organization", "content_type")]
+
+    def __str__(self):
+        return f"{self.config} ({self.organization})"
+
+    def disable_for_rate_limit(self):
+        self.disabled = True
+
+        enabled_to = now() + self.rate_limit_timeout
+        self.disabled_comment = (
+            "Rate limit hit at "
+            f"{now().strftime('%d %m %Y: %H %M %S')}.\n"
+            "Will be enabled back at "
+            f"{enabled_to.strftime('%d %m %Y: %H %M %S')}"
+        )
+        clock_schedule = ClockedSchedule.objects.get_or_create(clocked_time=enabled_to)[
+            0
+        ]
+        if not self.rate_limit_enable_task:
+            from intel_owl.tasks import enable_configuration_for_org_for_rate_limit
+
+            self.rate_limit_enable_task = PeriodicTask.objects.create(
+                name=f"{self.config.name}"
+                f"-{self.organization.name}"
+                "RateLimitCleaner",
+                clocked=clock_schedule,
+                one_off=True,
+                enabled=True,
+                task=f"{enable_configuration_for_org_for_rate_limit.__name__}",
+                kwargs=json.dumps(
+                    {
+                        "org_configuration_pk": self.pk,
+                    }
+                ),
+            )
+        else:
+            self.rate_limit_enable_task.clocked = clock_schedule
+            self.rate_limit_enable_task.enabled = True
+            self.rate_limit_enable_task.save()
+        logger.info(f"Disabling {self} for rate limit")
+        self.save()
+
+    def disable_manually(self, user: User):
+        self.disabled = True
+        self.disabled_comment = (
+            f"Disabled by user {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        if self.rate_limit_enable_task:
+            self.rate_limit_enable_task.delete()
+        self.save()
+
+    def enable_manually(self, user: User):
+        self.disabled_comment += (
+            f"\nEnabled back by {user.username}"
+            f" at {now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        self.enable()
+
+    def enable(self):
+        self.disabled = False
+        self.save()
+        if self.rate_limit_enable_task:
+            self.rate_limit_enable_task.delete()
+
+
+class ListCachable(models.Model):
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def delete_class_cache_keys(cls, user: User = None):
+        base_key = f"{cls.__name__}_{user.username if user else ''}"
+        for key in cache.get_where(f"list_{base_key}").keys():
+            logger.debug(f"Deleting cache key {key}")
+            cache.delete(key)
+
+
+class AbstractConfig(ListCachable):
     objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
         null=False,
         unique=True,
-        primary_key=True,
         validators=[plugin_name_validator],
     )
     description = models.TextField(null=False)
 
     disabled = models.BooleanField(null=False, default=False)
-    disabled_in_organizations = models.ManyToManyField(
-        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
-    )
+    orgs_configuration = GenericRelation(OrganizationPluginConfiguration)
 
     class Meta:
         indexes = [models.Index(fields=["name"]), models.Index(fields=["disabled"])]
@@ -863,6 +961,27 @@ class AbstractConfig(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_or_create_org_configuration(
+        self, organization: Organization
+    ) -> OrganizationPluginConfiguration:
+        try:
+            org_configuration = self.orgs_configuration.get(organization=organization)
+        except OrganizationPluginConfiguration.DoesNotExist:
+            org_configuration = OrganizationPluginConfiguration.objects.create(
+                config=self, organization=organization
+            )
+        return org_configuration
+
+    @classmethod
+    def get_content_type(cls) -> ContentType:
+        return ContentType.objects.get(
+            model=cls._meta.model_name, app_label=cls._meta.app_label
+        )
+
+    @property
+    def disabled_in_organizations(self) -> QuerySet:
+        return self.orgs_configuration.filter(disabled=True)
 
     @classmethod
     @property
@@ -889,8 +1008,9 @@ class AbstractConfig(models.Model):
         if user.has_membership():
             return (
                 not self.disabled
-                and user.membership.organization
-                not in self.disabled_in_organizations.all()
+                and not self.orgs_configuration.filter(
+                    disabled=True, organization__pk=user.membership.organization_id
+                ).exists()
             )
         return not self.disabled
 
@@ -992,8 +1112,6 @@ class PythonConfig(AbstractConfig):
 
     @classmethod
     def get_subclasses(cls) -> typing.List["PythonConfig"]:
-        from django.contrib.contenttypes.models import ContentType
-
         child_models = [ct.model_class() for ct in ContentType.objects.all()]
         return [
             model
@@ -1010,10 +1128,8 @@ class PythonConfig(AbstractConfig):
 
     def _get_params(self, user: User, runtime_configuration: Dict) -> Dict[str, Any]:
         return {
-            parameter.name: value
-            for parameter, value in self.read_params(
-                user, runtime_configuration
-            ).items()
+            parameter.name: parameter.value
+            for parameter in self.read_configured_params(user, runtime_configuration)
             if not parameter.is_secret
         }
 
@@ -1026,19 +1142,14 @@ class PythonConfig(AbstractConfig):
                 "task_id": task_id,
                 "start_time": now(),
                 "end_time": now(),
-                "parameters": self._get_params(job.user, job.runtime_configuration),
+                "parameters": self._get_params(
+                    job.user, job.get_config_runtime_configuration(self)
+                ),
             },
         )[0]
 
-    @classmethod
-    def delete_class_cache_keys(cls, user: User = None):
-        base_key = f"{cls.__name__}_{user.username if user else ''}"
-        for key in cache.get_where(f"list_{base_key}").keys():
-            logger.debug(f"Deleting cache key {key}")
-            cache.delete(key)
-
     def refresh_cache_keys(self, user: User = None):
-        from api_app.serializers import PythonListConfigSerializer
+        from api_app.serializers.plugin import PythonConfigListSerializer
 
         base_key = (
             f"{self.__class__.__name__}_{self.name}_{user.username if user else ''}"
@@ -1047,12 +1158,12 @@ class PythonConfig(AbstractConfig):
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
         if user:
-            PythonListConfigSerializer(
+            PythonConfigListSerializer(
                 child=self.serializer_class()
             ).to_representation_single_plugin(self, user)
         else:
             for generic_user in User.objects.exclude(email=""):
-                PythonListConfigSerializer(
+                PythonConfigListSerializer(
                     child=self.serializer_class()
                 ).to_representation_single_plugin(self, generic_user)
 
@@ -1114,33 +1225,25 @@ class PythonConfig(AbstractConfig):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def read_params(
+    def read_configured_params(
         self, user: User = None, config_runtime: Dict = None
-    ) -> Dict[Parameter, Any]:
-        # priority
-        # 1 - Runtime config
-        # 2 - Value inside the db
-        result = {}
-        for param in self.parameters.annotate_configured(
+    ) -> ParameterQuerySet:
+        params = self.parameters.annotate_configured(
             self, user
-        ).annotate_value_for_user(self, user):
-            param: Parameter
-            if param.name in config_runtime:
-                result[param] = config_runtime[param.name]
-            else:
-                if param.configured:
-                    result[param] = param.value
-                else:
-                    if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-                        result[param] = param.get_valid_value_for_test()
-                        continue
-                    if param.required:
-                        raise TypeError(
-                            f"Required param {param.name} "
-                            f"of plugin {param.python_module.module}"
-                            " does not have a valid value"
-                        )
-        return result
+        ).annotate_value_for_user(self, user, config_runtime)
+        not_configured_params = params.filter(required=True, configured=False)
+        # TODO to optimize
+        if not_configured_params.exists():
+            param = not_configured_params.first()
+            if not settings.STAGE_CI or settings.STAGE_CI and not param.value:
+                raise TypeError(
+                    f"Required param {param.name} "
+                    f"of plugin {param.python_module.module}"
+                    " does not have a valid value"
+                )
+        if settings.STAGE_CI:
+            return params.filter(Q(configured=True) | Q(value__isnull=False))
+        return params.filter(configured=True)
 
     def generate_health_check_periodic_task(self):
         from intel_owl.tasks import health_check
@@ -1159,7 +1262,7 @@ class PythonConfig(AbstractConfig):
                     "kwargs": json.dumps(
                         {
                             "python_module_pk": self.python_module_id,
-                            "python_config_pk": self.pk,
+                            "plugin_config_pk": self.pk,
                         }
                     ),
                 },

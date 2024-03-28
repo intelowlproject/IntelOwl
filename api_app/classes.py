@@ -7,9 +7,9 @@ from pathlib import PosixPath
 import requests
 from billiard.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
-from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import cached_property
+from requests import HTTPError
 
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 from certego_saas.apps.user.models import User
@@ -78,18 +78,26 @@ class Plugin(metaclass=ABCMeta):
         return self._job.user
 
     def __repr__(self):
-        return f"({self.__class__.__name__}, job: #{self.job_id})"
+        return str(self)
 
-    def _get_params(self, runtime_configuration: typing.Dict) -> typing.Dict:
-        return self._config.read_params(self._user, runtime_configuration)
+    def __str__(self):
+        try:
+            return f"({self.__class__.__name__}, job: #{self.job_id})"
+        except AttributeError:
+            return f"({self.__class__.__name__}"
 
     def config(self, runtime_configuration: typing.Dict):
-        for param, value in self._get_params(runtime_configuration).items():
-            attribute_name = f"_{param.name}" if param.is_secret else param.name
-            setattr(self, attribute_name, value)
+        self.__parameters = self._config.read_configured_params(
+            self._user, runtime_configuration
+        )
+        for parameter in self.__parameters:
+            attribute_name = (
+                f"_{parameter.name}" if parameter.is_secret else parameter.name
+            )
+            setattr(self, attribute_name, parameter.value)
             logger.debug(
                 f"Adding to {self.__class__.__name__} "
-                f"param {attribute_name} with value {value} "
+                f"param {attribute_name} with value {parameter.value} "
             )
 
     def before_run(self):
@@ -133,6 +141,11 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
+        if isinstance(e, HTTPError):
+            if "429 Client Error" in str(e):
+                self.disable_for_rate_limit()
+            else:
+                logger.info(f"Http error is {str(e)}")
         if settings.STAGE_CI:
             raise e
 
@@ -167,7 +180,7 @@ class Plugin(metaclass=ABCMeta):
         *_handle_analyzer_exception* and *_handle_base_exception* fn
         """
         return (
-            f"{self.__repr__()}."
+            f"{self}."
             f" {'Unexpected error' if is_base_err else f'{self.config_model.__name__} error'}:"  # noqa
             f" '{err}'"
         )
@@ -233,38 +246,63 @@ class Plugin(metaclass=ABCMeta):
     def update(cls) -> bool:
         raise NotImplementedError("No update implemented")
 
-    def health_check(self, user: User = None) -> bool:
-        for param in (
-            self._config.parameters.filter(
-                Q(name__startswith="url") | Q(name__startswith="_url")
-            )
-            .annotate_configured(self._config, user)
+    def _get_health_check_url(self, user: User = None) -> typing.Optional[str]:
+        params = (
+            self._config.parameters.annotate_configured(self._config, user)
             .annotate_value_for_user(self._config, user)
-        ):
+            .filter(name__icontains="url")
+        )
+        for param in params:
             if not param.configured or not param.value:
                 continue
             url = param.value
-            logger.info(
-                f"Url retrieved to verify is {param.name} for plugin {self.name}"
-            )
+            logger.info(f"Url retrieved to verify is {param.name} for {self}")
+            return url
+        return None
 
-            if url.startswith("http"):
-                logger.info(f"Checking url {url} for plugin {self.name}")
-                if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
-                    return True
-                try:
-                    # momentarily set this to False to
-                    # avoid fails for https services
-                    requests.head(url, timeout=10, verify=False)
-                except (
-                    requests.exceptions.ConnectionError,
-                    requests.exceptions.Timeout,
-                ) as e:
-                    logger.info(
-                        f"Health check failed: url {url}"
-                        f" for plugin {self.name}. Error: {e}"
-                    )
-                    return False
-                else:
-                    return True
+    def health_check(self, user: User = None) -> bool:
+        url = self._get_health_check_url(user)
+        if url and url.startswith("http"):
+            if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
+                return True
+            logger.info(f"Checking url {url} for {self}")
+            try:
+                # momentarily set this to False to
+                # avoid fails for https services
+                requests.head(url, timeout=10, verify=False)
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+            ) as e:
+                logger.info(
+                    f"Health check failed: url {url}" f" for {self}. Error: {e}"
+                )
+                return False
+            else:
+                return True
         raise NotImplementedError()
+
+    def disable_for_rate_limit(self):
+        logger.info(f"Trying to disable for rate limit {self}")
+        if self._user.has_membership():
+            org_configuration = self._config.get_or_create_org_configuration(
+                self._user.membership.organization
+            )
+            if org_configuration.rate_limit_timeout is not None:
+                api_key_parameter = self.__parameters.filter(
+                    name__contains="api_key"
+                ).first()
+                # if we do not have api keys OR the api key was org based
+                if not api_key_parameter or api_key_parameter.is_from_org:
+                    org_configuration.disable_for_rate_limit()
+                else:
+                    logger.warning(
+                        f"Not disabling {self} because api key used is personal"
+                    )
+            else:
+                logger.warning(
+                    f"You are trying to disable {self}"
+                    " for rate limit without specifying a timeout."
+                )
+        else:
+            logger.info(f"User {self._user.username} is not in organization.")

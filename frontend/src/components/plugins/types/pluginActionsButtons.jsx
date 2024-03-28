@@ -10,7 +10,7 @@ import { IconButton } from "@certego/certego-ui";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
-import { SpinnerIcon } from "../../common/SpinnerIcon";
+import { SpinnerIcon } from "../../common/icon/icons";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(

@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from typing import Dict
+
 import pycti
 from django.conf import settings
 from pycti.api.opencti_api_client import File
@@ -105,6 +107,11 @@ class OpenCTI(classes.Connector):
         )
         return md["id"]
 
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
+        if self.ssl_verify is None:
+            self.ssl_verify = False
+
     def run(self):
         # set up client
         self.opencti_instance = pycti.OpenCTIApiClient(
@@ -157,7 +164,7 @@ class OpenCTI(classes.Connector):
         ).create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
-            url=f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",
+            url=f"{settings.WEB_CLIENT_URL}/jobs/{self.job_id}",
         )
         # Add the external reference to the report
         pycti.StixDomainObject(self.opencti_instance, File).add_external_reference(

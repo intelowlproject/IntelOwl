@@ -45,7 +45,14 @@ export const ReportStatusColors = Object.freeze({
   failed: "danger",
 });
 
+export const InvestigationStatusColors = Object.freeze({
+  created: "light",
+  running: "secondary",
+  concluded: "success",
+});
+
 export const StatusColors = Object.freeze({
   ...JobStatusColors,
   ...ReportStatusColors,
+  ...InvestigationStatusColors,
 });

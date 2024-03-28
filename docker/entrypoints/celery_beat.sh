@@ -4,9 +4,11 @@ until cd /opt/deploy/intel_owl
 do
     echo "Waiting for server volume..."
 done
-
-# Apply database migrations
-echo "Waiting for db and UWSGI to be ready..."
-sleep 5
-
-/usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile= --schedule=/tmp/celerybeat-schedule --scheduler django_celery_beat.schedulers:DatabaseScheduler
+ARGUMENTS="-A intel_owl.celery beat --uid www-data --gid www-data --pidfile= --schedule=/tmp/celerybeat-schedule --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+if [[ $DEBUG == "True" ]] && [[ $DJANGO_TEST_SERVER == "True" ]];
+then
+    echo "Running celery with autoreload"
+    python3 manage.py celery_reload -c "$ARGUMENTS"
+else
+  /usr/local/bin/celery $ARGUMENTS
+fi

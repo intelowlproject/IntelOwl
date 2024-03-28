@@ -36,16 +36,12 @@ class Robtex(classes.ObservableAnalyzer):
 
         loaded_results = []
         for uri in uris:
-            try:
-                response = requests.get(self.base_url + uri)
-                response.raise_for_status()
-                result = response.text.split("\r\n")
-            except requests.ConnectionError as e:
-                raise AnalyzerRunException(f"Connection error: {e}")
-            else:
-                for item in result:
-                    if len(item) > 0:
-                        loaded_results.append(json.loads(item))
+            response = requests.get(self.base_url + uri)
+            response.raise_for_status()
+            result = response.text.split("\r\n")
+            for item in result:
+                if len(item) > 0:
+                    loaded_results.append(json.loads(item))
 
         return loaded_results
 

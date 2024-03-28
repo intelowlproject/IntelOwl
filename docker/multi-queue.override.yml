@@ -13,6 +13,7 @@ services:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_local
     restart: unless-stopped
+    hostname: celery_worker_local
     stop_grace_period: 3m
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
@@ -23,12 +24,14 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      - uwsgi
+      uwsgi:
+        condition: service_healthy
     <<: *no-healthcheck
 
   celery_worker_long:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_long
+    hostname: celery_worker_long
     restart: unless-stopped
     stop_grace_period: 3m
     volumes:
@@ -40,12 +43,14 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      - uwsgi
+      uwsgi:
+        condition: service_healthy
     <<: *no-healthcheck
 
   celery_worker_ingestor:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_ingestor
+    hostname: celery_worker_ingestor
     restart: unless-stopped
     stop_grace_period: 3m
     volumes:
@@ -57,5 +62,6 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      - uwsgi
+      uwsgi:
+        condition: service_healthy
     <<: *no-healthcheck

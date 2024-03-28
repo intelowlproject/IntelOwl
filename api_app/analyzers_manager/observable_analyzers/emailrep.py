@@ -34,11 +34,8 @@ class EmailRep(classes.ObservableAnalyzer):
 
         url = self.base_url.format(self.observable_name)
 
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
 
         return response.json()
 

@@ -8,9 +8,18 @@ from django.db.models import JSONField, ManyToManyField
 from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
 
-from .forms import ParameterInlineForm
-from .models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule, Tag
+from .forms import OrganizationPluginConfigurationForm, ParameterInlineForm
+from .models import (
+    AbstractConfig,
+    Job,
+    OrganizationPluginConfiguration,
+    Parameter,
+    PluginConfig,
+    PythonModule,
+    Tag,
+)
 from .tabulars import (
+    OrganizationPluginConfigurationInLine,
     ParameterInline,
     PluginConfigInlineForParameter,
     PluginConfigInlineForPythonConfig,
@@ -59,6 +68,12 @@ class JobAdminView(CustomAdminView):
         "file_name",
     )
     list_filter = ("status", "user", "tags")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
     @admin.display(description="Tags")
     def get_tags(self, instance: Job):
@@ -136,6 +151,9 @@ class AbstractReportAdminView(CustomAdminView):
     def has_add_permission(request):
         return False
 
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
 
 @admin.register(Parameter)
 class ParameterAdminView(CustomAdminView):
@@ -178,17 +196,27 @@ class AbstractConfigAdminView(CustomAdminView):
     @admin.display(description="Disabled in orgs")
     def disabled_in_orgs(self, instance: AbstractConfig):
         return list(
-            instance.disabled_in_organizations.all().values_list("name", flat=True)
+            instance.orgs_configuration.filter(disabled=True).values_list(
+                "organization__name", flat=True
+            )
         )
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-    list_display = (
-        "name",
-        "python_module",
-        "disabled",
-        "disabled_in_orgs",
-        "routing_key",
-    )
-    inlines = [PluginConfigInlineForPythonConfig]
+    list_display = AbstractConfigAdminView.list_display + ("routing_key",)
+    inlines = [PluginConfigInlineForPythonConfig, OrganizationPluginConfigurationInLine]
     list_filter = ["routing_key"]
+
+
+@admin.register(OrganizationPluginConfiguration)
+class OrganizationPluginConfigurationAdminView(CustomAdminView):
+    list_display = [
+        "config",
+        "organization",
+        "disabled",
+        "disabled_comment",
+        "rate_limit_timeout",
+    ]
+    exclude = ["content_type", "object_id"]
+    list_filter = ["organization", "content_type"]
+    form = OrganizationPluginConfigurationForm

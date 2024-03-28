@@ -45,11 +45,8 @@ class Spyse(classes.ObservableAnalyzer):
             "Authorization": f"Bearer {self._api_key_name}",
         }
         api_uri = self.__build_spyse_api_uri()
-        try:
-            response = requests.get(api_uri, headers=headers)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.get(api_uri, headers=headers)
+        response.raise_for_status()
 
         result = response.json()
         return result

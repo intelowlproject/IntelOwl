@@ -27,30 +27,25 @@ class XForce(classes.ObservableAnalyzer):
         endpoints = self._get_endpoints()
         result = {}
         for endpoint in endpoints:
-            try:
-                if self.observable_classification == self.ObservableTypes.URL:
-                    observable_to_check = quote_plus(self.observable_name)
-                else:
-                    observable_to_check = self.observable_name
-                url = f"{self.base_url}/{endpoint}/{observable_to_check}"
-                response = requests.get(
-                    url, auth=auth, headers=headers, timeout=self.timeout
-                )
-                if response.status_code == 404:
-                    result["found"] = False
-                else:
-                    response.raise_for_status()
-                result[endpoint] = response.json()
-                path = self.observable_classification
-                if self.observable_classification == self.ObservableTypes.DOMAIN:
-                    path = self.ObservableTypes.URL
-                elif self.observable_classification == self.ObservableTypes.HASH:
-                    path = "malware"
-                result[endpoint][
-                    "link"
-                ] = f"{self.web_url}/{path}/{observable_to_check}"
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
+            if self.observable_classification == self.ObservableTypes.URL:
+                observable_to_check = quote_plus(self.observable_name)
+            else:
+                observable_to_check = self.observable_name
+            url = f"{self.base_url}/{endpoint}/{observable_to_check}"
+            response = requests.get(
+                url, auth=auth, headers=headers, timeout=self.timeout
+            )
+            if response.status_code == 404:
+                result["found"] = False
+            else:
+                response.raise_for_status()
+            result[endpoint] = response.json()
+            path = self.observable_classification
+            if self.observable_classification == self.ObservableTypes.DOMAIN:
+                path = self.ObservableTypes.URL
+            elif self.observable_classification == self.ObservableTypes.HASH:
+                path = "malware"
+            result[endpoint]["link"] = f"{self.web_url}/{path}/{observable_to_check}"
 
         return result
 

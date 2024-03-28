@@ -2,12 +2,13 @@ import logging
 import typing
 from typing import Type
 
+from django.contrib.contenttypes.fields import GenericRelation
+
 from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuerySet
 from api_app.queryset import PythonConfigQuerySet
-from api_app.validators import plugin_name_validator
 
 if typing.TYPE_CHECKING:
-    from api_app.serializers import PythonConfigSerializer
+    from api_app.serializers.plugin import PythonConfigSerializer
 
 from django.db import models
 from django.utils.functional import cached_property
@@ -46,10 +47,10 @@ class PivotMap(models.Model):
         default=None,
         null=True,
     )
-    ending_job = models.ForeignKey(
+    ending_job = models.OneToOneField(
         Job,
         on_delete=models.CASCADE,
-        related_name="pivot_parents",
+        related_name="pivot_parent",
         editable=False,
     )
 
@@ -74,9 +75,6 @@ class PivotMap(models.Model):
 
 class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     objects = PivotConfigQuerySet.as_manager()
-    name = models.CharField(
-        max_length=100, null=False, validators=[plugin_name_validator], unique=True
-    )
     python_module = models.ForeignKey(
         PythonModule,
         on_delete=models.PROTECT,
@@ -96,6 +94,9 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         related_name="executed_by_pivot",
         null=False,
         blank=False,
+    )
+    orgs_configuration = GenericRelation(
+        "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
 
     def _generate_full_description(self) -> str:

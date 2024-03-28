@@ -12,16 +12,16 @@ import {
 } from "reactstrap";
 import { NavLink as RRNavLink, useLocation } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
-import { SiHackaday } from "react-icons/si";
 import { MdHome, MdShare } from "react-icons/md";
 import {
-  RiFileListFill,
   RiPlugFill,
   RiBookReadFill,
   RiGuideLine,
   RiTwitterXFill,
 } from "react-icons/ri";
 import { FaGithub, FaGoogle } from "react-icons/fa";
+import { IoSearch } from "react-icons/io5";
+import { TbReport } from "react-icons/tb";
 
 // lib
 import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
@@ -51,9 +51,9 @@ const authLinks = (
       </NavLink>
     </NavItem>
     <NavItem>
-      <NavLink className="d-flex-start-center" end to="/jobs">
-        <RiFileListFill />
-        <span className="ms-1">Jobs</span>
+      <NavLink className="d-flex-start-center" end to="/history">
+        <TbReport />
+        <span className="ms-1">History</span>
       </NavLink>
     </NavItem>
     <NavItem>
@@ -64,7 +64,7 @@ const authLinks = (
     </NavItem>
     <NavItem>
       <NavLink className="d-flex-start-center" end to="/scan">
-        <SiHackaday />
+        <IoSearch />
         <span className="ms-1">Scan</span>
       </NavLink>
     </NavItem>
@@ -74,7 +74,12 @@ const authLinks = (
 const guestLinks = (
   <>
     <NavItem>
-      <RRNavLink id="login-btn" className="btn btn-sm btn-info" end to="/login">
+      <RRNavLink
+        id="login-btn"
+        className="btn btn-sm btn-primary"
+        end
+        to="/login"
+      >
         Login
       </RRNavLink>
     </NavItem>
@@ -120,7 +125,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
           <span className="ms-1">Docs</span>
         </a>
       </NavItem>
-      <Button id="social-button" size="sm" className="mx-2 btn-info">
+      <Button id="social-button" size="sm" className="mx-2 btn-accent">
         <>
           <MdShare />
           <span className="ms-1">Social</span>
@@ -206,7 +211,7 @@ function AppHeader() {
   );
 
   return (
-    <header className="fixed-top">
+    <header className="sticky-top">
       {/* top loading bar */}
       <AxiosLoadingBar axiosInstance={axios} />
       {/* nav bar */}

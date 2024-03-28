@@ -174,15 +174,41 @@ First, you need to configure the environment variable `LOCAL_STORAGE` to `False`
 Then you need to configure permission access to the chosen S3 bucket.
 
 
-#### SQS
+#### Message Broker
 
-If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
+IntelOwl at the moment supports 3 different message brokers:
+- Redis (default)
+- RabbitMQ
+- Aws SQS
+
+The default broker, if nothing is specified, is `Redis`.
+
+To use `RabbitMQ`, you must use the option `--rabbitmq` when launching IntelOwl with the `./start` script.
+
+To use `Aws SQS`, you must use the option `--sqs` when launching IntelOwl with the `.start` script.
 In that case, you should create new SQS queues in AWS called `intelowl-<environment>-<queue_name>` and give your instances on AWS the proper permissions to access it.
+Moreover, you must populate the `AWS_USER_NUMBER`. This is required to connect in the right way to the selected SQS queues.
 Only FIFO queues are supported.
 
-Also, you need to set the environment variable `AWS_SQS` to `True` and populate the `AWS_USER_NUMBER`. This is required to connect in the right way to the selected SQS queues.
+If you want to use a remote message broker (like an `ElasticCache` or `AmazonMQ` instance), you must populate the `BROKER_URL` environment variable.
 
-Ultimately, to avoid to run RabbitMQ locally, you would need to use the option `--use-external-broker` when launching IntelOwl with the `./start` script.
+
+#### Websockets
+
+`Redis` is used for two different functions:
+- message broker
+- websockets
+
+For this reason, a `Redis` instance is **mandatory**.
+You can personalize IntelOwl in two different way:
+- with a local `Redis` instance.
+
+This is the default behaviour.
+
+- With a remote `Redis` instance.
+
+You must use the option `--use-external-redis` when launching IntelOwl with the `.start` script.
+Moreover, you need to populate the `WEBSOCKETS_URL` environment variable. If you are using `Redis` as a message broker too, remember to populate the `BROKER_URL` environment variable 
 
 #### RDS
 

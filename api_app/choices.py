@@ -120,6 +120,10 @@ class ReportStatus(models.TextChoices):
     SUCCESS = "SUCCESS"
     KILLED = "KILLED"
 
+    @classmethod
+    def final_statuses(cls):
+        return [cls.FAILED, cls.SUCCESS, cls.KILLED]
+
 
 class ParamTypes(models.TextChoices):
     INT = "int"

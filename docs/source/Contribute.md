@@ -60,7 +60,6 @@ cp docker/.env.start.test.template docker/.env.start.test
 
 # set STAGE env variable to "local"
 sed -i "s/STAGE=\"production\"/STAGE=\"local\"/g" docker/env_file_app
-sed -i "s/STAGE:\"prod\"/STAGE:\"local\"/g" frontend/public/env.js
 ```
 
 ### Backend
@@ -207,7 +206,7 @@ You may want to look at a few existing examples to start to build a new one, suc
 - [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
 - [malpedia_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/malpedia_scan.py), if you are creating a file analyzer
 - [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
-- **Please note:** If the new analyzer that you are adding is free for the user to use, please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`.
+- **Please note:** If the new analyzer that you are adding is free for the user to use, please add it in the `FREE_TO_USE_ANALYZERS` playbook. To do this you have to make a migration file; you can use `0026_add_mmdb_analyzer_free_to_use` as a template.
 
 After having written the new python module, you have to remember to:
 
@@ -293,14 +292,63 @@ After having written the new python module, you have to remember to:
 The visualizers' python code could be not immediate, so a small digression on _how_ it works is necessary.
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
 To do so, some utility classes have been made:
-
-- `VisualizablePage`: A single page of the final report, made of different **levels**. Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontaList` 
-- `VisualizableHorizontaList`: An horizontal list of visualizable elements that will be displayed as they are
-- `VisualizableVerticalList`: A vertical list made of a name, a title, and the list of elements.
-- `VisualizableBool`: The representation of a boolean value
-- `VisualizableTitle`: The representation of a tuple, composed of a title and a value
-- `VisualizableBase`: The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.
-
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-7n4c{border-color:inherit;font-family:"Courier New", Courier, monospace !important;text-align:center;vertical-align:top}
+.tg .tg-zh46{border-color:inherit;font-family:"Courier New", Courier, monospace !important;text-align:left;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-c3ow"><span style="font-weight:bold">Class</span></th>
+    <th class="tg-c3ow"><span style="font-weight:bold">Description</span></th>
+    <th class="tg-c3ow"><span style="font-weight:bold">Visual representation/example</span></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-7n4c">VisualizablePage</td>
+    <td class="tg-0pky">A single page of the final report, made of different <span style="font-weight:bold">levels</span>. Each page added is represented as a new tab in frontend.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableLevel_example.png" alt="Visualizable Page example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableLevel</td>
+    <td class="tg-0pky">Each level corresponds to a line in the final frontend visualizations. Every level is made of a <span class="tg-zh46">VisualizableHorizontalList</span>.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableLevel_example.png" alt="Visualizable Level example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableHorizontalList</td>
+    <td class="tg-0pky">An horizontal list of visualizable elements. In the example there is an horizontal list of vertical lists.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableHlist_example.png" alt="Visualizable Horizontal List Example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableVerticalList</td>
+    <td class="tg-0pky">A vertical list made of a name, a title, and the list of elements.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableVlist_example.png" alt="Visualizable Vertical List Example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableBool</td>
+    <td class="tg-0pky">The representation of a boolean value. It can be enabled or disabled with colors.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableBool_example.png" alt="Visualizable Bool example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableTitle</td>
+    <td class="tg-0pky">The representation of a tuple, composed of a title and a value.</td>
+    <td class="tg-c3ow"><img src="../static/visualizableTitle_example.png" alt="Visualizable Title example"/></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableBase</td>
+    <td class="tg-0pky">The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.</td>
+    <td class="tg-0pky">The title above is composed by two `VisualizableBase`</td>
+  </tr>
+</tbody>
+</table>
 Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
 At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
 
@@ -341,12 +389,12 @@ In the Pull Request remember to provide some real world examples (screenshots an
    3. *Type: list of types that are supported by the playbook
    4. *Analyzers: List of analyzers that will be run
    5. *Connectors: List of connectors that will be run
-2. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata playbooks_manager.PlaybookConfig --pks "<your playbook name>"`
-   2. Create a new migration file inside `/playbooks_manager/migrations/`
-      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
-      2. Remember to correctly set the `dependencies`
-      3. Remember to correctly set the `objects`
+
+### How to share your playbook with the community
+To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
+You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer (you will find it under `api_app/playbook_manager/migrations`).
+
+Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin PluginConfig <new_analyzer_name>`
 
 ## How to modify a plugin
 

@@ -1,21 +1,62 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import datetime
+from json import loads
 
-
+from celery._state import get_current_app
 from celery.canvas import Signature
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django_celery_beat.models import PeriodicTask
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import PythonModuleBasePaths
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import AbstractConfig, Job, Parameter, PluginConfig, PythonModule
+from api_app.models import (
+    AbstractConfig,
+    Job,
+    OrganizationPluginConfiguration,
+    Parameter,
+    PluginConfig,
+    PythonModule,
+)
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
+
+
+class OrganizationPluginConfigurationTestCase(CustomTestCase):
+    def test_disable_for_rate_limit(self):
+        org = Organization.objects.create(name="test_org")
+
+        Membership.objects.create(user=self.user, organization=org, is_owner=True)
+
+        obj = OrganizationPluginConfiguration.objects.create(
+            organization=org,
+            rate_limit_timeout=datetime.timedelta(minutes=1),
+            config=AnalyzerConfig.objects.first(),
+        )
+        self.assertFalse(obj.disabled)
+        self.assertIsNone(obj.rate_limit_enable_task)
+        obj.disable_for_rate_limit()
+        obj.refresh_from_db()
+        self.assertIsNotNone(obj.rate_limit_enable_task)
+        self.assertTrue(obj.disabled)
+        task: PeriodicTask = obj.rate_limit_enable_task
+        # retrieve the function
+        function = get_current_app().tasks.get(task.task)
+        # execute it
+        args = loads(task.args)
+        kwargs = loads(task.kwargs)
+        function(*args, **kwargs)
+        obj.refresh_from_db()
+        self.assertFalse(obj.disabled)
+        self.assertIsNone(obj.rate_limit_enable_task)
+        org.delete()
+        obj.delete()
 
 
 class PythonModuleTestCase(CustomTestCase):
@@ -214,11 +255,13 @@ class AbstractConfigTestCase(CustomTestCase):
 
         m = Membership.objects.create(user=self.user, organization=org, is_owner=True)
         muc: VisualizerConfig
-        muc.disabled_in_organizations.add(org)
+        org_config = muc.get_or_create_org_configuration(org)
+        org_config.disabled = True
+        org_config.save()
         self.assertFalse(
             VisualizerConfig.objects.filter(name="test")
             .exclude(disabled=True)
-            .exclude(disabled_in_organizations=self.user.membership.organization)
+            .exclude(orgs_configuration__organization=self.user.membership.organization)
         )
         self.assertFalse(muc.is_runnable(self.user))
 
@@ -417,8 +460,8 @@ class PluginConfigTestCase(CustomTestCase):
 class JobTestCase(CustomTestCase):
     def test_pivots_to_execute(self):
         ac = AnalyzerConfig.objects.first()
-        ac2 = AnalyzerConfig.objects.exclude(pk__in=[ac]).first()
-        ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac, ac2]).first()
+        ac2 = AnalyzerConfig.objects.exclude(pk__in=[ac.pk]).first()
+        ac3 = AnalyzerConfig.objects.exclude(pk__in=[ac.pk, ac2.pk]).first()
         j1 = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -427,6 +470,7 @@ class JobTestCase(CustomTestCase):
             status=Job.Status.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(
+            name="test",
             python_module=PythonModule.objects.get(
                 base_path="api_app.pivots_manager.pivots",
                 module="self_analyzable.SelfAnalyzable",

@@ -41,11 +41,8 @@ class HybridAnalysisGet(ObservableAnalyzer):
                 "Supported are: hash, ip, domain and url"
             )
 
-        try:
-            response = requests.post(self.api_url + uri, data=data, headers=headers)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(self.api_url + uri, data=data, headers=headers)
+        response.raise_for_status()
 
         result = response.json()
         # adding permalink to results

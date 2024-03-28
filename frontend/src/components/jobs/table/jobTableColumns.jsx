@@ -24,6 +24,7 @@ import {
 import { JobResultSections } from "../../../constants/miscConst";
 import { PlaybookInfoPopoverIcon } from "./playbookJobInfo";
 import { processTimeMMSS } from "../../../utils/time";
+import TableCell from "../../common/TableCell";
 
 export const jobTableColumns = [
   {
@@ -68,15 +69,7 @@ export const jobTableColumns = [
     id: "user",
     accessor: "user.username",
     Cell: ({ value, row: { original: job } }) => (
-      <CopyToClipboardButton
-        showOnHover
-        id={`table-user-${job?.id}`}
-        key={`table-user-${job?.id}`}
-        text={value}
-        className="d-block text-truncate"
-      >
-        {value}
-      </CopyToClipboardButton>
+      <TableCell job={job} isCopyToClipboard isTruncate value={value} />
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -87,15 +80,7 @@ export const jobTableColumns = [
     id: "name",
     accessor: (job) => job.observable_name || job.file_name,
     Cell: ({ value, row: { original: job } }) => (
-      <CopyToClipboardButton
-        showOnHover
-        id={`table-name-${job?.id}`}
-        key={`table-name-${job?.id}`}
-        text={value}
-        className="d-block text-truncate"
-      >
-        {value}
-      </CopyToClipboardButton>
+      <TableCell job={job} value={value} isCopyToClipboard isTruncate />
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -105,15 +90,7 @@ export const jobTableColumns = [
     id: "md5",
     accessor: "md5",
     Cell: ({ value, row: { original: job } }) => (
-      <CopyToClipboardButton
-        showOnHover
-        id={`table-md5-${job?.id}`}
-        key={`table-md5-${job?.id}`}
-        text={value}
-        className="d-block text-truncate"
-      >
-        {value}
-      </CopyToClipboardButton>
+      <TableCell job={job} isCopyToClipboard isTruncate value={value} />
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
@@ -192,6 +169,7 @@ export const jobTableColumns = [
     selectOptions: Object.values(ObservableClassifications)
       .sort()
       .concat(Object.values(FileMimeTypes).sort()),
+    Cell: ({ value }) => <TableCell value={value} />,
   },
   {
     Header: "TLP",
@@ -220,14 +198,19 @@ export const jobTableColumns = [
     Header: "Playbook Executed",
     id: "playbook_to_execute",
     accessor: (job) => job,
-    Cell: ({ value: job }) => (
-      <div className="d-flex justify-content-between">
-        <span className="d-block text-truncate">
-          {job.playbook_to_execute || "Custom Analysis"}
-        </span>
-        <PlaybookInfoPopoverIcon job={job} />
-      </div>
-    ),
+    Cell: ({ value: job }) => {
+      const playbookName = job.playbook_to_execute || "Custom analysis";
+      return (
+        <div className="d-flex justify-content-between">
+          <span className="d-block text-truncate">
+            <CopyToClipboardButton showOnHover text={playbookName}>
+              {playbookName}
+            </CopyToClipboardButton>
+          </span>
+          <PlaybookInfoPopoverIcon job={job} />
+        </div>
+      );
+    },
     disableSortBy: true,
     Filter: DefaultColumnFilter,
     maxWidth: 180,

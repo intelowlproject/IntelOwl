@@ -46,7 +46,7 @@ class ELFInfo(FileAnalyzer):
             )
             logger.warning(warning_message)
             self.report.errors.append(warning_message)
-            self.report.status = self.report.ReportStatus.FAILED
+            self.report.status = self.report.Status.FAILED
             self.report.save()
 
         return results

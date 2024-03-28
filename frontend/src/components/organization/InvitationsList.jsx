@@ -65,7 +65,7 @@ export default function InvitationsList() {
           <span>
             Being part of an organization has many perks.&nbsp;
             <a
-              href={`${INTELOWL_DOCS_URL}Advanced-Usage.html#organizations-and-data-sharing`}
+              href={`${INTELOWL_DOCS_URL}Advanced-Usage.html#organizations-and-user-management`}
               target="_blank"
               rel="noreferrer"
               className="link-primary"

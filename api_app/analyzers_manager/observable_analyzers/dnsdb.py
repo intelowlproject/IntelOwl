@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
-from typing import Dict
+from typing import Dict, Optional
 from urllib.parse import urlparse
 
 import dateparser
@@ -10,6 +10,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 _query_types = [
@@ -80,10 +81,7 @@ class DNSdb(classes.ObservableAnalyzer):
         if self.api_version == 1 and response.status_code == 404:
             self.no_results_found = True
         else:
-            try:
-                response.raise_for_status()
-            except requests.exceptions.HTTPError as e:
-                raise AnalyzerRunException(f"HTTPError: {e}")
+            response.raise_for_status()
 
         # validate output
         return self._parse_result(response.text)
@@ -156,22 +154,24 @@ class DNSdb(classes.ObservableAnalyzer):
 
         return {"Accept": header_application_type, "X-API-Key": self._api_key_name}
 
+    def _get_version_endpoint(self, api_version: int):
+        if api_version == 1:
+            return ""
+        elif api_version == 2:
+            return "/dnsdb/v2"
+        else:
+            raise AnalyzerRunException(
+                f"{api_version} not in supported versions list: "
+                f"{_supported_api_version}"
+            )
+
     def _create_url(self):
         """Generate API url
 
         :return: API url
         :rtype: str
         """
-        if self.api_version == 1:
-            api_version = ""
-        elif self.api_version == 2:
-            api_version = "/dnsdb/v2"
-        else:
-            raise AnalyzerRunException(
-                f"{self.api_version} not in supported versions list: "
-                f"{_supported_api_version}"
-            )
-
+        api_version = self._get_version_endpoint(self.api_version)
         observable_to_check = self.observable_name
         # for URLs we are checking the relative domain
         if self.observable_classification == self.ObservableTypes.URL:
@@ -287,6 +287,15 @@ class DNSdb(classes.ObservableAnalyzer):
             )
 
         return json_extracted_results
+
+    def _get_health_check_url(self, user: User = None) -> Optional[str]:
+        params = self._config.parameters.annotate_configured(
+            self._config, user
+        ).annotate_value_for_user(self._config, user)
+        server = params.get(name="server")
+        api_version = self._get_version_endpoint(params.get(name="api_version").value)
+
+        return f"https://{server}{api_version}"
 
     @classmethod
     def _monkeypatch(cls):

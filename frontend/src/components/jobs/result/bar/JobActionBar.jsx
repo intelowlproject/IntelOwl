@@ -4,12 +4,7 @@ import { Button } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { FaFileDownload } from "react-icons/fa";
 
-import {
-  ContentSection,
-  SocialShareBtn,
-  IconButton,
-  addToast,
-} from "@certego/certego-ui";
+import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
@@ -17,7 +12,12 @@ import { downloadJobSample, deleteJob } from "../jobApi";
 import { createJob } from "../../../scan/scanApi";
 import { ScanModesNumeric } from "../../../../constants/advancedSettingsConst";
 import { JobResultSections } from "../../../../constants/miscConst";
-import { DeleteIcon, CommentIcon, retryJobIcon } from "../utils/icons";
+import {
+  DeleteIcon,
+  CommentIcon,
+  retryJobIcon,
+  downloadReportIcon,
+} from "../../../common/icon/icons";
 
 export function JobActionsBar({ job }) {
   // routers
@@ -31,24 +31,26 @@ export function JobActionsBar({ job }) {
     setTimeout(() => navigate(-1), 250);
   };
 
-  const onDownloadSampleBtnClick = async () => {
-    const blob = await downloadJobSample(job.id);
-    if (!blob) return;
+  const fileDownload = (blob, filename) => {
     // create URL blob and a hidden <a> tag to serve file for download
     const fileLink = document.createElement("a");
     fileLink.href = window.URL.createObjectURL(blob);
     fileLink.rel = "noopener,noreferrer";
-    if (job?.file_name) {
-      // it forces the name of the downloaded file
-      fileLink.download = `${job.file_name}`;
-    }
+    fileLink.download = `${filename}`;
     // triggers the click event
     fileLink.click();
   };
 
-  const shareText = `Checkout this job (#${job.id}, ${
-    job.is_sample ? job.file_name : job.observable_name
-  }) on IntelOwl`;
+  const onDownloadSampleBtnClick = async () => {
+    const blob = await downloadJobSample(job.id);
+    if (!blob) return;
+    let filename = "file";
+    if (job?.file_name) {
+      // it forces the name of the downloaded file
+      filename = `${job.file_name}`;
+    }
+    fileDownload(blob, filename);
+  };
 
   const handleRetry = async () => {
     if (job.is_sample) {
@@ -77,6 +79,14 @@ export function JobActionsBar({ job }) {
         () => navigate(`/jobs/${jobId[0]}/${JobResultSections.VISUALIZER}/`),
         1000,
       );
+    }
+  };
+
+  const onDownloadReport = () => {
+    if (job) {
+      const blob = new Blob([JSON.stringify(job)], { type: "text/json" });
+      if (!blob) return;
+      fileDownload(blob, `job#${job.id}_report.json`);
     }
   };
 
@@ -110,29 +120,32 @@ export function JobActionsBar({ job }) {
         Icon={retryJobIcon}
         onClick={handleRetry}
         color="light"
-        size="xs"
+        size="sm"
         title="Force run the same analysis"
         titlePlacement="top"
         className="me-2"
       />
-
       <SaveAsPlaybookButton job={job} />
       {job?.is_sample && (
         <Button
           size="sm"
           color="secondary"
-          className="me-2"
+          className="ms-2"
           onClick={onDownloadSampleBtnClick}
         >
           <FaFileDownload />
           &nbsp;Sample
         </Button>
       )}
-      <SocialShareBtn
-        id="analysis-actions-share"
-        url={window.location.href}
-        text={shareText}
-        longtext={shareText}
+      <IconButton
+        id="downloadreportbtn"
+        Icon={downloadReportIcon}
+        size="sm"
+        color="accent-2"
+        className="ms-2"
+        onClick={onDownloadReport}
+        title="Download report in json format"
+        titlePlacement="top"
       />
     </ContentSection>
   );

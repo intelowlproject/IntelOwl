@@ -10,8 +10,15 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 class URLHaus(classes.ObservableAnalyzer):
     base_url = "https://urlhaus-api.abuse.ch/v1/"
+    disable: bool = False  # optional
+
+    def update(self) -> bool:
+        pass
 
     def run(self):
+        if self.disable:
+            return {"disabled": True}
+
         headers = {"Accept": "application/json"}
         if self.observable_classification in [
             self.ObservableTypes.DOMAIN,
@@ -27,13 +34,8 @@ class URLHaus(classes.ObservableAnalyzer):
                 f"not supported observable type {self.observable_classification}."
             )
 
-        try:
-            response = requests.post(
-                self.base_url + uri, data=post_data, headers=headers
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(self.base_url + uri, data=post_data, headers=headers)
+        response.raise_for_status()
 
         return response.json()
 

@@ -76,13 +76,11 @@ describe("test JobOverview (job report)", () => {
     // utility bar
     const utilitiesRow = container.querySelector("#utilitiesRow");
     expect(within(utilitiesRow).getByText("Job #1")).toBeInTheDocument();
-    const goBackButton = within(utilitiesRow).getByRole("button", { name: "" });
-    expect(goBackButton.id).toBe("gobackbutton");
     expect(
       within(utilitiesRow).getByRole("button", { name: "Comments (1)" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Delete Job" }),
+      within(utilitiesRow).getByRole("button", { name: "Delete" }),
     ).toBeInTheDocument();
     expect(
       within(utilitiesRow).getByRole("button", { name: "Rescan" }),
@@ -91,7 +89,7 @@ describe("test JobOverview (job report)", () => {
       within(utilitiesRow).getByRole("button", { name: "Save As Playbook" }),
     ).toBeInTheDocument();
     expect(
-      within(utilitiesRow).getByRole("button", { name: "Share" }),
+      within(utilitiesRow).getByRole("button", { name: "Report" }),
     ).toBeInTheDocument();
   });
 
@@ -210,6 +208,87 @@ describe("test JobOverview (job report)", () => {
     expect(
       within(JobInfoCardSection).getByText("TestPlaybook"),
     ).toBeInTheDocument();
+  });
+
+  test("investigation overview button", () => {
+    const { container } = render(
+      <BrowserRouter>
+        <JobOverview
+          isRunningJob={false}
+          section="raw"
+          subSection="analyzer"
+          refetch={() => {}}
+          job={{
+            id: 2,
+            user: {
+              username: "test",
+            },
+            tags: [],
+            comments: [
+              {
+                id: 1,
+                content: "test comment",
+                created_at: "2023-05-31T09:00:14.352880Z",
+                user: {
+                  username: "test",
+                },
+              },
+            ],
+            permissions: {
+              kill: true,
+              delete: true,
+              plugin_actions: true,
+            },
+            is_sample: false,
+            md5: "f9bc35a57b22f82c94dbcc420f71b903",
+            observable_name: "dns.google.com",
+            observable_classification: "domain",
+            file_name: "",
+            file_mimetype: "",
+            status: "reported_without_fails",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              pivots: {},
+              visualizers: {},
+            },
+            received_request_time: "2023-05-31T08:19:03.256003",
+            finished_analysis_time: "2023-05-31T08:19:04.484684",
+            process_time: 0.23,
+            tlp: "AMBER",
+            warnings: [],
+            errors: [],
+            analyzers_requested: ["Classic_DNS"],
+            analyzers_to_execute: [],
+            analyzer_reports: [],
+            connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
+            connectors_to_execute: [],
+            connector_reports: [],
+            pivots_requested: [],
+            pivots_to_execute: [],
+            pivot_reports: [],
+            visualizers_requested: [],
+            visualizers_to_execute: [],
+            visualizer_reports: [],
+            playbook_requested: "TestPlaybook",
+            playbook_to_execute: "TestPlaybook",
+            investigation: 1,
+          }}
+        />
+      </BrowserRouter>,
+    );
+    const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
+    expect(
+      within(JobInfoCardSection).getByText("dns.google.com"),
+    ).toBeInTheDocument();
+    const InvestigationOverviewButton = within(JobInfoCardSection).getByRole(
+      "button",
+      {
+        name: "Investigation Overview",
+      },
+    );
+    expect(InvestigationOverviewButton.id).toBe("investigationOverviewBtn");
+    expect(InvestigationOverviewButton).toBeInTheDocument();
   });
 
   test("move from raw to visualizer-Test page", async () => {

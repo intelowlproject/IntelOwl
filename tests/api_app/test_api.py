@@ -30,7 +30,7 @@ class ApiViewTests(CustomViewSetTestCase):
             ],
             "connectors_requested": [],
             "file_name": "file.exe",
-            "file_mimetype": "application/x-dosexec",
+            "file_mimetype": "application/vnd.microsoft.portable-executable",
         }
 
         self.analyze_multiple_files_data = {
@@ -41,8 +41,8 @@ class ApiViewTests(CustomViewSetTestCase):
             ],
             "connectors_requested": [],
             "file_mimetypes": [
-                "application/x-dosexec",
-                "application/x-dosexec",
+                "application/vnd.microsoft.portable-executable",
+                "application/vnd.microsoft.portable-executable",
             ],
         }
 
@@ -129,7 +129,7 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(md5, job.md5)
 
         self.assertCountEqual(
-            ["Suricata", "CapeSandbox", "YARAify_File_Scan"],
+            ["Suricata", "YARAify_File_Scan"],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
 
@@ -295,7 +295,7 @@ class ApiViewTests(CustomViewSetTestCase):
                 "md5": md5,
                 "is_sample": True,
                 "file_name": filename,
-                "file_mimetype": "application/x-dosexec",
+                "file_mimetype": "application/vnd.microsoft.portable-executable",
                 "file": uploaded_file,
             }
         )

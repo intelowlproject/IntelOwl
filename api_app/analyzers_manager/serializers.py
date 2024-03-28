@@ -1,14 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
-from ..serializers import (
-    AbstractReportBISerializer,
-    AbstractReportSerializer,
-    CrontabScheduleSerializer,
-    PeriodicTaskSerializer,
+from ..serializers.plugin import (
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
+from ..serializers.report import AbstractReportBISerializer, AbstractReportSerializer
 from .models import AnalyzerConfig, AnalyzerReport
 
 
@@ -34,9 +30,6 @@ class AnalyzerConfigSerializer(PythonConfigSerializer):
 
 
 class AnalyzerConfigSerializerForMigration(PythonConfigSerializerForMigration):
-    update_schedule = CrontabScheduleSerializer(read_only=True)
-    update_task = PeriodicTaskSerializer(read_only=True)
-
     class Meta:
         model = AnalyzerConfig
         exclude = PythonConfigSerializerForMigration.Meta.exclude

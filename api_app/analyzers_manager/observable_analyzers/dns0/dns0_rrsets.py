@@ -4,10 +4,7 @@ from typing import Dict
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers.dns0.dns0_base import DNS0Mixin
 from api_app.models import Parameter, PluginConfig
@@ -47,10 +44,7 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
         response = requests.get(
             self.base_url + self.endpoint, params=params, headers=headers
         )
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            raise AnalyzerRunException(e)
+        response.raise_for_status()
 
         return response.json()
 
@@ -59,10 +53,18 @@ class DNS0Rrsets(classes.ObservableAnalyzer, DNS0Mixin):
 
     def _validate_params(self):
         super()._validate_params()
-        if hasattr(self, "direction") and self.direction not in _supported_directions:
+        if (
+            hasattr(self, "direction")
+            and self.direction
+            and self.direction not in _supported_directions
+        ):
             raise AnalyzerConfigurationException("Matching direction not specified!")
 
-        if hasattr(self, "format") and self.format not in _supported_format_types:
+        if (
+            hasattr(self, "format")
+            and self.format
+            and self.format not in _supported_format_types
+        ):
             raise AnalyzerConfigurationException(
                 f"Format type {self.format} not supported! "
                 f"Available format types are: {_supported_format_types}"

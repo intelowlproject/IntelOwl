@@ -1,8 +1,10 @@
+// HTTP(S)
 // api/ auth
 export const API_BASE_URI = "/api";
 
 // intelowl core
 export const JOB_BASE_URI = `${API_BASE_URI}/jobs`;
+export const INVESTIGATION_BASE_URI = `${API_BASE_URI}/investigation`;
 export const COMMENT_BASE_URI = `${API_BASE_URI}/comments`;
 export const TAG_BASE_URI = `${API_BASE_URI}/tags`;
 export const ASK_MULTI_ANALYSIS_AVAILABILITY_URI = `${API_BASE_URI}/ask_multi_analysis_availability`;
@@ -42,5 +44,9 @@ export const NOTIFICATION_BASE_URI = `${API_BASE_URI}/notification`;
 
 // auth
 export const AUTH_BASE_URI = `${API_BASE_URI}/auth`;
-export const SESSIONS_BASE_URI = `${AUTH_BASE_URI}/sessions`;
 export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
+
+// WEBSOCKETS
+export const WEBSOCKET_BASE_URI = "ws";
+
+export const WEBSOCKET_JOBS_URI = `${WEBSOCKET_BASE_URI}/jobs`;

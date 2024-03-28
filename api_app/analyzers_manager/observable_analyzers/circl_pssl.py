@@ -1,16 +1,19 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import typing
 from typing import Dict
 
 import pypssl
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
+from certego_saas.apps.user.models import User
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class CIRCL_PSSL(classes.ObservableAnalyzer):
     _pdns_credentials: str
+    url = "https://www.circl.lu/"
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -25,7 +28,7 @@ class CIRCL_PSSL(classes.ObservableAnalyzer):
         user = self.__split_credentials[0]
         pwd = self.__split_credentials[1]
 
-        pssl = pypssl.PyPSSL(basic_auth=(user, pwd))
+        pssl = pypssl.PyPSSL(base_url=self.url, basic_auth=(user, pwd))
 
         result = pssl.query(self.observable_name, timeout=5)
 
@@ -49,6 +52,9 @@ class CIRCL_PSSL(classes.ObservableAnalyzer):
                 )
 
         return parsed_result
+
+    def _get_health_check_url(self, user: User = None) -> typing.Optional[str]:
+        return self.url
 
     @classmethod
     def _monkeypatch(cls):

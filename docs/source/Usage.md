@@ -2,11 +2,8 @@
 
 This page includes the most important things to know and understand when using IntelOwl.
 
-- [Client](#client)
-- [Organizations and User Management](#organizations-and-user-management)
-  - [Multi Tenancy](#multi-tenancy)
-  - [Registration](#registration)
-- [Plugins](#plugins)
+- [How to interact with IntelOwl](#how-to-interact-with-intelowl)
+- [Plugins Framework](#plugins-framework)
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Pivots](#pivots)
@@ -17,8 +14,10 @@ This page includes the most important things to know and understand when using I
   - [Enabling or Disabling Plugins](#enabling-or-disabling-plugins)
   - [Special Plugins operations](#special-plugins-operations)
   - [TLP Support](#tlp-support)
+- [Investigations Framework](#investigations-framework)
+  - [Create and populate an Investigation](#create-and-populate-an-investigation)
 
-## Client
+## How to interact with IntelOwl
 
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
@@ -27,8 +26,7 @@ There are multiple ways to interact with the Intel Owl APIs,
 1. Web Interface
 
    - Built-in Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, tags management and more features
-   - Built with [Create React App](https://create-react-app.dev/) and based on [certego-ui](https://github.com/certego/certego-ui).
-
+   
 2. pyIntelOwl (CLI/SDK)
 
    - Official Python client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
@@ -49,65 +47,7 @@ The server authentication is managed by API tokens. So, if you want to interact 
 Afterwards you can leverage the created tokens with the Intel Owl Client.
 </div>
 
-## Organizations and User management
-
-Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
-
-### Multi Tenancy
-
-Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
-Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.
-
-#### Manage organizations
-
-You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
-
-Once you create an organization, you are the unique "Owner" of that organization. So you are the only one who can delete the organization and promote/demote/kick users.
-Another role, which is called "Admin", can be set to a user (via the Django Admin interface only for now).
-Owners and admins share the following powers: they can manage invitations and the organization's plugin configuration.
-
-#### Accept Invites
-
-Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
-
-![img.png](../static/accept_invite.png)
-
-#### Plugins Params and Secrets
-
-From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
-This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
-Only Owners and Admins of the organization can set, change and delete them.
-
-#### Disable Plugins at Org level
-
-The org admin can disable a specific plugin for all the users in a specific org.
-To do that, Org Admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the plugin that they want to disable.
-
-![img.png](../static/disable_org.png)
-
-### Registration
-Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
-
-After a user registration has been made, an email is sent to the user to verify their email address. If necessary, there are buttons on the login page to resend the verification email and to reset the password.
-
-Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
-If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
-
-To have the "Registration" page to work correctly, you must configure some variables before starting IntelOwl. See [Optional Environment Configuration](/Installation.md#other-optional-configuration-to-enable-specific-services-features)
-
-In a development environment the emails that would be sent are written to the standard output.
-
-#### Recaptcha configuration
-The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
-
-If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE).
-
-Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY` value in the `env_file_app` file.
-
-Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `frontend/public/env.js` file.
-In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
-
-## Plugins
+## Plugins Framework
 
 Plugins are the core modular components of IntelOwl that can be easily added, changed and customized.
 There are several types of plugins:
@@ -207,7 +147,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `VirusTotal_v3_File`: check the file hash on VirusTotal. With TLP `CLEAR`, in case the hash is not found, you would send the file to the service.
 - `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
 - `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
-
+-  `Zippy_scan` : [Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated; takes in `lzma`,`zlib`,`brotli` as input based engines; `ensemble` being default.
 ##### Observable analyzers (ip, domain, url, hash)
 
 ###### Internal tools
@@ -219,6 +159,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 ###### External services
 
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
+* `BGP Ranking`: [BGP-Ranking](https://github.com/D4-project/BGP-Ranking) provides a way to collect such malicious activities, aggregate the information per ASN and provide a ranking model to rank the ASN from the most malicious to the less malicious ASN.
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `Auth0`: scan an IP against the Auth0 API
 * `BinaryEdge`: Details about an Host. List of recent events for the specified host, including details of exposed ports and services using [IP query](https://docs.binaryedge.io/api-v2/#v2queryiptarget) and return list of subdomains known from the target domains using [domain query](https://docs.binaryedge.io/api-v2/#v2querydomainssubdomaintarget)
@@ -239,6 +180,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `DNS0_rrsets_data`: Query billions of current and historical DNS resource records sets. Performs right-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DNS0_rrsets_name`: Query billions of current and historical DNS resource records sets. Performs left-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
+* `Feodo_Tracker`: [Feodo Tracker](https://feodotracker.abuse.ch/) offers various blocklists, helping network owners to protect their users from Dridex and Emotet/Heodo.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
 * `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
@@ -253,11 +195,13 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `IPApi`: Get information about IPs using [batch-endpoint](https://ip-api.com/docs/api:batch) and DNS using [DNS-endpoint](https://ip-api.com/docs/dns).
 * `IPInfo`: Location Information about an IP
+* `Ip2location`: [API Docs](https://www.ip2location.io/ip2location-documentation) IP2Location.io allows users to check IP address location in real time. (Supports both with or without key)
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in).
 * `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
@@ -265,6 +209,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MaxMindGeoIP`: extract GeoIP info for an observable
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
+* `Mmdb_server`: [Mmdb_server](https://github.com/adulau/mmdb-server) mmdb-server is an open source fast API server to lookup IP addresses for their geographic location, AS number. 
 * `Mnemonic_PassiveDNS` : Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 * `Netlas`: search an IP against [Netlas](https://netlas.io/api)
@@ -288,6 +233,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
 * `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
 * `Threatminer`: retrieve data from [Threatminer](https://www.threatminer.org/) API
+* `TorNodesDanMeUk`: check if an IP is a Tor Node using a list of all Tor nodes provided by [dan.me.uk](https://www.dan.me.uk/tornodes)
 * `TorProject`: check if an IP is a Tor Exit Node
 * `Triage_Search`: Search for reports of observables or upload from URL on triage cloud
 * `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list
@@ -302,7 +248,9 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
-
+* `Validin`:[Validin](https://app.validin.com/) investigates historic and current data describing the structure and composition of the internet.
+* `TweetFeed`: [TweetFeed](https://tweetfeed.live/) collects Indicators of Compromise (IOCs) shared by the infosec community at Twitter.\r\nHere you will find malicious URLs, domains, IPs, and SHA256/MD5 hashes.
+           
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -320,10 +268,12 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
 * `IntelX_Intelligent_Search`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
+* `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `MISP`: scan an observable on a MISP instance
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 * `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify](https://yaraify.abuse.ch/)
+* `PhoneInfoga` : [PhoneInfoga](https://sundowndev.github.io/phoneinfoga/) is one of the most advanced tools to scan international phone numbers. 
 
 ##### Optional analyzers
 
@@ -351,7 +301,7 @@ The following is the list of the available connectors. You can also navigate the
 
 ### Pivots
 
-With Intel v5.2.0 we introduced the `Pivot` Plugin.
+With IntelOwl v5.2.0 we introduced the `Pivot` Plugin.
 
 Pivots are designed to create a job from another job. This plugin allows the user to set certain conditions that trigger the execution of one or more subsequent jobs, strictly connected to the first one.
 
@@ -385,7 +335,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 
 ### Ingestors
 
-With Intel v5.1.0 we introduced the `Ingestor` Plugin.
+With IntelOwl v5.1.0 we introduced the `Ingestor` Plugin.
 
 Ingestors allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 Each Ingestor must have a `Playbook` attached: this will allow to create a `Job` from every IOC retrieved.
@@ -425,7 +375,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 
 You can create new playbooks in different ways, based on the users you want to share them with:
 
-If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`-
+If you want to share them to every user in IntelOwl, create them via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`.
 
 If you want share them to yourself or your organization only, you need to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
 In this way, after you have done an analysis, you can save the configuration of the Plugins you executed for re-use with a single click.
@@ -443,40 +393,53 @@ If you want to create completely new Plugins (not based on already existing pyth
 
 On the contrary, if you would like to just customize the already existing plugins, this is the place.
 
+#### SuperUser customization
+
 If you are an IntelOwl superuser, you can create, modify, delete analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at:
 - for analyzers: `/admin/analyzers_manager/analyzerconfig/`.
 - for connectors: `/admin/connectors_manager/connectorconfig/`.
 - ...and so on for all the Plugin types.
 
 The following are the most important fields that you can change without touching the source code:
-- `name`: Name of the analyzer
-- `description`: Description of the analyzer
-- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `disabled_in_organization`: you can choose to disable analyzers in some organizations only.
-- `python_module`: Python path of the class that will be executed 
-- `maximum_tlp`: see [TLP Support](#tlp-support)
-- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `routing_key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-- `update_schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
-Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
-A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
-
+- `Name`: Name of the analyzer
+- `Description`: Description of the analyzer
+- `Disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+- `Python Module`: Python path of the class that will be executed. This should not be changed most of the times.
+- `Maximum TLP`: see [TLP Support](#tlp-support)
+- `Soft Time Limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+- `Routing Key`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 For analyzers only:
-- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+- `Supported Filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+- `Not Supported Filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+- `Observable Supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
 
 For connectors only:
-- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
+- `Run on Failure` (default: `true`): if they can be run even if the job has status `reported_with_fails`
 
 For visualizers only:
-- `playbooks`: list of playbooks that trigger the specified visualizer execution.
+- `Playbooks`: list of playbooks that trigger the specified visualizer execution.
+
+Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
+A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 Changing other keys can break a plugin. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
+
+Other options can be added at the "Python module" level and not at the Plugin level. To do that, go to: `admin/api_app/pythonmodule/` and select the Python module used by the Plugin that you want to change.
+For example, the analyzer `AbuseIPDB` uses the Python module `abuseipdb.AbuseIPDB`.
+
+![img.png](../static/python_module_abuseipdb.png)
+
+Once there, you'll get this screen:
+
+![img.png](../static/abuseipdb.png)
+
+There you can change the following values:
+- `Update Schedule`: if the analyzer require some sort of update (local database, local rules, ...), you can specify the crontab schedule to update them.
+- `Health Check Schedule`: if the analyzer has implemented a Health Check, you can specify the crontab schedule to check whether the service works or not.
 
 #### Parameters
 Each Plugin could have one or more parameters available to be configured. These parameters allow the users to customize the Plugin behavior.
@@ -489,14 +452,38 @@ There are 2 types of Parameters:
 To see the list of these parameters:
 
 - You can view the "Plugin" Section in IntelOwl to have a complete and updated view of all the options available
-- You can view the parameters by exploring the Django Admin Interface.
+- You can view the parameters by exploring the Django Admin Interface:
+  - `admin/api_app/parameter/`
+  - or at the very end of each Plugin configuration like `/admin/analyzers_manager/analyzerconfig/`
 
-You can change the Plugin Parameters at 4 different levels:
+You can change the Plugin Parameters at 5 different levels:
 * if you are an IntelOwl superuser, you can go in the Django Admin Interface and change the default values of the parameters for every plugin you like. This option would change the default behavior for every user in the platform.
 * if you are either Owner or Admin of an org, you can customize the default values of the parameters for every member of the organization by leveraging the GUI in the "Organization Config" section. This overrides the previous option. 
 * if you are a normal user, you can customize the default values of the parameters for your analysis only by leveraging the GUI in the "Plugin config" section. This overrides the previous option. 
 * You can choose to provide runtime configuration when requesting an analysis that will override the previous options. This override is done only for the specific analysis. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
 
+<div class="admonition note">
+<p class="admonition-title">Playbook Exception</p>
+Please remember that, if you are executing a Playbook, the "Runtime configuration" of the Playbook take precedence over the Plugin Configuration.
+</div>
+
+<div class="admonition note">
+<p class="admonition-title">Plugin Configuration Order</p>
+Due to the multiple chances that are given to customize the parameters of the Plugins that are executed, it may be easy to confuse the order and launch Plugins without the awereness of what you are doing.
+
+This is the order to define which values are used for the parameters, starting by the most important element:
+* Runtime Configuration at Time of Request.
+* Runtime Configuration of the Playbook (if a Playbook is used and the Runtime Configuration at Time of Request is empty)
+* Plugin Configuration of the User
+* Plugin Configuration of the Organization
+* Default Plugin Configuration of the Parameter
+
+
+If you are using the GUI, please remember that you can always check the Parameters before starting a "Scan" by clicking at the "Runtime configuration" ![img.png](../static/runtime_config.png) button.
+
+Example:
+![img.png](../static/runtime_config_2.png)
+</div>
 
 ### Enabling or Disabling Plugins
 By default, each available plugin is configured as either disabled or not. The majority of them are enabled by default, while others may be disabled to avoid potential problems in the application usability for first time users.
@@ -561,9 +548,45 @@ Based on that value, IntelOwl understands if the specific plugin is allowed or n
 These is how every available TLP value behaves once selected for an analysis execution:
 1. `CLEAR`: no restriction (`WHITE` was replaced by `CLEAR` in TLP v2.0, but `WHITE` is supported for retrocompatibility)
 2. `GREEN`: disable analyzers that could impact privacy
-3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
-4. `RED` (default): disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
+3. `AMBER` (default): disable analyzers that could impact privacy and limit view permissions to my group
+4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
 
----
 
-To contribute to the project, see [Contribute](./Contribute.md).
+## Investigations Framework
+
+*Investigations* are a new framework introduced in IntelOwl v6 with the goal to allow the users to connect the analysis they do with each other.
+
+In this way the analysts can use IntelOwl as the starting point of their "Investigations", register their findings, correlate the information found, and collaborate...all in a single place.
+
+Things to know about the framework:
+* an *Investigation* is a superset of IntelOwl Jobs. It can have attached one or more existing IntelOwl Jobs
+* an *Investigation* contains a "description" section that can be changed and updated at anytime with new information from the analysts.
+* modification to the Investigation (description, jobs, etc) can be done by every member of the Organization where the creator of the Investigation belongs. However only they creator can delete an Investigation.
+
+### Create and populate an investigation
+
+*Investigations* are created in 2 ways:
+  * automatically:
+    * if you scan multiple observables at the same time, a new investigation will be created by default and all the observables they will be automatically connected to the same investigation.
+    * if you run a Job with a Playbook which contains a Pivot that triggers another Job, a new investigation will be created and both the Jobs will be added to the same investigation.
+  * manually: by clicking on the button in the "History" section you can create an Investigation from scratch without any job attached (see following image)
+
+![img.png](../static/create_investigation.png)
+
+If you want to add a job to an Investigation, you should click to the root block of the Investigation (see following image):
+
+![img_1.png](../static/add_job_to_investigation.png)
+
+Once a job has been added, you'll have something like this:
+
+![img.png](../static/simple_investigation.png)
+
+If you want to remove a Job, you can click on the Job block and click "Remove branch". On the contrary, if you just want to see Job Results, you can click in the "Link" button. (check next image)
+
+![img.png](../static/job_options.png)
+
+### Example output of a complex investigation
+
+![investigation_screen.png](../static/investigation_screen.png)
+
+

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Generator, Type
 from django.conf import settings
 from django.contrib.postgres.expressions import ArraySubquery
 from django.core.paginator import Paginator
+from treebeard.mp_tree import MP_NodeQuerySet
 
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
@@ -32,7 +33,7 @@ from django.db.models.functions import Cast, Coalesce
 from django.db.models.lookups import Exact
 from django.utils.timezone import now
 
-from api_app.choices import TLP
+from api_app.choices import TLP, ParamTypes
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
 
@@ -44,21 +45,19 @@ class SendToBiQuerySet(models.QuerySet):
 
     @staticmethod
     def _create_index_template():
-        if not settings.ELASTICSEARCH_CLIENT.indices.exists_template(
-            name=settings.ELASTICSEARCH_BI_INDEX
-        ):
-            with open(
-                settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
-            ) as f:
-                body = json.load(f)
-                body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
-                settings.ELASTICSEARCH_CLIENT.indices.put_template(
-                    name=settings.ELASTICSEARCH_BI_INDEX, body=body
-                )
+        with open(
+            settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
+        ) as f:
+            body = json.load(f)
+            body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
+            settings.ELASTICSEARCH_CLIENT.indices.put_template(
+                name=settings.ELASTICSEARCH_BI_INDEX, body=body
+            )
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
         from elasticsearch.helpers import bulk
 
+        self._create_index_template()
         BULK_MAX_SIZE = 1000
         found_errors = False
 
@@ -84,7 +83,6 @@ class SendToBiQuerySet(models.QuerySet):
                 self.model.objects.filter(
                     pk__in=objects.values_list("pk", flat=True)
                 ).update(sent_to_bi=True)
-        self._create_index_template()
         return found_errors
 
 
@@ -113,7 +111,27 @@ class CleanOnCreateQuerySet(models.QuerySet):
         )
 
 
+class OrganizationPluginConfigurationQuerySet(models.QuerySet):
+    def filter_for_config(self, config_class, config_pk: str):
+        return self.filter(
+            content_type=config_class.get_content_type(), object_id=config_pk
+        )
+
+
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
+    def alias_disabled_in_organization(self, organization):
+        from api_app.models import OrganizationPluginConfiguration
+
+        opc = OrganizationPluginConfiguration.objects.filter(organization=organization)
+
+        return self.alias(
+            disabled_in_organization=Exists(
+                opc.filter_for_config(
+                    config_class=self.model, config_pk=OuterRef("pk")
+                ).filter(disabled=True)
+            )
+        )
+
     def annotate_runnable(self, user: User = None) -> QuerySet:
         # the plugin is runnable IF
         # - it is not disabled
@@ -121,20 +139,30 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         qs = self.filter(
             pk=OuterRef("pk"),
         ).exclude(disabled=True)
-
         if user and user.has_membership():
-            qs = qs.exclude(
-                disabled_in_organizations=user.membership.organization,
-            )
+            qs = qs.alias_disabled_in_organization(user.membership.organization)
+            qs = qs.exclude(disabled_in_organization=True)
         return self.annotate(runnable=Exists(qs))
 
 
-class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
+class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
+    def create(self, parent=None, **kwargs):
+        if parent:
+            return parent.add_child(**kwargs)
+        return self.model.add_root(**kwargs)
+
+    def delete(self, *args, **kwargs):
+        # just to be sure to call the correct method
+        return MP_NodeQuerySet.delete(self, *args, **kwargs)
+
     @classmethod
     def _get_bi_serializer_class(cls):
-        from api_app.serializers import JobBISerializer
+        from api_app.serializers.job import JobBISerializer
 
         return JobBISerializer
+
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
 
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
@@ -197,6 +225,17 @@ class JobQuerySet(CleanOnCreateQuerySet, SendToBiQuerySet):
             .annotate(importance=F("date_weight") + F("user_weight"))
         )
 
+    def running(
+        self, check_pending: bool = False, minutes_ago: int = 25
+    ) -> "JobQuerySet":
+        qs = self.exclude(
+            status__in=[status.value for status in self.model.Status.final_statuses()]
+        )
+        if not check_pending:
+            qs = qs.exclude(status=self.model.Status.PENDING.value)
+        difference = now() - datetime.timedelta(minutes=minutes_ago)
+        return qs.filter(received_request_time__lte=difference)
+
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
     def annotate_configured(
@@ -226,7 +265,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
                 .visible_for_user_owned(user)
-                .values("value")[:1]
+                .values("value")[:1],
             )
         )
 
@@ -241,7 +280,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
                 .visible_for_user_by_org(user)
-                .values("value")[:1]
+                .values("value")[:1],
             )
             if user and user.has_membership()
             else Value(None, output_field=JSONField()),
@@ -256,27 +295,87 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
                 )
                 .default_values()
-                .values("value")[:1]
+                .values("value")[:1],
+            )
+        )
+
+    def _alias_runtime_config(self, runtime_config=None):
+        if not runtime_config:
+            runtime_config = {}
+        return self.alias(
+            runtime_value=Value(
+                runtime_config.get(F("name"), None),
+                output_field=JSONField(),
+            )
+        )
+
+    def _alias_for_test(self):
+        if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
+            return self.alias(
+                test_value=Value(
+                    None,
+                )
+            )
+        return self.alias(
+            test_value=Case(
+                When(
+                    name__icontains="url",
+                    then=Value("https://intelowl.com", output_field=JSONField()),
+                ),
+                When(
+                    name="pdns_credentials",
+                    then=Value("user|pwd", output_field=JSONField()),
+                ),
+                When(name__contains="test", then=Value(None, output_field=JSONField())),
+                When(
+                    type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())
+                ),
+                default=Value("test", output_field=JSONField()),
+                output_field=JSONField(),
             )
         )
 
     def annotate_value_for_user(
-        self, config: "PythonConfig", user: User = None
+        self, config: "PythonConfig", user: User = None, runtime_config=None
     ) -> "ParameterQuerySet":
         return (
             self.prefetch_related("values")
             ._alias_owner_value_for_user(config, user)
             ._alias_org_value_for_user(config, user)
             ._alias_default_value(config)
+            ._alias_runtime_config(runtime_config)
+            ._alias_for_test()
             # importance order
             .annotate(
+                # 1. runtime
+                # 2. owner
+                # 3. organization
+                # 4. default value
+                # 5. (if TEST environment) test value
+                # 5. (if NOT TEST environment) None
                 value=Case(
-                    When(owner_value__isnull=False, then=F("owner_value")),
-                    When(org_value__isnull=False, then=F("org_value")),
-                    default=F("default_value"),
+                    When(
+                        runtime_value__isnull=False,
+                        then=Cast(F("runtime_value"), output_field=JSONField()),
+                    ),
+                    When(
+                        owner_value__isnull=False,
+                        then=Cast(F("owner_value"), output_field=JSONField()),
+                    ),
+                    When(
+                        org_value__isnull=False,
+                        then=Cast(F("org_value"), output_field=JSONField()),
+                    ),
+                    When(
+                        default_value__isnull=False,
+                        then=Cast(F("default_value"), output_field=JSONField()),
+                    ),
+                    default=Cast(F("test_value"), output_field=JSONField()),
+                    output_field=JSONField(),
                 ),
                 is_from_org=Case(
                     When(
+                        runtime_value__isnull=True,
                         org_value__isnull=True,
                         owner_value__isnull=False,
                         then=Value(True),
@@ -288,7 +387,16 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
 
 
 class AbstractReportQuerySet(SendToBiQuerySet):
-    ...
+    def filter_completed(self):
+        return self.filter(status__in=self.model.Status.final_statuses())
+
+    def filter_retryable(self):
+        return self.filter(
+            status__in=[self.model.Status.FAILED.value, self.model.Status.PENDING.value]
+        )
+
+    def get_configurations(self) -> AbstractConfigQuerySet:
+        return self.model.config.objects.filter(pk__in=self.values("config__pk"))
 
 
 class ModelWithOwnershipQuerySet:

@@ -30,4 +30,3 @@ class AnalyzerConfigTestCase(CustomTestCase):
             "run_hash_type must be populated if run_hash is True",
             e.exception.messages[0],
         )
-        ac.delete()

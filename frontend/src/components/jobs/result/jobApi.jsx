@@ -1,32 +1,10 @@
 import React from "react";
 import axios from "axios";
-import { IoMdWarning } from "react-icons/io";
 
-import { addToast, confirm } from "@certego/certego-ui";
+import { addToast } from "@certego/certego-ui";
 
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
-
-// constants
-
-const areYouSureConfirmDialog = (opName) =>
-  confirm({
-    title: (
-      <div className="d-flex-start-center">
-        <IoMdWarning className="text-warning" />
-        <span className="ms-1">Confirm</span>
-      </div>
-    ),
-    message: (
-      <div className="text-wrap">
-        <h6 className="text-muted">Operation:</h6>
-        <h6 className="text-center text-ul fst-italic">{opName}</h6>
-        <hr className="bg-dark" />
-        <span className="">Are you sure ?</span>
-      </div>
-    ),
-    confirmColor: "secondary",
-    cancelColor: "link text-gray",
-  });
+import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 export async function downloadJobSample(jobId) {
   let blob;

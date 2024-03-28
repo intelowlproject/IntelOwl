@@ -75,6 +75,7 @@ class DNS(Visualizer):
                 )
                 for dns_resolution in analyzer_report.report["resolutions"]
             ],
+            size=self.Size.S_2,
             disable=disable_element,
             start_open=True,
         )

@@ -1,2 +1,2 @@
 # to allow Watchman to be used with Django Development Server
-pywatchman==1.4.1
+pywatchman==2.0.0

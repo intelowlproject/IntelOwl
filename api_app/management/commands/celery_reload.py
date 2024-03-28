@@ -24,4 +24,4 @@ class Command(BaseCommand):
         self.run(f"/usr/local/bin/celery {argument}")
 
     def run(self, cmd):
-        subprocess.run(shlex.split(cmd))
+        subprocess.run(shlex.split(cmd), check=True)

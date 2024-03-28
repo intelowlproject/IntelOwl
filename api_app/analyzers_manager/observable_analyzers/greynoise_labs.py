@@ -53,8 +53,6 @@ class GreynoiseLabs(ObservableAnalyzer):
             "Authorization": f"Bearer {self._auth_token}",
         }
 
-        logger.info("AUTH TOKEN: ", self._auth_token)
-
         try:
             for key, value in queries.items():
                 if not value["ip_required"]:

@@ -159,6 +159,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 ###### External services
 
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
+* `Abusix`: get abuse contacts of an IP address from [Abusix](https://abusix.com/contact-db/)
 * `BGP Ranking`: [BGP-Ranking](https://github.com/D4-project/BGP-Ranking) provides a way to collect such malicious activities, aggregate the information per ASN and provide a ranking model to rank the ASN from the most malicious to the less malicious ASN.
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `Auth0`: scan an IP against the Auth0 API

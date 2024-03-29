@@ -2,7 +2,6 @@
 import datetime
 
 import django.contrib.postgres.fields
-import django.contrib.postgres.fields.jsonb
 import django.core.validators
 import django.db.migrations.operations.special
 import django.db.models.deletion

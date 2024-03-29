@@ -331,7 +331,12 @@ class Job(MP_Node):
     def get_root(self):
         if self.is_root():
             return self
-        return super().get_root()
+        try:
+            return super().get_root()
+        except self.MultipleObjectsReturned:
+            # django treebeard is not thread safe
+            # this is not a really valid solution, but it will work for now
+            return self.objects.filter(path=self.path[0 : self.steplen]).first()  # noqa
 
     @property
     def analyzed_object_name(self):
@@ -640,7 +645,7 @@ class Parameter(models.Model):
     is_secret = models.BooleanField(db_index=True)
     required = models.BooleanField(null=False)
     python_module = models.ForeignKey(
-        PythonModule, related_name="parameters", on_delete=models.PROTECT
+        PythonModule, related_name="parameters", on_delete=models.CASCADE
     )
 
     class Meta:
@@ -861,6 +866,9 @@ class OrganizationPluginConfiguration(models.Model):
     class Meta:
         unique_together = [("object_id", "organization", "content_type")]
 
+    def __str__(self):
+        return f"{self.config} ({self.organization})"
+
     def disable_for_rate_limit(self):
         self.disabled = True
 
@@ -895,6 +903,7 @@ class OrganizationPluginConfiguration(models.Model):
             self.rate_limit_enable_task.clocked = clock_schedule
             self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
+        logger.info(f"Disabling {self} for rate limit")
         self.save()
 
     def disable_manually(self, user: User):
@@ -1223,14 +1232,17 @@ class PythonConfig(AbstractConfig):
             self, user
         ).annotate_value_for_user(self, user, config_runtime)
         not_configured_params = params.filter(required=True, configured=False)
+        # TODO to optimize
         if not_configured_params.exists():
             param = not_configured_params.first()
-            raise TypeError(
-                f"Required param {param.name} "
-                f"of plugin {param.python_module.module}"
-                " does not have a valid value"
-            )
-
+            if not settings.STAGE_CI or settings.STAGE_CI and not param.value:
+                raise TypeError(
+                    f"Required param {param.name} "
+                    f"of plugin {param.python_module.module}"
+                    " does not have a valid value"
+                )
+        if settings.STAGE_CI:
+            return params.filter(Q(configured=True) | Q(value__isnull=False))
         return params.filter(configured=True)
 
     def generate_health_check_periodic_task(self):

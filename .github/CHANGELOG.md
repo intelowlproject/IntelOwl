@@ -2,6 +2,9 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v6.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.1)
+Little fixes for the major.
+
 ## [v6.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.0)
 This major release is another important milestone for this project! We have been working hard to transform IntelOwl from a *Data Extraction Platform* to a complete *Investigation Platform*!
 

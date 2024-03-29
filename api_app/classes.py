@@ -78,7 +78,13 @@ class Plugin(metaclass=ABCMeta):
         return self._job.user
 
     def __repr__(self):
-        return f"({self.__class__.__name__}, job: #{self.job_id})"
+        return str(self)
+
+    def __str__(self):
+        try:
+            return f"({self.__class__.__name__}, job: #{self.job_id})"
+        except AttributeError:
+            return f"({self.__class__.__name__}"
 
     def config(self, runtime_configuration: typing.Dict):
         self.__parameters = self._config.read_configured_params(
@@ -135,12 +141,11 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
-        if isinstance(e, HTTPError) and (
-            e.response
-            and hasattr(e.response, "status_code")
-            and e.response.status_code == 429
-        ):
-            self.disable_for_rate_limit()
+        if isinstance(e, HTTPError):
+            if "429 Client Error" in str(e):
+                self.disable_for_rate_limit()
+            else:
+                logger.info(f"Http error is {str(e)}")
         if settings.STAGE_CI:
             raise e
 
@@ -175,7 +180,7 @@ class Plugin(metaclass=ABCMeta):
         *_handle_analyzer_exception* and *_handle_base_exception* fn
         """
         return (
-            f"{self.__repr__()}."
+            f"{self}."
             f" {'Unexpected error' if is_base_err else f'{self.config_model.__name__} error'}:"  # noqa
             f" '{err}'"
         )
@@ -251,9 +256,7 @@ class Plugin(metaclass=ABCMeta):
             if not param.configured or not param.value:
                 continue
             url = param.value
-            logger.info(
-                f"Url retrieved to verify is {param.name} for plugin {self.name}"
-            )
+            logger.info(f"Url retrieved to verify is {param.name} for {self}")
             return url
         return None
 
@@ -262,7 +265,7 @@ class Plugin(metaclass=ABCMeta):
         if url and url.startswith("http"):
             if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
                 return True
-            logger.info(f"Checking url {url} for plugin {self.name}")
+            logger.info(f"Checking url {url} for {self}")
             try:
                 # momentarily set this to False to
                 # avoid fails for https services
@@ -272,8 +275,7 @@ class Plugin(metaclass=ABCMeta):
                 requests.exceptions.Timeout,
             ) as e:
                 logger.info(
-                    f"Health check failed: url {url}"
-                    f" for plugin {self.name}. Error: {e}"
+                    f"Health check failed: url {url}" f" for {self}. Error: {e}"
                 )
                 return False
             else:
@@ -281,6 +283,7 @@ class Plugin(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def disable_for_rate_limit(self):
+        logger.info(f"Trying to disable for rate limit {self}")
         if self._user.has_membership():
             org_configuration = self._config.get_or_create_org_configuration(
                 self._user.membership.organization
@@ -292,9 +295,13 @@ class Plugin(metaclass=ABCMeta):
                 # if we do not have api keys OR the api key was org based
                 if not api_key_parameter or api_key_parameter.is_from_org:
                     org_configuration.disable_for_rate_limit()
+                else:
+                    logger.warning(
+                        f"Not disabling {self} because api key used is personal"
+                    )
             else:
                 logger.warning(
-                    f"You are trying to disable {self.name}"
+                    f"You are trying to disable {self}"
                     " for rate limit without specifying a timeout."
                 )
         else:

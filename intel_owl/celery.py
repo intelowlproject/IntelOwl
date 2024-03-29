@@ -3,7 +3,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import json
 import logging
 import os
 import uuid
@@ -145,7 +144,7 @@ app.conf.beat_schedule = {
     "check_stuck_analysis": {
         "task": "intel_owl.tasks.check_stuck_analysis",
         "schedule": crontab(minute="*/5"),
-        "kwargs": json.dumps({"check_pending": True}),
+        "kwargs": {"check_pending": True},
         "options": {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),

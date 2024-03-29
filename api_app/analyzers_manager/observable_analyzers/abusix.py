@@ -14,16 +14,12 @@ logger = logging.getLogger(__name__)
 class Abusix(classes.ObservableAnalyzer):
     def run(self):
         result = {}
-        try:
-            ip_addr = self.observable_name
-            cf = querycontacts.ContactFinder()
-            abuse_contacts = cf.find(ip_addr)
-            if not abuse_contacts:
-                abuse_contacts = []
-            result["abuse_contacts"] = abuse_contacts
-        except Exception as e:
-            logger.error(e)
-            result["error"] = e
+        ip_addr = self.observable_name
+        cf = querycontacts.ContactFinder()
+        abuse_contacts = cf.find(ip_addr)
+        if not abuse_contacts:
+            abuse_contacts = []
+        result["abuse_contacts"] = abuse_contacts
         return result
 
     def update(self) -> bool:
@@ -33,7 +29,10 @@ class Abusix(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("querycontacts.ContactFinder.find", return_value=[])
+                patch(
+                    "querycontacts.ContactFinder.find",
+                    return_value=["network-abuse@google.com"],
+                )
             )
         ]
         return super()._monkeypatch(patches=patches)

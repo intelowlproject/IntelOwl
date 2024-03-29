@@ -8,7 +8,6 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
@@ -53,35 +52,32 @@ class GreynoiseLabs(ObservableAnalyzer):
             "Authorization": f"Bearer {self._auth_token}",
         }
 
-        try:
-            for key, value in queries.items():
-                if not value["ip_required"]:
-                    if not os.path.isfile(value["db_location"]) and not self.update():
-                        error_message = f"Failed extraction from {key} db"
-                        self.report.errors.append(error_message)
-                        self.report.save()
-                        logger.error(error_message)
-                        continue
-
-                    with open(value["db_location"], "r", encoding="utf-8") as f:
-                        db = f.read()
-
-                    db_list = db.split("\n")
-                    if self.observable_name in db_list:
-                        result[key] = {"found": True}
-                    else:
-                        result[key] = {"found": False}
+        for key, value in queries.items():
+            if not value["ip_required"]:
+                if not os.path.isfile(value["db_location"]) and not self.update():
+                    error_message = f"Failed extraction from {key} db"
+                    self.report.errors.append(error_message)
+                    self.report.save()
+                    logger.error(error_message)
                     continue
 
-                json_body = {
-                    "query": value["query_string"],
-                    "variables": {"ip": f"{self.observable_name}"},
-                }
-                response = requests.post(headers=headers, json=json_body, url=url)
-                response.raise_for_status()
-                result[key] = response.json()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+                with open(value["db_location"], "r", encoding="utf-8") as f:
+                    db = f.read()
+
+                db_list = db.split("\n")
+                if self.observable_name in db_list:
+                    result[key] = {"found": True}
+                else:
+                    result[key] = {"found": False}
+                continue
+
+            json_body = {
+                "query": value["query_string"],
+                "variables": {"ip": f"{self.observable_name}"},
+            }
+            response = requests.post(headers=headers, json=json_body, url=url)
+            response.raise_for_status()
+            result[key] = response.json()
 
         return result
 

@@ -190,6 +190,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
 * `GreyNoise`: scan an IP against the [Greynoise](https://www.greynoise.io/) API (requires API key)
 * `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (requires API key))
+* `Greynoise_Labs`: scan an IP against the [Greynoise API](https://www.greynoise.io/) (requires authentication token which can be obtained from cookies on Greynoise website after launching the playground from [here](https://api.labs.greynoise.io/))
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed

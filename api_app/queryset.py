@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 from celery.canvas import Signature
 from django.db import models
 from django.db.models import (
+    BooleanField,
     Case,
     Exists,
     F,
@@ -262,7 +263,9 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         return self.alias(
             owner_value=Subquery(
                 PluginConfig.objects.filter(
-                    parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
+                    parameter__pk=OuterRef("pk"),
+                    **{config.snake_case_name: config.pk},
+                    for_organization=False,
                 )
                 .visible_for_user_owned(user)
                 .values("value")[:1],
@@ -376,11 +379,12 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 is_from_org=Case(
                     When(
                         runtime_value__isnull=True,
-                        org_value__isnull=True,
-                        owner_value__isnull=False,
+                        owner_value__isnull=True,
+                        org_value__isnull=False,
                         then=Value(True),
                     ),
                     default=Value(False),
+                    output_field=BooleanField(),
                 ),
             )
         )

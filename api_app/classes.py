@@ -141,11 +141,12 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
-        if isinstance(e, HTTPError):
-            if "429 Client Error" in str(e):
-                self.disable_for_rate_limit()
-            else:
-                logger.info(f"Http error is {str(e)}")
+        if isinstance(e, HTTPError) and (
+            hasattr(e, "response")
+            and hasattr(e.response, "status_code")
+            and e.response.status_code == 429
+        ):
+            self.disable_for_rate_limit()
         if settings.STAGE_CI:
             raise e
 
@@ -293,7 +294,12 @@ class Plugin(metaclass=ABCMeta):
                     name__contains="api_key"
                 ).first()
                 # if we do not have api keys OR the api key was org based
-                if not api_key_parameter or api_key_parameter.is_from_org:
+                # OR if the api key is not actually required and we do not have it set
+                if (
+                    not api_key_parameter
+                    or api_key_parameter.is_from_org
+                    or (not api_key_parameter.required and not api_key_parameter.value)
+                ):
                     org_configuration.disable_for_rate_limit()
                 else:
                     logger.warning(

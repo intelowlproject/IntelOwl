@@ -29,11 +29,31 @@ class MalcoreScan(FileAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
+        response = {
+            "data": {
+                "uuid": (
+                    "256cca7c24d6f9e4-a781ac10-5294b2e1-"
+                    "816c8b2d-fa97f27c-62aea6e24775b570"
+                ),
+                "status": "pending",
+                "scan_id": "6606e6a6d73e1e6bb84bd7c9",
+                "scan_url": (
+                    "https://app.malcore.io/report"
+                    "/6606e6a6d73e1e6bb84bd7ab/scan/undefined"
+                ),
+                "report_id": "6606e6a6d73e1e6bb84bd7ab",
+            },
+            "success": True,
+            "messages": [
+                {"code": 200, "type": "success", "message": "Scan is running"}
+            ],
+            "isMaintenance": False,
+        }
         patches = [
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=MockUpResponse(response, 200),
                 )
             )
         ]

@@ -95,7 +95,7 @@ class RegistrationView(rest_email_auth.views.RegistrationView, RecaptchaV2Mixin)
     throttle_classes: List = [POSTUserRateThrottle]
     serializer_class = RegistrationSerializer
 
-    def get_serializer_class(self):  # skipcq: PYL-R0201 
+    def get_serializer_class(self):  # skipcq: PYL-R0201
         """
         Returns the serializer class for registration.
         
@@ -235,7 +235,7 @@ class LogoutView(APIView):
 @permission_classes([AllowAny])
 def google_login(request: Request):
     """
-    Redirects to Google OAuth login
+    Redirect to Google OAuth login
     
     Args:
         request (Request): The request object.

@@ -95,14 +95,14 @@ class RegistrationView(rest_email_auth.views.RegistrationView, RecaptchaV2Mixin)
     throttle_classes: List = [POSTUserRateThrottle]
     serializer_class = RegistrationSerializer
 
-    def get_serializer_class(self: "RegistrationView") -> RegistrationSerializer:  
+    def get_serializer_class(self):  # skipcq: PYL-R0201  
         """
         Returns the serializer class for registration.
         
         Returns:
             RegistrationSerializer: The serializer class for user registration.
         """
-        return RegistrationSerializer()
+        return RegistrationSerializer
 
 
 class ResendVerificationView(
@@ -132,7 +132,7 @@ class LoginView(RecaptchaV2Mixin):
     throttle_classes: List = [POSTUserRateThrottle]
 
     @staticmethod
-    def validate_and_return_user(request: Request) -> Any:
+    def validate_and_return_user(request):
         """
         Validates user credentials and returns the user object.
         
@@ -146,7 +146,7 @@ class LoginView(RecaptchaV2Mixin):
         serializer.is_valid(raise_exception=True)
         return serializer.validated_data["user"]
 
-    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def post(self, request, *args, **kwargs):
         """
         Handles POST request for user login.
         
@@ -157,8 +157,9 @@ class LoginView(RecaptchaV2Mixin):
             Response: The response object.
         """
         try:
-            self.get_serializer()  
+            self.get_serializer()  # for RecaptchaV2Mixin  
         except AssertionError:
+            # it will raise this bcz `serializer_class` is not defined
             pass
         user = self.validate_and_return_user(request=request)
         logger.info(f"perform_login received request from '{user.username}''.")
@@ -174,6 +175,7 @@ class ChangePasswordView(APIView):
 
     @staticmethod
     def post(request: Request) -> Response:
+        # Get the old password and new password from the request data
         """
         Handles POST request for changing user password.
         
@@ -186,17 +188,21 @@ class ChangePasswordView(APIView):
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
 
+        # Check if the old password matches the user's current password
         user = request.user
         uname = user.username
         if not check_password(old_password, user.password):
             logger.info(f"'{uname}' has inputted invalid old password.")
+            # Return an error response if the old password doesn't match
             return Response(
                 {"error": "Invalid old password"}, status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Set the new password for the user
         user.set_password(new_password)
         user.save()
 
+        # Return a success response
         return Response({"message": "Password changed successfully"})
 
 
@@ -206,7 +212,7 @@ class LogoutView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:  
+    def post(self, request, *args, **kwargs):  # skipcq: PYL-R0201  
         """
         Handles POST request for user logout.
         
@@ -227,7 +233,7 @@ class LogoutView(APIView):
 )
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def google_login(request: Request) -> Response:
+def google_login(request: Request):
     """
     Redirects to Google OAuth login.
     
@@ -254,7 +260,7 @@ class GoogleLoginCallbackView(LoginView):
     Handles Google OAuth login callback.
     """
     @staticmethod
-    def validate_and_return_user(request: Request) -> Any:
+    def validate_and_return_user(request):
         """
         Validates Google OAuth token and returns the user object.
         
@@ -270,6 +276,7 @@ class GoogleLoginCallbackView(LoginView):
             OAuthError,
             OAuth2Error,
         ):
+            # Not giving out the actual error as we risk exposing the client secret
             raise AuthenticationFailed("OAuth authentication error.")
         user = token.get("userinfo")
         user_email = user.get("email")
@@ -282,19 +289,21 @@ class GoogleLoginCallbackView(LoginView):
                 email=user_email, username=user_name, password=None
             )
 
-    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
-    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def post(self, request, *args, **kwargs)
         user = self.validate_and_return_user(request=request)
         logger.info(f"perform_login received request from '{user.username}''.")
         login(request, user)
+        # Uncomment this for local testing
+        # return redirect("http://localhost/login")
         return redirect(self.request.build_absolute_uri("/login"))
 
 
 @api_view(["get"])
 @permission_classes([AllowAny])
-def checkConfiguration(request: Request) -> Response:
+def checkConfiguration(request):
     """
     Checks the configuration settings.
     
@@ -310,15 +319,18 @@ def checkConfiguration(request: Request) -> Response:
     errors = {}
 
     if page == register_uri.split("/")[-1]:
+        # email setup
         if not settings.DEFAULT_FROM_EMAIL:
             errors["DEFAULT_FROM_EMAIL"] = "required"
         if not settings.DEFAULT_EMAIL:
             errors["DEFAULT_EMAIL"] = "required"
 
+        # SES backend
         if settings.AWS_SES:
             if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
                 errors["AWS SES backend"] = "configuration required"
         else:
+            # SMTP backend
             if not all(
                 [
                     settings.EMAIL_HOST,
@@ -329,7 +341,9 @@ def checkConfiguration(request: Request) -> Response:
             ):
                 errors["SMTP backend"] = "configuration required"
 
+    # if you are in production environment
     if settings.USE_RECAPTCHA:
+        # recaptcha key
         if settings.DRF_RECAPTCHA_SECRET_KEY == "fake":
             errors["RECAPTCHA_SECRET_KEY"] = "required"
 
@@ -341,11 +355,15 @@ def checkConfiguration(request: Request) -> Response:
 
 class APIAccessTokenView(APIView):
     """
+    - ``GET`` -> get token-client pair info
+    - ``POST`` -> create and get token-client pair info
+    - ``DELETE`` -> delete existing API access token
     Handles API access token operations.
     """
+
     permission_classes = [IsAuthenticated]
 
-    def get_object(self) -> Token:
+    def get_object(self):
         try:
             instance = Token.objects.get(user__pk=self.request.user.pk)
         except Token.DoesNotExist:
@@ -353,7 +371,7 @@ class APIAccessTokenView(APIView):
 
         return instance
 
-    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def get(self, request, *args, **kwargs):
         """
         Handles GET request for retrieving API access token.
         
@@ -368,7 +386,7 @@ class APIAccessTokenView(APIView):
         serializer = TokenSerializer(instance)
         return Response(serializer.data)
 
-    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:  
+    def post(self, request):  # skipcq: PYL-R0201  
         """
         Handles POST request for creating API access token.
         
@@ -385,7 +403,7 @@ class APIAccessTokenView(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delete(self, request):
         """
         Handles DELETE request for deleting API access token.
         

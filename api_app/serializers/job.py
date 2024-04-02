@@ -226,8 +226,21 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 playbook.tags.all()
             )
 
-        attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
-        attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
+        analyzers_to_execute = attrs[
+            "analyzers_to_execute"
+        ] = self.set_analyzers_to_execute(**attrs)
+        connectors_to_execute = attrs[
+            "connectors_to_execute"
+        ] = self.set_connectors_to_execute(**attrs)
+        if not analyzers_to_execute and not connectors_to_execute:
+            warnings = "\n".join(self.filter_warnings)
+            raise ValidationError(
+                {
+                    "detail": "No Analyzers and Connectors "
+                    f"can be run after filtering:\n{warnings}"
+                }
+            )
+
         attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(**attrs)
         attrs["warnings"] = list(self.filter_warnings)
         attrs["tags"] = attrs.pop("tags_labels", [])
@@ -256,11 +269,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self, analyzers_requested: List[AnalyzerConfig], tlp: str, **kwargs
     ) -> List[AnalyzerConfig]:
         analyzers_executed = list(self.plugins_to_execute(tlp, analyzers_requested))
-        if not analyzers_executed:
-            warnings = "\n".join(self.filter_warnings)
-            raise ValidationError(
-                {"detail": f"No Analyzers can be run after filtering:\n{warnings}"}
-            )
         return analyzers_executed
 
     def plugins_to_execute(

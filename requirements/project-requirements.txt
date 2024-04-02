@@ -23,7 +23,7 @@ drf-spectacular==0.27.1
 django-rest-email-auth==4.0.0
 
 uWSGI==2.0.22
-uwsgitop==0.11
+uwsgitop==0.12
 whitenoise==6.6.0
 
 # infra

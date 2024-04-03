@@ -23,6 +23,16 @@ class DomainReputationServices(Visualizer):
             )
         except AnalyzerReport.DoesNotExist:
             logger.warning("VirusTotal_v3_Get_Observable report does not exist")
+            virustotal_report = self.Title(
+                self.Base(
+                    value="VirusTotal",
+                    link="",
+                    icon=VisualizableIcon.VIRUSTotal,
+                ),
+                self.Base(value="Engine Hits: Unknown"),
+                disable=True,
+            )
+            return virustotal_report
         else:
             hits = (
                 analyzer_report.report.get("data", {})
@@ -33,7 +43,7 @@ class DomainReputationServices(Visualizer):
             virustotal_report = self.Title(
                 self.Base(
                     value="VirusTotal",
-                    link=analyzer_report.report["link"],
+                    link=analyzer_report.report.get("link", ""),
                     icon=VisualizableIcon.VIRUSTotal,
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
@@ -84,7 +94,9 @@ class DomainReputationServices(Visualizer):
                 malware_printable = data[0].get("malware_printable", "")
             threatfox_report = self.Title(
                 self.Base(
-                    value="ThreatFox", link=analyzer_report.report.get("link", "")
+                    value="ThreatFox",
+                    link=analyzer_report.report.get("link", ""),
+                    icon=VisualizableIcon.URLHAUS,
                 ),
                 self.Base(value="" if disabled else f"found {malware_printable}"),
                 disable=disabled,

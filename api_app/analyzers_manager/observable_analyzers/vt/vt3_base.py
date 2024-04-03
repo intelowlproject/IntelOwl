@@ -229,24 +229,22 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             self._vt_get_relationships(
                 observable_name, relationships_requested, uri, result
             )
-        uri_prefix, uri_postfix = self._get_url_prefix_postfix()
+        uri_prefix, uri_postfix = self._get_url_prefix_postfix(result)
         result["link"] = f"https://www.virustotal.com/gui/{uri_prefix}/{uri_postfix}"
 
         return result
 
-    def _get_url_prefix_postfix(self) -> Tuple[str, str]:
+    def _get_url_prefix_postfix(self, result: Dict) -> Tuple[str, str]:
+        uri_postfix = self._job.observable_name
         if self._job.observable_classification == ObservableClassification.DOMAIN.value:
             uri_prefix = "domain"
-            uri_postfix = self._job.observable_name
         elif self._job.observable_classification == ObservableClassification.IP.value:
             uri_prefix = "ip-address"
-            uri_postfix = self._job.observable_name
         elif self._job.observable_classification == ObservableClassification.URL.value:
             uri_prefix = "url"
-            uri_postfix = self._job.sha256
+            uri_postfix = result.get("data", {}).get("id", self._job.sha256)
         else:  # hash
             uri_prefix = "search"
-            uri_postfix = self._job.observable_name
         return uri_prefix, uri_postfix
 
     def _vt_scan_file(self, md5: str, rescan_instead: bool = False) -> dict:

@@ -11,17 +11,19 @@ from certego_saas.apps.user.models import User
 
 @receiver(pre_save, sender=IngestorConfig)
 def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
+    from intel_owl.tasks import execute_ingestor
+
     instance.user = User.objects.get_or_create(
         username=f"{instance.name.title()}Ingestor"
     )[0]
 
     periodic_task = PeriodicTask.objects.update_or_create(
         name=f"{instance.name.title()}Ingestor",
-        task="intel_owl.tasks.execute_ingestor",
+        task=f"{execute_ingestor.__module__}.{execute_ingestor.__name__}",
         defaults={
             "crontab": instance.schedule,
             "queue": instance.queue,
-            "kwargs": json.dumps({"config_nameF": instance.name}),
+            "kwargs": json.dumps({"config_name": instance.name}),
             "enabled": not instance.disabled,
         },
     )[0]

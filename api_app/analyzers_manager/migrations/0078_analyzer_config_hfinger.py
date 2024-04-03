@@ -13,9 +13,9 @@ plugin = {
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },
     "name": "Hfinger",
-    "description": "create fingerprints of malware HTTPS requests using [Hfinger](https://github.com/CERT-Polska/hfinger)",
+    "description": "create fingerprints of malware HTTPs requests using [Hfinger](https://github.com/CERT-Polska/hfinger)",
     "disabled": False,
-    "soft_time_limit": 60,
+    "soft_time_limit": 30,
     "routing_key": "default",
     "health_check_status": True,
     "type": "file",
@@ -37,13 +37,36 @@ params = [
         },
         "name": "fingerprint_report_mode",
         "type": "int",
-        "description": "Fingerprint report mode.\r\n0 - similar number of collisions and fingerprints as mode 2, but using fewer features. \r\n1 - representation of all designed features, but a little more collisions than modes 0, 2, and 4.\r\n2 - optimal (the default mode).\r\n3 - the lowest number of generated fingerprints, but the highest number of collisions.\r\n4 - the highest fingerprint entropy, but slightly more fingerprints than modes 0-2",
+        "description": "Fingerprint report mode. \r\n0 - similar number of collisions and fingerprints as mode 2, but using fewer features, \r\n1 - representation of all designed features, but a little more collisions than modes 0, 2, and 4, \r\n2 - optimal (the default mode), \r\n3 - the lowest number of generated fingerprints, but the highest number of collisions, \r\n4 - the highest fingerprint entropy, but slightly more fingerprints than modes 0-2",
         "is_secret": False,
         "required": False,
     }
 ]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "hfinger.Hfinger",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "fingerprint_report_mode",
+            "type": "int",
+            "description": "Fingerprint report mode. \r\n0 - similar number of collisions and fingerprints as mode 2, but using fewer features, \r\n1 - representation of all designed features, but a little more collisions than modes 0, 2, and 4, \r\n2 - optimal (the default mode), \r\n3 - the lowest number of generated fingerprints, but the highest number of collisions, \r\n4 - the highest fingerprint entropy, but slightly more fingerprints than modes 0-2",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Hfinger",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 2,
+        "updated_at": "2024-04-03T19:33:51.679066Z",
+        "owner": None,
+    }
+]
 
 
 def _get_real_obj(Model, field, value):

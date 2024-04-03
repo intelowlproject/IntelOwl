@@ -21,7 +21,7 @@ def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
         defaults={
             "crontab": instance.schedule,
             "queue": instance.queue,
-            "kwargs": json.dumps({"config_pk": instance.name}),
+            "kwargs": json.dumps({"config_nameF": instance.name}),
             "enabled": not instance.disabled,
         },
     )[0]

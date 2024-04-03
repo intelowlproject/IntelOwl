@@ -128,7 +128,9 @@ class Plugin(metaclass=ABCMeta):
         self.report.save(update_fields=["status", "report"])
 
     def log_error(self, e):
-        if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):
+        if isinstance(
+            e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded, HTTPError)
+        ):
             error_message = self.get_error_message(e)
             logger.error(error_message)
         else:

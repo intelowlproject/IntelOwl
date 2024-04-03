@@ -924,7 +924,9 @@ class OrganizationPluginConfiguration(models.Model):
         self.enable()
 
     def enable(self):
+        logger.info(f"Enabling back {self}")
         self.disabled = False
+        self.disabled_comment = ""
         self.save()
         if self.rate_limit_enable_task:
             self.rate_limit_enable_task.delete()

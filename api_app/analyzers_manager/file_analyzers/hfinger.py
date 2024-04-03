@@ -19,6 +19,10 @@ class Hfinger(FileAnalyzer):
         return hfinger_analyze(self.filepath, self.fingerprint_report_mode)
 
     @classmethod
+    def update(cls) -> bool:
+        pass
+
+    @classmethod
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(

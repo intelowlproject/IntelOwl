@@ -232,7 +232,8 @@ def analyze_multiple_observables(request):
         data=request.data, many=True, context={"request": request}
     )
     oas.is_valid(raise_exception=True)
-    jobs = oas.save(send_task=True)
+    parent_job = oas.validated_data[0].get("parent_job", None)
+    jobs = oas.save(send_task=True, parent=parent_job)
     jrs = JobResponseSerializer(jobs, many=True).data
     logger.info(f"finished analyze_multiple_observables from user {request.user}")
     return Response(

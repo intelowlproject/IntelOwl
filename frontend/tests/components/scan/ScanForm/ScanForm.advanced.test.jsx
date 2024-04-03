@@ -133,6 +133,60 @@ describe("ScanForm adavanced use", () => {
     });
   });
 
+  test("test scan page with a parent and an observable in the GET parameters", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter
+        initialEntries={[
+          "/scan?parent=1&observable=thisIsTheParamObservable.com",
+        ]}
+      >
+        <Routes>
+          <Route path="/scan" element={<ScanForm />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    // check value has been loaded
+    expect(screen.getAllByRole("textbox")[0].value).toBe(
+      "thisIsTheParamObservable.com",
+    );
+    // check playbooks has been loaded
+    expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
+
+    // start scan button
+    const startScanButton = screen.getByRole("button", {
+      name: "Start Scan",
+    });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+
+    await user.click(startScanButton);
+
+    await waitFor(() => {
+      expect(axios.post.mock.calls[0]).toEqual(
+        // axios call
+        [
+          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
+          {
+            observables: [["domain", "thisIsTheParamObservable.com"]],
+            playbook_requested: "TEST_PLAYBOOK_DOMAIN",
+            tlp: "CLEAR",
+            scan_mode: 2,
+            scan_check_time: "48:00:00",
+            runtime_configuration: {
+              analyzers: {},
+              connectors: {},
+              visualizers: {},
+            },
+            parent_job: "1",
+          },
+          { headers: { "Content-Type": "application/json" } },
+        ],
+      );
+    });
+  });
+
   test("test playbooks advanced change time", async () => {
     const user = userEvent.setup();
 

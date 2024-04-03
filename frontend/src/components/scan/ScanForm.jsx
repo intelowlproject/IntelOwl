@@ -82,6 +82,7 @@ export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
   const investigationIdParam = searchParams.get("investigation") || null;
+  const parentIdParam = searchParams.get("parent");
   const { guideState, setGuideState } = useGuideContext();
 
   const { pluginsState: organizationPluginsState } = useOrganizationStore(
@@ -202,6 +203,7 @@ export default function ScanForm() {
         values.scan_mode,
         values.scan_check_time,
         investigationIdParam,
+        parentIdParam,
       );
 
       // multiple job or investigation id in GET param

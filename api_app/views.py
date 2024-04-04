@@ -749,6 +749,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             queue=report.config.queue,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=report.job.priority,
         )
         runner()
 

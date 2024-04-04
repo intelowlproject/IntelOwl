@@ -324,6 +324,8 @@ From the GUI, the users can pivot in two ways:
 ![img.png](../static/pivot_investigation_report.png)
 
 In both cases, the user is redirected to the Scan Page that is precompiled with the observable selected. Then the user would be able to select the [Playbook](#playbooks) to execute in the new job.
+![img.png](../static/pivot_scan_page.png)
+
 After the new Job is started, a new [Investigation](#investigations-framework) will be created (if it does not already exist) and both the jobs will be added to the same Investigation.
 
 In the following image you can find an example of an [Investigation](#investigations-framework) composed by 3 pivots generated manually:

@@ -309,7 +309,21 @@ Pivots are designed to create a job from another job. This plugin allows the use
 
 This is a "SOAR" feature that allows the users to connect multiple analysis together.
 
-Right now the support for this kind of plugin in the GUI is very limited, while the backend is fully operative. We are working on the frontend.
+Right now the support for this kind of plugin in the GUI is limited, while the backend is fully operative.
+
+From the GUI, the users can pivoting in two ways:
+- In the Job Visualizer Report it possible to select a field extracted and analyze its value clicking "Pivot" button (see following image)
+![img.png](../static/pivot_job_report.png)
+
+- In the Investigation Report it possible to select a Job block and click "Pivot" button to analyze the same observable that he has just analyzed (see following image)
+![img.png](../static/pivot_investigation_report.png)
+
+In both cases, the user is redirect to the Scan Page that is precompiled with the observable selected, then he be able to select the playbook to execute in the new job.
+After the analysis, a new investigation will be created (if not exists) and both the jobs will be added to the same investigation.
+
+Example of pivot: 2 from the Job Report and 1 from the Investigation Report:
+
+![img.png](../static/pivot_investigation.png)
 
 #### List of pre-built Pivots
 None

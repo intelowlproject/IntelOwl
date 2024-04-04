@@ -63,7 +63,7 @@ export function JobActionsBar({ job }) {
       );
     } else {
       addToast("Retrying the same job...", null, "spinner", false, 2000);
-      const jobId = await createJob(
+      const response = await createJob(
         [job.observable_name],
         job.observable_classification,
         job.playbook_requested,
@@ -76,7 +76,10 @@ export function JobActionsBar({ job }) {
         0,
       );
       setTimeout(
-        () => navigate(`/jobs/${jobId[0]}/${JobResultSections.VISUALIZER}/`),
+        () =>
+          navigate(
+            `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
+          ),
         1000,
       );
     }

@@ -571,6 +571,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 task_id=task_id,
                 immutable=True,
                 MessageGroupId=str(task_id),
+                priority=job.priority,
             )
 
 

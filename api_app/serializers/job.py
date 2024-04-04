@@ -358,6 +358,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 args=[job.pk],
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
+                priority=job.priority,
             )
 
         return job

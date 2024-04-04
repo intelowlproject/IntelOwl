@@ -400,6 +400,7 @@ class Job(MP_Node):
         runner.apply_async(
             queue=get_queue_name(settings.CONFIG_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
         )
 
     def set_final_status(self) -> None:
@@ -540,7 +541,12 @@ class Job(MP_Node):
             queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
         )
+
+    @property
+    def priority(self):
+        return self.user.profile.task_priority
 
     def _get_pipeline(
         self,
@@ -1199,6 +1205,7 @@ class PythonConfig(AbstractConfig):
             queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=job.priority,
         )
 
     @property

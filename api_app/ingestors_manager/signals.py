@@ -13,9 +13,11 @@ from certego_saas.apps.user.models import User
 def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
     from intel_owl.tasks import execute_ingestor
 
-    instance.user = User.objects.get_or_create(
-        username=f"{instance.name.title()}Ingestor"
-    )[0]
+    user = User.objects.get_or_create(username=f"{instance.name.title()}Ingestor")[0]
+    user.profile.task_priority = 7
+    user.profile.is_robot = True
+    user.profile.save()
+    instance.user = user
 
     periodic_task = PeriodicTask.objects.update_or_create(
         name=f"{instance.name.title()}Ingestor",

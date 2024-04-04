@@ -3,7 +3,7 @@
 from typing import Any, Dict
 
 from django.core.cache.backends.db import DatabaseCache
-from django.db import connections, router
+from django.db import ProgrammingError, connections, router
 
 
 def plain_key(key, key_prefix, version):
@@ -24,11 +24,14 @@ class DatabaseCacheExtended(DatabaseCache):
         table = connections[db].ops.quote_name(self._table)
         query = self.make_and_validate_key(starts_with + "%", version=version)
         with connections[db].cursor() as cursor:
-            cursor.execute(
-                f"SELECT cache_key, value, expires FROM {table} "
-                "WHERE cache_key LIKE %s",
-                [query],
-            )
+            try:
+                cursor.execute(
+                    f"SELECT cache_key, value, expires FROM {table} "
+                    "WHERE cache_key LIKE %s",
+                    [query],
+                )
+            except ProgrammingError:
+                return {}
             rows = cursor.fetchall()
         if len(rows) < 1:
             return {}

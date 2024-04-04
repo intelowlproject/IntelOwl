@@ -34,6 +34,7 @@ RUN mkdir -p ${LOG_PATH} \
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
 # apache2-utils is required to execute htpasswd
+# tshark is required for Hfinger file analyzer
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
     vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark \

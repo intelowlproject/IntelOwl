@@ -20,7 +20,7 @@ plugin = {
     "health_check_status": True,
     "type": "file",
     "docker_based": False,
-    "maximum_tlp": "AMBER",
+    "maximum_tlp": "RED",
     "observable_supported": [],
     "supported_filetypes": ["application/vnd.tcpdump.pcap"],
     "run_hash": False,

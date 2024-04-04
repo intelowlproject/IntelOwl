@@ -57,7 +57,6 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
     def after_run_success(self, content):
         super().after_run_success(content)
         self._config: IngestorConfig
-        # exhaust generator
         deque(
             self._config.create_jobs(
                 # every job created from an ingestor

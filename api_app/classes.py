@@ -5,10 +5,12 @@ from abc import ABCMeta, abstractmethod
 from pathlib import PosixPath
 
 import requests
+import base64
 from billiard.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.core.files import File
 from requests import HTTPError
 
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
@@ -121,8 +123,16 @@ class Plugin(metaclass=ABCMeta):
         self.report.save()
 
     def after_run_success(self, content: typing.Any):
+        # exhaust generator
         if isinstance(content, typing.Generator):
             content = list(content)
+        # avoiding JSON serialization errors for types: File and bytes
+        if isinstance(content, typing.List):
+            if all(isinstance(n, File) for n in content):
+                content = [base64.b64encode(f.read()).decode("utf-8") for f in content]
+            if all(isinstance(n, bytes) for n in content):
+                content = [base64.b64encode(b).decode("utf-8") for b in content]
+
         self.report.report = content
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])

@@ -1270,3 +1270,4 @@ class PythonConfig(AbstractConfig):
                 },
             )[0]
             self.health_check_task = periodic_task
+            self.save()

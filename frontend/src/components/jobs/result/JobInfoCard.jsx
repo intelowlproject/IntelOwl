@@ -63,7 +63,7 @@ export function JobInfoCard({ job }) {
             sm={12}
             md={10}
           >
-            <h3 className="d-flex align-items-center">
+            <h3 className="d-flex-start align-items-center text-truncate">
               <JobInfoIcon job={job} />
               {job.is_sample ? (
                 <CopyToClipboardButton

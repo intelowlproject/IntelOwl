@@ -15,7 +15,7 @@ import {
   UncontrolledTooltip,
   Collapse,
 } from "reactstrap";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   Field,
   Form,
@@ -902,7 +902,32 @@ export default function ScanForm() {
               </FormGroup>
             )}
             <FormGroup row>
-              <Label sm={3}>TLP</Label>
+              <Label className="d-flex" sm={3}>
+                TLP
+                <div className="ms-2">
+                  <MdInfoOutline id="tlp-info-icon" />
+                  <UncontrolledTooltip
+                    target="tlp-info-icon"
+                    placement="right"
+                    fade={false}
+                    autohide={false}
+                    innerClassName="p-2 text-start text-nowrap md-fit-content"
+                  >
+                    <span>
+                      IntelOwl supports a customized version of the Traffic
+                      Light Protocol (TLP).
+                      <br />
+                      For more info check the{" "}
+                      <Link
+                        to="https://intelowl.readthedocs.io/en/latest/Usage.html#tlp-support"
+                        target="_blank"
+                      >
+                        official doc.
+                      </Link>
+                    </span>
+                  </UncontrolledTooltip>
+                </div>
+              </Label>
               <Col sm={9}>
                 <div>
                   {TlpChoices.map((tlp) => (

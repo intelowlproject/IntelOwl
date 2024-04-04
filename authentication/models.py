@@ -2,7 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.conf import settings
-from django.core.validators import MinLengthValidator, MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinLengthValidator,
+    MinValueValidator,
+)
 from django.db import models
 
 __all__ = [
@@ -33,8 +37,12 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile",
     )
-    company_name = models.CharField(max_length=32, validators=[MinLengthValidator(3)], null=True)
-    company_role = models.CharField(max_length=32, validators=[MinLengthValidator(3)], null=True)
+    company_name = models.CharField(
+        max_length=32, validators=[MinLengthValidator(3)], null=True
+    )
+    company_role = models.CharField(
+        max_length=32, validators=[MinLengthValidator(3)], null=True
+    )
     twitter_handle = models.CharField(
         max_length=16, default="", blank=True, validators=[MinLengthValidator(3)]
     )
@@ -47,6 +55,7 @@ class UserProfile(models.Model):
         default=10, validators=[MaxValueValidator(10), MinValueValidator(1)]
     )
     is_robot = models.BooleanField(default=False)
+
     # meta
     class Meta:
         verbose_name_plural = "User Profiles"

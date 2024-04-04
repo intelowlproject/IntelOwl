@@ -5,20 +5,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('authentication', '0003_userprofile_is_robot_userprofile_task_priority_and_more'),
+        (
+            "authentication",
+            "0003_userprofile_is_robot_userprofile_task_priority_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userprofile',
-            name='company_name',
-            field=models.CharField(max_length=32, null=True, validators=[django.core.validators.MinLengthValidator(3)]),
+            model_name="userprofile",
+            name="company_name",
+            field=models.CharField(
+                max_length=32,
+                null=True,
+                validators=[django.core.validators.MinLengthValidator(3)],
+            ),
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='company_role',
-            field=models.CharField(max_length=32, null=True, validators=[django.core.validators.MinLengthValidator(3)]),
+            model_name="userprofile",
+            name="company_role",
+            field=models.CharField(
+                max_length=32,
+                null=True,
+                validators=[django.core.validators.MinLengthValidator(3)],
+            ),
         ),
     ]

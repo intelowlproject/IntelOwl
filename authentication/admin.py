@@ -125,7 +125,6 @@ class UserProfileAdmin(admin.ModelAdmin):
     )
     list_filter = ["task_priority", "is_robot"]
 
-
     @admin.display(boolean=True)
     def user_is_active(self, obj: UserProfile) -> bool:
         return obj.user.is_active

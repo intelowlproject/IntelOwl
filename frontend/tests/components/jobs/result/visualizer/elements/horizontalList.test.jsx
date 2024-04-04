@@ -11,8 +11,8 @@ import { VerticalListVisualizer } from "../../../../../../src/components/jobs/re
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useLocation: () => ({
-    pathname: "localhost/jobs/123/visualizer"
-  })
+    pathname: "localhost/jobs/123/visualizer",
+  }),
 }));
 
 describe("HorizontalListVisualizer component", () => {

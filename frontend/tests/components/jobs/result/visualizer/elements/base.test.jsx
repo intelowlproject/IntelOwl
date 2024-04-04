@@ -9,8 +9,8 @@ import { getIcon } from "../../../../../../src/components/jobs/result/visualizer
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useLocation: () => ({
-    pathname: "localhost/jobs/123/visualizer"
-  })
+    pathname: "localhost/jobs/123/visualizer",
+  }),
 }));
 
 describe("BaseVisualizer component", () => {

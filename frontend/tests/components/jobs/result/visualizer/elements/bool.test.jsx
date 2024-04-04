@@ -9,8 +9,8 @@ import { BooleanVisualizer } from "../../../../../../src/components/jobs/result/
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useLocation: () => ({
-    pathname: "localhost/jobs/123/visualizer"
-  })
+    pathname: "localhost/jobs/123/visualizer",
+  }),
 }));
 
 describe("BooleanVisualizer component", () => {

@@ -28,7 +28,7 @@ describe("visualizer icon module", () => {
       "controller",
       "exit",
       "connection",
-      "locker",
+      "lock",
       "otx",
       "github",
     ].forEach((iconCode) => {

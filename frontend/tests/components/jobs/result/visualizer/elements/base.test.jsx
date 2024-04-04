@@ -5,6 +5,14 @@ import userEvent from "@testing-library/user-event";
 import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
 import { getIcon } from "../../../../../../src/components/jobs/result/visualizer/icons";
 
+// mock useLocation
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useLocation: () => ({
+    pathname: "localhost/jobs/123/visualizer"
+  })
+}));
+
 describe("BaseVisualizer component", () => {
   test("required-only params", async () => {
     const { container } = render(

@@ -512,7 +512,7 @@ class JobSerializer(_AbstractJobViewSerializer):
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
 
-    def get_investigation(self, instance: Job):
+    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
         if root_investigation := instance.get_root().investigation:
             return root_investigation.pk
         return instance.investigation
@@ -947,7 +947,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer
 
-    def get_investigation(self, instance: Job):
+    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
         if root_investigation := instance.get_root().investigation:
             return root_investigation.pk
         return instance.investigation

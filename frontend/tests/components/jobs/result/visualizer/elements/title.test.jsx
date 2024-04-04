@@ -4,6 +4,14 @@ import { render, screen } from "@testing-library/react";
 import { TitleVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/title";
 import { BaseVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/base";
 
+// mock useLocation
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useLocation: () => ({
+    pathname: "localhost/jobs/123/visualizer"
+  })
+}));
+
 describe("TitleVisualizer component", () => {
   test("required-only params", () => {
     const { container } = render(

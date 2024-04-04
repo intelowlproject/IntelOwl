@@ -3,6 +3,14 @@ import "@testing-library/jest-dom";
 import { render, screen, within } from "@testing-library/react";
 import VisualizerReport from "../../../../../src/components/jobs/result/visualizer/visualizer";
 
+// mock useLocation
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useLocation: () => ({
+    pathname: "localhost/jobs/123/visualizer"
+  })
+}));
+
 describe("test VisualizerReport (conversion from backend data to frontend components)", () => {
   test("visualizer failed with error", () => {
     render(

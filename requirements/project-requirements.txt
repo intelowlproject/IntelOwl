@@ -1,9 +1,9 @@
 # django libs
 Django==4.2.11
 psycopg2-binary==2.9.6
-django-auth-ldap==4.6.0
+django-auth-ldap==4.7.0
 django-radius==1.5.0
-django-filter==24.1
+django-filter==24.2
 django-storages==1.14
 django-celery-beat==2.6.0
 django-celery-results==2.5.0
@@ -23,7 +23,7 @@ drf-spectacular==0.27.1
 django-rest-email-auth==4.0.0
 
 uWSGI==2.0.22
-uwsgitop==0.11
+uwsgitop==0.12
 whitenoise==6.6.0
 
 # infra
@@ -41,9 +41,9 @@ dnspython==2.6.1
 dnstwist[full]==20240116
 google>=3.0.0
 google-cloud-webrisk==1.14.0
-intezer-sdk==1.19.4
+intezer-sdk==1.20
 lief==0.14.0
-maxminddb==2.5.1
+maxminddb==2.6.0
 mwdblib==4.5.0
 git+https://github.com/decalage2/oletools.git@ccf99d1a8f85e552f5cc130fbaa504cfe5725a92
 OTXv2==1.5.12
@@ -67,10 +67,10 @@ quark-engine==24.2.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
-pydragonfly==0.1.0
 greynoise==2.1.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
+querycontacts==2.0.0
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

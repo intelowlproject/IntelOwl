@@ -8,4 +8,4 @@ class Command(MigrateCommand):
         super().handle(*args, **options)
         from api_app.signals import migrate_finished
 
-        migrate_finished.send(self)
+        migrate_finished.send(self, **options)

@@ -25,6 +25,7 @@ else:
         EMAIL_BACKEND = "django_ses.SESBackend"
         AWS_SES_REGION_NAME = AWS_REGION
         AWS_SES_REGION_ENDPOINT = f"email.{AWS_SES_REGION_NAME}.amazonaws.com"
+        AWS_SES_FROM_EMAIL = get_secret("EMAIL_HOST")
     else:
         EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
         EMAIL_HOST = get_secret("EMAIL_HOST")

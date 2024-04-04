@@ -159,6 +159,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 ###### External services
 
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
+* `Abusix`: get abuse contacts of an IP address from [Abusix](https://abusix.com/contact-db/)
 * `BGP Ranking`: [BGP-Ranking](https://github.com/D4-project/BGP-Ranking) provides a way to collect such malicious activities, aggregate the information per ASN and provide a ranking model to rank the ASN from the most malicious to the less malicious ASN.
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `Auth0`: scan an IP against the Auth0 API
@@ -189,6 +190,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
 * `GreyNoise`: scan an IP against the [Greynoise](https://www.greynoise.io/) API (requires API key)
 * `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (requires API key))
+* `Greynoise_Labs`: scan an IP against the [Greynoise API](https://www.greynoise.io/) (requires authentication token which can be obtained from cookies on Greynoise website after launching the playground from [here](https://api.labs.greynoise.io/))
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed

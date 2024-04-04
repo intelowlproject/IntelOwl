@@ -645,7 +645,7 @@ class Parameter(models.Model):
     is_secret = models.BooleanField(db_index=True)
     required = models.BooleanField(null=False)
     python_module = models.ForeignKey(
-        PythonModule, related_name="parameters", on_delete=models.PROTECT
+        PythonModule, related_name="parameters", on_delete=models.CASCADE
     )
 
     class Meta:
@@ -924,7 +924,9 @@ class OrganizationPluginConfiguration(models.Model):
         self.enable()
 
     def enable(self):
+        logger.info(f"Enabling back {self}")
         self.disabled = False
+        self.disabled_comment = ""
         self.save()
         if self.rate_limit_enable_task:
             self.rate_limit_enable_task.delete()
@@ -1232,14 +1234,17 @@ class PythonConfig(AbstractConfig):
             self, user
         ).annotate_value_for_user(self, user, config_runtime)
         not_configured_params = params.filter(required=True, configured=False)
+        # TODO to optimize
         if not_configured_params.exists():
             param = not_configured_params.first()
-            raise TypeError(
-                f"Required param {param.name} "
-                f"of plugin {param.python_module.module}"
-                " does not have a valid value"
-            )
-
+            if not settings.STAGE_CI or settings.STAGE_CI and not param.value:
+                raise TypeError(
+                    f"Required param {param.name} "
+                    f"of plugin {param.python_module.module}"
+                    " does not have a valid value"
+                )
+        if settings.STAGE_CI:
+            return params.filter(Q(configured=True) | Q(value__isnull=False))
         return params.filter(configured=True)
 
     def generate_health_check_periodic_task(self):
@@ -1265,3 +1270,4 @@ class PythonConfig(AbstractConfig):
                 },
             )[0]
             self.health_check_task = periodic_task
+            self.save()

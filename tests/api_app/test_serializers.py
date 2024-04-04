@@ -292,8 +292,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.disabled = True
         a.save()
-        with self.assertRaises(ValidationError):
-            self.ajcs.set_analyzers_to_execute([a], "CLEAR")
+        self.assertCountEqual(self.ajcs.set_analyzers_to_execute([a], "CLEAR"), [])
         a.disabled = False
         a.save()
         analyzers = self.ajcs.set_analyzers_to_execute([a], "CLEAR")
@@ -304,8 +303,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         previous_tlp = a.maximum_tlp
         a.maximum_tlp = "CLEAR"
         a.save()
-        with self.assertRaises(ValidationError):
-            self.ajcs.set_analyzers_to_execute([a], "GREEN")
+        self.assertCountEqual(self.ajcs.set_analyzers_to_execute([a], "GREEN"), [])
 
         a.maximum_tlp = "GREEN"
         a.save()
@@ -456,10 +454,13 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         a.type = "observable"
         a.save()
 
-        with self.assertRaises(ValidationError):
+        self.assertCountEqual(
+            [],
             FileJobSerializer.set_analyzers_to_execute(
                 self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
-            )
+            ),
+        )
+
         a.type = "file"
         a.save()
         self.assertTrue(
@@ -486,10 +487,12 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
             run_hash=False,
         )
 
-        with self.assertRaises(ValidationError):
+        self.assertCountEqual(
+            [],
             FileJobSerializer.set_analyzers_to_execute(
                 self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
-            )
+            ),
+        )
 
         analyzers = FileJobSerializer.set_analyzers_to_execute(
             self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
@@ -500,10 +503,12 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         a.not_supported_filetypes = ["text/html"]
         a.save()
 
-        with self.assertRaises(ValidationError):
+        self.assertCountEqual(
+            [],
             FileJobSerializer.set_analyzers_to_execute(
                 self.fas, [a], tlp="CLEAR", file_mimetype="text/html", file_name=""
-            )
+            ),
+        )
 
         analyzers = FileJobSerializer.set_analyzers_to_execute(
             self.fas, [a], tlp="CLEAR", file_mimetype="text/rtf", file_name=""
@@ -523,10 +528,12 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         a.observable_supported = ["domain"]
         a.type = "file"
         a.save()
-        with self.assertRaises(ValidationError):
+        self.assertCountEqual(
+            [],
             ObservableAnalysisSerializer.set_analyzers_to_execute(
                 self.oass, [a], tlp="CLEAR", observable_classification="domain"
-            )
+            ),
+        )
         a.type = "observable"
         a.save()
         analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(
@@ -539,10 +546,13 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
         a.observable_supported = ["ip"]
         a.type = "observable"
         a.save()
-        with self.assertRaises(ValidationError):
+        self.assertCountEqual(
+            [],
             ObservableAnalysisSerializer.set_analyzers_to_execute(
                 self.oass, [a], tlp="CLEAR", observable_classification="domain"
-            )
+            ),
+        )
+
         a.observable_supported = ["domain"]
         a.save()
         analyzers = ObservableAnalysisSerializer.set_analyzers_to_execute(

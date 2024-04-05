@@ -1,11 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
 import os
 
 from permhash import functions as permhash
 
 from api_app.analyzers_manager.classes import FileAnalyzer
+
+logger = logging.getLogger(__name__)
 
 
 class Permhash(FileAnalyzer):
@@ -17,6 +20,8 @@ class Permhash(FileAnalyzer):
     def run(self):
         result = {}
         _, file_extension = os.path.splitext(self.filepath)
+
+        logger.info(f"Started PERMHASH============================> {self.filepath}")
 
         file_extension = file_extension[1:]
 

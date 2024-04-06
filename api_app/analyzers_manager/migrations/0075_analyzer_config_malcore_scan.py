@@ -13,9 +13,9 @@ plugin = {
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },
     "name": "Malcore_Scan",
-    "description": "Malcore Scan",
+    "description": "Scan a file with the Malcore Executable Analysis API.",
     "disabled": False,
-    "soft_time_limit": 60,
+    "soft_time_limit": 400,
     "routing_key": "default",
     "health_check_status": True,
     "type": "file",
@@ -26,6 +26,8 @@ plugin = {
         "application/x-sharedlib",
         "application/vnd.microsoft.portable-executable",
         "application/x-elf",
+        "application/octet-stream",
+        "application/x-binary",
     ],
     "run_hash": False,
     "run_hash_type": "",
@@ -33,9 +35,55 @@ plugin = {
     "model": "analyzers_manager.AnalyzerConfig",
 }
 
-params = []
+params = [
+    {
+        "python_module": {
+            "module": "malcore_scan.MalcoreScan",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "api_key_name",
+        "type": "str",
+        "description": "API Key",
+        "is_secret": True,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "malcore_scan.MalcoreScan",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "max_tries",
+        "type": "int",
+        "description": "",
+        "is_secret": False,
+        "required": False,
+    },
+]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "malcore_scan.MalcoreScan",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "max_tries",
+            "type": "int",
+            "description": "",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Malcore_Scan",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 30,
+        "updated_at": "2024-04-04T01:44:40.479080Z",
+        "owner": None,
+    }
+]
 
 
 def _get_real_obj(Model, field, value):

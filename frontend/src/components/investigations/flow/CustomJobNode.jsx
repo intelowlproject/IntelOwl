@@ -4,6 +4,7 @@ import { NodeToolbar, Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
 import { Button } from "reactstrap";
 import { AiOutlineLink } from "react-icons/ai";
+import { LuGitBranchPlus } from "react-icons/lu";
 
 import { RemoveJob } from "./investigationActions";
 
@@ -31,6 +32,15 @@ function CustomJobNode({ data }) {
             rel="noreferrer"
           >
             <AiOutlineLink /> Link
+          </Button>
+          <Button
+            className="mx-1 p-2"
+            size="sm"
+            href={`/scan?parent=${data.id}&observable=${data.name}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <LuGitBranchPlus /> Pivot
           </Button>
           {data.isFirstLevel && <RemoveJob data={data} />}
         </div>

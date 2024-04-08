@@ -192,6 +192,8 @@ Only FIFO queues are supported.
 
 If you want to use a remote message broker (like an `ElasticCache` or `AmazonMQ` instance), you must populate the `BROKER_URL` environment variable.
 
+It is possible to use [task priority](https://docs.celeryq.dev/en/stable/userguide/routing.html#special-routing-options) inside IntelOwl: each User has default priority of 10, and robots users (like the Ingestors) have a priority of 7.    
+You can customize these priorities inside Django Admin, in the `Authentication.User Profiles` section.
 
 #### Websockets
 

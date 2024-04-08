@@ -54,7 +54,8 @@ class PlaybookConfigViewSet(
             data=request.data, many=True, context={"request": request}
         )
         oas.is_valid(raise_exception=True)
-        jobs = oas.save(send_task=True)
+        parent_job = oas.validated_data[0].get("parent_job", None)
+        jobs = oas.save(send_task=True, parent=parent_job)
         return Response(
             JobResponseSerializer(jobs, many=True).data,
             status=status.HTTP_200_OK,

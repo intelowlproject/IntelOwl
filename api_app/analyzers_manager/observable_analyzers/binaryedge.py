@@ -10,7 +10,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class BinaryEdge(classes.ObservableAnalyzer):
-    base_url: str = "https://api.binaryedge.io/v2/query/"
+    url: str = "https://api.binaryedge.io/v2/query/"
 
     _api_key_name: str
 
@@ -23,12 +23,12 @@ class BinaryEdge(classes.ObservableAnalyzer):
         if self.observable_classification == self.ObservableTypes.IP:
             try:
                 response_recent_ip_info = requests.get(
-                    self.base_url + "ip/" + self.observable_name, headers=self.headers
+                    self.url + "ip/" + self.observable_name, headers=self.headers
                 )
                 response_recent_ip_info.raise_for_status()
 
                 response_query_ip = requests.get(
-                    self.base_url + "search?query=ip:" + self.observable_name,
+                    self.url + "search?query=ip:" + self.observable_name,
                     headers=self.headers,
                 )
                 response_query_ip.raise_for_status()
@@ -43,7 +43,7 @@ class BinaryEdge(classes.ObservableAnalyzer):
         elif self.observable_classification == self.ObservableTypes.DOMAIN:
             try:
                 response_domain_report = requests.get(
-                    self.base_url + "domains/subdomain/" + self.observable_name,
+                    self.url + "domains/subdomain/" + self.observable_name,
                     headers=self.headers,
                 )
                 results = response_domain_report.json()

@@ -10,7 +10,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Netlas(classes.ObservableAnalyzer):
-    base_url: str = "https://app.netlas.io/api/whois_ip/"
+    url: str = "https://app.netlas.io/api/whois_ip/"
 
     _api_key_name: str
 
@@ -25,7 +25,7 @@ class Netlas(classes.ObservableAnalyzer):
     def run(self):
         try:
             response = requests.get(
-                self.base_url, params=self.parameters, headers=self.headers
+                self.url, params=self.parameters, headers=self.headers
             )
             response.raise_for_status()
         except requests.RequestException as e:

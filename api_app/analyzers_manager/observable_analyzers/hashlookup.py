@@ -9,11 +9,11 @@ from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class HashLookupServer(classes.ObservableAnalyzer):
-    hashlookup_server: str
+    url: str
 
     def run(self):
         if self.hashlookup_server:
-            hashlookup_instance = Hashlookup(root_url=self.hashlookup_server)
+            hashlookup_instance = Hashlookup(root_url=self.url)
         else:
             # the library maintains the default URL
             hashlookup_instance = Hashlookup()

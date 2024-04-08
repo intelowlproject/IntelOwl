@@ -9,7 +9,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class SecurityTrails(classes.ObservableAnalyzer):
-    base_url: str = "https://api.securitytrails.com/v1/"
+    url: str = "https://api.securitytrails.com/v1/"
     securitytrails_analysis: str
     securitytrails_current_type: str
     securitytrails_history_analysis: str
@@ -54,7 +54,7 @@ class SecurityTrails(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.base_url + uri, headers=headers)
+            response = requests.get(self.url + uri, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

@@ -20,7 +20,7 @@ class Validin(classes.ObservableAnalyzer):
     def update(self) -> bool:
         pass
 
-    base_url: str = "https://app.validin.com"
+    url: str = "https://app.validin.com"
     observable_classification: str
     observable_name: str
     scan_choice: str
@@ -34,7 +34,7 @@ class Validin(classes.ObservableAnalyzer):
             ).items():
                 logger.info(f"Executing query {query_name}")
                 try:
-                    response = requests.get(self.base_url + query_url, headers=headers)
+                    response = requests.get(self.url + query_url, headers=headers)
                     if response.status_code != 200:
                         logger.error(f"Query {query_name} failed")
 
@@ -50,7 +50,7 @@ class Validin(classes.ObservableAnalyzer):
         if self.observable_classification in endpoints:
             try:
                 query_url = endpoints[self.observable_classification][self.scan_choice]
-                response = requests.get(self.base_url + query_url, headers=headers)
+                response = requests.get(self.url + query_url, headers=headers)
                 return response.json()
             except KeyError:
                 raise AnalyzerRunException(

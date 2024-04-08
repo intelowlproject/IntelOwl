@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class UrlScan(ObservableAnalyzer):
-    base_url: str = "https://urlscan.io/api/v1"
+    url: str = "https://urlscan.io/api/v1"
 
     urlscan_analysis: str
     visibility: str
@@ -45,7 +45,7 @@ class UrlScan(ObservableAnalyzer):
     def __urlscan_submit(self) -> str:
         data = {"url": self.observable_name, "visibility": self.visibility}
         uri = "/scan/"
-        response = self.session.post(self.base_url + uri, json=data)
+        response = self.session.post(self.url + uri, json=data)
         # catch error description to help users to understand why it did not work
         if response.status_code == 400:
             error_description = response.json().get("description", "")
@@ -78,7 +78,7 @@ class UrlScan(ObservableAnalyzer):
         }
         if self.observable_classification == self.ObservableTypes.URL:
             params["q"] = "page." + params["q"]
-        resp = self.session.get(self.base_url + "/search/", params=params)
+        resp = self.session.get(self.url + "/search/", params=params)
         resp.raise_for_status()
         result = resp.json()
         return result

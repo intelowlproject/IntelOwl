@@ -14,7 +14,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class SSAPINet(classes.ObservableAnalyzer):
-    base_url: str = "https://shot.screenshotapi.net/screenshot"
+    url: str = "https://shot.screenshotapi.net/screenshot"
 
     _api_key_name: str
     use_proxy: bool
@@ -45,7 +45,7 @@ class SSAPINet(classes.ObservableAnalyzer):
             if self.use_proxy:
                 params["proxy"] = self.proxy
 
-            resp = requests.get(self.base_url, params=params)
+            resp = requests.get(self.url, params=params)
             resp.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

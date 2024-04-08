@@ -8,14 +8,12 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Hunter_Io(classes.ObservableAnalyzer):
-    base_url: str = "https://api.hunter.io/v2/domain-search?"
+    url: str = "https://api.hunter.io/v2/domain-search?"
 
     _api_key_name: str
 
     def run(self):
-        url = (
-            f"{self.base_url}domain={self.observable_name}&api_key={self._api_key_name}"
-        )
+        url = f"{self.url}domain={self.observable_name}&api_key={self._api_key_name}"
         response = requests.get(url)
         response.raise_for_status()
 

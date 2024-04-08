@@ -8,7 +8,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Koodous(classes.ObservableAnalyzer):
-    base_url: str = "https://developer.koodous.com/apks/"
+    url: str = "https://developer.koodous.com/apks/"
     query_analysis = "/analysis"
 
     _api_key_name: str
@@ -19,7 +19,7 @@ class Koodous(classes.ObservableAnalyzer):
         )
 
     def run(self):
-        common_url = self.base_url + self.observable_name
+        common_url = self.url + self.observable_name
 
         apk_info = self.get_response(common_url)
         apk_info.raise_for_status()

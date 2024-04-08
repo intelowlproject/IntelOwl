@@ -19,9 +19,7 @@ class PaginationMixin:
         page = self.paginate_queryset(queryset)
 
         if page is not None:
-            objects = self.serializer_class.Meta.model.objects.filter(
-                pk__in=[plugin.pk for plugin in page]
-            )
+            objects = queryset.filter(pk__in=[plugin.pk for plugin in page])
             if "page" in request.query_params and "page_size" in request.query_params:
                 cache_name += (
                     f"_{request.query_params['page']}_"

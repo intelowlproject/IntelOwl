@@ -27,3 +27,13 @@ services:
       - "6379"
     healthcheck:
       test: test $$(redis-cli -h '127.0.0.1' ping) = 'PONG'
+
+  celery_beat:
+    environment:
+      - BROKER_URL=redis://redis:6379/1
+      - WEBSOCKETS_URL=redis://redis:6379/0
+
+  celery_worker_default:
+    environment:
+      - BROKER_URL=redis://redis:6379/1
+      - WEBSOCKETS_URL=redis://redis:6379/0

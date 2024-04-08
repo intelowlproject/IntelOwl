@@ -5,18 +5,15 @@ from tests.mock_utils import if_mock_connections, patch
 
 
 class EmailSender(Connector):
-    receiver: str
     sender: str
-
-    @property
-    def body(self) -> str:
-        return "Email body"
+    body: str
+    subject: str
 
     def run(self) -> dict:
         base_eml = EmailMessage(
-            subject="Takedown domain",
+            subject=self.subject,
             from_email=self.sender,
-            to=[self.receiver],
+            to=[],
             body=self.body,
         )
         base_eml.send()

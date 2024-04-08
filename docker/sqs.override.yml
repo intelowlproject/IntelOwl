@@ -4,3 +4,13 @@ services:
     environment:
       - AWS_SQS=True
       - BROKER_URL=sqs://
+
+  celery_beat:
+    environment:
+      - AWS_SQS=True
+      - BROKER_URL=sqs://
+
+  celery_worker_default:
+    environment:
+      - AWS_SQS=True
+      - BROKER_URL=sqs://

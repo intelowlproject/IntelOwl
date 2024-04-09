@@ -5,6 +5,11 @@ import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { JobOverview } from "../../../../src/components/jobs/result/JobOverview";
 
+// mock flow component
+jest.mock("../../../../src/components/jobs/result/JobIsRunningAlert", () => ({
+  JobIsRunningAlert: jest.fn((props) => <div {...props} />),
+}));
+
 describe("test JobOverview (job report)", () => {
   test("test utility bar", () => {
     const { container } = render(

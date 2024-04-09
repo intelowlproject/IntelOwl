@@ -87,6 +87,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         fields = (
             "id",
             "user",
+            "delay",
             "is_sample",
             "tlp",
             "runtime_configuration",
@@ -102,6 +103,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     md5 = rfs.HiddenField(default=None)
     is_sample = rfs.HiddenField(write_only=True, default=False)
     user = rfs.HiddenField(default=rfs.CurrentUserDefault())
+    delay = rfs.IntegerField(default=0)
     scan_mode = rfs.ChoiceField(
         choices=ScanMode.choices,
         required=False,
@@ -339,6 +341,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def create(self, validated_data: Dict) -> Job:
         warnings = validated_data.pop("warnings")
+        delay = validated_data.pop("delay")
         send_task = validated_data.pop("send_task", False)
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
             try:
@@ -358,6 +361,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 args=[job.pk],
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
+                eta=now() + datetime.timedelta(seconds=delay),
             )
 
         return job
@@ -653,12 +657,13 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = data_to_check.copy()
-
             item["file"] = file
             if data_to_check.getlist("file_names", []):
                 item["file_name"] = data_to_check.getlist("file_names")[index]
             if data_to_check.get("file_mimetypes", []):
                 item["file_mimetype"] = data_to_check["file_mimetypes"][index]
+            if delay := data_to_check.get("delay", datetime.timedelta):
+                item["delay"] = int(delay.total_seconds() * index)
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:

@@ -12,6 +12,7 @@ if typing.TYPE_CHECKING:
 
 from django.db import models
 from django.utils.functional import cached_property
+from datetime import timedelta
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.interfaces import CreateJobsFromPlaybookInterface
@@ -97,6 +98,10 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     )
     orgs_configuration = GenericRelation(
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
+    )
+    delay = models.DurationField(
+        default=timedelta,
+        help_text="Expects data in the format 'DD HH:MM:SS'"
     )
 
     def _generate_full_description(self) -> str:

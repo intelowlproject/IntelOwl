@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
@@ -85,6 +86,10 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         PeriodicTask, related_name="ingestor", on_delete=models.PROTECT
     )
     maximum_jobs = models.IntegerField(default=10)
+    delay = models.DurationField(
+        default=timedelta,
+        help_text="Expects data in the format 'DD HH:MM:SS'"
+    )
 
     org_configuration = None
 

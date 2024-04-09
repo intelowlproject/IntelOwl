@@ -60,9 +60,10 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
         deque(
             self._config.create_jobs(
                 # every job created from an ingestor
-                content,
+                self.content,
                 TLP.CLEAR.value,
                 self._user,
+                self._config.delay
             ),
             maxlen=0,
         )

@@ -127,13 +127,15 @@ class Plugin(metaclass=ABCMeta):
         if isinstance(content, typing.Generator):
             content = list(content)
         # avoiding JSON serialization errors for types: File and bytes
-        if isinstance(content, typing.List):
-            if all(isinstance(n, File) for n in content):
-                content = [base64.b64encode(f.read()).decode("utf-8") for f in content]
-            if all(isinstance(n, bytes) for n in content):
-                content = [base64.b64encode(b).decode("utf-8") for b in content]
+        report_content = content
+        if isinstance(report_content, typing.List):
+            if all(isinstance(n, File) for n in report_content):
+                report_content = [base64.b64encode(f.read()).decode("utf-8") for f in report_content]
+            if all(isinstance(n, bytes) for n in report_content):
+                report_content = [base64.b64encode(b).decode("utf-8") for b in report_content]
 
-        self.report.report = content
+        self.content = content
+        self.report.report = report_content
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
 

@@ -12,6 +12,10 @@ class CRXcavator(classes.ObservableAnalyzer):
     name: str = "CRXcavator"
     url: str = "https://api.crxcavator.io/v1/report/"
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         try:
             response = requests.get(self.url + self.observable_name)

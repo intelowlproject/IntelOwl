@@ -23,6 +23,10 @@ class SSAPINet(classes.ObservableAnalyzer):
     # for other params provided by the API
     extra_api_params: dict
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         if self.use_proxy and not self.proxy:
             raise AnalyzerConfigurationException(

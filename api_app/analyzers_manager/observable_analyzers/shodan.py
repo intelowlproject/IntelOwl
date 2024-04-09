@@ -17,6 +17,10 @@ class Shodan(classes.ObservableAnalyzer):
     shodan_analysis: str
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         if self.shodan_analysis == "search":
             params = {"key": self._api_key_name, "minify": True}

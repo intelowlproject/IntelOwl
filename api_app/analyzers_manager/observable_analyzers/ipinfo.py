@@ -13,6 +13,10 @@ class IPInfo(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         try:
             response = requests.get(

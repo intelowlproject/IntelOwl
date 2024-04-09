@@ -20,6 +20,10 @@ class HoneyDB(classes.ObservableAnalyzer):
     _api_id_name: str
     honeydb_analysis: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         self.headers = {

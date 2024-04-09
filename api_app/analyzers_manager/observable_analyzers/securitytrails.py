@@ -15,6 +15,10 @@ class SecurityTrails(classes.ObservableAnalyzer):
     securitytrails_history_analysis: str
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {"apikey": self._api_key_name, "Content-Type": "application/json"}
 

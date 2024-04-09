@@ -13,6 +13,10 @@ class Onyphe(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {
             "Authorization": f"apikey {self._api_key_name}",

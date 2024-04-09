@@ -23,6 +23,10 @@ class Threatstream(classes.ObservableAnalyzer):
     _api_key_name: str
     _api_user_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         params = {}
         uri = ""

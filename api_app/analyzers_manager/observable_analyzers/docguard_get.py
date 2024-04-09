@@ -17,6 +17,10 @@ class DocGuard_Hash(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     @property
     def hash_type(self):
         hash_lengths = {32: "md5", 64: "sha256"}

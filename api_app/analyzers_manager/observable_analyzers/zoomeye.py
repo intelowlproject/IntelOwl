@@ -21,6 +21,10 @@ class ZoomEye(classes.ObservableAnalyzer):
     history: bool
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def __build_zoomeye_url(self):
         if self.observable_classification == self.ObservableTypes.IP:
             self.query += f" ip:{self.observable_name}"

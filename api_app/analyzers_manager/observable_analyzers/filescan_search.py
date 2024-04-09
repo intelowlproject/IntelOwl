@@ -16,6 +16,10 @@ class FileScanSearch(ObservableAnalyzer):
     url: str = "https://www.filescan.io/api/reports/search"
     _api_key: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         """Runs the FileScan_Search analyzer"""
         observable_name_base64 = base64.b64encode(

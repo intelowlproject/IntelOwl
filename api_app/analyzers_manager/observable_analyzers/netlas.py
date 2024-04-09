@@ -14,6 +14,10 @@ class Netlas(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         self.query = self.observable_name

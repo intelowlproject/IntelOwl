@@ -12,6 +12,10 @@ class VirusheeCheckHash(ObservableAnalyzer):
     url: str = "https://api.virushee.com/file/hash/{input}"
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         self.__session = requests.Session()
         if hasattr(self, "_api_key_name"):

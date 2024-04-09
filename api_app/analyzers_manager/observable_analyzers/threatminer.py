@@ -12,6 +12,10 @@ class Threatminer(classes.ObservableAnalyzer):
     url = "https://api.threatminer.org/v2/"
     rt_value: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         params = {"q": self.observable_name}
         if self.rt_value:

@@ -12,6 +12,10 @@ class Hunter_Io(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         url = f"{self.url}domain={self.observable_name}&api_key={self._api_key_name}"
         response = requests.get(url)

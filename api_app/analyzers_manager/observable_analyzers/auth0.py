@@ -13,6 +13,10 @@ class Auth0(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {"X-Auth-Token": self._api_key_name}
         url = f"{self.url}/{self.observable_name}"

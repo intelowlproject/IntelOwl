@@ -25,6 +25,10 @@ class Pulsedive(ObservableAnalyzer):
     scan_mode: str
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         supported_scan_values = ["basic", "passive", "active"]

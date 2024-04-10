@@ -775,11 +775,15 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
         errors = []
         observables = data.pop("observables", [])
         # TODO we could change the signature, but this means change frontend + clients
-        for _, name in observables:
+        for index, (classification, name) in enumerate(observables):
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
             item["observable_name"] = name
+
+            if delay := data.get("delay", datetime.timedelta):
+                item["delay"] = int(delay.total_seconds() * index)
+
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:

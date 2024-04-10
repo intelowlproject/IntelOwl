@@ -55,7 +55,8 @@ class CreateJobsFromPlaybookInterface:
         return ObservableAnalysisSerializer(
             data={
                 "playbook_requested": self.playbook_to_execute.name,
-                "observables": [(None, value) for value in values],
+                "observables": [(None, value) for value in values],  # (classification, value)
+                # -> the classification=None it's just a placeholder because it'll be calculated later
                 "tlp": tlp,
                 "delay": delay,
             },

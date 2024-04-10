@@ -6,14 +6,14 @@ from api_app.pivots_manager.classes import Pivot
 logger = logging.getLogger(__name__)
 
 
-class AbuseDomainToAbuseIp(Pivot):
+class AbuseIpToSubmission(Pivot):
     def should_run(self) -> Tuple[bool, Optional[str]]:
         for x in self.related_reports:
             if (
                 x.status == self.report_model.Status.SUCCESS.value
-                and len(x.report["resolutions"]) > 0
+                and len(x.report["abuse_contacts"]) > 0
             ):
-                value = x.report["resolutions"][0]["data"]
+                value = x.report["abuse_contacts"][0]
                 if value:
                     self.value = value
                     result = True
@@ -23,8 +23,7 @@ class AbuseDomainToAbuseIp(Pivot):
             result = False
         return (
             result,
-            f"Necessary reports{'' if result else ' do not'} have success status "
-            f"{'and' if result else 'or'} needed data",
+            f"Abuse contacts {'' if result else 'not'} found",
         )
 
     def get_value_to_pivot_to(self) -> Any:

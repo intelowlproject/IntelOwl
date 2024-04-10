@@ -204,12 +204,9 @@ class AbstractConfigAdminView(CustomAdminView):
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):
-    list_display = AbstractConfigAdminView.list_display + (
-        "routing_key",
-        "health_check_status",
-    )
+    list_display = AbstractConfigAdminView.list_display + ("routing_key",)
     inlines = [PluginConfigInlineForPythonConfig, OrganizationPluginConfigurationInLine]
-    list_filter = ["routing_key", "health_check_status"]
+    list_filter = ["routing_key"]
 
 
 @admin.register(OrganizationPluginConfiguration)

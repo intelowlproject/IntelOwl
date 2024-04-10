@@ -12,13 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 class ThreatFox(Ingestor):
+    url: str
     days: int
-
-    BASE_URL = "https://threatfox-api.abuse.ch/api/v1/"
 
     def run(self) -> Iterable[Any]:
         result = requests.post(
-            self.BASE_URL, json={"query": "get_iocs", "days": self.days}
+            self.url, json={"query": "get_iocs", "days": self.days}
         )
         result.raise_for_status()
         content = result.json()

@@ -1096,7 +1096,7 @@ class PythonConfig(AbstractConfig):
         related_name="healthcheck_for_%(class)s",
         editable=False,
     )
-    health_check_status = models.BooleanField(default=True, editable=False)
+    health_check_status = models.BooleanField(default=True)
 
     class Meta:
         abstract = True

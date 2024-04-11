@@ -9,9 +9,13 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Onyphe(classes.ObservableAnalyzer):
-    base_url: str = "https://www.onyphe.io/api/v2/summary/"
+    url: str = "https://www.onyphe.io/api/v2/summary/"
 
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         headers = {
@@ -33,7 +37,7 @@ class Onyphe(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.base_url + uri, headers=headers)
+            response = requests.get(self.url + uri, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

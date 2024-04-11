@@ -14,11 +14,15 @@ logger = logging.getLogger(__name__)
 
 
 class HoneyDB(classes.ObservableAnalyzer):
-    base_url = "https://honeydb.io/api"
+    url = "https://honeydb.io/api"
     # set secrets
     _api_key_name: str
     _api_id_name: str
     honeydb_analysis: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -53,15 +57,15 @@ class HoneyDB(classes.ObservableAnalyzer):
 
     def _request_analysis(self, endpoint):
         if endpoint == "scan_twitter":
-            url = f"{self.base_url}/twitter-threat-feed/{self.observable_name}"
+            url = f"{self.url}/twitter-threat-feed/{self.observable_name}"
         elif endpoint == "ip_query":
-            url = f"{self.base_url}/netinfo/lookup/{self.observable_name}"
+            url = f"{self.url}/netinfo/lookup/{self.observable_name}"
         elif endpoint == "ip_history":
-            url = f"{self.base_url}/ip-history/{self.observable_name}"
+            url = f"{self.url}/ip-history/{self.observable_name}"
         elif endpoint == "internet_scanner":
-            url = f"{self.base_url}/internet-scanner/info/{self.observable_name}"
+            url = f"{self.url}/internet-scanner/info/{self.observable_name}"
         elif endpoint == "ip_info":
-            url = f"{self.base_url}/ipinfo/{self.observable_name}"
+            url = f"{self.url}/ipinfo/{self.observable_name}"
         else:
             logger.error(f"endpoint {endpoint} not supported")
             return

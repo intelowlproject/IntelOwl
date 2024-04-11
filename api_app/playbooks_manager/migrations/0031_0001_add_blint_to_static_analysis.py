@@ -25,7 +25,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0031_add_blint_to_free_analyzers"),
+        ("playbooks_manager", "0031_0000_add_blint_to_free_analyzers"),
         ("analyzers_manager", "0078_analyzer_config_blint"),
     ]
 

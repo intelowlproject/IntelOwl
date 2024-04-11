@@ -2,9 +2,13 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-import os
 
+import magic
 from permhash.functions import (
+    APK_MANIFEST_MIMETYPES,
+    APK_MIMETYPES,
+    CRX_MANIFEST_MIMETYPES,
+    CRX_MIMETYPES,
     permhash_apk,
     permhash_apk_manifest,
     permhash_crx,
@@ -25,24 +29,20 @@ class Permhash(FileAnalyzer):
 
     def run(self):
         result = {}
-        _, file_extension = os.path.splitext(self.filepath)
-
-        logger.info(f"Started PERMHASH============================> {self.filepath}")
-
-        file_extension = file_extension[1:]
+        mimetype = magic.from_file(self.filepath, mime=True)
 
         hash_val = ""
 
-        if file_extension == "apk":
+        if mimetype in APK_MIMETYPES:
             hash_val = permhash_apk(self.filepath)
-        elif file_extension == "xml":
+        elif mimetype in APK_MANIFEST_MIMETYPES:
             hash_val = permhash_apk_manifest(self.filepath)
-        elif file_extension == "crx":
+        elif mimetype in CRX_MIMETYPES:
             hash_val = permhash_crx(self.filepath)
-        elif file_extension == "json":
+        elif mimetype in CRX_MANIFEST_MIMETYPES:
             hash_val = permhash_crx_manifest(self.filepath)
         else:
-            raise AnalyzerRunException(f"Invalid file extension: {file_extension}")
+            raise AnalyzerRunException(f"Mimetype {mimetype} not supported.")
 
         # permhash returns False if for some reason the hash value can't be found
         if hash_val:

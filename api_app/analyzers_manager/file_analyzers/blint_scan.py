@@ -34,11 +34,14 @@ class BlintAnalyzer(FileAnalyzer):
             "fuzzables": response[2],
         }
 
-    def clean_reports_directory(self, reports_dir):
+    @staticmethod
+    def clean_reports_directory(reports_dir):
+        files_cleaned = 0
         for file in os.listdir(reports_dir):
             file_path = os.path.join(reports_dir, file)
             try:
                 os.remove(file_path)
+                files_cleaned += 1
             except OSError as e:
                 logger.error(f"Error removing file {file_path}: {e}")
-        logger.info(f"cleaned {reports_dir}")
+        logger.info(f"cleaned {files_cleaned} files from {reports_dir}")

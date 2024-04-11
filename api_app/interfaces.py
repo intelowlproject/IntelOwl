@@ -62,7 +62,8 @@ class CreateJobsFromPlaybookInterface:
                 "observables": [
                     (None, value) for value in values
                 ],  # (classification, value)
-                # -> the classification=None it's just a placeholder because it'll be calculated later
+                # -> the classification=None it's just a placeholder
+                #    because it'll be calculated later
                 "tlp": tlp,
                 "delay": delay,
             },

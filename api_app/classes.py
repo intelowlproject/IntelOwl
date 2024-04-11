@@ -1,3 +1,4 @@
+import base64
 import logging
 import traceback
 import typing
@@ -5,12 +6,11 @@ from abc import ABCMeta, abstractmethod
 from pathlib import PosixPath
 
 import requests
-import base64
 from billiard.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+from django.core.files import File
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.core.files import File
 from requests import HTTPError
 
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
@@ -130,9 +130,13 @@ class Plugin(metaclass=ABCMeta):
         report_content = content
         if isinstance(report_content, typing.List):
             if all(isinstance(n, File) for n in report_content):
-                report_content = [base64.b64encode(f.read()).decode("utf-8") for f in report_content]
+                report_content = [
+                    base64.b64encode(f.read()).decode("utf-8") for f in report_content
+                ]
             if all(isinstance(n, bytes) for n in report_content):
-                report_content = [base64.b64encode(b).decode("utf-8") for b in report_content]
+                report_content = [
+                    base64.b64encode(b).decode("utf-8") for b in report_content
+                ]
 
         self.content = content
         self.report.report = report_content

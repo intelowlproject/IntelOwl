@@ -119,7 +119,10 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0077_analyzer_config_abusix"),
+        (
+            "analyzers_manager",
+            "0078_alter_analyzerconfig_not_supported_filetypes_and_more",
+        ),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

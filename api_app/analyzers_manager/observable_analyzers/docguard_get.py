@@ -13,9 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class DocGuard_Hash(classes.ObservableAnalyzer):
-    base_url: str = "https://api.docguard.net:8443/api/FileAnalyzing/GetByHash/"
+    url: str = "https://api.docguard.net:8443/api/FileAnalyzing/GetByHash/"
 
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     @property
     def hash_type(self):
@@ -43,7 +47,7 @@ class DocGuard_Hash(classes.ObservableAnalyzer):
         uri = f"{self.observable_name}"
         if self.observable_classification == self.ObservableTypes.HASH:
             try:
-                response = requests.get(self.base_url + uri, headers=headers)
+                response = requests.get(self.url + uri, headers=headers)
                 response.raise_for_status()
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)

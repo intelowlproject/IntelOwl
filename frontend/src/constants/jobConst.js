@@ -182,6 +182,7 @@ export const FileExtensions = Object.freeze({
   ISO: "iso",
   SH: "sh",
   CRX: "crx",
+  CONFIG: "config",
 });
 
 export const InvalidTLD = Object.freeze({

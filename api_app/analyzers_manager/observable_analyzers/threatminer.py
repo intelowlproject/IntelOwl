@@ -9,8 +9,12 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Threatminer(classes.ObservableAnalyzer):
-    base_url = "https://api.threatminer.org/v2/"
+    url = "https://api.threatminer.org/v2/"
     rt_value: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         params = {"q": self.observable_name}
@@ -30,7 +34,7 @@ class Threatminer(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.base_url + uri, params=params)
+            response = requests.get(self.url + uri, params=params)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

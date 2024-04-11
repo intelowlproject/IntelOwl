@@ -12,6 +12,7 @@ from permhash.functions import (
 )
 
 from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +42,13 @@ class Permhash(FileAnalyzer):
         elif file_extension == "json":
             hash_val = permhash_crx_manifest(self.filepath)
         else:
-            result["error"] = "Invalid file extension."
+            raise AnalyzerRunException(f"Invalid file extension: {file_extension}")
 
         # permhash returns False if for some reason the hash value can't be found
         if hash_val:
             result["hash"] = hash_val
         else:
-            result["error"] = "Could not find permissions in the file."
+            raise AnalyzerRunException("Could not find permissions in the file.")
 
         return result
 

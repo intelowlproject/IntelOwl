@@ -10,9 +10,10 @@ from api_app.queryset import PythonConfigQuerySet
 if typing.TYPE_CHECKING:
     from api_app.serializers.plugin import PythonConfigSerializer
 
+from datetime import timedelta
+
 from django.db import models
 from django.utils.functional import cached_property
-from datetime import timedelta
 
 from api_app.choices import PythonModuleBasePaths
 from api_app.interfaces import CreateJobsFromPlaybookInterface
@@ -100,8 +101,7 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
     delay = models.DurationField(
-        default=timedelta,
-        help_text="Expects data in the format 'DD HH:MM:SS'"
+        default=timedelta, help_text="Expects data in the format 'DD HH:MM:SS'"
     )
 
     def _generate_full_description(self) -> str:

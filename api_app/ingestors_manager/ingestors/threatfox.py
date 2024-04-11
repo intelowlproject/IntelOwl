@@ -16,9 +16,7 @@ class ThreatFox(Ingestor):
     days: int
 
     def run(self) -> Iterable[Any]:
-        result = requests.post(
-            self.url, json={"query": "get_iocs", "days": self.days}
-        )
+        result = requests.post(self.url, json={"query": "get_iocs", "days": self.days})
         result.raise_for_status()
         content = result.json()
         logger.info(f"Threatfox data is {content}")

@@ -87,8 +87,7 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     )
     maximum_jobs = models.IntegerField(default=10)
     delay = models.DurationField(
-        default=timedelta,
-        help_text="Expects data in the format 'DD HH:MM:SS'"
+        default=timedelta, help_text="Expects data in the format 'DD HH:MM:SS'"
     )
 
     org_configuration = None

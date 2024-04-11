@@ -1,6 +1,6 @@
+import datetime
 import io
 import logging
-import datetime
 from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
 
 from django.conf import settings
@@ -41,21 +41,27 @@ class CreateJobsFromPlaybookInterface:
                 f" playbook {self.playbook_to_execute_id}"
             )
 
-    def _get_serializer(self, value: Any, tlp: str, user: User, delay: datetime.timedelta):
+    def _get_serializer(
+        self, value: Any, tlp: str, user: User, delay: datetime.timedelta
+    ):
         values = value if isinstance(value, (list, Generator)) else [value]
         if self.playbook_to_execute.is_sample():
             return self._get_file_serializer(values, tlp, user, delay)
         else:
             return self._get_observable_serializer(values, tlp, user, delay)
 
-    def _get_observable_serializer(self, values: Iterable[Any], tlp: str, user: User, delay: datetime.timedelta):
+    def _get_observable_serializer(
+        self, values: Iterable[Any], tlp: str, user: User, delay: datetime.timedelta
+    ):
         from api_app.serializers.job import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
         return ObservableAnalysisSerializer(
             data={
                 "playbook_requested": self.playbook_to_execute.name,
-                "observables": [(None, value) for value in values],  # (classification, value)
+                "observables": [
+                    (None, value) for value in values
+                ],  # (classification, value)
                 # -> the classification=None it's just a placeholder because it'll be calculated later
                 "tlp": tlp,
                 "delay": delay,
@@ -65,10 +71,15 @@ class CreateJobsFromPlaybookInterface:
         )
 
     def _get_file_serializer(
-        self, values: Iterable[Union[bytes, File]], tlp: str, user: User, delay: datetime.timedelta
+        self,
+        values: Iterable[Union[bytes, File]],
+        tlp: str,
+        user: User,
+        delay: datetime.timedelta,
     ):
         from api_app.serializers.job import FileJobSerializer
         from tests.mock_utils import MockUpRequest
+
         files = [
             data
             if isinstance(data, File)

@@ -63,7 +63,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
                 self.content,
                 TLP.CLEAR.value,
                 self._user,
-                self._config.delay
+                self._config.delay,
             ),
             maxlen=0,
         )

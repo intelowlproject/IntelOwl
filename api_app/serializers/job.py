@@ -25,6 +25,7 @@ from api_app.defaults import default_runtime
 from api_app.helpers import calculate_md5, gen_random_colorhex
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Tag
+from api_app.pivots_manager.models import PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
@@ -98,6 +99,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "scan_mode",
             "scan_check_time",
             "investigation",
+            "parent_job",
         )
 
     md5 = rfs.HiddenField(default=None)
@@ -118,6 +120,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     investigation = rfs.PrimaryKeyRelatedField(
         queryset=Investigation.objects.all(), many=False, required=False, default=None
     )
+    parent_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=False)
     connectors_requested = rfs.SlugRelatedField(
         slug_field="name",
         queryset=ConnectorConfig.objects.all(),
@@ -346,7 +349,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         warnings = validated_data.pop("warnings")
         delay = validated_data.pop("delay")
         send_task = validated_data.pop("send_task", False)
-
+        parent_job = validated_data.pop("parent_job", None)
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
             try:
                 return self.check_previous_jobs(validated_data)
@@ -358,6 +361,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         job.save()
         logger.info(f"Job {job.pk} created")
 
+        if parent_job:
+            PivotMap.objects.create(
+                starting_job=validated_data["parent"], ending_job=job, pivot_config=None
+            )
         if send_task:
             from intel_owl.tasks import job_pipeline
 
@@ -366,6 +373,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 args=[job.pk],
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
+                priority=job.priority,
                 # countdown doesn't work as expected and it's just syntactic sugar for the expression below
                 eta=now() + datetime.timedelta(seconds=delay),
             )
@@ -515,11 +523,17 @@ class JobSerializer(_AbstractJobViewSerializer):
     )
     playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    investigation = rfs.SerializerMethodField(read_only=True, default=None)
     permissions = rfs.SerializerMethodField()
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
+
+    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
+        if root_investigation := instance.get_root().investigation:
+            return root_investigation.pk
+        return instance.investigation
 
     def get_fields(self):
         # this method override is required for a cyclic import
@@ -576,6 +590,8 @@ class MultipleJobSerializer(rfs.ListSerializer):
             # the parent has already an investigation
             # so we don't need to do anything because everything is already connected
             if parent.investigation:
+                parent.investigation.status = parent.investigation.Status.RUNNING.value
+                parent.investigation.save()
                 return jobs
             # if we have a parent, it means we are pivoting from one job to another
             else:
@@ -663,6 +679,7 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = data_to_check.copy()
+
             item["file"] = file
             if data_to_check.getlist("file_names", []):
                 item["file_name"] = data_to_check.getlist("file_names")[index]
@@ -939,10 +956,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
         source="playbook_to_execute",
         slug_field="name",
     )
-    investigation = rfs.SlugRelatedField(
-        read_only=True,
-        slug_field="pk",
-    )
+    investigation = rfs.SerializerMethodField(read_only=True, default=None)
 
     class Meta:
         model = Job
@@ -956,6 +970,11 @@ class JobResponseSerializer(rfs.ModelSerializer):
         ]
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer
+
+    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
+        if root_investigation := instance.get_root().investigation:
+            return root_investigation.pk
+        return instance.investigation
 
     def to_representation(self, instance: Job):
         result = super().to_representation(instance)

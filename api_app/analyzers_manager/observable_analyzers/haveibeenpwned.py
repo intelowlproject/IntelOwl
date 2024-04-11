@@ -8,7 +8,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class HaveIBeenPwned(classes.ObservableAnalyzer):
-    base_url: str = "https://haveibeenpwned.com/api/v3/breachedaccount/"
+    url: str = "https://haveibeenpwned.com/api/v3/breachedaccount/"
 
     truncate_response: bool
     include_unverified: bool
@@ -26,7 +26,7 @@ class HaveIBeenPwned(classes.ObservableAnalyzer):
         headers = {"hibp-api-key": self._api_key_name}
 
         response = requests.get(
-            self.base_url + self.observable_name, params=params, headers=headers
+            self.url + self.observable_name, params=params, headers=headers
         )
         response.raise_for_status()
 

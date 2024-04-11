@@ -10,13 +10,14 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 class Crowdsec(ObservableAnalyzer):
     _api_key_name: str
+    url: str = "https://cti.api.crowdsec.net"
 
     def run(self):
         headers = {
             "x-api-key": self._api_key_name,
             "User-Agent": f"crowdsec-intelowl/{settings.VERSION}",
         }
-        url = f"https://cti.api.crowdsec.net/v2/smoke/{self.observable_name}"
+        url = f"{self.url}/v2/smoke/{self.observable_name}"
         response = requests.get(url, headers=headers)
         if response.status_code == 404:
             result = {"not_found": True}

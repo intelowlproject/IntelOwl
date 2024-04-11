@@ -86,7 +86,7 @@ class Plugin(metaclass=ABCMeta):
         try:
             return f"({self.__class__.__name__}, job: #{self.job_id})"
         except AttributeError:
-            return f"({self.__class__.__name__}"
+            return f"{self.__class__.__name__}"
 
     def config(self, runtime_configuration: typing.Dict):
         self.__parameters = self._config.read_configured_params(
@@ -280,18 +280,18 @@ class Plugin(metaclass=ABCMeta):
         if url and url.startswith("http"):
             if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
                 return True
-            logger.info(f"Checking url {url} for {self}")
+            logger.info(f"healthcheck  url {url} for {self}")
             try:
                 # momentarily set this to False to
                 # avoid fails for https services
-                requests.head(url, timeout=10, verify=False)
+                response = requests.head(url, timeout=10, verify=False)
+                response.raise_for_status()
             except (
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
+                requests.exceptions.HTTPError,
             ) as e:
-                logger.info(
-                    f"Health check failed: url {url}" f" for {self}. Error: {e}"
-                )
+                logger.info(f"healthcheck failed: url {url}" f" for {self}. Error: {e}")
                 return False
             else:
                 return True

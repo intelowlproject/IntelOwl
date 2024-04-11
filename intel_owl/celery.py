@@ -65,13 +65,14 @@ if settings.AWS_SQS:
         BROKER_TRANSPORT_OPTIONS["access_key_id"] = settings.AWS_ACCESS_KEY_ID
         BROKER_TRANSPORT_OPTIONS["secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
 else:
-    BROKER_TRANSPORT_OPTIONS = {}
+    BROKER_TRANSPORT_OPTIONS = {
+        "priority_steps": list(range(10)),
+        "sep": ":",
+        "queue_order_strategy": "priority",
+    }
 
 task_queues = [
-    Queue(
-        get_queue_name(key),
-        routing_key=key,
-    )
+    Queue(get_queue_name(key), routing_key=key, queue_arguments={"x-max-priority": 10})
     for key in settings.CELERY_QUEUES
 ]
 if not settings.AWS_SQS:

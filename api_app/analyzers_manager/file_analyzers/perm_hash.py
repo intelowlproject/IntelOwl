@@ -4,7 +4,12 @@
 import logging
 import os
 
-from permhash import functions as permhash
+from permhash.functions import (
+    permhash_apk,
+    permhash_apk_manifest,
+    permhash_crx,
+    permhash_crx_manifest,
+)
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 
@@ -28,13 +33,13 @@ class Permhash(FileAnalyzer):
         hash_val = ""
 
         if file_extension == "apk":
-            hash_val = permhash.permhash_apk(self.filepath)
+            hash_val = permhash_apk(self.filepath)
         elif file_extension == "xml":
-            hash_val = permhash.permhash_apk_manifest(self.filepath)
+            hash_val = permhash_apk_manifest(self.filepath)
         elif file_extension == "crx":
-            hash_val = permhash.permhash_crx(self.filepath)
+            hash_val = permhash_crx(self.filepath)
         elif file_extension == "json":
-            hash_val = permhash.permhash_crx_manifest(self.filepath)
+            hash_val = permhash_crx_manifest(self.filepath)
         else:
             result["error"] = "Invalid file extension."
 

@@ -1,7 +1,7 @@
 import io
 import logging
+import datetime
 from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
-from datetime import timedelta
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -26,7 +26,7 @@ class CreateJobsFromPlaybookInterface:
     playbook_to_execute: "PlaybookConfig"
     playbook_to_execute_id: str
     name: str
-    delay: timedelta
+    delay: datetime.timedelta
 
     def validate_playbook_to_execute(self, user: User):
         from api_app.playbooks_manager.models import PlaybookConfig
@@ -41,14 +41,14 @@ class CreateJobsFromPlaybookInterface:
                 f" playbook {self.playbook_to_execute_id}"
             )
 
-    def _get_serializer(self, value: Any, tlp: str, user: User, delay: timedelta):
+    def _get_serializer(self, value: Any, tlp: str, user: User, delay: datetime.timedelta):
         values = value if isinstance(value, (list, Generator)) else [value]
         if self.playbook_to_execute.is_sample():
             return self._get_file_serializer(values, tlp, user, delay)
         else:
             return self._get_observable_serializer(values, tlp, user, delay)
 
-    def _get_observable_serializer(self, values: Iterable[Any], tlp: str, user: User, delay: timedelta):
+    def _get_observable_serializer(self, values: Iterable[Any], tlp: str, user: User, delay: datetime.timedelta):
         from api_app.serializers.job import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
@@ -65,7 +65,7 @@ class CreateJobsFromPlaybookInterface:
         )
 
     def _get_file_serializer(
-        self, values: Iterable[Union[bytes, File]], tlp: str, user: User, delay: timedelta
+        self, values: Iterable[Union[bytes, File]], tlp: str, user: User, delay: datetime.timedelta
     ):
         from api_app.serializers.job import FileJobSerializer
         from tests.mock_utils import MockUpRequest
@@ -94,7 +94,7 @@ class CreateJobsFromPlaybookInterface:
         value: Any,
         tlp: str,
         user: User,
-        delay: timedelta,
+        delay: datetime.timedelta,
         send_task: bool = True,
         parent_job=None,
     ) -> Generator["Job", None, None]:

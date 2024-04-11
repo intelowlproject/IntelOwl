@@ -340,9 +340,13 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
 
     def create(self, validated_data: Dict) -> Job:
+        # POP VALUES!
+        # this part is important because a Job doesn't need these fields and it wouldn't
+        # know how to handle it. we need these information only at this point of the job creation.
         warnings = validated_data.pop("warnings")
         delay = validated_data.pop("delay")
         send_task = validated_data.pop("send_task", False)
+
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
             try:
                 return self.check_previous_jobs(validated_data)
@@ -353,6 +357,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         job.warnings = warnings
         job.save()
         logger.info(f"Job {job.pk} created")
+
         if send_task:
             from intel_owl.tasks import job_pipeline
 
@@ -361,6 +366,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 args=[job.pk],
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
+                # countdown doesn't work as expected and it's just syntactic sugar for the expression below
                 eta=now() + datetime.timedelta(seconds=delay),
             )
 
@@ -662,7 +668,7 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
                 item["file_name"] = data_to_check.getlist("file_names")[index]
             if data_to_check.get("file_mimetypes", []):
                 item["file_mimetype"] = data_to_check["file_mimetypes"][index]
-            if delay := data_to_check.get("delay", datetime.timedelta):
+            if delay := data_to_check.get("delay", datetime.timedelta()):
                 item["delay"] = int(delay.total_seconds() * index)
             try:
                 validated = self.child.run_validation(item)
@@ -781,7 +787,7 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
             item = copy.deepcopy(data)
             item["observable_name"] = name
 
-            if delay := data.get("delay", datetime.timedelta):
+            if delay := data.get("delay", datetime.timedelta()):
                 item["delay"] = int(delay.total_seconds() * index)
 
             try:

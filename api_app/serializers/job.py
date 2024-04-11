@@ -344,8 +344,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def create(self, validated_data: Dict) -> Job:
         # POP VALUES!
-        # this part is important because a Job doesn't need these fields and it wouldn't
-        # know how to handle it. we need these information only at this point of the job creation.
+        # this part is important because a Job doesn't need these fields and it
+        # wouldn't know how to handle it. we need these information only at this
+        # point of the job creation.
         warnings = validated_data.pop("warnings")
         delay = validated_data.pop("delay")
         send_task = validated_data.pop("send_task", False)
@@ -374,7 +375,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
                 priority=job.priority,
-                # countdown doesn't work as expected and it's just syntactic sugar for the expression below
+                # countdown doesn't work as expected and it's just
+                # syntactic sugar for the expression below
                 eta=now() + datetime.timedelta(seconds=delay),
             )
 

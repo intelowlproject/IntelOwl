@@ -9,9 +9,13 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Stalkphish(classes.ObservableAnalyzer):
-    base_url: str = "https://api.stalkphish.io/api/v1/"
+    url: str = "https://api.stalkphish.io/api/v1/"
 
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         headers = {
@@ -35,7 +39,7 @@ class Stalkphish(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.base_url + uri, headers=headers)
+            response = requests.get(self.url + uri, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

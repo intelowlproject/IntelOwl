@@ -9,13 +9,17 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 class Auth0(classes.ObservableAnalyzer):
     name: str = "Auth0"
-    base_url: str = "https://signals.api.auth0.com/v2.0/ip"
+    url: str = "https://signals.api.auth0.com/v2.0/ip"
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {"X-Auth-Token": self._api_key_name}
-        url = f"{self.base_url}/{self.observable_name}"
+        url = f"{self.url}/{self.observable_name}"
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 

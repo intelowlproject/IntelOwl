@@ -148,6 +148,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
 - `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
 -  `Zippy_scan` : [Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated; takes in `lzma`,`zlib`,`brotli` as input based engines; `ensemble` being default.
+- `Blint`: [Blint](https://github.com/owasp-dep-scan/blint) is a Binary Linter that checks the security properties and capabilities of your executables. Supported binary formats: - Android (apk, aab) - ELF (GNU, musl) - PE (exe, dll) - Mach-O (x64, arm64)
 ##### Observable analyzers (ip, domain, url, hash)
 
 ###### Internal tools

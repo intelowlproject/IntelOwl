@@ -1,5 +1,4 @@
 import logging
-import os
 
 from blint.analysis import AnalysisRunner
 from django.conf import settings
@@ -10,12 +9,22 @@ logger = logging.getLogger(__name__)
 
 
 class BlintAnalyzer(FileAnalyzer):
-    reports_dir = os.path.join(settings.MEDIA_ROOT, "reports")
+    """
+    Wrapper for Blint static analysis tool
+    """
 
-    def run(self):
+    def update(self) -> bool:
+        pass
+
+    def run(self) -> tuple:
         logger.info(f"Running Blint on {self.filepath}")
-        if not os.path.exists(self.reports_dir):
-            os.makedirs(self.reports_dir)
+        # Blint requires a report directory
+        # that we create during the docker build at
+        # /opt/deploy/files_required/reports
+        reports_dir = f"{settings.MEDIA_ROOT}/reports"
         analyzer = AnalysisRunner()
-
-        return analyzer.start(files=[self.filepath], reports_dir=self.reports_dir)
+        response = analyzer.start(files=[self.filepath], reports_dir=reports_dir)
+        logger.info(f"response: {response}")
+        if response == ([], [], []):
+            return "No issues found"
+        return response

@@ -29,7 +29,7 @@ RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
     ${LOG_PATH}/asgi \
-    /opt/deploy/files_required /opt/deploy/files_required/yara /opt/deploy/configuration
+    /opt/deploy/files_required /opt/deploy/files_required/yara /opt/deploy/configuration /opt/deploy/files_required/reports
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
@@ -56,11 +56,10 @@ RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
-
-
 COPY . $PYTHONPATH
 
 RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
+    && touch ${LOG_PATH}/django/intel_owl.log ${LOG_PATH}/django/intel_owl_errors.log \
     && touch ${LOG_PATH}/django/celery.log ${LOG_PATH}/django/celery_errors.log \
     && touch ${LOG_PATH}/django/django_auth_ldap.log ${LOG_PATH}/django/django_errors.log \
     && touch ${LOG_PATH}/django/certego_saas.log ${LOG_PATH}/django/certego_saas_errors.log \
@@ -81,6 +80,6 @@ COPY --from=frontend-build /build /var/www/reactapp
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"
 # Path(HOME_DIR).mkdir(parents=True, exist_ok=True)
-# so we have to set the home env variable to allow to reate its directory
+# so we have to set the home env variable to allow to create its directory
 ENV HOME ${PYTHONPATH}
 

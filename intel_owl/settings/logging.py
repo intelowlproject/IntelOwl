@@ -41,6 +41,19 @@ LOGGING = {
             "filename": f"{DJANGO_LOG_DIRECTORY}/api_app_errors.log",
             "formatter": "stdfmt",
         },
+        "intel_owl": {
+            "level": INFO_OR_DEBUG_LEVEL,
+            # we use Logrotate instead of RotatingFileHandler because more reliable
+            "class": "logging.handlers.WatchedFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/intel_owl.log",
+            "formatter": "stdfmt",
+        },
+        "intel_owl_error": {
+            "level": "ERROR",
+            "class": "logging.handlers.WatchedFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/intel_owl_errors.log",
+            "formatter": "stdfmt",
+        },
         "celery": {
             "level": INFO_OR_DEBUG_LEVEL,
             "class": "logging.handlers.WatchedFileHandler",
@@ -114,6 +127,11 @@ LOGGING = {
     "loggers": {
         "api_app": {
             "handlers": ["api_app", "api_app_error"],
+            "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
+        },
+        "intel_owl": {
+            "handlers": ["intel_owl", "intel_owl_error"],
             "level": INFO_OR_DEBUG_LEVEL,
             "propagate": True,
         },

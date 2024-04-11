@@ -29,7 +29,6 @@ services:
       start_period: 3s
       retries: 15
 
-
   daphne:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_daphne
@@ -49,9 +48,6 @@ services:
       timeout: 2s
       start_period: 2s
       retries: 6
-    depends_on:
-      uwsgi:
-        condition: service_healthy
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
@@ -68,6 +64,8 @@ services:
       - "80:80"
     depends_on:
       uwsgi:
+        condition: service_healthy
+      daphne:
         condition: service_healthy
 
   celery_beat:

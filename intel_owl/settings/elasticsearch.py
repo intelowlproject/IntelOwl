@@ -22,8 +22,6 @@ if ELASTICSEARCH_BI_ENABLED:
             max_retries=10,
             retry_on_timeout=True,
             timeout=30,
-            sniff_on_connection_fail=True,
-            sniff_timeout=30,
         )
         if not ELASTICSEARCH_CLIENT.ping():
             print("ELASTICSEARCH client configuration did not connect correctly")

@@ -68,8 +68,6 @@ To activate this feature, it is necessary to set `ELASTICSEARCH_BI_ENABLED` to `
 `ELASTICSEARCH_BI_HOST` to `elasticsearch:9200`
 or your elasticsearch server.
 
-In case you are protecting your Cluster with API keys or using Elastic Cloud, you must populate the variable `ELASTICSEARCH_BI_API_KEY`.
-
 An [index template](https://github.com/intelowlproject/IntelOwl/configuration/elastic_search_mappings/intel_owl_bi.json) is created after the first bulk submission of reports. 
 If you want to use kibana to visualize your data/make dashboard, you must create an index pattern:
 Go to Kibana -> Discover -> Stack Management -> Index Patterns -> search for your index and use as time field `timestamp` 

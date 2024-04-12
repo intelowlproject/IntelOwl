@@ -11,7 +11,6 @@ ELASTICSEARCH_BI_ENABLED = (
 if ELASTICSEARCH_BI_ENABLED:
     ELASTICSEARCH_BI_HOST = secrets.get_secret("ELASTICSEARCH_BI_HOST").split(",")
     ELASTICSEARCH_BI_INDEX = secrets.get_secret("ELASTICSEARCH_BI_INDEX")
-    ELASTICSEARCH_BI_API_KEY = secrets.get_secret("ELASTICSEARCH_BI_API_KEY")
 
     if not ELASTICSEARCH_BI_HOST or not ELASTICSEARCH_BI_INDEX:
         print("Elasticsearch not correctly configured")
@@ -19,7 +18,6 @@ if ELASTICSEARCH_BI_ENABLED:
     else:
         ELASTICSEARCH_CLIENT = Elasticsearch(
             ELASTICSEARCH_BI_HOST,
-            api_key=ELASTICSEARCH_BI_API_KEY,
             maxsize=20,
             max_retries=10,
             retry_on_timeout=True,
@@ -27,6 +25,8 @@ if ELASTICSEARCH_BI_ENABLED:
             sniff_on_connection_fail=True,
             sniff_timeout=30,
         )
+        if not ELASTICSEARCH_CLIENT.ping():
+            print("ELASTICSEARCH client configuration did not connect correctly")
 
 ELASTICSEARCH_DSL_ENABLED = (
     secrets.get_secret("ELASTICSEARCH_DSL_ENABLED", False) == "True"

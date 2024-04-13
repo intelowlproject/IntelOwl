@@ -84,6 +84,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
 * `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
+* `Permhash`: create hash of manifest permssions found in APK, Android manifest, Chrome extensions or Chrome extension manifest using [Permhash](https://github.com/google/permhash)
 * `PDF_Info`: static PDF analysis ([peepdf](https://github.com/jesparza/peepdf) + [pdfid](https://github.com/mlodic/pdfid))
 * `Qiling_Linux`: [Qiling](https://github.com/qilingframework/qiling) qiling linux binary emulation.
 * `Qiling_Linux_Shellcode`: [Qiling](https://github.com/qilingframework/qiling) qiling linux shellcode emulation.

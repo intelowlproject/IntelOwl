@@ -49,7 +49,7 @@ class Permhash(FileAnalyzer):
         if hash_val:
             result["hash"] = hash_val
         else:
-            raise AnalyzerRunException("Could not find permissions in the file.")
+            result["error"] = "Could not find permissions in the file."
 
         return result
 

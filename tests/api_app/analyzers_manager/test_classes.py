@@ -47,6 +47,9 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "shellcode.bin",
                 "Sublime-Standard-Test-String.eml",
                 "textfile.txt",
+                "AndroidManifest.xml",
+                "sample.crx",
+                "manifest.json",
             ],
             [
                 "application/onenote",
@@ -64,6 +67,9 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/octet-stream",
                 "message/rfc822",
                 "text/plain",
+                "application/octet-stream",
+                "application/x-chrome-extension",
+                "application/json",
             ],
         ):
             try:

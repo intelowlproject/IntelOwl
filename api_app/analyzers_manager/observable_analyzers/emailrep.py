@@ -9,7 +9,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class EmailRep(classes.ObservableAnalyzer):
-    base_url: str = "https://emailrep.io/{}"
+    url: str = "https://emailrep.io/{}"
 
     _api_key_name: str
 
@@ -32,7 +32,7 @@ class EmailRep(classes.ObservableAnalyzer):
                 f" Supported: generic"
             )
 
-        url = self.base_url.format(self.observable_name)
+        url = self.url.format(self.observable_name)
 
         response = requests.get(url, headers=headers)
         response.raise_for_status()

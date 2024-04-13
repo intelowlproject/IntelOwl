@@ -145,6 +145,8 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertFalse(
             user.is_active, msg="newly registered user must have is_active=False"
         )
+        self.assertEqual(user.profile.company_name, "companytest")
+        user.delete()
 
     def test_verify_email_200(self):
         # register new user

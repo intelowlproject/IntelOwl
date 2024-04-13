@@ -12,7 +12,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):
-    base_url: str = "https://exchange.xforce.ibmcloud.com/api"
+    url: str = "https://exchange.xforce.ibmcloud.com/api"
     web_url: str = "https://exchange.xforce.ibmcloud.com"
 
     _api_key_name: str
@@ -31,7 +31,7 @@ class XForce(classes.ObservableAnalyzer):
                 observable_to_check = quote_plus(self.observable_name)
             else:
                 observable_to_check = self.observable_name
-            url = f"{self.base_url}/{endpoint}/{observable_to_check}"
+            url = f"{self.url}/{endpoint}/{observable_to_check}"
             response = requests.get(
                 url, auth=auth, headers=headers, timeout=self.timeout
             )

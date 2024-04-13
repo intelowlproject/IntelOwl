@@ -18,12 +18,16 @@ logger = logging.getLogger(__name__)
 
 
 class Pulsedive(ObservableAnalyzer):
-    base_url: str = "https://pulsedive.com/api"
+    url: str = "https://pulsedive.com/api"
     max_tries: int = 10
     poll_distance: int = 10
 
     scan_mode: str
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -53,7 +57,7 @@ class Pulsedive(ObservableAnalyzer):
         params = f"indicator={self.observable_name}"
         if hasattr(self, "_api_key_name"):
             params += self.default_param
-        resp = requests.get(f"{self.base_url}/info.php?{params}")
+        resp = requests.get(f"{self.url}/info.php?{params}")
 
         # handle 404 case, submit for analysis
         if resp.status_code == 404 and self.scan_mode != "basic":
@@ -70,9 +74,7 @@ class Pulsedive(ObservableAnalyzer):
         if hasattr(self, "_api_key_name"):
             params += self.default_param
         headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
-        resp = requests.post(
-            f"{self.base_url}/analyze.php", data=params, headers=headers
-        )
+        resp = requests.post(f"{self.url}/analyze.php", data=params, headers=headers)
         resp.raise_for_status()
         qid = resp.json().get("qid", None)
         # 3. retrieve result using qid after waiting for 10 seconds
@@ -87,7 +89,7 @@ class Pulsedive(ObservableAnalyzer):
 
     def __poll_for_result(self, params):
         result = {}
-        url = f"{self.base_url}/analyze.php?{params}"
+        url = f"{self.url}/analyze.php?{params}"
         obj_repr = self.__repr__()
         for chance in range(self.max_tries):
             logger.info(

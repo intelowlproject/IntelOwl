@@ -35,15 +35,17 @@ export function JobInfoCard({ job }) {
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
-          <Col sm={12} md={2} className="d-flex justify-content-start">
+          <Col sm={12} md={1} className="d-flex justify-content-start">
             {job.investigation && (
               <>
                 <Button
-                  className="bg-darker border-1"
+                  className="bg-darker border-1 lh-sm"
                   onClick={() =>
                     navigate(`/investigation/${job.investigation}`)
                   }
                   id="investigationOverviewBtn"
+                  size="xs"
+                  style={{ fontSize: "0.8rem" }}
                 >
                   Investigation Overview
                 </Button>
@@ -59,9 +61,9 @@ export function JobInfoCard({ job }) {
           <Col
             className="d-flex-start-start justify-content-center"
             sm={12}
-            md={8}
+            md={10}
           >
-            <h3>
+            <h3 className="d-flex-start align-items-center text-truncate">
               <JobInfoIcon job={job} />
               {job.is_sample ? (
                 <CopyToClipboardButton
@@ -87,7 +89,7 @@ export function JobInfoCard({ job }) {
                 : job.observable_classification}
             </Badge>
           </Col>
-          <Col sm={12} md={2} className="d-flex justify-content-end">
+          <Col sm={12} md={1} className="d-flex justify-content-end">
             <Button
               className="bg-darker border-0"
               onClick={() => setIsOpen(!isOpen)}

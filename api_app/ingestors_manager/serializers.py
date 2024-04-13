@@ -32,7 +32,7 @@ class IngestorConfigSerializer(PythonConfigSerializer):
 class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
     schedule = CrontabScheduleSerializer(read_only=True)
     periodic_task = PeriodicTaskSerializer(read_only=True)
-    user = UserSerializer(read_only=True)
+    user = UserSerializer(read_only=True, omit=["full_name"])
 
     class Meta:
         model = IngestorConfig

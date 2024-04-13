@@ -310,10 +310,30 @@ Pivots are designed to create a job from another job. This plugin allows the use
 
 This is a "SOAR" feature that allows the users to connect multiple analysis together.
 
-Right now the support for this kind of plugin in the GUI is very limited, while the backend is fully operative. We are working on the frontend.
-
 #### List of pre-built Pivots
 None
+
+You can build your own custom Pivot with your custom logic with just few lines of code. See the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-pivot) section for more info.
+
+#### Creating Pivots from the GUI
+
+From the GUI, the users can pivot in two ways:
+- If a Job executed a [Visualizer](#visualizers), it is possible to select a field extracted and analyze its value by clicking the "Pivot" button (see following image). In this way, the user is able to "jump" from one indicator to another.
+![img.png](../static/pivot_job_report.png)
+
+- Starting from an already existing [Investigation](#investigations-framework), it is possible to select a Job block and click the "Pivot" button to analyze the same observable again, usually choosing another [Playbook](#playbooks) (see following image)
+![img.png](../static/pivot_investigation_report.png)
+
+In both cases, the user is redirected to the Scan Page that is precompiled with the observable selected. Then the user would be able to select the [Playbook](#playbooks) to execute in the new job.
+![img.png](../static/pivot_scan_page.png)
+
+After the new Job is started, a new [Investigation](#investigations-framework) will be created (if it does not already exist) and both the jobs will be added to the same Investigation.
+
+In the following image you can find an example of an [Investigation](#investigations-framework) composed by 3 pivots generated manually:
+* leveraging the first way to create a Pivot, the 2 Jobs that analyzed IP addresses have been generated from the first `test\.com` Job
+* leveraging the second way to create a Pivot, the second `test\.com` analysis had been created with a different Playbook.
+
+![img.png](../static/pivot_investigation.png)
 
 ### Visualizers
 
@@ -571,7 +591,7 @@ Things to know about the framework:
 *Investigations* are created in 2 ways:
   * automatically:
     * if you scan multiple observables at the same time, a new investigation will be created by default and all the observables they will be automatically connected to the same investigation.
-    * if you run a Job with a Playbook which contains a Pivot that triggers another Job, a new investigation will be created and both the Jobs will be added to the same investigation.
+    * if you run a Job with a Playbook which contains a [Pivot](#pivots) that triggers another Job, a new investigation will be created and both the Jobs will be added to the same investigation. See how you can create a new [Pivot manually from the GUI](#creating-pivots-from-the-gui).
   * manually: by clicking on the button in the "History" section you can create an Investigation from scratch without any job attached (see following image)
 
 ![img.png](../static/create_investigation.png)

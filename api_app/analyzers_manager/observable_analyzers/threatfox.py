@@ -84,7 +84,17 @@ class ThreatFox(classes.ObservableAnalyzer):
                 patch(
                     "requests.post",
                     return_value=MockUpResponse(
-                        mock_response,
+                        {
+                            {
+                                "query_status": "ok",
+                                "data": [
+                                    {
+                                        "id": "12",
+                                        "ioc": "139.180.203.104:443",
+                                    },
+                                ],
+                            }
+                        },
                         200,
                     ),
                 ),

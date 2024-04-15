@@ -22,7 +22,6 @@ ENV LOG_PATH /var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
-ARG PYELASTIC_VERSION=7.4.1
 ARG PYCTI_VERSION=5.12.29
 
 RUN mkdir -p ${LOG_PATH} \
@@ -34,9 +33,10 @@ RUN mkdir -p ${LOG_PATH} \
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
 # apache2-utils is required to execute htpasswd
+# tshark is required for Hfinger file analyzer
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat-traditional \
-    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
+    vim libldap2-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils tshark \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
@@ -51,8 +51,6 @@ COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
 RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
-    # install elasticsearch-dsl's appropriate version as specified by user
-    && pip3 install --no-cache-dir elasticsearch-dsl==${PYELASTIC_VERSION} \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 

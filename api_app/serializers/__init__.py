@@ -51,7 +51,6 @@ class AbstractBIInterface(ModelSerializer):
     def to_elastic_dict(data):
         return {
             "_source": data,
-            "_type": "_doc",
             "_index": settings.ELASTICSEARCH_BI_INDEX + "-" + now().strftime("%Y.%m"),
             "_op_type": "index",
         }

@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 import uuid
 from typing import TYPE_CHECKING, Generator, Type
 
@@ -12,6 +11,8 @@ from treebeard.mp_tree import MP_NodeQuerySet
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
     from api_app.serializers import AbstractBIInterface
+
+import logging
 
 from celery.canvas import Signature
 from django.db import models
@@ -38,6 +39,8 @@ from api_app.choices import TLP, ParamTypes
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
 
+logger = logging.getLogger(__name__)
+
 
 class SendToBiQuerySet(models.QuerySet):
     @classmethod
@@ -54,10 +57,14 @@ class SendToBiQuerySet(models.QuerySet):
             settings.ELASTICSEARCH_CLIENT.indices.put_template(
                 name=settings.ELASTICSEARCH_BI_INDEX, body=body
             )
+            logger.info(
+                f"created template for Elastic named {settings.ELASTICSEARCH_BI_INDEX}"
+            )
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
         from elasticsearch.helpers import bulk
 
+        logger.info("BI start")
         self._create_index_template()
         BULK_MAX_SIZE = 1000
         found_errors = False
@@ -74,13 +81,13 @@ class SendToBiQuerySet(models.QuerySet):
                 request_timeout=max_timeout,
             )
             if errors:
-                logging.error(
+                logger.error(
                     f"Errors on sending to elastic: {errors}."
                     " We are not marking objects as sent."
                 )
                 found_errors |= errors
             else:
-                logging.info("BI sent")
+                logger.info("BI sent")
                 self.model.objects.filter(
                     pk__in=objects.values_list("pk", flat=True)
                 ).update(sent_to_bi=True)

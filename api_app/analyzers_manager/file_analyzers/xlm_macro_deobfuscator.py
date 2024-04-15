@@ -24,7 +24,7 @@ class XlmMacroDeobfuscator(FileAnalyzer):
             if not results:
                 results["error"] = "Can't decrypt with current passwords"
         except SoftTimeLimitExceeded:
-            self._handle_base_exception("Soft Time Limit Exceeded")
+            self._handle_exception("Soft Time Limit Exceeded", is_base_err=True)
         return results
 
     def decrypt(self, xlmpassword=""):

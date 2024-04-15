@@ -82,6 +82,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `ELF_Info`: static ELF analysis with [pyelftools](https://github.com/eliben/pyelftools) and [telfhash](https://github.com/trendmicro/telfhash)
 * `File_Info`: static generic File analysis (hashes, magic and [exiftool](https://exiftool.org/))
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
+* `Hfinger`: create fingerprints of malware HTTPS requests using [Hfinger](https://github.com/CERT-Polska/hfinger)
 * `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Permhash`: create hash of manifest permssions found in APK, Android manifest, Chrome extensions or Chrome extension manifest using [Permhash](https://github.com/google/permhash)

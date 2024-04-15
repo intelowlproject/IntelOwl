@@ -1,12 +1,15 @@
 import json
+import logging
 
-from django.db.models.signals import post_delete, post_migrate, pre_save
+from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 from django_celery_beat.models import PeriodicTask
 
-from api_app.ingestors_manager.apps import IngestorsManagerConfig
 from api_app.ingestors_manager.models import IngestorConfig
+from api_app.signals import migrate_finished
 from certego_saas.apps.user.models import User
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(pre_save, sender=IngestorConfig)
@@ -41,9 +44,16 @@ def post_delete_ingestor_config(
     instance.user.delete()
 
 
-@receiver(post_migrate, sender=IngestorsManagerConfig)
-def post_migrate_ingestor(
-    sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
+@receiver(migrate_finished)
+def post_migrate_ingestors_manager(
+    sender,
+    *args,
+    check_unapplied: bool = False,
+    **kwargs,
 ):
-    if plan:
-        IngestorConfig.delete_class_cache_keys()
+    logger.info(f"Post migrate {args} {kwargs}")
+    if check_unapplied:
+        return
+    IngestorConfig.delete_class_cache_keys()
+    for config in IngestorConfig.objects.all():
+        config.refresh_cache_keys()

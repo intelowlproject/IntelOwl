@@ -909,7 +909,7 @@ class OrganizationPluginConfiguration(models.Model):
             self.rate_limit_enable_task.clocked = clock_schedule
             self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
-        logger.info(f"Disabling {self} for rate limit")
+        logger.warning(f"Disabling {self} for rate limit")
         self.save()
 
     def disable_manually(self, user: User):

@@ -139,7 +139,6 @@ class Plugin(metaclass=ABCMeta):
             logger.exception(error_message)
 
     def after_run_failed(self, e: Exception):
-        self.log_error(e)
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
@@ -149,6 +148,8 @@ class Plugin(metaclass=ABCMeta):
             and e.response.status_code == 429
         ):
             self.disable_for_rate_limit()
+        else:
+            self.log_error(e)
         if settings.STAGE_CI:
             raise e
 

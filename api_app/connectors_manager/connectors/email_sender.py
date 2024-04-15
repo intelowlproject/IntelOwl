@@ -13,11 +13,11 @@ class EmailSender(Connector):
         base_eml = EmailMessage(
             subject=self.subject,
             from_email=self.sender,
-            to=[],
+            to=[self._job.observable_name],
             body=self.body,
         )
         base_eml.send()
-        return {}
+        return {"receiver": self._job.observable_name}
 
     @classmethod
     def _monkeypatch(cls):

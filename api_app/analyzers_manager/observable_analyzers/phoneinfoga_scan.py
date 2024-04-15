@@ -25,9 +25,10 @@ class Phoneinfoga(classes.ObservableAnalyzer, classes.DockerBasedAnalyzer):
     _NUMVERIFY_API_KEY: str = ""
     _GOOGLECSE_CX: str = ""
     _GOOGLE_API_KEY: str = ""
+    url = "http://phoneinfoga:5000"
 
     def run(self):
-        url: str = f"http://phoneinfoga:5000/api/v2/scanners/{self.scanner_name}/run"
+        url: str = f"{self.url}/api/v2/scanners/{self.scanner_name}/run"
         response = requests.post(
             url,
             headers={

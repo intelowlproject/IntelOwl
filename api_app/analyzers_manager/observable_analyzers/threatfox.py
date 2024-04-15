@@ -8,47 +8,6 @@ import requests
 from api_app.analyzers_manager import classes
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
-mock_response = {
-    {
-        "query_status": "ok",
-        "data": [
-            {
-                "id": "12",
-                "ioc": "139.180.203.104:443",
-                "threat_type": "botnet_cc",
-                "threat_type_desc": "Indicator that identifies a botnet"
-                " command&control server (C&C)",
-                "ioc_type": "ip:port",
-                "ioc_type_desc": "ip:port combination that is used for"
-                " botnet Command&control (C&C)",
-                "malware": "win.cobalt_strike",
-                "malware_printable": "Cobalt Strike",
-                "malware_alias": "Agentemis,BEACON,CobaltStrike",
-                "malware_malpedia": "https://malpedia.caad.fkie.fraunhofer"
-                ".de/details/win.cobalt_strike",
-                "confidence_level": 75,
-                "first_seen": "2020-12-06 09:10:23 UTC",
-                "last_seen": None,
-                "reference": None,
-                "reporter": "abuse_ch",
-                "tags": None,
-                "malware_samples": [
-                    {
-                        "time_stamp": "2021-03-23 08:18:06 UTC",
-                        "md5_hash": "5b7e82e051ade4b14d163eea2a17bf8b",
-                        "sha256_hash": "b325c92fa540edeb89b95dbfd4400c1"
-                        "cb33599c66859a87aead820e568a2ebe7",
-                        "malware_bazaar": "https://bazaar.abuse.ch/samp"
-                        "le/b325c92fa540edeb89b95dbfd440"
-                        "0c1cb33599c66859a87aead820e568a"
-                        "2ebe7/",
-                    }
-                ],
-            }
-        ],
-    }
-}
-
 
 class ThreatFox(classes.ObservableAnalyzer):
     url: str = "https://threatfox-api.abuse.ch/api/v1/"

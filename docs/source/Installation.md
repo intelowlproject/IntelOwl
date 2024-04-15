@@ -325,7 +325,7 @@ The database migration procedure is as follows:
 - Stop che container `docker container stop intelowl_postgres_12`
 - Remove the backup container `docker container rm intelowl_postgres_12`
 - Remove the postgres volume `docker volume rm intelowl_postgres_data`
-- Start the intermediary postgres 16 container `docker run -d --name intelowl_postgres_16 -v postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:16-alpine`
+- Start the intermediary postgres 16 container `docker run -d --name intelowl_postgres_16 -v intelowl_postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:16-alpine`
 - Add the data to the volume `cat /tmp/dump_intelowl.sql | docker exec -i intelowl_postgres_16 psql -U <POSTGRES_USER> -d <POSTGRES_DB>`
 - Remove the intermediary container `docker container rm intelowl_postgres_16`
 - Update IntelOwl to the latest version

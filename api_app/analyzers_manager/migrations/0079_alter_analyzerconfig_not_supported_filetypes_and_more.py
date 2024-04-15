@@ -7,7 +7,8 @@ import api_app.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0077_analyzer_config_abusix"),
+        ("api_app", "0062_alter_parameter_python_module"),
+        ("analyzers_manager", "0078_analyzer_config_hfinger"),
     ]
 
     operations = [

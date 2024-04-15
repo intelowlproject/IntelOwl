@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
         ("api_app", "0062_alter_parameter_python_module"),
         (
             "analyzers_manager",
-            "0078_alter_analyzerconfig_not_supported_filetypes_and_more",
+            "0079_alter_analyzerconfig_not_supported_filetypes_and_more",
         ),
     ]
 

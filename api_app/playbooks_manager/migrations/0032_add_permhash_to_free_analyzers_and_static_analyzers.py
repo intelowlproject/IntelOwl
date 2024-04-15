@@ -33,8 +33,8 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0030_add_tweetfeeds_to_free_analyzers"),
-        ("analyzers_manager", "0079_analyzer_config_permhash"),
+        ("playbooks_manager", "0031_add_hfinger_analyzer_free_to_use"),
+        ("analyzers_manager", "0080_analyzer_config_permhash"),
     ]
 
     operations = [

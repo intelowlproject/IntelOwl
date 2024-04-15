@@ -72,7 +72,7 @@ class ThreatFox(classes.ObservableAnalyzer):
             for index, element in enumerate(data):
                 ioc_id = element.get("id", "")
                 if ioc_id:
-                    result["data"][element][
+                    result["data"][index][
                         "link"
                     ] = f"https://threatfox.abuse.ch/ioc/{ioc_id}"
         return result

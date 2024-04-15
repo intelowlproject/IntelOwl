@@ -12,7 +12,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Threatstream(classes.ObservableAnalyzer):
-    base_url: str = "https://api.threatstream.com/api/"
+    url: str = "https://api.threatstream.com/api/"
 
     threatstream_analysis: str
     limit: str
@@ -22,6 +22,10 @@ class Threatstream(classes.ObservableAnalyzer):
 
     _api_key_name: str
     _api_user_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         params = {}
@@ -60,9 +64,7 @@ class Threatstream(classes.ObservableAnalyzer):
             api_header = {
                 "Authorization": f"apikey {self._api_user_name}:{self._api_key_name}"
             }
-            response = requests.get(
-                self.base_url + uri, params=params, headers=api_header
-            )
+            response = requests.get(self.url + uri, params=params, headers=api_header)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

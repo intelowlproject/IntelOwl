@@ -400,6 +400,7 @@ class Job(MP_Node):
         runner.apply_async(
             queue=get_queue_name(settings.CONFIG_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
         )
 
     def set_final_status(self) -> None:
@@ -540,7 +541,12 @@ class Job(MP_Node):
             queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
         )
+
+    @property
+    def priority(self):
+        return self.user.profile.task_priority
 
     def _get_pipeline(
         self,
@@ -903,7 +909,7 @@ class OrganizationPluginConfiguration(models.Model):
             self.rate_limit_enable_task.clocked = clock_schedule
             self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
-        logger.info(f"Disabling {self} for rate limit")
+        logger.warning(f"Disabling {self} for rate limit")
         self.save()
 
     def disable_manually(self, user: User):
@@ -924,7 +930,9 @@ class OrganizationPluginConfiguration(models.Model):
         self.enable()
 
     def enable(self):
+        logger.info(f"Enabling back {self}")
         self.disabled = False
+        self.disabled_comment = ""
         self.save()
         if self.rate_limit_enable_task:
             self.rate_limit_enable_task.delete()
@@ -1197,6 +1205,7 @@ class PythonConfig(AbstractConfig):
             queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=job.priority,
         )
 
     @property
@@ -1268,3 +1277,4 @@ class PythonConfig(AbstractConfig):
                 },
             )[0]
             self.health_check_task = periodic_task
+            self.save()

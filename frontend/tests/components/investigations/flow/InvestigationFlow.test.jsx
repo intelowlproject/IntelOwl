@@ -298,8 +298,14 @@ describe("test InvestigationFlow", () => {
     expect(removeJobButton).toBeInTheDocument();
     const linkFirstJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkFirstJobButton).toBeInTheDocument();
+    const firstJobPivotButton = screen.getByRole("link", { name: "Pivot" });
+    expect(firstJobPivotButton).toBeInTheDocument();
     // link to job page
     expect(linkFirstJobButton.href).toContain("/jobs/10/visualizer");
+    // link pivot
+    expect(firstJobPivotButton.href).toContain(
+      "/scan?parent=10&observable=test1.com",
+    );
     // job info
     const jobInfo = container.querySelector("#job10-info");
     expect(jobInfo).toBeInTheDocument();
@@ -317,8 +323,14 @@ describe("test InvestigationFlow", () => {
     expect(removeSecondJobButton).toBeNull(); // no remove button in pivot
     const linkSecondJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkSecondJobButton).toBeInTheDocument();
+    const secondJobPivotButton = screen.getByRole("link", { name: "Pivot" });
+    expect(secondJobPivotButton).toBeInTheDocument();
     // link to job page
     expect(linkSecondJobButton.href).toContain("/jobs/11/visualizer");
+    // link pivot
+    expect(secondJobPivotButton.href).toContain(
+      "/scan?parent=11&observable=test11.com",
+    );
     // job info
     const secondJobInfo = container.querySelector("#job11-info");
     expect(secondJobInfo).toBeInTheDocument();

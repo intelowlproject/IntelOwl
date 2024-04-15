@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
@@ -27,6 +26,10 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     In the case of empty response from Quad9 and a non-empty response from Google,
     we can guess that the domain was in the Quad9 blacklist.
     """
+
+    HEADERS = {"Accept": "application/dns-json"}
+    QUAD9_URL = "https://dns.quad9.net:5053/dns-query"
+    GOOGLE_URL = "https://dns.google.com/resolve"
 
     def run(self):
         observable = self.observable_name
@@ -57,32 +60,27 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         """
         answer_found = False
         timeout = False
-        try:
-            headers = {"Accept": "application/dns-json"}
-            url = "https://dns.quad9.net:5053/dns-query"
-            params = {"name": observable}
+        params = {"name": observable}
 
-            quad9_response = requests.get(url, headers=headers, params=params)
-            if quad9_response.status_code == 503:
-                msg = (
-                    "503 status code! "
-                    "It may be normal for this service to"
-                    " happen from time to time"
-                )
-                logger.info(msg)
-                self.report.errors.append(msg)
-                timeout = True
-                return answer_found, timeout
-            quad9_response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
-        else:
-            answer_found = bool(quad9_response.json().get("Answer", None))
+        quad9_response = requests.get(
+            self.QUAD9_URL, headers=self.HEADERS, params=params
+        )
+        if quad9_response.status_code == 503:
+            msg = (
+                "503 status code! "
+                "It may be normal for this service to"
+                " happen from time to time"
+            )
+            logger.info(msg)
+            self.report.errors.append(msg)
+            timeout = True
+            return answer_found, timeout
+        quad9_response.raise_for_status()
+        answer_found = bool(quad9_response.json().get("Answer", None))
 
         return answer_found, timeout
 
-    @staticmethod
-    def _google_dns_query(observable) -> bool:
+    def _google_dns_query(self, observable) -> bool:
         """Perform a DNS query with Google service, return True if Google answer the
         DNS query.
 
@@ -91,14 +89,9 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         :return: True in case of answer for the DNS query else False.
         :rtype: bool
         """
-        try:
-            params = {"name": observable}
-            google_response = requests.get(
-                "https://dns.google.com/resolve", params=params
-            )
-            google_response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        params = {"name": observable}
+        google_response = requests.get(self.GOOGLE_URL, params=params)
+        google_response.raise_for_status()
 
         return bool(google_response.json().get("Answer", None))
 

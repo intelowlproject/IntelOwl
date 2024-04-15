@@ -134,9 +134,11 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
         try:
             user = super().create(validated_data)
 
-            # save profile object only if user object was actually saved
+            # update profile object only if user object was actually saved
             if getattr(user, "pk", None):
-                self._profile_serializer.save(user=user)
+                self._profile_serializer.update(
+                    user.profile, self._profile_serializer.data
+                )
                 user.refresh_from_db()
         except DatabaseError:
             transaction.rollback()

@@ -190,6 +190,7 @@ class PythonModuleAdminView(CustomAdminView):
 class AbstractConfigAdminView(CustomAdminView):
     list_display = ("name", "description", "disabled", "disabled_in_orgs")
     search_fields = ("name",)
+    list_filter = ("disabled",)
     # allow to clone the object
     save_as = True
 

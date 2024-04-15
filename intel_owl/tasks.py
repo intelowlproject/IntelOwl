@@ -64,7 +64,7 @@ def execute_ingestor(config_name: str):
     if config.disabled:
         logger.info(f"Not executing ingestor {config.name} because disabled")
     else:
-        class_ = config.python_class
+        class_: typing.Type[Ingestor] = config.python_module.python_class
         obj: Ingestor = class_(config=config)
         obj.start(runtime_configuration={}, job_id=None, task_id=None)
         logger.info(f"Executing ingestor {config.name}")

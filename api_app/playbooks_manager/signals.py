@@ -1,3 +1,4 @@
+import logging
 from typing import Type
 
 from django.core.exceptions import ValidationError
@@ -6,6 +7,22 @@ from django.dispatch import receiver
 
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
+from api_app.signals import migrate_finished
+
+logger = logging.getLogger(__name__)
+
+
+@receiver(migrate_finished)
+def post_migrate_playbbooks_manager(
+    sender,
+    *args,
+    check_unapplied: bool = False,
+    **kwargs,
+):
+    logger.info(f"Post migrate {args} {kwargs}")
+    if check_unapplied:
+        return
+    PlaybookConfig.delete_class_cache_keys()
 
 
 @receiver(m2m_changed, sender=PlaybookConfig.analyzers.through)

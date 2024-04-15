@@ -44,15 +44,13 @@ class ThreatFox(classes.ObservableAnalyzer):
                     "requests.post",
                     return_value=MockUpResponse(
                         {
-                            {
-                                "query_status": "ok",
-                                "data": [
-                                    {
-                                        "id": "12",
-                                        "ioc": "139.180.203.104:443",
-                                    },
-                                ],
-                            }
+                            "query_status": "ok",
+                            "data": [
+                                {
+                                    "id": "12",
+                                    "ioc": "139.180.203.104:443",
+                                },
+                            ],
                         },
                         200,
                     ),

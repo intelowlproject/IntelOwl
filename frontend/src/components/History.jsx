@@ -6,6 +6,7 @@ import { Button, Col } from "reactstrap";
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { useNavigate, useLocation } from "react-router-dom";
 
+import { useGuideContext } from "../contexts/GuideContext";
 import { createInvestigation } from "./investigations/result/investigationApi";
 
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
@@ -53,6 +54,17 @@ export default function History() {
   const navigate = useNavigate();
   const location = useLocation();
   const isJobsTablePage = location?.pathname.includes("jobs");
+
+  const { guideState, setGuideState } = useGuideContext();
+
+  React.useEffect(() => {
+    if (guideState.tourActive) {
+      setTimeout(() => {
+        setGuideState({ run: true, stepIndex: 7 });
+      }, 200);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onClick = async () => {
     if (isJobsTablePage) {

@@ -16,7 +16,6 @@ import useTitle from "react-use/lib/useTitle";
 import { jobTableColumns } from "./jobTableColumns";
 
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
-import { useGuideContext } from "../../../contexts/GuideContext";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 // constants
@@ -64,17 +63,6 @@ export default function JobsTable() {
   React.useEffect(() => {
     if (!loadingTable) setInitialLoading(false);
   }, [loadingTable]);
-
-  const { guideState, setGuideState } = useGuideContext();
-
-  React.useEffect(() => {
-    if (guideState.tourActive) {
-      setTimeout(() => {
-        setGuideState({ run: true, stepIndex: 7 });
-      }, 100);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   React.useEffect(() => {
     if (!initialLoading) refetch();

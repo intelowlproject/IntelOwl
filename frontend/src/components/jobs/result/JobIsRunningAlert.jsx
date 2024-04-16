@@ -6,7 +6,7 @@ import "reactflow/dist/style.css";
 import { IconButton } from "@certego/certego-ui";
 
 import CustomJobPipelineNode from "./CustomJobPipelineNode";
-import { JobStatuses } from "../../../constants/jobConst";
+import { JobStatuses, JobFinalStatuses } from "../../../constants/jobConst";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 import {
@@ -146,7 +146,11 @@ export function JobIsRunningAlert({ job }) {
 
   return (
     <>
-      <div className="bg-body" style={{ width: "100vw", height: "15vh" }}>
+      <div
+        id="JobPipelineFlow"
+        className="bg-body"
+        style={{ width: 2000, height: 90 }}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -162,18 +166,19 @@ export function JobIsRunningAlert({ job }) {
         />
       </div>
       <div className="d-flex-center">
-        {job.permissions?.kill && (
-          <IconButton
-            id="killjob-iconbutton"
-            Icon={killJobIcon}
-            size="xs"
-            title="Stop Job Process"
-            color="danger"
-            titlePlacement="top"
-            onClick={onKillJobBtnClick}
-            className="mt-0"
-          />
-        )}
+        {job.permissions?.kill &&
+          !Object.values(JobFinalStatuses).includes(job.status) && (
+            <IconButton
+              id="killjob-iconbutton"
+              Icon={killJobIcon}
+              size="xs"
+              title="Stop Job Process"
+              color="danger"
+              titlePlacement="top"
+              onClick={onKillJobBtnClick}
+              className="mt-4"
+            />
+          )}
       </div>
     </>
   );

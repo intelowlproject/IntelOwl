@@ -321,7 +321,10 @@ export function JobOverview({
             </Col>
           </Row>
           {isRunningJob && (
-            <Row>
+            <Row
+              className="my-4 d-flex justify-content-center"
+              style={{ width: "100%" }}
+            >
               <JobIsRunningAlert job={job} />
             </Row>
           )}

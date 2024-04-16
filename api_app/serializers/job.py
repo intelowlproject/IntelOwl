@@ -455,6 +455,7 @@ class JobTreeSerializer(ModelSerializer):
             "pivot_config",
             "playbook",
             "status",
+            "received_request_time",
         ]
 
     playbook = rfs.SlugRelatedField(

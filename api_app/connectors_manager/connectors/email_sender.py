@@ -6,8 +6,17 @@ from tests.mock_utils import if_mock_connections, patch
 
 class EmailSender(Connector):
     sender: str
-    body: str
-    subject: str
+
+    @property
+    def subject(self) -> str:
+        return f"Take down domain {self._job.parent_job.parent_job.observable_name}"
+
+    @property
+    def body(self) -> str:
+        return (
+            f"Domain {self._job.parent_job.parent_job.observable_name} "
+            f"is malicious. Please take it down."
+        )
 
     def run(self) -> dict:
         base_eml = EmailMessage(

@@ -9,7 +9,7 @@ def migrate(apps, schema_editor):
     Profile = apps.get_model("authentication", "UserProfile")
     for user in User.objects.all():
         is_robot = user.username.endswith("Ingestor")
-        if not hasattr(user, "profile") and not user.profile:
+        if not hasattr(user, "profile") or not user.profile:
             profile = Profile(
                 user=user, task_priority=7 if is_robot else 10, is_robot=is_robot
             )

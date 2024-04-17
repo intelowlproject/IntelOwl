@@ -1,6 +1,8 @@
 import json
 import logging
+import uuid
 
+from django.conf import settings
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 from django_celery_beat.models import PeriodicTask
@@ -8,6 +10,7 @@ from django_celery_beat.models import PeriodicTask
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.signals import migrate_finished
 from certego_saas.apps.user.models import User
+from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +57,11 @@ def post_migrate_ingestors_manager(
     logger.info(f"Post migrate {args} {kwargs}")
     if check_unapplied:
         return
-    IngestorConfig.delete_class_cache_keys()
-    for config in IngestorConfig.objects.all():
-        config.refresh_cache_keys()
+    from intel_owl.tasks import refresh_cache
+
+    refresh_cache.apply_async(
+        queue=get_queue_name(settings.CONFIG_QUEUE),
+        MessageGroupId=str(uuid.uuid4()),
+        priority=3,
+        args=[IngestorConfig.python_path],
+    )

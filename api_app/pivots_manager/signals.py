@@ -1,11 +1,14 @@
 import logging
+import uuid
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed, pre_save
 from django.dispatch import receiver
 
 from api_app.pivots_manager.models import PivotConfig
 from api_app.signals import migrate_finished
+from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +23,14 @@ def post_migrate_pivots_manager(
     logger.info(f"Post migrate {args} {kwargs}")
     if check_unapplied:
         return
-    PivotConfig.delete_class_cache_keys()
-    for config in PivotConfig.objects.all():
-        config.refresh_cache_keys()
+    from intel_owl.tasks import refresh_cache
+
+    refresh_cache.apply_async(
+        queue=get_queue_name(settings.CONFIG_QUEUE),
+        MessageGroupId=str(uuid.uuid4()),
+        priority=3,
+        args=[PivotConfig.python_path],
+    )
 
 
 @receiver(pre_save, sender=PivotConfig)

@@ -80,9 +80,6 @@ services:
       - ./docker/entrypoints/celery_beat.sh
     env_file:
       - env_file_app
-    depends_on:
-      uwsgi:
-        condition: service_healthy
     <<: *no-healthcheck
 
 

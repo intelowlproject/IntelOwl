@@ -3,7 +3,7 @@ from django.db import migrations
 
 def migrate_python_module_pivot(apps, schema_editor):
     PythonModule = apps.get_model("api_app", "PythonModule")
-    PythonModule.objects.create(
+    PythonModule.objects.create_or_update(
         module="self_analyzable.SelfAnalyzable",
         base_path="api_app.pivots_manager.pivots",
     )

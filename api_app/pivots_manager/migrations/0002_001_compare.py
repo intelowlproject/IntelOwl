@@ -3,7 +3,7 @@ from django.db import migrations
 
 def migrate_python_module_pivot(apps, schema_editor):
     PythonModule = apps.get_model("api_app", "PythonModule")
-    pm = PythonModule.objects.create_or_update(
+    pm = PythonModule.objects.update_or_create(
         module="compare.Compare",
         base_path="api_app.pivots_manager.pivots",
     )

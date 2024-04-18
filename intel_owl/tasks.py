@@ -95,11 +95,13 @@ def remove_old_jobs():
 @shared_task(base=FailureLoggedTask)
 def refresh_cache(python_class_str: str):
     from django.utils.module_loading import import_string
+
     logger.info(f"Refreshing cache for {python_class_str}")
     python_class = import_string(python_class_str)
 
     python_class.delete_class_cache_keys()
     from api_app.models import PythonConfig
+
     if issubclass(python_class, PythonConfig):
         for config in python_class.objects.all():
             config.refresh_cache_keys()

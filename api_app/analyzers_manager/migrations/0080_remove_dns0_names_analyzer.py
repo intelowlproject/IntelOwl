@@ -3,12 +3,13 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     PythonModule = apps.get_model("api_app", "PythonModule")
-    pm = PythonModule.objects.get(
+    pm = PythonModule.objects.filter(
         module="dns0.dns0_names.DNS0Names",
         base_path="api_app.analyzers_manager.observable_analyzers",
-    )
-    pm.analyzerconfigs.all().delete()
-    pm.delete()
+    ).first()
+    if pm:
+        pm.analyzerconfigs.all().delete()
+        pm.delete()
 
 
 def reverse_migrate(apps, schema_editor):

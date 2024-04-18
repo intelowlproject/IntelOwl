@@ -8,21 +8,31 @@ from django.db import migrations
 def migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.remove(AnalyzerConfig.objects.get(name="DNS0_rrsets_name").id)
-    pc.analyzers.remove(AnalyzerConfig.objects.get(name="DNS0_names").id)
-    pc.full_clean()
-    pc.save()
+    pc = playbook_config.objects.filter(name="FREE_TO_USE_ANALYZERS").first()
+    if pc:
+        for analyzer_config_name in ["DNS0_rrsets_name", "DNS0_names"]:
+            analyzer_config = AnalyzerConfig.objects.filter(
+                name=analyzer_config_name
+            ).first()
+            if analyzer_config:
+                pc.analyzers.remove(analyzer_config.id)
+        pc.full_clean()
+        pc.save()
 
 
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.add(AnalyzerConfig.objects.get(name="DNS0_rrsets_name").id)
-    pc.analyzers.add(AnalyzerConfig.objects.get(name="DNS0_names").id)
-    pc.full_clean()
-    pc.save()
+    pc = playbook_config.objects.filter(name="FREE_TO_USE_ANALYZERS").first()
+    if pc:
+        for analyzer_config_name in ["DNS0_rrsets_name", "DNS0_names"]:
+            analyzer_config = AnalyzerConfig.objects.filter(
+                name=analyzer_config_name
+            ).first()
+            if analyzer_config:
+                pc.analyzers.add(analyzer_config.id)
+        pc.full_clean()
+        pc.save()
 
 
 class Migration(migrations.Migration):

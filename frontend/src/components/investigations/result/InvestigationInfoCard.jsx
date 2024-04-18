@@ -77,8 +77,6 @@ export function InvestigationInfoCard({ investigation, refetchTree }) {
                   color=""
                   className="text-secondary px-1"
                   onClick={editInvestigationName}
-                  title="Save"
-                  titlePlacement="top"
                 />
               </>
             ) : (

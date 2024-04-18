@@ -13,7 +13,7 @@ import { FaRegStopCircle } from "react-icons/fa";
 
 export function DeleteIcon() {
   return (
-    <span>
+    <span className="d-flex align-items-center">
       <MdDeleteOutline className="text-danger me-1" />
       Delete
     </span>

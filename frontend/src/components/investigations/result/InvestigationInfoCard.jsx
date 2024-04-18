@@ -25,7 +25,7 @@ import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
 import { updateInvestigation } from "./investigationApi";
 
-export function InvestigationInfoCard({ investigation }) {
+export function InvestigationInfoCard({ investigation, refetchTree }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -39,6 +39,7 @@ export function InvestigationInfoCard({ investigation }) {
       const success = await updateInvestigation(investigation.id, {
         name: investigationName,
       });
+      if (success) refetchTree();
       if (!success) return;
     }
     setIsEditing(false);
@@ -76,6 +77,8 @@ export function InvestigationInfoCard({ investigation }) {
                   color=""
                   className="text-secondary px-1"
                   onClick={editInvestigationName}
+                  title="Save"
+                  titlePlacement="top"
                 />
               </>
             ) : (
@@ -152,4 +155,5 @@ export function InvestigationInfoCard({ investigation }) {
 
 InvestigationInfoCard.propTypes = {
   investigation: PropTypes.object.isRequired,
+  refetchTree: PropTypes.func.isRequired,
 };

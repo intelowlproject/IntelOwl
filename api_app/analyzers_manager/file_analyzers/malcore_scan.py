@@ -16,21 +16,19 @@ logger = logging.getLogger(__name__)
 class MalcoreScan(FileAnalyzer):
     base_url = "https://api.malcore.io/api/"
     _api_key_name: str
-    poll_distance = 4
+    max_tries: int
+    poll_distance: int
 
     def run(self):
         self.headers = {"apiKey": self._api_key_name}
 
         binary = self.read_file_bytes()
         files = {"filename1": binary}
-        try:
-            logger.info(f"Sending {self.md5} to Malcore")
-            response = requests.post(
-                self.base_url + "upload", headers=self.headers, files=files
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        logger.info(f"Sending {self.md5} to Malcore")
+        response = requests.post(
+            self.base_url + "upload", headers=self.headers, files=files
+        )
+        response.raise_for_status()
 
         try:
             uuid = response.json()["data"]["data"]["uuid"]
@@ -41,6 +39,7 @@ class MalcoreScan(FileAnalyzer):
             logger.info(f"polling malcore try #{_try + 1}")
             self.result = self._get_status(uuid)["data"]
             if "status" not in self.result and "msg" not in self.result:
+                logger.info("Malcore analysis successfully retrieved")
                 break
 
             time.sleep(self.poll_distance)
@@ -49,13 +48,10 @@ class MalcoreScan(FileAnalyzer):
 
     def _get_status(self, uuid):
         payload = {"uuid": uuid}
-        try:
-            response = requests.post(
-                self.base_url + "status", headers=self.headers, json=payload
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        response = requests.post(
+            self.base_url + "status", headers=self.headers, json=payload
+        )
+        response.raise_for_status()
         return response.json()
 
     @classmethod

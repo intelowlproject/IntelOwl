@@ -22,13 +22,7 @@ plugin = {
     "docker_based": False,
     "maximum_tlp": "CLEAR",
     "observable_supported": [],
-    "supported_filetypes": [
-        "application/x-sharedlib",
-        "application/vnd.microsoft.portable-executable",
-        "application/x-elf",
-        "application/octet-stream",
-        "application/x-binary",
-    ],
+    "supported_filetypes": [],
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],
@@ -58,6 +52,17 @@ params = [
         "is_secret": False,
         "required": False,
     },
+    {
+        "python_module": {
+            "module": "malcore_scan.MalcoreScan",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "poll_distance",
+        "type": "int",
+        "description": "",
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
 values = [
@@ -80,9 +85,31 @@ values = [
         "pivot_config": None,
         "for_organization": False,
         "value": 30,
-        "updated_at": "2024-04-04T01:44:40.479080Z",
+        "updated_at": "2024-04-20T13:39:30.335066Z",
         "owner": None,
-    }
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "malcore_scan.MalcoreScan",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "poll_distance",
+            "type": "int",
+            "description": "",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Malcore_Scan",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 4,
+        "updated_at": "2024-04-20T13:45:20.956258Z",
+        "owner": None,
+    },
 ]
 
 

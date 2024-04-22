@@ -14,7 +14,7 @@ plugin = {
     },
     "related_analyzer_configs": ["Abusix"],
     "related_connector_configs": [],
-    "playbook_to_execute": "Send_Email",
+    "playbook_to_execute": "Send_Abuse_Email",
     "name": "AbuseIpToSubmission",
     "description": "Pivot for plugins Abusix that executes playbook Send_Email",
     "disabled": False,
@@ -107,7 +107,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
         ("pivots_manager", "0025_alter_pivotmap_ending_job"),
-        ("playbooks_manager", "0033_playbook_config_send_email"),
+        ("playbooks_manager", "0033_playbook_config_send_abuse_email"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

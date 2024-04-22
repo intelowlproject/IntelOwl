@@ -11,7 +11,7 @@ plugin = {
     "connectors": ["AbuseSubmitter"],
     "pivots": [],
     "for_organization": False,
-    "name": "Send_Email",
+    "name": "Send_Abuse_Email",
     "description": "Send email to take down malicious domain",
     "disabled": False,
     "type": ["generic"],
@@ -112,7 +112,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
         ("playbooks_manager", "0032_delete_dns0_playbook_free_to_use_analyzers"),
-        ("connectors_manager", "0030_connector_config_abusesubmitter"),
+        ("connectors_manager", "0031_connector_config_abusesubmitter"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

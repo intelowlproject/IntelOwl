@@ -6,22 +6,15 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "id": 9,
-    "analyzers": [
-        "Classic_DNS",
-        "CloudFlare_DNS",
-        "DNS0_EU",
-        "Google_DNS",
-        "Quad9_DNS",
-    ],
-    "connectors": [],
-    "pivots": ["AbuseDomainToAbuseIp"],
+    "id": 8,
+    "analyzers": [],
+    "connectors": ["AbuseSubmitter"],
+    "pivots": [],
     "for_organization": False,
-    "name": "Abuse_Domain",
-    "description": "Start investigation to request to take down a malicious domain. "
-    "A mail will be sent to the domain's abuse contacts found.",
+    "name": "Send_Email",
+    "description": "Send email to take down malicious domain",
     "disabled": False,
-    "type": ["domain"],
+    "type": ["generic"],
     "runtime_configuration": {
         "pivots": {},
         "analyzers": {},
@@ -119,6 +112,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
         ("playbooks_manager", "0032_delete_dns0_playbook_free_to_use_analyzers"),
+        ("connectors_manager", "0030_connector_config_abusesubmitter"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -118,7 +118,8 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("playbooks_manager", "0032_delete_dns0_playbook_free_to_use_analyzers"),
+        ("playbooks_manager", "0034_playbook_config_abuse_ip"),
+        ("pivots_manager", "0027_pivot_config_abusedomaintoabuseip"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

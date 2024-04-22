@@ -25,12 +25,12 @@ logger = logging.getLogger(__name__)
 
 
 class MaxmindDBManager:
-    supported_dbs: [str] = ["GeoLite2-Country", "GeoLite2-City", "GeoLite2-ASN"]
-    default_db_extension: str = ".mmdb"
+    _supported_dbs: [str] = ["GeoLite2-Country", "GeoLite2-City", "GeoLite2-ASN"]
+    _default_db_extension: str = ".mmdb"
 
     @classmethod
     def get_supported_dbs(cls):
-        return [db_name + cls.default_db_extension for db_name in cls.supported_dbs]
+        return [db_name + cls._default_db_extension for db_name in cls._supported_dbs]
 
     @classmethod
     def _get_physical_location(cls, db: str):
@@ -38,11 +38,11 @@ class MaxmindDBManager:
 
     @classmethod
     def update_all_dbs(cls, api_key: str) -> bool:
-        return all(cls._update_db(db, api_key) for db in cls.supported_dbs)
+        return all(cls._update_db(db, api_key) for db in cls._supported_dbs)
 
     def query_all_dbs(self, observable_query: str, api_key: str) -> dict:
         maxmind_final_result = {}
-        for db in self.supported_dbs:
+        for db in self._supported_dbs:
             maxmind_result = self._query_single_db(observable_query, db, api_key)
 
             if maxmind_result:
@@ -117,7 +117,9 @@ class MaxmindDBManager:
 
     @classmethod
     def _remove_old_db(cls, db: str) -> bool:
-        physical_db_location = cls._get_physical_location(db + cls.default_db_extension)
+        physical_db_location = cls._get_physical_location(
+            db + cls._default_db_extension
+        )
         today = datetime.datetime.now().date()
         counter = 0
         directory_found = False
@@ -128,7 +130,8 @@ class MaxmindDBManager:
                 "%Y%m%d"
             )
             downloaded_db_path = (
-                f"{MEDIA_ROOT}/" f"{db}_{formatted_date}/{db}{cls.default_db_extension}"
+                f"{MEDIA_ROOT}/"
+                f"{db}_{formatted_date}/{db}{cls._default_db_extension}"
             )
             try:
                 os.rename(downloaded_db_path, physical_db_location)

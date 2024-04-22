@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("playbooks_manager", "0033_playbook_config_send_email"),
+        ("playbooks_manager", "0033_playbook_config_send_abuse_email"),
         ("analyzers_manager", "0081_adjust_abusix"),
         ("pivots_manager", "0026_pivot_config_abuseiptosubmission"),
     ]

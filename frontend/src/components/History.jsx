@@ -81,7 +81,13 @@ export default function History() {
 
   const createButton = (
     <Col className="d-flex justify-content-end">
-      <Button id="createbutton" size="sm" color="darker" onClick={onClick}>
+      <Button
+        id="createbutton"
+        className="d-flex align-items-center"
+        size="sm"
+        color="darker"
+        onClick={onClick}
+      >
         <BsFillPlusCircleFill />
         &nbsp;Create {isJobsTablePage ? "job" : "investigation"}
       </Button>

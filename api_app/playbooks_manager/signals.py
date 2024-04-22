@@ -1,6 +1,8 @@
 import logging
+import uuid
 from typing import Type
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
@@ -8,12 +10,13 @@ from django.dispatch import receiver
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.signals import migrate_finished
+from intel_owl.celery import get_queue_name
 
 logger = logging.getLogger(__name__)
 
 
 @receiver(migrate_finished)
-def post_migrate_playbbooks_manager(
+def post_migrate_playbooks_manager(
     sender,
     *args,
     check_unapplied: bool = False,
@@ -22,7 +25,14 @@ def post_migrate_playbbooks_manager(
     logger.info(f"Post migrate {args} {kwargs}")
     if check_unapplied:
         return
-    PlaybookConfig.delete_class_cache_keys()
+    from intel_owl.tasks import refresh_cache
+
+    refresh_cache.apply_async(
+        queue=get_queue_name(settings.CONFIG_QUEUE),
+        MessageGroupId=str(uuid.uuid4()),
+        priority=3,
+        args=[PlaybookConfig.python_path],
+    )
 
 
 @receiver(m2m_changed, sender=PlaybookConfig.analyzers.through)

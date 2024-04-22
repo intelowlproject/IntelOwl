@@ -87,6 +87,10 @@ describe("test InvestigationOverview", () => {
     expect(
       container.querySelector("#edit-investigation-description"),
     ).toBeInTheDocument();
+    // markdown icon
+    expect(
+      container.querySelector("#investigation-markdown-doc"),
+    ).toBeInTheDocument();
   });
 
   test("Edit name", async () => {
@@ -132,6 +136,10 @@ describe("test InvestigationOverview", () => {
     // edit description icon
     expect(
       container.querySelector("#edit-investigation-description"),
+    ).toBeInTheDocument();
+    // markdown icon
+    expect(
+      container.querySelector("#investigation-markdown-doc"),
     ).toBeInTheDocument();
 
     await user.click(editNameButton);
@@ -197,6 +205,10 @@ describe("test InvestigationOverview", () => {
       "#edit-investigation-description",
     );
     expect(editDescriptionButton).toBeInTheDocument();
+    // markdown icon
+    expect(
+      container.querySelector("#investigation-markdown-doc"),
+    ).toBeInTheDocument();
 
     await user.click(editDescriptionButton);
     const editDescriptionInput = container.querySelector(

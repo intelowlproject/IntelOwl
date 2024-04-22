@@ -9,6 +9,7 @@ import { useLocation } from "react-router-dom";
 
 import { ObservableClassifications } from "../../../../constants/jobConst";
 import { getObservableClassification } from "../../../../utils/observables";
+import { markdownToHtml } from "../../../common/markdownToHtml";
 
 export function VisualizerTooltip({
   idElement,
@@ -58,7 +59,7 @@ export function VisualizerTooltip({
           className="bg-body p-3 py-2 mb-1 text-start"
           style={{ maxWidth: "400px" }}
         >
-          <small>{description}</small>
+          <small>{markdownToHtml(description)}</small>
         </div>
       )}
     </UncontrolledTooltip>

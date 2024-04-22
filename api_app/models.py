@@ -949,6 +949,11 @@ class ListCachable(models.Model):
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
 
+    @classmethod
+    @property
+    def python_path(cls) -> str:
+        return f"{cls.__module__}.{cls.__name__}"
+
 
 class AbstractConfig(ListCachable):
     objects = AbstractConfigQuerySet.as_manager()

@@ -9,7 +9,7 @@ import tarfile
 
 import maxminddb
 import requests
-from django.conf.settings import MEDIA_ROOT
+from django.conf import settings
 from geoip2.database import Reader
 from geoip2.errors import AddressNotFoundError, GeoIP2Error
 from geoip2.models import ASN, City, Country
@@ -34,7 +34,7 @@ class MaxmindDBManager:
 
     @classmethod
     def _get_physical_location(cls, db: str) -> str:
-        return f"{MEDIA_ROOT}/{db}"
+        return f"{settings.MEDIA_ROOT}/{db}"
 
     @classmethod
     def update_all_dbs(cls, api_key: str) -> bool:
@@ -105,7 +105,7 @@ class MaxmindDBManager:
 
             tar_db_path = cls._download_db(db, api_key)
             cls._extract_db_to_media_root(tar_db_path)
-            directory_found, downloaded_db_path = cls._remove_old_db(db)
+            directory_found = cls._remove_old_db(db)
 
             if not directory_found:
                 return False
@@ -132,7 +132,7 @@ class MaxmindDBManager:
                 "%Y%m%d"
             )
             downloaded_db_path = (
-                f"{MEDIA_ROOT}/"
+                f"{settings.MEDIA_ROOT}/"
                 f"{db}_{formatted_date}/{db}{cls._default_db_extension}"
             )
             try:
@@ -142,14 +142,14 @@ class MaxmindDBManager:
                 counter += 1
             else:
                 directory_found = True
-                shutil.rmtree(f"{MEDIA_ROOT}/" f"{db}_{formatted_date}")
+                shutil.rmtree(f"{settings.MEDIA_ROOT}/" f"{db}_{formatted_date}")
                 logger.info(f"maxmind directory found {downloaded_db_path}")
         return directory_found
 
     @classmethod
     def _extract_db_to_media_root(cls, tar_db_path: str):
         tf = tarfile.open(tar_db_path)
-        tf.extractall(str(MEDIA_ROOT))
+        tf.extractall(str(settings.MEDIA_ROOT))
 
     @classmethod
     def _download_db(cls, db_name: str, api_key: str) -> str:

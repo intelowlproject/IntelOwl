@@ -89,7 +89,9 @@ class MaxmindDBManager:
                 " reached max number of attempts"
             )
         if not os.path.exists(db_path):
-            raise maxminddb.InvalidDatabaseError("database location does not exist")
+            raise maxminddb.InvalidDatabaseError(
+                f"database location '{db_path}' does not exist"
+            )
 
     @classmethod
     def _update_db(cls, db: str, api_key: str) -> bool:

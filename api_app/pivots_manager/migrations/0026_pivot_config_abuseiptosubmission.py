@@ -6,27 +6,22 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "id": 8,
-    "analyzers": [],
-    "connectors": ["AbuseSubmitter"],
-    "pivots": [],
-    "for_organization": False,
-    "name": "Send_Email",
-    "description": "Send email to take down malicious domain",
-    "disabled": False,
-    "type": ["generic"],
-    "runtime_configuration": {
-        "pivots": {},
-        "analyzers": {},
-        "connectors": {},
-        "visualizers": {},
+    "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": None,
+        "module": "abuse_ip_to_submission.AbuseIpToSubmission",
+        "base_path": "api_app.pivots_manager.pivots",
     },
-    "scan_mode": 1,
-    "scan_check_time": None,
-    "tlp": "AMBER",
-    "owner": None,
-    "tags": [],
-    "model": "playbooks_manager.PlaybookConfig",
+    "related_analyzer_configs": ["Abusix"],
+    "related_connector_configs": [],
+    "playbook_to_execute": "Send_Email",
+    "name": "AbuseIpToSubmission",
+    "description": "Pivot for plugins Abusix that executes playbook Send_Email",
+    "disabled": False,
+    "soft_time_limit": 60,
+    "routing_key": "default",
+    "health_check_status": True,
+    "model": "pivots_manager.PivotConfig",
 }
 
 params = []
@@ -111,7 +106,8 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("playbooks_manager", "0034_playbook_config_abuse_ip"),
+        ("pivots_manager", "0025_alter_pivotmap_ending_job"),
+        ("playbooks_manager", "0033_playbook_config_send_email"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

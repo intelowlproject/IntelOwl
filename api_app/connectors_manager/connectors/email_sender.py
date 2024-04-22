@@ -15,7 +15,7 @@ class EmailSender(Connector):
     def body(self) -> str:
         return (
             f"Domain {self._job.parent_job.parent_job.observable_name} "
-            f"is malicious. Please take it down."
+            f"has been reported as malicious. We request you to take it down."
         )
 
     def run(self) -> dict:

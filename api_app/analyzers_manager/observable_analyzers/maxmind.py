@@ -34,7 +34,7 @@ class MaxmindDBManager:
 
     @classmethod
     def _get_physical_location(cls, db: str) -> str:
-        return f"{settings.MEDIA_ROOT}/{db}"
+        return f"{settings.MEDIA_ROOT}/{db}{cls._default_db_extension}"
 
     @classmethod
     def update_all_dbs(cls, api_key: str) -> bool:
@@ -58,6 +58,7 @@ class MaxmindDBManager:
         db_path: str = self._get_physical_location(db_name)
         self._check_and_update_db(api_key, db_name)
 
+        logger.info(f"Query {db_name=} for {query_ip=}")
         with Reader(db_path) as reader:
             try:
                 if "ASN" in db_name:
@@ -110,7 +111,7 @@ class MaxmindDBManager:
             if not directory_found:
                 return False
 
-            logger.info(f"ended download of db {db} from maxmind")
+            logger.info(f"ended download of {db=} from maxmind")
             return True
 
         except Exception as e:
@@ -119,9 +120,7 @@ class MaxmindDBManager:
 
     @classmethod
     def _remove_old_db(cls, db: str) -> bool:
-        physical_db_location = cls._get_physical_location(
-            db + cls._default_db_extension
-        )
+        physical_db_location = cls._get_physical_location(db)
         today = datetime.datetime.now().date()
         counter = 0
         directory_found = False

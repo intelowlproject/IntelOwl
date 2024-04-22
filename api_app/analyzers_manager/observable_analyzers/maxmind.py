@@ -191,7 +191,7 @@ class Maxmind(classes.ObservableAnalyzer):
         return cls._maxmind_db_manager.get_supported_dbs()
 
     @classmethod
-    def update_databases(cls) -> bool:
+    def update(cls) -> bool:
         return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
 
     @classmethod

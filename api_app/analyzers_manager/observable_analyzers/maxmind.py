@@ -125,7 +125,6 @@ class MaxmindDBManager:
         today = datetime.datetime.now().date()
         counter = 0
         directory_found = False
-        downloaded_db_path = ""
         # this is because we do not know the exact date of the db we downloaded
         while counter < 10 or not directory_found:
             formatted_date = (today - datetime.timedelta(days=counter)).strftime(

@@ -6,15 +6,15 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "id": 10,
-    "analyzers": ["Abusix"],
-    "connectors": [],
-    "pivots": ["AbuseIpToSubmission"],
+    "id": 8,
+    "analyzers": [],
+    "connectors": ["AbuseSubmitter"],
+    "pivots": [],
     "for_organization": False,
-    "name": "Abuse_IP",
-    "description": "Execute abusix than execute playbook Send_Email",
+    "name": "Send_Email",
+    "description": "Send email to take down malicious domain",
     "disabled": False,
-    "type": ["ip"],
+    "type": ["generic"],
     "runtime_configuration": {
         "pivots": {},
         "analyzers": {},
@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("playbooks_manager", "0032_playbook_config_abuse_domain"),
+        ("playbooks_manager", "0034_playbook_config_abuse_ip"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

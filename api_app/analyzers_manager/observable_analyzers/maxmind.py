@@ -29,11 +29,11 @@ class MaxmindDBManager:
     _default_db_extension: str = ".mmdb"
 
     @classmethod
-    def get_supported_dbs(cls):
+    def get_supported_dbs(cls) -> [str]:
         return [db_name + cls._default_db_extension for db_name in cls._supported_dbs]
 
     @classmethod
-    def _get_physical_location(cls, db: str):
+    def _get_physical_location(cls, db: str) -> str:
         return f"{MEDIA_ROOT}/{db}"
 
     @classmethod

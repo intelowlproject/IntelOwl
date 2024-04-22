@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("playbooks_manager", "0033_playbook_config_abuse_ip"),
+        ("playbooks_manager", "0034_playbook_config_abuse_ip"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -118,7 +118,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("playbooks_manager", "0031_add_hfinger_analyzer_free_to_use"),
+        ("playbooks_manager", "0032_delete_dns0_playbook_free_to_use_analyzers"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

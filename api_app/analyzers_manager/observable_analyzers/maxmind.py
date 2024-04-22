@@ -27,6 +27,10 @@ class MaxmindDBManager:
     default_db_extension: str = ".mmdb"
 
     @classmethod
+    def get_supported_dbs(cls):
+        return [db_name + cls.default_db_extension for db_name in cls.supported_dbs]
+
+    @classmethod
     def get_physical_location(cls, db: str):
         return f"{MEDIA_ROOT}/{db}"
 
@@ -41,34 +45,12 @@ class MaxmindDBManager:
                 f"Unable to find api key for {cls.__name__}"
             )
 
-        physical_db_location = cls.get_physical_location(db + cls.default_db_extension)
         try:
+            logger.info(f"starting download of {db=} from maxmind")
+
             tar_db_path = cls._download_db(db, api_key)
-
             cls._extract_db_to_media_root(tar_db_path)
-
-            today = datetime.datetime.now().date()
-            counter = 0
-            directory_found = False
-            downloaded_db_path = ""
-            # this is because we do not know the exact date of the db we downloaded
-            while counter < 10 or not directory_found:
-                date_to_check = today - datetime.timedelta(days=counter)
-                formatted_date = date_to_check.strftime("%Y%m%d")
-                downloaded_db_path = (
-                    f"{MEDIA_ROOT}/"
-                    f"{db}_{formatted_date}/{db}{cls.default_db_extension}"
-                )
-                try:
-                    os.rename(downloaded_db_path, physical_db_location)
-                except FileNotFoundError:
-                    logger.debug(
-                        f"{downloaded_db_path} not found move to the day before"
-                    )
-                    counter += 1
-                else:
-                    directory_found = True
-                    shutil.rmtree(f"{MEDIA_ROOT}/" f"{db}_{formatted_date}")
+            directory_found, downloaded_db_path = cls._remove_old_db(db)
 
             if directory_found:
                 logger.info(f"maxmind directory found {downloaded_db_path}")
@@ -83,13 +65,37 @@ class MaxmindDBManager:
         return False
 
     @classmethod
+    def _remove_old_db(cls, db: str) -> (bool, str):
+        physical_db_location = cls.get_physical_location(db + cls.default_db_extension)
+        today = datetime.datetime.now().date()
+        counter = 0
+        directory_found = False
+        downloaded_db_path = ""
+        # this is because we do not know the exact date of the db we downloaded
+        while counter < 10 or not directory_found:
+            formatted_date = (today - datetime.timedelta(days=counter)).strftime(
+                "%Y%m%d"
+            )
+            downloaded_db_path = (
+                f"{MEDIA_ROOT}/" f"{db}_{formatted_date}/{db}{cls.default_db_extension}"
+            )
+            try:
+                os.rename(downloaded_db_path, physical_db_location)
+            except FileNotFoundError:
+                logger.debug(f"{downloaded_db_path} not found move to the day before")
+                counter += 1
+            else:
+                directory_found = True
+                shutil.rmtree(f"{MEDIA_ROOT}/" f"{db}_{formatted_date}")
+        return directory_found, downloaded_db_path
+
+    @classmethod
     def _extract_db_to_media_root(cls, tar_db_path: str):
         tf = tarfile.open(tar_db_path)
         tf.extractall(str(MEDIA_ROOT))
 
     @classmethod
     def _download_db(cls, db_name: str, api_key: str) -> str:
-        logger.info(f"starting download of db {db_name} from maxmind")
         url = (
             "https://download.maxmind.com/app/geoip_download?edition_id="
             f"{db_name}&license_key={api_key}&suffix=tar.gz"
@@ -99,17 +105,19 @@ class MaxmindDBManager:
             raise AnalyzerRunException(
                 f"failed request for new maxmind db {db_name}."
                 f" Status code: {response.status_code}"
+                f"\nResponse: {response.raw}"
             )
 
-        tar_db_path = f"/tmp/{db_name}.tar.gz"
-        with open(tar_db_path, "wb") as f:
-            f.write(response.content)
-
-        return tar_db_path
+        return cls._write_db_to_filesystem(db_name, response.content)
 
     @classmethod
-    def get_supported_dbs(cls):
-        return [db_name + cls.default_db_extension for db_name in cls.supported_dbs]
+    def _write_db_to_filesystem(cls, db_name: str, content: bytes) -> str:
+        tar_db_path = f"/tmp/{db_name}.tar.gz"
+        logger.info(f"starting writing db {db_name} from maxmind to {tar_db_path}")
+        with open(tar_db_path, "wb") as f:
+            f.write(content)
+
+        return tar_db_path
 
 
 class Maxmind(classes.ObservableAnalyzer):

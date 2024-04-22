@@ -148,8 +148,10 @@ class MaxmindDBManager:
 
     @classmethod
     def _extract_db_to_media_root(cls, tar_db_path: str):
+        logger.info(f"Started extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
         tf = tarfile.open(tar_db_path)
         tf.extractall(str(settings.MEDIA_ROOT))
+        logger.info(f"Finished extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
 
     @classmethod
     def _download_db(cls, db_name: str, api_key: str) -> str:

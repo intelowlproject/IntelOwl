@@ -9,7 +9,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "email_sender.EmailSender",
+        "module": "abuse_submitter.AbuseSubmitter",
         "base_path": "api_app.connectors_manager.connectors",
     },
     "name": "AbuseSubmitter",
@@ -26,14 +26,14 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "email_sender.EmailSender",
+            "module": "abuse_submitter.AbuseSubmitter",
             "base_path": "api_app.connectors_manager.connectors",
         },
         "name": "sender",
         "type": "str",
         "description": "Email sender",
         "is_secret": False,
-        "required": True,
+        "required": False,
     }
 ]
 
@@ -41,14 +41,14 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "email_sender.EmailSender",
+                "module": "abuse_submitter.AbuseSubmitter",
                 "base_path": "api_app.connectors_manager.connectors",
             },
             "name": "sender",
             "type": "str",
             "description": "Email sender",
             "is_secret": False,
-            "required": True,
+            "required": False,
         },
         "analyzer_config": None,
         "connector_config": "AbuseSubmitter",
@@ -57,7 +57,7 @@ values = [
         "pivot_config": None,
         "for_organization": False,
         "value": "",
-        "updated_at": "2024-04-17T07:53:30.799933Z",
+        "updated_at": "2024-04-22T16:06:41.662930Z",
         "owner": None,
     }
 ]
@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("connectors_manager", "0029_4_change_primary_key"),
+        ("connectors_manager", "0030_connector_config_emailsender"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

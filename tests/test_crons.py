@@ -70,7 +70,7 @@ class CronTests(CustomTestCase):
 
     @if_mock_connections(skip("not working without connection"))
     def test_maxmind_updater(self):
-        maxmind.Maxmind.update_databases()
+        maxmind.Maxmind.update()
         for db in maxmind.Maxmind.get_db_names():
             self.assertTrue(os.path.exists(db))
 

@@ -33,7 +33,7 @@ class MaxmindDBManager:
         return [db_name + cls.default_db_extension for db_name in cls.supported_dbs]
 
     @classmethod
-    def get_physical_location(cls, db: str):
+    def _get_physical_location(cls, db: str):
         return f"{MEDIA_ROOT}/{db}"
 
     @classmethod
@@ -55,7 +55,7 @@ class MaxmindDBManager:
 
     def _query_single_db(self, query_ip: str, db_name: str, api_key: str) -> dict:
         result: ASN | City | Country
-        db_path: str = self.get_physical_location(db_name)
+        db_path: str = self._get_physical_location(db_name)
         self._check_and_update_db(api_key, db_name)
 
         with Reader(db_path) as reader:
@@ -82,7 +82,7 @@ class MaxmindDBManager:
                 return result.raw
 
     def _check_and_update_db(self, api_key: str, db_name: str):
-        db_path = self.get_physical_location(db_name)
+        db_path = self._get_physical_location(db_name)
         if not os.path.isfile(db_path) and not self._update_db(db_name, api_key):
             raise AnalyzerRunException(
                 f"failed extraction of maxmind db {db_name},"
@@ -117,7 +117,7 @@ class MaxmindDBManager:
 
     @classmethod
     def _remove_old_db(cls, db: str) -> bool:
-        physical_db_location = cls.get_physical_location(db + cls.default_db_extension)
+        physical_db_location = cls._get_physical_location(db + cls.default_db_extension)
         today = datetime.datetime.now().date()
         counter = 0
         directory_found = False

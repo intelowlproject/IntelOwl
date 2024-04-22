@@ -7,10 +7,12 @@ import os
 import shutil
 import tarfile
 
-import geoip2  # noqa: F401
-import geoip2.database  # noqa: F401
+import maxminddb
 import requests
 from django.conf.settings import MEDIA_ROOT
+from geoip2.database import Reader
+from geoip2.errors import AddressNotFoundError, GeoIP2Error
+from geoip2.models import ASN, City, Country
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import (
@@ -38,6 +40,57 @@ class MaxmindDBManager:
     def update(cls, api_key: str) -> bool:
         return all(cls._update_db(db, api_key) for db in cls.supported_dbs)
 
+    def query_all_dbs(self, observable_query: str, api_key: str) -> dict:
+        maxmind_final_result = {}
+        for db in self.supported_dbs:
+            maxmind_result = self._query_single_db(observable_query, db, api_key)
+
+            if maxmind_result:
+                logger.info(f"maxmind result: {maxmind_result}")
+                maxmind_final_result.update(maxmind_result)
+            else:
+                logger.warning("maxmind result not available")
+
+        return maxmind_final_result
+
+    def _query_single_db(self, query_ip: str, db_name: str, api_key: str) -> dict:
+        result: ASN | City | Country
+        db_path: str = self.get_physical_location(db_name)
+        self._check_and_update_db(api_key, db_name)
+
+        with Reader(db_path) as reader:
+            try:
+                if "ASN" in db_name:
+                    result = reader.asn(query_ip)
+                elif "Country" in db_name:
+                    result = reader.country(query_ip)
+                elif "City" in db_name:
+                    result = reader.city(query_ip)
+            except AddressNotFoundError:
+                reader.close()
+                logger.info(
+                    f"Query for observable '{query_ip}' "
+                    f"didn't produce any results in any db."
+                )
+                return {}
+            except (GeoIP2Error, maxminddb.InvalidDatabaseError) as e:
+                error_message = f"GeoIP2 database error: {e}"
+                logger.exception(error_message)
+                return {"error": error_message}
+            else:
+                reader.close()
+                return result.raw
+
+    def _check_and_update_db(self, api_key: str, db_name: str):
+        db_path = self.get_physical_location(db_name)
+        if not os.path.isfile(db_path) and not self._update_db(db_name, api_key):
+            raise AnalyzerRunException(
+                f"failed extraction of maxmind db {db_name},"
+                " reached max number of attempts"
+            )
+        if not os.path.exists(db_path):
+            raise maxminddb.InvalidDatabaseError("database location does not exist")
+
     @classmethod
     def _update_db(cls, db: str, api_key: str) -> bool:
         if not api_key:
@@ -52,9 +105,7 @@ class MaxmindDBManager:
             cls._extract_db_to_media_root(tar_db_path)
             directory_found, downloaded_db_path = cls._remove_old_db(db)
 
-            if directory_found:
-                logger.info(f"maxmind directory found {downloaded_db_path}")
-            else:
+            if not directory_found:
                 return False
 
             logger.info(f"ended download of db {db} from maxmind")
@@ -65,7 +116,7 @@ class MaxmindDBManager:
         return False
 
     @classmethod
-    def _remove_old_db(cls, db: str) -> (bool, str):
+    def _remove_old_db(cls, db: str) -> bool:
         physical_db_location = cls.get_physical_location(db + cls.default_db_extension)
         today = datetime.datetime.now().date()
         counter = 0
@@ -87,7 +138,8 @@ class MaxmindDBManager:
             else:
                 directory_found = True
                 shutil.rmtree(f"{MEDIA_ROOT}/" f"{db}_{formatted_date}")
-        return directory_found, downloaded_db_path
+                logger.info(f"maxmind directory found {downloaded_db_path}")
+        return directory_found
 
     @classmethod
     def _extract_db_to_media_root(cls, tar_db_path: str):
@@ -122,44 +174,20 @@ class MaxmindDBManager:
 
 class Maxmind(classes.ObservableAnalyzer):
     _api_key_name: str
-    maxmind_db_manager: "MaxmindDBManager" = MaxmindDBManager()
+    _maxmind_db_manager: "MaxmindDBManager" = MaxmindDBManager()
 
     def run(self):
-        maxmind_final_result = {}
-        for db in self.get_db_names():
-            try:
-                db_location = self.maxmind_db_manager.get_physical_location(db)
-                if not os.path.isfile(db_location) and not self.update_databases():
-                    raise AnalyzerRunException(
-                        f"failed extraction of maxmind db {db},"
-                        " reached max number of attempts"
-                    )
-                if not os.path.exists(db_location):
-                    raise maxminddb.InvalidDatabaseError(  # noqa: F821
-                        "database location does not exist"
-                    )
-                reader = maxminddb.open_database(db_location)  # noqa: F821
-                maxmind_result = reader.get(self.observable_name)
-                reader.close()
-            except maxminddb.InvalidDatabaseError as e:  # noqa: F821
-                error_message = f"Invalid database error: {e}"
-                logger.exception(error_message)
-                maxmind_result = {"error": error_message}
-            logger.info(f"maxmind result: {maxmind_result}")
-            if maxmind_result:
-                maxmind_final_result.update(maxmind_result)
-            else:
-                logger.warning("maxmind result not available")
-
-        return maxmind_final_result
+        return self._maxmind_db_manager.query_all_dbs(
+            self.observable_name, self._api_key_name
+        )
 
     @classmethod
     def get_db_names(cls) -> [str]:
-        return cls.maxmind_db_manager.get_supported_dbs()
+        return cls._maxmind_db_manager.get_supported_dbs()
 
     @classmethod
     def update_databases(cls) -> bool:
-        return cls.maxmind_db_manager.update(cls._api_key_name)
+        return cls._maxmind_db_manager.update(cls._api_key_name)
 
     @classmethod
     def _monkeypatch(cls):

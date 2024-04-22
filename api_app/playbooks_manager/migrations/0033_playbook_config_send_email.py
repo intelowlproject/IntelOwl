@@ -6,29 +6,27 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "python_module": {
-        "health_check_schedule": None,
-        "update_schedule": None,
-        "module": "abuse_domain_to_abuse_ip.AbuseDomainToAbuseIp",
-        "base_path": "api_app.pivots_manager.pivots",
-    },
-    "related_analyzer_configs": [
-        "Classic_DNS",
-        "CloudFlare_DNS",
-        "DNS0_EU",
-        "Google_DNS",
-        "Quad9_DNS",
-    ],
-    "related_connector_configs": [],
-    "playbook_to_execute": "Abuse_IP",
-    "name": "AbuseDomainToAbuseIp",
-    "description": "Pivot for plugins Classic_DNS, CloudFlare_DNS, DNS0_EU, "
-    "Google_DNS, Quad9_DNS that executes playbook Abuse_IP",
+    "id": 8,
+    "analyzers": [],
+    "connectors": ["AbuseSubmitter"],
+    "pivots": [],
+    "for_organization": False,
+    "name": "Send_Email",
+    "description": "Send email to take down malicious domain",
     "disabled": False,
-    "soft_time_limit": 60,
-    "routing_key": "default",
-    "health_check_status": True,
-    "model": "pivots_manager.PivotConfig",
+    "type": ["generic"],
+    "runtime_configuration": {
+        "pivots": {},
+        "analyzers": {},
+        "connectors": {},
+        "visualizers": {},
+    },
+    "scan_mode": 1,
+    "scan_check_time": None,
+    "tlp": "AMBER",
+    "owner": None,
+    "tags": [],
+    "model": "playbooks_manager.PlaybookConfig",
 }
 
 params = []
@@ -113,7 +111,8 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("pivots_manager", "0025_alter_pivotmap_ending_job"),
+        ("playbooks_manager", "0032_delete_dns0_playbook_free_to_use_analyzers"),
+        ("connectors_manager", "0030_connector_config_abusesubmitter"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

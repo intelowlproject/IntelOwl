@@ -9,14 +9,21 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "abuse_ip_to_submission.AbuseIpToSubmission",
+        "module": "abuse_domain_to_abuse_ip.AbuseDomainToAbuseIp",
         "base_path": "api_app.pivots_manager.pivots",
     },
-    "related_analyzer_configs": ["Abusix"],
+    "related_analyzer_configs": [
+        "Classic_DNS",
+        "CloudFlare_DNS",
+        "DNS0_EU",
+        "Google_DNS",
+        "Quad9_DNS",
+    ],
     "related_connector_configs": [],
-    "playbook_to_execute": "Send_Email",
-    "name": "AbuseIpToSubmission",
-    "description": "Pivot for plugins Abusix that executes playbook Send_Email",
+    "playbook_to_execute": "Abuse_IP",
+    "name": "AbuseDomainToAbuseIp",
+    "description": "Pivot for plugins Classic_DNS, CloudFlare_DNS, DNS0_EU, "
+    "Google_DNS, Quad9_DNS that executes playbook Abuse_IP",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",
@@ -106,7 +113,8 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("pivots_manager", "0026_pivot_config_abusedomaintoabuseip"),
+        ("pivots_manager", "0026_pivot_config_abuseiptosubmission"),
+        ("playbooks_manager", "0034_playbook_config_abuse_ip"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

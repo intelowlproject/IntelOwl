@@ -37,7 +37,7 @@ class MaxmindDBManager:
         return f"{MEDIA_ROOT}/{db}"
 
     @classmethod
-    def update(cls, api_key: str) -> bool:
+    def update_all_dbs(cls, api_key: str) -> bool:
         return all(cls._update_db(db, api_key) for db in cls.supported_dbs)
 
     def query_all_dbs(self, observable_query: str, api_key: str) -> dict:
@@ -187,7 +187,7 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def update_databases(cls) -> bool:
-        return cls._maxmind_db_manager.update(cls._api_key_name)
+        return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
 
     @classmethod
     def _monkeypatch(cls):

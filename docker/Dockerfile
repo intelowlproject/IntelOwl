@@ -28,7 +28,7 @@ RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
     ${LOG_PATH}/asgi \
-    /opt/deploy/files_required /opt/deploy/files_required/yara /opt/deploy/configuration
+    /opt/deploy/files_required /opt/deploy/configuration
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
@@ -50,7 +50,7 @@ COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
+RUN pip3 install --no-cache-dir --compile -r project-rFequirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
     && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 

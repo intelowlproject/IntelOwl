@@ -30,3 +30,6 @@ class AbuseIpToSubmission(Pivot):
 
     def get_value_to_pivot_to(self) -> Any:
         return self.value
+
+    def update(self) -> bool:
+        pass

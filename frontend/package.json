@@ -30,7 +30,7 @@
     "react-use": "^17.5.0",
     "reactflow": "^11.10.4",
     "reactstrap": "^9.2.1",
-    "recharts": "^2.8.0",
+    "recharts": "^2.12.6",
     "zustand": "^4.5.2"
   },
   "scripts": {

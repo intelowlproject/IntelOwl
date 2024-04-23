@@ -12,7 +12,7 @@ plugin = {
     "pivots": ["AbuseIpToSubmission"],
     "for_organization": False,
     "name": "Abuse_IP",
-    "description": "Execute abusix than execute playbook Send_Email",
+    "description": "Execute abusix then execute playbook Send_Abuse_Email",
     "disabled": False,
     "type": ["ip"],
     "runtime_configuration": {

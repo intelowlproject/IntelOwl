@@ -24,9 +24,6 @@ class EmailSender(Connector):
         base_eml.send()
         return {"receiver": self._job.observable_name}
 
-    def update(self) -> bool:
-        pass
-
     @classmethod
     def _monkeypatch(cls):
         patches = [

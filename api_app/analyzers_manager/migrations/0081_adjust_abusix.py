@@ -10,7 +10,7 @@ def migrate(apps, schema_editor):
 
 
 def reverse_migrate(apps, schema_editor):
-    ...
+    pass
 
 
 class Migration(migrations.Migration):

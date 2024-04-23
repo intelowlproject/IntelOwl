@@ -6,7 +6,7 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "id": 9,
+    "name": "Abuse_Domain",
     "analyzers": [
         "Classic_DNS",
         "CloudFlare_DNS",
@@ -17,7 +17,6 @@ plugin = {
     "connectors": [],
     "pivots": ["AbuseDomainToAbuseIp"],
     "for_organization": False,
-    "name": "Abuse_Domain",
     "description": "Start investigation to request to take down a malicious domain. "
     "A mail will be sent to the domain's abuse contacts found.",
     "disabled": False,

@@ -6,12 +6,11 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "id": 10,
+    "name": "Abuse_IP",
     "analyzers": ["Abusix"],
     "connectors": [],
     "pivots": ["AbuseIpToSubmission"],
     "for_organization": False,
-    "name": "Abuse_IP",
     "description": "Execute abusix then execute playbook Send_Abuse_Email",
     "disabled": False,
     "type": ["ip"],

@@ -71,7 +71,7 @@ class MaxmindDBManager:
                 reader.close()
                 logger.info(
                     f"Query for observable '{query_ip}' "
-                    f"didn't produce any results in any db."
+                    "didn't produce any results in any db."
                 )
                 return {}
             except (GeoIP2Error, maxminddb.InvalidDatabaseError) as e:

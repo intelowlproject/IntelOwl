@@ -181,6 +181,26 @@ class VisualizableListMixin:
         return result
 
 
+class VisualizableDataTableMixin:
+    def to_dict(self) -> Dict:
+        result = super().to_dict()  # noqa
+        data: List[Dict[str, VisualizableObject]] = result.pop("data", [])
+        if any(x for x in data):
+            new_data = []
+            for element in data:
+                new_data.append(
+                    {
+                        key: value.to_dict()
+                        for [key, value] in element.items()
+                        if value is not None
+                    }
+                )
+            result["data"] = new_data
+        else:
+            result["data"] = []
+        return result
+
+
 class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
@@ -259,6 +279,32 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         return "vertical_list"
 
 
+class VisualizableTable(VisualizableDataTableMixin, VisualizableObject):
+    def __init__(
+        self,
+        columns: List[str],
+        data: List[Dict[str, VisualizableObject]],
+        alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
+    ):
+        super().__init__(alignment=alignment, disable=False)
+        self.data = data
+        self.columns = columns
+
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["data", "columns"]
+
+    @property
+    def type(self) -> str:
+        return "table"
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        result.pop("disable")
+        result.pop("size")
+        return result
+
+
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
@@ -328,6 +374,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Bool = VisualizableBool
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
+    Table = VisualizableTable
 
     LevelSize = VisualizableLevelSize
     Page = VisualizablePage

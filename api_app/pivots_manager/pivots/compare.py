@@ -26,7 +26,7 @@ class Compare(Pivot):
         return content
 
     def should_run(self) -> Tuple[bool, Optional[str]]:
-        if len(list(self.related_reports)) != 1:
+        if self.related_reports.count() != 1:
             return (
                 False,
                 f"Unable to run pivot {self._config.name} "

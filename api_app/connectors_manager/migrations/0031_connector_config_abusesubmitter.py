@@ -38,28 +38,6 @@ params = [
 ]
 
 values = [
-    {
-        "parameter": {
-            "python_module": {
-                "module": "abuse_submitter.AbuseSubmitter",
-                "base_path": "api_app.connectors_manager.connectors",
-            },
-            "name": "sender",
-            "type": "str",
-            "description": "Email sender",
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": None,
-        "connector_config": "AbuseSubmitter",
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": "",
-        "updated_at": "2024-04-22T16:06:41.662930Z",
-        "owner": None,
-    }
 ]
 
 

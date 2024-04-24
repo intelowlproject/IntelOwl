@@ -9,7 +9,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "abuse_domain_to_abuse_ip.AbuseDomainToAbuseIp",
+        "module": "any_compare.AnyCompare",
         "base_path": "api_app.pivots_manager.pivots",
     },
     "related_analyzer_configs": [
@@ -31,9 +31,44 @@ plugin = {
     "model": "pivots_manager.PivotConfig",
 }
 
-params = []
+params = [
+    {
+        "python_module": {
+            "module": "any_compare.AnyCompare",
+            "base_path": "api_app.pivots_manager.pivots",
+        },
+        "name": "field_to_compare",
+        "type": "str",
+        "description": "Dotted path to the field",
+        "is_secret": False,
+        "required": True,
+    },
+]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "any_compare.AnyCompare",
+                "base_path": "api_app.pivots_manager.pivots",
+            },
+            "name": "field_to_compare",
+            "type": "str",
+            "description": "Dotted path to the field",
+            "is_secret": False,
+            "required": True,
+        },
+        "analyzer_config": None,
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": "AbuseDomainToAbuseIp",
+        "for_organization": False,
+        "value": "resolutions.0.data",
+        "updated_at": "2024-04-22T14:08:49.711495Z",
+        "owner": None,
+    },
+]
 
 
 def _get_real_obj(Model, field, value):

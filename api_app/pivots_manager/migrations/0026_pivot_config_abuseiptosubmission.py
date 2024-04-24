@@ -9,14 +9,14 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "abuse_ip_to_submission.AbuseIpToSubmission",
+        "module": "compare.Compare",
         "base_path": "api_app.pivots_manager.pivots",
     },
     "related_analyzer_configs": ["Abusix"],
     "related_connector_configs": [],
     "playbook_to_execute": "Send_Abuse_Email",
     "name": "AbuseIpToSubmission",
-    "description": "Pivot for plugins Abusix that executes playbook Send_Email",
+    "description": "Pivot for plugins Abusix that executes playbook Send_Abuse_Email",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",
@@ -24,9 +24,44 @@ plugin = {
     "model": "pivots_manager.PivotConfig",
 }
 
-params = []
+params = [
+    {
+        "python_module": {
+            "module": "compare.Compare",
+            "base_path": "api_app.pivots_manager.pivots",
+        },
+        "name": "field_to_compare",
+        "type": "str",
+        "description": "Dotted path to the field",
+        "is_secret": False,
+        "required": True,
+    },
+]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "compare.Compare",
+                "base_path": "api_app.pivots_manager.pivots",
+            },
+            "name": "field_to_compare",
+            "type": "str",
+            "description": "Dotted path to the field",
+            "is_secret": False,
+            "required": True,
+        },
+        "analyzer_config": None,
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": "AbuseIpToSubmission",
+        "for_organization": False,
+        "value": "abuse_contacts.0",
+        "updated_at": "2024-04-22T14:08:49.711495Z",
+        "owner": None,
+    },
+]
 
 
 def _get_real_obj(Model, field, value):

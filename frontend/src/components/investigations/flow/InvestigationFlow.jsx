@@ -67,6 +67,7 @@ export function InvestigationFlow(props) {
         deleteKeyCode={null}
         preventScrolling={false}
         zoomOnDoubleClick={false}
+        panOnScroll
         {...rest}
       >
         <MiniMap pannable />

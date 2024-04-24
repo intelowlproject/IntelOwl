@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import useAxios from "axios-hooks";
 import { Col, Row, Container, Input } from "reactstrap";
 import { MdEdit } from "react-icons/md";
-import { BsFillCheckSquareFill } from "react-icons/bs";
+import { BsFillCheckSquareFill, BsMarkdown } from "react-icons/bs";
 import { useLocation } from "react-router-dom";
 
 import { IconButton, Loader } from "@certego/certego-ui";
@@ -14,6 +14,7 @@ import { InvestigationActionsBar } from "./InvestigationActionBar";
 import { updateInvestigation } from "./investigationApi";
 import { InvestigationFlow } from "../flow/InvestigationFlow";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
+import { markdownToHtml } from "../../common/markdownToHtml";
 
 export function InvestigationOverview({
   isRunningInvestigation,
@@ -78,62 +79,79 @@ export function InvestigationOverview({
       {/* investigation metadata card */}
       <Row className="g-0">
         <Col>
-          <InvestigationInfoCard investigation={investigation} />
+          <InvestigationInfoCard
+            investigation={investigation}
+            refetchTree={refetchTree}
+          />
         </Col>
       </Row>
       <Row className="g-0 mt-3">
-        <div className="mb-2">
+        <div className="">
           <span className="fw-bold me-2 text-light">Description</span>
-          {isEditing ? (
-            <>
-              <IconButton
-                id="save-investigation-description"
-                Icon={BsFillCheckSquareFill}
-                size="sm"
-                color=""
-                className="text-secondary"
-                onClick={editInvestigationDescription}
-              />
-              <Input
-                id="edit-investigation-description-input"
-                name="textArea"
-                type="textarea"
-                onChange={(event) => {
-                  setInvestigationDescription(event.target.value);
-                }}
-                placeholder="Enter a description"
-                value={investigationDescription}
-                style={{ minHeight: "200px", overflowY: "auto" }}
-                className="bg-dark"
-              />
-            </>
-          ) : (
-            <>
-              <IconButton
-                id="edit-investigation-description"
-                Icon={MdEdit}
-                size="sm"
-                color=""
-                className="text-secondary"
-                onClick={() => setIsEditing(true)}
-                title="Edit description"
-                titlePlacement="top"
-              />
-              <div
-                className={`form-control bg-dark border-dark ${
-                  investigationDescription ? "text-light" : "text-gray"
-                }`}
-                style={{
-                  maxHeight: "200px",
-                  overflowY: "auto",
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {investigationDescription || "No description"}
-              </div>
-            </>
+          <IconButton
+            id="edit-investigation-description"
+            Icon={MdEdit}
+            color=""
+            className="text-secondary justify-content-center mx-0 px-1"
+            onClick={() => setIsEditing(true)}
+            title="Edit description"
+            titlePlacement="top"
+          />
+          <IconButton
+            id="investigation-markdown-doc"
+            Icon={BsMarkdown}
+            color=""
+            className="text-secondary mx-0 px-1"
+            title="Markdown syntax"
+            titlePlacement="top"
+            href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
+            target="_blank"
+            rel="noreferrer"
+          />
+          {isEditing && (
+            <IconButton
+              id="save-investigation-description"
+              Icon={BsFillCheckSquareFill}
+              color=""
+              className="text-secondary mx-0 px-1"
+              onClick={editInvestigationDescription}
+              title="Save"
+              titlePlacement="top"
+            />
           )}
         </div>
+      </Row>
+      <Row className="g-0 mt-0 mb-2">
+        {isEditing ? (
+          <Input
+            id="edit-investigation-description-input"
+            name="textArea"
+            type="textarea"
+            onChange={(event) => {
+              setInvestigationDescription(event.target.value);
+            }}
+            placeholder="Enter a description"
+            value={investigationDescription}
+            style={{ minHeight: "200px", overflowY: "auto" }}
+            className="bg-dark"
+          />
+        ) : (
+          <div
+            className={`form-control bg-dark border-dark ${
+              investigationDescription ? "text-light" : "text-gray"
+            }`}
+            style={{
+              maxHeight: "200px",
+              overflowY: "auto",
+              whiteSpace: "pre-line",
+              lineHeight: "0.7",
+            }}
+          >
+            {investigationDescription
+              ? markdownToHtml(investigationDescription)
+              : "No description"}
+          </div>
+        )}
       </Row>
       <Row
         className="g-0 mt-3"

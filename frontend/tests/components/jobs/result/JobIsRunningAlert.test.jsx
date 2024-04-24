@@ -164,6 +164,8 @@ describe("test JobIsRunningAlert", () => {
       </BrowserRouter>,
     );
 
+    const JobPipelineFlow = container.querySelector("#JobPipelineFlow");
+    expect(JobPipelineFlow).toBeInTheDocument();
     // analyzers node
     const analyzersNode = container.querySelector("#jobPipeline-step-1");
     expect(analyzersNode).toBeInTheDocument();
@@ -293,6 +295,8 @@ describe("test JobIsRunningAlert", () => {
       </BrowserRouter>,
     );
 
+    const JobPipelineFlow = container.querySelector("#JobPipelineFlow");
+    expect(JobPipelineFlow).toBeInTheDocument();
     // analyzers node
     const analyzersNode = container.querySelector("#jobPipeline-step-1");
     expect(analyzersNode).toBeInTheDocument();
@@ -422,6 +426,8 @@ describe("test JobIsRunningAlert", () => {
       </BrowserRouter>,
     );
 
+    const JobPipelineFlow = container.querySelector("#JobPipelineFlow");
+    expect(JobPipelineFlow).toBeInTheDocument();
     // analyzers node
     const analyzersNode = container.querySelector("#jobPipeline-step-1");
     expect(analyzersNode).toBeInTheDocument();
@@ -551,6 +557,8 @@ describe("test JobIsRunningAlert", () => {
       </BrowserRouter>,
     );
 
+    const JobPipelineFlow = container.querySelector("#JobPipelineFlow");
+    expect(JobPipelineFlow).toBeInTheDocument();
     // analyzers node
     const analyzersNode = container.querySelector("#jobPipeline-step-1");
     expect(analyzersNode).toBeInTheDocument();
@@ -686,6 +694,8 @@ describe("test JobIsRunningAlert", () => {
 
     const user = userEvent.setup();
 
+    const JobPipelineFlow = container.querySelector("#JobPipelineFlow");
+    expect(JobPipelineFlow).toBeInTheDocument();
     // kill job button
     const killJobButton = container.querySelector("#killjob-iconbutton");
     expect(killJobButton).toBeInTheDocument();

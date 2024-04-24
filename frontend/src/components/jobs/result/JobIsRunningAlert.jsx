@@ -1,12 +1,16 @@
 /* eslint-disable id-length */
 import React from "react";
 import PropTypes from "prop-types";
-import ReactFlow, { MarkerType } from "reactflow";
+import ReactFlow, {
+  MarkerType,
+  ReactFlowProvider,
+  useReactFlow,
+} from "reactflow";
 import "reactflow/dist/style.css";
 import { IconButton } from "@certego/certego-ui";
 
 import CustomJobPipelineNode from "./CustomJobPipelineNode";
-import { JobStatuses } from "../../../constants/jobConst";
+import { JobStatuses, JobFinalStatuses } from "../../../constants/jobConst";
 import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 import {
@@ -29,7 +33,7 @@ const defaultEdgeOptions = {
   },
 };
 
-export function JobIsRunningAlert({ job }) {
+function JobIsRunningFlow({ job }) {
   // number of analyzers/connectors/visualizers reported (status: killed/succes/failed)
   const analizersReported = reportedPluginNumber(job.analyzer_reports);
   const connectorsReported = reportedPluginNumber(job.connector_reports);
@@ -57,10 +61,12 @@ export function JobIsRunningAlert({ job }) {
     .slice(9)
     .includes(job.status);
 
+  const position = { x: 450, y: 0 };
+
   const nodes = [
     {
       id: `isRunningJob-analyzers`,
-      position: { x: 0, y: 0 },
+      position: { x: position.x * 0, y: position.y },
       data: {
         id: "step-1",
         label: "ANALYZERS",
@@ -75,7 +81,7 @@ export function JobIsRunningAlert({ job }) {
     },
     {
       id: `isRunningJob-connectors`,
-      position: { x: 450, y: 0 },
+      position: { x: position.x, y: position.y },
       data: {
         id: "step-2",
         label: "CONNECTORS",
@@ -90,7 +96,7 @@ export function JobIsRunningAlert({ job }) {
     },
     {
       id: `isRunningJob-pivots`,
-      position: { x: 900, y: 0 },
+      position: { x: position.x * 2, y: position.y },
       data: {
         id: "step-3",
         label: "PIVOTS",
@@ -104,7 +110,7 @@ export function JobIsRunningAlert({ job }) {
     },
     {
       id: `isRunningJob-visualizers`,
-      position: { x: 1350, y: 0 },
+      position: { x: position.x * 3, y: position.y },
       data: {
         id: "step-4",
         label: "VISUALIZERS",
@@ -137,6 +143,36 @@ export function JobIsRunningAlert({ job }) {
     },
   ];
 
+  const reactFlowInstance = useReactFlow();
+  // this is necessary to properly resize the flow in Google Chrome
+  React.useEffect(() => {
+    console.debug("JobIsRunningFlow - set fitView property");
+    setTimeout(() => reactFlowInstance.fitView(), 0);
+  });
+
+  return (
+    <div
+      id="JobPipelineFlow"
+      className="bg-body"
+      style={{ width: 2000, height: 90 }}
+    >
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        defaultEdgeOptions={defaultEdgeOptions}
+        defaultViewport={{ x: 0, y: 0, zoom: 1.2 }}
+        nodeTypes={nodeTypes}
+        deleteKeyCode={null}
+        preventScrolling={false}
+        zoomOnDoubleClick={false}
+        panOnDrag={false}
+        elementsSelectable={false}
+      />
+    </div>
+  );
+}
+
+export function JobIsRunningAlert({ job }) {
   const onKillJobBtnClick = async () => {
     const sure = await areYouSureConfirmDialog(`Kill Job #${job.id}`);
     if (!sure) return null;
@@ -146,39 +182,31 @@ export function JobIsRunningAlert({ job }) {
 
   return (
     <>
-      <div className="bg-body" style={{ width: "100vw", height: "15vh" }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          defaultEdgeOptions={defaultEdgeOptions}
-          defaultViewport={{ x: 0, y: 0, zoom: 1.2 }}
-          nodeTypes={nodeTypes}
-          deleteKeyCode={null}
-          preventScrolling={false}
-          zoomOnDoubleClick={false}
-          panOnDrag={false}
-          proOptions={{ hideAttribution: true }}
-          fitView
-        />
-      </div>
+      <ReactFlowProvider>
+        <JobIsRunningFlow job={job} />
+      </ReactFlowProvider>
       <div className="d-flex-center">
-        {job.permissions?.kill && (
-          <IconButton
-            id="killjob-iconbutton"
-            Icon={killJobIcon}
-            size="xs"
-            title="Stop Job Process"
-            color="danger"
-            titlePlacement="top"
-            onClick={onKillJobBtnClick}
-            className="mt-0"
-          />
-        )}
+        {job.permissions?.kill &&
+          !Object.values(JobFinalStatuses).includes(job.status) && (
+            <IconButton
+              id="killjob-iconbutton"
+              Icon={killJobIcon}
+              size="xs"
+              title="Stop Job Process"
+              color="danger"
+              titlePlacement="top"
+              onClick={onKillJobBtnClick}
+              className="mt-4"
+            />
+          )}
       </div>
     </>
   );
 }
 
 JobIsRunningAlert.propTypes = {
+  job: PropTypes.object.isRequired,
+};
+JobIsRunningFlow.propTypes = {
   job: PropTypes.object.isRequired,
 };

@@ -19,3 +19,6 @@ class AnyCompare(Compare):
             bool(result),
             f"All necessary reports{'' if result else ' do not'} have success status",
         )
+
+    def update(self) -> bool:
+        pass

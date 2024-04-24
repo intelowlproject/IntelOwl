@@ -33,10 +33,6 @@ class MaxmindDBManager:
         return [db_name + cls._default_db_extension for db_name in cls._supported_dbs]
 
     @classmethod
-    def _get_physical_location(cls, db: str) -> str:
-        return f"{settings.MEDIA_ROOT}/{db}{cls._default_db_extension}"
-
-    @classmethod
     def update_all_dbs(cls, api_key: str) -> bool:
         return all(cls._update_db(db, api_key) for db in cls._supported_dbs)
 
@@ -46,12 +42,16 @@ class MaxmindDBManager:
             maxmind_result = self._query_single_db(observable_query, db, api_key)
 
             if maxmind_result:
-                logger.info(f"maxmind result: {maxmind_result}")
+                logger.info(f"maxmind result: {maxmind_result} in {db=}")
                 maxmind_final_result.update(maxmind_result)
             else:
-                logger.warning("maxmind result not available")
+                logger.warning(f"maxmind result not available in {db=}")
 
         return maxmind_final_result
+
+    @classmethod
+    def _get_physical_location(cls, db: str) -> str:
+        return f"{settings.MEDIA_ROOT}/{db}{cls._default_db_extension}"
 
     def _query_single_db(self, query_ip: str, db_name: str, api_key: str) -> dict:
         result: ASN | City | Country
@@ -119,6 +119,40 @@ class MaxmindDBManager:
         return False
 
     @classmethod
+    def _download_db(cls, db_name: str, api_key: str) -> str:
+        url = (
+            "https://download.maxmind.com/app/geoip_download?edition_id="
+            f"{db_name}&license_key={api_key}&suffix=tar.gz"
+        )
+        response = requests.get(url)
+        if response.status_code >= 300:
+            raise AnalyzerRunException(
+                f"failed request for new maxmind db {db_name}."
+                f" Status code: {response.status_code}"
+                f"\nResponse: {response.raw}"
+            )
+
+        return cls._write_db_to_filesystem(db_name, response.content)
+
+    @classmethod
+    def _write_db_to_filesystem(cls, db_name: str, content: bytes) -> str:
+        tar_db_path = f"/tmp/{db_name}.tar.gz"
+        logger.info(
+            f"starting writing db {db_name} downloaded from maxmind to {tar_db_path}"
+        )
+        with open(tar_db_path, "wb") as f:
+            f.write(content)
+
+        return tar_db_path
+
+    @classmethod
+    def _extract_db_to_media_root(cls, tar_db_path: str):
+        logger.info(f"Started extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
+        tf = tarfile.open(tar_db_path)
+        tf.extractall(str(settings.MEDIA_ROOT))
+        logger.info(f"Finished extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
+
+    @classmethod
     def _remove_old_db(cls, db: str) -> bool:
         physical_db_location = cls._get_physical_location(db)
         today = datetime.datetime.now().date()
@@ -143,38 +177,6 @@ class MaxmindDBManager:
                 shutil.rmtree(f"{settings.MEDIA_ROOT}/" f"{db}_{formatted_date}")
                 logger.info(f"maxmind directory found {downloaded_db_path}")
         return directory_found
-
-    @classmethod
-    def _extract_db_to_media_root(cls, tar_db_path: str):
-        logger.info(f"Started extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
-        tf = tarfile.open(tar_db_path)
-        tf.extractall(str(settings.MEDIA_ROOT))
-        logger.info(f"Finished extracting {tar_db_path} to {settings.MEDIA_ROOT}.")
-
-    @classmethod
-    def _download_db(cls, db_name: str, api_key: str) -> str:
-        url = (
-            "https://download.maxmind.com/app/geoip_download?edition_id="
-            f"{db_name}&license_key={api_key}&suffix=tar.gz"
-        )
-        response = requests.get(url)
-        if response.status_code >= 300:
-            raise AnalyzerRunException(
-                f"failed request for new maxmind db {db_name}."
-                f" Status code: {response.status_code}"
-                f"\nResponse: {response.raw}"
-            )
-
-        return cls._write_db_to_filesystem(db_name, response.content)
-
-    @classmethod
-    def _write_db_to_filesystem(cls, db_name: str, content: bytes) -> str:
-        tar_db_path = f"/tmp/{db_name}.tar.gz"
-        logger.info(f"starting writing db {db_name} from maxmind to {tar_db_path}")
-        with open(tar_db_path, "wb") as f:
-            f.write(content)
-
-        return tar_db_path
 
 
 class Maxmind(classes.ObservableAnalyzer):

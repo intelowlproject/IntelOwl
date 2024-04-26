@@ -195,7 +195,8 @@ class Maxmind(classes.ObservableAnalyzer):
             self.observable_name, self._api_key_name
         )
         if maxmind_errors:
-            [self.report.errors.append(error_msg) for error_msg in maxmind_errors]
+            for error_msg in maxmind_errors:
+                self.report.errors.append(error_msg)
             self.report.save()
         return maxmind_final_result
 

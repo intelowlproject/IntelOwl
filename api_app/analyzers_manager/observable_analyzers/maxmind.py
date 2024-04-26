@@ -36,24 +36,31 @@ class MaxmindDBManager:
     def update_all_dbs(cls, api_key: str) -> bool:
         return all(cls._update_db(db, api_key) for db in cls._supported_dbs)
 
-    def query_all_dbs(self, observable_query: str, api_key: str) -> dict:
-        maxmind_final_result = {}
+    def query_all_dbs(self, observable_query: str, api_key: str) -> (dict, dict):
+        maxmind_final_result: {} = {}
+        maxmind_errors: [] = []
         for db in self._supported_dbs:
-            maxmind_result = self._query_single_db(observable_query, db, api_key)
+            maxmind_result, maxmind_error = self._query_single_db(
+                observable_query, db, api_key
+            )
 
-            if maxmind_result:
+            if maxmind_error:
+                maxmind_errors.append(maxmind_error["error"])
+            elif maxmind_result:
                 logger.info(f"maxmind result: {maxmind_result} in {db=}")
                 maxmind_final_result.update(maxmind_result)
             else:
                 logger.warning(f"maxmind result not available in {db=}")
 
-        return maxmind_final_result
+        return maxmind_final_result, maxmind_errors
 
     @classmethod
     def _get_physical_location(cls, db: str) -> str:
         return f"{settings.MEDIA_ROOT}/{db}{cls._default_db_extension}"
 
-    def _query_single_db(self, query_ip: str, db_name: str, api_key: str) -> dict:
+    def _query_single_db(
+        self, query_ip: str, db_name: str, api_key: str
+    ) -> (dict, dict):
         result: ASN | City | Country
         db_path: str = self._get_physical_location(db_name)
         self._check_and_update_db(api_key, db_name)
@@ -73,14 +80,14 @@ class MaxmindDBManager:
                     f"Query for observable '{query_ip}' "
                     "didn't produce any results in any db."
                 )
-                return {}
+                return {}, {}
             except (GeoIP2Error, maxminddb.InvalidDatabaseError) as e:
                 error_message = f"GeoIP2 database error: {e}"
                 logger.exception(error_message)
-                return {"error": error_message}
+                return {}, {"error": error_message}
             else:
                 reader.close()
-                return result.raw
+                return result.raw, {}
 
     def _check_and_update_db(self, api_key: str, db_name: str):
         db_path = self._get_physical_location(db_name)
@@ -184,9 +191,13 @@ class Maxmind(classes.ObservableAnalyzer):
     _maxmind_db_manager: "MaxmindDBManager" = MaxmindDBManager()
 
     def run(self):
-        return self._maxmind_db_manager.query_all_dbs(
+        maxmind_final_result, maxmind_errors = self._maxmind_db_manager.query_all_dbs(
             self.observable_name, self._api_key_name
         )
+        if maxmind_errors:
+            [self.report.errors.append(error_msg) for error_msg in maxmind_errors]
+            self.report.save()
+        return maxmind_final_result
 
     @classmethod
     def get_db_names(cls) -> [str]:

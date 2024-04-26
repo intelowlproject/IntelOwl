@@ -9,9 +9,15 @@ def migrate(apps, schema_editor):
     Profile = apps.get_model("authentication", "UserProfile")
     for user in User.objects.all():
         is_robot = user.username.endswith("Ingestor")
-        Profile.objects.create(
-            user=user, task_priority=7 if is_robot else 10, is_robot=is_robot
-        )
+        if not hasattr(user, "profile") or not user.profile:
+            profile = Profile(
+                user=user, task_priority=7 if is_robot else 10, is_robot=is_robot
+            )
+        else:
+            profile = user.profile
+            profile.task_priority=7 if is_robot else 10
+            profile.is_robot=is_robot
+        profile.save()
 
 
 def reverse_migrate(apps, schema_editor):

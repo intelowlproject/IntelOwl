@@ -61,9 +61,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.SeparateDatabaseAndState(
             database_operations=[
-                migrations.RunSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS api_app_job_path_f745a786_uniq ON api_app_job USING btree (path)"
-                ),
                 migrations.RunPython(migrate, migrations.RunPython.noop),
             ],
             state_operations=[

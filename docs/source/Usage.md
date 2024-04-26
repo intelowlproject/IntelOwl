@@ -82,6 +82,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `ELF_Info`: static ELF analysis with [pyelftools](https://github.com/eliben/pyelftools) and [telfhash](https://github.com/trendmicro/telfhash)
 * `File_Info`: static generic File analysis (hashes, magic and [exiftool](https://exiftool.org/))
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
+* `Hfinger`: create fingerprints of malware HTTPS requests using [Hfinger](https://github.com/CERT-Polska/hfinger)
 * `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `PDF_Info`: static PDF analysis ([peepdf](https://github.com/jesparza/peepdf) + [pdfid](https://github.com/mlodic/pdfid))
@@ -178,9 +179,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `DNSDB`: scan an observable against the [Passive DNS Farsight Database](https://www.farsightsecurity.com/solutions/dnsdb/) (support both v1 and v2 versions)
 * `DNS0_EU`: Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)
 * `DNS0_EU_Malicious_Detector`: Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)
-* `DNS0_names`: Run advanced searches on billions of current and historical domain names. ([DNS0 /names](https://docs.dns0.eu/dns-api/names))
-* `DNS0_rrsets_data`: Query billions of current and historical DNS resource records sets. Performs right-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
-* `DNS0_rrsets_name`: Query billions of current and historical DNS resource records sets. Performs left-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
 * `Feodo_Tracker`: [Feodo Tracker](https://feodotracker.abuse.ch/) offers various blocklists, helping network owners to protect their users from Dridex and Emotet/Heodo.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).

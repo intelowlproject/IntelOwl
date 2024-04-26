@@ -909,7 +909,7 @@ class OrganizationPluginConfiguration(models.Model):
             self.rate_limit_enable_task.clocked = clock_schedule
             self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
-        logger.info(f"Disabling {self} for rate limit")
+        logger.warning(f"Disabling {self} for rate limit")
         self.save()
 
     def disable_manually(self, user: User):
@@ -948,6 +948,11 @@ class ListCachable(models.Model):
         for key in cache.get_where(f"list_{base_key}").keys():
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
+
+    @classmethod
+    @property
+    def python_path(cls) -> str:
+        return f"{cls.__module__}.{cls.__name__}"
 
 
 class AbstractConfig(ListCachable):

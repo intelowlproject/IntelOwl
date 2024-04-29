@@ -29,16 +29,37 @@ params = [
             "module": "abuse_submitter.AbuseSubmitter",
             "base_path": "api_app.connectors_manager.connectors",
         },
+        "name": "header",
+        "type": "str",
+        "description": "Email header for initial greetings",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "abuse_submitter.AbuseSubmitter",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "footer",
+        "type": "str",
+        "description": "Email footer for final greetings",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "abuse_submitter.AbuseSubmitter",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
         "name": "sender",
         "type": "str",
         "description": "Email sender",
         "is_secret": False,
         "required": False,
-    }
+    },
 ]
 
-values = [
-]
+values = []
 
 
 def _get_real_obj(Model, field, value):

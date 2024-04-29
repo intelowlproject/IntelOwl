@@ -40,11 +40,33 @@ params = [
             "module": "email_sender.EmailSender",
             "base_path": "api_app.connectors_manager.connectors",
         },
+        "name": "header",
+        "type": "str",
+        "description": "Email header for initial greetings",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "email_sender.EmailSender",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
         "name": "body",
         "type": "str",
         "description": "Email body",
         "is_secret": False,
         "required": True,
+    },
+    {
+        "python_module": {
+            "module": "email_sender.EmailSender",
+            "base_path": "api_app.connectors_manager.connectors",
+        },
+        "name": "footer",
+        "type": "str",
+        "description": "Email footer for final greetings",
+        "is_secret": False,
+        "required": False,
     },
     {
         "python_module": {

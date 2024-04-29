@@ -8,18 +8,25 @@ from tests.mock_utils import if_mock_connections, patch
 class EmailSender(Connector):
     sender: str
     subject: str
+    header: str
     body: str
+    footer: str
 
     def run(self) -> dict:
         if self.sender:
             sender = self.sender
         else:
             sender = DEFAULT_FROM_EMAIL
+        body = self.body
+        if self.header:
+            body = self.header + "\n\n" + body
+        if self.footer:
+            body = body + "\n\n" + self.footer
         base_eml = EmailMessage(
             subject=self.subject,
             from_email=sender,
             to=[self._job.observable_name],
-            body=self.body,
+            body=body,
         )
         base_eml.send()
         return {"receiver": self._job.observable_name}

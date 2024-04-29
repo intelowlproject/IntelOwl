@@ -4,7 +4,7 @@ from api_app.connectors_manager.connectors.email_sender import EmailSender
 class AbuseSubmitter(EmailSender):
     @property
     def subject(self) -> str:
-        return f"Take down domain {self._job.parent_job.parent_job.observable_name}"
+        return f"Takedown domain request for {self._job.parent_job.parent_job.observable_name}"
 
     @property
     def body(self) -> str:

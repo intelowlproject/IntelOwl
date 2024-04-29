@@ -6,7 +6,7 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "name": "Abuse_Domain",
+    "name": "Takedown_Request",
     "analyzers": [
         "Classic_DNS",
         "CloudFlare_DNS",
@@ -15,7 +15,7 @@ plugin = {
         "Quad9_DNS",
     ],
     "connectors": [],
-    "pivots": ["AbuseDomainToAbuseIp"],
+    "pivots": ["TakedownRequestToAbuseIp"],
     "for_organization": False,
     "description": "Start investigation to request to take down a malicious domain. "
     "A mail will be sent to the domain's abuse contacts found.",
@@ -118,7 +118,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
         ("playbooks_manager", "0034_playbook_config_abuse_ip"),
-        ("pivots_manager", "0027_pivot_config_abusedomaintoabuseip"),
+        ("pivots_manager", "0027_pivot_config_takedownrequesttoabuseip"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

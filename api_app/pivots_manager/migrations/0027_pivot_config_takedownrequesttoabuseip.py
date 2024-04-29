@@ -21,7 +21,7 @@ plugin = {
     ],
     "related_connector_configs": [],
     "playbook_to_execute": "Abuse_IP",
-    "name": "AbuseDomainToAbuseIp",
+    "name": "TakedownRequestToAbuseIp",
     "description": "Pivot for plugins Classic_DNS, CloudFlare_DNS, DNS0_EU, "
     "Google_DNS, Quad9_DNS that executes playbook Abuse_IP",
     "disabled": False,
@@ -62,7 +62,7 @@ values = [
         "connector_config": None,
         "visualizer_config": None,
         "ingestor_config": None,
-        "pivot_config": "AbuseDomainToAbuseIp",
+        "pivot_config": "TakedownRequestToAbuseIp",
         "for_organization": False,
         "value": "resolutions.0.data",
         "updated_at": "2024-04-22T14:08:49.711495Z",

@@ -10,5 +10,5 @@ class AbuseSubmitter(EmailSender):
     def body(self) -> str:
         return (
             f"Domain {self._job.parent_job.parent_job.observable_name} "
-            "has been reported as malicious. We request you to take it down."
+            "has been detected as malicious by our team. We kindly request you to take it down as soon as possible."
         )

@@ -18,9 +18,9 @@ class EmailSender(Connector):
         else:
             sender = DEFAULT_FROM_EMAIL
         body = self.body
-        if self.header:
+        if hasattr(self, "header") and self.header:
             body = self.header + "\n\n" + body
-        if self.footer:
+        if hasattr(self, "footer") and self.footer:
             body = body + "\n\n" + self.footer
         base_eml = EmailMessage(
             subject=self.subject,

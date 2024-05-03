@@ -38,7 +38,7 @@ class UserProfile(models.Model):
         related_name="profile",
     )
     company_name = models.CharField(
-        max_length=32, validators=[MinLengthValidator(3)], null=True
+        max_length=32, validators=[MinLengthValidator(3)], default="", blank=True
     )
     company_role = models.CharField(
         max_length=32, validators=[MinLengthValidator(3)], null=True

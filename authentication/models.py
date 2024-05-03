@@ -41,7 +41,7 @@ class UserProfile(models.Model):
         max_length=32, validators=[MinLengthValidator(3)], default="", blank=True
     )
     company_role = models.CharField(
-        max_length=32, validators=[MinLengthValidator(3)], null=True
+        max_length=32, validators=[MinLengthValidator(3)], default="", blank=True
     )
     twitter_handle = models.CharField(
         max_length=16, default="", blank=True, validators=[MinLengthValidator(3)]

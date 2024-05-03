@@ -29,7 +29,12 @@ class EmailSender(Connector):
             body=body,
         )
         base_eml.send()
-        return {"receiver": self._job.observable_name}
+        return {
+            "subject": base_eml.subject,
+            "from": base_eml.from_email,
+            "to": base_eml.to,
+            "body": base_eml.body,
+        }
 
     def update(self) -> bool:
         pass

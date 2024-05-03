@@ -308,7 +308,8 @@ Pivots are designed to create a job from another job. This plugin allows the use
 This is a "SOAR" feature that allows the users to connect multiple analysis together.
 
 #### List of pre-built Pivots
-None
+- `TakedownRequestToAbuseIp`: This Plugin leverages results from DNS resolver analyzers to extract a valid IP address to pivot to the Abusix analyzer.
+- `AbuseIpToSubmission`: This Plugin leverages results from the Abusix analyzer to extract the abuse contacts of an IP address to pivot to the AbuseSubmitter connector.
 
 You can build your own custom Pivot with your custom logic with just few lines of code. See the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-pivot) section for more info.
 

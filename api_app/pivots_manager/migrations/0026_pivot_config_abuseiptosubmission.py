@@ -16,7 +16,9 @@ plugin = {
     "related_connector_configs": [],
     "playbook_to_execute": "Send_Abuse_Email",
     "name": "AbuseIpToSubmission",
-    "description": "Pivot for plugins Abusix that executes playbook Send_Abuse_Email",
+    "description": "This Plugin leverages results from the Abusix analyzer to "
+    "extract the abuse contacts of an IP address to pivot to "
+    "the AbuseSubmitter connector.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

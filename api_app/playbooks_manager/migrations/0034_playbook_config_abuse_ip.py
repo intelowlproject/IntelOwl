@@ -11,7 +11,8 @@ plugin = {
     "connectors": [],
     "pivots": ["AbuseIpToSubmission"],
     "for_organization": False,
-    "description": "Execute abusix then execute playbook Send_Abuse_Email",
+    "description": "Playbook containing the Abusix analyzer. "
+    "It is executed after the Takedown_Request playbook.",
     "disabled": False,
     "type": ["ip"],
     "runtime_configuration": {

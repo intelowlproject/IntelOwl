@@ -22,8 +22,8 @@ plugin = {
     "related_connector_configs": [],
     "playbook_to_execute": "Abuse_IP",
     "name": "TakedownRequestToAbuseIp",
-    "description": "Pivot for plugins Classic_DNS, CloudFlare_DNS, DNS0_EU, "
-    "Google_DNS, Quad9_DNS that executes playbook Abuse_IP",
+    "description": "This Plugin leverages results from DNS resolver analyzers "
+    "to extract a valid IP address to pivot to the Abusix analyzer.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

@@ -13,7 +13,7 @@ plugin = {
         "base_path": "api_app.connectors_manager.connectors",
     },
     "name": "AbuseSubmitter",
-    "description": "Send email to request the takedown of a malicious domain",
+    "description": "Send an email to request to take down a malicious domain.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

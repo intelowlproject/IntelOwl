@@ -11,7 +11,9 @@ plugin = {
     "connectors": ["AbuseSubmitter"],
     "pivots": [],
     "for_organization": False,
-    "description": "Send email to take down malicious domain",
+    "description": "Playbook containing the AbuseSubmitter connector to send an email "
+    "to request to take down a malicious domain. "
+    "It is executed after the Abuse_IP playbook.",
     "disabled": False,
     "type": ["generic"],
     "runtime_configuration": {

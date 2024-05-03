@@ -45,11 +45,7 @@ class Ip2whois(classes.ObservableAnalyzer):
             "expire_date": "2024-06-04T16:44:29Z",
             "domain_age": 10766,
             "whois_server": "",
-            "registrar": {
-                "iana_id": "292",
-                "name": "MarkMonitor Inc.",
-                "url": ""
-            },
+            "registrar": {"iana_id": "292", "name": "MarkMonitor Inc.", "url": ""},
             "registrant": {
                 "name": "",
                 "organization": "",
@@ -60,7 +56,7 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "",
                 "phone": "",
                 "fax": "",
-                "email": ""
+                "email": "",
             },
             "admin": {
                 "name": "",
@@ -72,7 +68,7 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "",
                 "phone": "",
                 "fax": "",
-                "email": ""
+                "email": "",
             },
             "tech": {
                 "name": "",
@@ -84,7 +80,7 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "",
                 "phone": "",
                 "fax": "",
-                "email": ""
+                "email": "",
             },
             "billing": {
                 "name": "",
@@ -96,15 +92,15 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "",
                 "phone": "",
                 "fax": "",
-                "email": ""
+                "email": "",
             },
             "nameservers": [
                 "dns1.p09.nsone.net",
                 "ns1-204.azure-dns.com",
                 "ns2-204.azure-dns.net",
                 "ns3-204.azure-dns.org",
-                "ns4-204.azure-dns.info"
-            ]
+                "ns4-204.azure-dns.info",
+            ],
         }
 
         patches = [

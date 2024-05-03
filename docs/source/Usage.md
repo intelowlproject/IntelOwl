@@ -297,6 +297,8 @@ The following is the list of the available connectors. You can also navigate the
 - `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 - `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
 - `Slack`: Send the analysis link to a Slack channel (useful for external notifications)
+- `EmailSender`: Send a generic email.
+- `AbuseSubmitter`: Send an email to request to take down a malicious domain.
 
 
 ### Pivots

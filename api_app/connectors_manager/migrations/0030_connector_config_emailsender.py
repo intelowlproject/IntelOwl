@@ -13,7 +13,7 @@ plugin = {
         "base_path": "api_app.connectors_manager.connectors",
     },
     "name": "EmailSender",
-    "description": "Send email",
+    "description": "Send a generic email",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

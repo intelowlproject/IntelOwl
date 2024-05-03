@@ -48,7 +48,7 @@ class Ip2whois(classes.ObservableAnalyzer):
             "registrar": {
                 "iana_id": "146",
                 "name": "GoDaddy.com, LLC",
-                "url": "https://www.godaddy.com"
+                "url": "https://www.godaddy.com",
             },
             "registrant": {
                 "name": "Registration Private",
@@ -60,7 +60,7 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "US",
                 "phone": "+1.4806242599",
                 "fax": "+1.4806242598",
-                "email": "Select Contact Domain Holder link at https://www.godaddy.com/whois/results.aspx?domain=LOCAPROXY.COM"
+                "email": "Select Contact Domain Holder link at https://www.godaddy.com/whois/results.aspx?domain=LOCAPROXY.COM",
             },
             "admin": {
                 "name": "Registration Private",
@@ -72,7 +72,7 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "US",
                 "phone": "+1.4806242599",
                 "fax": "+1.4806242598",
-                "email": "Select Contact Domain Holder link at https://www.godaddy.com/whois/results.aspx?domain=LOCAPROXY.COM"
+                "email": "Select Contact Domain Holder link at https://www.godaddy.com/whois/results.aspx?domain=LOCAPROXY.COM",
             },
             "tech": {
                 "name": "Registration Private",
@@ -84,7 +84,7 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "US",
                 "phone": "+1.4806242599",
                 "fax": "+1.4806242598",
-                "email": "Select Contact Domain Holder link at https://www.godaddy.com/whois/results.aspx?domain=LOCAPROXY.COM"
+                "email": "Select Contact Domain Holder link at https://www.godaddy.com/whois/results.aspx?domain=LOCAPROXY.COM",
             },
             "billing": {
                 "name": "",
@@ -96,11 +96,11 @@ class Ip2whois(classes.ObservableAnalyzer):
                 "country": "",
                 "phone": "",
                 "fax": "",
-                "email": ""
+                "email": "",
             },
-            "nameservers": ["vera.ns.cloudflare.com", "walt.ns.cloudflare.com"]
+            "nameservers": ["vera.ns.cloudflare.com", "walt.ns.cloudflare.com"],
         }
-        
+
         patches = [
             if_mock_connections(
                 patch(

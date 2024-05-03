@@ -5,12 +5,17 @@ import os
 from intel_owl import secrets
 
 from ._util import set_permissions
-from .commons import DEBUG, LOG_DIR, STAGE_CI
+from .commons import DEBUG, LOG_DIR, STAGE_CI, YARA_RULES_PATH
 
 DJANGO_LOG_DIRECTORY = LOG_DIR / "django"
 UWSGI_LOG_DIRECTORY = LOG_DIR / "uwsgi"
 ASGI_LOG_DIRECTORY = LOG_DIR / "asgi"
-for path in [DJANGO_LOG_DIRECTORY, UWSGI_LOG_DIRECTORY, ASGI_LOG_DIRECTORY]:
+for path in [
+    DJANGO_LOG_DIRECTORY,
+    UWSGI_LOG_DIRECTORY,
+    ASGI_LOG_DIRECTORY,
+    YARA_RULES_PATH,
+]:
     os.makedirs(path, exist_ok=True)
     if not STAGE_CI:
         set_permissions(path)

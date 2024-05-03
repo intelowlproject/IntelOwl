@@ -393,6 +393,9 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
 - `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
 - `Dns`: A playbook containing all dns providers
+- `Takedown_Request`: Start investigation to request to take down a malicious domain. A mail will be sent to the domain's abuse contacts found
+- `Abuse_IP`: Playbook containing the Abusix analyzer. It is executed after the Takedown_Request playbook
+- `Send_Abuse_Email`: Playbook containing the AbuseSubmitter connector to send an email to request to take down a malicious domain. It is executed after the Abuse_IP playbook
 
 #### Playbooks creation and customization
 

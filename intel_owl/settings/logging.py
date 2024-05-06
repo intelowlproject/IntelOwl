@@ -16,7 +16,6 @@ for path in [
     ASGI_LOG_DIRECTORY,
     YARA_RULES_PATH,
 ]:
-    os.makedirs(path, exist_ok=True)
     if not STAGE_CI:
         set_permissions(path)
 

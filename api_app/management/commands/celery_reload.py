@@ -27,5 +27,6 @@ class Command(BaseCommand):
         self.run("pkill celery")
         self.run(f"/usr/local/bin/celery {argument}")
 
-    def run(self, cmd):
+    @staticmethod
+    def run(cmd):
         subprocess.run(shlex.split(cmd), check=True)

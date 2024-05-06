@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import os
 from pathlib import Path, PosixPath
 
 from ._util import get_secret
@@ -15,7 +14,6 @@ BASE_STATIC_PATH = PROJECT_LOCATION / "static"
 MEDIA_ROOT = BASE_DIR / "files_required"
 CONFIG_ROOT = PROJECT_LOCATION / "configuration"
 YARA_RULES_PATH = MEDIA_ROOT / "yara"  # path for manual yara rules
-os.makedirs(YARA_RULES_PATH, exist_ok=True)
 
 LOG_DIR = Path("/") / "var" / "log" / "intel_owl"
 # test / ci

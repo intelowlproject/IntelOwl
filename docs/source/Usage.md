@@ -578,6 +578,17 @@ These is how every available TLP value behaves once selected for an analysis exe
 4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
 
 
+### Running a plugin
+A plugin can be run when all of the following requirements have been satisfied:
+1. All the required parameters of the plugin have been configured
+2. The plugin is not disabled
+3. The plugin is not disabled for the user's organization
+4. If the plugin has a health check schedule, the last check has to be successful
+5. The TLP selected to run the plugin cannot be higher than the maximum TLP configured for that plugin
+6. The observable classification or the file mimetype has to be supported by the plugin
+
+
+
 ## Investigations Framework
 
 *Investigations* are a new framework introduced in IntelOwl v6 with the goal to allow the users to connect the analysis they do with each other.

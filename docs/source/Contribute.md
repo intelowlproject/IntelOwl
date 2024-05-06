@@ -284,7 +284,7 @@ After having written the new python module, you have to remember to:
 
 Most of the times you don't need to create a new Pivot Module. There are already some base modules that can be extended.
 The most important ones are the following 2:
-1.`AnyCompare`: use this module if you want to create a custom Pivot from a specific value extracted from the results of the analyzers/connectors. How? you should populate the parameter `field_to_compare` with the field you would like to extract the value from.
+1.`AnyCompare`: use this module if you want to create a custom Pivot from a specific value extracted from the results of the analyzers/connectors. How? you should populate the parameter `field_to_compare` with the dotted path to the field you would like to extract the value from.
 2.`SelfAnalyzable`: use this module if you want to create a custom Pivot that would analyze again the same observable/file.
 
 

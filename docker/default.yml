@@ -48,6 +48,10 @@ services:
       timeout: 2s
       start_period: 2s
       retries: 6
+    depends_on:
+      uwsgi:
+        condition: service_healthy
+
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
@@ -81,7 +85,10 @@ services:
     env_file:
       - env_file_app
     <<: *no-healthcheck
-
+    depends_on:
+      uwsgi:
+        condition: service_healthy
+F
 
   celery_worker_default:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}

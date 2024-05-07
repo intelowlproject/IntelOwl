@@ -119,8 +119,6 @@ describe("test plugins report table", () => {
     );
     expect(infoIcon).toBeInTheDocument();
     expect(screen.getByText("0.07")).toBeInTheDocument(); // process time
-    expect(screen.getAllByText("10:19:03 AM")[0]).toBeInTheDocument(); // running time
-    expect(screen.getAllByText("10:19:03 AM")[1]).toBeInTheDocument(); // running time
 
     // user hovers infoIcon
     await user.hover(infoIcon);

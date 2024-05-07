@@ -32,6 +32,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0035_playbook_config_takedown_request"),
+        ("visualizers_manager", "0037_4_change_primary_key"),
     ]
 
     operations = [

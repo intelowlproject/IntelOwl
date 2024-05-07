@@ -125,6 +125,7 @@ export const mockedPlaybooks = {
       },
     ],
     tlp: "CLEAR",
+    starting: true,
   },
   TEST_PLAYBOOK_DOMAIN: {
     name: "TEST_PLAYBOOK_DOMAIN",
@@ -142,6 +143,7 @@ export const mockedPlaybooks = {
     scan_check_time: "02:00:00:00",
     tags: [],
     tlp: "CLEAR",
+    starting: true,
   },
   TEST_PLAYBOOK_URL: {
     name: "TEST_PLAYBOOK_URL",
@@ -159,6 +161,7 @@ export const mockedPlaybooks = {
     scan_check_time: null,
     tags: [],
     tlp: "AMBER",
+    starting: true,
   },
   TEST_PLAYBOOK_HASH: {
     name: "TEST_PLAYBOOK_HASH",
@@ -176,6 +179,7 @@ export const mockedPlaybooks = {
     scan_check_time: null,
     tags: [],
     tlp: "AMBER",
+    starting: true,
   },
   TEST_PLAYBOOK_FILE: {
     name: "TEST_PLAYBOOK_FILE",
@@ -193,6 +197,7 @@ export const mockedPlaybooks = {
     scan_check_time: null,
     tags: [],
     tlp: "AMBER",
+    starting: true,
   },
   TEST_PLAYBOOK_GENERIC: {
     name: "TEST_PLAYBOOK_GENERIC",
@@ -210,6 +215,7 @@ export const mockedPlaybooks = {
     scan_check_time: null,
     tags: [],
     tlp: "AMBER",
+    starting: true,
   },
 };
 

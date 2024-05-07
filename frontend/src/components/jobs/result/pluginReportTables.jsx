@@ -1,8 +1,13 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import PropTypes from "prop-types";
-import { MdOutlineRefresh, MdPauseCircleOutline } from "react-icons/md";
+import {
+  MdOutlineRefresh,
+  MdPauseCircleOutline,
+  MdInfoOutline,
+} from "react-icons/md";
 import { JSONTree } from "react-json-tree";
+import { UncontrolledPopover } from "reactstrap";
 
 import {
   DataTable,
@@ -15,6 +20,8 @@ import {
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
 import { PluginStatuses } from "../../../constants/pluginConst";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
+import { markdownToHtml } from "../../common/markdownToHtml";
 
 const tableProps = {
   columns: [
@@ -59,7 +66,7 @@ const tableProps = {
       Header: "Status",
       id: "status",
       accessor: "status",
-      Cell: ({ value }) => <StatusTag status={value} />,
+      Cell: ({ value }) => <StatusTag status={value} className="py-0" />,
       Filter: SelectOptionsFilter,
       selectOptions: Object.values(PluginStatuses),
       maxWidth: 50,
@@ -68,6 +75,38 @@ const tableProps = {
       Header: "Name",
       id: "name",
       accessor: "name",
+      Cell: ({
+        value,
+        row: { original: plugin },
+        customProps: { _job, _refetch, pluginsLoading },
+      }) => (
+        <div className="d-flex align-items-center row">
+          <div className="d-inline-block col-10 offset-1">{value}</div>
+          <div className="col-1">
+            <MdInfoOutline
+              id={`pluginReport-infoicon__${value}`}
+              className="text-secondary"
+              fontSize="20"
+            />
+            <UncontrolledPopover
+              target={`pluginReport-infoicon__${value}`}
+              placement="bottom"
+              trigger="hover"
+              popperClassName="px-2 bg-body"
+              delay={{ show: 0, hide: 200 }}
+              style={{ paddingTop: "1rem" }}
+            >
+              {pluginsLoading ? (
+                <small>
+                  <p>Description is loading</p>
+                </small>
+              ) : (
+                <small>{markdownToHtml(plugin?.description)}</small>
+              )}
+            </UncontrolledPopover>
+          </div>
+        </div>
+      ),
       Filter: DefaultColumnFilter,
       maxWidth: 300,
     },
@@ -120,11 +159,26 @@ const tableProps = {
 
 export function AnalyzersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
+  const reports = job?.analyzer_reports;
+
+  const [analyzers, analyzersLoading] = usePluginConfigurationStore((state) => [
+    state.analyzers,
+    state.analyzersLoading,
+  ]);
+
+  reports.forEach((report, index) => {
+    analyzers.forEach((analyzer) => {
+      if (analyzer.name === report.name) {
+        reports[index].description = analyzer.description;
+      }
+    });
+  });
+
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
-        data={job?.analyzer_reports}
-        customProps={{ job, refetch }}
+        data={reports}
+        customProps={{ job, refetch, pluginsLoading: analyzersLoading }}
         {...tableProps}
       />
     </div>
@@ -133,11 +187,25 @@ export function AnalyzersReportTable({ job, refetch }) {
 
 export function ConnectorsReportTable({ job, refetch }) {
   console.debug("ConnectorsReportTable rendered");
+  const reports = job?.connector_reports;
+
+  const [connectors, connectorsLoading] = usePluginConfigurationStore(
+    (state) => [state.connectors, state.connectorsLoading],
+  );
+
+  reports.forEach((report, index) => {
+    connectors.forEach((connector) => {
+      if (connector.name === report.name) {
+        reports[index].description = connector.description;
+      }
+    });
+  });
+
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
-        data={job?.connector_reports}
-        customProps={{ job, refetch }}
+        data={reports}
+        customProps={{ job, refetch, pluginsLoading: connectorsLoading }}
         {...tableProps}
       />
     </div>
@@ -145,11 +213,26 @@ export function ConnectorsReportTable({ job, refetch }) {
 }
 export function PivotsReportTable({ job, refetch }) {
   console.debug("PivotsReportTable rendered");
+  const reports = job?.pivot_reports;
+
+  const [pivots, pivotsLoading] = usePluginConfigurationStore((state) => [
+    state.pivots,
+    state.pivotsLoading,
+  ]);
+
+  reports.forEach((report, index) => {
+    pivots.forEach((pivot) => {
+      if (pivot.name === report.name) {
+        reports[index].description = pivot.description;
+      }
+    });
+  });
+
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
-        data={job?.pivot_reports}
-        customProps={{ job, refetch }}
+        data={reports}
+        customProps={{ job, refetch, pluginsLoading: pivotsLoading }}
         {...tableProps}
       />
     </div>
@@ -157,11 +240,25 @@ export function PivotsReportTable({ job, refetch }) {
 }
 export function VisualizersReportTable({ job, refetch }) {
   console.debug("VisualizersReportTable rendered");
+  const reports = job?.visualizer_reports;
+
+  const [visualizers, visualizersLoading] = usePluginConfigurationStore(
+    (state) => [state.visualizers, state.visualizersLoading],
+  );
+
+  reports.forEach((report, index) => {
+    visualizers.forEach((visualizer) => {
+      if (visualizer.name === report.name) {
+        reports[index].description = visualizer.description;
+      }
+    });
+  });
+
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
-        data={job?.visualizer_reports}
-        customProps={{ job, refetch }}
+        data={reports}
+        customProps={{ job, refetch, pluginsLoading: visualizersLoading }}
         {...tableProps}
       />
     </div>

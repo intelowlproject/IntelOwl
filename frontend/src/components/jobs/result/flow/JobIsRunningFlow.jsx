@@ -20,63 +20,6 @@ const defaultEdgeOptions = {
   },
 };
 
-const position = { x: 450, y: 0 };
-
-const initialNodes = [
-  {
-    id: `isRunningJob-analyzers`,
-    position: { x: position.x * 0, y: position.y },
-    data: {
-      id: "step-1",
-      label: "ANALYZERS",
-      running: false,
-      completed: false,
-      report: "0",
-    },
-    type: "jobPipelineNode",
-    draggable: false,
-  },
-  {
-    id: `isRunningJob-connectors`,
-    position: { x: position.x, y: position.y },
-    data: {
-      id: "step-2",
-      label: "CONNECTORS",
-      running: false,
-      completed: false,
-      report: "0",
-    },
-    type: "jobPipelineNode",
-    draggable: false,
-  },
-  {
-    id: `isRunningJob-pivots`,
-    position: { x: position.x * 2, y: position.y },
-    data: {
-      id: "step-3",
-      label: "PIVOTS",
-      running: false,
-      completed: false,
-      report: "0",
-    },
-    type: "jobPipelineNode",
-    draggable: false,
-  },
-  {
-    id: `isRunningJob-visualizers`,
-    position: { x: position.x * 3, y: position.y },
-    data: {
-      id: "step-4",
-      label: "VISUALIZERS",
-      running: false,
-      completed: false,
-      report: "0",
-    },
-    type: "jobPipelineNode",
-    draggable: false,
-  },
-];
-
 const edges = [
   {
     id: `edge-analyzers-connectors`,
@@ -96,6 +39,7 @@ const edges = [
 ];
 
 export function JobIsRunningFlow({ job }) {
+  const initialNodes = getNodes(job, true);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
   React.useEffect(() => {

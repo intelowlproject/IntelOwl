@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { AnalyzersReportTable } from "../../../../src/components/jobs/result/pluginReportTables";
+import { PluginsReportTable } from "../../../../src/components/jobs/result/pluginReportTables";
 import { mockedUsePluginConfigurationStore } from "../../../mock";
 
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
@@ -17,7 +17,7 @@ describe("test plugins report table", () => {
     const user = userEvent.setup();
     const { container } = render(
       <BrowserRouter>
-        <AnalyzersReportTable
+        <PluginsReportTable
           job={{
             id: 108,
             user: {
@@ -88,6 +88,40 @@ describe("test plugins report table", () => {
             visualizers_to_execute: ["IP", "Dns"],
             pivots_to_execute: ["test_pivot"],
           }}
+          pluginReports={[
+            {
+              id: 174,
+              name: "TEST_ANALYZER",
+              process_time: 0.07,
+              report: {
+                observable: "dns.google.com",
+                resolutions: [
+                  {
+                    TTL: 594,
+                    data: "8.8.8.8",
+                    name: "dns.google.com",
+                    type: 1,
+                  },
+                  {
+                    TTL: 594,
+                    data: "8.8.4.4",
+                    name: "dns.google.com",
+                    type: 1,
+                  },
+                ],
+              },
+              status: "SUCCESS",
+              errors: [],
+              start_time: "2023-05-31T08:19:03.380434Z",
+              end_time: "2023-05-31T08:19:03.455218Z",
+              runtime_configuration: {},
+              type: "analyzer",
+            },
+          ]}
+          pluginsStored={mockedUsePluginConfigurationStore.analyzers}
+          pluginsStoredLoading={
+            mockedUsePluginConfigurationStore.analyzersLoading
+          }
         />
       </BrowserRouter>,
     );

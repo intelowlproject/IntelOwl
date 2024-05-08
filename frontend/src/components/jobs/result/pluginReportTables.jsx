@@ -20,7 +20,6 @@ import {
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
 import { PluginStatuses } from "../../../constants/pluginConst";
-import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { markdownToHtml } from "../../common/markdownToHtml";
 
 const tableProps = {
@@ -157,19 +156,20 @@ const tableProps = {
   ),
 };
 
-export function AnalyzersReportTable({ job, refetch }) {
-  console.debug("AnalyzersReportTable rendered");
-  const reports = job?.analyzer_reports;
-
-  const [analyzers, analyzersLoading] = usePluginConfigurationStore((state) => [
-    state.analyzers,
-    state.analyzersLoading,
-  ]);
+export function PluginsReportTable({
+  job,
+  refetch,
+  pluginReports,
+  pluginsStored,
+  pluginsStoredLoading,
+}) {
+  console.debug("PluginsReportTable rendered");
+  const reports = pluginReports;
 
   reports.forEach((report, index) => {
-    analyzers.forEach((analyzer) => {
-      if (analyzer.name === report.name) {
-        reports[index].description = analyzer.description;
+    pluginsStored.forEach((plugin) => {
+      if (plugin.name === report.name) {
+        reports[index].description = plugin.description;
       }
     });
   });
@@ -178,104 +178,16 @@ export function AnalyzersReportTable({ job, refetch }) {
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
         data={reports}
-        customProps={{ job, refetch, pluginsLoading: analyzersLoading }}
+        customProps={{ job, refetch, pluginsLoading: pluginsStoredLoading }}
         {...tableProps}
       />
     </div>
   );
 }
 
-export function ConnectorsReportTable({ job, refetch }) {
-  console.debug("ConnectorsReportTable rendered");
-  const reports = job?.connector_reports;
-
-  const [connectors, connectorsLoading] = usePluginConfigurationStore(
-    (state) => [state.connectors, state.connectorsLoading],
-  );
-
-  reports.forEach((report, index) => {
-    connectors.forEach((connector) => {
-      if (connector.name === report.name) {
-        reports[index].description = connector.description;
-      }
-    });
-  });
-
-  return (
-    <div style={{ height: "60vh", overflow: "scroll" }}>
-      <DataTable
-        data={reports}
-        customProps={{ job, refetch, pluginsLoading: connectorsLoading }}
-        {...tableProps}
-      />
-    </div>
-  );
-}
-export function PivotsReportTable({ job, refetch }) {
-  console.debug("PivotsReportTable rendered");
-  const reports = job?.pivot_reports;
-
-  const [pivots, pivotsLoading] = usePluginConfigurationStore((state) => [
-    state.pivots,
-    state.pivotsLoading,
-  ]);
-
-  reports.forEach((report, index) => {
-    pivots.forEach((pivot) => {
-      if (pivot.name === report.name) {
-        reports[index].description = pivot.description;
-      }
-    });
-  });
-
-  return (
-    <div style={{ height: "60vh", overflow: "scroll" }}>
-      <DataTable
-        data={reports}
-        customProps={{ job, refetch, pluginsLoading: pivotsLoading }}
-        {...tableProps}
-      />
-    </div>
-  );
-}
-export function VisualizersReportTable({ job, refetch }) {
-  console.debug("VisualizersReportTable rendered");
-  const reports = job?.visualizer_reports;
-
-  const [visualizers, visualizersLoading] = usePluginConfigurationStore(
-    (state) => [state.visualizers, state.visualizersLoading],
-  );
-
-  reports.forEach((report, index) => {
-    visualizers.forEach((visualizer) => {
-      if (visualizer.name === report.name) {
-        reports[index].description = visualizer.description;
-      }
-    });
-  });
-
-  return (
-    <div style={{ height: "60vh", overflow: "scroll" }}>
-      <DataTable
-        data={reports}
-        customProps={{ job, refetch, pluginsLoading: visualizersLoading }}
-        {...tableProps}
-      />
-    </div>
-  );
-}
-AnalyzersReportTable.propTypes = {
+PluginsReportTable.propTypes = {
   job: PropTypes.object.isRequired,
-};
-
-ConnectorsReportTable.propTypes = {
-  job: PropTypes.object.isRequired,
-};
-
-PivotsReportTable.propTypes = {
-  job: PropTypes.object.isRequired,
-};
-
-VisualizersReportTable.propTypes = {
-  job: PropTypes.object.isRequired,
+  pluginReports: PropTypes.array.isRequired,
+  pluginsStored: PropTypes.array.isRequired,
+  pluginsStoredLoading: PropTypes.bool.isRequired,
 };

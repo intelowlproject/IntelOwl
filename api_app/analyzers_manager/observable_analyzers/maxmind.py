@@ -19,6 +19,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
+from api_app.models import PluginConfig
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -205,8 +206,22 @@ class Maxmind(classes.ObservableAnalyzer):
         return cls._maxmind_db_manager.get_supported_dbs()
 
     @classmethod
+    def _get_api_key(cls):
+        for plugin in PluginConfig.objects.filter(
+            parameter__python_module=cls.python_module,
+            parameter__is_secret=True,
+            parameter__name="_api_key_name",
+        ):
+            if plugin.value:
+                return plugin.value
+        return None
+
+    @classmethod
     def update(cls) -> bool:
-        return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
+        auth_token = cls._get_api_key()
+        if auth_token:
+            return cls._maxmind_db_manager.update_all_dbs(cls._api_key_name)
+        return False
 
     @classmethod
     def _monkeypatch(cls):

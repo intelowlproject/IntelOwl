@@ -8,6 +8,7 @@ from django.utils.timezone import now
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers import (
     feodo_tracker,
     greynoise_labs,
@@ -17,7 +18,8 @@ from api_app.analyzers_manager.observable_analyzers import (
     tor,
     tweetfeeds,
 )
-from api_app.models import Job
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
 
 from . import CustomTestCase, get_logger
@@ -220,4 +222,19 @@ class CronTests(CustomTestCase):
         )
     )
     def test_greynoise_labs_updater(self, mock_post=None):
+        python_module = PythonModule.objects.get(
+            base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
+            module="greynoise_labs.GreynoiseLabs",
+        )
+        PluginConfig.objects.create(
+            value="test",
+            parameter=Parameter.objects.get(
+                python_module=python_module, is_secret=True, name="auth_token"
+            ),
+            for_organization=False,
+            owner=None,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=python_module
+            ).first(),
+        )
         self.assertTrue(greynoise_labs.GreynoiseLabs.update())

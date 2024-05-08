@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
-import { StatusIcon } from "../../common/icon/StatusIcon";
+import { StatusIcon } from "../../../common/icon/StatusIcon";
 
 function CustomJobPipelineNode({ data }) {
   let statusIcon = "pending";

@@ -490,8 +490,6 @@ class JobSerializer(_AbstractJobViewSerializer):
             "path",
             "numchild",
             "sent_to_bi",
-            "scan_mode",
-            "scan_check_time",
         )
 
     comments = CommentSerializer(many=True, read_only=True)

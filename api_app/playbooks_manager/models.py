@@ -102,7 +102,7 @@ class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
             )
 
     def clean_starting(self):
-        if self.starting and self.scan_mode != ScanMode.FORCE_NEW_ANALYSIS.value:
+        if not self.starting and self.scan_mode != ScanMode.FORCE_NEW_ANALYSIS.value:
             raise ValidationError(
                 "Not starting playbooks must always force new analysis"
             )

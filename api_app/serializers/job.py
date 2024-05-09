@@ -587,7 +587,10 @@ class MultipleJobSerializer(rfs.ListSerializer):
             # if we have a parent, it means we are pivoting from one job to another
             else:
                 if parent.playbook_to_execute:
-                    investigation_name = f"{parent.playbook_to_execute.name}: {parent.analyzed_object_name}"
+                    investigation_name = (
+                        f"{parent.playbook_to_execute.name}:"
+                        f" {parent.analyzed_object_name}"
+                    )
                 else:
                     investigation_name = (
                         f"Pivot investigation: {parent.analyzed_object_name}"

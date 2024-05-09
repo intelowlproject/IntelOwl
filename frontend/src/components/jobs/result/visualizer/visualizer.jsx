@@ -104,6 +104,7 @@ function convertToElement(element, idElement, isChild = false) {
         <TableVisualizer
           key={idElement}
           id={idElement}
+          size={element.size}
           columns={element.columns}
           data={element.data?.map((additionalElement, index) => {
             const obj = {};

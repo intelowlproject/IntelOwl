@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { DataTable } from "@certego/certego-ui";
 
-export function TableVisualizer({ id, columns, data }) {
+export function TableVisualizer({ id, size, columns, data }) {
   const tableColumns = [];
 
   columns.forEach((column) => {
@@ -21,7 +21,7 @@ export function TableVisualizer({ id, columns, data }) {
   };
 
   return (
-    <div style={{ height: "30%", overflow: "scroll" }}>
+    <div className={size} style={{ height: "30%", overflow: "scroll" }}>
       <DataTable
         id={id}
         data={data}
@@ -35,6 +35,7 @@ export function TableVisualizer({ id, columns, data }) {
 
 TableVisualizer.propTypes = {
   id: PropTypes.string.isRequired,
+  size: PropTypes.string.isRequired,
   columns: PropTypes.arrayOf(PropTypes.string).isRequired,
   data: PropTypes.arrayOf(PropTypes.element).isRequired,
 };

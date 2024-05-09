@@ -284,9 +284,10 @@ class VisualizableTable(VisualizableDataTableMixin, VisualizableObject):
         self,
         columns: List[str],
         data: List[Dict[str, VisualizableObject]],
+        size: VisualizableSize = VisualizableSize.S_AUTO,
         alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
     ):
-        super().__init__(alignment=alignment, disable=False)
+        super().__init__(size=size, alignment=alignment, disable=False)
         self.data = data
         self.columns = columns
 
@@ -301,7 +302,6 @@ class VisualizableTable(VisualizableDataTableMixin, VisualizableObject):
     def to_dict(self) -> Dict:
         result = super().to_dict()
         result.pop("disable")
-        result.pop("size")
         return result
 
 

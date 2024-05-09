@@ -47,10 +47,9 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
 
     def should_run(self) -> Tuple[bool, Optional[str]]:
         # by default, the pivot run IF every report attached to it was success
-        result = all(
-            x.status == self.report_model.Status.SUCCESS.value
-            for x in self.related_reports
-        )
+        result = not self.related_reports.exclude(
+            status=self.report_model.Status.SUCCESS.value
+        ).exists()
         return (
             result,
             f"All necessary reports{'' if result else ' do not'} have success status",

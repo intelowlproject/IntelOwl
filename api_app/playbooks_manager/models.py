@@ -51,6 +51,10 @@ class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
 
     tlp = models.CharField(max_length=8, choices=TLP.choices)
 
+    starting = models.BooleanField(
+        default=True, help_text="If False, the playbook can only be executed by pivots"
+    )
+
     class Meta:
         ordering = ["name", "disabled"]
         indexes = OwnershipAbstractModel.Meta.indexes

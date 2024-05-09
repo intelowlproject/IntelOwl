@@ -21,9 +21,12 @@ class PlaybookConfigAdminView(AbstractConfigAdminView, ModelWithOwnershipAdminVi
         "get_pivots",
         "get_visualizers",
         "scan_mode",
+        "starting",
     ) + ModelWithOwnershipAdminView.list_display
     list_filter = (
-        AbstractConfigAdminView.list_filter + ModelWithOwnershipAdminView.list_filter
+        AbstractConfigAdminView.list_filter
+        + ("starting",)
+        + ModelWithOwnershipAdminView.list_filter
     )
 
     @staticmethod

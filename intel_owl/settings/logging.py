@@ -1,18 +1,21 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import os
 
 from intel_owl import secrets
 
 from ._util import set_permissions
-from .commons import DEBUG, LOG_DIR, STAGE_CI
+from .commons import DEBUG, LOG_DIR, STAGE_CI, YARA_RULES_PATH
 
 DJANGO_LOG_DIRECTORY = LOG_DIR / "django"
 UWSGI_LOG_DIRECTORY = LOG_DIR / "uwsgi"
 ASGI_LOG_DIRECTORY = LOG_DIR / "asgi"
-if not STAGE_CI:
-    for path in [DJANGO_LOG_DIRECTORY, UWSGI_LOG_DIRECTORY, ASGI_LOG_DIRECTORY]:
-        os.makedirs(path, exist_ok=True)
+for path in [
+    DJANGO_LOG_DIRECTORY,
+    UWSGI_LOG_DIRECTORY,
+    ASGI_LOG_DIRECTORY,
+    YARA_RULES_PATH,
+]:
+    if not STAGE_CI:
         set_permissions(path)
 
 DISABLE_LOGGING_TEST = secrets.get_secret("DISABLE_LOGGING_TEST", False) == "True"

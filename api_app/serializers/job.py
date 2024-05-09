@@ -490,8 +490,6 @@ class JobSerializer(_AbstractJobViewSerializer):
             "path",
             "numchild",
             "sent_to_bi",
-            "scan_mode",
-            "scan_check_time",
         )
 
     comments = CommentSerializer(many=True, read_only=True)
@@ -581,9 +579,10 @@ class MultipleJobSerializer(rfs.ListSerializer):
         if parent:
             # the parent has already an investigation
             # so we don't need to do anything because everything is already connected
-            if parent.investigation:
-                parent.investigation.status = parent.investigation.Status.RUNNING.value
-                parent.investigation.save()
+            root = parent.get_root()
+            if root.investigation:
+                root.investigation.status = root.investigation.Status.RUNNING.value
+                root.investigation.save()
                 return jobs
             # if we have a parent, it means we are pivoting from one job to another
             else:

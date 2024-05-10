@@ -196,6 +196,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
+* `IP2WHOIS`: [API Docs](https://www.ip2location.io/ip2whois-documentation) IP2Location.io IP2WHOIS Domain WHOIS API helps users to obtain domain information and WHOIS record by using a domain name.
 * `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
@@ -298,6 +299,8 @@ The following is the list of the available connectors. You can also navigate the
 - `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 - `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
 - `Slack`: Send the analysis link to a Slack channel (useful for external notifications)
+- `EmailSender`: Send a generic email.
+- `AbuseSubmitter`: Send an email to request to take down a malicious domain.
 
 
 ### Pivots
@@ -309,7 +312,8 @@ Pivots are designed to create a job from another job. This plugin allows the use
 This is a "SOAR" feature that allows the users to connect multiple analysis together.
 
 #### List of pre-built Pivots
-None
+- `TakedownRequestToAbuseIp`: This Plugin leverages results from DNS resolver analyzers to extract a valid IP address to pivot to the Abusix analyzer.
+- `AbuseIpToSubmission`: This Plugin leverages results from the Abusix analyzer to extract the abuse contacts of an IP address to pivot to the AbuseSubmitter connector.
 
 You can build your own custom Pivot with your custom logic with just few lines of code. See the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-pivot) section for more info.
 
@@ -391,6 +395,9 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
 - `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
 - `Dns`: A playbook containing all dns providers
+- `Takedown_Request`: Start investigation to request to take down a malicious domain. A mail will be sent to the domain's abuse contacts found
+- `Abuse_IP`: Playbook containing the Abusix analyzer. It is executed after the Takedown_Request playbook
+- `Send_Abuse_Email`: Playbook containing the AbuseSubmitter connector to send an email to request to take down a malicious domain. It is executed after the Abuse_IP playbook
 
 #### Playbooks creation and customization
 
@@ -571,6 +578,17 @@ These is how every available TLP value behaves once selected for an analysis exe
 2. `GREEN`: disable analyzers that could impact privacy
 3. `AMBER` (default): disable analyzers that could impact privacy and limit view permissions to my group
 4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
+
+
+### Running a plugin
+A plugin can be run when all of the following requirements have been satisfied:
+1. All the required parameters of the plugin have been configured
+2. The plugin is not disabled
+3. The plugin is not disabled for the user's organization
+4. If the plugin has a health check schedule, the last check has to be successful
+5. The TLP selected to run the plugin cannot be higher than the maximum TLP configured for that plugin
+6. The observable classification or the file mimetype has to be supported by the plugin
+
 
 
 ## Investigations Framework

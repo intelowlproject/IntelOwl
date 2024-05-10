@@ -354,14 +354,7 @@ class Job(MP_Node):
 
     @cached_property
     def parent_job(self) -> Optional["Job"]:
-        from api_app.pivots_manager.models import PivotMap
-
-        try:
-            pm = PivotMap.objects.get(ending_job=self)
-        except PivotMap.DoesNotExist:
-            return None
-        else:
-            return pm.starting_job
+        return self.get_parent()
 
     @cached_property
     def sha1(self) -> str:

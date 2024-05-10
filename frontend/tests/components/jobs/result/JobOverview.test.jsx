@@ -330,7 +330,7 @@ describe("test JobOverview (job report)", () => {
             visualizer_reports: [
               {
                 id: 730,
-                name: "Test page 1",
+                name: "Test_page_1",
                 process_time: 0.0,
                 status: "SUCCESS",
                 warnings: [],
@@ -449,7 +449,7 @@ describe("test JobOverview (job report)", () => {
             visualizer_reports: [
               {
                 id: 730,
-                name: "Test page 1",
+                name: "Test_page_1",
                 process_time: 0.0,
                 status: "RUNNING",
                 warnings: [],

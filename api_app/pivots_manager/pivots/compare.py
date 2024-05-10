@@ -18,7 +18,7 @@ class Compare(Pivot):
             try:
                 content = content[key]
             except TypeError:
-                if isinstance(content, list):
+                if isinstance(content, list) and len(content) > 0:
                     content = content[int(key)]
                 else:
                     raise RuntimeError(f"Not found {field}")

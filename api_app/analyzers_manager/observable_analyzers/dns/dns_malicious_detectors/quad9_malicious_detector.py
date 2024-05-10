@@ -31,6 +31,9 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     QUAD9_URL = "https://dns.quad9.net:5053/dns-query"
     GOOGLE_URL = "https://dns.google.com/resolve"
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain

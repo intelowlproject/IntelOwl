@@ -39,7 +39,7 @@ class MalcoreScan(FileAnalyzer):
             logger.info(f"polling malcore try #{_try + 1}")
             self.result = self._get_status(uuid)["data"]
             if "status" not in self.result and "msg" not in self.result:
-                logger.info("Malcore analysis successfully retrieved")
+                logger.info(f"Malcore analysis successfully retrieved for {self.md5}")
                 break
 
             time.sleep(self.poll_distance)

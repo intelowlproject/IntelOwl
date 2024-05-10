@@ -13,7 +13,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },
     "name": "Malcore_Scan",
-    "description": "Scan a file with the Malcore Executable Analysis API.",
+    "description": "Scan a file with the [Malcore](https://malcore.io/) Executable Analysis API.",
     "disabled": False,
     "soft_time_limit": 400,
     "routing_key": "default",
@@ -189,8 +189,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0074_adjust_maximum_tlp"),
+        ("analyzers_manager", "0085_analyzer_config_permhash"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

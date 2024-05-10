@@ -19,6 +19,9 @@ class MalcoreScan(FileAnalyzer):
     max_tries: int
     poll_distance: int
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         self.headers = {"apiKey": self._api_key_name}
 

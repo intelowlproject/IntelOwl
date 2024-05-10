@@ -42,14 +42,27 @@ class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
         null=False,
         blank=False,
         default=ScanMode.CHECK_PREVIOUS_ANALYSIS.value,
+        help_text=(
+            "If it's not a starting playbook,"
+            " this must be set to `check_previous_analysis`"
+        ),
     )
     scan_check_time = models.DurationField(
-        null=True, blank=True, default=datetime.timedelta(hours=24)
+        null=True,
+        blank=True,
+        default=datetime.timedelta(hours=24),
+        help_text=(
+            "Time range checked if the scan_mode is set to `check_previous_analysis`"
+        ),
     )
 
     tags = models.ManyToManyField(Tag, related_name="playbooks", blank=True)
 
     tlp = models.CharField(max_length=8, choices=TLP.choices)
+
+    starting = models.BooleanField(
+        default=True, help_text="If False, the playbook can only be executed by pivots"
+    )
 
     class Meta:
         ordering = ["name", "disabled"]
@@ -88,9 +101,16 @@ class PlaybookConfig(AbstractConfig, OwnershipAbstractModel):
                 " and not have check_time set"
             )
 
+    def clean_starting(self):
+        if not self.starting and self.scan_mode != ScanMode.FORCE_NEW_ANALYSIS.value:
+            raise ValidationError(
+                "Not starting playbooks must always force new analysis"
+            )
+
     def clean(self) -> None:
         super().clean()
         self.clean_scan()
+        self.clean_starting()
 
     def is_sample(self) -> bool:
         return AllTypes.FILE.value in self.type

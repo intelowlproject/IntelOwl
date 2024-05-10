@@ -86,7 +86,12 @@ def remove_old_jobs():
     num_jobs_to_delete = old_jobs.count()
     logger.info(f"found {num_jobs_to_delete} old jobs to delete")
     for old_job in old_jobs.iterator():
-        old_job.delete()
+        try:
+            old_job.delete()
+        except Job.DoesNotExist as e:
+            logger.warning(
+                f"job {old_job.id} does not exist. Err: {e}", stack_info=True
+            )
 
     logger.info("finished remove_old_jobs")
     return num_jobs_to_delete

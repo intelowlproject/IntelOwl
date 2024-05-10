@@ -1,3 +1,6 @@
+from kombu import uuid
+
+from api_app.models import Job
 from api_app.pivots_manager.classes import Pivot
 from api_app.pivots_manager.models import PivotConfig
 from tests import CustomTestCase
@@ -8,6 +11,14 @@ class PivotTestCase(CustomTestCase):
         "api_app/fixtures/0001_user.json",
     ]
 
+    def _create_jobs(self):
+        Job.objects.create(
+            user=self.superuser,
+            observable_name="test.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+        )
+
     def test_subclasses(self):
         def handler(signum, frame):
             raise TimeoutError("end of time")
@@ -15,8 +26,10 @@ class PivotTestCase(CustomTestCase):
         import signal
 
         signal.signal(signal.SIGALRM, handler)
-
+        self._create_jobs()
         subclasses = Pivot.all_subclasses()
+        for subclass in Pivot.all_subclasses():
+            subclasses.extend(subclass.all_subclasses())
         for subclass in subclasses:
             print("\n" f"Testing Pivot {subclass.__name__}")
             configs = PivotConfig.objects.filter(python_module=subclass.python_module)
@@ -28,10 +41,11 @@ class PivotTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
+                job = Job.objects.get(observable_classification="domain")
                 sub = subclass(config)
                 signal.alarm(timeout_seconds)
                 try:
-                    sub.start(None, {}, None)
+                    sub.start(job.pk, {}, uuid())
                 except Exception as e:
                     self.fail(
                         f"Pivot {subclass.__name__}"

@@ -30,7 +30,6 @@ plugin = {
         "application/mac-binary",
         "application/x-mach-binary",
         "application/x-elf",
-        "application/x-executable",
         "application/x-sharedlib",
         "application/java-archive",
         "application/x-dex",

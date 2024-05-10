@@ -27,7 +27,10 @@ class BlintAnalyzer(FileAnalyzer):
         set_permissions(reports_dir)
 
         analyzer = AnalysisRunner()
-        response = analyzer.start(files=[self.filepath], reports_dir=reports_dir)
+        findings, reviews, fuzzables = analyzer.start(
+            files=[self.filepath], reports_dir=reports_dir
+        )
+        response = {"findings": findings, "reviews": reviews, "fuzzables": fuzzables}
 
         shutil.rmtree(reports_dir)
 

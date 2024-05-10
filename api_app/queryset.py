@@ -8,6 +8,8 @@ from django.contrib.postgres.expressions import ArraySubquery
 from django.core.paginator import Paginator
 from treebeard.mp_tree import MP_NodeQuerySet
 
+from certego_saas.ext.upload.elastic import BIDocument
+
 if TYPE_CHECKING:
     from api_app.models import PythonConfig
     from api_app.serializers import AbstractBIInterface
@@ -62,10 +64,10 @@ class SendToBiQuerySet(models.QuerySet):
             )
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
-        from elasticsearch.helpers import bulk
+        # from elasticsearch.helpers import bulk
 
         logger.info("BI start")
-        self._create_index_template()
+        # self._create_index_template()
         BULK_MAX_SIZE = 1000
         found_errors = False
 
@@ -75,11 +77,31 @@ class SendToBiQuerySet(models.QuerySet):
             objects = page.object_list
             serializer = self._get_bi_serializer_class()(instance=objects, many=True)
             objects_serialized = serializer.data
-            _, errors = bulk(
+            for obj in objects_serialized:
+                kwargs = {
+                    k: obj[k]
+                    for k in set(obj.keys())
+                    - {"timestamp", "application", "environment"}
+                }
+                BIDocument.objects.create(
+                    index=settings.ELASTICSEARCH_BI_INDEX,
+                    timestamp=obj["timestamp"],
+                    application=obj["application"],
+                    environment=obj["environment"],
+                    kwargs=kwargs,
+                )
+                print(BIDocument.objects.all())
+            _, errors = BIDocument.upload(
                 settings.ELASTICSEARCH_CLIENT,
-                objects_serialized,
-                request_timeout=max_timeout,
+                index=settings.ELASTICSEARCH_BI_INDEX,
+                timeout=max_timeout,
+                max_number=10000,
             )
+            # _, errors = bulk(
+            #     settings.ELASTICSEARCH_CLIENT,
+            #     objects_serialized,
+            #     request_timeout=max_timeout,
+            # )
             if errors:
                 logger.error(
                     f"Errors on sending to elastic: {errors}."

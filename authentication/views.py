@@ -44,18 +44,44 @@ User: AUTH_USER_MODEL = get_user_model()
 class PasswordResetRequestView(
     rest_email_auth.views.PasswordResetRequestView, RecaptchaV2Mixin
 ):
+    """
+    Handles requests for password reset.
+
+    Args:
+        rest_email_auth.views.PasswordResetRequestView:
+        The parent view class for password reset requests.
+        RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
+    """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
 
 
 class PasswordResetView(rest_email_auth.views.PasswordResetView, RecaptchaV2Mixin):
+    """
+    Handles password reset.
+
+    Args:
+        rest_email_auth.views.PasswordResetView:
+        The parent view class for password reset.
+        RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
+    """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
 
 
 class EmailVerificationView(rest_email_auth.views.EmailVerificationView):
+    """
+    Handles email verification.
+
+    Args:
+        rest_email_auth.views.EmailVerificationView:
+        The parent view class for email verification.
+    """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -63,35 +89,84 @@ class EmailVerificationView(rest_email_auth.views.EmailVerificationView):
 
 
 class RegistrationView(rest_email_auth.views.RegistrationView, RecaptchaV2Mixin):
+    """
+    Handles user registration.
+
+    Args:
+        rest_email_auth.views.RegistrationView:
+        The parent view class for user registration.
+        RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
+    """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
     serializer_class = RegistrationSerializer
 
     def get_serializer_class(self):  # skipcq: PYL-R0201
+        """
+        Returns the serializer class for registration.
+
+        Returns:
+            RegistrationSerializer: The serializer class for user registration.
+        """
         return RegistrationSerializer
 
 
 class ResendVerificationView(
     rest_email_auth.views.ResendVerificationView, RecaptchaV2Mixin
 ):
+    """
+    Handles re-sending email verification.
+
+    Args:
+        rest_email_auth.views.ResendVerificationView:
+        The parent view class for resending email verification.
+        RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
+    """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
 
 
 class LoginView(RecaptchaV2Mixin):
+    """
+    Handles user login.
+
+    Args:
+        RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
+    """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
 
     @staticmethod
     def validate_and_return_user(request):
+        """
+        Validates user credentials and returns the user object.
+
+        Args:
+            request (Request): The request object containing user credentials.
+
+        Returns:
+            Any: The authenticated user object.
+        """
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return serializer.validated_data["user"]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles POST request for user login.
+
+        Args:
+            request (Request): The request object containing user credentials.
+
+        Returns:
+            Response: The response object.
+        """
         try:
             self.get_serializer()  # for RecaptchaV2Mixin
         except AssertionError:
@@ -104,11 +179,24 @@ class LoginView(RecaptchaV2Mixin):
 
 
 class ChangePasswordView(APIView):
+    """
+    Handles changing user password.
+    """
+
     permission_classes = [IsAuthenticated]
 
     @staticmethod
     def post(request: Request) -> Response:
         # Get the old password and new password from the request data
+        """
+        Handles POST request for changing user password.
+
+        Args:
+            request (Request): The request object containing old and new passwords.
+
+        Returns:
+            Response: The response object.
+        """
         old_password = request.data.get("old_password")
         new_password = request.data.get("new_password")
 
@@ -131,9 +219,22 @@ class ChangePasswordView(APIView):
 
 
 class LogoutView(APIView):
+    """
+    Handles user logout.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):  # skipcq: PYL-R0201
+        """
+        Handles POST request for user logout.
+
+        Args:
+            request (Request): The request object.
+
+        Returns:
+            Response: The response object.
+        """
         user = request.user
         logger.info(f"perform_logout received request from '{user.username}''.")
         logout(request)
@@ -148,6 +249,12 @@ class LogoutView(APIView):
 def google_login(request: Request):
     """
     Redirect to Google OAuth login
+
+    Args:
+        request (Request): The request object.
+
+    Returns:
+        Response: The response object.
     """
     redirect_uri = request.build_absolute_uri(reverse("oauth_google_callback"))
     try:
@@ -162,8 +269,21 @@ def google_login(request: Request):
 
 
 class GoogleLoginCallbackView(LoginView):
+    """
+    Handles Google OAuth login callback.
+    """
+
     @staticmethod
     def validate_and_return_user(request):
+        """
+        Validates Google OAuth token and returns the user object.
+
+        Args:
+            request (Request): The request object.
+
+        Returns:
+            Any: The authenticated user object.
+        """
         try:
             token = oauth.google.authorize_access_token(request)
         except (
@@ -198,6 +318,15 @@ class GoogleLoginCallbackView(LoginView):
 @api_view(["get"])
 @permission_classes([AllowAny])
 def checkConfiguration(request):
+    """
+    Checks the configuration settings.
+
+    Args:
+        request (Request): The request object.
+
+    Returns:
+        Response: The response object.
+    """
     logger.info(f"Requested checking configuration from {request.user}.")
     page = request.query_params.get("page")
     register_uri = reverse("auth_register")
@@ -243,6 +372,7 @@ class APIAccessTokenView(APIView):
     - ``GET`` -> get token-client pair info
     - ``POST`` -> create and get token-client pair info
     - ``DELETE`` -> delete existing API access token
+    Handles API access token operations.
     """
 
     permission_classes = [IsAuthenticated]
@@ -256,12 +386,30 @@ class APIAccessTokenView(APIView):
         return instance
 
     def get(self, request, *args, **kwargs):
+        """
+        Handles GET request for retrieving API access token.
+
+        Args:
+            request (Request): The request object.
+
+        Returns:
+            Response: The response object.
+        """
         instance = self.get_object()
         logger.info(f" user {request.user} request the API token")
         serializer = TokenSerializer(instance)
         return Response(serializer.data)
 
     def post(self, request):  # skipcq: PYL-R0201
+        """
+        Handles POST request for creating API access token.
+
+        Args:
+            request (Request): The request object.
+
+        Returns:
+            Response: The response object.
+        """
         username = request.user.username
         logger.info(f"user {username} send a request to create the API token")
         serializer = TokenSerializer(data={}, context={"user": request.user})
@@ -270,6 +418,15 @@ class APIAccessTokenView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
+        """
+        Handles DELETE request for deleting API access token.
+
+        Args:
+            request (Request): The request object.
+
+        Returns:
+            Response: The response object.
+        """
         logger.info(f"user {request.user} send a request to delete the API token")
         instance = self.get_object()
         instance.delete()

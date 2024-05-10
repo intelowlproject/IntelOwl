@@ -8,6 +8,12 @@ from django.db import migrations
 def migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+
+    pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
+    pc.analyzers.add(AnalyzerConfig.objects.get(name="Blint").id)
+    pc.full_clean()
+    pc.save()
+
     pc = playbook_config.objects.get(name="Sample_Static_Analysis")
     pc.analyzers.add(AnalyzerConfig.objects.get(name="Blint").id)
     pc.full_clean()
@@ -17,6 +23,12 @@ def migrate(apps, schema_editor):
 def reverse_migrate(apps, schema_editor):
     playbook_config = apps.get_model("playbooks_manager", "PlaybookConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+
+    pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
+    pc.analyzers.remove(AnalyzerConfig.objects.get(name="Blint").id)
+    pc.full_clean()
+    pc.save()
+
     pc = playbook_config.objects.get(name="Sample_Static_Analysis")
     pc.analyzers.remove(AnalyzerConfig.objects.get(name="Blint").id)
     pc.full_clean()
@@ -25,8 +37,11 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0031_0000_add_blint_to_free_analyzers"),
-        ("analyzers_manager", "0078_analyzer_config_blint"),
+        (
+            "playbooks_manager",
+            "0041_add_permhash_to_free_analyzers_and_static_analyzers",
+        ),
+        ("analyzers_manager", "0086_analyzer_config_blint"),
     ]
 
     operations = [

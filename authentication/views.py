@@ -48,9 +48,11 @@ class PasswordResetRequestView(
     Handles requests for password reset.
 
     Args:
-        rest_email_auth.views.PasswordResetRequestView: The parent view class for password reset requests.
+        rest_email_auth.views.PasswordResetRequestView:
+        The parent view class for password reset requests.
         RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
     """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -61,9 +63,11 @@ class PasswordResetView(rest_email_auth.views.PasswordResetView, RecaptchaV2Mixi
     Handles password reset.
 
     Args:
-        rest_email_auth.views.PasswordResetView: The parent view class for password reset.
+        rest_email_auth.views.PasswordResetView:
+        The parent view class for password reset.
         RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
     """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -74,8 +78,10 @@ class EmailVerificationView(rest_email_auth.views.EmailVerificationView):
     Handles email verification.
 
     Args:
-        rest_email_auth.views.EmailVerificationView: The parent view class for email verification.
+        rest_email_auth.views.EmailVerificationView:
+        The parent view class for email verification.
     """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -87,9 +93,11 @@ class RegistrationView(rest_email_auth.views.RegistrationView, RecaptchaV2Mixin)
     Handles user registration.
 
     Args:
-        rest_email_auth.views.RegistrationView: The parent view class for user registration.
+        rest_email_auth.views.RegistrationView:
+        The parent view class for user registration.
         RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
     """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -98,7 +106,7 @@ class RegistrationView(rest_email_auth.views.RegistrationView, RecaptchaV2Mixin)
     def get_serializer_class(self):  # skipcq: PYL-R0201
         """
         Returns the serializer class for registration.
-        
+
         Returns:
             RegistrationSerializer: The serializer class for user registration.
         """
@@ -112,9 +120,11 @@ class ResendVerificationView(
     Handles re-sending email verification.
 
     Args:
-        rest_email_auth.views.ResendVerificationView: The parent view class for resending email verification.
+        rest_email_auth.views.ResendVerificationView:
+        The parent view class for resending email verification.
         RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
     """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -127,6 +137,7 @@ class LoginView(RecaptchaV2Mixin):
     Args:
         RecaptchaV2Mixin: A mixin for reCAPTCHA verification.
     """
+
     authentication_classes: List = []
     permission_classes: List = []
     throttle_classes: List = [POSTUserRateThrottle]
@@ -135,10 +146,10 @@ class LoginView(RecaptchaV2Mixin):
     def validate_and_return_user(request):
         """
         Validates user credentials and returns the user object.
-        
+
         Args:
             request (Request): The request object containing user credentials.
-        
+
         Returns:
             Any: The authenticated user object.
         """
@@ -149,10 +160,10 @@ class LoginView(RecaptchaV2Mixin):
     def post(self, request, *args, **kwargs):
         """
         Handles POST request for user login.
-        
+
         Args:
             request (Request): The request object containing user credentials.
-        
+
         Returns:
             Response: The response object.
         """
@@ -171,6 +182,7 @@ class ChangePasswordView(APIView):
     """
     Handles changing user password.
     """
+
     permission_classes = [IsAuthenticated]
 
     @staticmethod
@@ -178,10 +190,10 @@ class ChangePasswordView(APIView):
         # Get the old password and new password from the request data
         """
         Handles POST request for changing user password.
-        
+
         Args:
             request (Request): The request object containing old and new passwords.
-        
+
         Returns:
             Response: The response object.
         """
@@ -210,15 +222,16 @@ class LogoutView(APIView):
     """
     Handles user logout.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):  # skipcq: PYL-R0201
         """
         Handles POST request for user logout.
-        
+
         Args:
             request (Request): The request object.
-        
+
         Returns:
             Response: The response object.
         """
@@ -236,10 +249,10 @@ class LogoutView(APIView):
 def google_login(request: Request):
     """
     Redirect to Google OAuth login
-    
+
     Args:
         request (Request): The request object.
-    
+
     Returns:
         Response: The response object.
     """
@@ -259,14 +272,15 @@ class GoogleLoginCallbackView(LoginView):
     """
     Handles Google OAuth login callback.
     """
+
     @staticmethod
     def validate_and_return_user(request):
         """
         Validates Google OAuth token and returns the user object.
-        
+
         Args:
             request (Request): The request object.
-        
+
         Returns:
             Any: The authenticated user object.
         """
@@ -306,10 +320,10 @@ class GoogleLoginCallbackView(LoginView):
 def checkConfiguration(request):
     """
     Checks the configuration settings.
-    
+
     Args:
         request (Request): The request object.
-    
+
     Returns:
         Response: The response object.
     """
@@ -374,10 +388,10 @@ class APIAccessTokenView(APIView):
     def get(self, request, *args, **kwargs):
         """
         Handles GET request for retrieving API access token.
-        
+
         Args:
             request (Request): The request object.
-        
+
         Returns:
             Response: The response object.
         """
@@ -389,10 +403,10 @@ class APIAccessTokenView(APIView):
     def post(self, request):  # skipcq: PYL-R0201
         """
         Handles POST request for creating API access token.
-        
+
         Args:
             request (Request): The request object.
-        
+
         Returns:
             Response: The response object.
         """
@@ -406,10 +420,10 @@ class APIAccessTokenView(APIView):
     def delete(self, request):
         """
         Handles DELETE request for deleting API access token.
-        
+
         Args:
             request (Request): The request object.
-        
+
         Returns:
             Response: The response object.
         """

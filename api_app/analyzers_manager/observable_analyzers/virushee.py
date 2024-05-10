@@ -9,14 +9,18 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class VirusheeCheckHash(ObservableAnalyzer):
-    base_url: str = "https://api.virushee.com/file/hash/{input}"
+    url: str = "https://api.virushee.com/file/hash/{input}"
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         self.__session = requests.Session()
         if hasattr(self, "_api_key_name"):
             self.__session.headers["X-API-Key"] = self._api_key_name
-        url = self.base_url.format(input=self.observable_name)
+        url = self.url.format(input=self.observable_name)
 
         try:
             response = self.__session.get(url)

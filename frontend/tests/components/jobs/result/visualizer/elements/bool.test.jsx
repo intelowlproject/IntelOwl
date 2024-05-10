@@ -5,6 +5,14 @@ import userEvent from "@testing-library/user-event";
 import { getIcon } from "../../../../../../src/components/jobs/result/visualizer/icons";
 import { BooleanVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/bool";
 
+// mock useLocation
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useLocation: () => ({
+    pathname: "localhost/jobs/123/visualizer",
+  }),
+}));
+
 describe("BooleanVisualizer component", () => {
   test("required-only params", async () => {
     const { container } = render(

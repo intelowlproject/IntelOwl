@@ -6,3 +6,7 @@ from django.apps import AppConfig
 
 class ApiAppAuthConfig(AppConfig):
     name = "authentication"
+
+    @staticmethod
+    def ready() -> None:
+        from . import signals  # noqa

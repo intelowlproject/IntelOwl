@@ -10,11 +10,15 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 class CRXcavator(classes.ObservableAnalyzer):
     name: str = "CRXcavator"
-    base_url: str = "https://api.crxcavator.io/v1/report/"
+    url: str = "https://api.crxcavator.io/v1/report/"
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         try:
-            response = requests.get(self.base_url + self.observable_name)
+            response = requests.get(self.url + self.observable_name)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

@@ -1,9 +1,36 @@
+import logging
+import uuid
+
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models.signals import m2m_changed, post_migrate, pre_save
+from django.db.models.signals import m2m_changed, pre_save
 from django.dispatch import receiver
 
-from api_app.pivots_manager.apps import PivotsManagerConfig
 from api_app.pivots_manager.models import PivotConfig
+from api_app.signals import migrate_finished
+from intel_owl.celery import get_queue_name
+
+logger = logging.getLogger(__name__)
+
+
+@receiver(migrate_finished)
+def post_migrate_pivots_manager(
+    sender,
+    *args,
+    check_unapplied: bool = False,
+    **kwargs,
+):
+    logger.info(f"Post migrate {args} {kwargs}")
+    if check_unapplied:
+        return
+    from intel_owl.tasks import refresh_cache
+
+    refresh_cache.apply_async(
+        queue=get_queue_name(settings.CONFIG_QUEUE),
+        MessageGroupId=str(uuid.uuid4()),
+        priority=3,
+        args=[PivotConfig.python_path],
+    )
 
 
 @receiver(pre_save, sender=PivotConfig)
@@ -22,14 +49,6 @@ def pre_save_pivot_config(
         # an integrity error will be raised because some fields are missing
         pass
     return instance
-
-
-@receiver(post_migrate, sender=PivotsManagerConfig)
-def post_migrate_pivot(
-    sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
-):
-    if plan:
-        PivotConfig.delete_class_cache_keys()
 
 
 @receiver(m2m_changed, sender=PivotConfig.related_analyzer_configs.through)

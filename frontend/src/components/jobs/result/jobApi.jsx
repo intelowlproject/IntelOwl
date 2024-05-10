@@ -20,8 +20,6 @@ export async function downloadJobSample(jobId) {
 }
 
 export async function killJob(jobId) {
-  const sure = await areYouSureConfirmDialog(`kill job #${jobId}`);
-  if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.patch(`${JOB_BASE_URI}/${jobId}/kill`);

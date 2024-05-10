@@ -11,10 +11,10 @@ services:
       - ./env_file_postgres
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
+      interval: 5s
+      timeout: 2s
+      retries: 6
+      start_period: 3s
 
 
   uwsgi:

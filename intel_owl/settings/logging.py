@@ -1,18 +1,21 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import os
 
 from intel_owl import secrets
 
 from ._util import set_permissions
-from .commons import DEBUG, LOG_DIR, STAGE_CI
+from .commons import DEBUG, LOG_DIR, STAGE_CI, YARA_RULES_PATH
 
 DJANGO_LOG_DIRECTORY = LOG_DIR / "django"
 UWSGI_LOG_DIRECTORY = LOG_DIR / "uwsgi"
 ASGI_LOG_DIRECTORY = LOG_DIR / "asgi"
-if not STAGE_CI:
-    for path in [DJANGO_LOG_DIRECTORY, UWSGI_LOG_DIRECTORY, ASGI_LOG_DIRECTORY]:
-        os.makedirs(path, exist_ok=True)
+for path in [
+    DJANGO_LOG_DIRECTORY,
+    UWSGI_LOG_DIRECTORY,
+    ASGI_LOG_DIRECTORY,
+    YARA_RULES_PATH,
+]:
+    if not STAGE_CI:
         set_permissions(path)
 
 DISABLE_LOGGING_TEST = secrets.get_secret("DISABLE_LOGGING_TEST", False) == "True"
@@ -39,6 +42,19 @@ LOGGING = {
             "level": "ERROR",
             "class": "logging.handlers.WatchedFileHandler",
             "filename": f"{DJANGO_LOG_DIRECTORY}/api_app_errors.log",
+            "formatter": "stdfmt",
+        },
+        "intel_owl": {
+            "level": INFO_OR_DEBUG_LEVEL,
+            # we use Logrotate instead of RotatingFileHandler because more reliable
+            "class": "logging.handlers.WatchedFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/intel_owl.log",
+            "formatter": "stdfmt",
+        },
+        "intel_owl_error": {
+            "level": "ERROR",
+            "class": "logging.handlers.WatchedFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/intel_owl_errors.log",
             "formatter": "stdfmt",
         },
         "celery": {
@@ -114,6 +130,11 @@ LOGGING = {
     "loggers": {
         "api_app": {
             "handlers": ["api_app", "api_app_error"],
+            "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
+        },
+        "intel_owl": {
+            "handlers": ["intel_owl", "intel_owl_error"],
             "level": INFO_OR_DEBUG_LEVEL,
             "propagate": True,
         },

@@ -10,16 +10,16 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class MnemonicPassiveDNS(classes.ObservableAnalyzer):
-    base_url: str = "https://api.mnemonic.no/pdns/v3/"
+    url: str = "https://api.mnemonic.no/pdns/v3/"
 
     cof_format: bool
     limit: int
 
     def run(self):
         if self.cof_format:
-            self.base_url += "cof/"
+            self.url += "cof/"
         response = requests.get(
-            self.base_url + self.observable_name, data={"limit": self.limit}
+            self.url + self.observable_name, data={"limit": self.limit}
         )
         response.raise_for_status()
 

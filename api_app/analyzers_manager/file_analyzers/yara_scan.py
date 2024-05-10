@@ -139,8 +139,13 @@ class YaraRepo:
                 try:
                     o.pull(allow_unrelated_histories=True, rebase=True)
                 except git.exc.GitCommandError as e:
-                    logger.exception(e)
-                    return
+                    if "index.lock" in e.stderr:
+                        # for some reason the git process did not exit correctly
+                        self.delete_lock_file()
+                        o.pull(allow_unrelated_histories=True, rebase=True)
+                    else:
+                        logger.exception(e)
+                        return
             else:
                 logger.info(f"About to clone {self.url} at {self.directory}")
                 git.Repo.clone_from(self.url, self.directory, depth=1)
@@ -150,6 +155,10 @@ class YaraRepo:
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
+
+    def delete_lock_file(self):
+        lock_file_path = self.directory / ".git" / "index.lock"
+        lock_file_path.unlink(missing_ok=False)
 
     @property
     def compiled_file_name(self):
@@ -328,7 +337,7 @@ class YaraStorage:
 class YaraScan(FileAnalyzer):
     ignore: list
     repositories: list
-    _private_repositories: dict
+    _private_repositories: dict = {}
     local_rules: str
 
     def _get_owner_and_key(self, url: str) -> Tuple[Union[str, None], Union[str, None]]:

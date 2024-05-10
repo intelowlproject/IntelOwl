@@ -82,6 +82,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `ELF_Info`: static ELF analysis with [pyelftools](https://github.com/eliben/pyelftools) and [telfhash](https://github.com/trendmicro/telfhash)
 * `File_Info`: static generic File analysis (hashes, magic and [exiftool](https://exiftool.org/))
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
+* `Hfinger`: create fingerprints of malware HTTPS requests using [Hfinger](https://github.com/CERT-Polska/hfinger)
 * `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `PDF_Info`: static PDF analysis ([peepdf](https://github.com/jesparza/peepdf) + [pdfid](https://github.com/mlodic/pdfid))
@@ -159,6 +160,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 ###### External services
 
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
+* `Abusix`: get abuse contacts of an IP address from [Abusix](https://abusix.com/contact-db/)
 * `BGP Ranking`: [BGP-Ranking](https://github.com/D4-project/BGP-Ranking) provides a way to collect such malicious activities, aggregate the information per ASN and provide a ranking model to rank the ASN from the most malicious to the less malicious ASN.
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `Auth0`: scan an IP against the Auth0 API
@@ -176,9 +178,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `DNSDB`: scan an observable against the [Passive DNS Farsight Database](https://www.farsightsecurity.com/solutions/dnsdb/) (support both v1 and v2 versions)
 * `DNS0_EU`: Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)
 * `DNS0_EU_Malicious_Detector`: Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)
-* `DNS0_names`: Run advanced searches on billions of current and historical domain names. ([DNS0 /names](https://docs.dns0.eu/dns-api/names))
-* `DNS0_rrsets_data`: Query billions of current and historical DNS resource records sets. Performs right-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
-* `DNS0_rrsets_name`: Query billions of current and historical DNS resource records sets. Performs left-hand side matching. ([DNS0 /rrsets](https://docs.dns0.eu/dns-api/rrsets))
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
 * `Feodo_Tracker`: [Feodo Tracker](https://feodotracker.abuse.ch/) offers various blocklists, helping network owners to protect their users from Dridex and Emotet/Heodo.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
@@ -189,12 +188,14 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
 * `GreyNoise`: scan an IP against the [Greynoise](https://www.greynoise.io/) API (requires API key)
 * `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (requires API key))
+* `Greynoise_Labs`: scan an IP against the [Greynoise API](https://www.greynoise.io/) (requires authentication token which can be obtained from cookies on Greynoise website after launching the playground from [here](https://api.labs.greynoise.io/))
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
 * `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
+* `IP2WHOIS`: [API Docs](https://www.ip2location.io/ip2whois-documentation) IP2Location.io IP2WHOIS Domain WHOIS API helps users to obtain domain information and WHOIS record by using a domain name.
 * `IPQS_Fraud_And_Risk_Scoring`: Scan an Observable against [IPQualityscore](https://www.ipqualityscore.com/)
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
@@ -297,6 +298,8 @@ The following is the list of the available connectors. You can also navigate the
 - `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 - `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
 - `Slack`: Send the analysis link to a Slack channel (useful for external notifications)
+- `EmailSender`: Send a generic email.
+- `AbuseSubmitter`: Send an email to request to take down a malicious domain.
 
 
 ### Pivots
@@ -307,10 +310,31 @@ Pivots are designed to create a job from another job. This plugin allows the use
 
 This is a "SOAR" feature that allows the users to connect multiple analysis together.
 
-Right now the support for this kind of plugin in the GUI is very limited, while the backend is fully operative. We are working on the frontend.
-
 #### List of pre-built Pivots
-None
+- `TakedownRequestToAbuseIp`: This Plugin leverages results from DNS resolver analyzers to extract a valid IP address to pivot to the Abusix analyzer.
+- `AbuseIpToSubmission`: This Plugin leverages results from the Abusix analyzer to extract the abuse contacts of an IP address to pivot to the AbuseSubmitter connector.
+
+You can build your own custom Pivot with your custom logic with just few lines of code. See the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-pivot) section for more info.
+
+#### Creating Pivots from the GUI
+
+From the GUI, the users can pivot in two ways:
+- If a Job executed a [Visualizer](#visualizers), it is possible to select a field extracted and analyze its value by clicking the "Pivot" button (see following image). In this way, the user is able to "jump" from one indicator to another.
+![img.png](../static/pivot_job_report.png)
+
+- Starting from an already existing [Investigation](#investigations-framework), it is possible to select a Job block and click the "Pivot" button to analyze the same observable again, usually choosing another [Playbook](#playbooks) (see following image)
+![img.png](../static/pivot_investigation_report.png)
+
+In both cases, the user is redirected to the Scan Page that is precompiled with the observable selected. Then the user would be able to select the [Playbook](#playbooks) to execute in the new job.
+![img.png](../static/pivot_scan_page.png)
+
+After the new Job is started, a new [Investigation](#investigations-framework) will be created (if it does not already exist) and both the jobs will be added to the same Investigation.
+
+In the following image you can find an example of an [Investigation](#investigations-framework) composed by 3 pivots generated manually:
+* leveraging the first way to create a Pivot, the 2 Jobs that analyzed IP addresses have been generated from the first `test\.com` Job
+* leveraging the second way to create a Pivot, the second `test\.com` analysis had been created with a different Playbook.
+
+![img.png](../static/pivot_investigation.png)
 
 ### Visualizers
 
@@ -370,6 +394,9 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Popular_URL_Reputation_Services`: Collection of the most popular and free reputation analyzers for URLs and Domains
 - `Popular_IP_Reputation_Services`: Collection of the most popular and free reputation analyzers for IP addresses
 - `Dns`: A playbook containing all dns providers
+- `Takedown_Request`: Start investigation to request to take down a malicious domain. A mail will be sent to the domain's abuse contacts found
+- `Abuse_IP`: Playbook containing the Abusix analyzer. It is executed after the Takedown_Request playbook
+- `Send_Abuse_Email`: Playbook containing the AbuseSubmitter connector to send an email to request to take down a malicious domain. It is executed after the Abuse_IP playbook
 
 #### Playbooks creation and customization
 
@@ -552,6 +579,17 @@ These is how every available TLP value behaves once selected for an analysis exe
 4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
 
 
+### Running a plugin
+A plugin can be run when all of the following requirements have been satisfied:
+1. All the required parameters of the plugin have been configured
+2. The plugin is not disabled
+3. The plugin is not disabled for the user's organization
+4. If the plugin has a health check schedule, the last check has to be successful
+5. The TLP selected to run the plugin cannot be higher than the maximum TLP configured for that plugin
+6. The observable classification or the file mimetype has to be supported by the plugin
+
+
+
 ## Investigations Framework
 
 *Investigations* are a new framework introduced in IntelOwl v6 with the goal to allow the users to connect the analysis they do with each other.
@@ -568,7 +606,7 @@ Things to know about the framework:
 *Investigations* are created in 2 ways:
   * automatically:
     * if you scan multiple observables at the same time, a new investigation will be created by default and all the observables they will be automatically connected to the same investigation.
-    * if you run a Job with a Playbook which contains a Pivot that triggers another Job, a new investigation will be created and both the Jobs will be added to the same investigation.
+    * if you run a Job with a Playbook which contains a [Pivot](#pivots) that triggers another Job, a new investigation will be created and both the Jobs will be added to the same investigation. See how you can create a new [Pivot manually from the GUI](#creating-pivots-from-the-gui).
   * manually: by clicking on the button in the "History" section you can create an Investigation from scratch without any job attached (see following image)
 
 ![img.png](../static/create_investigation.png)

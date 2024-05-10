@@ -57,6 +57,10 @@ class MockResponseNoOp:
     def query(*args, **kwargs):
         return {}
 
+    @staticmethod
+    def lookup(*args, **kwargs):
+        return {}
+
 
 def if_mock_connections(*decorators):
     def apply_all(f):

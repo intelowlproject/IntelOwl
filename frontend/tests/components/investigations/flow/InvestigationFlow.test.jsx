@@ -254,6 +254,7 @@ describe("test InvestigationFlow", () => {
                 analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
+                received_request_time: "2024-04-03T13:08:45.417245Z",
                 children: [
                   {
                     pk: 11,
@@ -261,6 +262,7 @@ describe("test InvestigationFlow", () => {
                     playbook: "Dns",
                     status: "reported_without_fails",
                     children: [],
+                    received_request_time: "2024-04-03T13:09:45.417245Z",
                   },
                 ],
               },
@@ -298,14 +300,23 @@ describe("test InvestigationFlow", () => {
     expect(removeJobButton).toBeInTheDocument();
     const linkFirstJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkFirstJobButton).toBeInTheDocument();
+    const firstJobPivotButton = screen.getByRole("link", { name: "Pivot" });
+    expect(firstJobPivotButton).toBeInTheDocument();
+    const firstJobCopyButton = screen.getByRole("button", { name: "Copy" });
+    expect(firstJobCopyButton).toBeInTheDocument();
     // link to job page
     expect(linkFirstJobButton.href).toContain("/jobs/10/visualizer");
+    // link pivot
+    expect(firstJobPivotButton.href).toContain(
+      "/scan?parent=10&observable=test1.com",
+    );
     // job info
     const jobInfo = container.querySelector("#job10-info");
     expect(jobInfo).toBeInTheDocument();
     expect(jobInfo.textContent).toContain("Job:#10");
     expect(jobInfo.textContent).toContain("Name:test1.com");
     expect(jobInfo.textContent).toContain("Playbook:Dns");
+    expect(jobInfo.textContent).toContain("Created:");
 
     fireEvent.click(secondJobNode);
     // pivot tollbar
@@ -317,13 +328,22 @@ describe("test InvestigationFlow", () => {
     expect(removeSecondJobButton).toBeNull(); // no remove button in pivot
     const linkSecondJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkSecondJobButton).toBeInTheDocument();
+    const secondJobPivotButton = screen.getByRole("link", { name: "Pivot" });
+    expect(secondJobPivotButton).toBeInTheDocument();
+    const secondJobCopyButton = screen.getByRole("button", { name: "Copy" });
+    expect(secondJobCopyButton).toBeInTheDocument();
     // link to job page
     expect(linkSecondJobButton.href).toContain("/jobs/11/visualizer");
+    // link pivot
+    expect(secondJobPivotButton.href).toContain(
+      "/scan?parent=11&observable=test11.com",
+    );
     // job info
     const secondJobInfo = container.querySelector("#job11-info");
     expect(secondJobInfo).toBeInTheDocument();
     expect(secondJobInfo.textContent).toContain("Job:#11");
     expect(secondJobInfo.textContent).toContain("Name:test11.com");
     expect(secondJobInfo.textContent).toContain("Playbook:Dns");
+    expect(jobInfo.textContent).toContain("Created:");
   });
 });

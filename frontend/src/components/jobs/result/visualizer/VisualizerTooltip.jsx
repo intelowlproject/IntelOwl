@@ -4,6 +4,12 @@ import { CopyToClipboardButton } from "@certego/certego-ui";
 import { Button, UncontrolledTooltip } from "reactstrap";
 import { MdContentCopy } from "react-icons/md";
 import { AiOutlineLink } from "react-icons/ai";
+import { LuGitBranchPlus } from "react-icons/lu";
+import { useLocation } from "react-router-dom";
+
+import { ObservableClassifications } from "../../../../constants/jobConst";
+import { getObservableClassification } from "../../../../utils/observables";
+import { markdownToHtml } from "../../../common/markdownToHtml";
 
 export function VisualizerTooltip({
   idElement,
@@ -12,6 +18,10 @@ export function VisualizerTooltip({
   description,
   disable,
 }) {
+  const location = useLocation();
+  const jobId = location?.pathname.split("/")[2];
+  const textClassification = getObservableClassification(copyText);
+
   return (
     <UncontrolledTooltip target={idElement} placement="right" autohide={false}>
       <div className="p-0 my-2 d-flex justify-content-start">
@@ -32,13 +42,24 @@ export function VisualizerTooltip({
         >
           <AiOutlineLink /> Link
         </Button>
+        {textClassification !== ObservableClassifications.GENERIC && (
+          <Button
+            className="mx-1 p-2"
+            size="sm"
+            href={`/scan?parent=${jobId}&observable=${copyText}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <LuGitBranchPlus /> Pivot
+          </Button>
+        )}
       </div>
       {description && (
         <div
           className="bg-body p-3 py-2 mb-1 text-start"
           style={{ maxWidth: "400px" }}
         >
-          <small>{description}</small>
+          <small>{markdownToHtml(description)}</small>
         </div>
       )}
     </UncontrolledTooltip>

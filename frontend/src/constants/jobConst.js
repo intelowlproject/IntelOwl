@@ -178,7 +178,7 @@ export const FileExtensions = Object.freeze({
   OK: "ok",
   PUBLICVM: "publicvm",
   ISO: "iso",
-  SH: "sh",
+  CONFIG: "config",
 });
 
 export const InvalidTLD = Object.freeze({

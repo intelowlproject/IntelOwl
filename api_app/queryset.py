@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 import uuid
 from typing import TYPE_CHECKING, Generator, Type
 
@@ -13,9 +12,12 @@ if TYPE_CHECKING:
     from api_app.models import PythonConfig
     from api_app.serializers import AbstractBIInterface
 
+import logging
+
 from celery.canvas import Signature
 from django.db import models
 from django.db.models import (
+    BooleanField,
     Case,
     Exists,
     F,
@@ -37,6 +39,8 @@ from api_app.choices import TLP, ParamTypes
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.user.models import User
 
+logger = logging.getLogger(__name__)
+
 
 class SendToBiQuerySet(models.QuerySet):
     @classmethod
@@ -53,10 +57,14 @@ class SendToBiQuerySet(models.QuerySet):
             settings.ELASTICSEARCH_CLIENT.indices.put_template(
                 name=settings.ELASTICSEARCH_BI_INDEX, body=body
             )
+            logger.info(
+                f"created template for Elastic named {settings.ELASTICSEARCH_BI_INDEX}"
+            )
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
         from elasticsearch.helpers import bulk
 
+        logger.info("BI start")
         self._create_index_template()
         BULK_MAX_SIZE = 1000
         found_errors = False
@@ -73,13 +81,13 @@ class SendToBiQuerySet(models.QuerySet):
                 request_timeout=max_timeout,
             )
             if errors:
-                logging.error(
+                logger.error(
                     f"Errors on sending to elastic: {errors}."
                     " We are not marking objects as sent."
                 )
                 found_errors |= errors
             else:
-                logging.info("BI sent")
+                logger.info("BI sent")
                 self.model.objects.filter(
                     pk__in=objects.values_list("pk", flat=True)
                 ).update(sent_to_bi=True)
@@ -262,7 +270,9 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         return self.alias(
             owner_value=Subquery(
                 PluginConfig.objects.filter(
-                    parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
+                    parameter__pk=OuterRef("pk"),
+                    **{config.snake_case_name: config.pk},
+                    for_organization=False,
                 )
                 .visible_for_user_owned(user)
                 .values("value")[:1],
@@ -302,11 +312,13 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_runtime_config(self, runtime_config=None):
         if not runtime_config:
             runtime_config = {}
-        return self.alias(
-            runtime_value=Value(
-                runtime_config.get(F("name"), None),
-                output_field=JSONField(),
-            )
+        # we are creating conditions for when runtime config should be used
+        whens = [
+            When(name=para, then=Value(value, output_field=JSONField()))
+            for para, value in runtime_config.items()
+        ]
+        return self.annotate(
+            runtime_value=Case(*whens, default=None, output_field=JSONField())
         )
 
     def _alias_for_test(self):
@@ -376,11 +388,12 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                 is_from_org=Case(
                     When(
                         runtime_value__isnull=True,
-                        org_value__isnull=True,
-                        owner_value__isnull=False,
+                        owner_value__isnull=True,
+                        org_value__isnull=False,
                         then=Value(True),
                     ),
                     default=Value(False),
+                    output_field=BooleanField(),
                 ),
             )
         )
@@ -567,6 +580,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
                 task_id=task_id,
                 immutable=True,
                 MessageGroupId=str(task_id),
+                priority=job.priority,
             )
 
 

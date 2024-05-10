@@ -1,10 +1,12 @@
 import logging
 import os
+import shutil
 
 from blint.analysis import AnalysisRunner
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import FileAnalyzer
+from intel_owl.settings._util import set_permissions
 
 logger = logging.getLogger(__name__)
 
@@ -18,30 +20,15 @@ class BlintAnalyzer(FileAnalyzer):
         pass
 
     def run(self) -> dict:
-        logger.info(f"Running Blint on {self.filepath}")
-        # Blint requires a report directory
-        # that we create during the docker build at
-        # /opt/deploy/files_required/reports
-        reports_dir = f"{settings.MEDIA_ROOT}/reports"
+        logger.info(f"Running Blint on {self.filepath} for {self.md5}")
+
+        reports_dir = settings.BLINT_REPORTS_PATH / f"blint_analysis_{self.md5}"
+        os.mkdir(reports_dir)
+        set_permissions(reports_dir)
+
         analyzer = AnalysisRunner()
         response = analyzer.start(files=[self.filepath], reports_dir=reports_dir)
-        self.clean_reports_directory(reports_dir)
-        if response == ([], [], []):
-            return "No issues found"
-        return {
-            "findings": response[0],
-            "reviews": response[1],
-            "fuzzables": response[2],
-        }
 
-    @staticmethod
-    def clean_reports_directory(reports_dir):
-        files_cleaned = 0
-        for file in os.listdir(reports_dir):
-            file_path = os.path.join(reports_dir, file)
-            try:
-                os.remove(file_path)
-                files_cleaned += 1
-            except OSError as e:
-                logger.error(f"Error removing file {file_path}: {e}")
-        logger.info(f"cleaned {files_cleaned} files from {reports_dir}")
+        shutil.rmtree(reports_dir)
+
+        return response

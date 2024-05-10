@@ -23,6 +23,16 @@ class DomainReputationServices(Visualizer):
             )
         except AnalyzerReport.DoesNotExist:
             logger.warning("VirusTotal_v3_Get_Observable report does not exist")
+            virustotal_report = self.Title(
+                self.Base(
+                    value="VirusTotal",
+                    link="",
+                    icon=VisualizableIcon.VIRUSTotal,
+                ),
+                self.Base(value="Engine Hits: Unknown"),
+                disable=True,
+            )
+            return virustotal_report
         else:
             hits = (
                 analyzer_report.report.get("data", {})
@@ -33,7 +43,7 @@ class DomainReputationServices(Visualizer):
             virustotal_report = self.Title(
                 self.Base(
                     value="VirusTotal",
-                    link=analyzer_report.report["link"],
+                    link=analyzer_report.report.get("link", ""),
                     icon=VisualizableIcon.VIRUSTotal,
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
@@ -84,12 +94,36 @@ class DomainReputationServices(Visualizer):
                 malware_printable = data[0].get("malware_printable", "")
             threatfox_report = self.Title(
                 self.Base(
-                    value="ThreatFox", link=analyzer_report.report.get("link", "")
+                    value="ThreatFox",
+                    link=analyzer_report.report.get("link", ""),
+                    icon=VisualizableIcon.URLHAUS,
                 ),
                 self.Base(value="" if disabled else f"found {malware_printable}"),
                 disable=disabled,
             )
             return threatfox_report
+
+    @visualizable_error_handler_with_params("Tranco")
+    def _tranco(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="Tranco")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Tranco report does not exist")
+        else:
+            ranks = analyzer_report.report.get("ranks", [])
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not ranks
+            rank = ""
+            if ranks and isinstance(ranks, list):
+                rank = ranks[0].get("rank", "")
+            tranco_report = self.Title(
+                self.Base(
+                    value="Tranco Rank",
+                    link="https://tranco-list.eu/",
+                ),
+                self.Base(value="" if disabled else rank),
+                disable=disabled,
+            )
+            return tranco_report
 
     @visualizable_error_handler_with_params("Phishtank")
     def _phishtank(self):
@@ -207,6 +241,8 @@ class DomainReputationServices(Visualizer):
         first_level_elements.append(self._urlhaus())
 
         first_level_elements.append(self._threatfox())
+
+        first_level_elements.append(self._tranco())
 
         second_level_elements.append(self._phishtank())
 

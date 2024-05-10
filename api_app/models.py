@@ -354,14 +354,7 @@ class Job(MP_Node):
 
     @cached_property
     def parent_job(self) -> Optional["Job"]:
-        from api_app.pivots_manager.models import PivotMap
-
-        try:
-            pm = PivotMap.objects.get(ending_job=self)
-        except PivotMap.DoesNotExist:
-            return None
-        else:
-            return pm.starting_job
+        return self.get_parent()
 
     @cached_property
     def sha1(self) -> str:
@@ -400,6 +393,7 @@ class Job(MP_Node):
         runner.apply_async(
             queue=get_queue_name(settings.CONFIG_QUEUE),
             MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
         )
 
     def set_final_status(self) -> None:
@@ -540,7 +534,12 @@ class Job(MP_Node):
             queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
         )
+
+    @property
+    def priority(self):
+        return self.user.profile.task_priority
 
     def _get_pipeline(
         self,
@@ -903,7 +902,7 @@ class OrganizationPluginConfiguration(models.Model):
             self.rate_limit_enable_task.clocked = clock_schedule
             self.rate_limit_enable_task.enabled = True
             self.rate_limit_enable_task.save()
-        logger.info(f"Disabling {self} for rate limit")
+        logger.warning(f"Disabling {self} for rate limit")
         self.save()
 
     def disable_manually(self, user: User):
@@ -924,7 +923,9 @@ class OrganizationPluginConfiguration(models.Model):
         self.enable()
 
     def enable(self):
+        logger.info(f"Enabling back {self}")
         self.disabled = False
+        self.disabled_comment = ""
         self.save()
         if self.rate_limit_enable_task:
             self.rate_limit_enable_task.delete()
@@ -940,6 +941,11 @@ class ListCachable(models.Model):
         for key in cache.get_where(f"list_{base_key}").keys():
             logger.debug(f"Deleting cache key {key}")
             cache.delete(key)
+
+    @classmethod
+    @property
+    def python_path(cls) -> str:
+        return f"{cls.__module__}.{cls.__name__}"
 
 
 class AbstractConfig(ListCachable):
@@ -1197,6 +1203,7 @@ class PythonConfig(AbstractConfig):
             queue=get_queue_name(settings.CONFIG_QUEUE),
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=job.priority,
         )
 
     @property
@@ -1268,3 +1275,4 @@ class PythonConfig(AbstractConfig):
                 },
             )[0]
             self.health_check_task = periodic_task
+            self.save()

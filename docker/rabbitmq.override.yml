@@ -14,3 +14,11 @@ services:
       - BROKER_URL="amqp://guest:guest@rabbitmq:5672"
     depends_on:
       - rabbitmq
+
+  celery_worker_default:
+    environment:
+      - BROKER_URL="amqp://guest:guest@rabbitmq:5672"
+
+  celery_beat:
+    environment:
+      - BROKER_URL="amqp://guest:guest@rabbitmq:5672"

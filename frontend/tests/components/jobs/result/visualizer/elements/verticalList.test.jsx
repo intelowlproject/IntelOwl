@@ -5,6 +5,14 @@ import { BaseVisualizer } from "../../../../../../src/components/jobs/result/vis
 import { VerticalListVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/verticalList";
 import { HorizontalListVisualizer } from "../../../../../../src/components/jobs/result/visualizer/elements/horizontalList";
 
+// mock useLocation
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useLocation: () => ({
+    pathname: "localhost/jobs/123/visualizer",
+  }),
+}));
+
 describe("VerticalListVisualizer component", () => {
   test("required-only params", () => {
     const { container } = render(

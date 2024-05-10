@@ -320,13 +320,15 @@ The database migration procedure is as follows:
 - You have IntelOwl version 5.x.x up and running
 - Bring down the application (you can use the start script or manually concatenate your docker compose configuration )
 - Go inside the docker folder `cd docker`
-- Bring only the postgres 12 container up `docker run  -d --name intelowl_postgres_12 -v intelowl_postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:12-alpine `
-- Dump the entire database. You need the user and the database that you configured during startup for this `docker exec -t intelowl_postgres_12  pg_dump -U $POSTGRES_USER -d $POSTGRES_DB --no-owner> /tmp/dump_intelowl.sql `
-- Remove the backup container `docker rm intelowl_postgres_12`
-- Remove the postgres volume `docker volume rm intelowl_postgres_data`
-- Start the intermediary postgres 16 container `docker run  -d --name intelowl_postgres_16 -v postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:16-alpine `
-- Add the data to the volume `cat /tmp/dump_postgres.sql| docker exec -i intelowl_postgres_16 psql -U $POSTGRES_USER -d $POSTGRES_PASSWORD`
-- Remove the intermediary container `docker rm intelowl_postgres_16`
+- Bring only the postgres 12 container up `docker run -d --name intelowl_postgres_12 -v intel_owl_postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:12-alpine`
+- Dump the entire database. You need the user and the database that you configured during startup for this `docker exec -t intelowl_postgres_12  pg_dump -U <POSTGRES_USER> -d <POSTGRES_DB> --no-owner > /tmp/dump_intelowl.sql`
+- Stop che container `docker container stop intelowl_postgres_12`
+- Remove the backup container `docker container rm intelowl_postgres_12`
+- Remove the postgres volume `docker volume rm intel_owl_postgres_data` <------------- remove old data, this is not exactly necessary because the new postgres has a different volume name
+- Start the intermediary postgres 16 container `docker run -d --name intelowl_postgres_16 -v intelowl_postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:16-alpine`
+- Add the data to the volume `cat /tmp/dump_intelowl.sql | docker exec -i intelowl_postgres_16 psql -U <POSTGRES_USER> -d <POSTGRES_DB>`
+- Stop the intermediary container `docker container stop intelowl_postgres_16`
+- Remove the intermediary container `docker container rm intelowl_postgres_16`
 - Update IntelOwl to the latest version
 - Bring up the application back again (you can use the start script or manually concatenate your docker compose configuration)
 

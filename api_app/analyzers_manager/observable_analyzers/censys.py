@@ -18,7 +18,7 @@ class Censys(classes.ObservableAnalyzer):
     def update(self):
         pass
 
-    base_url = "https://search.censys.io/api/v2"
+    url = "https://search.censys.io/api/v2"
 
     censys_analysis: str
     _api_id_name: str
@@ -33,7 +33,7 @@ class Censys(classes.ObservableAnalyzer):
                 "Supported is IP"
             )
         response = requests.get(
-            self.base_url + uri,
+            self.url + uri,
             auth=(self._api_id_name, self._api_secret_name),
             headers={
                 "Accept": "application/json",

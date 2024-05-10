@@ -8,15 +8,18 @@ from django.utils.timezone import now
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers import (
     feodo_tracker,
+    greynoise_labs,
     maxmind,
     phishing_army,
     talos,
     tor,
     tweetfeeds,
 )
-from api_app.models import Job
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
 
 from . import CustomTestCase, get_logger
@@ -70,7 +73,7 @@ class CronTests(CustomTestCase):
     @if_mock_connections(skip("not working without connection"))
     def test_maxmind_updater(self):
         maxmind.Maxmind.update()
-        for db in maxmind.db_names:
+        for db in maxmind.Maxmind.get_db_names():
             self.assertTrue(os.path.exists(db))
 
     @if_mock_connections(
@@ -177,3 +180,61 @@ class CronTests(CustomTestCase):
     def test_yara_updater(self):
         yara_scan.YaraScan.update()
         self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))
+
+    @if_mock_connections(
+        patch(
+            "requests.post",
+            return_value=MockUpResponse(
+                {
+                    "data": {
+                        "topC2s": {
+                            "queryInfo": {
+                                "resultsAvailable": 1914,
+                                "resultsLimit": 191,
+                            },
+                            "c2s": [
+                                {
+                                    "source_ip": "91.92.247.12",
+                                    "c2_ips": ["103.245.236.120"],
+                                    "c2_domains": [],
+                                    "hits": 11608,
+                                },
+                                {
+                                    "source_ip": "14.225.208.190",
+                                    "c2_ips": ["14.225.213.142"],
+                                    "c2_domains": [],
+                                    "hits": 2091,
+                                    "pervasiveness": 26,
+                                },
+                                {
+                                    "source_ip": "157.10.53.101",
+                                    "c2_ips": ["14.225.208.190"],
+                                    "c2_domains": [],
+                                    "hits": 1193,
+                                    "pervasiveness": 23,
+                                },
+                            ],
+                        },
+                    },
+                },
+                200,
+            ),
+        )
+    )
+    def test_greynoise_labs_updater(self, mock_post=None):
+        python_module = PythonModule.objects.get(
+            base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
+            module="greynoise_labs.GreynoiseLabs",
+        )
+        PluginConfig.objects.create(
+            value="test",
+            parameter=Parameter.objects.get(
+                python_module=python_module, is_secret=True, name="auth_token"
+            ),
+            for_organization=False,
+            owner=None,
+            analyzer_config=AnalyzerConfig.objects.filter(
+                python_module=python_module
+            ).first(),
+        )
+        self.assertTrue(greynoise_labs.GreynoiseLabs.update())

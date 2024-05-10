@@ -15,7 +15,7 @@ import {
   UncontrolledTooltip,
   Collapse,
 } from "reactstrap";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   Field,
   Form,
@@ -82,6 +82,7 @@ export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
   const investigationIdParam = searchParams.get("investigation") || null;
+  const parentIdParam = searchParams.get("parent");
   const { guideState, setGuideState } = useGuideContext();
 
   const { pluginsState: organizationPluginsState } = useOrganizationStore(
@@ -202,6 +203,7 @@ export default function ScanForm() {
         values.scan_mode,
         values.scan_check_time,
         investigationIdParam,
+        parentIdParam,
       );
 
       // multiple job or investigation id in GET param
@@ -384,6 +386,7 @@ export default function ScanForm() {
     playbooksGrouped[classification]
       .map((playbook) => ({
         isDisabled: playbook.disabled,
+        starting: playbook.starting,
         value: playbook.name,
         analyzers: playbook.analyzers,
         connectors: playbook.connectors,
@@ -409,7 +412,7 @@ export default function ScanForm() {
         scan_check_time: playbook.scan_check_time,
         runtime_configuration: playbook.runtime_configuration,
       }))
-      .filter((item) => !item.isDisabled);
+      .filter((item) => !item.isDisabled && item.starting);
 
   const updateAdvancedConfig = (
     tags,
@@ -900,7 +903,32 @@ export default function ScanForm() {
               </FormGroup>
             )}
             <FormGroup row>
-              <Label sm={3}>TLP</Label>
+              <Label className="d-flex" sm={3}>
+                TLP
+                <div className="ms-2">
+                  <MdInfoOutline id="tlp-info-icon" />
+                  <UncontrolledTooltip
+                    target="tlp-info-icon"
+                    placement="right"
+                    fade={false}
+                    autohide={false}
+                    innerClassName="p-2 text-start text-nowrap md-fit-content"
+                  >
+                    <span>
+                      IntelOwl supports a customized version of the Traffic
+                      Light Protocol (TLP).
+                      <br />
+                      For more info check the{" "}
+                      <Link
+                        to="https://intelowl.readthedocs.io/en/latest/Usage.html#tlp-support"
+                        target="_blank"
+                      >
+                        official doc.
+                      </Link>
+                    </span>
+                  </UncontrolledTooltip>
+                </div>
+              </Label>
               <Col sm={9}>
                 <div>
                   {TlpChoices.map((tlp) => (

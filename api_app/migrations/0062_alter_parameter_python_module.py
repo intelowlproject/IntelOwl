@@ -19,4 +19,9 @@ class Migration(migrations.Migration):
                 to="api_app.pythonmodule",
             ),
         ),
+        migrations.AlterField(
+            model_name="job",
+            name="path",
+            field=models.CharField(max_length=255, unique=True),
+        ),
     ]

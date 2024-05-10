@@ -7,7 +7,9 @@ class Compare(Pivot):
     field_to_compare: str
 
     def _get_value(self, field: str) -> Any:
-        report = self.related_reports.first()
+        report = self.related_reports.filter(
+            status=self.report_model.Status.SUCCESS.value
+        ).first()
         if not report:
             raise RuntimeError("No report found")
         content = report.report
@@ -16,7 +18,7 @@ class Compare(Pivot):
             try:
                 content = content[key]
             except TypeError:
-                if isinstance(content, list):
+                if isinstance(content, list) and len(content) > 0:
                     content = content[int(key)]
                 else:
                     raise RuntimeError(f"Not found {field}")
@@ -26,7 +28,7 @@ class Compare(Pivot):
         return content
 
     def should_run(self) -> Tuple[bool, Optional[str]]:
-        if len(list(self.related_reports)) != 1:
+        if self.related_reports.count() != 1:
             return (
                 False,
                 f"Unable to run pivot {self._config.name} "

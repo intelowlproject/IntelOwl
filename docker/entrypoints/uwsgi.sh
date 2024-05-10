@@ -7,11 +7,11 @@ done
 
 # Apply database migrations
 echo "Waiting for db to be ready..."
-sleep 3
 # makemigrations is needed only for the durin package.
 # The customization of the parameters is not applied until the migration is done
 python manage.py makemigrations durin
 python manage.py makemigrations rest_email_auth
+python manage.py createcachetable
 # fake-initial does not fake the migration if the table does not exist
 python manage.py migrate --fake-initial
 if ! python manage.py migrate --check
@@ -19,7 +19,6 @@ if ! python manage.py migrate --check
     echo "Issue with migration exiting"
     exit 1
 fi
-python manage.py createcachetable
 # Collect static files
 python manage.py collectstatic --noinput
 echo "------------------------------"

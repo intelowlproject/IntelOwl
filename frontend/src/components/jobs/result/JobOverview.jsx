@@ -19,12 +19,7 @@ import { Loader } from "@certego/certego-ui";
 import { JSONTree } from "react-json-tree";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  AnalyzersReportTable,
-  ConnectorsReportTable,
-  PivotsReportTable,
-  VisualizersReportTable,
-} from "./pluginReportTables";
+import { PluginsReportTable } from "./pluginReportTables";
 import {
   reportedPluginNumber,
   reportedVisualizerNumber,
@@ -39,6 +34,7 @@ import { JobResultSections } from "../../../constants/miscConst";
 import { JobInfoCard } from "./JobInfoCard";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobActionsBar } from "./bar/JobActionBar";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 /* THESE IDS CANNOT BE EMPTY!
 We perform a redirect in case the user landed in the visualzier page without a visualizer,
@@ -63,6 +59,26 @@ export function JobOverview({
 
   const isSelectedUI = section === JobResultSections.VISUALIZER;
 
+  const [
+    analyzersLoading,
+    connectorsLoading,
+    visualizersLoading,
+    pivotsLoading,
+    analyzers,
+    connectors,
+    visualizers,
+    pivots,
+  ] = usePluginConfigurationStore((state) => [
+    state.analyzersLoading,
+    state.connectorsLoading,
+    state.visualizersLoading,
+    state.pivotsLoading,
+    state.analyzers,
+    state.connectors,
+    state.visualizers,
+    state.pivots,
+  ]);
+
   const rawElements = React.useMemo(
     () => [
       {
@@ -80,7 +96,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <AnalyzersReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.analyzer_reports}
+            pluginsStored={analyzers}
+            pluginsStoredLoading={analyzersLoading}
+          />
+        ),
       },
       {
         name: "connector",
@@ -97,7 +121,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <ConnectorsReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.connector_reports}
+            pluginsStored={connectors}
+            pluginsStoredLoading={connectorsLoading}
+          />
+        ),
       },
       {
         name: "pivot",
@@ -114,7 +146,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <PivotsReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.pivot_reports}
+            pluginsStored={pivots}
+            pluginsStoredLoading={pivotsLoading}
+          />
+        ),
       },
       {
         name: "visualizer",
@@ -135,7 +175,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <VisualizersReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.visualizer_reports}
+            pluginsStored={visualizers}
+            pluginsStoredLoading={visualizersLoading}
+          />
+        ),
       },
       {
         name: "full",
@@ -158,7 +206,14 @@ export function JobOverview({
         ),
       },
     ],
-    [job],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      job,
+      analyzersLoading,
+      connectorsLoading,
+      visualizersLoading,
+      pivotsLoading,
+    ],
   );
 
   // state
@@ -321,7 +376,10 @@ export function JobOverview({
             </Col>
           </Row>
           {isRunningJob && (
-            <Row>
+            <Row
+              className="my-4 d-flex justify-content-center"
+              style={{ width: "100%" }}
+            >
               <JobIsRunningAlert job={job} />
             </Row>
           )}

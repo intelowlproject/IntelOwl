@@ -25,25 +25,31 @@ import { PlaybookTag } from "../../common/PlaybookTag";
 import { StatusTag } from "../../common/StatusTag";
 import { TLPTag } from "../../common/TLPTag";
 import { JobInfoIcon } from "./JobInfoIcon";
+import { JobIsRunningAlert } from "./JobIsRunningAlert";
+import { JobFinalStatuses } from "../../../constants/jobConst";
 
 export function JobInfoCard({ job }) {
   const navigate = useNavigate();
   // local state
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
+  const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
+  const [isOpenJobErrors, setIsOpenJobErrors] = React.useState(false);
 
   return (
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
-          <Col sm={12} md={2} className="d-flex justify-content-start">
+          <Col sm={12} md={1} className="d-flex justify-content-start">
             {job.investigation && (
               <>
                 <Button
-                  className="bg-darker border-1"
+                  className="bg-darker border-1 lh-sm"
                   onClick={() =>
                     navigate(`/investigation/${job.investigation}`)
                   }
                   id="investigationOverviewBtn"
+                  size="xs"
+                  style={{ fontSize: "0.8rem" }}
                 >
                   Investigation Overview
                 </Button>
@@ -59,9 +65,9 @@ export function JobInfoCard({ job }) {
           <Col
             className="d-flex-start-start justify-content-center"
             sm={12}
-            md={8}
+            md={10}
           >
-            <h3>
+            <h3 className="d-flex-start align-items-center text-truncate">
               <JobInfoIcon job={job} />
               {job.is_sample ? (
                 <CopyToClipboardButton
@@ -87,13 +93,13 @@ export function JobInfoCard({ job }) {
                 : job.observable_classification}
             </Badge>
           </Col>
-          <Col sm={12} md={2} className="d-flex justify-content-end">
+          <Col sm={12} md={1} className="d-flex justify-content-end">
             <Button
               className="bg-darker border-0"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => setIsOpenJobInfoCard(!isOpenJobInfoCard)}
               id="JobInfoCardDropDown"
             >
-              <ArrowToggleIcon isExpanded={isOpen} />
+              <ArrowToggleIcon isExpanded={isOpenJobInfoCard} />
             </Button>
             <UncontrolledTooltip placement="left" target="JobInfoCardDropDown">
               Toggle Job Metadata
@@ -101,14 +107,14 @@ export function JobInfoCard({ job }) {
           </Col>
         </Row>
       </ContentSection>
-      <Collapse isOpen={isOpen} id="JobInfoCardCollapse">
+      <Collapse isOpen={isOpenJobInfoCard} id="JobInfoCardCollapse">
         <ContentSection className="border-top-0 bg-body ps-0 pe-1 py-1">
           <ListGroup
             horizontal
             className="align-items-start flex-wrap flex-lg-nowrap"
           >
             {[
-              ["Status", <StatusTag status={job.status} />],
+              ["Status", <StatusTag status={job.status} className="py-0" />],
               ["TLP", <TLPTag value={job.tlp} />],
               ["User", job.user?.username],
               ["MD5", job.md5],
@@ -134,7 +140,7 @@ export function JobInfoCard({ job }) {
                 ),
               ],
             ].map(([key, value]) => (
-              <ListGroupItem key={key}>
+              <ListGroupItem className="mx-2" key={key}>
                 <small className="fw-bold text-light">{key}</small>
                 <div className="bg-dark p-1 text-light">{value}</div>
               </ListGroupItem>
@@ -155,33 +161,85 @@ export function JobInfoCard({ job }) {
               ],
               [
                 "Tags",
-                job.tags.map((tag) => (
-                  <JobTag key={tag.label} tag={tag} className="me-2" />
-                )),
+                job.tags.length ? (
+                  job.tags.map((tag) => (
+                    <JobTag key={tag.label} tag={tag} className="me-2" />
+                  ))
+                ) : (
+                  <small className="fst-italic text-gray">None</small>
+                ),
               ],
               [
                 "Warning(s)",
-                <ul className="text-warning">
-                  {job.warnings.map((error) => (
-                    <li>{error}</li>
-                  ))}
-                </ul>,
+                <>
+                  <div className="d-flex text-warning align-items-center justify-content-between mx-2">
+                    {job.warnings.length} warnings
+                    <Button
+                      className="bg-dark border-0 p-0"
+                      onClick={() => setIsOpenJobWarnings(!isOpenJobWarnings)}
+                      id="JobWarningsDropDown"
+                    >
+                      <ArrowToggleIcon isExpanded={isOpenJobWarnings} />
+                    </Button>
+                    <UncontrolledTooltip
+                      placement="left"
+                      target="JobWarningsDropDown"
+                    >
+                      Toggle Job Warnings
+                    </UncontrolledTooltip>
+                  </div>
+                  <Collapse isOpen={isOpenJobWarnings} id="JobWarningsCollapse">
+                    <ul className="text-warning">
+                      {job.warnings.map((error) => (
+                        <li>{error}</li>
+                      ))}
+                    </ul>
+                  </Collapse>
+                </>,
               ],
               [
                 "Error(s)",
-                <ul className="text-danger">
-                  {job.errors.map((error) => (
-                    <li>{error}</li>
-                  ))}
-                </ul>,
+                <>
+                  <div className="d-flex text-danger align-items-center justify-content-between mx-2">
+                    {job.errors.length} errors
+                    <Button
+                      className="bg-dark border-0 p-0"
+                      onClick={() => setIsOpenJobErrors(!isOpenJobErrors)}
+                      id="JobErrorsDropDown"
+                    >
+                      <ArrowToggleIcon isExpanded={isOpenJobErrors} />
+                    </Button>
+                    <UncontrolledTooltip
+                      placement="left"
+                      target="JobErrorsDropDown"
+                    >
+                      Toggle Job Errors
+                    </UncontrolledTooltip>
+                  </div>
+                  <Collapse isOpen={isOpenJobErrors} id="JobErrorsCollapse">
+                    <ul className="text-danger">
+                      {job.errors.map((error) => (
+                        <li>{error}</li>
+                      ))}
+                    </ul>
+                  </Collapse>
+                </>,
               ],
             ].map(([key, value]) => (
-              <ListGroupItem key={key}>
+              <ListGroupItem className="mx-2" key={key}>
                 <small className="fw-bold text-light">{key}</small>
                 <div className="bg-dark p-1">{value}</div>
               </ListGroupItem>
             ))}
           </ListGroup>
+          {Object.values(JobFinalStatuses).includes(job.status) && (
+            <div
+              className="my-4 d-flex justify-content-center"
+              style={{ width: "100%" }}
+            >
+              <JobIsRunningAlert job={job} />
+            </div>
+          )}
         </ContentSection>
       </Collapse>
     </div>

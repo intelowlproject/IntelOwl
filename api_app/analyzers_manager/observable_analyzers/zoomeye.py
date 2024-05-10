@@ -12,7 +12,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class ZoomEye(classes.ObservableAnalyzer):
-    base_url: str = "https://api.zoomeye.org/"
+    url: str = "https://api.zoomeye.org/"
 
     search_type: str
     query: str
@@ -20,6 +20,10 @@ class ZoomEye(classes.ObservableAnalyzer):
     facets: str
     history: bool
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def __build_zoomeye_url(self):
         if self.observable_classification == self.ObservableTypes.IP:
@@ -29,20 +33,20 @@ class ZoomEye(classes.ObservableAnalyzer):
             self.search_type = "host"
 
         if self.search_type in ["host", "web"]:
-            self.url = self.base_url + self.search_type + "/search?query="
-            self.url += self.query
+            self.final_url = self.url + self.search_type + "/search?query="
+            self.final_url += self.query
 
             if self.page:
-                self.url += f"&page={self.page}"
+                self.final_url += f"&page={self.page}"
 
             if self.facets:
-                self.url += f"&facet={','.join(self.facets)}"
+                self.final_url += f"&facet={','.join(self.facets)}"
 
         elif self.search_type == "both":
-            self.url = self.base_url + "both/search?"
+            self.final_url = self.url + "both/search?"
             if self.history:
-                self.url += f"history={self.history}&"
-            self.url += f"ip={self.observable_name}"
+                self.final_url += f"history={self.history}&"
+            self.final_url += f"ip={self.observable_name}"
         else:
             raise AnalyzerConfigurationException(
                 f"search type: '{self.search_type}' not supported."
@@ -53,7 +57,9 @@ class ZoomEye(classes.ObservableAnalyzer):
         self.__build_zoomeye_url()
 
         try:
-            response = requests.get(self.url, headers={"API-KEY": self._api_key_name})
+            response = requests.get(
+                self.final_url, headers={"API-KEY": self._api_key_name}
+            )
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

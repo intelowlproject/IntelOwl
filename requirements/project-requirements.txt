@@ -75,7 +75,7 @@ greynoise==2.1.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0
-blint==2.1.1
+blint==2.1.5
 hfinger==0.2.2
 permhash==0.1.4
 

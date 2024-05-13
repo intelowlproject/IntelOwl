@@ -204,8 +204,8 @@ class VisualizableDataTableMixin:
 class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
-        name: VisualizableBase,
         value: List[VisualizableObject],
+        name: VisualizableBase = None,
         start_open: bool = False,  # noqa
         add_count_in_title: bool = True,
         fill_empty: bool = True,
@@ -220,7 +220,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
             alignment=alignment,
             disable=disable,
         )
-        if add_count_in_title:
+        if name and add_count_in_title:
             name.value += f" ({len(value)})"
         for v in value:
             if isinstance(v, str):
@@ -229,6 +229,8 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
                 )
         if fill_empty and not value:
             value = [VisualizableBase(value="no data available", disable=False)]
+        if not name:
+            start_open = True
         self.value = value
         self.name = name
         self.add_count_in_title = add_count_in_title

@@ -141,7 +141,9 @@ function parseElementFields(rawElement) {
       break;
     }
     case VisualizerComponentType.VLIST: {
-      validatedFields.name = parseElementFields(rawElement.name);
+      if (rawElement.name !== null)
+        validatedFields.name = parseElementFields(rawElement.name);
+      else validatedFields.name = rawElement.name;
       validatedFields.values = parseElementList(rawElement.values || []);
       validatedFields.startOpen = parseBool(rawElement.start_open);
       break;

@@ -71,7 +71,11 @@ function convertToElement(element, idElement, isChild = false) {
           key={idElement}
           id={idElement}
           size={element.size}
-          name={convertToElement(element.name, `${idElement}-vlist`)}
+          name={
+            element.name
+              ? convertToElement(element.name, `${idElement}-vlist`)
+              : null
+          }
           values={element.values.map((additionalElement, index) =>
             convertToElement(
               additionalElement,

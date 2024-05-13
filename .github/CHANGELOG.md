@@ -7,9 +7,10 @@ Major fixes and adjustments. We improved the documentation to help the transitio
 
 We added **Pivot** buttons to enable manual Pivoting from an Observable/File analysis to another. See [Doc](https://intelowl.readthedocs.io/en/latest/Usage.html#pivots) for more info
 
-As usual, we add new plugins. This release brings a lot of new ones:
+As usual, we add new plugins. This release brings the following new ones:
 * a complete **TakedownRequest** playbook to automate TakeDown requests for malicious domains
-* new analyzers for services like [HFinger](https://github.com/CERT-Polska/hfinger) and improvement of the existing Maxmind analyzer.
+* new File Analyzers for tools like [HFinger](https://github.com/CERT-Polska/hfinger), [Permhash](https://github.com/google/permhash) and [Blint](https://github.com/owasp-dep-scan/blint)
+* improvement of the existing Maxmind analyzer: it now downloads the ASN database too.
 
 ## [v6.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.1)
 Little fixes for the major.

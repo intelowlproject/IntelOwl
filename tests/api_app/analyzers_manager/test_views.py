@@ -40,7 +40,7 @@ class AnalyzerConfigViewSetTestCase(
         self.assertIn("status", result)
         self.assertTrue(result["status"])
 
-        analyzer = "Xlm_Macro_Deobfuscator"
+        analyzer = "QuarkEngine"
         response = self.client.post(f"{self.URL}/{analyzer}/pull")
         self.assertEqual(response.status_code, 400)
         result = response.json()

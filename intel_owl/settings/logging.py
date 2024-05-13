@@ -17,7 +17,7 @@ for path in [
     BLINT_REPORTS_PATH,
 ]:
     if not STAGE_CI:
-        set_permissions(path)
+        set_permissions(path, force_create=True)
 
 DISABLE_LOGGING_TEST = secrets.get_secret("DISABLE_LOGGING_TEST", False) == "True"
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"

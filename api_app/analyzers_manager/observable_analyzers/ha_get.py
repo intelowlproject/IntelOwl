@@ -15,6 +15,10 @@ class HybridAnalysisGet(ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {
             "api-key": self._api_key_name,

@@ -12,6 +12,10 @@ class Crowdsec(ObservableAnalyzer):
     _api_key_name: str
     url: str = "https://cti.api.crowdsec.net"
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {
             "x-api-key": self._api_key_name,

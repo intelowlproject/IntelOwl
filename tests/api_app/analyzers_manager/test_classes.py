@@ -15,6 +15,10 @@ class MockUpObservableAnalyzer(ObservableAnalyzer):
     def run(self) -> dict:
         return {}
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
 
 class FileAnalyzerTestCase(CustomTestCase):
     fixtures = [

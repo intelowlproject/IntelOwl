@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import datetime
 import os
 
 from django.conf import settings
@@ -30,6 +29,8 @@ logger = get_logger()
 
 class CronTests(CustomTestCase):
     def test_check_stuck_analysis(self):
+        import datetime
+
         _job = Job.objects.create(
             user=self.user,
             status=Job.Status.RUNNING.value,
@@ -54,6 +55,8 @@ class CronTests(CustomTestCase):
         _job.delete()
 
     def test_remove_old_jobs(self):
+        import datetime
+
         _job = Job.objects.create(
             user=self.user,
             status=Job.Status.FAILED.value,

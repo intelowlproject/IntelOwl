@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 class XlmMacroDeobfuscator(FileAnalyzer):
     passwords_to_check: list
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         results = {}
         try:

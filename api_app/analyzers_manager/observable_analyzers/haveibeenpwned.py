@@ -15,6 +15,10 @@ class HaveIBeenPwned(classes.ObservableAnalyzer):
     domain: str
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         params = {
             "truncateResponse": self.truncate_response,

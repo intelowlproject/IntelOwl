@@ -23,6 +23,10 @@ class InQuest(ObservableAnalyzer):
     _api_key_name: str
     inquest_analysis: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         self.generic_identifier_mode = "user-defined"  # Or auto

@@ -15,6 +15,10 @@ class MnemonicPassiveDNS(classes.ObservableAnalyzer):
     cof_format: bool
     limit: int
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         if self.cof_format:
             self.url += "cof/"

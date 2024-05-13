@@ -6,6 +6,10 @@ from api_app.pivots_manager.classes import Pivot
 class Compare(Pivot):
     field_to_compare: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def _get_value(self, field: str) -> Any:
         report = self.related_reports.filter(
             status=self.report_model.Status.SUCCESS.value

@@ -24,6 +24,10 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
     max_no_of_strings: dict
     rank_strings: dict
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         # get binary
         binary = self.read_file_bytes()

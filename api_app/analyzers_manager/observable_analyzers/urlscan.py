@@ -21,6 +21,10 @@ class UrlScan(ObservableAnalyzer):
     search_size: int
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {"Content-Type": "application/json", "User-Agent": "IntelOwl/v1.x"}
         if not hasattr(self, "_api_key_name") and self.urlscan_analysis == "search":

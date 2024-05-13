@@ -12,13 +12,17 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):
-    base_url: str = "https://exchange.xforce.ibmcloud.com/api"
+    url: str = "https://exchange.xforce.ibmcloud.com/api"
     web_url: str = "https://exchange.xforce.ibmcloud.com"
 
     _api_key_name: str
     _api_password_name: str
     malware_only: bool
     timeout: int = 5
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         auth = HTTPBasicAuth(self._api_key_name, self._api_password_name)
@@ -31,7 +35,7 @@ class XForce(classes.ObservableAnalyzer):
                 observable_to_check = quote_plus(self.observable_name)
             else:
                 observable_to_check = self.observable_name
-            url = f"{self.base_url}/{endpoint}/{observable_to_check}"
+            url = f"{self.url}/{endpoint}/{observable_to_check}"
             response = requests.get(
                 url, auth=auth, headers=headers, timeout=self.timeout
             )

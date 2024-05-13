@@ -18,10 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class InQuest(ObservableAnalyzer):
-    base_url: str = "https://labs.inquest.net"
+    url: str = "https://labs.inquest.net"
 
     _api_key_name: str
     inquest_analysis: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -104,7 +108,7 @@ class InQuest(ObservableAnalyzer):
                 "Supported are: 'dfi_search', 'iocdb_search', 'repdb_search'."
             )
 
-        response = requests.get(self.base_url + uri, headers=headers, timeout=30)
+        response = requests.get(self.url + uri, headers=headers, timeout=30)
         response.raise_for_status()
         result = response.json()
         if (

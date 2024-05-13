@@ -232,7 +232,8 @@ def analyze_multiple_observables(request):
         data=request.data, many=True, context={"request": request}
     )
     oas.is_valid(raise_exception=True)
-    jobs = oas.save(send_task=True)
+    parent_job = oas.validated_data[0].get("parent_job", None)
+    jobs = oas.save(send_task=True, parent=parent_job)
     jrs = JobResponseSerializer(jobs, many=True).data
     logger.info(f"finished analyze_multiple_observables from user {request.user}")
     return Response(
@@ -749,6 +750,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
             queue=report.config.queue,
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
+            priority=report.job.priority,
         )
         runner()
 
@@ -920,4 +922,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
                 {"detail": "Unexpected exception raised. Check the code."}
             )
         else:
+            if update_status is None:
+                raise ValidationError(
+                    {"detail": "This Plugin has no Update implemented"}
+                )
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)

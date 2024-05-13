@@ -25,6 +25,7 @@ from api_app.defaults import default_runtime
 from api_app.helpers import calculate_md5, gen_random_colorhex
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Tag
+from api_app.pivots_manager.models import PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
@@ -97,6 +98,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             "scan_mode",
             "scan_check_time",
             "investigation",
+            "parent_job",
         )
 
     md5 = rfs.HiddenField(default=None)
@@ -116,6 +118,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     investigation = rfs.PrimaryKeyRelatedField(
         queryset=Investigation.objects.all(), many=False, required=False, default=None
     )
+    parent_job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), required=False)
     connectors_requested = rfs.SlugRelatedField(
         slug_field="name",
         queryset=ConnectorConfig.objects.all(),
@@ -226,8 +229,21 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 playbook.tags.all()
             )
 
-        attrs["analyzers_to_execute"] = self.set_analyzers_to_execute(**attrs)
-        attrs["connectors_to_execute"] = self.set_connectors_to_execute(**attrs)
+        analyzers_to_execute = attrs[
+            "analyzers_to_execute"
+        ] = self.set_analyzers_to_execute(**attrs)
+        connectors_to_execute = attrs[
+            "connectors_to_execute"
+        ] = self.set_connectors_to_execute(**attrs)
+        if not analyzers_to_execute and not connectors_to_execute:
+            warnings = "\n".join(self.filter_warnings)
+            raise ValidationError(
+                {
+                    "detail": "No Analyzers and Connectors "
+                    f"can be run after filtering:\n{warnings}"
+                }
+            )
+
         attrs["visualizers_to_execute"] = self.set_visualizers_to_execute(**attrs)
         attrs["warnings"] = list(self.filter_warnings)
         attrs["tags"] = attrs.pop("tags_labels", [])
@@ -256,11 +272,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         self, analyzers_requested: List[AnalyzerConfig], tlp: str, **kwargs
     ) -> List[AnalyzerConfig]:
         analyzers_executed = list(self.plugins_to_execute(tlp, analyzers_requested))
-        if not analyzers_executed:
-            warnings = "\n".join(self.filter_warnings)
-            raise ValidationError(
-                {"detail": f"No Analyzers can be run after filtering:\n{warnings}"}
-            )
         return analyzers_executed
 
     def plugins_to_execute(
@@ -332,6 +343,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     def create(self, validated_data: Dict) -> Job:
         warnings = validated_data.pop("warnings")
         send_task = validated_data.pop("send_task", False)
+        parent_job = validated_data.pop("parent_job", None)
         if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
             try:
                 return self.check_previous_jobs(validated_data)
@@ -342,6 +354,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         job.warnings = warnings
         job.save()
         logger.info(f"Job {job.pk} created")
+        if parent_job:
+            PivotMap.objects.create(
+                starting_job=validated_data["parent"], ending_job=job, pivot_config=None
+            )
         if send_task:
             from intel_owl.tasks import job_pipeline
 
@@ -350,6 +366,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 args=[job.pk],
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
+                priority=job.priority,
             )
 
         return job
@@ -438,6 +455,7 @@ class JobTreeSerializer(ModelSerializer):
             "pivot_config",
             "playbook",
             "status",
+            "received_request_time",
         ]
 
     playbook = rfs.SlugRelatedField(
@@ -472,8 +490,6 @@ class JobSerializer(_AbstractJobViewSerializer):
             "path",
             "numchild",
             "sent_to_bi",
-            "scan_mode",
-            "scan_check_time",
         )
 
     comments = CommentSerializer(many=True, read_only=True)
@@ -497,11 +513,17 @@ class JobSerializer(_AbstractJobViewSerializer):
     )
     playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    investigation = rfs.SerializerMethodField(read_only=True, default=None)
     permissions = rfs.SerializerMethodField()
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
+
+    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
+        if root_investigation := instance.get_root().investigation:
+            return root_investigation.pk
+        return instance.investigation
 
     def get_fields(self):
         # this method override is required for a cyclic import
@@ -557,12 +579,25 @@ class MultipleJobSerializer(rfs.ListSerializer):
         if parent:
             # the parent has already an investigation
             # so we don't need to do anything because everything is already connected
-            if parent.investigation:
+            root = parent.get_root()
+            if root.investigation:
+                root.investigation.status = root.investigation.Status.RUNNING.value
+                root.investigation.save()
                 return jobs
             # if we have a parent, it means we are pivoting from one job to another
             else:
+                if parent.playbook_to_execute:
+                    investigation_name = (
+                        f"{parent.playbook_to_execute.name}:"
+                        f" {parent.analyzed_object_name}"
+                    )
+                else:
+                    investigation_name = (
+                        f"Pivot investigation: {parent.analyzed_object_name}"
+                    )
+
                 investigation = Investigation.objects.create(
-                    name="Pivot investigation",
+                    name=investigation_name,
                     owner=self.context["request"].user,
                 )
                 investigation.jobs.add(parent)
@@ -579,7 +614,8 @@ class MultipleJobSerializer(rfs.ListSerializer):
             # we are in the multiple input case
             elif len(jobs) > 1:
                 investigation = Investigation.objects.create(
-                    name="Custom investigation", owner=self.context["request"].user
+                    name=f"Custom investigation: {len(jobs)} jobs",
+                    owner=self.context["request"].user,
                 )
                 for job in jobs:
                     job: Job
@@ -589,7 +625,6 @@ class MultipleJobSerializer(rfs.ListSerializer):
             else:
                 return jobs
         investigation: Investigation
-        investigation.name = investigation.name + f" #{investigation.id}"
         investigation.status = investigation.Status.RUNNING.value
         investigation.for_organization = True
         investigation.save()
@@ -916,10 +951,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
         source="playbook_to_execute",
         slug_field="name",
     )
-    investigation = rfs.SlugRelatedField(
-        read_only=True,
-        slug_field="pk",
-    )
+    investigation = rfs.SerializerMethodField(read_only=True, default=None)
 
     class Meta:
         model = Job
@@ -933,6 +965,11 @@ class JobResponseSerializer(rfs.ModelSerializer):
         ]
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer
+
+    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
+        if root_investigation := instance.get_root().investigation:
+            return root_investigation.pk
+        return instance.investigation
 
     def to_representation(self, instance: Job):
         result = super().to_representation(instance)

@@ -10,7 +10,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class ThreatFox(classes.ObservableAnalyzer):
-    base_url: str = "https://threatfox-api.abuse.ch/api/v1/"
+    url: str = "https://threatfox-api.abuse.ch/api/v1/"
     disable: bool = False  # optional
 
     def update(self) -> bool:
@@ -22,15 +22,18 @@ class ThreatFox(classes.ObservableAnalyzer):
 
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
-        response = requests.post(self.base_url, data=json.dumps(payload))
+        response = requests.post(self.url, data=json.dumps(payload))
         response.raise_for_status()
 
         result = response.json()
-        data = result.get("data", {})
-        if isinstance(data, dict):
-            ioc_id = data.get("id", "")
-            if ioc_id:
-                result["link"] = f"https://threatfox.abuse.ch/ioc/{ioc_id}"
+        data = result.get("data", [])
+        if data and isinstance(data, list):
+            for index, element in enumerate(data):
+                ioc_id = element.get("id", "")
+                if ioc_id:
+                    result["data"][index][
+                        "link"
+                    ] = f"https://threatfox.abuse.ch/ioc/{ioc_id}"
         return result
 
     @classmethod
@@ -39,7 +42,18 @@ class ThreatFox(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=MockUpResponse(
+                        {
+                            "query_status": "ok",
+                            "data": [
+                                {
+                                    "id": "12",
+                                    "ioc": "139.180.203.104:443",
+                                },
+                            ],
+                        },
+                        200,
+                    ),
                 ),
             )
         ]

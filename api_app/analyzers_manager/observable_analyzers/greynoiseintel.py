@@ -17,31 +17,41 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
     greynoise_api_version: str
     max_records_to_retrieve: int
 
-    _api_key_name: str
+    _api_key_name: str = None
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
+    @property
+    def integration_name(self):
+        if self.greynoise_api_version == "v2":
+            return "greynoise-intelowl-v1.0"
+        elif self.greynoise_api_version == "v3":
+            return "greynoise-community-intelowl-v1.0"
+        raise RuntimeError(f"Version {self.greynoise_api_version} not configured")
 
     def run(self):
         response = {}
+        if self.greynoise_api_version == "v2":
+            session = GreyNoise(
+                api_key=self._api_key_name,
+                integration_name=self.integration_name,
+            )
+        elif self.greynoise_api_version == "v3":
+            session = GreyNoise(
+                api_key=self._api_key_name,
+                integration_name=self.integration_name,
+                offering="Community",
+            )
+        else:
+            raise AnalyzerRunException(
+                "Invalid API Version. Supported are: v2 (paid), v3 (community)"
+            )
         try:
+            response = session.ip(self.observable_name)
             if self.greynoise_api_version == "v2":
-                session = GreyNoise(
-                    api_key=self._api_key_name,
-                    integration_name="greynoise-intelowl-v1.0",
-                )
-                response = session.ip(self.observable_name)
                 response |= session.riot(self.observable_name)
-
-            elif self.greynoise_api_version == "v3":
-                # this allows to use this service without an API key set
-                session = GreyNoise(
-                    api_key=self._api_key_name,
-                    integration_name="greynoise-community-intelowl-v1.0",
-                    offering="Community",
-                )
-                response = session.ip(self.observable_name)
-            else:
-                raise AnalyzerRunException(
-                    "Invalid API Version. Supported are: v2 (paid), v3 (community)"
-                )
         # greynoise library does provide empty messages in case of these errors...
         # so it's better to catch them and create custom management
         except RateLimitError as e:

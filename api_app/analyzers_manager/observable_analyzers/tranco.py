@@ -10,14 +10,18 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Tranco(classes.ObservableAnalyzer):
-    base_url: str = "https://tranco-list.eu/api/ranks/domain/"
+    url: str = "https://tranco-list.eu/api/ranks/domain/"
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         observable_to_analyze = self.observable_name
         if self.observable_classification == self.ObservableTypes.URL:
             observable_to_analyze = urlparse(self.observable_name).hostname
 
-        url = self.base_url + observable_to_analyze
+        url = self.url + observable_to_analyze
         response = requests.get(url)
         response.raise_for_status()
 

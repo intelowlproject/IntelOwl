@@ -33,6 +33,7 @@ function createJobPayload(
   _scanMode,
   scanCheckTime,
   investigationIdParam,
+  parentIdParam,
 ) {
   let payload = {};
   /* we add a custom function to the object to reuse the code:
@@ -105,6 +106,10 @@ function createJobPayload(
   if (investigationIdParam) {
     payload.append("investigation", investigationIdParam);
   }
+  // parent id in param
+  if (parentIdParam) {
+    payload.append("parent_job", parentIdParam);
+  }
   // remove custom method in order to avoid to send it to the backend
   if (!isSample) delete payload.append;
   console.debug("job request params:");
@@ -162,6 +167,7 @@ export async function createJob(
   _scanMode,
   scanCheckTime,
   investigationIdParam,
+  parentIdParam,
 ) {
   try {
     console.debug(
@@ -202,6 +208,7 @@ export async function createJob(
       _scanMode,
       scanCheckTime,
       investigationIdParam,
+      parentIdParam,
     );
     const resp = await axios.post(apiUrl, payload, {
       headers: {

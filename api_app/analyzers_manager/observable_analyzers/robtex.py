@@ -12,7 +12,11 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Robtex(classes.ObservableAnalyzer):
-    base_url = "https://freeapi.robtex.com/"
+    url = "https://freeapi.robtex.com/"
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         if self.observable_classification == self.ObservableTypes.IP:
@@ -36,7 +40,7 @@ class Robtex(classes.ObservableAnalyzer):
 
         loaded_results = []
         for uri in uris:
-            response = requests.get(self.base_url + uri)
+            response = requests.get(self.url + uri)
             response.raise_for_status()
             result = response.text.split("\r\n")
             for item in result:

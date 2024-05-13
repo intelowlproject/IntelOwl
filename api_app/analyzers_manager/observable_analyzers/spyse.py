@@ -12,9 +12,13 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Spyse(classes.ObservableAnalyzer):
-    base_url: str = "https://api.spyse.com/v4/data/"
+    url: str = "https://api.spyse.com/v4/data/"
 
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def __build_spyse_api_uri(self) -> str:
         if self.observable_classification == self.ObservableTypes.DOMAIN:
@@ -37,7 +41,7 @@ class Spyse(classes.ObservableAnalyzer):
                 f"{self.observable_classification} not supported."
                 "Supported are: IP, domain and generic."
             )
-        return f"{self.base_url}/{endpoint}/{self.observable_name}"
+        return f"{self.url}/{endpoint}/{self.observable_name}"
 
     def run(self):
         headers = {

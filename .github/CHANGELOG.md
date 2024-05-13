@@ -2,13 +2,23 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v6.0.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.1)
+Major fixes and adjustments. We improved the documentation to help the transition to the new major version.
+
+We added **Pivot** buttons to enable manual Pivoting from an Observable/File analysis to another. See [Doc](https://intelowl.readthedocs.io/en/latest/Usage.html#pivots) for more info
+
+As usual, we add new plugins. This release brings the following new ones:
+* a complete **TakedownRequest** playbook to automate TakeDown requests for malicious domains
+* new File Analyzers for tools like [HFinger](https://github.com/CERT-Polska/hfinger), [Permhash](https://github.com/google/permhash) and [Blint](https://github.com/owasp-dep-scan/blint)
+* improvement of the existing Maxmind analyzer: it now downloads the ASN database too.
+
 ## [v6.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.1)
 Little fixes for the major.
 
 ## [v6.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.0)
 This major release is another important milestone for this project! We have been working hard to transform IntelOwl from a *Data Extraction Platform* to a complete *Investigation Platform*!
 
-One of the most noticeable feature is the addition of the [**Investigation** framework](https://intelowl.readthedocs.io/en/latest/Usage.md#investigations-framework)!
+One of the most noticeable feature is the addition of the [**Investigation** framework](https://intelowl.readthedocs.io/en/latest/Usage.html#investigations-framework)!
  
 Thanks to the this new feature, analysts can leverage IntelOwl as the starting point of their "Investigations", register their findings, correlate the information found, and collaborate...all in a single place.
 

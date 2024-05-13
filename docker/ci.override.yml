@@ -9,6 +9,7 @@ services:
         limits:
           cpus: '1'
           memory: 2000M
+          
   uwsgi:
     build:
       context: ..

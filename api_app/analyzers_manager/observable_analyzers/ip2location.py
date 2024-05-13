@@ -9,12 +9,16 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Ip2location(classes.ObservableAnalyzer):
-    base_url: str = "https://api.ip2location.io/"
+    url: str = "https://api.ip2location.io/"
     _api_key_name: str
     api_version: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def get_response(self, payload):
-        return requests.get(self.base_url, params=payload)
+        return requests.get(self.url, params=payload)
 
     def run(self):
         try:

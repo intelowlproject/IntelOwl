@@ -84,7 +84,7 @@ class Plugin(metaclass=ABCMeta):
         try:
             return f"({self.__class__.__name__}, job: #{self.job_id})"
         except AttributeError:
-            return f"({self.__class__.__name__}"
+            return f"{self.__class__.__name__}"
 
     def config(self, runtime_configuration: typing.Dict):
         self.__parameters = self._config.read_configured_params(
@@ -128,7 +128,9 @@ class Plugin(metaclass=ABCMeta):
         self.report.save(update_fields=["status", "report"])
 
     def log_error(self, e):
-        if isinstance(e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded)):
+        if isinstance(
+            e, (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded, HTTPError)
+        ):
             error_message = self.get_error_message(e)
             logger.error(error_message)
         else:
@@ -137,15 +139,17 @@ class Plugin(metaclass=ABCMeta):
             logger.exception(error_message)
 
     def after_run_failed(self, e: Exception):
-        self.log_error(e)
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
-        if isinstance(e, HTTPError):
-            if "429 Client Error" in str(e):
-                self.disable_for_rate_limit()
-            else:
-                logger.info(f"Http error is {str(e)}")
+        if isinstance(e, HTTPError) and (
+            hasattr(e, "response")
+            and hasattr(e.response, "status_code")
+            and e.response.status_code == 429
+        ):
+            self.disable_for_rate_limit()
+        else:
+            self.log_error(e)
         if settings.STAGE_CI:
             raise e
 
@@ -177,7 +181,7 @@ class Plugin(metaclass=ABCMeta):
     def get_error_message(self, err, is_base_err=False):
         """
         Returns error message for
-        *_handle_analyzer_exception* and *_handle_base_exception* fn
+        *_handle_analyzer_exception* fn
         """
         return (
             f"{self}."
@@ -209,16 +213,11 @@ class Plugin(metaclass=ABCMeta):
             # add end time of process
             self.after_run()
 
-    def _handle_exception(self, exc) -> None:
-        error_message = self.get_error_message(exc)
+    def _handle_exception(self, exc, is_base_err: bool = False) -> None:
+        if not is_base_err:
+            traceback.print_exc()
+        error_message = self.get_error_message(exc, is_base_err=is_base_err)
         logger.error(error_message)
-        self.report.errors.append(str(exc))
-        self.report.status = self.report.Status.FAILED
-
-    def _handle_base_exception(self, exc) -> None:
-        traceback.print_exc()
-        error_message = self.get_error_message(exc, is_base_err=True)
-        logger.exception(error_message)
         self.report.errors.append(str(exc))
         self.report.status = self.report.Status.FAILED
 
@@ -265,18 +264,18 @@ class Plugin(metaclass=ABCMeta):
         if url and url.startswith("http"):
             if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
                 return True
-            logger.info(f"Checking url {url} for {self}")
+            logger.info(f"healthcheck  url {url} for {self}")
             try:
                 # momentarily set this to False to
                 # avoid fails for https services
-                requests.head(url, timeout=10, verify=False)
+                response = requests.head(url, timeout=10, verify=False)
+                response.raise_for_status()
             except (
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
+                requests.exceptions.HTTPError,
             ) as e:
-                logger.info(
-                    f"Health check failed: url {url}" f" for {self}. Error: {e}"
-                )
+                logger.info(f"healthcheck failed: url {url}" f" for {self}. Error: {e}")
                 return False
             else:
                 return True
@@ -293,7 +292,12 @@ class Plugin(metaclass=ABCMeta):
                     name__contains="api_key"
                 ).first()
                 # if we do not have api keys OR the api key was org based
-                if not api_key_parameter or api_key_parameter.is_from_org:
+                # OR if the api key is not actually required and we do not have it set
+                if (
+                    not api_key_parameter
+                    or api_key_parameter.is_from_org
+                    or (not api_key_parameter.required and not api_key_parameter.value)
+                ):
                     org_configuration.disable_for_rate_limit()
                 else:
                     logger.warning(

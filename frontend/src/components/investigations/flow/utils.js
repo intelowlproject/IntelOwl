@@ -23,6 +23,7 @@ function addJobNode(
       refetchTree,
       refetchInvestigation,
       isFirstLevel: isFirstLevel || false,
+      created: job.received_request_time,
     },
     type: "jobNode",
   });

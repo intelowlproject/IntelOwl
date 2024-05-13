@@ -11,13 +11,17 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class CheckPhish(classes.ObservableAnalyzer):
-    base_url: str = "https://developers.checkphish.ai/api/neo/scan"
-    status_url: str = base_url + "/status"
+    url: str = "https://developers.checkphish.ai/api/neo/scan"
+    status_url: str = url + "/status"
 
     polling_tries: int
     polling_time: float
 
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         json_data = {
@@ -25,7 +29,7 @@ class CheckPhish(classes.ObservableAnalyzer):
             "urlInfo": {"url": self.observable_name},
         }
 
-        response = requests.post(CheckPhish.base_url, json=json_data)
+        response = requests.post(CheckPhish.url, json=json_data)
         response.raise_for_status()
 
         job_id = response.json().get("jobID")

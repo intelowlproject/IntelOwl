@@ -9,11 +9,15 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class HybridAnalysisGet(ObservableAnalyzer):
-    base_url: str = "https://www.hybrid-analysis.com"
-    api_url: str = f"{base_url}/api/v2/"
-    sample_url: str = f"{base_url}/sample"
+    url: str = "https://www.hybrid-analysis.com"
+    api_url: str = f"{url}/api/v2/"
+    sample_url: str = f"{url}/sample"
 
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         headers = {

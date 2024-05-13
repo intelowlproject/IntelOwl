@@ -1,115 +1,46 @@
+/* eslint-disable id-length */
 import React from "react";
 import PropTypes from "prop-types";
-import { Fade } from "reactstrap";
-import { MdPauseCircleOutline } from "react-icons/md";
+import { ReactFlowProvider } from "reactflow";
+import "reactflow/dist/style.css";
+import { IconButton } from "@certego/certego-ui";
 
-import { IconAlert, IconButton } from "@certego/certego-ui";
+import { JobFinalStatuses } from "../../../constants/jobConst";
+import { areYouSureConfirmDialog } from "../../common/areYouSureConfirmDialog";
 
 import { killJob } from "./jobApi";
-import { JobStatuses } from "../../../constants/jobConst";
-
-import {
-  reportedPluginNumber,
-  reportedVisualizerNumber,
-} from "./utils/reportedPlugins";
+import { killJobIcon } from "../../common/icon/icons";
+import { JobIsRunningFlow } from "./flow/JobIsRunningFlow";
 
 export function JobIsRunningAlert({ job }) {
-  // number of analyzers/connectors/visualizers reported (status: killed/succes/failed)
-  const analizersReported = reportedPluginNumber(job.analyzer_reports);
-  const connectorsReported = reportedPluginNumber(job.connector_reports);
-  const pivotsReported = reportedPluginNumber(job.pivot_reports);
-  const visualizersReported = reportedVisualizerNumber(
-    job.visualizer_reports,
-    job.visualizers_to_execute,
-  );
-
-  /* Check if analyzers/connectors/visualizers are completed
-      The analyzers are completed from the "analyzers_completed" status (index=3) to the last status 
-      The connectors are completed from the "connectors_completed" status (index=5) to the last status 
-      The visualizers are completed from the "visualizers_completed" status (index=7) to the last status 
-    */
-  const analyzersCompleted = Object.values(JobStatuses)
-    .slice(3)
-    .includes(job.status);
-  const connectorsCompleted = Object.values(JobStatuses)
-    .slice(5)
-    .includes(job.status);
-  const pivotsCompleted = Object.values(JobStatuses)
-    .slice(7)
-    .includes(job.status);
-  const visualizersCompleted = Object.values(JobStatuses)
-    .slice(9)
-    .includes(job.status);
-
-  const alertElements = [
-    {
-      step: 1,
-      type: "ANALYZERS",
-      completed:
-        analizersReported === job.analyzers_to_execute.length &&
-        analyzersCompleted,
-      report: `${analizersReported}/${job.analyzers_to_execute.length}`,
-    },
-    {
-      step: 2,
-      type: "CONNECTORS",
-      completed:
-        connectorsReported === job.connectors_to_execute.length &&
-        connectorsCompleted,
-      report: `${connectorsReported}/${job.connectors_to_execute.length}`,
-    },
-    {
-      step: 3,
-      type: "PIVOTS",
-      completed:
-        pivotsReported === job.pivots_to_execute.length && pivotsCompleted,
-      report: `${pivotsReported}/${job.pivots_to_execute.length}`,
-    },
-    {
-      step: 4,
-      type: "VISUALIZERS",
-      completed:
-        visualizersReported === job.visualizers_to_execute.length &&
-        visualizersCompleted,
-      report: `${visualizersReported}/${job.visualizers_to_execute.length}`,
-    },
-  ];
+  const onKillJobBtnClick = async () => {
+    const sure = await areYouSureConfirmDialog(`Kill Job #${job.id}`);
+    if (!sure) return null;
+    await killJob(job.id);
+    return null;
+  };
 
   return (
-    <Fade className="d-flex-center mx-auto">
-      <IconAlert
-        id="jobisrunningalert-iconalert"
-        color="info"
-        className="text-info text-center"
-      >
-        <h6>
-          This job is currently <strong className="text-accent">running</strong>
-          .
-        </h6>
-        {alertElements.map((element) => (
-          <div className="text-white">
-            STEP {element.step}: {element.type} RUNNING -
-            <strong
-              className={`text-${element.completed ? "success" : "info"}`}
-            >
-              &nbsp;reported {element.report}
-            </strong>
-          </div>
-        ))}
-        {job.permissions?.kill && (
-          <IconButton
-            id="jobisrunningalert-iconbutton"
-            Icon={MdPauseCircleOutline}
-            size="xs"
-            title="Stop Job Process"
-            color="danger"
-            titlePlacement="top"
-            onClick={() => killJob(job.id)}
-            className="mt-2"
-          />
-        )}
-      </IconAlert>
-    </Fade>
+    <>
+      <ReactFlowProvider>
+        <JobIsRunningFlow job={job} />
+      </ReactFlowProvider>
+      <div className="d-flex-center">
+        {job.permissions?.kill &&
+          !Object.values(JobFinalStatuses).includes(job.status) && (
+            <IconButton
+              id="killjob-iconbutton"
+              Icon={killJobIcon}
+              size="xs"
+              title="Stop Job Process"
+              color="danger"
+              titlePlacement="top"
+              onClick={onKillJobBtnClick}
+              className="mt-4"
+            />
+          )}
+      </div>
+    </>
   );
 }
 

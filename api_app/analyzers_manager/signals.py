@@ -1,13 +1,31 @@
-from django.db.models.signals import post_migrate
+import logging
+import uuid
+
+from django.conf import settings
 from django.dispatch import receiver
 
-from api_app.analyzers_manager.apps import AnalyzersManagerConfig
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.signals import migrate_finished
+from intel_owl.celery import get_queue_name
+
+logger = logging.getLogger(__name__)
 
 
-@receiver(post_migrate, sender=AnalyzersManagerConfig)
-def post_migrate_analyzer(
-    sender, app_config, verbosity, interactive, stdout, using, plan, apps, **kwargs
+@receiver(migrate_finished)
+def post_migrate_analyzers_manager(
+    sender,
+    *args,
+    check_unapplied: bool = False,
+    **kwargs,
 ):
-    if plan:
-        AnalyzerConfig.delete_class_cache_keys()
+    logger.info(f"Post migrate {args} {kwargs}")
+    if check_unapplied:
+        return
+    from intel_owl.tasks import refresh_cache
+
+    refresh_cache.apply_async(
+        queue=get_queue_name(settings.CONFIG_QUEUE),
+        MessageGroupId=str(uuid.uuid4()),
+        priority=3,
+        args=[AnalyzerConfig.python_path],
+    )

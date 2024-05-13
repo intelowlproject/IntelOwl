@@ -12,10 +12,14 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Shodan(classes.ObservableAnalyzer):
-    base_url: str = "https://api.shodan.io/"
+    url: str = "https://api.shodan.io/"
 
     shodan_analysis: str
     _api_key_name: str
+
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self):
         if self.shodan_analysis == "search":
@@ -33,7 +37,7 @@ class Shodan(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.get(self.base_url + uri, params=params)
+            response = requests.get(self.url + uri, params=params)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

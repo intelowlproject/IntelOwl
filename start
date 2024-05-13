@@ -220,6 +220,10 @@ while [[ $# -gt 0 ]]; do
     params["https"]=true
     shift 1
   ;;
+  --traefik)
+    params["traefik"]=true
+    shift 1
+  ;;
   -h | --help)
     print_help
     exit 0

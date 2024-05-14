@@ -4,7 +4,15 @@ import { DataTable, DefaultColumnFilter } from "@certego/certego-ui";
 
 import { VerticalListVisualizer } from "./verticalList";
 
-export function TableVisualizer({ id, size, columns, data }) {
+export function TableVisualizer({
+  id,
+  size,
+  columns,
+  data,
+  pageSize,
+  disableFilters,
+  disableSortBy,
+}) {
   const tableColumns = [];
 
   columns.forEach((column) => {
@@ -21,14 +29,15 @@ export function TableVisualizer({ id, size, columns, data }) {
           row: { original },
         },
       }) => original[column],
-      disableSortBy: true,
+      disableFilters,
+      disableSortBy,
       Filter: DefaultColumnFilter,
     });
   });
 
   const tableConfig = {};
   const tableInitialState = {
-    pageSize: 6,
+    pageSize,
   };
 
   return (
@@ -48,5 +57,8 @@ TableVisualizer.propTypes = {
   id: PropTypes.string.isRequired,
   size: PropTypes.string.isRequired,
   columns: PropTypes.arrayOf(PropTypes.string).isRequired,
-  data: PropTypes.arrayOf(PropTypes.element).isRequired,
+  data: PropTypes.array.isRequired,
+  pageSize: PropTypes.number.isRequired,
+  disableFilters: PropTypes.bool.isRequired,
+  disableSortBy: PropTypes.bool.isRequired,
 };

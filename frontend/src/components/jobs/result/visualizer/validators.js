@@ -155,7 +155,12 @@ function parseElementFields(rawElement) {
     }
     case VisualizerComponentType.TABLE: {
       validatedFields.data = parseElementListOfDict(rawElement.data || []);
-      validatedFields.columns = rawElement.columns;
+      validatedFields.columns = rawElement.columns.map((column) =>
+        parseString(column),
+      );
+      validatedFields.pageSize = rawElement.page_size;
+      validatedFields.disableFilters = parseBool(rawElement.disable_filters);
+      validatedFields.disableSortBy = parseBool(rawElement.disable_sort_by);
       break;
     }
     // base case

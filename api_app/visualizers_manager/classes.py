@@ -288,14 +288,26 @@ class VisualizableTable(VisualizableDataTableMixin, VisualizableObject):
         data: List[Dict[str, VisualizableObject]],
         size: VisualizableSize = VisualizableSize.S_AUTO,
         alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
+        page_size: int = 5,
+        disable_filters: bool = False,
+        disable_sort_by: bool = False,
     ):
         super().__init__(size=size, alignment=alignment, disable=False)
         self.data = data
         self.columns = columns
+        self.page_size = page_size
+        self.disable_filters = disable_filters
+        self.disable_sort_by = disable_sort_by
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["data", "columns"]
+        return super().attributes + [
+            "data",
+            "columns",
+            "page_size",
+            "disable_filters",
+            "disable_sort_by",
+        ]
 
     @property
     def type(self) -> str:

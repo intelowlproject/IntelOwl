@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { DataTable } from "@certego/certego-ui";
+import { DataTable, DefaultColumnFilter } from "@certego/certego-ui";
+
+import { VerticalListVisualizer } from "./verticalList";
 
 export function TableVisualizer({ id, size, columns, data }) {
   const tableColumns = [];
@@ -10,8 +12,17 @@ export function TableVisualizer({ id, size, columns, data }) {
     tableColumns.push({
       Header: columnHeader,
       id: column,
-      accessor: column,
+      accessor: (row) =>
+        row[column].type === VerticalListVisualizer
+          ? row[column].props.values.map((val) => val.props.value)
+          : row[column].props.value,
+      Cell: ({
+        cell: {
+          row: { original },
+        },
+      }) => original[column],
       disableSortBy: true,
+      Filter: DefaultColumnFilter,
     });
   });
 
@@ -21,7 +32,7 @@ export function TableVisualizer({ id, size, columns, data }) {
   };
 
   return (
-    <div className={size} style={{ height: "30%", overflow: "scroll" }}>
+    <div className={size} style={{ maxHeight: "60vh", overflowY: "scroll" }}>
       <DataTable
         id={id}
         data={data}

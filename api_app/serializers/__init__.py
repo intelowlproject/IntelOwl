@@ -9,6 +9,8 @@ from certego_saas.ext.upload.elastic import AbstractBISerializer
 
 
 class AbstractBIInterface(AbstractBISerializer):
+    application = rfs.CharField(read_only=True, default="IntelOwl")
+    environment = rfs.SerializerMethodField(method_name="get_environment")
     username: Field
     name: Field
     class_instance = rfs.SerializerMethodField(

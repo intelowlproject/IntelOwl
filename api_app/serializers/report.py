@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers as rfs
 
 from api_app.models import AbstractReport
@@ -32,7 +33,7 @@ class AbstractReportBISerializer(AbstractBIInterface):
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
-        return self.to_elastic_dict(data)
+        return self.to_elastic_dict(data, settings.ELASTICSEARCH_BI_INDEX)
 
     def get_class_instance(self, instance: AbstractReport):
         return super().get_class_instance(instance).split("report")[0]

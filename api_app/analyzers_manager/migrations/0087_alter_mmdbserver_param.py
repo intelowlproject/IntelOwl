@@ -6,7 +6,7 @@ def migrate(apps, schema_editor):
 
     pm = PythonModule.objects.get(
         module="mmdb_server.MmdbServer",
-        base_path="api_app.analyzers_manager.file_analyzers",
+        base_path="api_app.analyzers_manager.observable_analyzers",
     )
     param = pm.parameters.get(name="base_url")
     param.name = "url"

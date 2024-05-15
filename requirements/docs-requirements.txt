@@ -2,4 +2,4 @@ sphinx_rtd_theme==2.0.0
 sphinxcontrib-openapi==0.8.3
 sphinxcontrib-redoc==1.6.0
 recommonmark==0.7.1
-docutils==0.20.1
+docutils==0.21.2

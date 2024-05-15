@@ -41,7 +41,11 @@ export function TableVisualizer({
   };
 
   return (
-    <div className={size} style={{ maxHeight: "60vh", overflowY: "scroll" }}>
+    <div
+      id={id}
+      className={size}
+      style={{ maxHeight: "60vh", overflowY: "scroll" }}
+    >
       <DataTable
         id={id}
         data={data}
@@ -58,7 +62,13 @@ TableVisualizer.propTypes = {
   size: PropTypes.string.isRequired,
   columns: PropTypes.arrayOf(PropTypes.string).isRequired,
   data: PropTypes.array.isRequired,
-  pageSize: PropTypes.number.isRequired,
-  disableFilters: PropTypes.bool.isRequired,
-  disableSortBy: PropTypes.bool.isRequired,
+  pageSize: PropTypes.number,
+  disableFilters: PropTypes.bool,
+  disableSortBy: PropTypes.bool,
+};
+
+TableVisualizer.defaultProps = {
+  pageSize: 5,
+  disableFilters: false,
+  disableSortBy: false,
 };

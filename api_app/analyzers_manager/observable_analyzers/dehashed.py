@@ -21,7 +21,7 @@ class DehashedSearch(ObservableAnalyzer):
     - API key is mandatory for dehased.com's API.
     """
 
-    base_url: str = "https://api.dehashed.com/"
+    url: str = "https://api.dehashed.com/"
     size: int
     pages: int
     operator: str
@@ -86,7 +86,7 @@ class DehashedSearch(ObservableAnalyzer):
                 "User-Agent": "IntelOwl",
             }
         )
-        url = f"{self.base_url}search?query={value}&size={self.size}"
+        url = f"{self.url}search?query={value}&size={self.size}"
 
         total_entries = []
         for page_no in range(1, self.pages + 1):

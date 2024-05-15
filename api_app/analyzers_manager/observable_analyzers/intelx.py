@@ -25,7 +25,7 @@ class IntelX(ObservableAnalyzer):
     Requires API Key
     """
 
-    base_url: str = "https://2.intelx.io"
+    url: str = "https://2.intelx.io"
 
     _api_key_name: str
 
@@ -41,7 +41,7 @@ class IntelX(ObservableAnalyzer):
         super().config(runtime_configuration)
         if self.query_type not in ["phonebook", "intelligent"]:
             raise AnalyzerConfigurationException(f"{self.query_type} not supported")
-        self.url = self.base_url + f"/{self.query_type}/search"
+        self.search_url = self.url + f"/{self.query_type}/search"
 
     @cached_property
     def _session(self):
@@ -58,7 +58,7 @@ class IntelX(ObservableAnalyzer):
             )
             try:
                 r = self._session.get(
-                    f"{self.url}/result?id={search_id}"
+                    f"{self.search_url}/result?id={search_id}"
                     f"&limit={self.rows_limit}&offset=-1"
                 )
                 r.raise_for_status()
@@ -104,7 +104,7 @@ class IntelX(ObservableAnalyzer):
         logger.info(
             f"starting {self.query_type} request for observable {self.observable_name}"
         )
-        r = self._session.post(self.url, json=params)
+        r = self._session.post(self.search_url, json=params)
         r.raise_for_status()
         search_id = r.json().get("id", None)
         if not search_id:

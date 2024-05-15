@@ -12,8 +12,8 @@ class MalpediaScan(FileAnalyzer):
     Scan a binary against all YARA rules in Malpedia.
     """
 
-    base_url = "https://malpedia.caad.fkie.fraunhofer.de/api"
-    url = base_url + "/scan/binary"
+    url = "https://malpedia.caad.fkie.fraunhofer.de/api"
+    binary_url = url + "/scan/binary"
 
     _api_key_name: str
 
@@ -23,7 +23,7 @@ class MalpediaScan(FileAnalyzer):
         # construct req
         headers = {"Authorization": f"APIToken {self._api_key_name}"}
         files = {"file": binary}
-        response = requests.post(self.url, headers=headers, files=files)
+        response = requests.post(self.binary_url, headers=headers, files=files)
         response.raise_for_status()
 
         result = response.json()

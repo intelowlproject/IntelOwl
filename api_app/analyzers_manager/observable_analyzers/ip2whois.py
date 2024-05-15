@@ -9,14 +9,14 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Ip2whois(classes.ObservableAnalyzer):
-    base_url: str = "https://api.ip2whois.com/v2"
+    url: str = "https://api.ip2whois.com/v2"
     _api_key_name: str
 
     def update(self):
         pass
 
     def get_response(self, payload):
-        return requests.get(self.base_url, params=payload)
+        return requests.get(self.url, params=payload)
 
     def run(self):
         try:

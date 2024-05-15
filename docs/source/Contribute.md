@@ -186,7 +186,7 @@ If the `Python Module` that you define need this type of behaviour, you have to 
 
 Some `Python Module` requires further check to see if the service provider is able to answer requests; for example if you have done too many requests, or the website is currently down for maintenance and so on.
 If the `Python Module` that you define need this type of behaviour, you have to configure two things:
-- In the python code, you can override a method called `health_check` and put there the custom health check logic. As default, plugins will try to make an HTTP `HEAD` request to the configured url.
+- In the python code, you can override a method called `health_check` and put there the custom health check logic. As default, plugins will try to make an HTTP `HEAD` request to the configured url (the Plugin must have a `url` attribute).
 - In the model class, you have to add the `health_check_schedule` (crontab syntax) that define when the health check should be executed.
 
 

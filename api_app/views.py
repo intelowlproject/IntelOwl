@@ -922,4 +922,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
                 {"detail": "Unexpected exception raised. Check the code."}
             )
         else:
+            if update_status is None:
+                raise ValidationError(
+                    {"detail": "This Plugin has no Update implemented"}
+                )
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)

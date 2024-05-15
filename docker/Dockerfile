@@ -22,13 +22,13 @@ ENV LOG_PATH /var/log/intel_owl
 ARG REPO_DOWNLOADER_ENABLED=true
 ARG WATCHMAN=false
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
-ARG PYCTI_VERSION=5.12.29
+ARG PYCTI_VERSION=6.1.0
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
     ${LOG_PATH}/asgi \
-    /opt/deploy/files_required /opt/deploy/configuration /opt/deploy/files_required/yara
+    /opt/deploy/files_required /opt/deploy/configuration /opt/deploy/files_required/blint /opt/deploy/files_required/yara
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
@@ -78,6 +78,6 @@ COPY --from=frontend-build /build /var/www/reactapp
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"
 # Path(HOME_DIR).mkdir(parents=True, exist_ok=True)
-# so we have to set the home env variable to allow to reate its directory
+# so we have to set the home env variable to allow to create its directory
 ENV HOME ${PYTHONPATH}
 

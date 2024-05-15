@@ -13,6 +13,10 @@ class Ip2location(classes.ObservableAnalyzer):
     _api_key_name: str
     api_version: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def get_response(self, payload):
         return requests.get(self.url, params=payload)
 

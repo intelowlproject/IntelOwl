@@ -13,6 +13,10 @@ class Koodous(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def get_response(self, url):
         return requests.get(
             url, headers={"Authorization": f"Token {self._api_key_name}"}

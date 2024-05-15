@@ -60,7 +60,7 @@ pyelftools==0.31
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
-pymisp==2.4.172
+pymisp==2.4.190
 pyOneNote==0.0.2
 pypdns==2.2.1
 pypssl==2.2
@@ -75,7 +75,9 @@ greynoise==2.1.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0
+blint==2.1.5
 hfinger==0.2.2
+permhash==0.1.4
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

@@ -276,6 +276,10 @@ class ParameterQuerySetTestCase(CustomTestCase):
 
         # user value
         self.assertEqual(param.value, "myperfecttest1")
+        param = Parameter.objects.annotate_value_for_user(
+            ac, self.user, {param.name: "runtime_test"}
+        ).get(pk=param.pk)
+        self.assertEqual(param.value, "runtime_test")
 
         pc.delete()
         pc2.delete()

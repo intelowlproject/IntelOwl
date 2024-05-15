@@ -25,7 +25,6 @@ services:
 
   nginx:
     depends_on:
-      - uwsgi
       - traefik
     labels:
       - "traefik.enable=true"

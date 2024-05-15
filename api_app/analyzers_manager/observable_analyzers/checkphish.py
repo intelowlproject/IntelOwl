@@ -19,6 +19,10 @@ class CheckPhish(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         json_data = {
             "apiKey": self._api_key_name,

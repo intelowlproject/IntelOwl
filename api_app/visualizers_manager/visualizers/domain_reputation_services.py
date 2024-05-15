@@ -15,6 +15,10 @@ logger = getLogger(__name__)
 
 
 class DomainReputationServices(Visualizer):
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
@@ -102,6 +106,28 @@ class DomainReputationServices(Visualizer):
                 disable=disabled,
             )
             return threatfox_report
+
+    @visualizable_error_handler_with_params("Tranco")
+    def _tranco(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="Tranco")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Tranco report does not exist")
+        else:
+            ranks = analyzer_report.report.get("ranks", [])
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not ranks
+            rank = ""
+            if ranks and isinstance(ranks, list):
+                rank = ranks[0].get("rank", "")
+            tranco_report = self.Title(
+                self.Base(
+                    value="Tranco Rank",
+                    link="https://tranco-list.eu/",
+                ),
+                self.Base(value="" if disabled else rank),
+                disable=disabled,
+            )
+            return tranco_report
 
     @visualizable_error_handler_with_params("Phishtank")
     def _phishtank(self):
@@ -219,6 +245,8 @@ class DomainReputationServices(Visualizer):
         first_level_elements.append(self._urlhaus())
 
         first_level_elements.append(self._threatfox())
+
+        first_level_elements.append(self._tranco())
 
         second_level_elements.append(self._phishtank())
 

@@ -15,6 +15,10 @@ logger = getLogger(__name__)
 
 
 class Yara(Visualizer):
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     @visualizable_error_handler_with_params("Analyzer")
     def _yara_analyzer(self):
         return self.Title(

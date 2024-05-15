@@ -586,8 +586,18 @@ class MultipleJobSerializer(rfs.ListSerializer):
                 return jobs
             # if we have a parent, it means we are pivoting from one job to another
             else:
+                if parent.playbook_to_execute:
+                    investigation_name = (
+                        f"{parent.playbook_to_execute.name}:"
+                        f" {parent.analyzed_object_name}"
+                    )
+                else:
+                    investigation_name = (
+                        f"Pivot investigation: {parent.analyzed_object_name}"
+                    )
+
                 investigation = Investigation.objects.create(
-                    name="Pivot investigation",
+                    name=investigation_name,
                     owner=self.context["request"].user,
                 )
                 investigation.jobs.add(parent)
@@ -604,7 +614,8 @@ class MultipleJobSerializer(rfs.ListSerializer):
             # we are in the multiple input case
             elif len(jobs) > 1:
                 investigation = Investigation.objects.create(
-                    name="Custom investigation", owner=self.context["request"].user
+                    name=f"Custom investigation: {len(jobs)} jobs",
+                    owner=self.context["request"].user,
                 )
                 for job in jobs:
                     job: Job
@@ -614,7 +625,6 @@ class MultipleJobSerializer(rfs.ListSerializer):
             else:
                 return jobs
         investigation: Investigation
-        investigation.name = investigation.name + f" #{investigation.id}"
         investigation.status = investigation.Status.RUNNING.value
         investigation.for_organization = True
         investigation.save()

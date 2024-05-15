@@ -82,7 +82,7 @@ describe("extractCountry test", () => {
           end_time: "2024-01-15T14:56:32.328332Z",
           report: {
             country: {
-                names: {
+              names: {
                 de: "Schweden",
                 en: "Sweden",
                 es: "Suecia",
@@ -95,7 +95,7 @@ describe("extractCountry test", () => {
               iso_code: "SE",
               geoname_id: 2661886,
               is_in_european_union: true,
-            }
+            },
             // other keys (locations, continent, registered_country) unsued
           },
         },

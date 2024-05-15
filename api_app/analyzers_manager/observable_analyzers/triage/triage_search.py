@@ -41,7 +41,7 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
             query = f"{self.observable_classification}:{self.observable_name}"
         params = {"query": query}
 
-        self.response = self.session.get(self.base_url + "search", params=params)
+        self.response = self.session.get(self.url + "search", params=params)
 
         self.final_report = self.response.json()
 
@@ -56,7 +56,7 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
             logger.info(
                 f"triage {self.observable_name} polling for result try #{_try + 1}"
             )
-            self.response = self.session.post(self.base_url + "samples", json=data)
+            self.response = self.session.post(self.url + "samples", json=data)
             if self.response.status_code == 200:
                 break
             time.sleep(self.poll_distance)

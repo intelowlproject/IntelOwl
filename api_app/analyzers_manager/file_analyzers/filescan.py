@@ -18,7 +18,7 @@ class FileScanUpload(FileAnalyzer):
 
     max_tries: int = 30
     poll_distance: int = 10
-    base_url = "https://www.filescan.io/api"
+    url = "https://www.filescan.io/api"
     _api_key: str
 
     def run(self):
@@ -31,7 +31,7 @@ class FileScanUpload(FileAnalyzer):
         if not binary:
             raise AnalyzerRunException("File is empty")
         response = requests.post(
-            self.base_url + "/scan/file",
+            self.url + "/scan/file",
             files={"file": (self.filename, binary)},
             headers={"X-Api-Key": self._api_key},
         )
@@ -41,7 +41,7 @@ class FileScanUpload(FileAnalyzer):
 
     def __fetch_report(self, task_id: int) -> dict:
         report = {}
-        url = f"{self.base_url}/scan/{task_id}/report"
+        url = f"{self.url}/scan/{task_id}/report"
         params = {
             "filter": [
                 "general",

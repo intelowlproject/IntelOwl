@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class DocGuardUpload(FileAnalyzer):
-    base_url = "https://api.docguard.io:8443/api"
+    url = "https://api.docguard.io:8443/api"
     _api_key_name: str
 
     def run(self):
@@ -31,7 +31,7 @@ class DocGuardUpload(FileAnalyzer):
         if not binary:
             raise AnalyzerRunException("File is empty")
         response = requests.post(
-            self.base_url + "/FileAnalyzing/AnalyzeFile",
+            self.url + "/FileAnalyzing/AnalyzeFile",
             headers=headers,
             files={"file": (self.filename, binary)},
         )

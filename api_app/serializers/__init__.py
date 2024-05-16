@@ -5,10 +5,10 @@ from rest_framework.fields import Field
 
 from api_app.interfaces import OwnershipAbstractModel
 from certego_saas.apps.organization.organization import Organization
-from certego_saas.ext.upload.elastic import AbstractBISerializer
+from certego_saas.ext.upload.elastic import BISerializer
 
 
-class AbstractBIInterface(AbstractBISerializer):
+class AbstractBIInterface(BISerializer):
     application = rfs.CharField(read_only=True, default="IntelOwl")
     environment = rfs.SerializerMethodField(method_name="get_environment")
     username: Field
@@ -21,7 +21,7 @@ class AbstractBIInterface(AbstractBISerializer):
     end_time: Field
 
     class Meta:
-        fields = AbstractBISerializer.Meta.fields + [
+        fields = BISerializer.Meta.fields + [
             "username",
             "name",
             "class_instance",
@@ -41,6 +41,10 @@ class AbstractBIInterface(AbstractBISerializer):
             return "stag"
         else:
             return "test"
+
+    @staticmethod
+    def get_index():
+        return settings.ELASTICSEARCH_BI_INDEX
 
 
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):

@@ -33,6 +33,15 @@ def migrate(apps, schema_editor):
             pc.parameter = p2
             pc.save()
     p3.delete()
+    Parameter.objects.create(
+        name="all_scanners",
+        type="bool",
+        description="Set this to True to enable all available scanners. "
+        "If enabled, this overwrite the scanner param",
+        is_secret=False,
+        required=False,
+        python_module=pm,
+    )
 
 
 class Migration(migrations.Migration):

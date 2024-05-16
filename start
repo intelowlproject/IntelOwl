@@ -160,12 +160,12 @@ while [[ $# -gt 0 ]]; do
     shift 1
     ;;
   --pcap_analyzers)
-    params["pcap_analyzers"]=true
+    analyzers["pcap_analyzers"]=true
     shift 1
     ;;
 
   --phoneinfoga)
-    params["phoneinfoga"]=true
+    analyzers["phoneinfoga"]=true
     shift 1
     ;;
   --multi_queue)

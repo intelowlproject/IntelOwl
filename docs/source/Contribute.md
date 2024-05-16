@@ -351,6 +351,11 @@ To do so, some utility classes have been made:
     <td class="tg-c3ow"><img alt="Visualizable Vertical List Example" src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/visualizableVlist_example.png"></td>
   </tr>
   <tr>
+    <td class="tg-7n4c">VisualizableTable</td>
+    <td class="tg-0pky">A table of visualizable elements. In the example there is a table of base and vertical lists.</td>
+    <td class="tg-c3ow"><img alt="Visualizable Table Example" src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/visualizableTable_example.png"></td>
+  </tr>
+  <tr>
     <td class="tg-7n4c">VisualizableBool</td>
     <td class="tg-0pky">The representation of a boolean value. It can be enabled or disabled with colors.</td>
     <td class="tg-c3ow"><img alt="Visualizable Bool example" src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/visualizableBool_example.png"></td>

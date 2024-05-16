@@ -181,26 +181,6 @@ class VisualizableListMixin:
         return result
 
 
-class VisualizableDataTableMixin:
-    def to_dict(self) -> Dict:
-        result = super().to_dict()  # noqa
-        data: List[Dict[str, VisualizableObject]] = result.pop("data", [])
-        if any(x for x in data):
-            new_data = []
-            for element in data:
-                new_data.append(
-                    {
-                        key: value.to_dict()
-                        for [key, value] in element.items()
-                        if value is not None
-                    }
-                )
-            result["data"] = new_data
-        else:
-            result["data"] = []
-        return result
-
-
 class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
@@ -281,7 +261,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         return "vertical_list"
 
 
-class VisualizableTable(VisualizableDataTableMixin, VisualizableObject):
+class VisualizableTable(VisualizableObject):
     def __init__(
         self,
         columns: List[str],
@@ -315,6 +295,20 @@ class VisualizableTable(VisualizableDataTableMixin, VisualizableObject):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
+        data: List[Dict[str, VisualizableObject]] = result.pop("data", [])
+        if any(x for x in data):
+            new_data = []
+            for element in data:
+                new_data.append(
+                    {
+                        key: value.to_dict()
+                        for [key, value] in element.items()
+                        if value is not None
+                    }
+                )
+            result["data"] = new_data
+        else:
+            result["data"] = []
         result.pop("disable")
         return result
 

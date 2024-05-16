@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { DataTable, DefaultColumnFilter } from "@certego/certego-ui";
 
 import { VerticalListVisualizer } from "./verticalList";
+import { HorizontalListVisualizer } from "./horizontalList";
 
 export function TableVisualizer({
   id,
@@ -21,7 +22,9 @@ export function TableVisualizer({
       Header: columnHeader,
       id: column,
       accessor: (row) =>
-        row[column].type === VerticalListVisualizer
+        [VerticalListVisualizer, HorizontalListVisualizer].includes(
+          row[column].type,
+        )
           ? row[column].props.values.map((val) => val.props.value)
           : row[column].props.value,
       Cell: ({

@@ -33,9 +33,9 @@ export function VerticalListVisualizer({
         <CardTitle className="p-1 mb-0">
           <Button className="p-0 w-100 px-1" onClick={toggleList} color={color}>
             <div
-              className={`d-flex align-items-center text-capitalize justify-content-${alignment}`}
+              className={`d-flex flex-wrap align-items-center text-capitalize justify-content-${alignment}`}
             >
-              {name}
+              <div className="text-break">{name}</div>
               {isListOpen ? (
                 <IoIosArrowDropupCircle className="ms-1" />
               ) : (

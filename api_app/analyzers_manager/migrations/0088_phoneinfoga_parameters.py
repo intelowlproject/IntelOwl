@@ -20,7 +20,7 @@ def migrate(apps, schema_editor):
     p2 = Parameter.objects.create(
         name="scanners",
         type="list",
-        description="List of scanner names for [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/)",
+        description="List of scanner names for [Phoneinfoga](https://sundowndev.github.io/phoneinfoga/). Available options are: `local,numverify,googlecse,ovh`",
         is_secret=False,
         required=False,
         python_module=pm,

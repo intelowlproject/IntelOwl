@@ -125,7 +125,11 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
           <span className="ms-1">Docs</span>
         </a>
       </NavItem>
-      <Button id="social-button" size="sm" className="mx-2 btn-accent">
+      <Button
+        id="social-button"
+        size="sm"
+        className="mx-2 btn-accent d-flex align-items-center"
+      >
         <>
           <MdShare />
           <span className="ms-1">Social</span>

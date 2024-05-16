@@ -19,7 +19,7 @@ class VirusheeFileUpload(FileAnalyzer):
 
     max_tries = 30
     poll_distance = 10
-    base_url = "https://api.virushee.com"
+    url = "https://api.virushee.com"
 
     _api_key_name: str
 
@@ -46,7 +46,7 @@ class VirusheeFileUpload(FileAnalyzer):
 
     def __check_report_for_hash(self) -> Optional[dict]:
         response_json = None
-        response = self.__session.get(f"{self.base_url}/file/hash/{self.md5}")
+        response = self.__session.get(f"{self.url}/file/hash/{self.md5}")
         if response.status_code == 404:  # hash not found in db
             return response_json
         response.raise_for_status()
@@ -57,13 +57,13 @@ class VirusheeFileUpload(FileAnalyzer):
     def __upload_file(self, binary: bytes) -> str:
         name_to_send = self.filename if self.filename else self.md5
         files = {"file": (name_to_send, binary)}
-        response = self.__session.post(f"{self.base_url}/file/upload", files=files)
+        response = self.__session.post(f"{self.url}/file/upload", files=files)
         response.raise_for_status()
         return response.json()["task"]
 
     def __poll_status_and_result(self, task_id: str) -> dict:
         response_json = None
-        url = f"{self.base_url}/file/task/{task_id}"
+        url = f"{self.url}/file/task/{task_id}"
         for chance in range(self.max_tries):
             logger.info(f"Polling try#{chance+1}")
             response = self.__session.get(url)

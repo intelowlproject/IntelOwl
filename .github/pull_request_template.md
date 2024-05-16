@@ -20,12 +20,13 @@ Please delete options that are not relevant.
     - [ ] I strictly followed the documentation ["How to create a Plugin"](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-add-a-new-plugin)
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
     - [ ] [Advanced-Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Advanced-Usage.md) was updated (in case the plugin provides additional optional configuration).
-    - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.
     - [ ] I have dumped the configuration from Django Admin using the `dumpplugin` command and added it in the project as a data migration. (["How to share a plugin with the community"](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-share-your-plugin-with-the-community))
     - [ ] If a File analyzer was added and it supports a mimetype which is not already supported, you added a sample of that type inside the archive `test_files.zip` and you added the default tests for that mimetype in [test_classes.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_classes.py).
-    - [ ] If you created a new analyzer and it is free (does not require API keys), please add it in the `FREE_TO_USE_ANALYZERS` playbook by following [this guide](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-modify-a-plugin).
+    - [ ] If you created a new analyzer and it is free (does not require any API key), please add it in the `FREE_TO_USE_ANALYZERS` playbook by following [this guide](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-modify-a-plugin).
     - [ ] Check if it could make sense to add that analyzer/connector to other [freely available playbooks](https://intelowl.readthedocs.io/en/develop/Usage.html#list-of-pre-built-playbooks).
-    - [ ] I have provided the resulting raw JSON of a finished analysis and a screenshot of the results. 
+    - [ ] I have provided the resulting raw JSON of a finished analysis and a screenshot of the results.
+    - [ ] If the plugin interacts with an external service, I have created an attribute called precisely `url` that contains this information. This is required for Health Checks. 
+    - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.
     - [ ] I have added that raw JSON sample to the `MockUpResponse` of the `_monkeypatch()` method. This serves us to provide a valid sample for testing.
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
 - [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.

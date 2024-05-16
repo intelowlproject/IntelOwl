@@ -39,9 +39,9 @@ export function VerticalListVisualizer({
               color={color}
             >
               <div
-                className={`d-flex align-items-center text-capitalize justify-content-${alignment}`}
+                className={`d-flex flex-wrap align-items-center text-capitalize justify-content-${alignment}`}
               >
-                {name}
+                <div className="text-break">{name}</div>
                 {isListOpen ? (
                   <IoIosArrowDropupCircle className="ms-1" />
                 ) : (

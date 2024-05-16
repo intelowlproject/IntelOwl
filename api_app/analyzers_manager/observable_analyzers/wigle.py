@@ -9,7 +9,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class WiGLE(classes.ObservableAnalyzer):
-    base_url: str = "https://api.wigle.net"
+    url: str = "https://api.wigle.net"
 
     _api_key_name: str
     search_type: str
@@ -52,7 +52,7 @@ class WiGLE(classes.ObservableAnalyzer):
             )
 
         response = requests.get(
-            self.base_url + uri,
+            self.url + uri,
             headers={"Authorization": "Basic " + self._api_key_name},
         )
         response.raise_for_status()

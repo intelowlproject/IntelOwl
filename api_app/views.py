@@ -182,7 +182,8 @@ def analyze_multiple_files(request):
     logger.info(f"received analyze_multiple_files from user {request.user}")
     fas = FileJobSerializer(data=request.data, context={"request": request}, many=True)
     fas.is_valid(raise_exception=True)
-    jobs = fas.save(send_task=True)
+    parent_job = fas.validated_data[0].get("parent_job", None)
+    jobs = fas.save(send_task=True, parent=parent_job)
     jrs = JobResponseSerializer(jobs, many=True).data
     logger.info(f"finished analyze_multiple_files from user {request.user}")
     return Response(

@@ -3,6 +3,7 @@ import {
   IP_REGEX,
   URL_REGEX,
   HASH_REGEX,
+  PHONE_REGEX,
 } from "../constants/regexConst";
 import {
   ObservableClassifications,
@@ -10,9 +11,11 @@ import {
   InvalidTLD,
 } from "../constants/jobConst";
 
+// IMPORTANT, order matters! phone must be checked after ip or the numbers will be taken as IP addesses
 const observableType2RegExMap = {
   domain: DOMAIN_REGEX,
   ip: IP_REGEX,
+  phone: PHONE_REGEX,
   url: URL_REGEX,
   hash: HASH_REGEX,
 };
@@ -34,6 +37,8 @@ export function observableValidators(stringToValidate) {
   Object.entries(observableType2RegExMap).forEach(([typeName, typeRegEx]) => {
     if (typeRegEx.test(sanitizedString)) {
       stringClassification = typeName;
+      if (stringClassification === "phone")
+        stringClassification = ObservableClassifications.GENERIC;
     }
   });
 

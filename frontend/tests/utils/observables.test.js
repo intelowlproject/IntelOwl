@@ -18,6 +18,9 @@ describe("test observables utilities functions", () => {
     expect(getObservableClassification("hello world")).toBe(
       ObservableClassifications.GENERIC,
     );
+    expect(getObservableClassification("123 4567890")).toBe(
+      ObservableClassifications.GENERIC,
+    );
     expect(getObservableClassification("google.]com")).toBe(
       ObservableClassifications.DOMAIN,
     );
@@ -104,5 +107,38 @@ describe("Observable validators tests", () => {
       classification: "url",
       observable: "http://test.com",
     });
+  });
+
+  test.each([
+    "123 4567890",
+    "123 4567890 ",
+    "123 4567890;",
+    " 123 4567890 ",
+  ])("test valid phone numbers (%s)", (valueToValidate) => {
+    expect(observableValidators(valueToValidate)).toStrictEqual({
+      classification: "generic",
+      observable: "123 4567890",
+    });
+  });
+
+  test.each([
+    "123-456-7890",
+    "(123) 456-7890",
+    "123 456 7890",
+    "123.456.7890",
+    "+91 (123) 456-7890",
+    "+39 123 4567890",
+    "12345 67890",
+    "123-4567890",
+  ])("test invalid phone numbers (%s)", (valueToValidate) => {
+    /* these are valid phone numbers format in the real world, but it's too much complex to support all of them.
+    Also store the same type of data in different format add complexity.
+    If we want to support them store in the db the phone numbers always in the same format.
+    */
+    const validationResult = observableValidators(valueToValidate);
+    /* some of the elements match the ip regex, in case they don't match it return null:
+     use the ?. to access to the field for the null element and it will be undefined.
+    */
+    expect(["ip", undefined]).toContain(validationResult?.classification)
   });
 });

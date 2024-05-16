@@ -412,7 +412,7 @@ In the Pull Request remember to provide some real world examples (screenshots an
 To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a data migration
 You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer (you will find it under `api_app/playbook_manager/migrations`).
 
-Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin PluginConfig <new_analyzer_name>`
+Example: `docker exec -ti intelowl_uwsgi python3 manage.py dumpplugin PlaybookConfig <new_analyzer_name>`
 
 ## How to modify a plugin
 

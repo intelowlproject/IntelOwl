@@ -119,8 +119,9 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
 
 function SaveAsPlaybookIcon() {
   return (
-    <span>
-      <IoMdSave className="me-2" /> Save As Playbook
+    <span className="d-flex align-items-center">
+      <IoMdSave className="me-1" />
+      Save As Playbook
     </span>
   );
 }

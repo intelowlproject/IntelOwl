@@ -736,10 +736,11 @@ export default function ScanForm() {
                         <Button
                           color="primary"
                           size="sm"
-                          className="mx-auto rounded-1 mx-auto col-sm-auto"
+                          className="mx-auto rounded-1 mx-auto col-sm-auto d-flex align-items-center"
                           onClick={() => arrayHelpers.push("")}
                         >
-                          <BsFillPlusCircleFill /> Add new value
+                          <BsFillPlusCircleFill />
+                          &nbsp;Add new value
                         </Button>
                       </Row>
                     </Col>

@@ -6,7 +6,6 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "id": 10,
     "analyzers": ["Hfinger", "Suricata"],
     "connectors": [],
     "pivots": [],

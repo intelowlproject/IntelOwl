@@ -10,106 +10,54 @@ from tests import CustomTestCase
 
 
 class PlaybookConfigQuerySetTestCase(CustomTestCase):
-    def test__subquery_user(self):
-        pc = PlaybookConfig.objects.create(name="test", type=["ip"], description="test")
-        pc.analyzers.set([AnalyzerConfig.objects.first()])
-        j1 = Job.objects.create(
+    def setUp(self) -> None:
+        self.pc = PlaybookConfig.objects.create(
+            name="testplaybook", type=["ip"], description="test"
+        )
+        self.pc.analyzers.set([AnalyzerConfig.objects.first()])
+        self.j1 = Job.objects.create(
             user=self.superuser,
             observable_name="test3.com",
             observable_classification="domain",
             status="reported_without_fails",
-            playbook_to_execute=pc,
+            playbook_to_execute=self.pc,
             finished_analysis_time=now(),
         )
-        j2 = Job.objects.create(
+
+        self.j2 = Job.objects.create(
             user=self.user,
             observable_name="test3.com",
             observable_classification="domain",
             status="reported_without_fails",
-            playbook_to_execute=pc,
+            playbook_to_execute=self.pc,
             finished_analysis_time=now(),
         )
-        j3 = Job.objects.create(
+        self.j3 = Job.objects.create(
             user=self.superuser,
             observable_name="test3.com",
             observable_classification="domain",
             status="reported_without_fails",
-            playbook_to_execute=pc,
+            playbook_to_execute=self.pc,
             finished_analysis_time=now(),
         )
+
+    def tearDown(self):
+        self.j1.delete()
+        self.j2.delete()
+        self.j3.delete()
+        self.pc.delete()
+
+    def test__subquery_user(self):
         subq = PlaybookConfigQuerySet._subquery_weight_user(self.user)
-        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
+        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="testplaybook")
         self.assertEqual(1, pc.weight)
-        j1.delete()
-        j2.delete()
-        j3.delete()
-        pc.delete()
 
     def test__subquery_org_not_membership(self):
-        pc = PlaybookConfig.objects.create(name="test", type=["ip"], description="test")
-        pc.analyzers.set([AnalyzerConfig.objects.first()])
-        j1 = Job.objects.create(
-            user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
-
-        j2 = Job.objects.create(
-            user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
-        j3 = Job.objects.create(
-            user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
         subq = PlaybookConfigQuerySet._subquery_weight_org(self.user)
-        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
+        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="testplaybook")
         self.assertEqual(0, pc.weight)
 
-        j1.delete()
-        j2.delete()
-        j3.delete()
-        pc.delete()
-
     def test__subquery_org(self):
-        pc = PlaybookConfig.objects.create(name="test", type=["ip"], description="test")
-        pc.analyzers.set([AnalyzerConfig.objects.first()])
-        j1 = Job.objects.create(
-            user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
-
-        j2 = Job.objects.create(
-            user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
-        j3 = Job.objects.create(
-            user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
         org = Organization.objects.create(name="test_org")
 
         m1 = Membership.objects.create(
@@ -118,51 +66,17 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
         )
         m2 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
         subq = PlaybookConfigQuerySet._subquery_weight_org(self.user)
-        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
+        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="testplaybook")
         self.assertEqual(2, pc.weight)
 
         m1.delete()
         m2.delete()
         org.delete()
-        j1.delete()
-        j2.delete()
-        j3.delete()
-        pc.delete()
 
     def test__subquery_other(self):
-        pc = PlaybookConfig.objects.create(name="test", type=["ip"], description="test")
-        pc.analyzers.set([AnalyzerConfig.objects.first()])
-        j1 = Job.objects.create(
-            user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
-        j2 = Job.objects.create(
-            user=self.user,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
-        j3 = Job.objects.create(
-            user=self.superuser,
-            observable_name="test3.com",
-            observable_classification="domain",
-            status="reported_without_fails",
-            playbook_to_execute=pc,
-            finished_analysis_time=now(),
-        )
         subq = PlaybookConfigQuerySet._subquery_weight_other(self.user)
-        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="test")
+        pc = PlaybookConfig.objects.annotate(weight=subq).get(name="testplaybook")
         self.assertEqual(2, pc.weight)
-        j1.delete()
-        j2.delete()
-        j3.delete()
-        pc.delete()
 
     def test_ordered_for_user(self):
         pc2 = PlaybookConfig.objects.create(
@@ -218,7 +132,7 @@ class PlaybookConfigQuerySetTestCase(CustomTestCase):
             .filter(description="test")
             .values_list("name", flat=True)
         )
-        self.assertEqual(4, len(pcs))
+        self.assertEqual(5, len(pcs))
         self.assertEqual("zz_first", pcs[0])
         self.assertEqual("asecond", pcs[1])
         self.assertEqual("second", pcs[2])

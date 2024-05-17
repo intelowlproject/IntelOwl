@@ -103,7 +103,7 @@ check_parameters "$@" && shift 2
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers" "phoneinfoga")
+docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga")
 
 declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml" ["redis"]="docker/redis.override.yml")
 for value in "${docker_analyzers[@]}"; do
@@ -163,7 +163,6 @@ while [[ $# -gt 0 ]]; do
     analyzers["pcap_analyzers"]=true
     shift 1
     ;;
-
   --phoneinfoga)
     analyzers["phoneinfoga"]=true
     shift 1

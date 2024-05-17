@@ -15,7 +15,7 @@ services:
     environment:
       - DEBUG=True
       - DJANGO_TEST_SERVER=True
-      - DJANGO_WATCHMAN_TIMEOUT=20
+      - DJANGO_WATCHMAN_TIMEOUT=60
       - WATCHMAN=True
 
   daphne:
@@ -38,7 +38,7 @@ services:
     environment:
       - DEBUG=True
       - DJANGO_TEST_SERVER=True
-      - DJANGO_WATCHMAN_TIMEOUT=20
+      - DJANGO_WATCHMAN_TIMEOUT=60
       - WATCHMAN=True
 
   celery_worker_default:
@@ -48,5 +48,5 @@ services:
     environment:
       - DEBUG=True
       - DJANGO_TEST_SERVER=True
-      - DJANGO_WATCHMAN_TIMEOUT=20
+      - DJANGO_WATCHMAN_TIMEOUT=60
       - WATCHMAN=True

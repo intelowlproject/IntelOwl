@@ -13,7 +13,7 @@ class EmailSender(Connector):
     footer: str
 
     def run(self) -> dict:
-        if self.sender:
+        if hasattr(self, "sender") and self.sender:
             sender = self.sender
         else:
             sender = DEFAULT_FROM_EMAIL

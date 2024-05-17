@@ -289,7 +289,7 @@ class PythonConfigSerializer(AbstractConfigSerializer):
 
 class AbstractConfigSerializerForMigration(AbstractConfigSerializer):
     class Meta:
-        exclude = []
+        exclude = ["id"]
 
 
 class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
@@ -297,7 +297,9 @@ class PythonConfigSerializerForMigration(AbstractConfigSerializerForMigration):
     parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
-        exclude = ["id", "health_check_task"]
+        exclude = AbstractConfigSerializerForMigration.Meta.exclude + [
+            "health_check_task"
+        ]
 
     def to_representation(self, instance):
         return super().to_representation(instance)

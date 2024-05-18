@@ -239,7 +239,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0087_alter_mmdbserver_param"),
+        ("analyzers_manager", "0088_phoneinfoga_parameters"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

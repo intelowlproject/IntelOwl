@@ -23,7 +23,7 @@ class HudsonRock(classes.ObservableAnalyzer):
     installed_software: bool = None  # for IP/LOGIN/DOMAIN
     sort_by: str = None  # for LOGIN
     domain_cred_type: str = None  # for DOMAIN
-    domain_filtered: str = None  # for DOMAIN
+    domain_filtered: bool = None  # for DOMAIN
     third_party_domains: bool = None  # for DOMAIN
 
     _api_key_name: str

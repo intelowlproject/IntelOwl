@@ -126,7 +126,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                 patch(
                     "requests.post",
                     return_value=MockUpResponse(
-                        [
+                        {
                             {
                                 "date_uploaded": "2019-11-07T04:38:32.024Z",
                                 "stealer_family": "Vidar",
@@ -612,7 +612,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                                 "ip": "••••••••••••••",
                                 "malware_path": "•••••",
                             },
-                        ],
+                        },
                         200,
                     ),
                 ),

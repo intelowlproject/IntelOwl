@@ -95,7 +95,9 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbook_to_execute=PlaybookConfig.objects.filter(type=["file"]).first(),
+            playbook_to_execute=PlaybookConfig.objects.get(
+                name="Sample_Static_Analysis"
+            ),
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()

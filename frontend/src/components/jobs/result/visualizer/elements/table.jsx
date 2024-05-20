@@ -5,6 +5,13 @@ import { DataTable, DefaultColumnFilter } from "@certego/certego-ui";
 import { VerticalListVisualizer } from "./verticalList";
 import { HorizontalListVisualizer } from "./horizontalList";
 
+function getAccessor(element) {
+  if ([VerticalListVisualizer, HorizontalListVisualizer].includes(element.type))
+    // recursive call
+    return element.props.values.map((val) => getAccessor(val)).flat();
+  return element.props.value;
+}
+
 export function TableVisualizer({
   id,
   size,
@@ -21,12 +28,7 @@ export function TableVisualizer({
     tableColumns.push({
       Header: columnHeader,
       id: column,
-      accessor: (row) =>
-        [VerticalListVisualizer, HorizontalListVisualizer].includes(
-          row[column].type,
-        )
-          ? row[column].props.values.map((val) => val.props.value)
-          : row[column].props.value,
+      accessor: (row) => getAccessor(row[column]),
       Cell: ({
         cell: {
           row: { original },

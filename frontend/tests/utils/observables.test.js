@@ -18,7 +18,7 @@ describe("test observables utilities functions", () => {
     expect(getObservableClassification("hello world")).toBe(
       ObservableClassifications.GENERIC,
     );
-    expect(getObservableClassification("123 4567890")).toBe(
+    expect(getObservableClassification("+391234567890")).toBe(
       ObservableClassifications.GENERIC,
     );
     expect(getObservableClassification("google.]com")).toBe(
@@ -110,18 +110,19 @@ describe("Observable validators tests", () => {
   });
 
   test.each([
-    "123 4567890",
-    "123 4567890 ",
-    "123 4567890;",
-    " 123 4567890 ",
+    "+391234567890",
+    "+391234567890 ",
+    "+391234567890;",
+    " +391234567890 ",
   ])("test valid phone numbers (%s)", (valueToValidate) => {
     expect(observableValidators(valueToValidate)).toStrictEqual({
       classification: "generic",
-      observable: "123 4567890",
+      observable: "+391234567890",
     });
   });
 
   test.each([
+    "123 4567890",
     "123-456-7890",
     "(123) 456-7890",
     "123 456 7890",

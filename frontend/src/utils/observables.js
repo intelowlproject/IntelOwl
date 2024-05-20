@@ -22,12 +22,16 @@ const observableType2RegExMap = {
 
 /* Remove [] inside the string, remove any no-word characters at the end of the string */
 export function sanitizeObservable(observable) {
-  return observable
-    .replaceAll("[", "")
-    .replaceAll("]", "")
-    .trim()
-    .replace(/\W*$/, "")
-    .replace(/^\W/, "");
+  return (
+    observable
+      .replaceAll("[", "")
+      .replaceAll("]", "")
+      .trim()
+      .replace(/\W*$/, "")
+      /* ignore + at the start of the string to support phone number:
+    this could lead to a match problem in the loading observable feature */
+      .replace(/^(?!\+)\W/, "")
+  );
 }
 
 export function observableValidators(stringToValidate) {

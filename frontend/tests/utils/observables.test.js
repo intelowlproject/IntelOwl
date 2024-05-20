@@ -22,7 +22,7 @@ describe("test observables utilities functions", () => {
       ObservableClassifications.GENERIC,
     );
     expect(getObservableClassification("2024-05-10")).toBe(
-      ObservableClassifications.GENERIC
+      ObservableClassifications.GENERIC,
     );
     expect(getObservableClassification("google.]com")).toBe(
       ObservableClassifications.DOMAIN,
@@ -140,7 +140,7 @@ describe("Observable validators tests", () => {
     /* some of the elements match the ip regex, in case they don't match it return null:
      use the ?. to access to the field for the null element and it will be undefined.
     */
-    expect(["ip", undefined]).toContain(validationResult?.classification)
+    expect(["ip", undefined]).toContain(validationResult?.classification);
   });
 
   test.each([
@@ -151,19 +151,17 @@ describe("Observable validators tests", () => {
     "10/10/21",
     "2024-05-10T12:30:40Z",
     "2024-05-10T12:30:40",
-    "2024-05-10 12:30:40"
+    "2024-05-10 12:30:40",
   ])("test valid date (%s)", (valueToValidate) => {
     expect(observableValidators(valueToValidate)).toBeNull();
   });
 
-  test.each([
-    "2024-05-40",
-    "10/13/21",
-    "2024-05-10 56:30:40"
-  ])("test valid date (%s)", (valueToValidate) => {
-    const validationResult = observableValidators(valueToValidate);
-    // 2024-05-40 matches IP addess regex.
-    expect(["ip", undefined]).toContain(validationResult?.classification)
-  });
-
+  test.each(["2024-05-40", "10/13/21", "2024-05-10 56:30:40"])(
+    "test valid date (%s)",
+    (valueToValidate) => {
+      const validationResult = observableValidators(valueToValidate);
+      // 2024-05-40 matches IP addess regex.
+      expect(["ip", undefined]).toContain(validationResult?.classification);
+    },
+  );
 });

@@ -26,7 +26,7 @@ plugin = {
     "health_check_status": True,
     "type": "observable",
     "docker_based": False,
-    "maximum_tlp": "CLEAR",
+    "maximum_tlp": "AMBER",
     "observable_supported": ["ip", "domain", "generic"],
     "supported_filetypes": [],
     "run_hash": False,

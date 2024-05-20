@@ -86,8 +86,7 @@ class HudsonRock(classes.ObservableAnalyzer):
                         "page",
                         "added_since",
                         "added_until",
-                        "installed_software" "type",
-                        "filtered",
+                        "installed_software", "type", "filtered",
                         "third_party_domains",
                     ]
                 )

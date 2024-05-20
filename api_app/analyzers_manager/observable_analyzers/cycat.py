@@ -26,7 +26,7 @@ class CyCat(classes.ObservableAnalyzer):
             headers={"accept": "application/json"},
         )
         response.raise_for_status()
-        return response
+        return response.json()
 
     def run(self):
         final_response = {}

@@ -13,7 +13,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "CyCat",
-    "description": "[CyCat](https://cycat.org/)  or the CYbersecurity Resource CATalogue aims at mapping and documenting, in a single formalism and catalogue available cybersecurity tools, rules, playbooks, processes and controls.",
+    "description": "[CyCat](https://cycat.org/) or the CYbersecurity Resource CATalogue aims at mapping and documenting, in a single formalism and catalogue available cybersecurity tools, rules, playbooks, processes and controls.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

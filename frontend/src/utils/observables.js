@@ -11,13 +11,14 @@ import {
   InvalidTLD,
 } from "../constants/jobConst";
 
-// IMPORTANT, order matters! phone must be checked after ip or the numbers will be taken as IP addesses
-const observableType2RegExMap = {
-  domain: DOMAIN_REGEX,
-  ip: IP_REGEX,
-  phone: PHONE_REGEX,
-  url: URL_REGEX,
-  hash: HASH_REGEX,
+// IMPORTANT, order matters! phone and date must be checked after ip or the numbers will be taken as IP addesses
+const observableType2Validation = {
+  domain: (obs) => DOMAIN_REGEX.test(obs),
+  ip: (obs) => IP_REGEX.test(obs),
+  phone: (obs) => PHONE_REGEX.test(obs),
+  date: (obs) => new Date(obs).toString() !== "Invalid Date",
+  url: (obs) => URL_REGEX.test(obs),
+  hash: (obs) => HASH_REGEX.test(obs),
 };
 
 /* Remove [] inside the string, remove any no-word characters at the end of the string */
@@ -38,13 +39,16 @@ export function observableValidators(stringToValidate) {
   const sanitizedString = sanitizeObservable(stringToValidate);
 
   let stringClassification = "";
-  Object.entries(observableType2RegExMap).forEach(([typeName, typeRegEx]) => {
-    if (typeRegEx.test(sanitizedString)) {
-      stringClassification = typeName;
-      if (stringClassification === "phone")
-        stringClassification = ObservableClassifications.GENERIC;
-    }
-  });
+  Object.entries(observableType2Validation).forEach(
+    ([typeName, typeValidationFunction]) => {
+      const validType = typeValidationFunction(sanitizedString);
+      if (validType) {
+        stringClassification = typeName;
+        if (stringClassification === "phone") stringClassification = null;
+        if (stringClassification === "date") stringClassification = null;
+      }
+    },
+  );
 
   // domain
   if (stringClassification === ObservableClassifications.DOMAIN) {

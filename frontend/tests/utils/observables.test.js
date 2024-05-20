@@ -21,6 +21,9 @@ describe("test observables utilities functions", () => {
     expect(getObservableClassification("+391234567890")).toBe(
       ObservableClassifications.GENERIC,
     );
+    expect(getObservableClassification("2024-05-10")).toBe(
+      ObservableClassifications.GENERIC
+    );
     expect(getObservableClassification("google.]com")).toBe(
       ObservableClassifications.DOMAIN,
     );
@@ -115,10 +118,7 @@ describe("Observable validators tests", () => {
     "+391234567890;",
     " +391234567890 ",
   ])("test valid phone numbers (%s)", (valueToValidate) => {
-    expect(observableValidators(valueToValidate)).toStrictEqual({
-      classification: "generic",
-      observable: "+391234567890",
-    });
+    expect(observableValidators(valueToValidate)).toBeNull();
   });
 
   test.each([
@@ -142,4 +142,28 @@ describe("Observable validators tests", () => {
     */
     expect(["ip", undefined]).toContain(validationResult?.classification)
   });
+
+  test.each([
+    "2024-05-10",
+    "2024-05-10 ",
+    "2024-05-10;",
+    " 2024-05-10 ",
+    "10/10/21",
+    "2024-05-10T12:30:40Z",
+    "2024-05-10T12:30:40",
+    "2024-05-10 12:30:40"
+  ])("test valid date (%s)", (valueToValidate) => {
+    expect(observableValidators(valueToValidate)).toBeNull();
+  });
+
+  test.each([
+    "2024-05-40",
+    "10/13/21",
+    "2024-05-10 56:30:40"
+  ])("test valid date (%s)", (valueToValidate) => {
+    const validationResult = observableValidators(valueToValidate);
+    // 2024-05-40 matches IP addess regex.
+    expect(["ip", undefined]).toContain(validationResult?.classification)
+  });
+
 });

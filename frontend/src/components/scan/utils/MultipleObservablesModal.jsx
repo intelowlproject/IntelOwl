@@ -4,7 +4,6 @@ import { Modal, ModalHeader, ModalBody, Button, Input } from "reactstrap";
 
 import { ContentSection } from "@certego/certego-ui";
 import { observableValidators } from "../../../utils/observables";
-import { ObservableClassifications } from "../../../constants/jobConst";
 
 // components
 export function MultipleObservablesModal(props) {
@@ -25,10 +24,7 @@ export function MultipleObservablesModal(props) {
 
     tokenizedText.forEach((string) => {
       const validationValue = observableValidators(string);
-      if (
-        validationValue !== null &&
-        validationValue.classification !== ObservableClassifications.GENERIC
-      )
+      if (validationValue !== null)
         observables[validationValue.classification].push(
           validationValue.observable,
         );

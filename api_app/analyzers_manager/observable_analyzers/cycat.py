@@ -61,32 +61,33 @@ class CyCat(classes.ObservableAnalyzer):
                             "description": """Detects Execution via
                             SyncInvoke in CL_Invocation.ps1 module""",
                             "raw": """
-    author: oscd.community, Natalia Shornikova
-    date: 2020/10/14
-    description: Detects Execution via SyncInvoke in CL_Invocation.ps1 module
-    detection:
-      condition: selection
-      selection:
-        EventID: 4104
-        ScriptBlockText|contains|all:
-        - CL_Invocation.ps1
-        - SyncInvoke
-    falsepositives:
-    - Unknown
-    id: 4cd29327-685a-460e-9dac-c3ab96e549dc
-    level: high
-    logsource:
-      product: windows
-      service: powershell
-    modified: 2021/05/21
-    references:
-    - https://twitter.com/bohops/status/948061991012327424
-    status: experimental
-    tags:
-    - attack.defense_evasion
-    - attack.t1216
-    title: Execution via CL_Invocation.ps1
-    """,
+                            author: oscd.community, Natalia Shornikova
+                            date: 2020/10/14
+                            description: Detects Execution via
+                            SyncInvoke in CL_Invocation.ps1 module
+                            detection:
+                            condition: selection
+                            selection:
+                                EventID: 4104
+                                ScriptBlockText|contains|all:
+                                - CL_Invocation.ps1
+                                - SyncInvoke
+                            falsepositives:
+                            - Unknown
+                            id: 4cd29327-685a-460e-9dac-c3ab96e549dc
+                            level: high
+                            logsource:
+                            product: windows
+                            service: powershell
+                            modified: 2021/05/21
+                            references:
+                            - https://twitter.com/bohops/status/948061991012327424
+                            status: experimental
+                            tags:
+                            - attack.defense_evasion
+                            - attack.t1216
+                            title: Execution via CL_Invocation.ps1
+                            """,
                             "sigma:id": "4cd29327-685a-460e-9dac-c3ab96e549dc",
                             "title": "Execution via CL_Invocation.ps1",
                             "_cycat_type": "Item",

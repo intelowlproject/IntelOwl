@@ -44,7 +44,7 @@ dnspython==2.6.1
 dnstwist[full]==20240116
 google>=3.0.0
 google-cloud-webrisk==1.14.0
-intezer-sdk==1.20
+intezer-sdk==1.21
 lief==0.14.0
 maxminddb==2.6.0
 geoip2==4.8.0

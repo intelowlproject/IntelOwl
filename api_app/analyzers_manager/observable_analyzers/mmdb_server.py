@@ -16,11 +16,11 @@ class MmdbServer(classes.ObservableAnalyzer):
     def update(self) -> bool:
         pass
 
-    base_url: str
+    url: str
     observable_name: str
 
     def run(self):
-        response = requests.get(self.base_url + self.observable_name)
+        response = requests.get(self.url + self.observable_name)
         response.raise_for_status()
         return response.json()
 

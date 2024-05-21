@@ -51,7 +51,7 @@ class YETI(classes.Connector):
         headers = {"Accept": "application/json", "X-Api-Key": self._api_key_name}
         if self._url_key_name and self._url_key_name.endswith("/"):
             self._url_key_name = self._url_key_name[:-1]
-        url = f"{self._url_key_name}/observable/"
+        url = f"{self._url_key_name}/api/v2/observables/"
 
         # create observable with `obs_value` if it doesn't exists
         # new context, tags, source are appended with existing ones

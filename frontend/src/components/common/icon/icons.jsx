@@ -22,7 +22,7 @@ export function DeleteIcon() {
 
 export function CommentIcon({ commentNumber }) {
   return (
-    <span>
+    <span className="d-flex align-items-center">
       <MdComment className="me-1" />
       Comments ({commentNumber})
     </span>
@@ -35,7 +35,7 @@ CommentIcon.propTypes = {
 
 export function retryJobIcon() {
   return (
-    <span>
+    <span className="d-flex align-items-center">
       <MdOutlineRefresh className="me-1" />
       Rescan
     </span>
@@ -44,7 +44,7 @@ export function retryJobIcon() {
 
 export function downloadReportIcon() {
   return (
-    <span>
+    <span className="d-flex align-items-center">
       <MdFileDownload className="me-1" />
       Report
     </span>
@@ -57,7 +57,7 @@ export function SpinnerIcon() {
 
 export function killJobIcon() {
   return (
-    <span>
+    <span className="d-flex align-items-center">
       <FaRegStopCircle className="me-1" />
       Kill job
     </span>

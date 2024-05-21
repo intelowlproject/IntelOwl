@@ -76,12 +76,12 @@ describe("extractCountry test", () => {
       id: 2,
       analyzer_reports: [
         {
-          name: "Maxmind",
+          name: "MaxMindGeoIP",
           process_time: 0.07,
           status: "SUCCESS",
           end_time: "2024-01-15T14:56:32.328332Z",
           report: {
-            data: {
+            country: {
               names: {
                 de: "Schweden",
                 en: "Sweden",
@@ -95,8 +95,8 @@ describe("extractCountry test", () => {
               iso_code: "SE",
               geoname_id: 2661886,
               is_in_european_union: true,
-              // other keys (locations, continent, registered_country) unsued
             },
+            // other keys (locations, continent, registered_country) unsued
           },
         },
       ],
@@ -130,7 +130,7 @@ describe("extractCountry test", () => {
     };
 
     const country = extractCountry(job);
-    expect(country.countryCode).toBe("");
+    expect(country.countryCode).toBe("SE");
     expect(country.countryName).toBe("Sweden");
   });
 
@@ -243,7 +243,7 @@ describe("extractCountry test", () => {
           report: {},
         },
         {
-          name: "Maxmind",
+          name: "MaxMindGeoIP",
           process_time: 0.07,
           status: "SUCCESS",
           end_time: "2024-01-15T14:56:32.328332Z",
@@ -324,7 +324,7 @@ describe("extractCountry test", () => {
           },
         },
         {
-          name: "Maxmind",
+          name: "MaxMindGeoIP",
           process_time: 0.07,
           status: "SUCCESS",
           end_time: "2024-01-15T14:56:32.328332Z",

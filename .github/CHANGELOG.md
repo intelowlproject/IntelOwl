@@ -10,6 +10,7 @@ We added **Pivot** buttons to enable manual Pivoting from an Observable/File ana
 As usual, we add new plugins. This release brings the following new ones:
 * a complete **TakedownRequest** playbook to automate TakeDown requests for malicious domains
 * new File Analyzers for tools like [HFinger](https://github.com/CERT-Polska/hfinger), [Permhash](https://github.com/google/permhash) and [Blint](https://github.com/owasp-dep-scan/blint)
+* new Observable Analyzers for [CyCat](https://cycat.org/) and [Hudson Rock](https://cavalier.hudsonrock.com/docs)
 * improvement of the existing Maxmind analyzer: it now downloads the ASN database too.
 
 ## [v6.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.1)

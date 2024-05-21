@@ -85,7 +85,9 @@ function CustomJobNode({ data }) {
           </div>
           <div className="d-flex justify-content-between">
             <span className="me-2">Playbook:</span>
-            <span className="text-accent">{data?.playbook}</span>
+            <span className="text-accent">
+              {data?.playbook || "Custom analysis"}
+            </span>
           </div>
           <div className="d-flex justify-content-between">
             <span className="me-2">Created:</span>

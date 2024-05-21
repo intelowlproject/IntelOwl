@@ -359,13 +359,13 @@ export function JobOverview({
             className="g-0 d-flex-between-end align-items-center"
             id="utilitiesRow"
           >
-            <Col>
-              <h2>
+            <Col md={4}>
+              <h2 className="d-flex align-items-center">
                 <span className="me-2 text-secondary">Job #{job.id}</span>
                 <StatusIcon status={job.status} className="small" />
               </h2>
             </Col>
-            <Col className="d-flex justify-content-end mt-1">
+            <Col md={8} className="d-flex justify-content-end mt-1">
               <JobActionsBar job={job} />
             </Col>
           </Row>
@@ -386,7 +386,7 @@ export function JobOverview({
           <Row className="g-0 mt-3">
             <div className="mb-2 d-inline-flex flex-row-reverse">
               {/* UI/raw switch */}
-              <ButtonGroup className="ms-2 mb-3">
+              <ButtonGroup className="ms-2">
                 <Button
                   outline={!isSelectedUI}
                   color={isSelectedUI ? "primary" : "tertiary"}
@@ -421,7 +421,9 @@ export function JobOverview({
                   {/* generate the nav with the UI/raw visualizers avoid to generate the navbar item for the "no visualizer element" */}
                   {elementsToShow.map(
                     (componentsObject) =>
-                      componentsObject.id !== "" && (
+                      componentsObject.id !== "" &&
+                      componentsObject.name !==
+                        LOADING_VISUALIZER_UI_ELEMENT_CODE && (
                         <NavItem>
                           <NavLink
                             className={`${

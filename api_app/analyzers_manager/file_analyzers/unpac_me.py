@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class UnpacMe(FileAnalyzer):
-    base_url: str = "https://api.unpac.me/api/v1/"
+    url: str = "https://api.unpac.me/api/v1/"
 
     _api_key_name: str
     private: bool
@@ -60,12 +60,10 @@ class UnpacMe(FileAnalyzer):
     def _req_with_checks(self, url, files=None, post=False):
         try:
             if post:
-                r = requests.post(
-                    self.base_url + url, files=files, headers=self.headers
-                )
+                r = requests.post(self.url + url, files=files, headers=self.headers)
             else:
                 headers = self.headers if self.private == "private" else {}
-                r = requests.get(self.base_url + url, files=files, headers=headers)
+                r = requests.get(self.url + url, files=files, headers=headers)
             r.raise_for_status()
         except requests.exceptions.HTTPError as e:
             logger.error(

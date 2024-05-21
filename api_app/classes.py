@@ -257,6 +257,8 @@ class Plugin(metaclass=ABCMeta):
             url = param.value
             logger.info(f"Url retrieved to verify is {param.name} for {self}")
             return url
+        if hasattr(self, "url") and self.url:
+            return self.url
         return None
 
     def health_check(self, user: User = None) -> bool:
@@ -264,7 +266,7 @@ class Plugin(metaclass=ABCMeta):
         if url and url.startswith("http"):
             if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
                 return True
-            logger.info(f"healthcheck  url {url} for {self}")
+            logger.info(f"healthcheck url {url} for {self}")
             try:
                 # momentarily set this to False to
                 # avoid fails for https services

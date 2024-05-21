@@ -3,21 +3,9 @@
 
 from intel_owl import secrets
 
-from ._util import set_permissions
-from .commons import BLINT_REPORTS_PATH, DEBUG, LOG_DIR, STAGE_CI, YARA_RULES_PATH
+from .commons import DEBUG, LOG_DIR
 
 DJANGO_LOG_DIRECTORY = LOG_DIR / "django"
-UWSGI_LOG_DIRECTORY = LOG_DIR / "uwsgi"
-ASGI_LOG_DIRECTORY = LOG_DIR / "asgi"
-for path in [
-    DJANGO_LOG_DIRECTORY,
-    UWSGI_LOG_DIRECTORY,
-    ASGI_LOG_DIRECTORY,
-    YARA_RULES_PATH,
-    BLINT_REPORTS_PATH,
-]:
-    if not STAGE_CI:
-        set_permissions(path, force_create=True)
 
 DISABLE_LOGGING_TEST = secrets.get_secret("DISABLE_LOGGING_TEST", False) == "True"
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"

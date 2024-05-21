@@ -421,7 +421,8 @@ export function JobOverview({
                   {/* generate the nav with the UI/raw visualizers avoid to generate the navbar item for the "no visualizer element" */}
                   {elementsToShow.map(
                     (componentsObject) =>
-                      componentsObject.id !== "" && (
+                      componentsObject.id !== "" &&
+                      componentsObject.name !== "loading" && (
                         <NavItem>
                           <NavLink
                             className={`${

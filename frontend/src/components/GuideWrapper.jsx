@@ -19,7 +19,7 @@ export default function GuideWrapper() {
             questions you could either check out our{" "}
             <a href="https://intelowl.readthedocs.io/en/latest/">docs</a> or
             reach us out on{" "}
-            <a href="https://www.honeynet.org/gsoc/">
+            <a href="https://gsoc-slack.honeynet.org/">
               the official IntelOwl slack channel
             </a>
           </p>

@@ -422,7 +422,8 @@ export function JobOverview({
                   {elementsToShow.map(
                     (componentsObject) =>
                       componentsObject.id !== "" &&
-                      componentsObject.name !== "loading" && (
+                      componentsObject.name !==
+                        LOADING_VISUALIZER_UI_ELEMENT_CODE && (
                         <NavItem>
                           <NavLink
                             className={`${

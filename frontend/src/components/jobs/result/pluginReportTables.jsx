@@ -19,7 +19,7 @@ import {
 
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
-import { PluginStatuses } from "../../../constants/pluginConst";
+import { PluginStatuses, PluginsTypes } from "../../../constants/pluginConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
 
 const tableProps = {
@@ -168,7 +168,12 @@ export function PluginsReportTable({
 
   reports.forEach((report, index) => {
     pluginsStored.forEach((plugin) => {
-      if (plugin.name === report.name) {
+      if (
+        (report.type !== PluginsTypes.VISUALIZER &&
+          plugin.name === report.name) ||
+        (report.type === PluginsTypes.VISUALIZER &&
+          plugin.name === report.config)
+      ) {
         reports[index].description = plugin.description;
       }
     });

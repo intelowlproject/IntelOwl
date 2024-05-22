@@ -221,9 +221,11 @@ export function JobOverview({
   const location = useLocation();
   const [UIElements, setUIElements] = useState([]);
   console.debug(
-    `location pathname: ${location.pathname}, state: ${JSON.stringify(
-      location?.state,
-    )}`,
+    `location pathname: ${
+      location.pathname
+    }, state - userChanged: ${JSON.stringify(
+      location?.state?.userChanged,
+    )}, state - jobReport: #${location?.state?.jobReport.id}`,
   );
 
   useEffect(() => {
@@ -395,7 +397,7 @@ export function JobOverview({
                       `/jobs/${job.id}/${
                         JobResultSections.VISUALIZER
                       }/${encodeURIComponent(UIElements[0].name)}`,
-                      { state: { userChanged: true } },
+                      { state: { userChanged: true, jobReport: job } },
                     )
                   }
                 >
@@ -408,7 +410,7 @@ export function JobOverview({
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,
-                      { state: { userChanged: true } },
+                      { state: { userChanged: true, jobReport: job } },
                     )
                   }
                 >
@@ -438,7 +440,9 @@ export function JobOverview({
                                 }/${section}/${encodeURIComponent(
                                   componentsObject.name,
                                 )}`,
-                                { state: { userChanged: true } },
+                                {
+                                  state: { userChanged: true, jobReport: job },
+                                },
                               )
                             }
                           >

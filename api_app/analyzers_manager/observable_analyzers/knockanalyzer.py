@@ -1,7 +1,5 @@
-import glob
 import json
 import logging
-import os
 
 from knock.knockpy import KNOCKPY
 
@@ -16,9 +14,6 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
     This analyzer is a wrapper for the knockpy project.
     """
 
-    def update(self) -> bool:
-        pass
-
     observable_name: str
     dns: str = None
     useragent: str = None
@@ -26,6 +21,9 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
     threads: int = None
     recon: bool = True
     bruteforce: bool = True
+
+    def update(self) -> bool:
+        pass
 
     def run(self):
         logger.info(f"Running KnockAnalyzer for {self.observable_name}")
@@ -38,10 +36,7 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
             recon=self.recon,
             bruteforce=self.bruteforce,
         )
-        files = glob.glob("domain.com*.json")
-        for file in files:
-            logger.info(f"Removing {file}")
-            os.remove(file)
+
         return json.dumps(results)
 
     @classmethod
@@ -51,18 +46,6 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
                 patch(
                     "requests.get",
                     return_value=MockUpResponse(
-                        {
-                            "marcia.domain.com": ["66.96.162.92"],
-                            "http": [404, None, "Apache"],
-                            "https": [None, None, None],
-                            "cert": [None, None],
-                        },
-                        {
-                            "mbsizer.domain.com": ["66.96.162.92"],
-                            "http": [404, None, "Apache"],
-                            "https": [None, None, None],
-                            "cert": [None, None],
-                        },
                         {
                             "malektravel.domain.com": ["66.96.162.92"],
                             "http": [403, None, "Apache"],

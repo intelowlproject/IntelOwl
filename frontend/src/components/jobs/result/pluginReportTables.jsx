@@ -83,12 +83,12 @@ const tableProps = {
           <div className="d-inline-block col-10 offset-1">{value}</div>
           <div className="col-1">
             <MdInfoOutline
-              id={`pluginReport-infoicon__${value.replaceAll(" ", "_")}`}
+              id={`pluginReport-infoicon__${plugin.type}_${plugin.id}`}
               className="text-secondary"
               fontSize="20"
             />
             <UncontrolledPopover
-              target={`pluginReport-infoicon__${value.replaceAll(" ", "_")}`}
+              target={`pluginReport-infoicon__${plugin.type}_${plugin.id}`}
               placement="bottom"
               trigger="hover"
               popperClassName="px-2 bg-body"

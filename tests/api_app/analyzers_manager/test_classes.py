@@ -223,7 +223,6 @@ class ObservableAnalyzerTestCase(CustomTestCase):
             for config in AnalyzerConfig.objects.filter(
                 python_module=subclass.python_module
             ):
-                print(f"t/o for {config.name} is {config.soft_time_limit}s")
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
                 print("\t" f"Testing with config {config.name}")

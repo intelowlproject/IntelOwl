@@ -14,7 +14,9 @@ class Vulners(classes.ObservableAnalyzer):
     This analyzer is a wrapper for the vulners project.
     """
 
-    score_AI: True
+    score_AI: bool = False
+    skip: int = 0
+    size: int = 5
     _api_key_name: str
     url = "https://vulners.com/api/v3"
 
@@ -29,10 +31,9 @@ class Vulners(classes.ObservableAnalyzer):
         url = self.url + "/search/lucene"
         headers = {"Content-Type": "application/json"}
         data = {
-            "query": "Fortinet AND RCE order:published",
-            "skip": 0,
-            "size": 5,
-            "fields": ["id", "published", "description", "type", "title", "cvelist"],
+            "query": self.observable_name,
+            "skip": self.size,
+            "size": self.skip,
             "apiKey": self._api_key_name,
         }
         response = requests.post(url, headers=headers, data=json.dumps(data))
@@ -41,10 +42,10 @@ class Vulners(classes.ObservableAnalyzer):
     def run(self):
         response = None
         if self.score_AI:
-            resposne = self.search_ai()
+            response = self.search_ai()
         else:
             response = self.search_databse()
-        resposne.raise_for_status()
+        response.raise_for_status()
         return response.json()
 
     # this is a framework implication

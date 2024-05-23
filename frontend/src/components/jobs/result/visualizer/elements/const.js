@@ -4,4 +4,5 @@ export const VisualizerComponentType = Object.freeze({
   VLIST: "vertical_list",
   HLIST: "horizontal_list",
   TITLE: "title",
+  TABLE: "table",
 });

@@ -1,4 +1,3 @@
-import json
 import logging
 
 import requests
@@ -21,22 +20,27 @@ class Vulners(classes.ObservableAnalyzer):
     url = "https://vulners.com/api/v3"
 
     def search_ai(self):
-        url = self.url + "/ai/scoretext/"
-        headers = {"Content-Type": "application/json"}
-        data = {"text": self.observable_name, "apiKey": self._api_key_name}
-        response = requests.post(url, headers=headers, data=json.dumps(data))
+        response = requests.post(
+            url=self.url + "/ai/scoretext/",
+            headers={"Content-Type": "application/json"},
+            data=f"""{{
+                "text": {self.observable_name},
+                "apiKey": {self._api_key_name}
+                }}""",
+        )
         return response
 
     def search_databse(self):
-        url = self.url + "/search/lucene"
-        headers = {"Content-Type": "application/json"}
-        data = {
-            "query": self.observable_name,
-            "skip": self.size,
-            "size": self.skip,
-            "apiKey": self._api_key_name,
-        }
-        response = requests.post(url, headers=headers, data=json.dumps(data))
+        response = requests.post(
+            url=self.url + "/search/lucene",
+            headers={"Content-Type": "application/json"},
+            data=f"""{{
+                "query": {self.observable_name},
+                "skip": {self.size},
+                "size": {self.skip},
+                "apiKey": {self._api_key_name},
+            }}""",
+        )
         return response
 
     def run(self):

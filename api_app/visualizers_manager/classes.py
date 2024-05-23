@@ -184,8 +184,8 @@ class VisualizableListMixin:
 class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
-        name: VisualizableBase,
         value: List[VisualizableObject],
+        name: VisualizableBase = None,
         start_open: bool = False,  # noqa
         add_count_in_title: bool = True,
         fill_empty: bool = True,
@@ -200,7 +200,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
             alignment=alignment,
             disable=disable,
         )
-        if add_count_in_title:
+        if name and add_count_in_title:
             name.value += f" ({len(value)})"
         for v in value:
             if isinstance(v, str):
@@ -209,6 +209,8 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
                 )
         if fill_empty and not value:
             value = [VisualizableBase(value="no data available", disable=False)]
+        if not name:
+            start_open = True
         self.value = value
         self.name = name
         self.add_count_in_title = add_count_in_title
@@ -257,6 +259,58 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     @property
     def type(self) -> str:
         return "vertical_list"
+
+
+class VisualizableTable(VisualizableObject):
+    def __init__(
+        self,
+        columns: List[str],
+        data: List[Dict[str, VisualizableObject]],
+        size: VisualizableSize = VisualizableSize.S_AUTO,
+        alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
+        page_size: int = 5,
+        disable_filters: bool = False,
+        disable_sort_by: bool = False,
+    ):
+        super().__init__(size=size, alignment=alignment, disable=False)
+        self.data = data
+        self.columns = columns
+        self.page_size = page_size
+        self.disable_filters = disable_filters
+        self.disable_sort_by = disable_sort_by
+
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + [
+            "data",
+            "columns",
+            "page_size",
+            "disable_filters",
+            "disable_sort_by",
+        ]
+
+    @property
+    def type(self) -> str:
+        return "table"
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        data: List[Dict[str, VisualizableObject]] = result.pop("data", [])
+        if any(x for x in data):
+            new_data = []
+            for element in data:
+                new_data.append(
+                    {
+                        key: value.to_dict()
+                        for [key, value] in element.items()
+                        if value is not None
+                    }
+                )
+            result["data"] = new_data
+        else:
+            result["data"] = []
+        result.pop("disable")
+        return result
 
 
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
@@ -328,6 +382,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Bool = VisualizableBool
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
+    Table = VisualizableTable
 
     LevelSize = VisualizableLevelSize
     Page = VisualizablePage

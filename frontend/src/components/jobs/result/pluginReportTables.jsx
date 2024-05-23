@@ -19,7 +19,7 @@ import {
 
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
-import { PluginStatuses } from "../../../constants/pluginConst";
+import { PluginStatuses, PluginsTypes } from "../../../constants/pluginConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
 
 const tableProps = {
@@ -83,12 +83,12 @@ const tableProps = {
           <div className="d-inline-block col-10 offset-1">{value}</div>
           <div className="col-1">
             <MdInfoOutline
-              id={`pluginReport-infoicon__${value}`}
+              id={`pluginReport-infoicon__${plugin.type}_${plugin.id}`}
               className="text-secondary"
               fontSize="20"
             />
             <UncontrolledPopover
-              target={`pluginReport-infoicon__${value}`}
+              target={`pluginReport-infoicon__${plugin.type}_${plugin.id}`}
               placement="bottom"
               trigger="hover"
               popperClassName="px-2 bg-body"
@@ -168,7 +168,12 @@ export function PluginsReportTable({
 
   reports.forEach((report, index) => {
     pluginsStored.forEach((plugin) => {
-      if (plugin.name === report.name) {
+      if (
+        (report.type !== PluginsTypes.VISUALIZER &&
+          plugin.name === report.name) ||
+        (report.type === PluginsTypes.VISUALIZER &&
+          plugin.name === report.config)
+      ) {
         reports[index].description = plugin.description;
       }
     });

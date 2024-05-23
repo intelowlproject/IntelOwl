@@ -149,7 +149,7 @@ describe("test plugins report table", () => {
     expect(screen.getAllByText("SUCCESS")[1]).toBeInTheDocument(); // status
     expect(screen.getByText("TEST_ANALYZER")).toBeInTheDocument(); // name
     const infoIcon = container.querySelector(
-      `#pluginReport-infoicon__TEST_ANALYZER`,
+      `#pluginReport-infoicon__analyzer_174`,
     );
     expect(infoIcon).toBeInTheDocument();
     expect(screen.getByText("0.07")).toBeInTheDocument(); // process time

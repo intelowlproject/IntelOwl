@@ -19,12 +19,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "Vulners",
-    "description": """[Vulners](vulners.com) is the most complete
-    and the only fully correlated security intelligence database, 
-    which goes through constant updates and links 200+ data sources
-      in a unified machine-readable format. It contains 8 mln+ entries,
-        including CVEs, advisories, exploits, and IoCs — everything
-          you need to stay abreast on the latest security threats.""",
+    "description": "[Vulners](vulners.com) is the most complete and the only fully correlated security intelligence database, which goes through constant updates and links 200+ data sources in a unified machine-readable format. It contains 8 mln+ entries, including CVEs, advisories, exploits, and IoCs — everything you need to stay abreast on the latest security threats.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",
@@ -234,7 +229,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0091_analyzer_config_knock"),
+        ("analyzers_manager", "0090_analyzer_config_cycat"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

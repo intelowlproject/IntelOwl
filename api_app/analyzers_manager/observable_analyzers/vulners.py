@@ -21,12 +21,15 @@ class Vulners(classes.ObservableAnalyzer):
 
     def search_ai(self):
         return requests.post(
-            json={"text": self.observable_name, "apikey": self._api_key_name}
+            url=self.url + "/ai/scoretext/",
+            headers={"Content-Type": "application/json"},
+            json={"text": self.observable_name, "apiKey": self._api_key_name},
         )
 
     def search_databse(self):
-        response = requests.post(
+        return requests.post(
             url=self.url + "/search/lucene",
+            headers={"Content-Type": "application/json"},
             json={
                 "query": self.observable_name,
                 "skip": self.size,
@@ -34,7 +37,6 @@ class Vulners(classes.ObservableAnalyzer):
                 "apiKey": self._api_key_name,
             },
         )
-        return response
 
     def run(self):
         response = None

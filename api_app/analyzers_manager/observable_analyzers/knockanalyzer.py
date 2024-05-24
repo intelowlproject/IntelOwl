@@ -41,25 +41,25 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        response = {
-            {
-                "marcia.domain.com": ["66.96.162.92"],
-                "http": [404, None, "Apache"],
-                "https": [None, None, None],
-                "cert": [None, None],
-            },
-            {
-                "mbsizer.domain.com": ["66.96.162.92"],
-                "http": [404, None, "Apache"],
-                "https": [None, None, None],
-                "cert": [None, None],
-            },
-        }
         patches = [
             if_mock_connections(
                 patch(
                     "knock.knockpy.KNOCKPY",
-                    return_value=MockUpResponse(response, 200),
+                    return_value=MockUpResponse(
+                        {
+                            "marcia.domain.com": ["66.96.162.92"],
+                            "http": [404, None, "Apache"],
+                            "https": [None, None, None],
+                            "cert": [None, None],
+                        },
+                        {
+                            "mbsizer.domain.com": ["66.96.162.92"],
+                            "http": [404, None, "Apache"],
+                            "https": [None, None, None],
+                            "cert": [None, None],
+                        },
+                        200,
+                    ),
                 ),
             )
         ]

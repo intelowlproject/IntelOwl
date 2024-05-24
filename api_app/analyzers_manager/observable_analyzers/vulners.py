@@ -20,26 +20,19 @@ class Vulners(classes.ObservableAnalyzer):
     url = "https://vulners.com/api/v3"
 
     def search_ai(self):
-        response = requests.post(
-            url=self.url + "/ai/scoretext/",
-            headers={"Content-Type": "application/json"},
-            data=f"""{{
-                "text": {self.observable_name},
-                "apiKey": {self._api_key_name}
-                }}""",
+        return requests.post(
+            json={"text": self.observable_name, "apikey": self._api_key_name}
         )
-        return response
 
     def search_databse(self):
         response = requests.post(
             url=self.url + "/search/lucene",
-            headers={"Content-Type": "application/json"},
-            data=f"""{{
-                "query": {self.observable_name},
-                "skip": {self.size},
-                "size": {self.skip},
-                "apiKey": {self._api_key_name},
-            }}""",
+            json={
+                "query": self.observable_name,
+                "skip": self.size,
+                "size": self.skip,
+                "apiKey": self._api_key_name,
+            },
         )
         return response
 

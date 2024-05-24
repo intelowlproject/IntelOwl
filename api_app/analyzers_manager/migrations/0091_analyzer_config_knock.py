@@ -15,7 +15,7 @@ plugin = {
     "name": "Knock",
     "description": "[Kncok](https://github.com/guelfoweb/knock) is a portable and modular python3 tool designed to quickly enumerate subdomains on a target domain through passive reconnaissance and dictionary scan.",
     "disabled": False,
-    "soft_time_limit": 300,
+    "soft_time_limit": 600,
     "routing_key": "default",
     "health_check_status": True,
     "type": "observable",

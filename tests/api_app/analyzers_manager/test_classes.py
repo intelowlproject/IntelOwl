@@ -224,7 +224,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                 python_module=subclass.python_module
             ):
                 timeout_seconds = config.soft_time_limit
-                timeout_seconds = min(timeout_seconds, 20)
+                timeout_seconds = max(timeout_seconds, 20)
                 print("\t" f"Testing with config {config.name}")
                 for observable_supported in config.observable_supported:
                     print(

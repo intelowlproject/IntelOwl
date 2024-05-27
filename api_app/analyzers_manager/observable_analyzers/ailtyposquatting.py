@@ -30,7 +30,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
         os.mkdir(reports_dir)
         set_permissions(reports_dir)
 
-        resultList = list()
+        resultList = []
         resultList = runAll(
             domain=self.observable_name,
             limit=math.inf,
@@ -42,11 +42,10 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
         )
         response["algorithms"] = resultList
 
-        if self._config.maximum_tlp == "CLEAR":
-            if self.dns_resolving:
-                response["dnsResolving"] = dnsResolving(
-                    resultList, domain=self.observable_name, pathOutput=reports_dir
-                )
+        if self._config.maximum_tlp == "CLEAR" and self.dns_resolving:
+            response["dnsResolving"] = dnsResolving(
+                resultList, domain=self.observable_name, pathOutput=reports_dir
+            )
 
         shutil.rmtree(reports_dir)
         return response

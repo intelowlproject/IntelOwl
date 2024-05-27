@@ -21,7 +21,11 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
 
     def run(self):
         response = {}
-
+        logger.info(
+            f"""running AilTypoSquatting on {self.observable_name}
+                    with tlp {self._config.maximum_tlp}
+                    and dns resolving {self.dns_resolving}"""
+        )
         resultList = []
         resultList = runAll(
             domain=self.observable_name,

@@ -44,7 +44,7 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    "knock.knockpy.KNOCKPY",
+                    "KNOCKPY",
                     return_value=MockUpResponse(
                         {
                             "marcia.domain.com": ["66.96.162.92"],

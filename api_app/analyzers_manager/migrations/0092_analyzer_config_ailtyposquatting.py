@@ -20,7 +20,7 @@ plugin = {
     "health_check_status": True,
     "type": "observable",
     "docker_based": False,
-    "maximum_tlp": "CLEAR",
+    "maximum_tlp": "RED",
     "observable_supported": ["domain"],
     "supported_filetypes": [],
     "run_hash": False,
@@ -35,47 +35,13 @@ params = [
             "module": "ailtyposquatting.AilTypoSquatting",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
-        "name": "omission",
+        "name": "dns_resolving",
         "type": "bool",
-        "description": "omission for AilTypoSquatting",
-        "is_secret": False,
-        "required": False,
-    },
-    {
-        "python_module": {
-            "module": "ailtyposquatting.AilTypoSquatting",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
-        "name": "subdomain",
-        "type": "bool",
-        "description": "subdomain for AilTypoSquatting",
-        "is_secret": False,
-        "required": False,
-    },
-    {
-        "python_module": {
-            "module": "ailtyposquatting.AilTypoSquatting",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
-        "name": "addDash",
-        "type": "bool",
-        "description": "addDash for AilTypoSquatting",
-        "is_secret": False,
-        "required": False,
-    },
-    {
-        "python_module": {
-            "module": "ailtyposquatting.AilTypoSquatting",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
-        "name": "runall",
-        "type": "bool",
-        "description": "runall for AilTypoSquatting",
+        "description": "dns_resolving for AilTypoSquatting; only works for TLP CLEAR",
         "is_secret": False,
         "required": False,
     },
 ]
-
 values = [
     {
         "parameter": {
@@ -83,9 +49,9 @@ values = [
                 "module": "ailtyposquatting.AilTypoSquatting",
                 "base_path": "api_app.analyzers_manager.observable_analyzers",
             },
-            "name": "omission",
+            "name": "dns_resolving",
             "type": "bool",
-            "description": "omission for AilTypoSquatting",
+            "description": "dns_resolving for AilTypoSquatting; only works for TLP CLEAR",
             "is_secret": False,
             "required": False,
         },
@@ -97,72 +63,6 @@ values = [
         "for_organization": False,
         "value": False,
         "updated_at": "2024-05-26T00:10:15.236358Z",
-        "owner": None,
-    },
-    {
-        "parameter": {
-            "python_module": {
-                "module": "ailtyposquatting.AilTypoSquatting",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
-            },
-            "name": "subdomain",
-            "type": "bool",
-            "description": "subdomain for AilTypoSquatting",
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": "AILTypoSquatting",
-        "connector_config": None,
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": False,
-        "updated_at": "2024-05-26T00:10:15.239951Z",
-        "owner": None,
-    },
-    {
-        "parameter": {
-            "python_module": {
-                "module": "ailtyposquatting.AilTypoSquatting",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
-            },
-            "name": "addDash",
-            "type": "bool",
-            "description": "addDash for AilTypoSquatting",
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": "AILTypoSquatting",
-        "connector_config": None,
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": False,
-        "updated_at": "2024-05-26T00:10:15.242347Z",
-        "owner": None,
-    },
-    {
-        "parameter": {
-            "python_module": {
-                "module": "ailtyposquatting.AilTypoSquatting",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
-            },
-            "name": "runall",
-            "type": "bool",
-            "description": "runall for AilTypoSquatting",
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": "AILTypoSquatting",
-        "connector_config": None,
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": True,
-        "updated_at": "2024-05-26T00:10:15.166020Z",
         "owner": None,
     },
 ]
@@ -245,7 +145,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0090_analyzer_config_cycat"),
+        ("analyzers_manager", "0091_analyzer_config_vulners"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

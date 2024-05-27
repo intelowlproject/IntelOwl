@@ -27,17 +27,15 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
                     and dns resolving {self.dns_resolving}"""
         )
         resultList = []
-        resultList = runAll(
+        response["algorithms"] = runAll(
             domain=self.observable_name,
             limit=math.inf,
             formatoutput="yara",
             pathOutput=None,
         )
-        response["algorithms"] = resultList
-
         if self._job.tlp == "CLEAR" and self.dns_resolving:
             response["dnsResolving"] = dnsResolving(
-                resultList, domain=self.observable_name, pathOutput=None
+                resultList=resultList, domain=self.observable_name, pathOutput=None
             )
 
         return response

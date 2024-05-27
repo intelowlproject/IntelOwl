@@ -14,7 +14,6 @@ BASE_STATIC_PATH = PROJECT_LOCATION / "static"
 MEDIA_ROOT = BASE_DIR / "files_required"
 CONFIG_ROOT = PROJECT_LOCATION / "configuration"
 BLINT_REPORTS_PATH = MEDIA_ROOT / "blint"
-AILTYPO_REPORTS_PATH = MEDIA_ROOT / "ailtypo"
 YARA_RULES_PATH = MEDIA_ROOT / "yara"  # path for manual yara rules
 
 LOG_DIR = Path("/") / "var" / "log" / "intel_owl"

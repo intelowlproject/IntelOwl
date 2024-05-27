@@ -23,7 +23,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
         response = {}
         logger.info(
             f"""running AilTypoSquatting on {self.observable_name}
-                    with tlp {self._config.maximum_tlp}
+                    with tlp {self._job.tlp}
                     and dns resolving {self.dns_resolving}"""
         )
         resultList = []
@@ -35,7 +35,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
         )
         response["algorithms"] = resultList
 
-        if self._config.maximum_tlp == "CLEAR" and self.dns_resolving:
+        if self._job.tlp == "CLEAR" and self.dns_resolving:
             response["dnsResolving"] = dnsResolving(
                 resultList, domain=self.observable_name, pathOutput=None
             )

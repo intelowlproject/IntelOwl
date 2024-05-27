@@ -1,10 +1,10 @@
 import json
 import logging
 
-from knock.knockpy import KNOCKPY
+from knock import knockpy
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
 
     def run(self):
         logger.info(f"Running KnockAnalyzer for {self.observable_name}")
-        results = KNOCKPY(
+        results = knockpy.KNOCKPY(
             domain=self.observable_name,
             dns=self.dns,
             useragent=self.useragent,
@@ -43,24 +43,7 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch(
-                    "KNOCKPY",
-                    return_value=MockUpResponse(
-                        {
-                            "marcia.domain.com": ["66.96.162.92"],
-                            "http": [404, None, "Apache"],
-                            "https": [None, None, None],
-                            "cert": [None, None],
-                        },
-                        {
-                            "mbsizer.domain.com": ["66.96.162.92"],
-                            "http": [404, None, "Apache"],
-                            "https": [None, None, None],
-                            "cert": [None, None],
-                        },
-                        200,
-                    ),
-                ),
+                patch.object(knockpy, "KNOCKPY", return_value=None),
             )
         ]
         return super()._monkeypatch(patches=patches)

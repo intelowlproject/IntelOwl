@@ -9,7 +9,7 @@ declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
 declare -A test_mode=(["test"]=1 ["ci"]=1)
 declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
 
-declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml")
+declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["traefik_local"]="docker/traefik_local.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml" ["nginx_default"]="docker/nginx.override.yml")
 
 print_synopsis () {
   echo "SYNOPSIS"
@@ -39,6 +39,7 @@ print_help () {
   echo "    --multi_queue               Uses the multiqueue.override.yml compose file."
   echo "    --nfs                       Uses the nfs.override.yml compose file."
   echo "    --traefik                   Uses the traefik.override.yml compose file."
+  echo "    --traefik_local             Uses the traefik_local.override.yml compose file."
   echo "    --use-external-database     Do NOT use postgres.override.yml compose file."
   echo "    --use-external-redis        Do NOT use redis.override.yml compose file."
   echo "    --rabbitmq                  Uses the rabbitmq.override.yml compose file."
@@ -105,7 +106,7 @@ current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
 docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga")
 
-declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml" ["redis"]="docker/redis.override.yml")
+declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["traefik_local"]="docker/traefik_local.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml" ["redis"]="docker/redis.override.yml")
 for value in "${docker_analyzers[@]}"; do
   path_mapping["${value}"]+="integrations/${value}/compose.yml"
   path_mapping["${value}.test"]+="integrations/${value}/compose-tests.yml"
@@ -223,6 +224,10 @@ while [[ $# -gt 0 ]]; do
     params["traefik"]=true
     shift 1
   ;;
+  --traefik_local)
+    params["traefik_local"]=true
+    shift 1
+  ;;
   -h | --help)
     print_help
     exit 0
@@ -281,6 +286,21 @@ for value in "${!params[@]}"; do
     compose_files+=("${path_mapping["$value"]}")
   fi
 done
+
+# Check if no traefik related parameters were provided
+traefik_enabled=false
+for param in "${!params[@]}"; do
+  if [[ "$param" == "traefik" || "$param" == "traefik_local" ]]; then
+    traefik_enabled=true
+    break
+  fi
+done
+
+# Add the default nginx configuration if traefik is not used
+if [ "$traefik_enabled" = false ]; then
+  compose_files+=("${path_mapping["nginx_default"]}")
+fi
+
 # add all the test files
 if [[ $env_argument == "test" ]]; then
   test_values=("multi_queue" "flower")
@@ -334,6 +354,7 @@ for value in "${compose_files[@]}" ; do
     to_run+=" -f $value"
   fi
 done
+
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
   docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
 else

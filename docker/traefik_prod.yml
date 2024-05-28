@@ -1,0 +1,66 @@
+services:
+  traefik:
+    container_name: "intelowl_traefik_prod"
+    command:
+      # Pleases refer to the official documentation: https://doc.traefik.io/traefik/
+      # LOGS - may be omitted if you don't need logs
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
+      - "--log.filePath=/var/log/traefik/traefik.log"
+      - "--log.level=DEBUG"
+      # DASHBOARD
+      - "--api.dashboard=true"
+      # PROVIDERS
+      - "--providers.docker=true"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.exposedbydefault=false"
+      # ENTRYPOINTS - redirect every request to use HTTPS
+      - "--entrypoints.web.address=:80"
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      # CERTIFICATE RESOLVERS
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      # DEV - use this for testing purposes or else you might get blocked
+      - "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      # PROD - use this if everything works fine
+      #- "--certificatesresolvers.le.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.le.acme.email=postmaster@example.com" # CHANGE THIS
+      - "--certificatesresolvers.le.acme.storage=/etc/letsencrypt/acme.json"  
+    labels:
+      # DASHBOARD - setup for secure dashboard access
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.intelowl.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))" # CHANGE THIS (Only "Host"!)
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true" 
+      - "traefik.http.routers.dashboard.tls.certresolver=le"
+      # auth/ipallowlist middlewares allow to limit/secure access - may be omitted
+      # Here you may define which IPs/CIDR ranges are allowed to access this resource - may be omitted
+      # - "traefik.http.routers.dashboard.middlewares=dashboard-ipallowlist"
+      # - "traefik.http.middlewares.dashboard-ipallowlist.ipallowlist.sourcerange=0.0.0.0" # CHANGE THIS
+      # You can create a new user and password for basic auth with this command: 
+      # echo $(htpasswd -nbB user password) | sed -e s/\\$/\\$\\$/g 
+      # - "traefik.http.routers.dashboard.middlewares=auth"
+      # - "traefik.http.middlewares.auth.basicauth.users=user:$$2y$$05$$v.ncVNXEJriELglCBEZJmu5I1VrhyhuaVCXATRQTUVuvOF1qgYwpa" # CHANGE THIS (default is user:password)
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/letsencrypt:/etc/letsencrypt"
+      - "/var/log/traefik:/var/log/traefik"
+
+  nginx:
+      depends_on:
+        - traefik
+      labels:
+        - "traefik.http.routers.nginx.rule=Host(`intelowl.example.com`)" # CHANGE THIS
+        - "traefik.http.routers.nginx.entrypoints=websecure"
+        - "traefik.http.routers.nginx.tls=true" 
+        - "traefik.http.routers.nginx.tls.certresolver=le"
+        # Here you may define which IPs/CIDR ranges are allowed to access this resource
+        # - "traefik.http.routers.nginx.middlewares=nginx-ipallowlist"
+        # - "traefik.http.middlewares.nginx-ipallowlist.ipallowlist.sourcerange=0.0.0.0" # CHANGE THIS

@@ -8,7 +8,7 @@ pip3 install --compile -r requirements/django-server-requirements.txt
 # install Watchman to enhance performance on the Django development Server
 # https://docs.djangoproject.com/en/3.2/ref/django-admin/#runserver
 cd /tmp
-wget https://github.com/facebook/watchman/releases/download/v2024.05.13.00/watchman-v2024.05.13.00-linux.zip
+wget https://github.com/facebook/watchman/releases/download/v2024.04.15.00/watchman-v2024.04.15.00-linux.zip
 unzip watchman-*-linux.zip
 cd watchman-*-linux/
 mkdir -p /usr/local/{bin,lib} /usr/local/var/run/watchman

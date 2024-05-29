@@ -13,7 +13,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.watch=true"
       - "--providers.docker.exposedbydefault=false"
-      # ENTRYPOINTS - redirect every request to use HTTPS
+      # ENTRYPOINTS
       - "--entrypoints.web.address=:80"
     ports:
       - "80:80"

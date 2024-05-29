@@ -93,7 +93,8 @@ class JobConsumer(JsonWebsocketConsumer):
 
     def send_job(self, event) -> None:
         job_data = event["job"]
-        logger.debug(f"job data: {job_data}")
+        # this is too much noisy
+        # logger.debug(f"job data: {job_data}")
         self.send_json(content=job_data)
         if job_data["status"] in Status.final_statuses():
             logger.debug("job sent to the client and terminated, close ws")

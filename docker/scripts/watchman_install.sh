@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "WATCHMAN value is "
+echo $WATCHMAN
+
 # This script can be disabled during development using WATCHMAN=false env variable
 if [ "$WATCHMAN" = "false" ]; then echo "Skipping WATCHMAN installation because we are not in test mode"; exit 0;  fi
 

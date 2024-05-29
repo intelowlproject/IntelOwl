@@ -16,7 +16,6 @@ services:
       - DEBUG=True
       - DJANGO_TEST_SERVER=True
       - DJANGO_WATCHMAN_TIMEOUT=60
-      - WATCHMAN=True
 
   daphne:
     image: intelowlproject/intelowl:test
@@ -37,9 +36,6 @@ services:
       - ../:/opt/deploy/intel_owl
     environment:
       - DEBUG=True
-      - DJANGO_TEST_SERVER=True
-      - DJANGO_WATCHMAN_TIMEOUT=60
-      - WATCHMAN=True
 
   celery_worker_default:
     image: intelowlproject/intelowl:test
@@ -47,6 +43,3 @@ services:
       - ../:/opt/deploy/intel_owl
     environment:
       - DEBUG=True
-      - DJANGO_TEST_SERVER=True
-      - DJANGO_WATCHMAN_TIMEOUT=60
-      - WATCHMAN=True

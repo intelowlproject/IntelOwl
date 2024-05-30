@@ -27,17 +27,28 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
                     with tlp {self._job.tlp}
                     and dns resolving {self.dns_resolving}"""
         )
-        resultList = []
+
         response["algorithms"] = typo.runAll(
             domain=self.observable_name,
             limit=math.inf,
-            formatoutput="yara",
+            formatoutput="text",
             pathOutput=None,
         )
         if self._job.tlp == self._job.TLP.CLEAR.value and self.dns_resolving:
-            response["dnsResolving"] = resolving.dnsResolving(
-                resultList=resultList, domain=self.observable_name, pathOutput=None
-            )
+            # for "x.com", response["algorithms"][0]=".com"
+            # which is not valid for look up
+            if len(self.observable_name.split(".")[0]) == 1:
+                response["dnsResolving"] = resolving.dnsResolving(
+                    resultList=response["algorithms"][1:],
+                    domain=self.observable_name,
+                    pathOutput=None,
+                )
+            else:
+                response["dnsResolving"] = resolving.dnsResolving(
+                    resultList=response["algorithms"],
+                    domain=self.observable_name,
+                    pathOutput=None,
+                )
 
         return response
 

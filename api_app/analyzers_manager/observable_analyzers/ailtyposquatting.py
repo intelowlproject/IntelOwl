@@ -5,6 +5,7 @@ from ail_typo_squatting import runAll
 from ail_typo_squatting.dns_local.resolving import dnsResolving
 
 from api_app.analyzers_manager import classes
+from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -39,3 +40,13 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
             )
 
         return response
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch.object("runAll", return_value=None),
+                patch.object("dnsResolving", return_value=None),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

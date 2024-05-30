@@ -1,7 +1,7 @@
 import logging
 import math
 
-from ail_typo_squatting import runAll
+from ail_typo_squatting import typo
 from ail_typo_squatting.dns_local import resolving
 
 from api_app.analyzers_manager import classes
@@ -28,7 +28,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
                     and dns resolving {self.dns_resolving}"""
         )
         resultList = []
-        response["algorithms"] = runAll(
+        response["algorithms"] = typo.runAll(
             domain=self.observable_name,
             limit=math.inf,
             formatoutput="yara",
@@ -45,7 +45,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch.object(runAll, "runAll", return_value=None),
+                patch.object(typo, "runAll", return_value=None),
                 patch.object(resolving, "dnsResolving", return_value=None),
             )
         ]

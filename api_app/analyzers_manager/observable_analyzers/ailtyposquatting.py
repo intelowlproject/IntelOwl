@@ -2,7 +2,7 @@ import logging
 import math
 
 from ail_typo_squatting import runAll
-from ail_typo_squatting.dns_local.resolving import dnsResolving
+from ail_typo_squatting.dns_local import resolving
 
 from api_app.analyzers_manager import classes
 from tests.mock_utils import if_mock_connections, patch
@@ -35,7 +35,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
             pathOutput=None,
         )
         if self._job.tlp == self._job.TLP.CLEAR.value and self.dns_resolving:
-            response["dnsResolving"] = dnsResolving(
+            response["dnsResolving"] = resolving.dnsResolving(
                 resultList=resultList, domain=self.observable_name, pathOutput=None
             )
 
@@ -46,7 +46,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch.object(runAll, "runAll", return_value=None),
-                patch.object(dnsResolving, "dnsResolving", return_value=None),
+                patch.object(resolving, "dnsResolving", return_value=None),
             )
         ]
         return super()._monkeypatch(patches=patches)

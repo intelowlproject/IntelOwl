@@ -6,8 +6,7 @@ services:
       # Pleases refer to the official documentation: https://doc.traefik.io/traefik/
       # DASHBOARD
       - "--api.dashboard=true"
-      - "--api.insecure=true"
-      # LOGS
+      # LOGS - may be omitted if you don't need logs
       - "--log.level=DEBUG"
       # PROVIDERS
       - "--providers.docker=true"
@@ -18,15 +17,15 @@ services:
     ports:
       - "80:80"
     volumes:
+      - "/etc/letsencrypt:/etc/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/var/log/traefik:/var/log/traefik"
 
   nginx:
       depends_on:
         - traefik
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.nginx.rule=Host(`localhost`)"
-        - "traefik.http.routers.nginx.entrypoints=web"
         - "traefik.http.services.nginx.loadbalancer.server.port=80"
       expose: 
         - "80"

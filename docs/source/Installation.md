@@ -183,7 +183,7 @@ There are 3 options to execute the web server:
 
     Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing every line which has a "# CHANGE THIS" comment appended. For a detailed explanation follow the official documentation: [Traefix doc](https://doc.traefik.io/traefik/).
     
-    After the configuration is done, you can add the option `--traefik` for a production ready deployment while executing [`./start`](#run)
+    After the configuration is done, you can add the option `--traefik_prod` for a production ready deployment while executing [`./start`](#run)
     If you just want to test things out you can add the option `--traefik_local` for a development deployment.
 
 ## Run

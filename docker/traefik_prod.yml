@@ -1,22 +1,14 @@
 services:
   traefik:
     image: "traefik:3.0"
-    container_name: "traefik"
+    container_name: "intelowl_traefik_prod"
     command:
       # Pleases refer to the official documentation: https://doc.traefik.io/traefik/
-      # DASHBOARD
-      - "--api.dashboard=true"
       # LOGS - may be omitted if you don't need logs
       - "--accesslog=true"
       - "--accesslog.filepath=/var/log/traefik/access.log"
-      - "--log.level=DEBUG"
       - "--log.filePath=/var/log/traefik/traefik.log"
-      # PROVIDERS
-      - "--providers.docker=true"
-      - "--providers.docker.watch=true"
-      - "--providers.docker.exposedbydefault=false"
       # ENTRYPOINTS - redirect every request to use HTTPS
-      - "--entrypoints.web.address=:80"
       - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
       - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
       - "--entryPoints.web.http.redirections.entrypoint.permanent=true"
@@ -50,7 +42,6 @@ services:
       # port the service is listening on
       - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
     ports:
-      - "80:80"
       - "443:443"
     volumes:
       - "/etc/letsencrypt:/etc/letsencrypt"
@@ -61,7 +52,6 @@ services:
       depends_on:
         - traefik
       labels:
-        - "traefik.enable=true"
         - "traefik.http.routers.nginx.rule=Host(`intelowl.example.com`)" # CHANGE THIS
         - "traefik.http.routers.nginx.entrypoints=websecure"
         - "traefik.http.routers.nginx.tls=true" 
@@ -69,7 +59,3 @@ services:
         - "traefik.http.routers.nginx.middlewares=nginx-ipallowlist"
         # Here you may define which IPs/CIDR ranges are allowed to access this resource
         - "traefik.http.middlewares.nginx-ipallowlist.ipallowlist.sourcerange=127.0.0.1,127.0.0.1/16" # CHANGE THIS
-        - "traefik.http.services.nginx.loadbalancer.server.port=80"
-      expose: 
-        - "80"
-

@@ -34,7 +34,7 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
             formatoutput="yara",
             pathOutput=None,
         )
-        if self._job.tlp == "CLEAR" and self.dns_resolving:
+        if self._job.tlp == self._job.TLP.CLEAR.value and self.dns_resolving:
             response["dnsResolving"] = dnsResolving(
                 resultList=resultList, domain=self.observable_name, pathOutput=None
             )

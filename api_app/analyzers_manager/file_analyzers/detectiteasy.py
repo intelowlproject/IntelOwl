@@ -13,7 +13,7 @@ class DetectItEasy(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling (in secs)
     poll_distance: int = 3
 
-    def update():
+    def update(self):
         pass
 
     def run(self):

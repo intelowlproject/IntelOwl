@@ -45,8 +45,8 @@ class AilTypoSquatting(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch.object("runAll", return_value=None),
-                patch.object("dnsResolving", return_value=None),
+                patch.object(runAll, "runAll", return_value=None),
+                patch.object(dnsResolving, "dnsResolving", return_value=None),
             )
         ]
         return super()._monkeypatch(patches=patches)

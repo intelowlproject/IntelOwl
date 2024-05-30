@@ -1,25 +1,8 @@
 services:
   traefik:
     image: "traefik:3.0"
-    container_name: "traefik"
-    command:
-      # Pleases refer to the official documentation: https://doc.traefik.io/traefik/
-      # DASHBOARD
-      - "--api.dashboard=true"
-      # LOGS - may be omitted if you don't need logs
-      - "--log.level=DEBUG"
-      # PROVIDERS
-      - "--providers.docker=true"
-      - "--providers.docker.watch=true"
-      - "--providers.docker.exposedbydefault=false"
-      # ENTRYPOINTS - redirect every request to use HTTPS
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "80:80"
-    volumes:
-      - "/etc/letsencrypt:/etc/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/var/log/traefik:/var/log/traefik"
+    labels:
+      - "traefik.enable=true"
 
   nginx:
       depends_on:

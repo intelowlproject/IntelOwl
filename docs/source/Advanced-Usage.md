@@ -60,7 +60,7 @@ After a user registration has been made, an email is sent to the user to verify 
 Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
 If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
 
-To have the "Registration" page to work correctly, you must configure some variables before starting IntelOwl. See [Optional Environment Configuration](/Installation.md#other-optional-configuration-to-enable-specific-services-features)
+To have the "Registration" page to work correctly, you must configure some variables before starting IntelOwl. See [Optional Environment Configuration](https://intelowl.readthedocs.io/en/latest/Installation.html#other-optional-configuration-to-enable-specific-services-features)
 
 In a development environment the emails that would be sent are written to the standard output.
 

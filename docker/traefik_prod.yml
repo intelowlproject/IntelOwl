@@ -23,9 +23,9 @@ services:
       # CERTIFICATE RESOLVERS
       - "--certificatesresolvers.le.acme.httpchallenge=true"
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
-      # DEV - use this for testing purposes or else you might get blocked
+      # DEV - use this for testing purposes or else you might get blocked - # CHANGE THIS
       - "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      # PROD - use this if everything works fine
+      # PROD - use this if everything works fine - # CHANGE THIS
       #- "--certificatesresolvers.le.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.le.acme.email=postmaster@example.com" # CHANGE THIS
       - "--certificatesresolvers.le.acme.storage=/etc/letsencrypt/acme.json"  

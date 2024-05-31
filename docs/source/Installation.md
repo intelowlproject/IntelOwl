@@ -181,7 +181,9 @@ There are 3 options to execute the web server:
 
     We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
 
-    Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing every line which has a "# CHANGE THIS" comment appended. For a detailed explanation follow the official documentation: [Traefix doc](https://doc.traefik.io/traefik/).
+    Before using the production deployment, you should change the configuration file `docker/traefik_prod.yml` by customising every line which has a "# CHANGE THIS" comment appended to reflect your environment. For a detailed explanation follow the official documentation: [Traefix doc](https://doc.traefik.io/traefik/).
+
+    The development deployment is ready to go and running on localhost. 
     
     After the configuration is done, you can add the option `--traefik_prod` for a production ready deployment while executing [`./start`](#run)
     If you just want to test things out you can add the option `--traefik_local` for a development deployment.

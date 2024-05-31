@@ -298,8 +298,6 @@ for value in "${!params[@]}"; do
   fi
 done
 
-echo "Using the following compose files: ${compose_files[@]}"
-
 # add all the test files
 if [[ $env_argument == "test" ]]; then
   test_values=("multi_queue" "flower")

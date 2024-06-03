@@ -12,7 +12,7 @@ from .vt3_base import VirusTotalv3AnalyzerMixin
 
 
 class VirusTotalv3Intelligence(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
-    base_url = "https://www.virustotal.com/api/v3/intelligence"
+    url = "https://www.virustotal.com/api/v3/intelligence"
 
     limit: int
     order_by: str
@@ -33,7 +33,7 @@ class VirusTotalv3Intelligence(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
             params["order"] = self.order_by
         try:
             response = requests.get(
-                self.base_url + "/search", params=params, headers=self.headers
+                self.url + "/search", params=params, headers=self.headers
             )
             response.raise_for_status()
         except requests.RequestException as e:

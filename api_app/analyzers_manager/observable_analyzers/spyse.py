@@ -16,6 +16,10 @@ class Spyse(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def __build_spyse_api_uri(self) -> str:
         if self.observable_classification == self.ObservableTypes.DOMAIN:
             endpoint = "domain"

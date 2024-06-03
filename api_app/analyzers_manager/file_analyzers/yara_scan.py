@@ -337,7 +337,7 @@ class YaraStorage:
 class YaraScan(FileAnalyzer):
     ignore: list
     repositories: list
-    _private_repositories: dict
+    _private_repositories: dict = {}
     local_rules: str
 
     def _get_owner_and_key(self, url: str) -> Tuple[Union[str, None], Union[str, None]]:

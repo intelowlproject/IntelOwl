@@ -1,8 +1,13 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import PropTypes from "prop-types";
-import { MdOutlineRefresh, MdPauseCircleOutline } from "react-icons/md";
+import {
+  MdOutlineRefresh,
+  MdPauseCircleOutline,
+  MdInfoOutline,
+} from "react-icons/md";
 import { JSONTree } from "react-json-tree";
+import { UncontrolledPopover } from "reactstrap";
 
 import {
   DataTable,
@@ -14,7 +19,8 @@ import {
 
 import { StatusTag } from "../../common/StatusTag";
 import { killPlugin, retryPlugin } from "./jobApi";
-import { PluginStatuses } from "../../../constants/pluginConst";
+import { PluginStatuses, PluginsTypes } from "../../../constants/pluginConst";
+import { markdownToHtml } from "../../common/markdownToHtml";
 
 const tableProps = {
   columns: [
@@ -59,7 +65,7 @@ const tableProps = {
       Header: "Status",
       id: "status",
       accessor: "status",
-      Cell: ({ value }) => <StatusTag status={value} />,
+      Cell: ({ value }) => <StatusTag status={value} className="py-0" />,
       Filter: SelectOptionsFilter,
       selectOptions: Object.values(PluginStatuses),
       maxWidth: 50,
@@ -68,6 +74,38 @@ const tableProps = {
       Header: "Name",
       id: "name",
       accessor: "name",
+      Cell: ({
+        value,
+        row: { original: plugin },
+        customProps: { _job, _refetch, pluginsLoading },
+      }) => (
+        <div className="d-flex align-items-center row">
+          <div className="d-inline-block col-10 offset-1">{value}</div>
+          <div className="col-1">
+            <MdInfoOutline
+              id={`pluginReport-infoicon__${plugin.type}_${plugin.id}`}
+              className="text-secondary"
+              fontSize="20"
+            />
+            <UncontrolledPopover
+              target={`pluginReport-infoicon__${plugin.type}_${plugin.id}`}
+              placement="bottom"
+              trigger="hover"
+              popperClassName="px-2 bg-body"
+              delay={{ show: 0, hide: 200 }}
+              style={{ paddingTop: "1rem" }}
+            >
+              {pluginsLoading ? (
+                <small>
+                  <p>Description is loading</p>
+                </small>
+              ) : (
+                <small>{markdownToHtml(plugin?.description)}</small>
+              )}
+            </UncontrolledPopover>
+          </div>
+        </div>
+      ),
       Filter: DefaultColumnFilter,
       maxWidth: 300,
     },
@@ -118,67 +156,43 @@ const tableProps = {
   ),
 };
 
-export function AnalyzersReportTable({ job, refetch }) {
-  console.debug("AnalyzersReportTable rendered");
+export function PluginsReportTable({
+  job,
+  refetch,
+  pluginReports,
+  pluginsStored,
+  pluginsStoredLoading,
+}) {
+  console.debug("PluginsReportTable rendered");
+  const reports = pluginReports;
+
+  reports.forEach((report, index) => {
+    pluginsStored.forEach((plugin) => {
+      if (
+        (report.type !== PluginsTypes.VISUALIZER &&
+          plugin.name === report.name) ||
+        (report.type === PluginsTypes.VISUALIZER &&
+          plugin.name === report.config)
+      ) {
+        reports[index].description = plugin.description;
+      }
+    });
+  });
+
   return (
     <div style={{ height: "60vh", overflow: "scroll" }}>
       <DataTable
-        data={job?.analyzer_reports}
-        customProps={{ job, refetch }}
+        data={reports}
+        customProps={{ job, refetch, pluginsLoading: pluginsStoredLoading }}
         {...tableProps}
       />
     </div>
   );
 }
 
-export function ConnectorsReportTable({ job, refetch }) {
-  console.debug("ConnectorsReportTable rendered");
-  return (
-    <div style={{ height: "60vh", overflow: "scroll" }}>
-      <DataTable
-        data={job?.connector_reports}
-        customProps={{ job, refetch }}
-        {...tableProps}
-      />
-    </div>
-  );
-}
-export function PivotsReportTable({ job, refetch }) {
-  console.debug("PivotsReportTable rendered");
-  return (
-    <div style={{ height: "60vh", overflow: "scroll" }}>
-      <DataTable
-        data={job?.pivot_reports}
-        customProps={{ job, refetch }}
-        {...tableProps}
-      />
-    </div>
-  );
-}
-export function VisualizersReportTable({ job, refetch }) {
-  console.debug("VisualizersReportTable rendered");
-  return (
-    <div style={{ height: "60vh", overflow: "scroll" }}>
-      <DataTable
-        data={job?.visualizer_reports}
-        customProps={{ job, refetch }}
-        {...tableProps}
-      />
-    </div>
-  );
-}
-AnalyzersReportTable.propTypes = {
+PluginsReportTable.propTypes = {
   job: PropTypes.object.isRequired,
-};
-
-ConnectorsReportTable.propTypes = {
-  job: PropTypes.object.isRequired,
-};
-
-PivotsReportTable.propTypes = {
-  job: PropTypes.object.isRequired,
-};
-
-VisualizersReportTable.propTypes = {
-  job: PropTypes.object.isRequired,
+  pluginReports: PropTypes.array.isRequired,
+  pluginsStored: PropTypes.array.isRequired,
+  pluginsStoredLoading: PropTypes.bool.isRequired,
 };

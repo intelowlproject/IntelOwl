@@ -38,5 +38,4 @@ export function JobInfoIcon({ job }) {
 
 JobInfoIcon.propTypes = {
   job: PropTypes.object.isRequired,
-  countryInfo: PropTypes.object.isRequired,
 };

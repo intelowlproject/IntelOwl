@@ -13,6 +13,10 @@ class EmailRep(classes.ObservableAnalyzer):
 
     _api_key_name: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         """
         API key is not mandatory, emailrep supports requests with no key:

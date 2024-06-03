@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     # using public endpoint as the default url
-    base_url: str = "https://api.tria.ge/v0/"
+    url: str = "https://api.tria.ge/v0/"
     private_url: str = "https://private.tria.ge/api/v0/"
     report_url: str = "https://tria.ge/"
 
@@ -30,7 +30,7 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         if self.endpoint == "private":
-            self.base_url = self.private_url
+            self.url = self.private_url
 
         if self.report_type not in ["overview", "complete"]:
             raise AnalyzerConfigurationException(
@@ -57,7 +57,7 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
         if sample_id is None:
             raise AnalyzerRunException("error sending sample")
 
-        self.session.get(self.base_url + f"samples/{sample_id}/events")
+        self.session.get(self.url + f"samples/{sample_id}/events")
 
         self.final_report["overview"] = self.get_overview_report(sample_id)
 
@@ -75,17 +75,15 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.final_report["permalink"] = f"{self.report_url}{analysis_id}"
 
     def get_overview_report(self, sample_id):
-        overview = self.session.get(
-            self.base_url + f"samples/{sample_id}/overview.json"
-        )
+        overview = self.session.get(self.url + f"samples/{sample_id}/overview.json")
         return overview.json()
 
     def get_static_report(self, sample_id):
-        static = self.session.get(self.base_url + f"samples/{sample_id}/reports/static")
+        static = self.session.get(self.url + f"samples/{sample_id}/reports/static")
         return static.json()
 
     def get_task_report(self, sample_id, task):
         task_report = self.session.get(
-            self.base_url + f"samples/{sample_id}/{task}/report_triage.json"
+            self.url + f"samples/{sample_id}/{task}/report_triage.json"
         )
         return task_report.status_code, task_report.json()

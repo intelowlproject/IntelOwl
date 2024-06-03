@@ -8,6 +8,7 @@ export const IP_REGEX =
 export const DOMAIN_REGEX = /^(?:[\w-]{1,63}\.)+[\w-]{2,63}$/;
 export const URL_REGEX = /^.{2,20}:\/\/.+$/;
 export const HASH_REGEX = /^[a-zA-Z0-9]{32,}$/;
+export const PHONE_REGEX = /^\+[1-9]\d{1,14}$/;
 
 export const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
 export const PASSWORD_REGEX = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{12,}$/i;

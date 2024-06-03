@@ -13,6 +13,7 @@ import { VisualizerComponentType } from "./elements/const";
 import { getIcon } from "./icons";
 
 import { HorizontalListVisualizer } from "./elements/horizontalList";
+import { TableVisualizer } from "./elements/table";
 
 /**
  * Convert the validated data into a VisualizerElement.
@@ -70,7 +71,11 @@ function convertToElement(element, idElement, isChild = false) {
           key={idElement}
           id={idElement}
           size={element.size}
-          name={convertToElement(element.name, `${idElement}-vlist`)}
+          name={
+            element.name
+              ? convertToElement(element.name, `${idElement}-vlist`)
+              : null
+          }
           values={element.values.map((additionalElement, index) =>
             convertToElement(
               additionalElement,
@@ -94,6 +99,32 @@ function convertToElement(element, idElement, isChild = false) {
           alignment={element.alignment}
           title={convertToElement(element.title, `${idElement}-title`)}
           value={convertToElement(element.value, `${idElement}-value`, true)}
+        />
+      );
+      break;
+    }
+    case VisualizerComponentType.TABLE: {
+      visualizerElement = (
+        <TableVisualizer
+          key={idElement}
+          id={idElement}
+          size={element.size}
+          columns={element.columns}
+          data={element.data?.map((additionalElement, index) => {
+            const obj = {};
+            Object.entries(additionalElement).forEach(
+              ([key, value], valueIndex) => {
+                obj[key] = convertToElement(
+                  value,
+                  `${idElement}-table-item${index}-value${valueIndex}`,
+                );
+              },
+            );
+            return obj;
+          })}
+          pageSize={element.pageSize}
+          disableFilters={element.disableFilters}
+          disableSortBy={element.disableSortBy}
         />
       );
       break;

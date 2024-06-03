@@ -14,6 +14,10 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 class Robtex(classes.ObservableAnalyzer):
     url = "https://freeapi.robtex.com/"
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         if self.observable_classification == self.ObservableTypes.IP:
             uris = [

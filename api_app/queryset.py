@@ -312,11 +312,13 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_runtime_config(self, runtime_config=None):
         if not runtime_config:
             runtime_config = {}
-        return self.alias(
-            runtime_value=Value(
-                runtime_config.get(F("name"), None),
-                output_field=JSONField(),
-            )
+        # we are creating conditions for when runtime config should be used
+        whens = [
+            When(name=para, then=Value(value, output_field=JSONField()))
+            for para, value in runtime_config.items()
+        ]
+        return self.annotate(
+            runtime_value=Case(*whens, default=None, output_field=JSONField())
         )
 
     def _alias_for_test(self):

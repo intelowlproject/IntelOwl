@@ -19,12 +19,7 @@ import { Loader } from "@certego/certego-ui";
 import { JSONTree } from "react-json-tree";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  AnalyzersReportTable,
-  ConnectorsReportTable,
-  PivotsReportTable,
-  VisualizersReportTable,
-} from "./pluginReportTables";
+import { PluginsReportTable } from "./pluginReportTables";
 import {
   reportedPluginNumber,
   reportedVisualizerNumber,
@@ -39,6 +34,7 @@ import { JobResultSections } from "../../../constants/miscConst";
 import { JobInfoCard } from "./JobInfoCard";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobActionsBar } from "./bar/JobActionBar";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 /* THESE IDS CANNOT BE EMPTY!
 We perform a redirect in case the user landed in the visualzier page without a visualizer,
@@ -63,6 +59,26 @@ export function JobOverview({
 
   const isSelectedUI = section === JobResultSections.VISUALIZER;
 
+  const [
+    analyzersLoading,
+    connectorsLoading,
+    visualizersLoading,
+    pivotsLoading,
+    analyzers,
+    connectors,
+    visualizers,
+    pivots,
+  ] = usePluginConfigurationStore((state) => [
+    state.analyzersLoading,
+    state.connectorsLoading,
+    state.visualizersLoading,
+    state.pivotsLoading,
+    state.analyzers,
+    state.connectors,
+    state.visualizers,
+    state.pivots,
+  ]);
+
   const rawElements = React.useMemo(
     () => [
       {
@@ -80,7 +96,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <AnalyzersReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.analyzer_reports}
+            pluginsStored={analyzers}
+            pluginsStoredLoading={analyzersLoading}
+          />
+        ),
       },
       {
         name: "connector",
@@ -97,7 +121,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <ConnectorsReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.connector_reports}
+            pluginsStored={connectors}
+            pluginsStoredLoading={connectorsLoading}
+          />
+        ),
       },
       {
         name: "pivot",
@@ -114,7 +146,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <PivotsReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.pivot_reports}
+            pluginsStored={pivots}
+            pluginsStoredLoading={pivotsLoading}
+          />
+        ),
       },
       {
         name: "visualizer",
@@ -135,7 +175,15 @@ export function JobOverview({
             />
           </div>
         ),
-        report: <VisualizersReportTable job={job} refetch={refetch} />,
+        report: (
+          <PluginsReportTable
+            job={job}
+            refetch={refetch}
+            pluginReports={job?.visualizer_reports}
+            pluginsStored={visualizers}
+            pluginsStoredLoading={visualizersLoading}
+          />
+        ),
       },
       {
         name: "full",
@@ -158,7 +206,14 @@ export function JobOverview({
         ),
       },
     ],
-    [job],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      job,
+      analyzersLoading,
+      connectorsLoading,
+      visualizersLoading,
+      pivotsLoading,
+    ],
   );
 
   // state
@@ -166,9 +221,11 @@ export function JobOverview({
   const location = useLocation();
   const [UIElements, setUIElements] = useState([]);
   console.debug(
-    `location pathname: ${location.pathname}, state: ${JSON.stringify(
-      location?.state,
-    )}`,
+    `location pathname: ${
+      location.pathname
+    }, state - userChanged: ${JSON.stringify(
+      location?.state?.userChanged,
+    )}, state - jobReport: #${location?.state?.jobReport.id}`,
   );
 
   useEffect(() => {
@@ -304,13 +361,13 @@ export function JobOverview({
             className="g-0 d-flex-between-end align-items-center"
             id="utilitiesRow"
           >
-            <Col>
-              <h2>
+            <Col md={4}>
+              <h2 className="d-flex align-items-center">
                 <span className="me-2 text-secondary">Job #{job.id}</span>
                 <StatusIcon status={job.status} className="small" />
               </h2>
             </Col>
-            <Col className="d-flex justify-content-end mt-1">
+            <Col md={8} className="d-flex justify-content-end mt-1">
               <JobActionsBar job={job} />
             </Col>
           </Row>
@@ -331,7 +388,7 @@ export function JobOverview({
           <Row className="g-0 mt-3">
             <div className="mb-2 d-inline-flex flex-row-reverse">
               {/* UI/raw switch */}
-              <ButtonGroup className="ms-2 mb-3">
+              <ButtonGroup className="ms-2">
                 <Button
                   outline={!isSelectedUI}
                   color={isSelectedUI ? "primary" : "tertiary"}
@@ -340,7 +397,7 @@ export function JobOverview({
                       `/jobs/${job.id}/${
                         JobResultSections.VISUALIZER
                       }/${encodeURIComponent(UIElements[0].name)}`,
-                      { state: { userChanged: true } },
+                      { state: { userChanged: true, jobReport: job } },
                     )
                   }
                 >
@@ -353,7 +410,7 @@ export function JobOverview({
                   onClick={() =>
                     navigate(
                       `/jobs/${job.id}/${JobResultSections.RAW}/${rawElements[0].name}`,
-                      { state: { userChanged: true } },
+                      { state: { userChanged: true, jobReport: job } },
                     )
                   }
                 >
@@ -366,7 +423,9 @@ export function JobOverview({
                   {/* generate the nav with the UI/raw visualizers avoid to generate the navbar item for the "no visualizer element" */}
                   {elementsToShow.map(
                     (componentsObject) =>
-                      componentsObject.id !== "" && (
+                      componentsObject.id !== "" &&
+                      componentsObject.name !==
+                        LOADING_VISUALIZER_UI_ELEMENT_CODE && (
                         <NavItem>
                           <NavLink
                             className={`${
@@ -383,7 +442,9 @@ export function JobOverview({
                                 }/${section}/${encodeURIComponent(
                                   componentsObject.name,
                                 )}`,
-                                { state: { userChanged: true } },
+                                {
+                                  state: { userChanged: true, jobReport: job },
+                                },
                               )
                             }
                           >

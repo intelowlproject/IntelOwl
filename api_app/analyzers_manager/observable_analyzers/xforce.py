@@ -20,6 +20,10 @@ class XForce(classes.ObservableAnalyzer):
     malware_only: bool
     timeout: int = 5
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         auth = HTTPBasicAuth(self._api_key_name, self._api_password_name)
         headers = {"Accept": "application/json"}

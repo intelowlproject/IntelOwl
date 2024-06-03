@@ -386,6 +386,7 @@ export default function ScanForm() {
     playbooksGrouped[classification]
       .map((playbook) => ({
         isDisabled: playbook.disabled,
+        starting: playbook.starting,
         value: playbook.name,
         analyzers: playbook.analyzers,
         connectors: playbook.connectors,
@@ -411,7 +412,7 @@ export default function ScanForm() {
         scan_check_time: playbook.scan_check_time,
         runtime_configuration: playbook.runtime_configuration,
       }))
-      .filter((item) => !item.isDisabled);
+      .filter((item) => !item.isDisabled && item.starting);
 
   const updateAdvancedConfig = (
     tags,
@@ -735,10 +736,11 @@ export default function ScanForm() {
                         <Button
                           color="primary"
                           size="sm"
-                          className="mx-auto rounded-1 mx-auto col-sm-auto"
+                          className="mx-auto rounded-1 mx-auto col-sm-auto d-flex align-items-center"
                           onClick={() => arrayHelpers.push("")}
                         >
-                          <BsFillPlusCircleFill /> Add new value
+                          <BsFillPlusCircleFill />
+                          &nbsp;Add new value
                         </Button>
                       </Row>
                     </Col>

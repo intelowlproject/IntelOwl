@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
-    base_url = "https://www.virustotal.com/api/v3/"
+    url = "https://www.virustotal.com/api/v3/"
 
     max_tries: int
     poll_distance: int
@@ -82,7 +82,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
                             )
                             logger.debug(f"requesting uri: {rel_uri}")
                             response = requests.get(
-                                self.base_url + rel_uri, headers=self.headers
+                                self.url + rel_uri, headers=self.headers
                             )
                             result[relationship] = response.json()
         except Exception as e:
@@ -329,7 +329,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     def _perform_request(self, uri: str, method: str, ignore_404=False, **kwargs):
         error = None
         try:
-            url = self.base_url + uri
+            url = self.url + uri
             if method == "GET":
                 response = requests.get(url, headers=self.headers, **kwargs)
             elif method == "POST":

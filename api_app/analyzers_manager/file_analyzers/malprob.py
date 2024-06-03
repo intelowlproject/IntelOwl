@@ -60,7 +60,7 @@ class MalprobScan(FileAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    "requests.get",
+                    "requests.post",
                     return_value=MockUpResponse(
                         {
                             "report": {

@@ -481,19 +481,25 @@ class JobTestCase(CustomTestCase):
         j1.analyzers_to_execute.set([ac, ac2])
         pc.related_analyzer_configs.set([ac, ac2])
         self.assertCountEqual(
-            j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk]
+            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True),
+            [pc.pk],
         )
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac])
-        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [])
+        self.assertCountEqual(
+            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
+        )
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac2, ac3])
         self.assertCountEqual(
-            j1.pivots_to_execute.values_list("pk", flat=True), [pc.pk]
+            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True),
+            [pc.pk],
         )
 
         del j1.pivots_to_execute
         j1.analyzers_to_execute.set([ac, ac3])
-        self.assertCountEqual(j1.pivots_to_execute.values_list("pk", flat=True), [])
+        self.assertCountEqual(
+            j1.pivots_to_execute.filter(name="test").values_list("pk", flat=True), []
+        )

@@ -19,7 +19,7 @@ import {
   RiGuideLine,
   RiTwitterXFill,
 } from "react-icons/ri";
-import { FaGithub, FaGoogle } from "react-icons/fa";
+import { FaGithub, FaGoogle, FaLinkedin } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { TbReport } from "react-icons/tb";
 
@@ -125,7 +125,11 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
           <span className="ms-1">Docs</span>
         </a>
       </NavItem>
-      <Button id="social-button" size="sm" className="mx-2 btn-accent">
+      <Button
+        id="social-button"
+        size="sm"
+        className="mx-2 btn-accent d-flex align-items-center"
+      >
         <>
           <MdShare />
           <span className="ms-1">Social</span>
@@ -143,9 +147,9 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href={`https://twitter.com/${INTELOWL_TWITTER_ACCOUNT}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-social"
+              className="btn-social d-flex align-items-center"
             >
-              <RiTwitterXFill className="text-info" /> Follow @
+              <RiTwitterXFill className="text-info me-1" /> Follow @
               {INTELOWL_TWITTER_ACCOUNT}
             </a>
           </div>
@@ -154,9 +158,19 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href="https://github.com/intelowlproject"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-social my-1"
+              className="btn-social my-1 d-flex align-items-center"
             >
-              <FaGithub /> Connect on Github{" "}
+              <FaGithub className="me-1" /> Connect on Github{" "}
+            </a>
+          </div>
+          <div>
+            <a
+              href="https://www.linkedin.com/company/intelowl"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-social my-1 d-flex align-items-center"
+            >
+              <FaLinkedin className="me-1" /> IntelOwl on LinkedIn{" "}
             </a>
           </div>
           <div>
@@ -164,9 +178,9 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href="https://www.honeynet.org/gsoc/"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-social my-1"
+              className="btn-social my-1 d-flex align-items-center"
             >
-              <FaGoogle className="text-accent" /> Honeynet on GSOC{" "}
+              <FaGoogle className="text-accent me-1" /> Honeynet on GSOC{" "}
             </a>
           </div>
           <div>
@@ -174,7 +188,7 @@ function RightLinks({ handleClickStart, isAuthenticated }) {
               href="https://gsoc-slack.honeynet.org/"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-social my-1"
+              className="btn-social my-1 d-flex align-items-center"
             >
               <img
                 className="px-1"

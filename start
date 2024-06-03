@@ -2,7 +2,6 @@
 
 generic_version_regex="^[0-9]{1,2}\.[0-9]{1,2}.[0-9]{1,2}$"
 version_regex="^[3-9]\.[0-9]{1,2}.[0-9]{1,2}$"
-pyelastic_default_version="7.4.1"
 pycti_default_version="5.10.0"
 
 # little trick for exact matching in arrays
@@ -55,9 +54,6 @@ print_help () {
   echo "    --pycti-version <value>     The pycti version to choose. This must match the"
   echo "                                OpenCTI server version you are connecting to."
   echo "                                Default is ${pycti_default_version}."
-  echo "    --pyelastic-version <value> The py-elasticsearch version to choose. This"
-  echo "                                must match the server version you are"
-  echo "                                connecting to. Default is ${pyelastic_default_version}."
 }
 
 check_parameters () {
@@ -87,7 +83,6 @@ check_parameters () {
 set_defaults_values () {
   project_name="intel_owl"
   version=$current_version
-  export PYELASTIC_VERSION=$pyelastic_default_version
   export PYCTI_VERSION=$pycti_default_version
 }
 
@@ -108,7 +103,7 @@ check_parameters "$@" && shift 2
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("tor_analyzers" "malware_tools_analyzers" "cyberchef" "pcap_analyzers" "phoneinfoga")
+docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga")
 
 declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.override.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml" ["redis"]="docker/redis.override.yml")
 for value in "${docker_analyzers[@]}"; do
@@ -165,12 +160,11 @@ while [[ $# -gt 0 ]]; do
     shift 1
     ;;
   --pcap_analyzers)
-    params["pcap_analyzers"]=true
+    analyzers["pcap_analyzers"]=true
     shift 1
     ;;
-
   --phoneinfoga)
-    params["phoneinfoga"]=true
+    analyzers["phoneinfoga"]=true
     shift 1
     ;;
   --multi_queue)
@@ -213,14 +207,6 @@ while [[ $# -gt 0 ]]; do
     params["elastic"]=true
     shift 1
   ;;
-  --pyelastic-version)
-    if ! [[ $2 =~ $generic_version_regex ]]; then
-      echo "Error! Wrong pyelastic version format." >&2
-      exit 1
-    fi
-    export PYELASTIC_VERSION=$2
-    shift 2
-  ;;
   --pycti-version)
     if ! [[ $2 =~ $generic_version_regex ]]; then
       echo "Error! Wrong pycti version format." >&2
@@ -231,6 +217,10 @@ while [[ $# -gt 0 ]]; do
   ;;
   --https)
     params["https"]=true
+    shift 1
+  ;;
+  --traefik)
+    params["traefik"]=true
     shift 1
   ;;
   -h | --help)
@@ -248,9 +238,8 @@ done
 # here all variables should be parsed and ready for use
 cmd_py_version=("up" "build")
 if [[ ( ! $env_argument == "test" || ! ${cmd_py_version[*]} =~ $cmd_argument ) && \
-  ( $PYELASTIC_VERSION != "$pyelastic_default_version" || \
-  $PYCTI_VERSION != "$pycti_default_version" ) ]]; then
-    echo "pycti_version and pyelastic_version options are valid only while running in" >&2
+  ( $PYCTI_VERSION != "$pycti_default_version" ) ]]; then
+    echo "pycti_version options are valid only while running in" >&2
     echo "'test' mode and while building a new image. This is because they can change" >&2
     echo "the version of those library only during the build of a new Docker Image." >&2
     exit 11

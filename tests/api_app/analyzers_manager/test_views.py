@@ -40,13 +40,16 @@ class AnalyzerConfigViewSetTestCase(
         self.assertIn("status", result)
         self.assertTrue(result["status"])
 
-        analyzer = "Xlm_Macro_Deobfuscator"
+        analyzer = "Doc_Info"
         response = self.client.post(f"{self.URL}/{analyzer}/pull")
         self.assertEqual(response.status_code, 400)
         result = response.json()
+        print(result)
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], "No update implemented")
+        self.assertEqual(
+            result["errors"]["detail"], "This Plugin has no Update implemented"
+        )
 
     def test_health_check(self):
         analyzer = "ClamAV"

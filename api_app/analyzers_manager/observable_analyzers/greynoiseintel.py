@@ -19,6 +19,10 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
 
     _api_key_name: str = None
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     @property
     def integration_name(self):
         if self.greynoise_api_version == "v2":

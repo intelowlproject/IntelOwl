@@ -12,7 +12,7 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Hunter_How(classes.ObservableAnalyzer):
-    base_url: str = "https://api.hunter.how/search"
+    url: str = "https://api.hunter.how/search"
     _api_key_name: str
     page: int
     page_size: int
@@ -40,7 +40,7 @@ class Hunter_How(classes.ObservableAnalyzer):
 
     def run(self):
         try:
-            response_ip = requests.get(self.base_url, params=self.parameters)
+            response_ip = requests.get(self.url, params=self.parameters)
             response_ip.raise_for_status()
 
         except requests.RequestException as e:

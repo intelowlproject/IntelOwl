@@ -23,7 +23,7 @@ class YETI(classes.ObservableAnalyzer):
         headers = {"Accept": "application/json", "X-Api-Key": self._api_key_name}
         if self._url_key_name and self._url_key_name.endswith("/"):
             self._url_key_name = self._url_key_name[:-1]
-        url = f"{self._url_key_name}/observablesearch/"
+        url = f"{self._url_key_name}/api/v2/observablesearch/"
 
         # search for observables
         resp = requests.post(

@@ -16,6 +16,7 @@ from api_app.visualizers_manager.classes import (
     VisualizableLevelSize,
     VisualizableObject,
     VisualizablePage,
+    VisualizableTable,
     VisualizableTitle,
     VisualizableVerticalList,
     Visualizer,
@@ -213,6 +214,78 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             ],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
+
+    def test_to_dict_name_null(self):
+        value = VisualizableBase(
+            value="", color=VisualizableColor.DANGER, link="http://test_value"
+        )
+        vvl = VisualizableVerticalList(value=[value])
+        expected_result = {
+            "alignment": "center",
+            "type": "vertical_list",
+            "name": None,
+            "disable": True,
+            "start_open": True,
+            "size": "auto",
+            "values": [],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
+
+
+class VisualizableTableTestCase(CustomTestCase):
+    def test_to_dict(self):
+        data = [
+            {
+                "column_name": VisualizableBase(
+                    value="test_value", color=VisualizableColor.DANGER
+                )
+            }
+        ]
+        columns = ["column_name"]
+        vvl = VisualizableTable(columns=columns, data=data)
+        expected_result = {
+            "size": "auto",
+            "alignment": "around",
+            "columns": ["column_name"],
+            "page_size": 5,
+            "disable_filters": False,
+            "disable_sort_by": False,
+            "type": "table",
+            "data": [
+                {
+                    "column_name": {
+                        "size": "auto",
+                        "alignment": "center",
+                        "disable": True,
+                        "value": "test_value",
+                        "color": "danger",
+                        "link": "",
+                        "icon": "",
+                        "bold": False,
+                        "italic": False,
+                        "copy_text": "test_value",
+                        "description": "",
+                        "type": "base",
+                    }
+                }
+            ],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
+
+    def test_to_dict_data_null(self):
+        columns = ["column_name"]
+        vvl = VisualizableTable(columns=columns, data=[])
+        expected_result = {
+            "size": "auto",
+            "alignment": "around",
+            "columns": ["column_name"],
+            "page_size": 5,
+            "disable_filters": False,
+            "disable_sort_by": False,
+            "type": "table",
+            "data": [],
+        }
+        self.assertCountEqual(vvl.to_dict(), expected_result)
 
 
 class VisualizableHorizontalListTestCase(CustomTestCase):

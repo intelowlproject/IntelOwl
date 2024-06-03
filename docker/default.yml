@@ -26,8 +26,8 @@ services:
       test: [ "CMD-SHELL", "nc -z localhost 8001 || exit 1" ]
       interval: 5s
       timeout: 2s
-      start_period: 3s
-      retries: 15
+      start_period: 300s
+      retries: 2
 
   daphne:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -48,6 +48,9 @@ services:
       timeout: 2s
       start_period: 2s
       retries: 6
+    depends_on:
+      uwsgi:
+        condition: service_healthy
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
@@ -80,10 +83,10 @@ services:
       - ./docker/entrypoints/celery_beat.sh
     env_file:
       - env_file_app
+    <<: *no-healthcheck
     depends_on:
       uwsgi:
         condition: service_healthy
-    <<: *no-healthcheck
 
 
   celery_worker_default:

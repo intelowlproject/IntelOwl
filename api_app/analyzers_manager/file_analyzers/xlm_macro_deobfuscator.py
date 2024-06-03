@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 class XlmMacroDeobfuscator(FileAnalyzer):
     passwords_to_check: list
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         results = {}
         try:
@@ -24,7 +28,7 @@ class XlmMacroDeobfuscator(FileAnalyzer):
             if not results:
                 results["error"] = "Can't decrypt with current passwords"
         except SoftTimeLimitExceeded:
-            self._handle_base_exception("Soft Time Limit Exceeded")
+            self._handle_exception("Soft Time Limit Exceeded", is_base_err=True)
         return results
 
     def decrypt(self, xlmpassword=""):

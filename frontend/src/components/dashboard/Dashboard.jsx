@@ -47,7 +47,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (guideState.tourActive) {
       setTimeout(() => {
-        setGuideState({ run: true, stepIndex: 8 });
+        setGuideState({ run: true, stepIndex: 9 });
       }, 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

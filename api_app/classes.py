@@ -155,7 +155,6 @@ class Plugin(metaclass=ABCMeta):
             logger.exception(error_message)
 
     def after_run_failed(self, e: Exception):
-        self.log_error(e)
         self.report.errors.append(str(e))
         self.report.status = self.report.Status.FAILED
         self.report.save(update_fields=["status", "errors"])
@@ -165,6 +164,8 @@ class Plugin(metaclass=ABCMeta):
             and e.response.status_code == 429
         ):
             self.disable_for_rate_limit()
+        else:
+            self.log_error(e)
         if settings.STAGE_CI:
             raise e
 
@@ -196,7 +197,7 @@ class Plugin(metaclass=ABCMeta):
     def get_error_message(self, err, is_base_err=False):
         """
         Returns error message for
-        *_handle_analyzer_exception* and *_handle_base_exception* fn
+        *_handle_analyzer_exception* fn
         """
         return (
             f"{self}."
@@ -228,16 +229,11 @@ class Plugin(metaclass=ABCMeta):
             # add end time of process
             self.after_run()
 
-    def _handle_exception(self, exc) -> None:
-        error_message = self.get_error_message(exc)
+    def _handle_exception(self, exc, is_base_err: bool = False) -> None:
+        if not is_base_err:
+            traceback.print_exc()
+        error_message = self.get_error_message(exc, is_base_err=is_base_err)
         logger.error(error_message)
-        self.report.errors.append(str(exc))
-        self.report.status = self.report.Status.FAILED
-
-    def _handle_base_exception(self, exc) -> None:
-        traceback.print_exc()
-        error_message = self.get_error_message(exc, is_base_err=True)
-        logger.exception(error_message)
         self.report.errors.append(str(exc))
         self.report.status = self.report.Status.FAILED
 
@@ -277,6 +273,8 @@ class Plugin(metaclass=ABCMeta):
             url = param.value
             logger.info(f"Url retrieved to verify is {param.name} for {self}")
             return url
+        if hasattr(self, "url") and self.url:
+            return self.url
         return None
 
     def health_check(self, user: User = None) -> bool:
@@ -284,7 +282,7 @@ class Plugin(metaclass=ABCMeta):
         if url and url.startswith("http"):
             if settings.STAGE_CI or settings.MOCK_CONNECTIONS:
                 return True
-            logger.info(f"healthcheck  url {url} for {self}")
+            logger.info(f"healthcheck url {url} for {self}")
             try:
                 # momentarily set this to False to
                 # avoid fails for https services

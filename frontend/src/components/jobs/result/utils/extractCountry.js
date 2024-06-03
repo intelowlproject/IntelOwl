@@ -6,12 +6,15 @@ export function extractCountry(job) {
   let ip2LocationReport = {};
 
   job.analyzer_reports.forEach((report) => {
-    if (report.name === "Maxmind") maxmindAnalyzerReport = report;
+    if (report.name === "MaxMindGeoIP") maxmindAnalyzerReport = report;
     if (report.name === "AbuseIPDB") abuseIpdbReport = report;
     if (report.name === "Ip2location") ip2LocationReport = report;
   });
   if (maxmindAnalyzerReport) {
-    countryName = maxmindAnalyzerReport.report?.data?.names?.en || countryName;
+    countryName =
+      maxmindAnalyzerReport.report?.country?.names?.en || countryName;
+    countryCode =
+      maxmindAnalyzerReport.report?.country?.iso_code || countryCode;
   }
   if (ip2LocationReport) {
     // update with Ip2location data, don't override previous extracted data

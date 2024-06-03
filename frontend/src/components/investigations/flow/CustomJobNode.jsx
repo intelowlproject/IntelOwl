@@ -2,9 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { NodeToolbar, Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
-import { Button } from "reactstrap";
+import { Button, UncontrolledTooltip } from "reactstrap";
 import { AiOutlineLink } from "react-icons/ai";
 import { LuGitBranchPlus } from "react-icons/lu";
+import { MdContentCopy } from "react-icons/md";
+
+import { CopyToClipboardButton, DateHoverable } from "@certego/certego-ui";
 
 import { RemoveJob } from "./investigationActions";
 
@@ -24,8 +27,17 @@ function CustomJobNode({ data }) {
         id={`toolbar-job-${data.id}`}
       >
         <div className="p-1 my-2 d-flex justify-content-start">
+          <CopyToClipboardButton
+            id="investigation-copybtn"
+            text={data.name}
+            className="mx-1 p-2 btn btn-secondary btn-sm"
+            showOnHover
+          >
+            <MdContentCopy /> Copy
+          </CopyToClipboardButton>
           <Button
-            className="ms-2 me-1 p-2"
+            id="investigation-linkbtn"
+            className="mx-1 p-2"
             size="sm"
             href={`/jobs/${data.id}/visualizer`}
             target="_blank"
@@ -33,7 +45,15 @@ function CustomJobNode({ data }) {
           >
             <AiOutlineLink /> Link
           </Button>
+          <UncontrolledTooltip
+            target="investigation-linkbtn"
+            placement="top"
+            fade={false}
+          >
+            Go to job #{data.id} result page
+          </UncontrolledTooltip>
           <Button
+            id="investigation-pivotbtn"
             className="mx-1 p-2"
             size="sm"
             href={`/scan?parent=${data.id}&observable=${data.name}`}
@@ -42,6 +62,13 @@ function CustomJobNode({ data }) {
           >
             <LuGitBranchPlus /> Pivot
           </Button>
+          <UncontrolledTooltip
+            target="investigation-pivotbtn"
+            placement="top"
+            fade={false}
+          >
+            Analyze the same observable again
+          </UncontrolledTooltip>
           {data.isFirstLevel && <RemoveJob data={data} />}
         </div>
         <div
@@ -58,7 +85,20 @@ function CustomJobNode({ data }) {
           </div>
           <div className="d-flex justify-content-between">
             <span className="me-2">Playbook:</span>
-            <span className="text-accent">{data?.playbook}</span>
+            <span className="text-accent">
+              {data?.playbook || "Custom analysis"}
+            </span>
+          </div>
+          <div className="d-flex justify-content-between">
+            <span className="me-2">Created:</span>
+            <span className="text-accent">
+              <DateHoverable
+                className="text-accent"
+                ago
+                value={data?.created}
+                format="hh:mm:ss a MMM do, yyyy"
+              />
+            </span>
           </div>
         </div>
       </NodeToolbar>

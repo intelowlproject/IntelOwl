@@ -19,7 +19,7 @@ export default function GuideWrapper() {
             questions you could either check out our{" "}
             <a href="https://intelowl.readthedocs.io/en/latest/">docs</a> or
             reach us out on{" "}
-            <a href="https://www.honeynet.org/gsoc/">
+            <a href="https://gsoc-slack.honeynet.org/">
               the official IntelOwl slack channel
             </a>
           </p>
@@ -103,13 +103,29 @@ export default function GuideWrapper() {
       disableBeacon: true,
     },
     {
-      target: "#jobsHistory",
+      target: "#Jobs",
       content: (
         <div id="guidebox">
-          <h3>Job History</h3>
+          <h3>Jobs History</h3>
           <p>
-            Here you could see the list of all previous jobs and expand over the
-            details through clicking that particular job from the table
+            Jobs are simple analysis of an observable or a file. Here you could
+            see the list of all previous jobs and expand over the details
+            through clicking that particular job from the table
+          </p>
+        </div>
+      ),
+      disableBeacon: true,
+    },
+    {
+      target: "#Investigations",
+      content: (
+        <div id="guidebox">
+          <h3>Investigations History</h3>
+          <p>
+            Investigations are a framework to connect jobs with each other. Here
+            you could see the list of all previous investigations and expand
+            over the details through clicking that particular investigation from
+            the table
           </p>
         </div>
       ),
@@ -208,7 +224,7 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 7 });
-            navigate("/jobs");
+            navigate("/history/jobs");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -219,7 +235,6 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 8 });
-            navigate("/dashboard");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -230,6 +245,7 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 9 });
+            navigate("/dashboard");
           } else {
             setGuideState({ run: false, stepIndex: 0 });
             navigate("/");
@@ -240,6 +256,16 @@ export default function GuideWrapper() {
         if (type === "step:after") {
           if (action === "close") {
             setGuideState({ run: true, stepIndex: 10 });
+          } else {
+            setGuideState({ run: false, stepIndex: 0 });
+            navigate("/");
+          }
+        }
+        break;
+      case 10:
+        if (type === "step:after") {
+          if (action === "close") {
+            setGuideState({ run: true, stepIndex: 11 });
             navigate("/");
           } else {
             setGuideState({ run: false, stepIndex: 0 });

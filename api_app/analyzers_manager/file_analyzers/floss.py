@@ -4,6 +4,7 @@
 from json import dumps as json_dumps
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class Floss(FileAnalyzer, DockerBasedAnalyzer):
@@ -23,15 +24,28 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
     max_no_of_strings: dict
     rank_strings: dict
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         # get binary
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}"]
+        # From floss v3 there is prompt that can be overcome
+        # by using the flag --no static.
+        # We can lose static strings considering that we can easily
+        # retrieve them with more simple tools
+        args = [f"@{fname}", "--json", "--no", "static"]
         req_data = {"args": args, "timeout": self.timeout}
         req_files = {fname: binary}
         result = self._docker_run(req_data, req_files)
+        if not isinstance(result, dict):
+            raise AnalyzerRunException(
+                f"result from floss tool is not a dict but is {type(result)}."
+                f" Full dump: {result}"
+            )
         result["exceeded_max_number_of_strings"] = {}
         # we are changing the endpoint of _docker_run to stringsifter
         self.url = self.ranking_url

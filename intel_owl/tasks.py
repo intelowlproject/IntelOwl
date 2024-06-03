@@ -86,10 +86,30 @@ def remove_old_jobs():
     num_jobs_to_delete = old_jobs.count()
     logger.info(f"found {num_jobs_to_delete} old jobs to delete")
     for old_job in old_jobs.iterator():
-        old_job.delete()
+        try:
+            old_job.delete()
+        except Job.DoesNotExist as e:
+            logger.warning(
+                f"job {old_job.id} does not exist. Err: {e}", stack_info=True
+            )
 
     logger.info("finished remove_old_jobs")
     return num_jobs_to_delete
+
+
+@shared_task(base=FailureLoggedTask)
+def refresh_cache(python_class_str: str):
+    from django.utils.module_loading import import_string
+
+    logger.info(f"Refreshing cache for {python_class_str}")
+    python_class = import_string(python_class_str)
+
+    python_class.delete_class_cache_keys()
+    from api_app.models import PythonConfig
+
+    if issubclass(python_class, PythonConfig):
+        for config in python_class.objects.all():
+            config.refresh_cache_keys()
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=120)

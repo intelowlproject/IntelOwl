@@ -5,31 +5,7 @@ from django.db.models.fields.related_descriptors import (
     ManyToManyDescriptor,
 )
 
-old_plugin = {'id': 1, 'python_module': {'health_check_schedule': None,
-                                         'update_schedule': {'minute': '30', 'hour': '7', 'day_of_week': '*',
-                                                             'day_of_month': '*', 'month_of_year': '*'},
-                                         'module': 'threatfox.ThreatFox',
-                                         'base_path': 'api_app.ingestors_manager.ingestors'},
-              'schedule': {'minute': '30', 'hour': '7', 'day_of_week': '*', 'day_of_month': '*', 'month_of_year': '*'},
-              'periodic_task': {'crontab': {'minute': '30', 'hour': '7', 'day_of_week': '*', 'day_of_month': '*',
-                                            'month_of_year': '*'}, 'name': 'ThreatFoxIngestor',
-                                'task': 'intel_owl.tasks.execute_ingestor', 'kwargs': '{"config_pk": "ThreatFox"}',
-                                'queue': 'default', 'enabled': False},
-              'user': {'username': 'ThreatFoxIngestor', 'first_name': '', 'last_name': '', 'email': ''},
-              'name': 'ThreatFox', 'description': 'Threatfox ingestor', 'disabled': True, 'soft_time_limit': 60,
-              'routing_key': 'default', 'health_check_status': True, 'maximum_jobs': 10, 'delay': '00:00:00',
-              'health_check_task': None, 'playbook_to_execute': 3, 'model': 'ingestors_manager.IngestorConfig'}
-old_params = [{'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'},
-               'name': 'days', 'type': 'int', 'description': 'Days to check. From 1 to 7', 'is_secret': False,
-               'required': True}]
-old_values = [{'parameter': {
-    'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'},
-    'name': 'days', 'type': 'int', 'description': 'Days to check. From 1 to 7', 'is_secret': False, 'required': True},
-               'analyzer_config': None, 'connector_config': None, 'visualizer_config': None,
-               'ingestor_config': 'ThreatFox', 'pivot_config': None, 'for_organization': False, 'value': 1,
-               'updated_at': '2024-04-11T15:28:34.851708Z', 'owner': None}]
-
-new_plugin = {'id': 1, 'python_module': {'health_check_schedule': None,
+plugin = {'id': 1, 'python_module': {'health_check_schedule': None,
                                          'update_schedule': {'minute': '30', 'hour': '7', 'day_of_week': '*',
                                                              'day_of_month': '*', 'month_of_year': '*'},
                                          'module': 'threatfox.ThreatFox',
@@ -43,12 +19,12 @@ new_plugin = {'id': 1, 'python_module': {'health_check_schedule': None,
               'name': 'ThreatFox', 'description': 'Threatfox ingestor', 'disabled': True, 'soft_time_limit': 60,
               'routing_key': 'default', 'health_check_status': True, 'maximum_jobs': 10, 'delay': '00:00:00',
               'health_check_task': None, 'playbook_to_execute': 3, 'model': 'ingestors_manager.IngestorConfig'}
-new_params = [{'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'},
+params = [{'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'},
                'name': 'days', 'type': 'int', 'description': 'Days to check. From 1 to 7', 'is_secret': False,
                'required': True},
               {'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'},
                'name': 'url', 'type': 'str', 'description': 'API endpoint', 'is_secret': False, 'required': True}]
-new_values = [{'parameter': {
+values = [{'parameter': {
     'python_module': {'module': 'threatfox.ThreatFox', 'base_path': 'api_app.ingestors_manager.ingestors'},
     'name': 'days', 'type': 'int', 'description': 'Days to check. From 1 to 7', 'is_secret': False, 'required': True},
                'analyzer_config': None, 'connector_config': None, 'visualizer_config': None,
@@ -78,7 +54,7 @@ def _get_real_obj(Model, field, value):
         else:
             if isinstance(value, int):
                 if Model.__name__ == "PluginConfig":
-                    value = other_model.objects.get(name=new_plugin["name"])
+                    value = other_model.objects.get(name=plugin["name"])
                 else:
                     value = other_model.objects.get(pk=value)
             else:
@@ -124,56 +100,49 @@ def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     PythonModule = apps.get_model("api_app", "PythonModule")
-    python_path = new_plugin.pop("model")
+    python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
 
     pm = PythonModule.objects.get(
         module="threatfox.ThreatFox", base_path="api_app.ingestors_manager.ingestors"
     )
+    if not Parameter.objects.filter(python_module=pm, name="url"):
+        p = Parameter(
+            name="url",
+            type="str",
+            description="API endpoint",
+            is_secret=False,
+            required=True,
+            python_module=pm,
+        )
+        p.full_clean()
+        p.save()
 
-    for parameter in Parameter.objects.filter(python_module=pm):
-        parameter.delete()
-
-    for pluginconfig in PluginConfig.objects.filter(ingestor_config__name="ThreatFox"):
-        pluginconfig.delete()
-
-    if (obj := Model.objects.filter(name=new_plugin["name"])).exists():
-        obj.delete()
-
-    exists = _create_object(Model, new_plugin)
-    if not exists:
-        for param in new_params:
-            _create_object(Parameter, param)
-        for value in new_values:
-            _create_object(PluginConfig, value)
+    if not Model.objects.filter(name=plugin["name"]).exists():
+        exists = _create_object(Model, plugin)
+        if not exists:
+            for param in params:
+                _create_object(Parameter, param)
+            for value in values:
+                _create_object(PluginConfig, value)
 
 
 def reverse_migrate(apps, schema_editor):
-    Parameter = apps.get_model("api_app", "Parameter")
-    PluginConfig = apps.get_model("api_app", "PluginConfig")
-    PythonModule = apps.get_model("api_app", "PythonModule")
-    python_path = new_plugin.pop("model")
+    python_path = plugin.pop("model")
     Model = apps.get_model(*python_path.split("."))
+
+    try:
+        Model.objects.get(name=plugin["name"]).delete()
+    except Model.DoesNotExist:
+        pass  # nothing to reverse migrate
+
+    Parameter = apps.get_model("api_app", "Parameter")
+    PythonModule = apps.get_model("api_app", "PythonModule")
 
     pm = PythonModule.objects.get(
         module="threatfox.ThreatFox", base_path="api_app.ingestors_manager.ingestors"
     )
-
-    for parameter in Parameter.objects.filter(python_module=pm):
-        parameter.delete()
-
-    for pluginconfig in PluginConfig.objects.filter(ingestor_config__name="ThreatFox"):
-        pluginconfig.delete()
-
-    if (obj := Model.objects.filter(name=new_plugin["name"])).exists():
-        obj.delete()
-
-    exists = _create_object(Model, old_plugin)
-    if not exists:
-        for param in old_params:
-            _create_object(Parameter, param)
-        for value in old_values:
-            _create_object(PluginConfig, value)
+    Parameter.objects.filter(python_module=pm, name="url").delete()
 
 
 class Migration(migrations.Migration):
@@ -188,3 +157,4 @@ class Migration(migrations.Migration):
             migrate, reverse_migrate
         )
     ]
+

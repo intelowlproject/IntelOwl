@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("pivots_manager", "0025_alter_pivotmap_ending_job"),
+        ("pivots_manager", "0027_pivot_config_takedownrequesttoabuseip"),
     ]
 
     operations = [

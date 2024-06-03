@@ -24,7 +24,7 @@ plugin = {
     "observable_supported": [],
     "supported_filetypes": [
         "application/vnd.microsoft.portable-executable",
-        "application/x-dosexec",
+        "application/vnd.microsoft.portable-executable",
         "application/x-elf",
         "application/x-macbinary",
         "application/mac-binary",

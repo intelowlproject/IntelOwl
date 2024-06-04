@@ -12,7 +12,7 @@ class DetectItEasy(FileAnalyzer, DockerBasedAnalyzer):
     # http request polling max number of tries
     max_tries: int = 10
     # interval between http request polling (in secs)
-    poll_distance: int = 3
+    poll_distance: int = 1
 
     def update(self):
         pass
@@ -26,7 +26,9 @@ class DetectItEasy(FileAnalyzer, DockerBasedAnalyzer):
             "args": args,
         }
         req_files = {fname: binary}
-        logger.info(f"Running {self.analyzer_name} with args: {args}")
+        logger.info(
+            f"Running {self.analyzer_name} on {self.filename} with args: {args}"
+        )
         report = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
         if not report:
             self.report.errors.append("DIE does not support the file")

@@ -15,7 +15,7 @@ plugin = {
     "name": "DetectItEasy",
     "description": "[DetectItEasy](https://github.com/horsicq/Detect-It-Easy) is a program for determining types of files.",
     "disabled": False,
-    "soft_time_limit": 60,
+    "soft_time_limit": 10,
     "routing_key": "default",
     "health_check_status": True,
     "type": "file",

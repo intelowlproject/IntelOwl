@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class MalprobScan(FileAnalyzer):
     url: str = "https://malprob.io/api"
     private: bool = False
-    timeout: int = 10
+    timeout: int = 60
     _api_key_name: str
 
     def update(self):

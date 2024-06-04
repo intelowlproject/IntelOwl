@@ -54,9 +54,7 @@ class MalprobScan(FileAnalyzer):
         if rescan.status_code == 204:
             self.disable_for_rate_limit()
             raise AnalyzerRunException("Limit reached for API")
-        rescan = rescan.json()
-        response = {"scan_result": scan, "rescan_result": rescan}
-        return response
+        return rescan.json()
 
     @classmethod
     def _monkeypatch(cls):

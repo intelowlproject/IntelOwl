@@ -11,48 +11,51 @@ logger = logging.getLogger(__name__)
 
 class MalprobScan(FileAnalyzer):
     url: str = "https://malprob.io/api"
-    rescan: bool = False
+    private: bool = False
+    timeout: int = 60
     _api_key_name: str
 
     def update(self):
         pass
 
     def run(self):
-        response = {}
         file_name = str(self.filename).replace("/", "_").replace(" ", "_")
         headers = {"Authorization": f"Token {self._api_key_name}"}
         binary_file = self.read_file_bytes()
 
-        if not self.rescan:
-            logger.info(f"uploading {file_name} to MalProb.io for analysis")
-            response["scan"] = requests.post(
+        if self._job.tlp == self._job.TLP.CLEAR.value:
+            logger.info(f"uploading {file_name}:{self.md5} to MalProb.io for analysis")
+            scan = requests.post(
                 f"{self.url}/scan/",
                 files={"file": binary_file},
-                data={"name": file_name, "private": False},
+                data={"name": file_name, "private": self.private},
                 headers=headers,
-                timeout=120,
+                timeout=self.timeout,
             )
-            response["scan"].raise_for_status()
-            if response["scan"].status_code == 204:
+            scan.raise_for_status()
+            if scan.status_code == 204:
+                self.disable_for_rate_limit()
                 raise AnalyzerRunException("Limit reached for API")
-            elif response["scan"].status_code == 302:
-                raise logger.error(
-                    "status 302: file already exists | Rescanning the file"
+            elif scan.status_code == 302:
+                logger.info(
+                    f"status 302: file already exists | Rescanning the file: {self.md5}"
                 )
             else:
-                return response["scan"].json()
+                return scan.json()
 
         logger.info(f"rescanning {file_name} using {self.md5} on MalProb.io")
-        response["rescan"] = requests.post(
+        rescan = requests.post(
             f"{self.url}/rescan/",
             data={"hashcode": self.md5},
             headers=headers,
-            timeout=120,
+            timeout=self.timeout,
         )
-        response["rescan"].raise_for_status()
-        if response["rescan"].status_code == 204:
+        rescan.raise_for_status()
+        if rescan.status_code == 204:
+            self.disable_for_rate_limit()
             raise AnalyzerRunException("Limit reached for API")
-        response["rescan"] = response["rescan"].json()
+        rescan = rescan.json()
+        response = {"scan_result": scan, "rescan_result": rescan}
         return response
 
     @classmethod

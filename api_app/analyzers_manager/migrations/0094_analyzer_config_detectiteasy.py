@@ -20,7 +20,7 @@ plugin = {
     "health_check_status": True,
     "type": "file",
     "docker_based": False,
-    "maximum_tlp": "CLEAR",
+    "maximum_tlp": "RED",
     "observable_supported": [],
     "supported_filetypes": [
         "application/vnd.microsoft.portable-executable",

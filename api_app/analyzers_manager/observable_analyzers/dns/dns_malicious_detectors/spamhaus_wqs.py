@@ -31,7 +31,7 @@ class SpamhausWQS(classes.ObservableAnalyzer):
             response = requests.get(
                 url=f"{self.url}/AUTHBL/{self.observable_name}", headers=headers
             )
-        if response.status_code == 404:
+        if response.json()["status"] == 404:
             # 404 - Not found - The record is not listed
             return malicious_detector_response(self.observable_name, False)
         response.raise_for_status()

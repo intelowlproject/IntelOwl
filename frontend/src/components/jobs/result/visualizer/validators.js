@@ -49,6 +49,7 @@ function parseComponentType(value) {
       VisualizerComponentType.BOOL,
       VisualizerComponentType.VLIST,
       VisualizerComponentType.HLIST,
+      VisualizerComponentType.TABLE,
     ].includes(value)
   ) {
     return value;
@@ -100,6 +101,17 @@ function parseElementList(rawElementList) {
   );
 }
 
+// parse list of dict with this format {key: Element}
+function parseElementListOfDict(rawElementList) {
+  return rawElementList?.map((additionalElementrawData) => {
+    const obj = {};
+    Object.entries(additionalElementrawData).forEach(([key, value]) => {
+      obj[key] = parseElementFields(value);
+    });
+    return obj;
+  });
+}
+
 // parse a single element
 function parseElementFields(rawElement) {
   // HList and Title don't have disable field, they will not be used
@@ -129,7 +141,9 @@ function parseElementFields(rawElement) {
       break;
     }
     case VisualizerComponentType.VLIST: {
-      validatedFields.name = parseElementFields(rawElement.name);
+      if (rawElement.name !== null)
+        validatedFields.name = parseElementFields(rawElement.name);
+      else validatedFields.name = rawElement.name;
       validatedFields.values = parseElementList(rawElement.values || []);
       validatedFields.startOpen = parseBool(rawElement.start_open);
       break;
@@ -137,6 +151,16 @@ function parseElementFields(rawElement) {
     case VisualizerComponentType.TITLE: {
       validatedFields.title = parseElementFields(rawElement.title);
       validatedFields.value = parseElementFields(rawElement.value);
+      break;
+    }
+    case VisualizerComponentType.TABLE: {
+      validatedFields.data = parseElementListOfDict(rawElement.data || []);
+      validatedFields.columns = rawElement.columns.map((column) =>
+        parseString(column),
+      );
+      validatedFields.pageSize = rawElement.page_size;
+      validatedFields.disableFilters = parseBool(rawElement.disable_filters);
+      validatedFields.disableSortBy = parseBool(rawElement.disable_sort_by);
       break;
     }
     // base case

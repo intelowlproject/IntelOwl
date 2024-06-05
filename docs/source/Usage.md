@@ -255,7 +255,9 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `TweetFeed`: [TweetFeed](https://tweetfeed.live/) collects Indicators of Compromise (IOCs) shared by the infosec community at Twitter.\r\nHere you will find malicious URLs, domains, IPs, and SHA256/MD5 hashes.
 * `HudsonRock`: [Hudson Rock](https://cavalier.hudsonrock.com/docs) provides its clients the ability to query a database of over 27,541,128 computers which were compromised through global info-stealer campaigns performed by threat actors.
 * `CyCat`: [CyCat](https://cycat.org/) or the CYbersecurity Resource CATalogue aims at mapping and documenting, in a single formalism and catalogue available cybersecurity tools, rules, playbooks, processes and controls. 
-          
+* `Vulners`: [Vulners](vulners.com) is the most complete and the only fully correlated security intelligence database, which goes through constant updates and links 200+ data sources in a unified machine-readable format. It contains 8 mln+ entries, including CVEs, advisories, exploits, and IoCs — everything you need to stay abreast on the latest security threats.
+* `AILTypoSquatting`:[AILTypoSquatting](https://github.com/typosquatter/ail-typo-squatting) is a Python library to generate list of potential typo squatting domains with domain name permutation engine to feed AIL and other systems.
+
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.

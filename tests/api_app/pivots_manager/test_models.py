@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
+from api_app.analyzers_manager.constants import AllTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job, PythonModule
@@ -95,9 +96,9 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbook_to_execute=PlaybookConfig.objects.get(
-                name="Sample_Static_Analysis"
-            ),
+            playbook_to_execute=PlaybookConfig.objects.filter(
+                disabled=False, type__icontains=AllTypes.FILE.value
+            ).first(),
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()

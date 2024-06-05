@@ -337,7 +337,11 @@ To do so, some utility classes have been made:
   </tr>
   <tr>
     <td class="tg-7n4c">VisualizableLevel</td>
-    <td class="tg-0pky">Each level corresponds to a line in the final frontend visualizations. Every level is made of a <span class="tg-zh46">VisualizableHorizontalList</span>.</td>
+    <td class="tg-0pky">
+      Each level corresponds to a line in the final frontend visualizations. Every level is made of a 
+      <span class="tg-zh46">VisualizableHorizontalList</span>.
+      The dimension of the level can be customized with the size parameter (1 is the biggest, 6 is the smallest). 
+    </td>
     <td class="tg-c3ow"><img alt="Visualizable Level example" src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/visualizableLevel_example.png"></td>
   </tr>
   <tr>
@@ -349,6 +353,11 @@ To do so, some utility classes have been made:
     <td class="tg-7n4c">VisualizableVerticalList</td>
     <td class="tg-0pky">A vertical list made of a name, a title, and the list of elements.</td>
     <td class="tg-c3ow"><img alt="Visualizable Vertical List Example" src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/visualizableVlist_example.png"></td>
+  </tr>
+  <tr>
+    <td class="tg-7n4c">VisualizableTable</td>
+    <td class="tg-0pky">A table of visualizable elements. In the example there is a table of base and vertical lists.</td>
+    <td class="tg-c3ow"><img alt="Visualizable Table Example" src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/visualizableTable_example.png"></td>
   </tr>
   <tr>
     <td class="tg-7n4c">VisualizableBool</td>

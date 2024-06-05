@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import useTitle from "react-use/lib/useTitle";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
-import axios from "axios";
+import useAxios from "axios-hooks";
 import { WEBSOCKET_JOBS_URI, JOB_BASE_URI } from "../../../constants/apiURLs";
 import { JobOverview } from "./JobOverview";
 
@@ -17,9 +17,10 @@ import { JobFinalStatuses } from "../../../constants/jobConst";
 export default function JobResult() {
   console.debug("JobResult rendered!");
 
+  // state
+  const location = useLocation();
   const [initialLoading, setInitialLoading] = React.useState(true);
-  const [initialError, setInitialError] = React.useState("");
-  const [job, setJob] = React.useState(undefined);
+  const [job, setJob] = React.useState(location.state?.jobReport || undefined);
   // this state var is used to check if we notified the user, in this way we avoid to notify more than once
   const [notified, setNotified] = React.useState(false);
   // this state var is used to check if the user changed page, in case he waited the result on the page we avoid the notification
@@ -53,7 +54,11 @@ export default function JobResult() {
       `notified: ${notified}, toNotify: ${toNotify}`,
   );
 
-  const getJob = () => axios.get(`${JOB_BASE_URI}/${jobId}`);
+  // useAxios caches the request by default
+  const [{ data: respData, loading, error }, refetchJob] = useAxios({
+    url: `${JOB_BASE_URI}/${jobId}`,
+  });
+
   useEffect(() => {
     /* INITIAL SETUP:
     - add a focus listener:
@@ -66,12 +71,10 @@ export default function JobResult() {
       setToNotify(false);
     });
     window.addEventListener("blur", () => setToNotify(true));
-    getJob()
-      .then((response) => setJob(response.data))
-      .catch((err) => setInitialError(err))
-      .finally((_) => setInitialLoading(false));
+    if (!job && respData && !loading && error == null) setJob(respData);
+    if (!loading) setInitialLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading]);
 
   // page title
   useTitle(
@@ -133,12 +136,12 @@ export default function JobResult() {
   return (
     <Loader
       loading={initialLoading}
-      error={initialError}
+      error={error}
       render={() => (
         <JobOverview
           isRunningJob={jobIsRunning}
           job={job}
-          refetch={getJob}
+          refetch={refetchJob}
           section={section}
           subSection={subSection}
         />

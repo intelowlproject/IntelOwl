@@ -29,9 +29,77 @@ plugin = {
     "model": "analyzers_manager.AnalyzerConfig",
 }
 
-params = []
+params = [
+    {
+        "python_module": {
+            "module": "detectiteasy.DetectItEasy",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "max_tries",
+        "type": "int",
+        "description": "max_tries  for detect it easy",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "detectiteasy.DetectItEasy",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "poll_distance",
+        "type": "int",
+        "description": "poll_distance for detect it easy",
+        "is_secret": False,
+        "required": False,
+    },
+]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "detectiteasy.DetectItEasy",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "max_tries",
+            "type": "int",
+            "description": "max_tries  for detect it easy",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "DetectItEasy",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 10,
+        "updated_at": "2024-06-05T10:38:28.119622Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "detectiteasy.DetectItEasy",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "poll_distance",
+            "type": "int",
+            "description": "poll_distance for detect it easy",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "DetectItEasy",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 1,
+        "updated_at": "2024-06-05T10:38:28.426691Z",
+        "owner": None,
+    },
+]
 
 
 def _get_real_obj(Model, field, value):

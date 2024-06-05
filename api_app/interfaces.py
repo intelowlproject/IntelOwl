@@ -76,7 +76,7 @@ class CreateJobsFromPlaybookInterface:
         values: Iterable[Union[bytes, File]],
         tlp: str,
         user: User,
-        delay: datetime.timedelta,
+        delay: datetime.timedelta = datetime.timedelta(),
     ):
         from api_app.serializers.job import FileJobSerializer
         from tests.mock_utils import MockUpRequest
@@ -106,7 +106,7 @@ class CreateJobsFromPlaybookInterface:
         value: Any,
         tlp: str,
         user: User,
-        delay: datetime.timedelta,
+        delay: datetime.timedelta = datetime.timedelta(),
         send_task: bool = True,
         parent_job=None,
     ) -> Generator["Job", None, None]:

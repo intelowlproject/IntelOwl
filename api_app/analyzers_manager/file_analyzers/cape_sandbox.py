@@ -220,28 +220,14 @@ class CAPEsandbox(FileAnalyzer):
         self,
         task_id,
     ) -> dict:
-        # decreasing timeout:
-        #   average analysis starting time -> the request is still made in case of mock
-        #   real analysis duration with poll distance of 1 minute + the remaining module
-        #   empirical value of processing duration time
-        #   real polling with max tries
-        #   final attempts in case there is a bottleneck
+        # decreasing timeout
         timeout_attempts = (
-            [30]
-            + [60] * (self.timeout // 60)
-            + [self.timeout % 60]
-            + [50]
-            + [self.poll_distance] * self.max_tries
-            + [60] * 3
+            [30]  # avg time to start the machine and the analysis
+            + [60] * (self.timeout // 60)  # time of the analysis
+            + [90]  # avg time of processing time
+            + [self.poll_distance] * self.max_tries  # attempts in the best time window
+            + [30] * 20  # exceed soft time limit in order to generate the error
         )
-
-        tot_time = sum(timeout_attempts)
-        if tot_time > 600:
-            logger.warning(
-                f" Job: {self.job_id} -> "
-                "Broken soft time limit!! "
-                f"The analysis in the worst case will last {tot_time} seconds"
-            )
 
         results = None
         success = False

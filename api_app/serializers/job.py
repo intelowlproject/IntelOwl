@@ -698,7 +698,7 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
             if data_to_check.get("file_mimetypes", []):
                 item["file_mimetype"] = data_to_check["file_mimetypes"][index]
             if delay := data_to_check.get("delay", datetime.timedelta()):
-                item["delay"] = int(delay.total_seconds() * index)
+                item["delay"] = int(delay * index)
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
@@ -817,7 +817,7 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
             item["observable_name"] = name
 
             if delay := data.get("delay", datetime.timedelta()):
-                item["delay"] = int(delay.total_seconds() * index)
+                item["delay"] = int(delay * index)
 
             try:
                 validated = self.child.run_validation(item)

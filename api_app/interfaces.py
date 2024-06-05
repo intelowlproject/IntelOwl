@@ -51,7 +51,11 @@ class CreateJobsFromPlaybookInterface:
             return self._get_observable_serializer(values, tlp, user, delay)
 
     def _get_observable_serializer(
-        self, values: Iterable[Any], tlp: str, user: User, delay: datetime.timedelta
+        self,
+            values: Iterable[Any],
+            tlp: str,
+            user: User,
+            delay: datetime.timedelta = datetime.timedelta()
     ):
         from api_app.serializers.job import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
@@ -65,7 +69,7 @@ class CreateJobsFromPlaybookInterface:
                 # -> the classification=None it's just a placeholder
                 #    because it'll be calculated later
                 "tlp": tlp,
-                "delay": delay,
+                "delay": int(delay.total_seconds()),  # datetime.timedelta serialization
             },
             context={"request": MockUpRequest(user=user)},
             many=True,
@@ -91,7 +95,7 @@ class CreateJobsFromPlaybookInterface:
         data = {
             "playbook_requested": self.playbook_to_execute.name,
             "tlp": tlp,
-            "delay": delay,
+            "delay": int(delay.total_seconds()),  # datetime.timedelta serialization
         }
         query_dict.update(data)
         query_dict.setlist("files", files)

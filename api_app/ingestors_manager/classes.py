@@ -55,12 +55,13 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
         self._config.validate_playbook_to_execute(self._user)
 
     def after_run_success(self, content):
+        pre_parsing_content = content
         super().after_run_success(content)
         self._config: IngestorConfig
         deque(
             self._config.create_jobs(
                 # every job created from an ingestor
-                self.content,
+                pre_parsing_content,
                 TLP.CLEAR.value,
                 self._user,
                 self._config.delay,

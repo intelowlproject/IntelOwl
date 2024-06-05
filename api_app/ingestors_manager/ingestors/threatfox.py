@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class ThreatFox(Ingestor):
+    # API endpoint
     url: str
+    # Days to check. From 1 to 7
     days: int
 
     def run(self) -> Iterable[Any]:

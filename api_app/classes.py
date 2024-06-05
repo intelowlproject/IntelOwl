@@ -133,12 +133,11 @@ class Plugin(metaclass=ABCMeta):
                 report_content = [
                     base64.b64encode(f.read()).decode("utf-8") for f in report_content
                 ]
-            if all(isinstance(n, bytes) for n in report_content):
+            elif all(isinstance(n, bytes) for n in report_content):
                 report_content = [
                     base64.b64encode(b).decode("utf-8") for b in report_content
                 ]
 
-        self.content = content
         self.report.report = report_content
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])

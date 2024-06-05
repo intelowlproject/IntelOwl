@@ -13,6 +13,7 @@ In some systems you could find pre-installed older versions. Please check this a
 <ul>
 <li>The project uses public docker images that are available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
 <li>IntelOwl is tested and supported to work in a Debian distro. More precisely we suggest using Ubuntu. Other Linux-based OS <i>should</i> work but that has not been tested much. It <i>may</i> also run on Windows, but that is not officially supported.</li>
+<li>IntelOwl does not support ARM at the moment. We'll fix this with the next v6.0.5 release
 <li>Before installing remember that you must comply with the <a href="https://github.com/certego/IntelOwl/blob/master/LICENSE">LICENSE</a> and the <a href="https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md">Legal Terms</a></li>
 </ul>
 </div>
@@ -35,7 +36,10 @@ However, if you feel lazy, you could just install and test IntelOwl with the fol
 git clone https://github.com/intelowlproject/IntelOwl
 cd IntelOwl/
 
-# verify installed dependencies and start the app
+# run helper script to verify installed dependencies and configure basic stuff
+./initialize.sh
+
+# start the app
 ./start prod up
 # now the application is running on http://localhost:80
 

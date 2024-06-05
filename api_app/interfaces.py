@@ -52,10 +52,10 @@ class CreateJobsFromPlaybookInterface:
 
     def _get_observable_serializer(
         self,
-            values: Iterable[Any],
-            tlp: str,
-            user: User,
-            delay: datetime.timedelta = datetime.timedelta()
+        values: Iterable[Any],
+        tlp: str,
+        user: User,
+        delay: datetime.timedelta = datetime.timedelta(),
     ):
         from api_app.serializers.job import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest

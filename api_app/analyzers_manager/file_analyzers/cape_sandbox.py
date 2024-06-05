@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 from typing import Dict
 
 import requests
+from billiard.exceptions import SoftTimeLimitExceeded
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -234,89 +235,101 @@ class CAPEsandbox(FileAnalyzer):
         status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
         is_pending = True
 
-        while is_pending:  # starts the for loop when we are not in pending state
-            is_pending = False  # ends the timeouts loop but only this time
-            for try_, curr_timeout in enumerate(timeout_attempts):
-                attempt = try_ + 1
-                try:
-                    logger.info(
-                        f" Job: {self.job_id} -> "
-                        f"Starting poll number #{attempt}/{len(timeout_attempts)}"
-                    )
-
-                    request = self.__single_poll(status_api)
-
-                    # in case the request was ok
-                    responded_json = request.json()
-                    error = responded_json.get("error")
-                    data = responded_json.get("data")
-
-                    logger.info(
-                        f"Job: {self.job_id} -> "
-                        f"Status of the CAPESandbox task: {data}"
-                    )
-
-                    if error:
-                        raise AnalyzerRunException(error)
-
-                    if data == "pending":
-                        is_pending = True
+        try:
+            while is_pending:  # starts the for loop when we are not in pending state
+                is_pending = False  # ends the timeouts loop but only this time
+                for try_, curr_timeout in enumerate(timeout_attempts):
+                    attempt = try_ + 1
+                    try:
                         logger.info(
                             f" Job: {self.job_id} -> "
-                            "Waiting for the pending status to end, "
-                            "sleeping for 15 seconds..."
-                        )
-                        time.sleep(15)
-                        break
-
-                    if data in ("running", "processing"):
-                        raise self.ContinuePolling(f"Task still {data}")
-
-                    if data in ("reported", "completed"):
-                        report_url = (
-                            self._url_key_name
-                            + "/apiv2/tasks/get/report/"
-                            + str(task_id)
-                            + "/litereport"
+                            f"Starting poll number #{attempt}/{len(timeout_attempts)}"
                         )
 
-                        results = self.__single_poll(report_url, polling=False).json()
+                        request = self.__single_poll(status_api)
 
-                        # the task was being processed
-                        if (
-                            "error" in results
-                            and results["error"]
-                            and results["error_value"] == "Task is still being analyzed"
-                        ):
-                            raise self.ContinuePolling("Task still processing")
+                        # in case the request was ok
+                        responded_json = request.json()
+                        error = responded_json.get("error")
+                        data = responded_json.get("data")
 
                         logger.info(
-                            f" Job: {self.job_id} ->"
-                            f"Poll number #{attempt}/{len(timeout_attempts)} fetched"
-                            " the results of the analysis."
-                            " stopping polling.."
-                        )
-                        success = True
-
-                        break
-
-                    else:
-                        raise AnalyzerRunException(
-                            f"status {data} was unexpected. Check the code"
+                            f"Job: {self.job_id} -> "
+                            f"Status of the CAPESandbox task: {data}"
                         )
 
-                except self.ContinuePolling as e:
-                    logger.info(
-                        f"Job: {self.job_id} -> "
-                        "Continuing the poll at attempt number: "
-                        f"#{attempt}/{len(timeout_attempts)}. {e}. "
-                        f"Sleeping for {curr_timeout} seconds."
-                    )
-                    if try_ != self.max_tries - 1:  # avoiding useless last sleep
-                        time.sleep(curr_timeout)
+                        if error:
+                            raise AnalyzerRunException(error)
 
-        if not success:
-            raise AnalyzerRunException(f"{self.job_id} poll ended without results")
+                        if data == "pending":
+                            is_pending = True
+                            logger.info(
+                                f" Job: {self.job_id} -> "
+                                "Waiting for the pending status to end, "
+                                "sleeping for 15 seconds..."
+                            )
+                            time.sleep(15)
+                            break
+
+                        if data in ("running", "processing"):
+                            raise self.ContinuePolling(f"Task still {data}")
+
+                        if data in ("reported", "completed"):
+                            report_url = (
+                                self._url_key_name
+                                + "/apiv2/tasks/get/report/"
+                                + str(task_id)
+                                + "/litereport"
+                            )
+
+                            results = self.__single_poll(
+                                report_url, polling=False
+                            ).json()
+
+                            # the task was being processed
+                            if (
+                                "error" in results
+                                and results["error"]
+                                and results["error_value"]
+                                == "Task is still being analyzed"
+                            ):
+                                raise self.ContinuePolling("Task still processing")
+
+                            logger.info(
+                                f" Job: {self.job_id} ->"
+                                f"Poll number #{attempt}/{len(timeout_attempts)} "
+                                "fetched the results of the analysis."
+                                " stopping polling.."
+                            )
+                            success = True
+
+                            break
+
+                        else:
+                            raise AnalyzerRunException(
+                                f"status {data} was unexpected. Check the code"
+                            )
+
+                    except self.ContinuePolling as e:
+                        logger.info(
+                            f"Job: {self.job_id} -> "
+                            "Continuing the poll at attempt number: "
+                            f"#{attempt}/{len(timeout_attempts)}. {e}. "
+                            f"Sleeping for {curr_timeout} seconds."
+                        )
+                        if try_ != self.max_tries - 1:  # avoiding useless last sleep
+                            time.sleep(curr_timeout)
+
+            if not success:
+                raise AnalyzerRunException(f"{self.job_id} poll ended without results")
+
+        except SoftTimeLimitExceeded:
+            self._handle_exception(
+                f"Soft Time Limit Exceeded: "
+                f"{self._url_key_name + '/analysis/' + str(task_id)}",
+                is_base_err=True,
+            )
+
         return results
 
     @classmethod

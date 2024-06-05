@@ -179,7 +179,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0093_analyzer_config_ailtyposquatting"),
+        ("analyzers_manager", "0095_analyzer_config_malprobscan"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

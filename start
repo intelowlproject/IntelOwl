@@ -91,11 +91,7 @@ load_env () {
 }
 
 if ! docker compose version > /dev/null 2>&1; then
-  ./initialize.sh
-  if ! [ $? ]; then
-    echo "Failed to install dependencies." >&2
-    exit 127
-  fi
+  echo "Run ./initialize.sh to install Docker Compose 2"
 fi
 
 check_parameters "$@" && shift 2

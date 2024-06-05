@@ -6,7 +6,6 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 class MalprobSearch(classes.ObservableAnalyzer):
     url: str = "https://malprob.io/api"
-    _api_key_name: str
 
     def update(self):
         pass

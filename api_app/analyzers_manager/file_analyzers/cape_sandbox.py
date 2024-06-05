@@ -325,7 +325,7 @@ class CAPEsandbox(FileAnalyzer):
 
         except SoftTimeLimitExceeded:
             self._handle_exception(
-                f"Soft Time Limit Exceeded: "
+                "Soft Time Limit Exceeded: "
                 f"{self._url_key_name + '/analysis/' + str(task_id)}",
                 is_base_err=True,
             )

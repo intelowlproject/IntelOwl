@@ -170,8 +170,8 @@ function parseElementFields(rawElement) {
         parseColumnElementList(column),
       );
       validatedFields.pageSize = rawElement.page_size;
-      validatedFields.sort_by_id = parseString(rawElement.sort_by_id);
-      validatedFields.sort_by_desc = parseBool(rawElement.sort_by_desc);
+      validatedFields.sortById = parseString(rawElement.sort_by_id);
+      validatedFields.sortByDesc = parseBool(rawElement.sort_by_desc);
       break;
     }
     // base case

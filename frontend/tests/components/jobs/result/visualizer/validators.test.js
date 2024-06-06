@@ -309,7 +309,7 @@ describe("visualizer data validation", () => {
                 description: "test description",
                 disable_filters: true,
                 disable_sort_by: true,
-              }
+              },
             ],
             data: [
               {
@@ -516,7 +516,7 @@ describe("visualizer data validation", () => {
                 description: "test description",
                 disableFilters: true,
                 disableSortBy: true,
-              }
+              },
             ],
             data: [
               {

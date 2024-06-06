@@ -171,7 +171,7 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                         description: "test description",
                         disable_filters: true,
                         disable_sort_by: true,
-                      }
+                      },
                     ],
                     data: [
                       {

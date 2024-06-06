@@ -112,6 +112,17 @@ function parseElementListOfDict(rawElementList) {
   });
 }
 
+// parse list of Column Elements
+function parseColumnElementList(rawElementList) {
+  return {
+    name: parseString(rawElementList.name),
+    maxWidth: rawElementList.max_width,
+    description: parseString(rawElementList.description),
+    disableFilters: parseBool(rawElementList.disable_filters),
+    disableSortBy: parseBool(rawElementList.disable_sort_by),
+  };
+}
+
 // parse a single element
 function parseElementFields(rawElement) {
   // HList and Title don't have disable field, they will not be used
@@ -156,11 +167,11 @@ function parseElementFields(rawElement) {
     case VisualizerComponentType.TABLE: {
       validatedFields.data = parseElementListOfDict(rawElement.data || []);
       validatedFields.columns = rawElement.columns.map((column) =>
-        parseString(column),
+        parseColumnElementList(column),
       );
       validatedFields.pageSize = rawElement.page_size;
-      validatedFields.disableFilters = parseBool(rawElement.disable_filters);
-      validatedFields.disableSortBy = parseBool(rawElement.disable_sort_by);
+      validatedFields.sort_by_id = parseString(rawElement.sort_by_id);
+      validatedFields.sort_by_desc = parseBool(rawElement.sort_by_desc);
       break;
     }
     // base case

@@ -21,7 +21,6 @@ class PassiveDNS(Visualizer):
         #             "last_seen": "2019-12-03 21:28:00",
         #             "first_seen": "2015-07-08 00:00:00"
         #         },
-        #   DA GESTIRE
         #         {
         #             "domain": "dns.google",
         #             "last_seen": "2015-01-19 00:00:00",
@@ -53,7 +52,7 @@ class PassiveDNS(Visualizer):
                         )
                     }
                 )
-            elif key == "ip":
+            elif key == "ip" or key == "domain":
                 obj.update(
                     {
                         "rdata": Visualizer.Base(
@@ -66,7 +65,7 @@ class PassiveDNS(Visualizer):
             obj.update(
                 {
                     "rrtype": Visualizer.Base(
-                        value="a", color=Visualizer.Color.TRANSPARENT, disable=False
+                        value="A", color=Visualizer.Color.TRANSPARENT, disable=False
                     )
                 }
             )
@@ -81,7 +80,6 @@ class PassiveDNS(Visualizer):
 
     def _otx_report(self, report):
         # EXAMPLE REPORT
-        # {
         #     passive_dns: [
         #         {
         #             "address": "NXDOMAIN", ---> rdata
@@ -98,23 +96,7 @@ class PassiveDNS(Visualizer):
         #             "whitelisted_message": [],
         #             "whitelisted": false
         #         },
-        #       {
-        #     "address": "195.22.26.248", ---> rdata
-        #     "first": "2022-03-19T17:14:00",
-        #     "last": "2022-03-19T17:16:33",
-        #     "hostname": "4ed8a7c6.ard.rr.zealbino.com", ----> rname
-        #     "record_type": "A",
-        #     "indicator_link": "/indicator/hostname/4ed8a7c6.ard.rr.zealbino.com",
-        #     "flag_url": "assets/images/flags/pt.png",
-        #     "flag_title": "Portugal",
-        #     "asset_type": "hostname",
-        #     "asn": "AS8426 claranet ltd",
-        #     "suspicious": false,
-        #     "whitelisted_message": [],
-        #     "whitelisted": false
-        # },
-        #     ]
-        # }
+        #       ]
         obj = {}
         for [key, value] in report.items():
             if key == "last":
@@ -191,9 +173,11 @@ class PassiveDNS(Visualizer):
         logger.debug(f"{printable_analyzer_name=}")
         reports = []
         if "threatminer.Threatminer" in analyzer_report.config.python_module:
-            reports = analyzer_report.report["results"]
+            reports = analyzer_report.report.get("results", [])
         elif "otx.OTX" in analyzer_report.config.python_module:
             reports = analyzer_report.report.get("passive_dns", [])
+        elif "dnsdb.DNSdb" in analyzer_report.config.python_module:
+            reports = analyzer_report.report.get("data", [])
         else:
             reports = analyzer_report.report
         # EXAMPLE REPORT - MnemonicPassiveDNS
@@ -223,6 +207,17 @@ class PassiveDNS(Visualizer):
         #     "time_first": "1696798385",
         #     "time_last": "1697890824"
         # }
+        #  EXAMPLE REPORT - DNSDB
+        # {
+        #     "count":271,
+        #     "time_first":1578076118,
+        #     "time_last":1580765117,
+        #     "rrname":"fsi.io.",
+        #     "rrtype":"A",
+        #     "bailiwick":"fsi.io.",
+        #     "rdata":["104.244.14.108"]
+        # }
+
         ui_data = []
         for report in reports:
             obj = {}

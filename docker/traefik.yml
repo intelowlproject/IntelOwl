@@ -1,0 +1,15 @@
+services:
+  traefik:
+    image: "traefik:3.0"
+    labels:
+      - "traefik.enable=true"
+
+  nginx:
+      depends_on:
+        - traefik
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.nginx.loadbalancer.server.port=80"
+      expose: 
+        - "80"
+

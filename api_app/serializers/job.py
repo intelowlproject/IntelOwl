@@ -25,7 +25,6 @@ from api_app.defaults import default_runtime
 from api_app.helpers import calculate_md5, gen_random_colorhex
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Tag
-from api_app.pivots_manager.models import PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
@@ -361,6 +360,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         job.warnings = warnings
         job.save()
         logger.info(f"Job {job.pk} created")
+
+        from api_app.pivots_manager.models import PivotMap
 
         if parent_job:
             PivotMap.objects.create(

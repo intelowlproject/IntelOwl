@@ -17,6 +17,10 @@ class ThreatFox(Ingestor):
     # Days to check. From 1 to 7
     days: int
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self) -> Iterable[Any]:
         result = requests.post(self.url, json={"query": "get_iocs", "days": self.days})
         result.raise_for_status()

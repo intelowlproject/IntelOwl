@@ -810,7 +810,9 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
         errors = []
         observables = data.pop("observables", [])
         # TODO we could change the signature, but this means change frontend + clients
-        for index, (classification, name) in enumerate(observables):
+        for index, (_, name) in enumerate(
+            observables
+        ):  # observable = (classification, name)
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)

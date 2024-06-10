@@ -22,18 +22,20 @@ export function TableVisualizer({ id, size, columns, data, pageSize, sortBy }) {
     const columnElement = (
       <>
         <span id={`${column.name}-header`}>{columnHeader}</span>
-        <UncontrolledTooltip
-          target={`${column.name}-header`}
-          placement="top"
-          fade={false}
-          style={{
-            paddingTop: "1rem",
-            paddingLeft: "1rem",
-            paddingRight: "1rem",
-          }}
-        >
-          {markdownToHtml(column.description)}
-        </UncontrolledTooltip>
+        {column.description && (
+          <UncontrolledTooltip
+            target={`${column.name}-header`}
+            placement="top"
+            fade={false}
+            style={{
+              paddingTop: "1rem",
+              paddingLeft: "1rem",
+              paddingRight: "1rem",
+            }}
+          >
+            {markdownToHtml(column.description)}
+          </UncontrolledTooltip>
+        )}
       </>
     );
 

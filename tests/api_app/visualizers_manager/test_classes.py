@@ -9,7 +9,6 @@ from api_app.choices import PythonModuleBasePaths
 from api_app.models import Job, PythonModule
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.classes import (
-    ColumnObject,
     VisualizableBase,
     VisualizableBool,
     VisualizableHorizontalList,
@@ -18,6 +17,7 @@ from api_app.visualizers_manager.classes import (
     VisualizableObject,
     VisualizablePage,
     VisualizableTable,
+    VisualizableTableColumn,
     VisualizableTitle,
     VisualizableVerticalList,
     Visualizer,
@@ -247,7 +247,7 @@ class VisualizableTableTestCase(CustomTestCase):
             }
         ]
         columns = [
-            ColumnObject(
+            VisualizableTableColumn(
                 name="column_name",
                 description="test description",
                 max_width=VisualizableTableColumnSize.S_300,
@@ -297,7 +297,7 @@ class VisualizableTableTestCase(CustomTestCase):
 
     def test_to_dict_data_null(self):
         columns = [
-            ColumnObject(
+            VisualizableTableColumn(
                 name="column_name",
                 description="test description",
             ),
@@ -555,9 +555,9 @@ class ErrorHandlerTestCase(CustomTestCase):
         )
 
 
-class ColumnObjectTestCase(CustomTestCase):
+class VisualizableTableColumnTestCase(CustomTestCase):
     def test_to_dict(self):
-        co = ColumnObject(
+        co = VisualizableTableColumn(
             name="id",
             description="test description",
             max_width=VisualizableTableColumnSize.S_300,

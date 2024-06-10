@@ -262,7 +262,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         return "vertical_list"
 
 
-class ColumnObject:
+class VisualizableTableColumn:
     def __init__(
         self,
         name: str,
@@ -300,7 +300,7 @@ class ColumnObject:
 class VisualizableTable(VisualizableObject):
     def __init__(
         self,
-        columns: List[ColumnObject],
+        columns: List[VisualizableTableColumn],
         data: List[Dict[str, VisualizableObject]],
         size: VisualizableSize = VisualizableSize.S_AUTO,
         alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
@@ -332,7 +332,7 @@ class VisualizableTable(VisualizableObject):
     def to_dict(self) -> Dict:
         result = super().to_dict()
         data: List[Dict[str, VisualizableObject]] = result.pop("data", [])
-        columns: List[ColumnObject] = result.pop("columns", [])
+        columns: List[VisualizableTableColumn] = result.pop("columns", [])
         if any(x for x in data):
             new_data = []
             for element in data:
@@ -426,6 +426,8 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
     Table = VisualizableTable
+
+    TableColumn = VisualizableTableColumn
 
     LevelSize = VisualizableLevelSize
     Page = VisualizablePage

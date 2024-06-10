@@ -41,6 +41,13 @@ function parseElementSize(value) {
   return "col-auto";
 }
 
+function parseElementWidth(value) {
+  if ([50, 100, 150, 200, 250, 300].includes(value)) {
+    return value;
+  }
+  return 300;
+}
+
 function parseComponentType(value) {
   if (
     [
@@ -116,7 +123,7 @@ function parseElementListOfDict(rawElementList) {
 function parseColumnElementList(rawElementList) {
   return {
     name: parseString(rawElementList.name),
-    maxWidth: rawElementList.max_width,
+    maxWidth: parseElementWidth(rawElementList.max_width),
     description: parseString(rawElementList.description),
     disableFilters: parseBool(rawElementList.disable_filters),
     disableSortBy: parseBool(rawElementList.disable_sort_by),

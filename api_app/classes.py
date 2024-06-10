@@ -123,20 +123,16 @@ class Plugin(metaclass=ABCMeta):
         self.report.save()
 
     def after_run_success(self, content: typing.Any):
-        # exhaust generator
-        if isinstance(content, typing.Generator):
-            content = list(content)
         # avoiding JSON serialization errors for types: File and bytes
-        report_content = content
-        if isinstance(report_content, typing.List):
-            if all(isinstance(n, File) for n in report_content):
-                report_content = [
-                    base64.b64encode(f.read()).decode("utf-8") for f in report_content
-                ]
-            elif all(isinstance(n, bytes) for n in report_content):
-                report_content = [
-                    base64.b64encode(b).decode("utf-8") for b in report_content
-                ]
+        report_content = []
+        if isinstance(content, typing.List):
+            for n in content:
+                if isinstance(n, File):
+                    report_content.append(base64.b64encode(n.read()).decode("utf-8"))
+                elif isinstance(n, bytes):
+                    report_content.append(base64.b64encode(n).decode("utf-8"))
+                else:
+                    report_content.append(n)
 
         self.report.report = report_content
         self.report.status = self.report.Status.SUCCESS.value

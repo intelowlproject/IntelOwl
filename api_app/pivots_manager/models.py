@@ -4,6 +4,7 @@ from typing import Type
 
 from django.contrib.contenttypes.fields import GenericRelation
 
+from api_app.pivots_manager.exceptions import PivotConfigurationException
 from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuerySet
 from api_app.queryset import PythonConfigQuerySet
 
@@ -18,7 +19,6 @@ from django.utils.functional import cached_property
 from api_app.choices import PythonModuleBasePaths
 from api_app.interfaces import CreateJobsFromPlaybookInterface
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
-from api_app.pivots_manager.exceptions import PivotConfigurationException
 
 logger = logging.getLogger(__name__)
 

@@ -76,6 +76,7 @@ if ! [ -x "$(command -v docker)" ]; then
       echo 'Error: Could not install docker.' >&2
       exit 1
     fi
+    rm get-docker.sh
   else
     echo 'You chose to do not install Docker. Exiting'
     exit 1

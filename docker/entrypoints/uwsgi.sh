@@ -30,6 +30,17 @@ CHANGELOG_NOTIFICATION_COMMAND='python manage.py changelog_notification .github/
 
 if [[ $DEBUG == "True" ]] && [[ $DJANGO_TEST_SERVER == "True" ]];
 then
+    # Create superuser if it does not exist
+    exists=$(echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='admin').exists())" | python manage.py shell)
+
+    if [ "$exists" == "True" ]; then
+        echo "Superuser 'admin' already exists."
+    else
+        echo "Creating superuser 'admin' with password 'admin'..."
+        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | python manage.py shell
+        echo "Superuser 'admin' created successfully."
+    fi
+
     $CHANGELOG_NOTIFICATION_COMMAND --debug
     python manage.py runserver 0.0.0.0:8001
 else

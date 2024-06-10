@@ -1,3 +1,0 @@
-POSTGRES_PASSWORD=password
-POSTGRES_USER=user
-POSTGRES_DB=intel_owl_db

@@ -1,0 +1,6 @@
+### ---- Environment variables for additional integrations ---
+### All env variables for docker based integrations should be added here
+### IMPORTANT: don't change these values unless you know what you are doing. It can have breaking changes!
+
+# Applies to all integrations, choose from: INFO (recommended), ERROR, DEBUG.
+LOG_LEVEL=INFO

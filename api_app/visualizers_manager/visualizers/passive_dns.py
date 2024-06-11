@@ -13,6 +13,10 @@ logger = getLogger(__name__)
 
 
 class PassiveDNS(Visualizer):
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def _threatminer_report(self, report):
         obj = {}
         for [key, value] in report.items():
@@ -36,7 +40,7 @@ class PassiveDNS(Visualizer):
                         )
                     }
                 )
-            elif key == "ip" or key == "domain":
+            elif key in ["ip", "domain"]:
                 obj.update(
                     {
                         "rdata": Visualizer.Base(
@@ -219,9 +223,9 @@ class PassiveDNS(Visualizer):
         elif "validin.Validin" in analyzer_report.config.python_module:
             records = analyzer_report.report.get("records", [])
             if records:
-                for [type, values] in records.items():
+                for [records_type, values] in records.items():
                     for value in values:
-                        value.update({"type": type})
+                        value.update({"type": records_type})
                         reports.append(value)
         else:
             reports = analyzer_report.report

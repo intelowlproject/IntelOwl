@@ -55,6 +55,10 @@ class CAPEsandbox(FileAnalyzer):
     # CapeSandbox SSL certificate (multiline string).
     _certificate: str
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     @staticmethod
     def _clean_certificate(cert):
         return (

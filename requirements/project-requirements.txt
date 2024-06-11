@@ -67,7 +67,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==24.5.1
+quark-engine==24.6.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0

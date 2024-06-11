@@ -19,7 +19,7 @@ plugin = {
     "pivots": [],
     "for_organization": False,
     "name": "Passive_DNS",
-    "description": "Passive DNS playbook",
+    "description": "A playbook that retrieve information from Passive DNS",
     "disabled": False,
     "type": ["ip", "url", "domain"],
     "runtime_configuration": {

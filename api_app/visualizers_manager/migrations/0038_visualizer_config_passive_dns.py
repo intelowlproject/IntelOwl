@@ -14,7 +14,7 @@ plugin = {
     },
     "playbooks": ["Passive_DNS"],
     "name": "Passive_DNS",
-    "description": "Passive DNS visualizer",
+    "description": "Visualize Passive DNS informations",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

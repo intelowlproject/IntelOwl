@@ -7,29 +7,13 @@ from api_app.visualizers_manager.classes import VisualizableObject, Visualizer
 from api_app.visualizers_manager.decorators import (
     visualizable_error_handler_with_params,
 )
+from api_app.visualizers_manager.enums import VisualizableTableColumnSize
 
 logger = getLogger(__name__)
 
 
 class PassiveDNS(Visualizer):
     def _threatminer_report(self, report):
-        # EXAMPLE REPORT
-        # {
-        #     "results": [
-        #         {
-        #             "ip": "69.172.200.235",
-        #             "last_seen": "2019-12-03 21:28:00",
-        #             "first_seen": "2015-07-08 00:00:00"
-        #         },
-        #         {
-        #             "domain": "dns.google",
-        #             "last_seen": "2015-01-19 00:00:00",
-        #             "first_seen": "2015-01-19 00:00:00"
-        #         },
-        #     ],
-        #     "status_code": "200",
-        #     "status_message": "Results found."
-        # }
         obj = {}
         for [key, value] in report.items():
             if key == "last_seen":
@@ -79,24 +63,6 @@ class PassiveDNS(Visualizer):
         return obj
 
     def _otx_report(self, report):
-        # EXAMPLE REPORT
-        #     passive_dns: [
-        #         {
-        #             "address": "NXDOMAIN", ---> rdata
-        #             "first": "2023-12-01T13:24:37",
-        #             "last": "2023-12-01T13:24:37",
-        #             "hostname": "dns.vietbaotinmoi.com",  ----> rname
-        #             "record_type": "A",
-        #             "indicator_link": "/indicator/hostname/dns.vietbaotinmoi.com",
-        #             "flag_url": "",
-        #             "flag_title": "",
-        #             "asset_type": "hostname",
-        #             "asn": null,
-        #             "suspicious": true,
-        #             "whitelisted_message": [],
-        #             "whitelisted": false
-        #         },
-        #       ]
         obj = {}
         for [key, value] in report.items():
             if key == "last":
@@ -168,6 +134,78 @@ class PassiveDNS(Visualizer):
                 )
         return obj
 
+    def _validin_report(self, report):
+        obj = {}
+        for [key, value] in report.items():
+            if key == "last_seen":
+                timestamp = datetime.datetime.fromtimestamp(value)
+                obj.update(
+                    {
+                        "time_last": Visualizer.Base(
+                            value=timestamp.strftime("%Y-%m-%d"),
+                            color=Visualizer.Color.TRANSPARENT,
+                            disable=False,
+                        )
+                    }
+                )
+            elif key == "first_seen":
+                timestamp = datetime.datetime.fromtimestamp(value)
+                obj.update(
+                    {
+                        "time_first": Visualizer.Base(
+                            value=timestamp.strftime("%Y-%m-%d"),
+                            color=Visualizer.Color.TRANSPARENT,
+                            disable=False,
+                        )
+                    }
+                )
+            elif key == "key":
+                obj.update(
+                    {
+                        "rrname": Visualizer.Base(
+                            value=value,
+                            color=Visualizer.Color.TRANSPARENT,
+                            disable=False,
+                        )
+                    }
+                )
+            elif key == "type":
+                obj.update(
+                    {
+                        "rrtype": Visualizer.Base(
+                            value="A", color=Visualizer.Color.TRANSPARENT, disable=False
+                        )
+                    }
+                )
+            elif key == "value":
+                if isinstance(value, list):
+                    obj.update(
+                        {
+                            "rdata": Visualizer.VList(
+                                value=[
+                                    Visualizer.Base(
+                                        value=data,
+                                        color=Visualizer.Color.TRANSPARENT,
+                                        disable=False,
+                                    )
+                                    for data in value
+                                ],
+                                disable=not value,
+                            ),
+                        }
+                    )
+                else:
+                    obj.update(
+                        {
+                            "rdata": Visualizer.Base(
+                                value=value,
+                                color=Visualizer.Color.TRANSPARENT,
+                                disable=False,
+                            )
+                        }
+                    )
+        return obj
+
     def _report_data(self, analyzer_report: AnalyzerReport) -> List:
         printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
         logger.debug(f"{printable_analyzer_name=}")
@@ -178,45 +216,15 @@ class PassiveDNS(Visualizer):
             reports = analyzer_report.report.get("passive_dns", [])
         elif "dnsdb.DNSdb" in analyzer_report.config.python_module:
             reports = analyzer_report.report.get("data", [])
+        elif "validin.Validin" in analyzer_report.config.python_module:
+            records = analyzer_report.report.get("records", [])
+            if records:
+                for [type, values] in records.items():
+                    for value in values:
+                        value.update({"type": type})
+                        reports.append(value)
         else:
             reports = analyzer_report.report
-        # EXAMPLE REPORT - MnemonicPassiveDNS
-        # {
-        #       "count": 4477,
-        #       "rdata": "34.224.149.186",
-        #       "rrname": "test.com",
-        #       "rrtype": "a",
-        #       "time_last": 1714654257,
-        #       "time_first": 1712319486
-        # }
-        # EXAMPLE REPORT - Robtex
-        # {
-        #       "count": 2,
-        #       "rrdata": "mx.spamexperts.com",
-        #       "rrname": "test.com",
-        #       "rrtype": "MX",
-        #       "time_last": 1582215078,
-        #       "time_first": 1441363932
-        # }
-        # EXAMPLE REPORT - CIRCL_PDNS
-        # {
-        #     "rrtype": "A",
-        #     "rrname": "185.194.93.14",
-        #     "rdata": "circl.lu",
-        #     "count": "19",
-        #     "time_first": "1696798385",
-        #     "time_last": "1697890824"
-        # }
-        #  EXAMPLE REPORT - DNSDB
-        # {
-        #     "count":271,
-        #     "time_first":1578076118,
-        #     "time_last":1580765117,
-        #     "rrname":"fsi.io.",
-        #     "rrtype":"A",
-        #     "bailiwick":"fsi.io.",
-        #     "rdata":["104.244.14.108"]
-        # }
 
         ui_data = []
         for report in reports:
@@ -225,6 +233,8 @@ class PassiveDNS(Visualizer):
                 obj = self._threatminer_report(report)
             if "otx.OTX" in analyzer_report.config.python_module:
                 obj = self._otx_report(report)
+            if "validin.Validin" in analyzer_report.config.python_module:
+                obj = self._validin_report(report)
             for [key, value] in report.items():
                 if key in ["time_first", "time_last"]:
                     timestamp = datetime.datetime.fromtimestamp(value)
@@ -294,20 +304,52 @@ class PassiveDNS(Visualizer):
         for analyzer_report in self.analyzer_reports():
             reports_data.extend(self._report_data(analyzer_report=analyzer_report))
 
+        columns = [
+            Visualizer.TableColumn(
+                name="time_last",
+                max_width=VisualizableTableColumnSize.S_100,
+                description="""This field returns the last time that the unique tuple"
+                 (rrname, rrtype, rdata) record has been seen by the passive DNS.""",
+            ),
+            Visualizer.TableColumn(
+                name="time_first",
+                max_width=VisualizableTableColumnSize.S_100,
+                description="""The first time that the record / unique tuple
+                 (rrname, rrtype, rdata) has been seen by the passive DNS.""",
+            ),
+            Visualizer.TableColumn(
+                name="rrname",
+                max_width=VisualizableTableColumnSize.S_300,
+                disable_sort_by=True,
+                description="Name of the queried resource.",
+            ),
+            Visualizer.TableColumn(
+                name="rrtype",
+                max_width=VisualizableTableColumnSize.S_100,
+                disable_sort_by=True,
+                description="Record type as seen by the passive DNS.",
+            ),
+            Visualizer.TableColumn(
+                name="rdata",
+                max_width=VisualizableTableColumnSize.S_300,
+                disable_sort_by=True,
+                description="Resource records of the queried resource.",
+            ),
+            Visualizer.TableColumn(
+                name="source",
+                max_width=VisualizableTableColumnSize.S_200,
+                disable_sort_by=True,
+            ),
+        ]
+
         return [
             self.Table(
                 data=reports_data,
-                columns=[
-                    "time_last",
-                    "time_first",
-                    "rrname",
-                    "rrtype",
-                    "rdata",
-                    "source",
-                ],
+                columns=columns,
                 size=self.Size.S_ALL,
-                disable_sort_by=True,
                 page_size=10,
+                sort_by_id="time_last",
+                sort_by_desc=True,
             )
         ]
 

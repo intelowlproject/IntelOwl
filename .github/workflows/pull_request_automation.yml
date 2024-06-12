@@ -87,7 +87,6 @@ jobs:
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
           REPO_DOWNLOADER_ENABLED: false
-          WATCHMAN: false
 
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
@@ -98,7 +97,6 @@ jobs:
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
           REPO_DOWNLOADER_ENABLED: false
-          WATCHMAN: false
 
       - name: Docker debug
         if: always()

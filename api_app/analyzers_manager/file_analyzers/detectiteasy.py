@@ -31,7 +31,7 @@ class DetectItEasy(FileAnalyzer, DockerBasedAnalyzer):
         )
         report = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
         if not report:
-            self.report.errors.append("DIE does not support the file")
+            self.report.errors.append("DIE did not detect the file type")
             return {}
         return report
 

@@ -15,19 +15,19 @@ plugin = {
             "month_of_year": "*",
         },
         "update_schedule": None,
-        "module": "malprob.MalprobSearch",
-        "base_path": "api_app.analyzers_manager.observable_analyzers",
+        "module": "malprob.MalprobScan",
+        "base_path": "api_app.analyzers_manager.file_analyzers",
     },
-    "name": "MalprobSearch",
-    "description": "[Malprob](https://malprob.io/) is a leading malware detection and identification service, powered by cutting-edge AI technology.",
+    "name": "MalprobScan",
+    "description": "[Malprob](https://malprob.io/) is a malware detection and identification service, powered by cutting-edge AI technology.",
     "disabled": False,
-    "soft_time_limit": 10,
+    "soft_time_limit": 60,
     "routing_key": "default",
     "health_check_status": True,
-    "type": "observable",
+    "type": "file",
     "docker_based": False,
     "maximum_tlp": "AMBER",
-    "observable_supported": ["hash"],
+    "observable_supported": [],
     "supported_filetypes": [],
     "run_hash": False,
     "run_hash_type": "",
@@ -35,9 +35,88 @@ plugin = {
     "model": "analyzers_manager.AnalyzerConfig",
 }
 
-params = []
+params = [
+    {
+        "python_module": {
+            "module": "malprob.MalprobScan",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "api_key_name",
+        "type": "str",
+        "description": "api key for MalprobScan",
+        "is_secret": True,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "malprob.MalprobScan",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "private",
+        "type": "bool",
+        "description": "private scan for MalprobScan",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "malprob.MalprobScan",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "timeout",
+        "type": "int",
+        "description": "request timeout for MalprobScan",
+        "is_secret": False,
+        "required": False,
+    },
+]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "malprob.MalprobScan",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "private",
+            "type": "bool",
+            "description": "private scan for MalprobScan",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "MalprobScan",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": False,
+        "updated_at": "2024-06-03T22:17:04.195860Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "malprob.MalprobScan",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "timeout",
+            "type": "int",
+            "description": "request timeout for MalprobScan",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "MalprobScan",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 60,
+        "updated_at": "2024-06-04T10:23:40.132533Z",
+        "owner": None,
+    },
+]
 
 
 def _get_real_obj(Model, field, value):
@@ -117,7 +196,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0093_analyzer_config_ailtyposquatting"),
+        ("analyzers_manager", "0095_analyzer_config_malprobsearch"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -16,9 +16,6 @@ class MalprobSearch(classes.ObservableAnalyzer):
             timeout=10,
         )
         response.raise_for_status()
-        if response.status_code == 204:
-            self.disable_for_rate_limit()
-            raise classes.AnalyzerRunException("Limit reached for API")
         return response.json()
 
     @classmethod

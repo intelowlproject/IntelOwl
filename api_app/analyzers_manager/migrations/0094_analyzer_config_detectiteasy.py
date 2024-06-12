@@ -37,7 +37,7 @@ params = [
         },
         "name": "max_tries",
         "type": "int",
-        "description": "max_tries  for detect it easy",
+        "description": "max_tries for detect it easy",
         "is_secret": False,
         "required": False,
     },

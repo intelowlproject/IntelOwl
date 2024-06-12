@@ -100,6 +100,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Suricata`: Analyze PCAPs with open IDS signatures with [Suricata engine](https://github.com/OISF/suricata)
 * `Thug_HTML_Info`: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 * `Xlm_Macro_Deobfuscator`: [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) deobfuscate xlm macros
+* `DetectItEasy`:[DetectItEasy](https://github.com/horsicq/Detect-It-Easy) is a program for determining types of files.
 * `Yara`: scan a file with
   * [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
   * [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)

@@ -14,6 +14,9 @@ class SpamhausWQS(classes.ObservableAnalyzer):
     url: str = "https://apibl.spamhaus.net/lookup/v1"
     _api_key: str = None
 
+    def update(self):
+        pass
+
     def run(self):
         headers = {"Authorization": f"Bearer {self._api_key}"}
 

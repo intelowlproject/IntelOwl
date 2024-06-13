@@ -17,268 +17,41 @@ class PassiveDNS(Visualizer):
     def update(cls) -> bool:
         pass
 
-    def _threatminer_report(self, report):
-        obj = {}
-        for [key, value] in report.items():
-            if key == "last_seen":
-                obj.update(
-                    {
-                        "time_last": Visualizer.Base(
-                            value=value.split(" ")[0],
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key == "first_seen":
-                obj.update(
-                    {
-                        "time_first": Visualizer.Base(
-                            value=value.split(" ")[0],
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key in ["ip", "domain"]:
-                obj.update(
-                    {
-                        "rdata": Visualizer.Base(
-                            value=value,
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            obj.update(
-                {
-                    "rrtype": Visualizer.Base(
-                        value="A", color=Visualizer.Color.TRANSPARENT, disable=False
-                    )
-                }
-            )
-            obj.update(
-                {
-                    "rrname": Visualizer.Base(
-                        value="null", color=Visualizer.Color.TRANSPARENT, disable=True
-                    )
-                }
-            )
-        return obj
-
-    def _otx_report(self, report):
-        obj = {}
-        for [key, value] in report.items():
-            if key == "last":
-                obj.update(
-                    {
-                        "time_last": Visualizer.Base(
-                            value=value.split("T")[0],
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key == "first":
-                obj.update(
-                    {
-                        "time_first": Visualizer.Base(
-                            value=value.split("T")[0],
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key == "record_type":
-                obj.update(
-                    {
-                        "rrtype": Visualizer.Base(
-                            value=value,
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key == "address":
-                if isinstance(value, list):
-                    obj.update(
-                        {
-                            "rdata": Visualizer.VList(
-                                value=[
-                                    Visualizer.Base(
-                                        value=data,
-                                        color=Visualizer.Color.TRANSPARENT,
-                                        disable=False,
-                                    )
-                                    for data in value
-                                ],
-                                disable=not value,
-                            ),
-                        }
-                    )
-                else:
-                    obj.update(
-                        {
-                            "rdata": Visualizer.Base(
-                                value=value,
-                                color=Visualizer.Color.TRANSPARENT,
-                                disable=False,
-                            )
-                        }
-                    )
-            elif key == "hostname":
-                obj.update(
-                    {
-                        "rrname": Visualizer.Base(
-                            value=value,
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-        return obj
-
-    def _validin_report(self, report):
-        obj = {}
-        for [key, value] in report.items():
-            if key == "last_seen":
-                timestamp = datetime.datetime.fromtimestamp(value)
-                obj.update(
-                    {
-                        "time_last": Visualizer.Base(
-                            value=timestamp.strftime("%Y-%m-%d"),
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key == "first_seen":
-                timestamp = datetime.datetime.fromtimestamp(value)
-                obj.update(
-                    {
-                        "time_first": Visualizer.Base(
-                            value=timestamp.strftime("%Y-%m-%d"),
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key == "key":
-                obj.update(
-                    {
-                        "rrname": Visualizer.Base(
-                            value=value,
-                            color=Visualizer.Color.TRANSPARENT,
-                            disable=False,
-                        )
-                    }
-                )
-            elif key == "type":
-                obj.update(
-                    {
-                        "rrtype": Visualizer.Base(
-                            value="A", color=Visualizer.Color.TRANSPARENT, disable=False
-                        )
-                    }
-                )
-            elif key == "value":
-                if isinstance(value, list):
-                    obj.update(
-                        {
-                            "rdata": Visualizer.VList(
-                                value=[
-                                    Visualizer.Base(
-                                        value=data,
-                                        color=Visualizer.Color.TRANSPARENT,
-                                        disable=False,
-                                    )
-                                    for data in value
-                                ],
-                                disable=not value,
-                            ),
-                        }
-                    )
-                else:
-                    obj.update(
-                        {
-                            "rdata": Visualizer.Base(
-                                value=value,
-                                color=Visualizer.Color.TRANSPARENT,
-                                disable=False,
-                            )
-                        }
-                    )
-        return obj
-
-    def _report_data(self, analyzer_report: AnalyzerReport) -> List:
-        printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-        logger.debug(f"{printable_analyzer_name=}")
-        reports = []
-        if "threatminer.Threatminer" in analyzer_report.config.python_module:
-            reports = analyzer_report.report.get("results", [])
-        elif "otx.OTX" in analyzer_report.config.python_module:
-            reports = analyzer_report.report.get("passive_dns", [])
-        elif "dnsdb.DNSdb" in analyzer_report.config.python_module:
-            reports = analyzer_report.report.get("data", [])
-        elif "validin.Validin" in analyzer_report.config.python_module:
-            records = analyzer_report.report.get("records", [])
-            if records:
-                for [records_type, values] in records.items():
-                    for value in values:
-                        value.update({"type": records_type})
-                        reports.append(value)
+    def _threatminer_reports(self) -> List:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="Threatminer")
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Threatminer report does not exist")
+            return []
         else:
-            reports = analyzer_report.report
-
-        ui_data = []
-        for report in reports:
-            obj = {}
-            if "threatminer.Threatminer" in analyzer_report.config.python_module:
-                obj = self._threatminer_report(report)
-            if "otx.OTX" in analyzer_report.config.python_module:
-                obj = self._otx_report(report)
-            if "validin.Validin" in analyzer_report.config.python_module:
-                obj = self._validin_report(report)
-            for [key, value] in report.items():
-                if key in ["time_first", "time_last"]:
-                    timestamp = datetime.datetime.fromtimestamp(value)
-                    obj.update(
-                        {
-                            key: Visualizer.Base(
-                                value=timestamp.strftime("%Y-%m-%d"),
-                                color=Visualizer.Color.TRANSPARENT,
-                                disable=False,
-                            )
-                        }
-                    )
-                elif key in ["rrname", "rrtype", "count"]:
-                    obj.update(
-                        {
-                            key: Visualizer.Base(
-                                value=value,
-                                color=Visualizer.Color.TRANSPARENT,
-                                disable=False,
-                            )
-                        }
-                    )
-                elif key in ["rrdata", "rdata"]:
-                    if isinstance(value, list):
+            reports = analyzer_report.report.get("results", [])
+            threatminer_report = []
+            for report in reports:
+                obj = {}
+                for [key, value] in report.items():
+                    if key == "last_seen":
                         obj.update(
                             {
-                                "rdata": Visualizer.VList(
-                                    value=[
-                                        Visualizer.Base(
-                                            value=data,
-                                            color=Visualizer.Color.TRANSPARENT,
-                                            disable=False,
-                                        )
-                                        for data in value
-                                    ],
-                                    disable=not value,
-                                ),
+                                "time_last": Visualizer.Base(
+                                    value=value.split(" ")[0],
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
                             }
                         )
-                    else:
+                    elif key == "first_seen":
+                        obj.update(
+                            {
+                                "time_first": Visualizer.Base(
+                                    value=value.split(" ")[0],
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key in ["ip", "domain"]:
                         obj.update(
                             {
                                 "rdata": Visualizer.Base(
@@ -288,31 +61,376 @@ class PassiveDNS(Visualizer):
                                 )
                             }
                         )
-            if obj:
+                    obj.update(
+                        {
+                            "rrtype": Visualizer.Base(
+                                value="A",
+                                color=Visualizer.Color.TRANSPARENT,
+                                disable=False,
+                            )
+                        }
+                    )
+                    obj.update(
+                        {
+                            "rrname": Visualizer.Base(
+                                value="null",
+                                color=Visualizer.Color.TRANSPARENT,
+                                disable=True,
+                            )
+                        }
+                    )
+                if obj:
+                    obj.update(
+                        {"source": self._visualizable_source(analyzer_report.config)}
+                    )
+                    threatminer_report.append(obj)
+            return threatminer_report
+
+    def _otxquery_reports(self) -> List:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="OTXQuery")
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("OTXQuery report does not exist")
+            return []
+        else:
+            reports = analyzer_report.report.get("passive_dns", [])
+            otx_report = []
+            for report in reports:
+                obj = {}
+                for [key, value] in report.items():
+                    if key == "last":
+                        obj.update(
+                            {
+                                "time_last": Visualizer.Base(
+                                    value=value.split("T")[0],
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key == "first":
+                        obj.update(
+                            {
+                                "time_first": Visualizer.Base(
+                                    value=value.split("T")[0],
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key == "record_type":
+                        obj.update(
+                            {
+                                "rrtype": Visualizer.Base(
+                                    value=value,
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key == "address":
+                        if isinstance(value, list):
+                            obj.update(
+                                {
+                                    "rdata": Visualizer.VList(
+                                        value=[
+                                            Visualizer.Base(
+                                                value=data,
+                                                color=Visualizer.Color.TRANSPARENT,
+                                                disable=False,
+                                            )
+                                            for data in value
+                                        ],
+                                        disable=not value,
+                                    ),
+                                }
+                            )
+                        else:
+                            obj.update(
+                                {
+                                    "rdata": Visualizer.Base(
+                                        value=value,
+                                        color=Visualizer.Color.TRANSPARENT,
+                                        disable=False,
+                                    )
+                                }
+                            )
+                    elif key == "hostname":
+                        obj.update(
+                            {
+                                "rrname": Visualizer.Base(
+                                    value=value,
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                if obj:
+                    obj.update(
+                        {"source": self._visualizable_source(analyzer_report.config)}
+                    )
+                    otx_report.append(obj)
+            return otx_report
+
+    def _validin_reports(self) -> List:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="Validin")
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Validin report does not exist")
+            return []
+        else:
+            records = analyzer_report.report.get("records", [])
+            reports = []
+            if records:
+                for [records_type, values] in records.items():
+                    for value in values:
+                        value.update({"type": records_type})
+                        reports.append(value)
+            validin_report = []
+            for report in reports:
+                obj = {}
+                for [key, value] in report.items():
+                    if key == "last_seen":
+                        timestamp = datetime.datetime.fromtimestamp(value)
+                        obj.update(
+                            {
+                                "time_last": Visualizer.Base(
+                                    value=timestamp.strftime("%Y-%m-%d"),
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key == "first_seen":
+                        timestamp = datetime.datetime.fromtimestamp(value)
+                        obj.update(
+                            {
+                                "time_first": Visualizer.Base(
+                                    value=timestamp.strftime("%Y-%m-%d"),
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key == "key":
+                        obj.update(
+                            {
+                                "rrname": Visualizer.Base(
+                                    value=value,
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key == "type":
+                        obj.update(
+                            {
+                                "rrtype": Visualizer.Base(
+                                    value="A",
+                                    color=Visualizer.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                            }
+                        )
+                    elif key == "value":
+                        if isinstance(value, list):
+                            obj.update(
+                                {
+                                    "rdata": Visualizer.VList(
+                                        value=[
+                                            Visualizer.Base(
+                                                value=data,
+                                                color=Visualizer.Color.TRANSPARENT,
+                                                disable=False,
+                                            )
+                                            for data in value
+                                        ],
+                                        disable=not value,
+                                    ),
+                                }
+                            )
+                        else:
+                            obj.update(
+                                {
+                                    "rdata": Visualizer.Base(
+                                        value=value,
+                                        color=Visualizer.Color.TRANSPARENT,
+                                        disable=False,
+                                    )
+                                }
+                            )
+                if obj:
+                    obj.update(
+                        {"source": self._visualizable_source(analyzer_report.config)}
+                    )
+                    validin_report.append(obj)
+            return validin_report
+
+    def _dnsdb_reports(self) -> List:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="DNSDB")
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("DNSDB report does not exist")
+            return []
+        else:
+            reports = analyzer_report.report.get("data", [])
+            dnsdb_report = []
+            for report in reports:
+                obj = self._report_data(report)
+                if obj:
+                    obj.update(
+                        {"source": self._visualizable_source(analyzer_report.config)}
+                    )
+                    dnsdb_report.append(obj)
+            return dnsdb_report
+
+    def _circl_pdns_reports(self) -> List:
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="CIRCLPassiveDNS"
+            )
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("CIRCLPassiveDNS report does not exist")
+            return []
+        else:
+            reports = analyzer_report.report
+            circl_pdns_report = []
+            for report in reports:
+                obj = self._report_data(report)
+                if obj:
+                    obj.update(
+                        {"source": self._visualizable_source(analyzer_report.config)}
+                    )
+                    circl_pdns_report.append(obj)
+            return circl_pdns_report
+
+    def _robtex_reports(self) -> List:
+        try:
+            analyzer_report = self.analyzer_reports().get(config__name="Robtex")
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Robtex report does not exist")
+            return []
+        else:
+            reports = analyzer_report.report
+            robtex_report = []
+            for report in reports:
+                obj = self._report_data(report)
+                if obj:
+                    obj.update(
+                        {"source": self._visualizable_source(analyzer_report.config)}
+                    )
+                    robtex_report.append(obj)
+            return robtex_report
+
+    def _mnemonic_pdns_reports(self) -> List:
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="Mnemonic_PassiveDNS"
+            )
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
+            logger.debug(f"{printable_analyzer_name=}")
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Mnemonic_PassiveDNS report does not exist")
+            return []
+        else:
+            reports = analyzer_report.report
+            mnemonic_pdns_report = []
+            for report in reports:
+                obj = self._report_data(report)
+                if obj:
+                    obj.update(
+                        {"source": self._visualizable_source(analyzer_report.config)}
+                    )
+                    mnemonic_pdns_report.append(obj)
+            return mnemonic_pdns_report
+
+    def _report_data(self, report) -> List:
+        obj = {}
+        for [key, value] in report.items():
+            if key in ["time_first", "time_last"]:
+                timestamp = datetime.datetime.fromtimestamp(value)
                 obj.update(
                     {
-                        "source": Visualizer.Base(
-                            value=printable_analyzer_name,
+                        key: Visualizer.Base(
+                            value=timestamp.strftime("%Y-%m-%d"),
                             color=Visualizer.Color.TRANSPARENT,
                             disable=False,
-                            description=analyzer_report.config.description,
                         )
                     }
                 )
-                ui_data.append(obj)
-        return ui_data
+            elif key in ["rrname", "rrtype", "count"]:
+                obj.update(
+                    {
+                        key: Visualizer.Base(
+                            value=value,
+                            color=Visualizer.Color.TRANSPARENT,
+                            disable=False,
+                        )
+                    }
+                )
+            elif key in ["rrdata", "rdata"]:
+                if isinstance(value, list):
+                    obj.update(
+                        {
+                            "rdata": Visualizer.VList(
+                                value=[
+                                    Visualizer.Base(
+                                        value=data,
+                                        color=Visualizer.Color.TRANSPARENT,
+                                        disable=False,
+                                    )
+                                    for data in value
+                                ],
+                                disable=not value,
+                            ),
+                        }
+                    )
+                else:
+                    obj.update(
+                        {
+                            "rdata": Visualizer.Base(
+                                value=value,
+                                color=Visualizer.Color.TRANSPARENT,
+                                disable=False,
+                            )
+                        }
+                    )
+        return obj
+
+    def _visualizable_source(self, analyzer_config) -> VisualizableObject:
+        return Visualizer.Base(
+            value=analyzer_config.name.replace("_", " "),
+            color=Visualizer.Color.TRANSPARENT,
+            disable=False,
+            description=analyzer_config.description,
+        )
 
     @visualizable_error_handler_with_params("pdns_table")
     def _pdns_table_ui(self) -> VisualizableObject:
         reports_data = []
-        for analyzer_report in self.analyzer_reports():
-            reports_data.extend(self._report_data(analyzer_report=analyzer_report))
+        reports_data.extend(self._otxquery_reports())
+        reports_data.extend(self._threatminer_reports())
+        reports_data.extend(self._validin_reports())
+        reports_data.extend(self._dnsdb_reports())
+        reports_data.extend(self._circl_pdns_reports())
+        reports_data.extend(self._robtex_reports())
+        reports_data.extend(self._mnemonic_pdns_reports())
 
         columns = [
             Visualizer.TableColumn(
                 name="time_last",
                 max_width=VisualizableTableColumnSize.S_100,
-                description="""This field returns the last time that the unique tuple"
+                description="""The last time that the unique tuple"
                  (rrname, rrtype, rdata) record has been seen by the passive DNS.""",
             ),
             Visualizer.TableColumn(

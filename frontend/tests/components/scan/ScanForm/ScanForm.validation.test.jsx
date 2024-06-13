@@ -197,6 +197,50 @@ describe("test ScanForm component form validation", () => {
     });
   });
 
+  test("form validation - observable and connector selected but no analyzer", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <BrowserRouter>
+        <ScanForm />
+      </BrowserRouter>,
+    );
+
+    const analyzerSelectionRadioButton = screen.getAllByRole("radio")[3];
+    expect(analyzerSelectionRadioButton).toBeInTheDocument();
+    await user.click(analyzerSelectionRadioButton);
+    expect(screen.getByText("Select Analyzers")).toBeInTheDocument();
+    expect(screen.getByText("Select Connectors")).toBeInTheDocument();
+
+    const firstObservableInputElement = screen.getByRole("textbox", {
+      name: "",
+    });
+    expect(firstObservableInputElement).toBeInTheDocument();
+    await user.type(firstObservableInputElement, "google.com");
+    expect(firstObservableInputElement.value).toBe("google.com");
+
+    // select connector (no analyzers selected)
+    const connectorDropdownButton = screen.getAllByRole("combobox")[1];
+    expect(connectorDropdownButton).toBeInTheDocument();
+    await user.click(connectorDropdownButton);
+    const testConnectorButton = container.querySelector(
+      `#${connectorDropdownButton.id.replace("-input", "")}-option-0`,
+    );
+    expect(testConnectorButton).toBeInTheDocument();
+    await user.click(testConnectorButton);
+    expect(screen.getByText("TEST_CONNECTOR")).toBeInTheDocument();
+
+    const startScanButton = screen.getByRole("button", { name: "Start Scan" });
+    expect(startScanButton).toBeInTheDocument();
+    expect(startScanButton.className).not.toContain("disabled");
+    await waitFor(() => {
+      expect(RecentScans).toHaveBeenCalledWith(
+        { classification: "domain", param: "google.com" },
+        {},
+      );
+    });
+  });
+
   test("form validation - no observable and analyzer selected", async () => {
     const user = userEvent.setup();
 

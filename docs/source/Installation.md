@@ -307,6 +307,7 @@ Before upgrading, some important things should be checked by the administrator:
   * This change is transparent if you use our `start` script to run IntelOwl. That would spawn a Redis instance instead of a Rabbit-MQ one locally.
   * If you were using an external broker like AWS SQS or a managed Rabbit-MQ, they are still supported but we suggest to move to a Redis supported service to simplify the architecture (because Redis is now mandatory for Websockets)
 * Support for multiple jobs with multiple playbooks has been removed. Every Observable or File in the request will be processed by a single playbook. 
+* If you have problems with something like: `daphne.log does not exist`, please create this directory with `mkdir /var/lib/docker/volumes/intel_owl_generic_logs/_data/asgi`
 * We upgraded the base PostgreSQL image from version 12 to version 16. You have 2 choice:
   * remove your actual database and start from scratch with a new one
   * maintain your database and do not update Postgres. This could break the application at anytime because we do not support it anymore.

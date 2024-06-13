@@ -34,7 +34,7 @@ class PassiveDNS(Visualizer):
                     if key == "last_seen":
                         obj.update(
                             {
-                                "time_last": Visualizer.Base(
+                                "last_view": Visualizer.Base(
                                     value=value.split(" ")[0],
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
@@ -44,7 +44,7 @@ class PassiveDNS(Visualizer):
                     elif key == "first_seen":
                         obj.update(
                             {
-                                "time_first": Visualizer.Base(
+                                "first_view": Visualizer.Base(
                                     value=value.split(" ")[0],
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
@@ -103,7 +103,7 @@ class PassiveDNS(Visualizer):
                     if key == "last":
                         obj.update(
                             {
-                                "time_last": Visualizer.Base(
+                                "last_view": Visualizer.Base(
                                     value=value.split("T")[0],
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
@@ -113,7 +113,7 @@ class PassiveDNS(Visualizer):
                     elif key == "first":
                         obj.update(
                             {
-                                "time_first": Visualizer.Base(
+                                "first_view": Visualizer.Base(
                                     value=value.split("T")[0],
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
@@ -124,7 +124,7 @@ class PassiveDNS(Visualizer):
                         obj.update(
                             {
                                 "rrtype": Visualizer.Base(
-                                    value=value,
+                                    value=value.upper(),
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
                                 )
@@ -198,7 +198,7 @@ class PassiveDNS(Visualizer):
                         timestamp = datetime.datetime.fromtimestamp(value)
                         obj.update(
                             {
-                                "time_last": Visualizer.Base(
+                                "last_view": Visualizer.Base(
                                     value=timestamp.strftime("%Y-%m-%d"),
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
@@ -209,7 +209,7 @@ class PassiveDNS(Visualizer):
                         timestamp = datetime.datetime.fromtimestamp(value)
                         obj.update(
                             {
-                                "time_first": Visualizer.Base(
+                                "first_view": Visualizer.Base(
                                     value=timestamp.strftime("%Y-%m-%d"),
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
@@ -230,7 +230,7 @@ class PassiveDNS(Visualizer):
                         obj.update(
                             {
                                 "rrtype": Visualizer.Base(
-                                    value="A",
+                                    value=value.upper(),
                                     color=Visualizer.Color.TRANSPARENT,
                                     disable=False,
                                 )
@@ -357,22 +357,43 @@ class PassiveDNS(Visualizer):
     def _report_data(self, report) -> List:
         obj = {}
         for [key, value] in report.items():
-            if key in ["time_first", "time_last"]:
+            if key == "time_first":
                 timestamp = datetime.datetime.fromtimestamp(value)
                 obj.update(
                     {
-                        key: Visualizer.Base(
+                        "first_view": Visualizer.Base(
                             value=timestamp.strftime("%Y-%m-%d"),
                             color=Visualizer.Color.TRANSPARENT,
                             disable=False,
                         )
                     }
                 )
-            elif key in ["rrname", "rrtype", "count"]:
+            elif key == "time_last":
+                timestamp = datetime.datetime.fromtimestamp(value)
+                obj.update(
+                    {
+                        "last_view": Visualizer.Base(
+                            value=timestamp.strftime("%Y-%m-%d"),
+                            color=Visualizer.Color.TRANSPARENT,
+                            disable=False,
+                        )
+                    }
+                )
+            elif key in ["rrname", "count"]:
                 obj.update(
                     {
                         key: Visualizer.Base(
                             value=value,
+                            color=Visualizer.Color.TRANSPARENT,
+                            disable=False,
+                        )
+                    }
+                )
+            elif key == "rrtype":
+                obj.update(
+                    {
+                        key: Visualizer.Base(
+                            value=value.upper(),
                             color=Visualizer.Color.TRANSPARENT,
                             disable=False,
                         )
@@ -428,13 +449,13 @@ class PassiveDNS(Visualizer):
 
         columns = [
             Visualizer.TableColumn(
-                name="time_last",
+                name="last_view",
                 max_width=VisualizableTableColumnSize.S_100,
                 description="""The last time that the unique tuple"
                  (rrname, rrtype, rdata) record has been seen by the passive DNS.""",
             ),
             Visualizer.TableColumn(
-                name="time_first",
+                name="first_view",
                 max_width=VisualizableTableColumnSize.S_100,
                 description="""The first time that the record / unique tuple
                  (rrname, rrtype, rdata) has been seen by the passive DNS.""",
@@ -447,7 +468,7 @@ class PassiveDNS(Visualizer):
             ),
             Visualizer.TableColumn(
                 name="rrtype",
-                max_width=VisualizableTableColumnSize.S_100,
+                max_width=VisualizableTableColumnSize.S_50,
                 disable_sort_by=True,
                 description="Record type as seen by the passive DNS.",
             ),
@@ -470,7 +491,7 @@ class PassiveDNS(Visualizer):
                 columns=columns,
                 size=self.Size.S_ALL,
                 page_size=10,
-                sort_by_id="time_last",
+                sort_by_id="last_view",
                 sort_by_desc=True,
             )
         ]

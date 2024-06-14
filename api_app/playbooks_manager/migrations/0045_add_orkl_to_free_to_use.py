@@ -10,7 +10,7 @@ def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
 
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.add(AnalyzerConfig.objects.get(name="Orklsearch").id)
+    pc.analyzers.add(AnalyzerConfig.objects.get(name="OrklSearch").id)
     pc.full_clean()
     pc.save()
 
@@ -20,7 +20,7 @@ def reverse_migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
 
     pc = playbook_config.objects.get(name="FREE_TO_USE_ANALYZERS")
-    pc.analyzers.remove(AnalyzerConfig.objects.get(name="Orklsearch").id)
+    pc.analyzers.remove(AnalyzerConfig.objects.get(name="OrklSearch").id)
     pc.full_clean()
     pc.save()
 

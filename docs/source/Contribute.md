@@ -70,7 +70,7 @@ Now, you can execute IntelOwl in development mode by selecting the mode `test` w
 ./start test up
 ```
 
-A user `admin` with password `admin` should autimatically be created for development instances.
+A user `admin` with password `admin` should automatically be created for development instances.
 
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
 

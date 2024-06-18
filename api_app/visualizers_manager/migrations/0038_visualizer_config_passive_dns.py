@@ -9,7 +9,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "passive_dns.PassiveDNS",
+        "module": "passive_dns.visualizer.PassiveDNS",
         "base_path": "api_app.visualizers_manager.visualizers",
     },
     "playbooks": ["Passive_DNS"],

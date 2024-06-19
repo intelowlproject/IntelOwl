@@ -6,6 +6,7 @@ from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.models import Job
 from api_app.visualizers_manager.visualizers.passive_dns.analyzer_extractor import (
+    PDNSReport,
     extract_circlpdns_reports,
     extract_dnsdb_reports,
     extract_mnemonicpdns_reports,
@@ -87,23 +88,15 @@ class TestOTXQuery(CustomTestCase):
         )
         self.assertEqual(
             [
-                {
-                    "rdata": "195.22.26.248",
-                    "first_view": "2022-03-19",
-                    "last_view": "2022-03-19",
-                    "rrname": "4ed8a7c6.ard.rr.zealbino.com",
-                    "rrtype": "A",
-                    "source": "OTXQuery",
-                    "source_description": "scan an observable on Alienvault OTX",
-                    "indicator_link": "/indicator/hostname/4ed8a7c6.ard.rr.zealbino.com",  # noqa: E501
-                    "flag_url": "assets/images/flags/pt.png",
-                    "flag_title": "Portugal",
-                    "asset_type": "hostname",
-                    "asn": "AS8426 claranet ltd",
-                    "suspicious": False,
-                    "whitelisted_message": [],
-                    "whitelisted": False,
-                },
+                PDNSReport(
+                    last_view="2022-03-19",
+                    first_view="2022-03-19",
+                    rrtype="A",
+                    rdata="195.22.26.248",
+                    rrname="4ed8a7c6.ard.rr.zealbino.com",
+                    source="OTXQuery",
+                    source_description="scan an observable on Alienvault OTX",
+                ),
             ],
             report,
         )
@@ -176,24 +169,24 @@ class TestThreatminer(CustomTestCase):
         )
         self.assertEqual(
             [
-                {
-                    "last_view": "2019-12-03",
-                    "first_view": "2015-07-08",
-                    "rrtype": "A",
-                    "rdata": "69.172.200.235",
-                    "rrname": "test.com",
-                    "source": "Threatminer",
-                    "source_description": "retrieve data from [Threatminer API](https://www.threatminer.org/api.php)",  # noqa: E501
-                },
-                {
-                    "last_view": "2015-01-19",
-                    "first_view": "2015-01-19",
-                    "rrtype": "A",
-                    "rdata": "dns.google",
-                    "rrname": "test.com",
-                    "source": "Threatminer",
-                    "source_description": "retrieve data from [Threatminer API](https://www.threatminer.org/api.php)",  # noqa: E501
-                },
+                PDNSReport(
+                    last_view="2019-12-03",
+                    first_view="2015-07-08",
+                    rrtype="A",
+                    rdata="69.172.200.235",
+                    rrname="test.com",
+                    source="Threatminer",
+                    source_description="retrieve data from [Threatminer API](https://www.threatminer.org/api.php)",  # noqa: E501
+                ),
+                PDNSReport(
+                    last_view="2015-01-19",
+                    first_view="2015-01-19",
+                    rrtype="A",
+                    rdata="dns.google",
+                    rrname="test.com",
+                    source="Threatminer",
+                    source_description="retrieve data from [Threatminer API](https://www.threatminer.org/api.php)",  # noqa: E501
+                ),
             ],
             report,
         )
@@ -284,26 +277,24 @@ class TestValidin(CustomTestCase):
 
         self.assertEqual(
             [
-                {
-                    "last_view": "2024-06-18",
-                    "first_view": "2024-03-02",
-                    "rrtype": "A",
-                    "rdata": "3.18.255.247",
-                    "rrname": "test.com",
-                    "source": "Validin",
-                    "source_description": "[Validin's](https://app.validin.com) API for threat researchers, teams, and companies to investigate historic and current data describing the structure and composition of the internet.",  # noqa: E501
-                    "value_type": "IP4",
-                },
-                {
-                    "last_view": "2024-06-18",
-                    "first_view": "2024-03-02",
-                    "rrtype": "A",
-                    "rdata": "34.224.149.186",
-                    "rrname": "test.com",
-                    "source": "Validin",
-                    "source_description": "[Validin's](https://app.validin.com) API for threat researchers, teams, and companies to investigate historic and current data describing the structure and composition of the internet.",  # noqa: E501
-                    "value_type": "IP4",
-                },
+                PDNSReport(
+                    last_view="2024-06-18",
+                    first_view="2024-03-02",
+                    rrtype="A",
+                    rdata="3.18.255.247",
+                    rrname="test.com",
+                    source="Validin",
+                    source_description="[Validin's](https://app.validin.com) API for threat researchers, teams, and companies to investigate historic and current data describing the structure and composition of the internet.",  # noqa: E501
+                ),
+                PDNSReport(
+                    last_view="2024-06-18",
+                    first_view="2024-03-02",
+                    rrtype="A",
+                    rdata="34.224.149.186",
+                    rrname="test.com",
+                    source="Validin",
+                    source_description="[Validin's](https://app.validin.com) API for threat researchers, teams, and companies to investigate historic and current data describing the structure and composition of the internet.",  # noqa: E501
+                ),
             ],
             report,
         )
@@ -362,15 +353,6 @@ class TestDNSdb(CustomTestCase):
                         "bailiwick": "farsightsecurity.com.",
                         "rdata": ["66.160.140.81"],
                     },
-                    {
-                        "count": 17381,
-                        "time_first": 1427893644,
-                        "time_last": 1468329272,
-                        "rrname": "www.farsightsecurity.com.",
-                        "rrtype": "A",
-                        "bailiwick": "farsightsecurity.com.",
-                        "rdata": ["104.244.13.104"],
-                    },
                 ]
             },
             job=self.job,
@@ -382,28 +364,15 @@ class TestDNSdb(CustomTestCase):
         )
         self.assertEqual(
             [
-                {
-                    "last_view": "2015-04-01",
-                    "first_view": "2013-09-25",
-                    "rrname": "www.farsightsecurity.com.",
-                    "rrtype": "A",
-                    "bailiwick": "farsightsecurity.com.",
-                    "rdata": ["66.160.140.81"],
-                    "count": 5059,
-                    "source": "DNSDB",
-                    "source_description": "Scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions). Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/).",  # noqa: E501
-                },
-                {
-                    "last_view": "2016-07-12",
-                    "first_view": "2015-04-01",
-                    "rrname": "www.farsightsecurity.com.",
-                    "rrtype": "A",
-                    "bailiwick": "farsightsecurity.com.",
-                    "rdata": ["104.244.13.104"],
-                    "count": 17381,
-                    "source": "DNSDB",
-                    "source_description": "Scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions). Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/).",  # noqa: E501
-                },
+                PDNSReport(
+                    last_view="2015-04-01",
+                    first_view="2013-09-25",
+                    rrtype="A",
+                    rdata=["66.160.140.81"],
+                    rrname="www.farsightsecurity.com.",
+                    source="DNSDB",
+                    source_description="Scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions). Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/).",  # noqa: E501
+                ),
             ],
             report,
         )
@@ -470,16 +439,15 @@ class TestRobtex(CustomTestCase):
         )
         self.assertEqual(
             [
-                {
-                    "last_view": "2020-02-20",
-                    "first_view": "2015-09-04",
-                    "rrname": "test.com",
-                    "rrtype": "MX",
-                    "rdata": "mx.spamexperts.com",
-                    "count": 2,
-                    "source": "Robtex",
-                    "source_description": "scan a domain/IP against the Robtex Passive DNS DB",  # noqa: E501
-                },
+                PDNSReport(
+                    last_view="2020-02-20",
+                    first_view="2015-09-04",
+                    rrtype="MX",
+                    rdata="mx.spamexperts.com",
+                    rrname="test.com",
+                    source="Robtex",
+                    source_description="scan a domain/IP against the Robtex Passive DNS DB",  # noqa: E501
+                ),
             ],
             report,
         )
@@ -546,16 +514,15 @@ class TestMnemonicPDNS(CustomTestCase):
         )
         self.assertEqual(
             [
-                {
-                    "last_view": "2024-05-02",
-                    "first_view": "2024-04-05",
-                    "rrname": "test.com",
-                    "rrtype": "a",
-                    "rdata": "34.224.149.186",
-                    "count": 4477,
-                    "source": "Mnemonic PassiveDNS",
-                    "source_description": "Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).",  # noqa: E501
-                },
+                PDNSReport(
+                    last_view="2024-05-02",
+                    first_view="2024-04-05",
+                    rrtype="a",
+                    rdata="34.224.149.186",
+                    rrname="test.com",
+                    source="Mnemonic PassiveDNS",
+                    source_description="Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).",  # noqa: E501
+                ),
             ],
             report,
         )
@@ -622,16 +589,15 @@ class TestCIRCLPassiveDNS(CustomTestCase):
         )
         self.assertEqual(
             [
-                {
-                    "last_view": "2024-05-02",
-                    "first_view": "2024-04-05",
-                    "rrname": "test.com",
-                    "rrtype": "a",
-                    "rdata": "34.224.149.186",
-                    "count": 4477,
-                    "source": "CIRCLPassiveDNS",
-                    "source_description": "scan an observable against the CIRCL Passive DNS DB",  # noqa: E501
-                },
+                PDNSReport(
+                    last_view="2024-05-02",
+                    first_view="2024-04-05",
+                    rrtype="a",
+                    rdata="34.224.149.186",
+                    rrname="test.com",
+                    source="CIRCLPassiveDNS",
+                    source_description="scan an observable against the CIRCL Passive DNS DB",  # noqa: E501
+                ),
             ],
             report,
         )

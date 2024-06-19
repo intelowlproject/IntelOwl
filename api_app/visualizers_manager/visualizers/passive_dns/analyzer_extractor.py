@@ -24,7 +24,7 @@ from api_app.models import Job, PythonModule
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class PDNSReport:
     last_view: str
     first_view: str

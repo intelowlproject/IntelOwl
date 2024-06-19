@@ -22,7 +22,7 @@ class PDFInfo(FileAnalyzer):
         return [item for sublist in list_of_lists for item in sublist]
 
     def run(self):
-        self.results = {"peepdf": {}, "pdfid": {}, "pdfreader": {}}
+        self.results = {"peepdf": {}, "pdfid": {}, "pdfreader": {}, "uris": []}
 
         # the analysis fails only when BOTH fails
         peepdf_success = self.__peepdf_analysis()
@@ -39,7 +39,7 @@ class PDFInfo(FileAnalyzer):
                 uris.extend(s["uris"])
             uris.extend(self.results["pdfreader"]["uris"])
             logger.info(f"{uris=}")
-            uris = list[set(uris)]  # removing duplicates
+            uris = list(set(uris))  # removing duplicates
             if uris:
                 self.results["uris"] = uris
 

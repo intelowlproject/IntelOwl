@@ -27,6 +27,7 @@ class LoadFile(Compare):
         return super().should_run()
 
     def get_value_to_pivot_to(self) -> Any:
-        file_content = open(self._value, "rb").read()
-        os.unlink(self._value)
-        return file_content
+        with open(self._value, "rb") as f:
+            file_content = f.read()
+            os.unlink(self._value)
+            return file_content

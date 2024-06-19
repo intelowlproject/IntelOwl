@@ -367,6 +367,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 - `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
 - `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
 - `Pivot`: Visualizer that can be used in a Playbook to show the Pivot execution result. See [Pivots](#pivots) for more info.
+- `Passive_DNS`: Visualizer for the Playbook "Passive_DNS".
 
 ### Ingestors
 
@@ -408,6 +409,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Takedown_Request`: Start investigation to request to take down a malicious domain. A mail will be sent to the domain's abuse contacts found
 - `Abuse_IP`: Playbook containing the Abusix analyzer. It is executed after the Takedown_Request playbook
 - `Send_Abuse_Email`: Playbook containing the AbuseSubmitter connector to send an email to request to take down a malicious domain. It is executed after the Abuse_IP playbook
+- `Passive_DNS`: Playbook containing the analyzers that retrieve information from Passive DNS
 
 #### Playbooks creation and customization
 

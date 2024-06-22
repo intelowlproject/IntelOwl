@@ -91,38 +91,38 @@ else
   fi
 fi
 
-# docker compose V1 is no longer supported
-if [ -x "$(command -v docker-compose)" ] && ! docker compose version; then
-  echo "Error: Docker compose V1 is no longer supported. Please install at least v$MINIMUM_DOCKER_COMPOSE_VERSION of docker compose V2." >&2
+# docker-compose V1 is no longer supported
+if [ -x "$(command -v docker-compose)" ] && ! docker-compose version; then
+  echo "Error: docker-compose V1 is no longer supported. Please install at least v$MINIMUM_DOCKER_COMPOSE_VERSION of docker-compose V2." >&2
   exit 1
 fi
 
-if ! docker compose version; then
-  echo 'Error: docker compose is not installed.' >&2
-  # Ask if user wants to install docker compose
-  read -p "Do you want to install docker compose? [y/n] " -n 1 -r
+if ! docker-compose version; then
+  echo 'Error: docker-compose is not installed.' >&2
+  # Ask if user wants to install docker-compose
+  read -p "Do you want to install docker-compose? [y/n] " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # Install docker compose
+    # Install docker-compose
     sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
     sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-    # Check if docker compose is installed
-    if ! docker compose version; then
-      echo 'Error: Could not install docker compose.' >&2
+    # Check if docker-compose is installed
+    if ! docker-compose version; then
+      echo 'Error: Could not install docker-compose.' >&2
       exit 1
     fi
   else
-    echo 'You chose to do not install docker compose. Exiting' >&2
+    echo 'You chose to do not install docker-compose. Exiting' >&2
     exit 1
   fi
 else
-  # docker compose exists
-  docker_compose_version="$(docker compose version | cut -d 'v' -f3)"
+  # docker-compose exists
+  docker_compose_version="$(docker-compose version | cut -d 'v' -f3)"
   if [[ $(semantic_version_comp "$docker_compose_version" "$MINIMUM_DOCKER_COMPOSE_VERSION") == "lessThan" ]]; then
-    echo "Error: Docker compose version is too old. Please upgrade to at least $MINIMUM_DOCKER_COMPOSE_VERSION." >&2
+    echo "Error: docker-compose version is too old. Please upgrade to at least $MINIMUM_DOCKER_COMPOSE_VERSION." >&2
     exit 1
   else
-    echo "Docker compose version $docker_compose_version detected"
+    echo "docker-compose version $docker_compose_version detected"
   fi
 fi
 

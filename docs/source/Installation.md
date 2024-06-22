@@ -1,7 +1,7 @@
 # Installation
 
 ## Requirements
-The project leverages `docker compose` with a custom Bash script and you need to have the following packages installed in your machine:
+The project leverages `docker-compose` with a custom Bash script and you need to have the following packages installed in your machine:
 * [docker](https://docs.docker.com/get-docker/) - v19.03.0+
 * [docker-compose](https://docs.docker.com/compose/install/) - v2.3.4+
 
@@ -78,7 +78,7 @@ IntelOwl is composed of various different technologies, namely:
 * Kibana (*optional*): GUI for Elastic Search. We provide a saved configuration with dashboards and visualizations.
 * Flower (*optional*): Celery Management Web Interface
 
-All these components are managed via `docker compose`.
+All these components are managed via `docker-compose`.
 
 ## Deployment Preparation
 
@@ -177,7 +177,7 @@ There are 3 options to execute the web server:
 
     You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file and put those required files in the specified locations.
 
-    Then you should call the `./start` script with the parameter `--https` to leverage the right Docker Compose file for HTTPS.
+    Then you should call the `./start` script with the parameter `--https` to leverage the right docker-compose file for HTTPS.
   
     Plus, if you use [Flower](Advanced-Configuration.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
 
@@ -193,8 +193,8 @@ There are 3 options to execute the web server:
 
 <div class="admonition note">
 <p class="admonition-title">Important Info</p>
-IntelOwl depends heavily on docker and docker compose so as to hide this complexity from the enduser the project
-leverages a custom shell script (<code>start</code>) to interface with <code>docker compose</code>.
+IntelOwl depends heavily on docker and docker-compose so as to hide this complexity from the enduser the project
+leverages a custom shell script (<code>start</code>) to interface with <code>docker-compose</code>.
 
 You may invoke <code>$ ./start --help</code> to get help and usage info.
 
@@ -215,7 +215,7 @@ $ ./start prod up
 You can add the `docker` options `-d` to run the application in the background. 
 <div class="admonition note">
 <p class="admonition-title">Important Info</p>
-All <code>docker</code> and <code>docker compose</code> specific options must be passed at the end of the script, after a <code>--</code> token.
+All <code>docker</code> and <code>docker-compose</code> specific options must be passed at the end of the script, after a <code>--</code> token.
 This token indicates the end of IntelOwl's options and the beginning of Docker options.
 
 Example:
@@ -298,7 +298,7 @@ Below you can find the additional process required to upgrade from each major ve
 #### Updating to >=6.0.0 from a 5.x.x version
 IntelOwl v6 introduced some major changes regarding how the project is started.
 Before upgrading, some important things should be checked by the administrator:
-* Docker Compose V1 support has been dropped project-wide. If you are still using a Compose version prior to v2.3.4, please [upgrade](https://docs.docker.com/compose/migrate/) to a newer version or install Docker Compose V2.
+* docker-compose V1 support has been dropped project-wide. If you are still using a Compose version prior to v2.3.4, please [upgrade](https://docs.docker.com/compose/migrate/) to a newer version or install docker-compose V2.
 * IntelOwl is now started with the new Bash `start` script that has the same options as the old Python `start.py` script but is more manageable and has decreased the overall project dependencies. The `start.py` script has now been removed. Please use the new `start` script instead.
 * The default message broker is now Redis. We have replaced Rabbit-MQ for Redis to allow support for Websockets in the application:
   * This change is transparent if you use our `start` script to run IntelOwl. That would spawn a Redis instance instead of a Rabbit-MQ one locally.
@@ -322,7 +322,7 @@ Upgrade at your own risk.
 
 The database migration procedure is as follows:
 - You have IntelOwl version 5.x.x up and running
-- Bring down the application (you can use the start script or manually concatenate your docker compose configuration )
+- Bring down the application (you can use the start script or manually concatenate your docker-compose configuration )
 - Go inside the docker folder `cd docker`
 - Bring only the postgres 12 container up `docker run -d --name intelowl_postgres_12 -v intel_owl_postgres_data:/var/lib/postgresql/data/ --env-file env_file_postgres  library/postgres:12-alpine`
 - Dump the entire database. You need the user and the database that you configured during startup for this `docker exec -t intelowl_postgres_12  pg_dump -U <POSTGRES_USER> -d <POSTGRES_DB> --no-owner > /tmp/dump_intelowl.sql`
@@ -334,7 +334,7 @@ The database migration procedure is as follows:
 - Stop the intermediary container `docker container stop intelowl_postgres_16`
 - Remove the intermediary container `docker container rm intelowl_postgres_16`
 - Update IntelOwl to the latest version
-- Bring up the application back again (you can use the start script or manually concatenate your docker compose configuration)
+- Bring up the application back again (you can use the start script or manually concatenate your docker-compose configuration)
 
 
 #### Updating to >=5.0.0 from a 4.x.x version

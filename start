@@ -21,7 +21,7 @@ print_help () {
   print_synopsis
   echo "ARGUMENTS"
   echo "    <env>    Environment for execution"
-  echo -e "    <command>    Command for docker compose\n"
+  echo -e "    <command>    Command for docker-compose\n"
   echo "OPTIONS"
   echo "    --project_name <name>       Specify project name."
   echo "    --version <value>           Choose the version you would like to install"
@@ -90,8 +90,8 @@ load_env () {
   export "$(grep -v '^#' "$1" | xargs -d '\n')"
 }
 
-if ! docker compose version > /dev/null 2>&1; then
-  echo "Run ./initialize.sh to install Docker Compose 2"
+if ! docker-compose version > /dev/null 2>&1; then
+  echo "Run ./initialize.sh to install docker-compose 2"
 fi
 
 check_parameters "$@" && shift 2
@@ -331,7 +331,7 @@ for value in "${compose_files[@]}" ; do
   fi
 done
 if grep "docker" <<< "$(groups)" > /dev/null 2>&1; then
-  docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  docker-compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
 else
-  sudo docker compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
+  sudo docker-compose --project-directory docker ${to_run[@]} -p "$project_name" "$cmd_argument" "$@"
 fi

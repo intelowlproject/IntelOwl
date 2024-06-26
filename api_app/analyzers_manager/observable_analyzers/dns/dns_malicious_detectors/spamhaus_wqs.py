@@ -30,11 +30,10 @@ class SpamhausWQS(classes.ObservableAnalyzer):
                 url=f"{self.url}/AUTHBL/{self.observable_name}", headers=headers
             )
 
-        response = response.json()
-        if response["status"] == 200:
+        if response.status_code == 200:
             # 200 - Found - The record is listed
             return malicious_detector_response(self.observable_name, True)
-        elif response["status"] == 404:
+        elif response.status_code == 404:
             # 404 - Not found - The record is not listed
             return malicious_detector_response(self.observable_name, False)
         else:

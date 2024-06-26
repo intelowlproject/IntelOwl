@@ -31,7 +31,7 @@ dataclasses==0.6
 flower==2.0.0
 uWSGI==2.0.22
 uwsgitop==0.12
-whitenoise==6.6.0
+whitenoise==6.7.0
 daphne==4.1.0
 channels==4.1.0
 channels-redis==4.2.0
@@ -71,7 +71,7 @@ quark-engine==24.6.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
-greynoise==2.1.0
+greynoise==2.2.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0

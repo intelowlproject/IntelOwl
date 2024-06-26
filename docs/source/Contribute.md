@@ -70,6 +70,8 @@ Now, you can execute IntelOwl in development mode by selecting the mode `test` w
 ./start test up
 ```
 
+A user `admin` with password `admin` should automatically be created for development instances.
+
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
 
 - if you changed the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.

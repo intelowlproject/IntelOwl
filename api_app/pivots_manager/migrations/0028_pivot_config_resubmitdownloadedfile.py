@@ -20,7 +20,7 @@ plugin = {
     "that executes playbook FREE_TO_USE_ANALYZERS",
     "disabled": False,
     "soft_time_limit": 60,
-    "routing_key": "stored_in",
+    "routing_key": "stored_base64",
     "health_check_status": True,
     "model": "pivots_manager.PivotConfig",
 }
@@ -58,7 +58,7 @@ values = [
         "ingestor_config": None,
         "pivot_config": "ResubmitDownloadedFile",
         "for_organization": False,
-        "value": "stored_in",
+        "value": "stored_base64",
         "updated_at": "2024-06-19T12:30:03.194133Z",
         "owner": None,
     }

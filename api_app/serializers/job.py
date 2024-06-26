@@ -344,7 +344,14 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         warnings = validated_data.pop("warnings")
         send_task = validated_data.pop("send_task", False)
         parent_job = validated_data.pop("parent_job", None)
-        if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
+
+        # if we have a parent job and a new playbook to excute force new analysis
+        # in order to avoid graph related issues
+        if validated_data[
+            "scan_mode"
+        ] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and not (
+            validated_data["parent"] and validated_data["playbook_to_execute"]
+        ):
             try:
                 return self.check_previous_jobs(validated_data)
             except self.Meta.model.DoesNotExist:

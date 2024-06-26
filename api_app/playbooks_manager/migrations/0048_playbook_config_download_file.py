@@ -111,8 +111,8 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("playbooks_manager", "0044_add_cycat_to_free_to_use"),
-        ("analyzers_manager", "0097_analyzer_config_downloadfilefromuri"),
+        ("playbooks_manager", "0047_add_crt_sh_to_free_to_use"),
+        ("analyzers_manager", "0099_analyzer_config_downloadfilefromuri"),
         ("pivots_manager", "0028_pivot_config_resubmitdownloadedfile"),
     ]
 

@@ -19,6 +19,10 @@ class DownloadFileFromUri(ObservableAnalyzer):
     header_accept: str
     timeout: int
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         result = {"stored_base64": ""}
 

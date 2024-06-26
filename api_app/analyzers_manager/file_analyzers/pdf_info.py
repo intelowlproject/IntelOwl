@@ -18,6 +18,10 @@ class PDFInfo(FileAnalyzer):
     def flatten(list_of_lists: List[List[Any]]) -> List[Any]:
         return [item for sublist in list_of_lists for item in sublist]
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         self.results = {"peepdf": {}, "pdfid": {}}
         # the analysis fails only when BOTH fails

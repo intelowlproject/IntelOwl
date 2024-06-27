@@ -14,7 +14,7 @@ class GoReSym(FileAnalyzer, DockerBasedAnalyzer):
     # http request polling max number of tries
     max_tries: int = 5
 
-    def update(cls) -> bool:
+    def update(self) -> bool:
         pass
 
     def run(self):

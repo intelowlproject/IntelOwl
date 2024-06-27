@@ -22,9 +22,7 @@ plugin = {
     "docker_based": False,
     "maximum_tlp": "RED",
     "observable_supported": [],
-    "supported_filetypes": [
-        "application/x-executable",
-    ],
+    "supported_filetypes": [],
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],

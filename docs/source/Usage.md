@@ -263,6 +263,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MalprobSearch`:[Malprob](https://malprob.io/) is a leading malware detection and identification service, powered by cutting-edge AI technology.
 * `OrklSearch`:[Orkl](https://orkl.eu/) is the Community Driven Cyber Threat Intelligence Library.
 * `Crt_sh`:[Crt_Sh](https://crt.sh/) lets you get certificates info about a domain.
+* `Spamhaus_WQS`:[Spamhaus_WQS](https://docs.spamhaus.com/datasets/docs/source/70-access-methods/web-query-service/000-intro.html) : The Spamhaus Web Query Service (WQS) is a method of accessing Spamhaus block lists using the HTTPS protocol. 
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 

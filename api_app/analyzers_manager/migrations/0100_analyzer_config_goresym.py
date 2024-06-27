@@ -23,9 +23,7 @@ plugin = {
     "maximum_tlp": "RED",
     "observable_supported": [],
     "supported_filetypes": [
-        "application/vnd.microsoft.portable-executable",
-        "application/x-binary",
-        "application/x-elf",
+        "application/x-executable",
     ],
     "run_hash": False,
     "run_hash_type": "",

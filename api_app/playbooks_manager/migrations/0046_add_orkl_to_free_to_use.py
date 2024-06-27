@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "playbooks_manager",
-            "0044_add_cycat_to_free_to_use",
+            "0045_playbook_config_passive_dns",
         ),
         ("analyzers_manager", "0097_analyzer_config_orklsearch"),
     ]

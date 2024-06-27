@@ -20,15 +20,16 @@ class SpamhausWQS(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"Authorization": f"Bearer {self._api_key}"}
-
-        if self.observable_classification == self.ObservableTypes.DOMAIN.value:
-            response = requests.get(
-                url=f"{self.url}/DBL/{self.observable_name}", headers=headers
-            )
-        elif self.observable_classification == self.ObservableTypes.IP.value:
-            response = requests.get(
-                url=f"{self.url}/AUTHBL/{self.observable_name}", headers=headers
-            )
+        response = requests.get(
+            url=f"""{self.url}/
+            {
+                "DBL"
+                if self.observable_classification == self.ObservableTypes.DOMAIN.value
+                else "AUTHBL"
+            }
+            /{self.observable_name}""",
+            headers=headers,
+        )
 
         if response.status_code == 200:
             # 200 - Found - The record is listed
@@ -37,7 +38,7 @@ class SpamhausWQS(classes.ObservableAnalyzer):
             # 404 - Not found - The record is not listed
             return malicious_detector_response(self.observable_name, False)
         else:
-            raise AnalyzerRunException(f"result not expected: {response}")
+            raise AnalyzerRunException(f"result not expected: {response.status_code}")
 
     @classmethod
     def _monkeypatch(cls):

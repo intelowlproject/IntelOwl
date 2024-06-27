@@ -30,8 +30,8 @@ class SpamhausWQS(classes.ObservableAnalyzer):
             /{self.observable_name}""",
             headers=headers,
         )
-# refer to the link for status code info
-# https://docs.spamhaus.com/datasets/docs/source/70-access-methods/web-query-service/060-api-info.html#http-response-status-codes
+        # refer to the link for status code info
+        # https://docs.spamhaus.com/datasets/docs/source/70-access-methods/web-query-service/060-api-info.html#http-response-status-codes
         if response.status_code == 200:
             # 200 - Found - The record is listed
             return malicious_detector_response(self.observable_name, True)

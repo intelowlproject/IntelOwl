@@ -34,6 +34,7 @@ class TorNodesDanMeUK(classes.ObservableAnalyzer):
         db_list = db.split("\n")
         if self.observable_name in db_list:
             result["found"] = True
+            result["nodes_info"] = "https://www.dan.me.uk/torlist/?full"
 
         return result
 

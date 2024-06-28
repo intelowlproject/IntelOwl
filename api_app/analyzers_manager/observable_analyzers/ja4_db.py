@@ -20,12 +20,12 @@ class Ja4DB(classes.ObservableAnalyzer):
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
     @classmethod
-    def update(self):
-        logger.info(f"Updating database from {self.url}")
-        response = requests.get(url=self.url)
+    def update(cls):
+        logger.info(f"Updating database from {cls.url}")
+        response = requests.get(url=cls.url)
         response.raise_for_status()
         data = response.json()
-        database_location = self.location()
+        database_location = cls.location()
 
         with open(database_location, "w", encoding="utf-8") as f:
             json.dump(data, f)

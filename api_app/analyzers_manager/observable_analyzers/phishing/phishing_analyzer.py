@@ -1,6 +1,7 @@
 from logging import getLogger
 from typing import Dict
 
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By  # noqa: F401
@@ -16,7 +17,7 @@ class PhishingAnalyzer(ObservableAnalyzer):
     proxy_address: str = ""
     proxy_port: str = ""
 
-    driver: webdriver.Chrome
+    driver: webdriver.Chrome = None
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -42,4 +43,14 @@ class PhishingAnalyzer(ObservableAnalyzer):
     def run(self):
         self.driver.get(self.observable_name)
 
+        html_page: str = self.driver.page_source
+        json_response = requests.get(
+            url=self.observable_name,
+            proxies=f"{self.proxy_protocol}://"
+            f"{self.proxy_address}:{self.proxy_port}",
+            timeout=20,
+        ).json()
+
         self.driver.close()
+
+        return {"page_source": html_page, "json_response": json_response}

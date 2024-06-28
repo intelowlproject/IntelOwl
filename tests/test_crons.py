@@ -143,7 +143,7 @@ class CronTests(CustomTestCase):
     )
     def test_feodo_tracker_updater(self, mock_get=None):
         feodo_tracker.Feodo_Tracker.update()
-        location, _ = feodo_tracker.Feodo_Tracker.default_locations
+        location, _ = feodo_tracker.Feodo_Tracker.default_locations()
         self.assertTrue(os.path.exists(location))
 
     @if_mock_connections(

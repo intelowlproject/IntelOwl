@@ -11,6 +11,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.observable_analyzers import (
     feodo_tracker,
     greynoise_labs,
+    ja4_db,
     maxmind,
     phishing_army,
     talos,
@@ -142,9 +143,8 @@ class CronTests(CustomTestCase):
     )
     def test_feodo_tracker_updater(self, mock_get=None):
         feodo_tracker.Feodo_Tracker.update()
-        self.assertTrue(
-            os.path.exists(f"{settings.MEDIA_ROOT}/feodotracker_abuse_ipblocklist.json")
-        )
+        location, _ = feodo_tracker.Feodo_Tracker.default_locations()
+        self.assertTrue(os.path.exists(location))
 
     @if_mock_connections(
         patch(
@@ -172,7 +172,12 @@ class CronTests(CustomTestCase):
     )
     def test_tweetfeed_updater(self, mock_get=None):
         tweetfeeds.TweetFeeds.update()
-        self.assertTrue(os.path.exists(f"{settings.MEDIA_ROOT}/tweetfeed_month.json"))
+        location, _ = tweetfeeds.TweetFeeds.location()
+        self.assertTrue(os.path.exists(location))
+
+    def test_ja4_db_updater(self, mock_get=None):
+        ja4_db.Ja4DB.update()
+        self.assertTrue(os.path.exists(ja4_db.Ja4DB.location()))
 
     def test_quark_updater(self):
         from quark.config import DIR_PATH

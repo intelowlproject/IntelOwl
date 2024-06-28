@@ -1,5 +1,6 @@
 from logging import getLogger
 from typing import Dict
+from unittest.mock import patch
 
 import requests
 from selenium import webdriver
@@ -8,6 +9,7 @@ from selenium.webdriver.common.by import By  # noqa: F401
 from selenium.webdriver.common.keys import Keys  # noqa: F401
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from tests.mock_utils import MockUpResponse, if_mock_connections
 
 logger = getLogger(__name__)
 
@@ -63,3 +65,15 @@ class PhishingAnalyzer(ObservableAnalyzer):
             "request_body": response.request.body.encode("utf-8"),
             "request_headers": response.request.headers,
         }
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockUpResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -43,13 +43,17 @@ class PhishingAnalyzer(ObservableAnalyzer):
     def run(self):
         self.driver.get(self.observable_name)
 
-        html_page: str = self.driver.page_source
         response = requests.get(
             url=self.observable_name,
             proxies=f"{self.proxy_protocol}://"
             f"{self.proxy_address}:{self.proxy_port}",
             timeout=20,
         )
+        response.raise_for_status()
+        if response.status_code == 404:
+            return {"not_found": True}
+
+        html_page: str = self.driver.page_source
 
         self.driver.close()
 

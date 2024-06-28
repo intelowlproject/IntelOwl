@@ -9,9 +9,9 @@ import api_app.fields
 def migrate(apps, schema_editor):
     Job = apps.get_model("api_app", "Job")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
-    Job.objects.filter(
-        file_mimetype__in=["application/x-executable", "application/x-dosexec"]
-    ).update(file_mimetype="application/vnd.microsoft.portable-executable")
+    Job.objects.filter(file_mimetype__in=["application/x-dosexec"]).update(
+        file_mimetype="application/vnd.microsoft.portable-executable"
+    )
 
     for config in AnalyzerConfig.objects.filter(
         Q(
@@ -19,16 +19,7 @@ def migrate(apps, schema_editor):
                 "application/x-dosexec",
             ]
         )
-        | Q(
-            not_supported_filetypes__contains=[
-                "application/x-executable",
-            ]
-        ),
     ):
-        try:
-            config.not_supported_filetypes.remove("application/x-executable")
-        except ValueError:
-            pass
         try:
             config.not_supported_filetypes.remove("application/x-dosexec")
         except ValueError:
@@ -44,16 +35,7 @@ def migrate(apps, schema_editor):
                 "application/x-dosexec",
             ]
         )
-        | Q(
-            supported_filetypes__contains=[
-                "application/x-executable",
-            ]
-        ),
     ):
-        try:
-            config.supported_filetypes.remove("application/x-executable")
-        except ValueError:
-            pass
         try:
             config.supported_filetypes.remove("application/x-dosexec")
         except ValueError:
@@ -122,6 +104,7 @@ class Migration(migrations.Migration):
                         ("application/x-sharedlib", "Shared Lib"),
                         ("application/vnd.microsoft.portable-executable", "Exe"),
                         ("application/x-elf", "Elf"),
+                        ("application/x-executable", "X-Exe"),
                         ("application/octet-stream", "Octet"),
                         ("application/vnd.tcpdump.pcap", "Pcap"),
                         ("application/pdf", "Pdf"),
@@ -197,6 +180,7 @@ class Migration(migrations.Migration):
                         ("application/x-sharedlib", "Shared Lib"),
                         ("application/vnd.microsoft.portable-executable", "Exe"),
                         ("application/x-elf", "Elf"),
+                        ("application/x-executable", "X-Exe"),
                         ("application/octet-stream", "Octet"),
                         ("application/vnd.tcpdump.pcap", "Pcap"),
                         ("application/pdf", "Pdf"),

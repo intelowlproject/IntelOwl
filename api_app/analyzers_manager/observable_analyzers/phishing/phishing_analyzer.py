@@ -44,13 +44,18 @@ class PhishingAnalyzer(ObservableAnalyzer):
         self.driver.get(self.observable_name)
 
         html_page: str = self.driver.page_source
-        json_response = requests.get(
+        response = requests.get(
             url=self.observable_name,
             proxies=f"{self.proxy_protocol}://"
             f"{self.proxy_address}:{self.proxy_port}",
             timeout=20,
-        ).json()
+        )
 
         self.driver.close()
 
-        return {"page_source": html_page, "json_response": json_response}
+        return {
+            "page_source": html_page,
+            "text_response": response.text,
+            "request_body": response.request.body.encode("utf-8"),
+            "request_headers": response.request.headers,
+        }

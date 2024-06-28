@@ -24,15 +24,15 @@ class PhishingAnalyzer(ObservableAnalyzer):
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
         options: Options = None
-        if self.proxy_address and self.proxy_protocol and self.proxy_port:
+        if self.proxy_address:
             options = self._config_proxy_server()
         self.driver = webdriver.Chrome(options=options)
 
     def _config_proxy_server(self) -> Options:
         options = webdriver.ChromeOptions()
         options.add_argument(
-            f"--proxy-server={self.proxy_protocol}://"
-            f"{self.proxy_address}:{self.proxy_port}"
+            f"--proxy-server={self.proxy_protocol+'://' if self.proxy_address else ''}"
+            f"{self.proxy_address}{':'+self.proxy_port if self.proxy_port else ''}"
         )
         options.add_argument(
             f'--host-resolver-rules="MAP * ~NOTFOUND , EXCLUDE {self.proxy_address}"'

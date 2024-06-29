@@ -21,7 +21,10 @@ class GoReSym(FileAnalyzer, DockerBasedAnalyzer):
     def run(self):
         binary = self.read_file_bytes()
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [self.flags, f"@{fname}"]
+
+        args = []
+        args.extend(self.flags.split(" "))
+        args.append(f"@{fname}")
         req_data = {"args": args}
         req_files = {fname: binary}
         logger.info(

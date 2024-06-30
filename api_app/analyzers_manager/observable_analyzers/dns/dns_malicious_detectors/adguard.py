@@ -47,6 +47,25 @@ class AdGuard(classes.ObservableAnalyzer):
         r_filtered.raise_for_status()
         return dns.message.from_wire(r_filtered.content).answer
 
+    def check_a(self, observable: str, a_filtered: List[RRset]) -> dict:
+        # adguard follows 2 patterns for malicious domains,
+        # it either redirects the request to ad-block.dns.adguard.com
+        # or it sinkholes the request (to 0.0.0.0).
+        # If the response contains neither of these,
+        # we can safely say the domain is not malicious
+        for ans in a_filtered:
+            if str(ans.name) == "ad-block.dns.adguard.com.":
+                return malicious_detector_response(
+                    observable=observable, malicious=True
+                )
+
+            if any(str(data) == "0.0.0.0" for data in ans):
+                return malicious_detector_response(
+                    observable=observable, malicious=True
+                )
+
+        return malicious_detector_response(observable=observable, malicious=False)
+
     def run(self):
         logger.info(f"Running AdGuard DNS analyzer for {self.observable_name}")
         observable = self.observable_name
@@ -68,22 +87,4 @@ class AdGuard(classes.ObservableAnalyzer):
                 note="No response from AdGuard DNS API",
             )
 
-        # adguard follows 2 patterns for malicious domains,
-        # it either redirects the request to ad-block.dns.adguard.com
-        # or it sinkholes the request (to 0.0.0.0).
-        # If the response contains neither of these,
-        # we can safely say the domain is not malicious
-        for ans in a_filtered:
-            if str(ans.name) == "ad-block.dns.adguard.com.":
-                # means being redirected to ad guard alert page
-                return malicious_detector_response(
-                    observable=observable, malicious=True
-                )
-            for data in ans:
-                data = str(data)
-                if data == "0.0.0.0":
-                    # means sinkhole
-                    return malicious_detector_response(
-                        observable=observable, malicious=True
-                    )
-        return malicious_detector_response(observable=observable, malicious=False)
+        return self.check_a(observable, a_filtered)

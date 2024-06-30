@@ -54,7 +54,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "AndroidManifest.xml",
                 "sample.crx",
                 "manifest.json",
-                "main",
+                "main.out",
             ],
             [
                 "application/onenote",

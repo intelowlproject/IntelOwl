@@ -18,7 +18,6 @@ class AdGuard(classes.ObservableAnalyzer):
     """Check if a domain is malicious by AdGuard public resolver."""
 
     url = "https://dns.adguard-dns.com/dns-query"
-    SINKHOLE_IPS = frozenset(["0.0.0.0"])
 
     def update(self) -> bool:
         pass
@@ -49,7 +48,8 @@ class AdGuard(classes.ObservableAnalyzer):
         r_filtered.raise_for_status()
         return dns.message.from_wire(r_filtered.content).answer
 
-    def check_a(self, observable: str, a_filtered: List[RRset]) -> dict:
+    @staticmethod
+    def check_a(observable: str, a_filtered: List[RRset]) -> dict:
         # adguard follows 2 patterns for malicious domains,
         # it either redirects the request to ad-block.dns.adguard.com
         # or it sinkholes the request (to 0.0.0.0).
@@ -61,15 +61,12 @@ class AdGuard(classes.ObservableAnalyzer):
                     observable=observable, malicious=True
                 )
 
-            if any(self.is_sinkholed(data) for data in ans):
+            if any(str(data) == "0.0.0.0" for data in ans):
                 return malicious_detector_response(
                     observable=observable, malicious=True
                 )
 
         return malicious_detector_response(observable=observable, malicious=False)
-
-    def is_sinkholed(self, data):
-        return str(data) in self.SINKHOLE_IPS
 
     def run(self):
         logger.info(f"Running AdGuard DNS analyzer for {self.observable_name}")

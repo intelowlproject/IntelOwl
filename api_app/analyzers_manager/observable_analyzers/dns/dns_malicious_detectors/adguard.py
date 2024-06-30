@@ -25,6 +25,7 @@ class AdGuard(classes.ObservableAnalyzer):
     # We make DOH(DNS over http) query out of the observable
     # Mainly done using the wire format of the query
     # ref: https://datatracker.ietf.org/doc/html/rfc8484
+    @staticmethod
     def encode_query(self, observable: str) -> str:
         logger.info(f"Encoding query for {observable}")
         query = dns.message.make_query(observable, "A")
@@ -47,6 +48,7 @@ class AdGuard(classes.ObservableAnalyzer):
         r_filtered.raise_for_status()
         return dns.message.from_wire(r_filtered.content).answer
 
+    @staticmethod
     def check_a(self, observable: str, a_filtered: List[RRset]) -> dict:
         # adguard follows 2 patterns for malicious domains,
         # it either redirects the request to ad-block.dns.adguard.com

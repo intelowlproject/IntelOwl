@@ -17,14 +17,7 @@ logger = logging.getLogger(__name__)
 class AdGuard(classes.ObservableAnalyzer):
     """Check if a domain is malicious by AdGuard public resolver."""
 
-    headers = {"accept": "application/dns-message"}
-    url = "https://dns.adguard-dns.com/"  # for health chack
-
-    url_no_filter = "https://unfiltered.adguard-dns.com/dns-query"
-
-    # malicious dns -> contains ans
-    # non-malicious dns -> empty ans
-    url_dns_filter = "https://dns.adguard-dns.com/dns-query"
+    url = "https://dns.adguard-dns.com/dns-query"
 
     def update(self) -> bool:
         pass
@@ -47,26 +40,12 @@ class AdGuard(classes.ObservableAnalyzer):
             f"Sending filtered request to AdGuard DNS API for query: {encoded_query}"
         )
         r_filtered = requests.get(
-            url=f"{self.url_dns_filter}?dns={encoded_query}",
-            headers=self.headers,
+            url=f"{self.url}?dns={encoded_query}",
+            headers={"accept": "application/dns-message"},
         )
         logger.info(f"Received r_filtered from AdGuard DNS API: {r_filtered.content}")
         r_filtered.raise_for_status()
         return dns.message.from_wire(r_filtered.content).answer
-
-    def unfiltered_query(self, encoded_query: str) -> List[RRset]:
-        logger.info(
-            f"Sending unfiltered request to AdGuard DNS API for query: {encoded_query}"
-        )
-        r_unfiltered = requests.get(
-            url=f"{self.url_no_filter}?dns={encoded_query}",
-            headers=self.headers,
-        )
-        logger.info(
-            f"Received r_unfiltered from AdGuard DNS API: {r_unfiltered.content}"
-        )
-        r_unfiltered.raise_for_status()
-        return dns.message.from_wire(r_unfiltered.content).answer
 
     def run(self):
         logger.info(f"Running AdGuard DNS analyzer for {self.observable_name}")
@@ -77,50 +56,34 @@ class AdGuard(classes.ObservableAnalyzer):
             observable = urlparse(self.observable_name).hostname
         encoded_query = self.encode_query(observable)
         a_filtered = self.filter_query(encoded_query)
-        #         "answers": [
-        #     {
-        #       "name": "crambidnonutilitybayadeer.com.",
-        #       "type": "CNAME",
-        #       "ttl": 3600,
-        #       "data": "ad-block.dns.adguard.com."
-        #     },
-        #     {
-        #       "name": "ad-block.dns.adguard.com.",
-        #       "type": "A",
-        #       "ttl": 742,
-        #       "data": "94.140.14.36"
-        #     }
-        #   ],
 
         if not a_filtered:
+            # dont need to check unfiltered if filtered is empty
+            # as filter responds even if the domain is not malicious
+            # and recognised by adguard
             logger.info(f"Filtered response is empty for {self.observable_name}")
-            a_unfiltered = self.unfiltered_query(encoded_query)
-            if not a_unfiltered:
-                # If both responses are empty,
-                # we can't determine if the domain is malicious
-                # as it might still be a valid domain
-                # but not recognised by AdGuard at all
-                logger.info(f"Unfiltered response is empty for {self.observable_name}")
-                return malicious_detector_response(
-                    observable=observable,
-                    malicious=False,
-                    note="Not recognised by AdGuard at all.",
-                )
+            return malicious_detector_response(
+                observable=observable,
+                malicious=False,
+                note="No response from AdGuard DNS API",
+            )
 
-        # adguard follows 2 patterns for malicious domains
+        # adguard follows 2 patterns for malicious domains,
         # it either redirects the request to ad-block.dns.adguard.com
         # or it sinkholes the request (to 0.0.0.0).
         # If the response contains neither of these,
+        # we can safely say the domain is not malicious
         for ans in a_filtered:
-            if ans.name == "ad-block.dns.adguard.com.":
+            if str(ans.name) == "ad-block.dns.adguard.com.":
                 # means being redirected to ad guard alert page
                 return malicious_detector_response(
                     observable=observable, malicious=True
                 )
             for data in ans:
+                data = str(data)
                 if data == "0.0.0.0":
                     # means sinkhole
                     return malicious_detector_response(
                         observable=observable, malicious=True
                     )
-        return False
+        return malicious_detector_response(observable=observable, malicious=False)

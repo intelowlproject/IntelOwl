@@ -50,7 +50,6 @@ export const FileMimeTypes = Object.freeze({
   SHARED_LIB: "application/x-sharedlib",
   EXE: "application/vnd.microsoft.portable-executable",
   ELF: "application/x-elf",
-  X_EXE: "application/x-executable",
   OCTET: "application/octet-stream",
   PCAP: "application/vnd.tcpdump.pcap",
   PDF: "application/pdf",

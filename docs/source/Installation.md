@@ -185,9 +185,12 @@ There are 3 options to execute the web server:
 
     We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
 
-    Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
+    Before using the production deployment, you should change the configuration file `docker/traefik_prod.yml` by customising every line which has a "# CHANGE THIS" comment appended to reflect your environment. For a detailed explanation follow the official documentation: [Traefix doc](https://doc.traefik.io/traefik/).
+
+    The development deployment is ready to go and running on localhost. 
     
-    After the configuration is done, you can add the option `--traefik` while executing [`./start`](#run)
+    After the configuration is done, you can add the option `--traefik_prod` for a production ready deployment while executing [`./start`](#run)
+    If you just want to test things out you can add the option `--traefik_local` for a development deployment.
 
 ## Run
 
@@ -304,6 +307,7 @@ Before upgrading, some important things should be checked by the administrator:
   * This change is transparent if you use our `start` script to run IntelOwl. That would spawn a Redis instance instead of a Rabbit-MQ one locally.
   * If you were using an external broker like AWS SQS or a managed Rabbit-MQ, they are still supported but we suggest to move to a Redis supported service to simplify the architecture (because Redis is now mandatory for Websockets)
 * Support for multiple jobs with multiple playbooks has been removed. Every Observable or File in the request will be processed by a single playbook. 
+* If you have problems with something like: `daphne.log does not exist`, please create this directory with `mkdir /var/lib/docker/volumes/intel_owl_generic_logs/_data/asgi`
 * We upgraded the base PostgreSQL image from version 12 to version 16. You have 2 choice:
   * remove your actual database and start from scratch with a new one
   * maintain your database and do not update Postgres. This could break the application at anytime because we do not support it anymore.

@@ -32,7 +32,7 @@ class AbstractReportBISerializer(AbstractBIInterface):
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
-        return self.to_elastic_dict(data)
+        return self.to_elastic_dict(data, self.get_index())
 
     def get_class_instance(self, instance: AbstractReport):
         return super().get_class_instance(instance).split("report")[0]

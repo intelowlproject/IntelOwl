@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("pivots_manager", "0027_pivot_config_takedownrequesttoabuseip"),
+        ("pivots_manager", "0029_pivot_config_downloadfilefromuri"),
     ]
 
     operations = [

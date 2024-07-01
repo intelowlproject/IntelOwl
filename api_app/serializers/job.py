@@ -350,7 +350,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         if validated_data[
             "scan_mode"
         ] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and not (
-            validated_data["parent"] and validated_data["playbook_to_execute"]
+            "parent" in validated_data
+            and validated_data["parent"]
+            and "playbook_to_execute" in validated_data
+            and validated_data["playbook_to_execute"]
         ):
             try:
                 return self.check_previous_jobs(validated_data)

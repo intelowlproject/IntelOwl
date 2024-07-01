@@ -142,7 +142,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("pivots_manager", "0027_pivot_config_takedownrequesttoabuseip"),
-        ("analyzers_manager", "0099_analyzer_config_downloadfilefromuri"),
+        ("analyzers_manager", "0100_analyzer_config_downloadfilefromuri"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

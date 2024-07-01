@@ -55,15 +55,19 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
         self._config.validate_playbook_to_execute(self._user)
 
     def after_run_success(self, content):
+        # exhaust generator
+        if isinstance(content, typing.Generator):
+            content = list(content)
+
         super().after_run_success(content)
         self._config: IngestorConfig
-        # exhaust generator
         deque(
             self._config.create_jobs(
                 # every job created from an ingestor
                 content,
                 TLP.CLEAR.value,
                 self._user,
+                self._config.delay,
             ),
             maxlen=0,
         )

@@ -84,5 +84,8 @@ pyxlsb2==0.0.8
 xlrd2==1.3.4
 defusedxml==0.7.1
 
+# required by MalwareBazaar Ingestor -> https://bazaar.abuse.ch/api/#download (read the warning)
+pyzipper==0.3.6
+
 #others
 dateparser==1.2.0

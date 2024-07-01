@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ThreatFox(Ingestor):
     # API endpoint
-    url: str
+    url = "https://threatfox-api.abuse.ch/api/v1/"
     # Days to check. From 1 to 7
     days: int
 

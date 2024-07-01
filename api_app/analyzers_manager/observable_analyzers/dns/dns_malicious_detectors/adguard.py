@@ -60,7 +60,7 @@ class AdGuard(classes.ObservableAnalyzer):
                 return malicious_detector_response(
                     observable=observable, malicious=True
                 )
-
+            # nosec
             if any(str(data) == "0.0.0.0" for data in ans):
                 return malicious_detector_response(
                     observable=observable, malicious=True

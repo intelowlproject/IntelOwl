@@ -17,7 +17,7 @@ logger = getLogger(__name__)
 class PhishingAnalyzer(ObservableAnalyzer):
     proxy_protocol: str = ""
     proxy_address: str = ""
-    proxy_port: str = ""
+    proxy_port: int = 0
 
     driver: webdriver.Chrome = None
 
@@ -32,7 +32,7 @@ class PhishingAnalyzer(ObservableAnalyzer):
         options = webdriver.ChromeOptions()
         options.add_argument(
             f"--proxy-server={self.proxy_protocol+'://' if self.proxy_address else ''}"
-            f"{self.proxy_address}{':'+self.proxy_port if self.proxy_port else ''}"
+            f"{self.proxy_address}{':'+str(self.proxy_port) if self.proxy_port else ''}"
         )
         options.add_argument(
             f'--host-resolver-rules="MAP * ~NOTFOUND , EXCLUDE {self.proxy_address}"'

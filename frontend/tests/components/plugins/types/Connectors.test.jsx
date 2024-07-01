@@ -29,7 +29,7 @@ describe("test Connectors component", () => {
       </BrowserRouter>,
     );
 
-    const title = screen.getByRole("heading", { name: "Connectors 0 total" });
+    const title = screen.getByRole("heading", { name: "Connectors 1 total" });
     expect(title).toBeInTheDocument();
     // table
     const tableComponent = screen.getByRole("table");

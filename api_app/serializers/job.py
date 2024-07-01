@@ -1099,7 +1099,7 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
 
     def to_representation(self, instance: Job):
         data = super().to_representation(instance)
-        return self.to_elastic_dict(data)
+        return self.to_elastic_dict(data, self.get_index())
 
     @staticmethod
     def get_playbook(instance: Job):

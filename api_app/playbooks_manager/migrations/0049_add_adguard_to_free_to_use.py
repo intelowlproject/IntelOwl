@@ -25,8 +25,8 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0047_add_crt_sh_to_free_to_use"),
-        ("analyzers_manager", "0100_analyzer_config_adguard"),
+        ("playbooks_manager", "0048_playbook_config_download_file"),
+        ("analyzers_manager", "0101_analyzer_config_adguard"),
     ]
 
     operations = [

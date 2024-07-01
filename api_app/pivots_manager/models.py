@@ -17,7 +17,7 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from api_app.choices import PythonModuleBasePaths
-from api_app.interfaces import CreateJobsFromPlaybookInterface
+from api_app.interfaces import CreateJobsFromPlaybookInterface  # skipcq: PYL-R0401
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
 
 logger = logging.getLogger(__name__)

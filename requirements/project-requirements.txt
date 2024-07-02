@@ -54,7 +54,7 @@ OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2023.2.7
-Pillow==10.3.0
+Pillow==10.4.0
 pydeep==0.4
 pyelftools==0.31
 PyExifTool==0.5.0

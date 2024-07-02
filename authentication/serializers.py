@@ -17,6 +17,7 @@ from api_app.models import Job
 from certego_saas.apps.user.serializers import (
     UserAccessSerializer as CertegoUserAccessSerializer,
 )
+from certego_saas.apps.user.serializers import UserSerializer
 from certego_saas.ext.upload import Slack
 from certego_saas.models import User
 from certego_saas.settings import certego_apps_settings
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "UserAccessSerializer",
     "UserProfileSerializer",
+    "ProfileSerializer",
     "RegistrationSerializer",
     "EmailVerificationSerializer",
 ]
@@ -76,10 +78,33 @@ class UserAccessSerializer(CertegoUserAccessSerializer):
         return _AccessSerializer(instance=obj).data
 
 
-class UserProfileSerializer(rfs.ModelSerializer):
+class HiddenUserSerializer(UserSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "password",
+            "is_active",
+        )
+
+
+class ProfileSerializer(rfs.ModelSerializer):
+    user = HiddenUserSerializer(read_only=True)
+
     class Meta:
         model = UserProfile
-        exclude = ("user",)
+        exclude = ("id",)
+
+
+class UserProfileSerializer(UserSerializer):
+    profile = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ("username", "profile")  # used only in the final recursion get()
 
 
 class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer):
@@ -109,13 +134,13 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
             },
         }
 
-    profile = UserProfileSerializer(write_only=True)
+    profile = ProfileSerializer(write_only=True)
     is_active = rfs.BooleanField(default=False, read_only=True)
 
     def validate_profile(self, profile):
         logger.info(f"{profile}")
 
-        self._profile_serializer = UserProfileSerializer(data=profile)
+        self._profile_serializer = ProfileSerializer(data=profile)
         self._profile_serializer.is_valid(raise_exception=True)
         return profile
 

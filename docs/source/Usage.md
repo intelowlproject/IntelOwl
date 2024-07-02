@@ -264,6 +264,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `OrklSearch`:[Orkl](https://orkl.eu/) is the Community Driven Cyber Threat Intelligence Library.
 * `Crt_sh`:[Crt_Sh](https://crt.sh/) lets you get certificates info about a domain.
 * `Spamhaus_WQS`:[Spamhaus_WQS](https://docs.spamhaus.com/datasets/docs/source/70-access-methods/web-query-service/000-intro.html) : The Spamhaus Web Query Service (WQS) is a method of accessing Spamhaus block lists using the HTTPS protocol. 
+* `GoReSym`:[GoReSym](https://github.com/mandiant/GoReSym) is a Go symbol parser that extracts program metadata (such as CPU architecture, OS, endianness, compiler version, etc), function metadata (start & end addresses, names, sources), filename and line number metadata, and embedded structures and types. 
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 

@@ -54,6 +54,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "AndroidManifest.xml",
                 "sample.crx",
                 "manifest.json",
+                "main.out",
             ],
             [
                 "application/onenote",
@@ -74,6 +75,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/octet-stream",
                 "application/x-chrome-extension",
                 "application/json",
+                "application/x-executable",
             ],
         ):
             try:

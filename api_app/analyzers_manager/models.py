@@ -86,6 +86,7 @@ class MimeTypes(models.TextChoices):
     X_SHELLSCRIPT = "text/x-shellscript"
     CRX = "application/x-chrome-extension"
     JSON = "application/json"
+    EXECUTABLE = "application/x-executable"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:

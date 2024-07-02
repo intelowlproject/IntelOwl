@@ -22,7 +22,10 @@ plugin = {
     "docker_based": False,
     "maximum_tlp": "RED",
     "observable_supported": [],
-    "supported_filetypes": ["application/x-executable"],
+    "supported_filetypes": [
+        "application/vnd.microsoft.portable-executable",
+        "application/x-executable",
+    ],
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],
@@ -35,38 +38,59 @@ params = [
             "module": "goresym.GoReSym",
             "base_path": "api_app.analyzers_manager.file_analyzers",
         },
-        "name": "flags",
-        "type": "str",
-        "description": 'Here are all the available flags:\r\n\r\n* `-d` ("default", optional) flag will print standard Go packages in addition to user packages.\r\n* `-p` ("paths", optional) flag will print any file paths embedded in the `pclntab`.\r\n* `-t` ("types", optional) flag will print Go type names.\r\n* `-m <virtual address>` ("manual", optional) flag will dump the `RTYPE` structure recursively at the given virtual address\r\n* `-v <version string>` ("version", optional) flag will override automated version detection and use the provided version. This is needed for some stripped binaries. Type parsing will fail if the version is not accurate.\r\n* `-human` (optional) flag will print a flat text listing instead of JSON. Especially useful when printing structure and interface types.\r\n* `-about` (optional) flag with print out license information\r\nexample string: "-d -p -t" [white-space separated]',
+        "name": "default",
+        "type": "bool",
+        "description": "flag will print standard Go packages in addition to user packages.",
         "is_secret": False,
         "required": False,
-    }
+    },
+    {
+        "python_module": {
+            "module": "goresym.GoReSym",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "paths",
+        "type": "bool",
+        "description": "flag will print any file paths embedded in the `pclntab`",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "goresym.GoReSym",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "types",
+        "type": "bool",
+        "description": "flag will print Go type names.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "goresym.GoReSym",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "manual",
+        "type": "str",
+        "description": "flag will dump the RTYPE structure recursively at the given virtual address",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "goresym.GoReSym",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "version",
+        "type": "str",
+        "description": "flag will override automated version detection and use the provided version. This is needed for some stripped binaries. Type parsing will fail if the version is not accurate.",
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
-values = [
-    {
-        "parameter": {
-            "python_module": {
-                "module": "goresym.GoReSym",
-                "base_path": "api_app.analyzers_manager.file_analyzers",
-            },
-            "name": "flags",
-            "type": "str",
-            "description": 'Here are all the available flags:\r\n\r\n* `-d` ("default", optional) flag will print standard Go packages in addition to user packages.\r\n* `-p` ("paths", optional) flag will print any file paths embedded in the `pclntab`.\r\n* `-t` ("types", optional) flag will print Go type names.\r\n* `-m <virtual address>` ("manual", optional) flag will dump the `RTYPE` structure recursively at the given virtual address\r\n* `-v <version string>` ("version", optional) flag will override automated version detection and use the provided version. This is needed for some stripped binaries. Type parsing will fail if the version is not accurate.\r\n* `-human` (optional) flag will print a flat text listing instead of JSON. Especially useful when printing structure and interface types.\r\n* `-about` (optional) flag with print out license information\r\nexample string: "-d -p -t" [white-space separated]',
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": "GoReSym",
-        "connector_config": None,
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": "-t -d -p",
-        "updated_at": "2024-06-28T18:48:55.156666Z",
-        "owner": None,
-    }
-]
+values = []
 
 
 def _get_real_obj(Model, field, value):
@@ -146,7 +170,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0100_add_x_executable"),
+        ("analyzers_manager", "0101_add_x_executable"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

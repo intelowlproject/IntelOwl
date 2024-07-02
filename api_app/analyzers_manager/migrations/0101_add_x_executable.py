@@ -47,7 +47,7 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0099_analyzer_config_spamhaus_wqs"),
+        ("analyzers_manager", "0100_analyzer_config_downloadfilefromuri"),
         ("api_app", "0062_alter_parameter_python_module"),
     ]
 

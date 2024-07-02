@@ -13,17 +13,33 @@ class GoReSym(FileAnalyzer, DockerBasedAnalyzer):
     poll_distance: int = 5
     # http request polling max number of tries
     max_tries: int = 5
-    flags: str = "-t -d -p"
+    default: bool
+    paths: bool
+    types: bool
+    manual: str
+    version: str
 
     def update(self) -> bool:
         pass
 
+    def getArgs(self):
+        args = []
+        if self.default:
+            args.append("-d")
+        if self.paths:
+            args.append("-p")
+        if self.types:
+            args.append("-t")
+        if self.manual:
+            args.append("-m " + self.manual)
+        if self.version:
+            args.append("-v " + self.version)
+        return args
+
     def run(self):
         binary = self.read_file_bytes()
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-
-        args = []
-        args.extend(self.flags.split(" "))
+        args = self.getArgs()
         args.append(f"@{fname}")
         req_data = {"args": args}
         req_files = {fname: binary}

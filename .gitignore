@@ -45,3 +45,6 @@ coverage.xml
 *.cover
 .hypothesis/
 /.env
+
+# post run dev
+integrations/malware_tools_analyzers/clamav/sigs

@@ -63,8 +63,6 @@ services:
       - ../configuration/nginx/locations.conf:/etc/nginx/locations.conf
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
-    ports:
-      - "80:80"
     depends_on:
       uwsgi:
         condition: service_healthy

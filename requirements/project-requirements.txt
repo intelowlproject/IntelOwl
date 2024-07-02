@@ -16,7 +16,7 @@ django-treebeard==4.7
 
 jsonschema==4.22.0
 # django rest framework libs
-Authlib==1.3.0
+Authlib==1.3.1
 djangorestframework==3.15.2
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.27.1
@@ -31,11 +31,11 @@ dataclasses==0.6
 flower==2.0.0
 uWSGI==2.0.22
 uwsgitop==0.12
-whitenoise==6.6.0
+whitenoise==6.7.0
 daphne==4.1.0
 channels==4.1.0
 channels-redis==4.2.0
-elasticsearch-dsl==8.13.0
+elasticsearch-dsl==8.14.0
 
 # plugins
 GitPython==3.1.41
@@ -67,11 +67,11 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==24.5.1
+quark-engine==24.6.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
-greynoise==2.1.0
+greynoise==2.2.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0
@@ -83,6 +83,9 @@ ail_typo_squatting==2.7.4
 pyxlsb2==0.0.8
 xlrd2==1.3.4
 defusedxml==0.7.1
+
+# required by MalwareBazaar Ingestor -> https://bazaar.abuse.ch/api/#download (read the warning)
+pyzipper==0.3.6
 
 #others
 dateparser==1.2.0

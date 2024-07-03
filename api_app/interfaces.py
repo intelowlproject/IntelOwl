@@ -1,3 +1,4 @@
+import datetime
 import io
 import logging
 from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
@@ -25,6 +26,7 @@ class CreateJobsFromPlaybookInterface:
     playbook_to_execute: "PlaybookConfig"
     playbook_to_execute_id: str
     name: str
+    delay: datetime.timedelta
 
     def validate_playbook_to_execute(self, user: User):
         from api_app.playbooks_manager.models import PlaybookConfig
@@ -39,29 +41,46 @@ class CreateJobsFromPlaybookInterface:
                 f" playbook {self.playbook_to_execute_id}"
             )
 
-    def _get_serializer(self, value: Any, tlp: str, user: User):
+    def _get_serializer(
+        self, value: Any, tlp: str, user: User, delay: datetime.timedelta
+    ):
         values = value if isinstance(value, (list, Generator)) else [value]
         if self.playbook_to_execute.is_sample():
-            return self._get_file_serializer(values, tlp, user)
+            return self._get_file_serializer(values, tlp, user, delay)
         else:
-            return self._get_observable_serializer(values, tlp, user)
+            return self._get_observable_serializer(values, tlp, user, delay)
 
-    def _get_observable_serializer(self, values: Iterable[Any], tlp: str, user: User):
+    def _get_observable_serializer(
+        self,
+        values: Iterable[Any],
+        tlp: str,
+        user: User,
+        delay: datetime.timedelta = datetime.timedelta(),
+    ):
         from api_app.serializers.job import ObservableAnalysisSerializer
         from tests.mock_utils import MockUpRequest
 
         return ObservableAnalysisSerializer(
             data={
                 "playbook_requested": self.playbook_to_execute.name,
-                "observables": [(None, value) for value in values],
+                "observables": [
+                    (None, value) for value in values
+                ],  # (classification, value)
+                # -> the classification=None it's just a placeholder
+                #    because it'll be calculated later
                 "tlp": tlp,
+                "delay": int(delay.total_seconds()),  # datetime.timedelta serialization
             },
             context={"request": MockUpRequest(user=user)},
             many=True,
         )
 
     def _get_file_serializer(
-        self, values: Iterable[Union[bytes, File]], tlp: str, user: User
+        self,
+        values: Iterable[Union[bytes, File]],
+        tlp: str,
+        user: User,
+        delay: datetime.timedelta = datetime.timedelta(),
     ):
         from api_app.serializers.job import FileJobSerializer
         from tests.mock_utils import MockUpRequest
@@ -76,6 +95,7 @@ class CreateJobsFromPlaybookInterface:
         data = {
             "playbook_requested": self.playbook_to_execute.name,
             "tlp": tlp,
+            "delay": int(delay.total_seconds()),  # datetime.timedelta serialization
         }
         query_dict.update(data)
         query_dict.setlist("files", files)
@@ -90,11 +110,12 @@ class CreateJobsFromPlaybookInterface:
         value: Any,
         tlp: str,
         user: User,
+        delay: datetime.timedelta = datetime.timedelta(),
         send_task: bool = True,
         parent_job=None,
     ) -> Generator["Job", None, None]:
         try:
-            serializer = self._get_serializer(value, tlp, user)
+            serializer = self._get_serializer(value, tlp, user, delay)
         except ValueError as e:
             logger.exception(e)
             raise

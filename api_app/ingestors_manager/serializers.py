@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
 
-from certego_saas.apps.user.serializers import UserSerializer
+from authentication.serializers import UserProfileSerializer
 
 from ..playbooks_manager.models import PlaybookConfig
 from ..serializers.celery import CrontabScheduleSerializer, PeriodicTaskSerializer
@@ -32,7 +32,7 @@ class IngestorConfigSerializer(PythonConfigSerializer):
 class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
     schedule = CrontabScheduleSerializer(read_only=True)
     periodic_task = PeriodicTaskSerializer(read_only=True)
-    user = UserSerializer(read_only=True, omit=["full_name"])
+    user = UserProfileSerializer(read_only=True)
 
     class Meta:
         model = IngestorConfig

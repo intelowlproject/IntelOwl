@@ -20,6 +20,14 @@ class Ja4DB(classes.ObservableAnalyzer):
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
     @classmethod
+    def check_ja4_fingerprint(cls, observable: str):
+        # we check the length of the observable
+        # and the number of underscores
+        if len(observable) > 70 or len(observable) < 20:
+            return False
+        return observable.count("_") >= 2
+
+    @classmethod
     def update(cls):
         logger.info(f"Updating database from {cls.url}")
         response = requests.get(url=cls.url)
@@ -32,6 +40,9 @@ class Ja4DB(classes.ObservableAnalyzer):
         logger.info(f"Database updated at {database_location}")
 
     def run(self):
+        if not self.check_ja4_fingerprint(self.observable_name):
+            return {"not supported": True}
+
         database_location = self.location()
         if not os.path.exists(database_location):
             logger.info(

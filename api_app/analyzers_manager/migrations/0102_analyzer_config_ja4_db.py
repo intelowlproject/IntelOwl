@@ -26,7 +26,7 @@ plugin = {
     "health_check_status": True,
     "type": "observable",
     "docker_based": False,
-    "maximum_tlp": "RED",
+    "maximum_tlp": "AMBER",
     "observable_supported": ["generic"],
     "supported_filetypes": [],
     "run_hash": False,

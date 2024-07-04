@@ -21,8 +21,20 @@ class Ja4DB(classes.ObservableAnalyzer):
 
     @classmethod
     def check_ja4_fingerprint(cls, observable: str):
-        # we check the length of the observable
-        # and the number of underscores
+        # https://github.com/FoxIO-LLC/ja4/blob/main/technical_details/README.md
+        if not observable[0] in ["t", "q"]:
+            # checks for protocol,
+            # TCP(t) and QUIC(q) are the only supported protocols
+            return False
+        if not observable[1:3] in ["12", "13"]:
+            # checks for the version of the protocol
+            return False
+        if not observable[3] in ["d", "i"]:
+            # SNI or no SNI
+            return False
+        if not observable[4:8].isdigit():
+            # number of cipher suits and extensions
+            return False
         if len(observable) > 70 or len(observable) < 20:
             return False
         return observable.count("_") >= 2

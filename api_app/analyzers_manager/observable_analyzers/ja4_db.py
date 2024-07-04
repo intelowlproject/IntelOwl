@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class Ja4DB(classes.ObservableAnalyzer):
+    class NotJA4Exception(Exception):
+        pass
+
     url = " https://ja4db.com/api/read/"
 
     @classmethod
@@ -19,25 +22,32 @@ class Ja4DB(classes.ObservableAnalyzer):
         db_name = "ja4_db.json"
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
-    @classmethod
-    def check_ja4_fingerprint(cls, observable: str):
-        # https://github.com/FoxIO-LLC/ja4/blob/main/technical_details/README.md
-        if not observable[0] in ["t", "q"]:
-            # checks for protocol,
-            # TCP(t) and QUIC(q) are the only supported protocols
-            return False
-        if not observable[1:3] in ["12", "13"]:
-            # checks for the version of the protocol
-            return False
-        if not observable[3] in ["d", "i"]:
-            # SNI or no SNI
-            return False
-        if not observable[4:8].isdigit():
-            # number of cipher suits and extensions
-            return False
-        if len(observable) > 70 or len(observable) < 20:
-            return False
-        return observable.count("_") >= 2
+    def check_ja4_fingerprint(self, observable: str) -> str:
+        message = ""
+        try:
+            # https://github.com/FoxIO-LLC/ja4/blob/main/technical_details/README.md
+            if not observable[0] in ["t", "q"]:
+                # checks for protocol,
+                # TCP(t) and QUIC(q) are the only supported protocols
+                raise self.NotJA4Exception("only TCP and QUIC protocols are supported")
+            if not observable[1:3] in ["12", "13"]:
+                # checks for the version of the protocol
+                raise self.NotJA4Exception("procotol version wrong")
+            if not observable[3] in ["d", "i"]:
+                # SNI or no SNI
+                raise self.NotJA4Exception("SNI value not valid")
+            if not observable[4:8].isdigit():
+                # number of cipher suits and extensions
+                raise self.NotJA4Exception("cipher suite must be a number")
+            if len(observable) > 70 or len(observable) < 20:
+                raise self.NotJA4Exception("invalid length")
+            if not observable.count("_") >= 2:
+                raise self.NotJA4Exception("missing underscores")
+        except self.NotJA4Exception as e:
+            message = f"{self.observable_name} is not valid JA4 because {e}"
+            logger.info(message)
+
+        return message
 
     @classmethod
     def update(cls):
@@ -52,8 +62,9 @@ class Ja4DB(classes.ObservableAnalyzer):
         logger.info(f"Database updated at {database_location}")
 
     def run(self):
-        if not self.check_ja4_fingerprint(self.observable_name):
-            return {"not supported": True}
+        reason = self.check_ja4_fingerprint(self.observable_name)
+        if not reason:
+            return {"not_supported": reason}
 
         database_location = self.location()
         if not os.path.exists(database_location):

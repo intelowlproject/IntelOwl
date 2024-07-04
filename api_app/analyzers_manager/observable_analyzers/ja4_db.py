@@ -12,6 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 class Ja4DB(classes.ObservableAnalyzer):
+    """
+    We are only checking JA4 "traditional" fingerprints here
+    We should support all the JAX types as well but it is difficult
+     to add them considering that
+    it is not easy to understand the format and how to avoid
+     to run this analyzer even in cases
+    where a ja4x has not been submitted.
+    This should probably require a rework where those fingerprints
+     are saved in a table/collection
+    """
+
     class NotJA4Exception(Exception):
         pass
 

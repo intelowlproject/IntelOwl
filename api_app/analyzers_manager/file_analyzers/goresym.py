@@ -49,8 +49,13 @@ class GoReSym(FileAnalyzer, DockerBasedAnalyzer):
         )
         result = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
         if "error" in result:
+            er = (
+                "Failed to parse file: failed to read pclntab: failed to locate pclntab"
+            )
+            if result["error"] == er:
+                logger.warning(f"Not a GO-compiled file: {result['error']}")
+                return f"Not a Go-compiled file: {result['error']}"
             raise AnalyzerRunException(result["error"])
-
         return result
 
     @staticmethod

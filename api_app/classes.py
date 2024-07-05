@@ -124,8 +124,9 @@ class Plugin(metaclass=ABCMeta):
 
     def after_run_success(self, content: typing.Any):
         # avoiding JSON serialization errors for types: File and bytes
-        report_content = []
-        if isinstance(content, typing.List):
+        report_content = content
+        if isinstance(report_content, typing.List):
+            report_content = []
             for n in content:
                 if isinstance(n, File):
                     report_content.append(base64.b64encode(n.read()).decode("utf-8"))

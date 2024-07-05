@@ -25,8 +25,8 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0048_playbook_config_download_file"),
-        ("analyzers_manager", "0102_analyzer_config_goresym"),
+        ("playbooks_manager", "0049_add_adguard_to_free_to_use_and_dns"),
+        ("analyzers_manager", "0104_analyzer_config_goresym"),
     ]
 
     operations = [

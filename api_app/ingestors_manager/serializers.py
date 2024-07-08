@@ -33,6 +33,7 @@ class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
     schedule = CrontabScheduleSerializer(read_only=True)
     periodic_task = PeriodicTaskSerializer(read_only=True)
     user = UserProfileSerializer(read_only=True)
+    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
 
     class Meta:
         model = IngestorConfig

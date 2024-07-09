@@ -58,7 +58,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbook_to_execute=playbook,
         )
 
         jobs = list(
@@ -85,9 +84,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbook_to_execute=PlaybookConfig.objects.filter(
-                disabled=False, type__icontains=AllTypes.FILE.value
-            ).first(),
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
@@ -97,7 +93,9 @@ class PivotConfigTestCase(CustomTestCase):
                 job.tlp,
                 job.user,
                 send_task=False,
-                playbook_to_execute=PlaybookConfig.objects.first(),
+                playbook_to_execute=PlaybookConfig.objects.filter(
+                    disabled=False, type__icontains=AllTypes.FILE.value
+                ).first(),
             )
         )
         self.assertEqual(1, len(jobs))
@@ -112,7 +110,6 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
         jobs = list(
             pc.create_jobs(
@@ -120,7 +117,9 @@ class PivotConfigTestCase(CustomTestCase):
                 job.tlp,
                 job.user,
                 send_task=False,
-                playbook_to_execute=PlaybookConfig.objects.first(),
+                playbook_to_execute=PlaybookConfig.objects.filter(
+                    type=["domain"]
+                ).first(),
             )
         )
         self.assertEqual(1, len(jobs))

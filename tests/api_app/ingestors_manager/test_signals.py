@@ -22,7 +22,9 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
             description="test",
             disabled=True,
             schedule=crontab,
-            playbook_to_execute=PlaybookConfig.objects.first(),
+            playbooks_choice=PlaybookConfig.objects.filter(
+                pk=PlaybookConfig.objects.first().pk
+            ),
         )
         self.assertIsNotNone(ic.periodic_task)
         self.assertEqual(ic.periodic_task.name, "TestIngestor")
@@ -48,7 +50,9 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
             description="test",
             disabled=True,
             schedule=crontab,
-            playbook_to_execute=PlaybookConfig.objects.first(),
+            playbooks_choice=PlaybookConfig.objects.filter(
+                pk=PlaybookConfig.objects.first().pk
+            ),
         )
         user = ic.user
         task = ic.periodic_task

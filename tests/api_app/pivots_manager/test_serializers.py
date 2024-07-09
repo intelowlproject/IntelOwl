@@ -27,7 +27,9 @@ class PivotMapSerializerTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbook_to_execute=PlaybookConfig.objects.first(),
+            playbooks_choice=PlaybookConfig.objects.filter(
+                pk=PlaybookConfig.objects.first().pk
+            ),
         )
 
     def tearDown(self) -> None:
@@ -75,7 +77,9 @@ class PivotConfigSerializerTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbook_to_execute=PlaybookConfig.objects.first(),
+            playbooks_choice=PlaybookConfig.objects.filter(
+                pk=PlaybookConfig.objects.first().pk
+            ),
         )
         pc.related_analyzer_configs.set([ac])
         pcs = PivotConfigSerializer(pc)

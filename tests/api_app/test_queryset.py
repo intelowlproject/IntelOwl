@@ -699,7 +699,9 @@ class JobQuerySetTestCase(CustomTestCase):
             description="test",
             disabled=False,
             schedule=schedule,
-            playbook_to_execute=PlaybookConfig.objects.first(),
+            playbooks_choice=PlaybookConfig.objects.filter(
+                pk=PlaybookConfig.objects.first().pk
+            ),
         )
         j = Job.objects.create(
             tlp="RED",

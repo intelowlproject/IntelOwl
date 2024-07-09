@@ -18,7 +18,11 @@ class IngestorConfigAdminView(PythonConfigAdminView):
         "name",
         "python_module",
         "disabled",
-        "playbook_to_execute",
+        "get_playbooks_choice",
         "schedule",
     )
     exclude = ["user", "periodic_task"]
+
+    @admin.display(description="Playbooks choice")
+    def get_playbooks_choice(self, instance: IngestorConfig):
+        return instance.playbooks_names

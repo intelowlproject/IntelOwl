@@ -47,13 +47,8 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ('api_app', '0062_alter_parameter_python_module'),
-        ('ingestors_manager', '0019_ingestor_config_malwarebazaar'),
+        ("api_app", "0062_alter_parameter_python_module"),
+        ("ingestors_manager", "0019_ingestor_config_malwarebazaar"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate, reverse_migrate
-        )
-    ]
-
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

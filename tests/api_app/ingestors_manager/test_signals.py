@@ -22,10 +22,8 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
             description="test",
             disabled=True,
             schedule=crontab,
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        ic.playbooks_choice.add(PlaybookConfig.objects.first())
         self.assertIsNotNone(ic.periodic_task)
         self.assertEqual(ic.periodic_task.name, "TestIngestor")
         self.assertEqual(ic.periodic_task.task, "intel_owl.tasks.execute_ingestor")
@@ -50,10 +48,8 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
             description="test",
             disabled=True,
             schedule=crontab,
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        ic.playbooks_choice.add(PlaybookConfig.objects.first())
         user = ic.user
         task = ic.periodic_task
         self.assertIsNotNone(task)

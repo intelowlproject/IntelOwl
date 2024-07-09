@@ -699,10 +699,8 @@ class JobQuerySetTestCase(CustomTestCase):
             description="test",
             disabled=False,
             schedule=schedule,
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        ingestor.playbooks_choice.add(PlaybookConfig.objects.first())
         j = Job.objects.create(
             tlp="RED",
             user=ingestor.user,

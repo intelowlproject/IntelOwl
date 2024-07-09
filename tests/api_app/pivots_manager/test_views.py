@@ -50,10 +50,8 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        self.pc.playbooks_choice.add(PlaybookConfig.objects.first())
         self.pivot = PivotMap.objects.create(
             starting_job=self.j1, ending_job=self.j2, pivot_config=self.pc
         )
@@ -82,10 +80,8 @@ class PivotConfigViewSetTestCase(
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        self.pc.playbooks_choice.add(PlaybookConfig.objects.first())
         self.pc.save()
 
     def tearDown(self) -> None:

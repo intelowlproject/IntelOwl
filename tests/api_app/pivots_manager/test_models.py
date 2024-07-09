@@ -19,10 +19,8 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        pc.playbooks_choice.add(PlaybookConfig.objects.first())
         ac = AnalyzerConfig.objects.first()
         pc.related_analyzer_configs.set([ac])
         self.assertIn(ac.name, pc.description)
@@ -38,10 +36,8 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        pc.playbooks_choice.add(PlaybookConfig.objects.first())
         try:
             pc.full_clean()
         except ValidationError as e:
@@ -54,10 +50,8 @@ class PivotConfigTestCase(CustomTestCase):
             python_module=PythonModule.objects.filter(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
-            playbooks_choice=PlaybookConfig.objects.filter(
-                pk=PlaybookConfig.objects.first().pk
-            ),
         )
+        pc.playbooks_choice.add(PlaybookConfig.objects.first())
         try:
             pc.full_clean()
         except ValidationError as e:

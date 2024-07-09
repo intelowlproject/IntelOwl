@@ -24,7 +24,12 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
             observable_classification="domain",
             user=self.user,
         )
-        serializer = self.c._get_file_serializer([b"test"], tlp="CLEAR", user=self.user, playbook_to_execute=self.c.playbooks_choice.first())
+        serializer = self.c._get_file_serializer(
+            [b"test"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
+        )
         self.assertIsInstance(serializer, MultipleFileJobSerializer)
         serializer.is_valid(raise_exception=True)
         jobs = serializer.save(send_task=False, parent=parent_job)
@@ -45,8 +50,10 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
             user=self.user,
         )
         serializer = self.c._get_observable_serializer(
-            ["google.com"], tlp="CLEAR", user=self.user,
-        playbook_to_execute = self.c.playbooks_choice.first()
+            ["google.com"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
         )
         self.assertIsInstance(serializer, MultipleObservableJobSerializer)
         serializer.is_valid(raise_exception=True)
@@ -70,7 +77,10 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         )
         self.assertIsNone(parent_job.investigation)
         serializer = self.c._get_observable_serializer(
-            ["google.com", "google2.com"], tlp="CLEAR", user=self.user, playbook_to_execute=self.c.playbooks_choice.first()
+            ["google.com", "google2.com"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
         )
         self.assertIsInstance(serializer, MultipleObservableJobSerializer)
         serializer.is_valid(raise_exception=True)
@@ -101,7 +111,10 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         # the parent has an investigation
         self.assertIsNotNone(parent_job.investigation)
         serializer = self.c._get_observable_serializer(
-            ["google.com", "google2.com"], tlp="CLEAR", user=self.user, playbook_to_execute=self.c.playbooks_choice.first()
+            ["google.com", "google2.com"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
         )
         self.assertIsInstance(serializer, MultipleObservableJobSerializer)
         serializer.is_valid(raise_exception=True)

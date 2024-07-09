@@ -81,8 +81,8 @@ class PivotConfigViewSetTestCase(
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
         )
-        self.pc.playbooks_choice.add(PlaybookConfig.objects.first())
         self.pc.save()
+        self.pc.playbooks_choice.add(PlaybookConfig.objects.first())
 
     def tearDown(self) -> None:
         super().tearDown()

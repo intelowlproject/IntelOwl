@@ -37,21 +37,6 @@ class PivotConfigTestCase(CustomTestCase):
                 base_path="api_app.pivots_manager.pivots"
             ).first(),
         )
-        pc.playbooks_choice.add(PlaybookConfig.objects.first())
-        try:
-            pc.full_clean()
-        except ValidationError as e:
-            self.fail(e)
-
-    def test_field_validation_valid(self):
-        pc = PivotConfig(
-            name="test",
-            description="test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-        )
-        pc.playbooks_choice.add(PlaybookConfig.objects.first())
         try:
             pc.full_clean()
         except ValidationError as e:
@@ -78,7 +63,11 @@ class PivotConfigTestCase(CustomTestCase):
 
         jobs = list(
             pc.create_jobs(
-                ["something", "something2"], job.tlp, job.user, send_task=False
+                ["something", "something2"],
+                job.tlp,
+                job.user,
+                send_task=False,
+                playbook_to_execute=playbook,
             )
         )
         self.assertEqual(2, len(jobs))
@@ -102,7 +91,15 @@ class PivotConfigTestCase(CustomTestCase):
         )
         with open("test_files/file.exe", "rb") as f:
             content = f.read()
-        jobs = list(pc.create_jobs(content, job.tlp, job.user, send_task=False))
+        jobs = list(
+            pc.create_jobs(
+                content,
+                job.tlp,
+                job.user,
+                send_task=False,
+                playbook_to_execute=PlaybookConfig.objects.first(),
+            )
+        )
         self.assertEqual(1, len(jobs))
         self.assertEqual("PivotOnTest.0", jobs[0].file_name)
         self.assertEqual(
@@ -117,7 +114,15 @@ class PivotConfigTestCase(CustomTestCase):
             ).first(),
             playbook_to_execute=PlaybookConfig.objects.filter(type=["domain"]).first(),
         )
-        jobs = list(pc.create_jobs("google.com", job.tlp, job.user, send_task=False))
+        jobs = list(
+            pc.create_jobs(
+                "google.com",
+                job.tlp,
+                job.user,
+                send_task=False,
+                playbook_to_execute=PlaybookConfig.objects.first(),
+            )
+        )
         self.assertEqual(1, len(jobs))
         self.assertEqual("google.com", jobs[0].observable_name)
         self.assertEqual("domain", jobs[0].observable_classification)

@@ -14,6 +14,7 @@ import {
   INGESTORS_CONFIG_URI,
 } from "../constants/apiURLs";
 import { prettifyErrors } from "../utils/api";
+import { ScanModesNumeric } from "../constants/advancedSettingsConst";
 
 async function downloadAllPlugin(pluginUrl) {
   const pageSize = 70;
@@ -47,7 +48,6 @@ async function downloadAllPlugin(pluginUrl) {
 }
 
 export const usePluginConfigurationStore = create((set, get) => ({
-  // loading: true,
   analyzersLoading: true,
   connectorsLoading: true,
   pivotsLoading: true,
@@ -332,5 +332,46 @@ export const usePluginConfigurationStore = create((set, get) => ({
       );
       return null;
     }
+  },
+  editPlaybookConfig: async (playbookName, values) => {
+    const playbookToEdit =
+      playbookName !== values.name ? playbookName : values.name;
+    const data = {
+      name: values.name,
+      description: values.description,
+      type: values.type,
+      analyzers: values.analyzers.map((analyzer) => analyzer.value),
+      connectors: values.connectors.map((connector) => connector.value),
+      visualizers: values.visualizers.map((visualizer) => visualizer.value),
+      pivots: values.pivots.map((pivot) => pivot.value),
+      runtime_configuration: values.runtime_configuration,
+      tags_labels: values.tags.map((tag) => tag.value.label),
+      tlp: values.tlp,
+      scan_mode: parseInt(values.scan_mode, 10),
+    };
+    if (values.scan_mode === ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS) {
+      data.scan_check_time = `${values.scan_check_time}:00:00`;
+    }
+    let success = false;
+
+    try {
+      const response = await axios.patch(
+        `${PLAYBOOKS_CONFIG_URI}/${playbookToEdit}`,
+        data,
+      );
+      success = response.status === 200;
+      addToast(`${values.name} configuration saved`, null, "success");
+      get().retrievePlaybooksConfiguration();
+    } catch (error) {
+      addToast(
+        `Failed to edited ${values.name} configuration.`,
+        prettifyErrors(error),
+        "danger",
+        true,
+        10000,
+      );
+      return { success, error: prettifyErrors(error) };
+    }
+    return { success };
   },
 }));

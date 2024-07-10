@@ -23,6 +23,7 @@ import {
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
   PluginPullButton,
+  PlaybooksEditButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -336,6 +337,7 @@ export const pivotTableColumns = [
     maxWidth: 125,
   },
 ];
+
 // Playbooks columns: these columns are shown for the playbooks
 export const playbookTableColumns = [
   ...pluginTableColumns,
@@ -425,7 +427,8 @@ export const playbookTableColumns = [
           type={PluginsTypes.PLAYBOOK}
           pluginOwner={value?.owner}
         />
-        {value.is_deletable && (
+        {value.is_editable && <PlaybooksEditButton playbookConfig={value} />}
+        {value.is_editable && (
           <PlaybooksDeletionButton playbookName={value?.name} />
         )}
       </div>

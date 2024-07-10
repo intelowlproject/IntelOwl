@@ -3,9 +3,9 @@ import uuid
 from typing import Type
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
+from rest_framework.exceptions import ValidationError
 
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -75,7 +75,9 @@ def m2m_changed_pivots_playbook_config(
         wrong_pivots = objects.exclude(pk__in=valid_pks)
         if wrong_pivots.exists():
             raise ValidationError(
-                f"You can't set pivot{'s' if wrong_pivots.size()> 0 else ''}"
-                f" {','.join(wrong_pivots.values_list('name', flat=True))} because"
-                " the playbook does not have all the required plugins"
+                {
+                    "detail": f"You can't set pivots"
+                    f" {','.join(wrong_pivots.values_list('name', flat=True))} because"
+                    " the playbook does not have all the required plugins"
+                }
             )

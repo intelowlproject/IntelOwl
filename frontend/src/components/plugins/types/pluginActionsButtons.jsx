@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
-import { MdDelete, MdFileDownload } from "react-icons/md";
+import { MdDelete, MdFileDownload, MdEdit } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
 
 import { IconButton } from "@certego/certego-ui";
@@ -11,6 +11,7 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
+import { EditPlaybookConfigForm } from "./EditPlaybookConfigForm";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -151,7 +152,7 @@ export function PlaybooksDeletionButton({ playbookName }) {
   };
 
   return (
-    <div>
+    <div className="px-2">
       <IconButton
         id={`playbook-deletion-${playbookName}`}
         color="danger"
@@ -238,4 +239,73 @@ PluginPullButton.propTypes = {
   pluginName: PropTypes.string.isRequired,
   pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
     .isRequired,
+};
+
+export function PlaybooksEditButton({ playbookConfig }) {
+  const [showModal, setShowModal] = React.useState(false);
+
+  const [
+    analyzersLoading,
+    connectorsLoading,
+    visualizersLoading,
+    pivotsLoading,
+  ] = usePluginConfigurationStore((state) => [
+    state.analyzersLoading,
+    state.connectorsLoading,
+    state.visualizersLoading,
+    state.pivotsLoading,
+  ]);
+
+  const pluginsLoading =
+    analyzersLoading ||
+    connectorsLoading ||
+    visualizersLoading ||
+    pivotsLoading;
+
+  return (
+    <div className="d-flex flex-column align-items-center px-2">
+      <IconButton
+        id={`playbook-edit-btn__${playbookConfig?.name}`}
+        color="info"
+        size="sm"
+        Icon={pluginsLoading ? SpinnerIcon : MdEdit}
+        title={
+          pluginsLoading
+            ? "Playbook configuration is loading"
+            : "Edit playbook config"
+        }
+        onClick={() => {
+          if (!pluginsLoading) setShowModal(true);
+          return null;
+        }}
+        titlePlacement="top"
+      />
+      <Modal
+        id={`modal-playbook-edit-btn__${playbookConfig?.name}`}
+        autoFocus
+        centered
+        zIndex="1050"
+        size="lg"
+        keyboard={false}
+        backdrop="static"
+        labelledBy="Playbook edit modal"
+        isOpen={showModal}
+        style={{ minWidth: "60%" }}
+      >
+        <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
+          <small className="text-info">Edit playbook config</small>
+        </ModalHeader>
+        <ModalBody className="m-2">
+          <EditPlaybookConfigForm
+            playbookConfig={playbookConfig}
+            toggle={setShowModal}
+          />
+        </ModalBody>
+      </Modal>
+    </div>
+  );
+}
+
+PlaybooksEditButton.propTypes = {
+  playbookConfig: PropTypes.object.isRequired,
 };

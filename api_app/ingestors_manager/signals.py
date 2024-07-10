@@ -21,9 +21,9 @@ def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
     from intel_owl.tasks import execute_ingestor
 
     user = User.objects.get_or_create(
-        username__iexact=f"{instance.name.title()}Ingestor",
+        username__iexact=f"{instance.name}Ingestor",
         defaults={
-            "username": f"{instance.name.title()}Ingestor",
+            "username": f"{instance.name}Ingestor",
         },
     )[0]
 
@@ -37,10 +37,10 @@ def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
     instance.user = user
 
     periodic_task = PeriodicTask.objects.update_or_create(
-        name__iexact=f"{instance.name.title()}Ingestor",
+        name__iexact=f"{instance.name}Ingestor",
         task=f"{execute_ingestor.__module__}.{execute_ingestor.__name__}",
         defaults={
-            "name": f"{instance.name.title()}Ingestor",
+            "name": f"{instance.name}Ingestor",
             "crontab": instance.schedule,
             "queue": instance.queue,
             "kwargs": json.dumps({"config_name": instance.name}),

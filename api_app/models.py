@@ -1260,7 +1260,7 @@ class PythonConfig(AbstractConfig):
             and self.python_module.health_check_schedule
         ):
             periodic_task = PeriodicTask.objects.update_or_create(
-                name__iexact=f"{self.name.title()}HealthCheck{self.__class__.__name__}",
+                name__iexact=f"{self.name}HealthCheck{self.__class__.__name__}",
                 task=f"{health_check.__module__}.{health_check.__name__}",
                 defaults={
                     "name": f"{self.name}HealthCheck{self.__class__.__name__}",

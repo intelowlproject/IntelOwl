@@ -9,6 +9,7 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.signals import migrate_finished
+from authentication.models import UserProfile
 from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
 
@@ -19,14 +20,29 @@ logger = logging.getLogger(__name__)
 def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
     from intel_owl.tasks import execute_ingestor
 
-    user = User.objects.get_or_create(username=f"{instance.name.title()}Ingestor")[0]
+    # check if the retrieved user is not in the correct "title" format,
+    # in this case create the correct user
+    user = User.objects.filter(username__iexact=f"{instance.name.title()}Ingestor")
+    if not user or (
+        user
+        and f"{instance.name.title()}Ingestor"
+        not in [u["username"] for u in user.values("username")]
+    ):
+        user = User.objects.create_user(f"{instance.name.title()}Ingestor")
+    else:
+        user = user.get(f"{instance.name.title()}Ingestor")
+
+    # in case the user has been created
+    if not hasattr(user, "profile"):
+        user.profile = UserProfile()
+
     user.profile.task_priority = 7
     user.profile.is_robot = True
     user.profile.save()
     instance.user = user
 
     periodic_task = PeriodicTask.objects.update_or_create(
-        name=f"{instance.name.title()}Ingestor",
+        name__iexact=f"{instance.name.title()}Ingestor",
         task=f"{execute_ingestor.__module__}.{execute_ingestor.__name__}",
         defaults={
             "crontab": instance.schedule,

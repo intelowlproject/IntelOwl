@@ -32,7 +32,7 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
         self.assertEqual(ic.periodic_task.queue, "default")
         self.assertEqual(json.loads(ic.periodic_task.kwargs)["config_name"], ic.name)
         self.assertIsNotNone(ic.user)
-        self.assertEqual(ic.user.username, "TestIngestor")
+        self.assertEqual(ic.user.username, "testIngestor")
         ic.delete()
         if created:
             crontab.delete()

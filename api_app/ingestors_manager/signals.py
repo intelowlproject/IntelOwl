@@ -20,17 +20,12 @@ logger = logging.getLogger(__name__)
 def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
     from intel_owl.tasks import execute_ingestor
 
-    # check if the retrieved user is not in the correct "title" format,
-    # in this case create the correct user
-    user = User.objects.filter(username__iexact=f"{instance.name.title()}Ingestor")
-    if not user or (
-        user
-        and f"{instance.name.title()}Ingestor"
-        not in [u["username"] for u in user.values("username")]
-    ):
-        user = User.objects.create_user(f"{instance.name.title()}Ingestor")
-    else:
-        user = user.get(f"{instance.name.title()}Ingestor")
+    user = User.objects.get_or_create(
+        username__iexact=f"{instance.name.title()}Ingestor",
+        defaults={
+            "username": f"{instance.name.title()}Ingestor",
+        },
+    )[0]
 
     # in case the user has been created
     if not hasattr(user, "profile"):
@@ -45,6 +40,7 @@ def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
         name__iexact=f"{instance.name.title()}Ingestor",
         task=f"{execute_ingestor.__module__}.{execute_ingestor.__name__}",
         defaults={
+            "name": f"{instance.name.title()}Ingestor",
             "crontab": instance.schedule,
             "queue": instance.queue,
             "kwargs": json.dumps({"config_name": instance.name}),

@@ -25,7 +25,7 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
             playbook_to_execute=PlaybookConfig.objects.first(),
         )
         self.assertIsNotNone(ic.periodic_task)
-        self.assertEqual(ic.periodic_task.name, "TestIngestor")
+        self.assertEqual(ic.periodic_task.name, "testIngestor")
         self.assertEqual(ic.periodic_task.task, "intel_owl.tasks.execute_ingestor")
         self.assertFalse(ic.periodic_task.enabled)
         self.assertEqual(ic.periodic_task.crontab, crontab)

@@ -69,10 +69,9 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         related_name="%(class)ss",
         limit_choices_to={"base_path": PythonModuleBasePaths.Ingestor.value},
     )
-    playbook_to_execute = models.ForeignKey(
+    playbooks_choice = models.ManyToManyField(
         PlaybookConfig,
         related_name="ingestors",
-        on_delete=models.CASCADE,
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

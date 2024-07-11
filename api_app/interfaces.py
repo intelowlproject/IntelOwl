@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Union
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import QuerySet
 from django.utils.functional import cached_property
 
 from certego_saas.apps.organization.organization import Organization
@@ -23,38 +24,52 @@ logger = logging.getLogger(__name__)
 
 
 class CreateJobsFromPlaybookInterface:
-    playbook_to_execute: "PlaybookConfig"
-    playbook_to_execute_id: str
+    playbooks_choice: QuerySet
     name: str
     delay: datetime.timedelta
 
-    def validate_playbook_to_execute(self, user: User):
+    @property
+    def playbooks_names(self):
+        return ", ".join(self.playbooks_choice.values_list("name", flat=True))
+
+    def validate_playbooks(self, user: User):
         from api_app.playbooks_manager.models import PlaybookConfig
 
-        if (
-            not PlaybookConfig.objects.filter(pk=self.playbook_to_execute_id)
-            .visible_for_user(user)
-            .exists()
-        ):
-            raise RuntimeError(
-                f"User {user.username} do not have visibility to"
-                f" playbook {self.playbook_to_execute_id}"
-            )
+        for playbook in self.playbooks_choice.all():
+            if (
+                not PlaybookConfig.objects.filter(pk=playbook.pk)
+                .visible_for_user(user)
+                .exists()
+            ):
+                raise RuntimeError(
+                    f"User {user.username} do not have visibility to"
+                    f" playbook {playbook.pk}"
+                )
 
     def _get_serializer(
-        self, value: Any, tlp: str, user: User, delay: datetime.timedelta
+        self,
+        value: Any,
+        tlp: str,
+        user: User,
+        delay: datetime.timedelta,
+        playbook_to_execute: "PlaybookConfig",
     ):
         values = value if isinstance(value, (list, Generator)) else [value]
-        if self.playbook_to_execute.is_sample():
-            return self._get_file_serializer(values, tlp, user, delay)
+        if playbook_to_execute.is_sample():
+            return self._get_file_serializer(
+                values, tlp, user, delay=delay, playbook_to_execute=playbook_to_execute
+            )
         else:
-            return self._get_observable_serializer(values, tlp, user, delay)
+            return self._get_observable_serializer(
+                values, tlp, user, playbook_to_execute=playbook_to_execute, delay=delay
+            )
 
     def _get_observable_serializer(
         self,
         values: Iterable[Any],
         tlp: str,
         user: User,
+        playbook_to_execute: "PlaybookConfig",
         delay: datetime.timedelta = datetime.timedelta(),
     ):
         from api_app.serializers.job import ObservableAnalysisSerializer
@@ -62,7 +77,7 @@ class CreateJobsFromPlaybookInterface:
 
         return ObservableAnalysisSerializer(
             data={
-                "playbook_requested": self.playbook_to_execute.name,
+                "playbook_requested": playbook_to_execute.name,
                 "observables": [
                     (None, value) for value in values
                 ],  # (classification, value)
@@ -80,6 +95,7 @@ class CreateJobsFromPlaybookInterface:
         values: Iterable[Union[bytes, File]],
         tlp: str,
         user: User,
+        playbook_to_execute: "PlaybookConfig",
         delay: datetime.timedelta = datetime.timedelta(),
     ):
         from api_app.serializers.job import FileJobSerializer
@@ -93,7 +109,7 @@ class CreateJobsFromPlaybookInterface:
         ]
         query_dict = QueryDict(mutable=True)
         data = {
-            "playbook_requested": self.playbook_to_execute.name,
+            "playbook_requested": playbook_to_execute.name,
             "tlp": tlp,
             "delay": int(delay.total_seconds()),  # datetime.timedelta serialization
         }
@@ -110,12 +126,15 @@ class CreateJobsFromPlaybookInterface:
         value: Any,
         tlp: str,
         user: User,
+        playbook_to_execute: "PlaybookConfig",
         delay: datetime.timedelta = datetime.timedelta(),
         send_task: bool = True,
         parent_job=None,
     ) -> Generator["Job", None, None]:
         try:
-            serializer = self._get_serializer(value, tlp, user, delay)
+            serializer = self._get_serializer(
+                value, tlp, user, delay, playbook_to_execute=playbook_to_execute
+            )
         except ValueError as e:
             logger.exception(e)
             raise

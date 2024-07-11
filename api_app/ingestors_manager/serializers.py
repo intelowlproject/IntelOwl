@@ -16,8 +16,8 @@ from .models import IngestorConfig, IngestorReport
 
 class IngestorConfigSerializer(PythonConfigSerializer):
     schedule = CrontabScheduleSerializer(read_only=True)
-    playbook_to_execute = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(), slug_field="name", many=False
+    playbooks_choice = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), slug_field="name", many=True
     )
 
     class Meta:
@@ -33,7 +33,9 @@ class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
     schedule = CrontabScheduleSerializer(read_only=True)
     periodic_task = PeriodicTaskSerializer(read_only=True)
     user = UserProfileSerializer(read_only=True)
-    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    playbooks_choice = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
 
     class Meta:
         model = IngestorConfig

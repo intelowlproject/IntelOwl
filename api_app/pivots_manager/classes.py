@@ -61,7 +61,11 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
     def before_run(self):
         super().before_run()
         self._config: PivotConfig
-        self._config.validate_playbook_to_execute(self._user)
+        self._config.validate_playbooks(self._user)
+
+    def get_playbook_to_execute(self):
+        self._config: PivotConfig
+        return self._config.playbooks_choice.first()
 
     def run(self) -> Any:
         self._config: PivotConfig
@@ -71,7 +75,11 @@ class Pivot(Plugin, metaclass=abc.ABCMeta):
             content = self.get_value_to_pivot_to()
             logger.info(f"Creating jobs from {content}")
             for job in self._config.create_jobs(
-                content, self._job.tlp, self._user, parent_job=self._job
+                content,
+                self._job.tlp,
+                self._user,
+                parent_job=self._job,
+                playbook_to_execute=self.get_playbook_to_execute(),
             ):
                 report["jobs_id"].append(job.pk)
                 PivotMap.objects.create(

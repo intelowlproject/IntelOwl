@@ -90,12 +90,9 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     related_connector_configs = models.ManyToManyField(
         "connectors_manager.ConnectorConfig", related_name="pivots", blank=True
     )
-    playbook_to_execute = models.ForeignKey(
+    playbooks_choice = models.ManyToManyField(
         "playbooks_manager.PlaybookConfig",
-        on_delete=models.PROTECT,
-        related_name="executed_by_pivot",
-        null=False,
-        blank=False,
+        related_name="executed_by_pivots",
     )
     orgs_configuration = GenericRelation(
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
@@ -111,7 +108,7 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         return (
             f"Pivot for plugins {plugins_name}"
             " that executes"
-            f" playbook {self.playbook_to_execute.name}"
+            f" playbooks {self.playbooks_names}"
         )
 
     @property

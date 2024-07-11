@@ -13,7 +13,7 @@ def migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0050_add_goresym_to_sample_static_abalysis"),
-        ("ingestors_manager", "0021_ingestor_fix_malwarebazaar_threatfox"),
+        ("ingestors_manager", "0022_ingestor_fix_duplicated_users"),
     ]
 
     operations = [

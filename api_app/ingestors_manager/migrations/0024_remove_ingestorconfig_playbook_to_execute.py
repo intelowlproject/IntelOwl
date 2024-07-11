@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "ingestors_manager",
-            "0022_remove_ingestorconfig_playbook_to_execute_and_more",
+            "0023_remove_ingestorconfig_playbook_to_execute_and_more",
         ),
     ]
 

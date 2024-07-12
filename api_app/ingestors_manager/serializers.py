@@ -63,6 +63,7 @@ class IngestorReportSerializer(AbstractReportSerializer):
 
 class IngestorReportBISerializer(AbstractReportBISerializer):
     name = rfs.SerializerMethodField()
+    username = rfs.CharField(source="config.user.username")
 
     class Meta:
         model = IngestorReport

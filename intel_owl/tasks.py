@@ -381,7 +381,7 @@ def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
             VisualizerReport,
         ]:
             report_class: typing.Type[AbstractReport]
-            report_class.objects.filter(sent_to_bi=False).filter_completed().order_by(
+            report_class.objects.filter(sent_to_bi=False).filter_completed().defer("report").order_by(
                 "-start_time"
             )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)
         Job.objects.filter(sent_to_bi=False).filter_completed().order_by(

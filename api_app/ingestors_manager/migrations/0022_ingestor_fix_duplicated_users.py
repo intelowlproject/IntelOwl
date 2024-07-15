@@ -15,10 +15,11 @@ def migrate(apps, schema_editor):
             correct_user = User.objects.get_or_create(
                 username=f"{username.title()}Ingestor"
             )[0]
-            correct_user.profile = UserProfile()
-            correct_user.profile.task_priority = 7
-            correct_user.profile.is_robot = True
-            correct_user.profile.save()
+            if not hasattr(correct_user, "profile"):
+                correct_user.profile = UserProfile()
+                correct_user.profile.task_priority = 7
+                correct_user.profile.is_robot = True
+                correct_user.profile.save()
 
             related_ingestor = IngestorConfig.objects.get(name__iexact=username)
             related_ingestor.user = correct_user

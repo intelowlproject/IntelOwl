@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { AiOutlineApi } from "react-icons/ai";
-import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { TiFlowChildren, TiBook } from "react-icons/ti";
 import { IoIosEye } from "react-icons/io";
 import { MdInput } from "react-icons/md";
@@ -9,11 +8,9 @@ import { PiGraphFill } from "react-icons/pi";
 import {
   RouterTabs,
   FallBackLoading,
-  ContentSection,
+  // ContentSection,
 } from "@certego/certego-ui";
-import { Link } from "react-router-dom";
-import { Button, Col } from "reactstrap";
-import { useOrganizationStore } from "../../stores/useOrganizationStore";
+// import { Button, Col } from "reactstrap";
 import { useGuideContext } from "../../contexts/GuideContext";
 
 const Analyzers = React.lazy(() => import("./types/Analyzers"));
@@ -118,20 +115,6 @@ const routes = [
 
 export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
-  const {
-    isUserOwner,
-    organization,
-    fetchAll: fetchAllOrganizations,
-  } = useOrganizationStore(
-    React.useCallback(
-      (state) => ({
-        isUserOwner: state.isUserOwner,
-        fetchAll: state.fetchAll,
-        organization: state.organization,
-      }),
-      [],
-    ),
-  );
 
   const { guideState, setGuideState } = useGuideContext();
 
@@ -144,49 +127,5 @@ export default function PluginsContainer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // on component mount
-  React.useEffect(() => {
-    if (!isUserOwner) {
-      fetchAllOrganizations();
-    }
-  }, [isUserOwner, fetchAllOrganizations]);
-  const configButtons = (
-    <Col className="d-flex justify-content-end">
-      <ContentSection className="d-inline-flex mb-0 py-0">
-        {organization?.name ? (
-          <Link
-            className="d-flex"
-            to="/me/organization/config"
-            style={{ color: "inherit", textDecoration: "inherit" }}
-          >
-            <Button
-              size="sm"
-              color="darker"
-              onClick={() => null}
-              className="me-2"
-            >
-              <BsPeopleFill className="me-2" /> Organization {organization.name}
-              &apos;s plugin config
-            </Button>
-          </Link>
-        ) : null}
-        <Link
-          className="d-flex"
-          to="/me/config"
-          style={{ color: "inherit", textDecoration: "inherit" }}
-        >
-          <Button
-            id="pluginconfigbutton"
-            size="sm"
-            color="darker"
-            onClick={() => null}
-          >
-            <BsSliders className="me-2" id="plugin_config" />
-            Your plugin config
-          </Button>
-        </Link>
-      </ContentSection>
-    </Col>
-  );
-  return <RouterTabs routes={routes} extraNavComponent={configButtons} />;
+  return <RouterTabs routes={routes} />;
 }

@@ -12,6 +12,22 @@ export const mockedUseAuthStore = {
     total_submissions: 10,
     month_submissions: 2,
   },
+  isAuthenticated: () => true,
+  updateToken: () => {},
+  deleteToken: () => {},
+  service: {
+    fetchUserAccess: () => {},
+    loginUser: () => {},
+    logoutUser: () => {},
+    forceLogout: () => {},
+  },
+};
+
+export const mockedUseAuthStoreNoAuth = {
+  loading: false,
+  token: null,
+  user: {},
+  access: {},
   isAuthenticated: () => false,
   updateToken: () => {},
   deleteToken: () => {},

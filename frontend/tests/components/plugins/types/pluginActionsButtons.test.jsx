@@ -14,6 +14,7 @@ import {
   PlaybooksDeletionButton,
   OrganizationPluginStateToggle,
   PluginPullButton,
+  PlaybooksEditButton,
 } from "../../../../src/components/plugins/types/pluginActionsButtons";
 import { mockedUseOrganizationStoreOwner } from "../../../mock";
 
@@ -301,5 +302,60 @@ describe("PluginPullButton test", () => {
         ).toBeInTheDocument();
       }
     });
+  });
+});
+
+describe("PlaybooksEditButton test", () => {
+  const playbookConfig = {
+    id: 13,
+    name: "test",
+    description: "playbook: test",
+    type: ["domain"],
+    analyzers: ["TEST_ANALYZER"],
+    connectors: ["TEST_CONNECTOR"],
+    pivots: [],
+    visualizers: [],
+    runtime_configuration: {
+      pivots: {},
+      analyzers: {
+        TEST_ANALYZER: {
+          query_type: "A",
+        },
+      },
+      connectors: {},
+      visualizers: {},
+    },
+    scan_mode: 2,
+    scan_check_time: "0:24:00:00",
+    tags: [],
+    tlp: "GREEN",
+    weight: 0,
+    is_editable: true,
+    for_organization: true,
+    disabled: false,
+    starting: true,
+    owner: "marti",
+    orgPluginDisabled: false,
+    plugin_type: "playbook",
+  };
+
+  test("Playbook edit btn - loading", async () => {
+    const userAction = userEvent.setup();
+    const { container } = render(
+      <BrowserRouter>
+        <PlaybooksEditButton playbookConfig={playbookConfig} />
+      </BrowserRouter>,
+    );
+
+    const playbookEditIcon = container.querySelector(
+      "#playbook-edit-btn__test",
+    );
+    expect(playbookEditIcon).toBeInTheDocument();
+
+    await userAction.click(playbookEditIcon);
+    // loading tooltip
+    expect(
+      screen.getByText("Playbook configuration is loading"),
+    ).toBeInTheDocument();
   });
 });

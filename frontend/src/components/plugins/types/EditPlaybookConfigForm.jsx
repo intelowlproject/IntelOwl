@@ -210,7 +210,7 @@ export function EditPlaybookConfigForm({ playbookConfig, toggle }) {
           <small className="text-danger">Type: {formik.errors.type}</small>
         )}
         <FormGroup>
-          <Label className="me-4 mb-0" for="playbook-types">
+          <Label className="me-4 mb-0" for="supportedType">
             Supported types:
           </Label>
           {Object.values(AllPluginSupportedTypes).map((type) => (

@@ -35,39 +35,393 @@ class LeakIx(classes.ObservableAnalyzer):
                     "requests.get",
                     return_value=MockUpResponse(
                         {
-                            "description": """Detects Execution via
-                            SyncInvoke in CL_Invocation.ps1 module""",
-                            "raw": """
-                            author: oscd.community, Natalia Shornikova
-                            date: 2020/10/14
-                            description: Detects Execution via
-                            SyncInvoke in CL_Invocation.ps1 module
-                            detection:
-                            condition: selection
-                            selection:
-                                EventID: 4104
-                                ScriptBlockText|contains|all:
-                                - CL_Invocation.ps1
-                                - SyncInvoke
-                            falsepositives:
-                            - Unknown
-                            id: 4cd29327-685a-460e-9dac-c3ab96e549dc
-                            level: high
-                            logsource:
-                            product: windows
-                            service: powershell
-                            modified: 2021/05/21
-                            references:
-                            - https://twitter.com/bohops/status/948061991012327424
-                            status: experimental
-                            tags:
-                            - attack.defense_evasion
-                            - attack.t1216
-                            title: Execution via CL_Invocation.ps1
-                            """,
-                            "sigma:id": "4cd29327-685a-460e-9dac-c3ab96e549dc",
-                            "title": "Execution via CL_Invocation.ps1",
-                            "_cycat_type": "Item",
+                            "Leaks": None,
+                            "Services": [
+                                {
+                                    "ip": "78.47.222.185",
+                                    "mac": "",
+                                    "ssh": {
+                                        "motd": "",
+                                        "banner": "",
+                                        "version": 0,
+                                        "fingerprint": """SHA256:tIWzYmTZxEx3IDfaJu
+                                        9FvMiE0xvhumiLkugD51yuLrs""",
+                                    },
+                                    "ssl": {
+                                        "jarm": "",
+                                        "enabled": False,
+                                        "version": "",
+                                        "detected": False,
+                                        "certificate": {
+                                            "cn": "",
+                                            "valid": False,
+                                            "domain": None,
+                                            "key_algo": "",
+                                            "key_size": 0,
+                                            "not_after": "0001-01-01T00:00:00Z",
+                                            "not_before": "0001-01-01T00:00:00Z",
+                                            "fingerprint": "",
+                                            "issuer_name": "",
+                                        },
+                                        "cypher_suite": "",
+                                    },
+                                    "host": "78.47.222.185",
+                                    "http": {
+                                        "url": "",
+                                        "root": "",
+                                        "title": "",
+                                        "header": None,
+                                        "length": 0,
+                                        "status": 0,
+                                        "favicon_hash": "",
+                                    },
+                                    "leak": {
+                                        "type": "",
+                                        "stage": "",
+                                        "dataset": {
+                                            "rows": 0,
+                                            "size": 0,
+                                            "files": 0,
+                                            "infected": False,
+                                            "collections": 0,
+                                            "ransom_notes": None,
+                                        },
+                                        "severity": "",
+                                    },
+                                    "port": "22",
+                                    "tags": ["rescan"],
+                                    "time": "2024-07-09T22:55:48.772687919Z",
+                                    "geoip": {
+                                        "location": {"lat": 50.6584, "lon": 7.8268},
+                                        "city_name": "Hachenburg",
+                                        "region_name": "Rheinland-Pfalz",
+                                        "country_name": "Germany",
+                                        "continent_name": "Europe",
+                                        "region_iso_code": "DE-RP",
+                                        "country_iso_code": "DE",
+                                    },
+                                    "vendor": "",
+                                    "network": {
+                                        "asn": 24940,
+                                        "network": "78.46.0.0/15",
+                                        "organization_name": "Hetzner Online GmbH",
+                                    },
+                                    "reverse": "",
+                                    "service": {
+                                        "software": {
+                                            "os": "",
+                                            "name": "",
+                                            "modules": None,
+                                            "version": "",
+                                            "fingerprint": "",
+                                        },
+                                        "credentials": {
+                                            "key": "",
+                                            "raw": None,
+                                            "noauth": False,
+                                            "password": "",
+                                            "username": "",
+                                        },
+                                    },
+                                    "summary": "",
+                                    "protocol": "ssh",
+                                    "transport": ["tcp"],
+                                    "event_type": "service",
+                                    "event_source": "SSHOpenPlugin",
+                                    "event_pipeline": ["tcpid", "SSHOpenPlugin"],
+                                    "event_fingerprint": """fe6a4680fe6a4680fe6a4680fe
+                        6a4680fe6a4680fe6a4680fe6a4680fe6a4680""",
+                                },
+                                {
+                                    "ip": "78.47.222.185",
+                                    "mac": "",
+                                    "ssh": {
+                                        "motd": "",
+                                        "banner": "",
+                                        "version": 0,
+                                        "fingerprint": """SHA256:tIWzYmTZxEx3IDfa
+                            Ju9FvMiE0xvhumiLkugD51yuLrs""",
+                                    },
+                                    "ssl": {
+                                        "jarm": "",
+                                        "enabled": False,
+                                        "version": "",
+                                        "detected": False,
+                                        "certificate": {
+                                            "cn": "",
+                                            "valid": False,
+                                            "domain": None,
+                                            "key_algo": "",
+                                            "key_size": 0,
+                                            "not_after": "0001-01-01T00:00:00Z",
+                                            "not_before": "0001-01-01T00:00:00Z",
+                                            "fingerprint": "",
+                                            "issuer_name": "",
+                                        },
+                                        "cypher_suite": "",
+                                    },
+                                    "host": "78.47.222.185",
+                                    "http": {
+                                        "url": "",
+                                        "root": "",
+                                        "title": "",
+                                        "header": None,
+                                        "length": 0,
+                                        "status": 0,
+                                        "favicon_hash": "",
+                                    },
+                                    "leak": {
+                                        "type": "",
+                                        "stage": "",
+                                        "dataset": {
+                                            "rows": 0,
+                                            "size": 0,
+                                            "files": 0,
+                                            "infected": False,
+                                            "collections": 0,
+                                            "ransom_notes": None,
+                                        },
+                                        "severity": "",
+                                    },
+                                    "port": "22",
+                                    "tags": ["rescan"],
+                                    "time": "2024-07-07T23:17:08.554427934Z",
+                                    "geoip": {
+                                        "location": {"lat": 50.6584, "lon": 7.8268},
+                                        "city_name": "Hachenburg",
+                                        "region_name": "Rheinland-Pfalz",
+                                        "country_name": "Germany",
+                                        "continent_name": "Europe",
+                                        "region_iso_code": "DE-RP",
+                                        "country_iso_code": "DE",
+                                    },
+                                    "vendor": "",
+                                    "network": {
+                                        "asn": 24940,
+                                        "network": "78.46.0.0/15",
+                                        "organization_name": "Hetzner Online GmbH",
+                                    },
+                                    "reverse": "",
+                                    "service": {
+                                        "software": {
+                                            "os": "",
+                                            "name": "",
+                                            "modules": None,
+                                            "version": "",
+                                            "fingerprint": "",
+                                        },
+                                        "credentials": {
+                                            "key": "",
+                                            "raw": None,
+                                            "noauth": False,
+                                            "password": "",
+                                            "username": "",
+                                        },
+                                    },
+                                    "summary": "",
+                                    "protocol": "ssh",
+                                    "transport": ["tcp"],
+                                    "event_type": "service",
+                                    "event_source": "SSHOpenPlugin",
+                                    "event_pipeline": ["tcpid", "SSHOpenPlugin"],
+                                    "event_fingerprint": """fe6a4680fe6a4680fe6a4680fe6a
+                                    4680fe6a4680fe6a4680fe6a4680fe6a4680""",
+                                },
+                                {
+                                    "ip": "78.47.222.185",
+                                    "mac": "",
+                                    "ssh": {
+                                        "motd": "",
+                                        "banner": "",
+                                        "version": 0,
+                                        "fingerprint": """SHA256:tIWzYmTZxEx3IDfaJ
+                                        u9FvMiE0xvhumiLkugD51yuLrs""",
+                                    },
+                                    "ssl": {
+                                        "jarm": "",
+                                        "enabled": False,
+                                        "version": "",
+                                        "detected": False,
+                                        "certificate": {
+                                            "cn": "",
+                                            "valid": False,
+                                            "domain": None,
+                                            "key_algo": "",
+                                            "key_size": 0,
+                                            "not_after": "0001-01-01T00:00:00Z",
+                                            "not_before": "0001-01-01T00:00:00Z",
+                                            "fingerprint": "",
+                                            "issuer_name": "",
+                                        },
+                                        "cypher_suite": "",
+                                    },
+                                    "host": "78.47.222.185",
+                                    "http": {
+                                        "url": "",
+                                        "root": "",
+                                        "title": "",
+                                        "header": None,
+                                        "length": 0,
+                                        "status": 0,
+                                        "favicon_hash": "",
+                                    },
+                                    "leak": {
+                                        "type": "",
+                                        "stage": "",
+                                        "dataset": {
+                                            "rows": 0,
+                                            "size": 0,
+                                            "files": 0,
+                                            "infected": False,
+                                            "collections": 0,
+                                            "ransom_notes": None,
+                                        },
+                                        "severity": "",
+                                    },
+                                    "port": "22",
+                                    "tags": ["rescan"],
+                                    "time": "2024-07-05T22:25:11.350175468Z",
+                                    "geoip": {
+                                        "location": {"lat": 50.6584, "lon": 7.8268},
+                                        "city_name": "Hachenburg",
+                                        "region_name": "Rheinland-Pfalz",
+                                        "country_name": "Germany",
+                                        "continent_name": "Europe",
+                                        "region_iso_code": "DE-RP",
+                                        "country_iso_code": "DE",
+                                    },
+                                    "vendor": "",
+                                    "network": {
+                                        "asn": 24940,
+                                        "network": "78.46.0.0/15",
+                                        "organization_name": "Hetzner Online GmbH",
+                                    },
+                                    "reverse": "",
+                                    "service": {
+                                        "software": {
+                                            "os": "",
+                                            "name": "",
+                                            "modules": None,
+                                            "version": "",
+                                            "fingerprint": "",
+                                        },
+                                        "credentials": {
+                                            "key": "",
+                                            "raw": None,
+                                            "noauth": False,
+                                            "password": "",
+                                            "username": "",
+                                        },
+                                    },
+                                    "summary": "",
+                                    "protocol": "ssh",
+                                    "transport": ["tcp"],
+                                    "event_type": "service",
+                                    "event_source": "SSHOpenPlugin",
+                                    "event_pipeline": ["tcpid", "SSHOpenPlugin"],
+                                    "event_fingerprint": """fe6a4680fe6a4680fe6a4680f
+                                    e6a4680fe6a4680fe6a4680fe6a4680fe6a4680""",
+                                },
+                                {
+                                    "ip": "78.47.222.185",
+                                    "mac": "",
+                                    "ssh": {
+                                        "motd": "",
+                                        "banner": "",
+                                        "version": 0,
+                                        "fingerprint": """SHA256:tIWzYmTZxEx3IDfaJu
+                                        9FvMiE0xvhumiLkugD51yuLrs""",
+                                    },
+                                    "ssl": {
+                                        "jarm": "",
+                                        "enabled": False,
+                                        "version": "",
+                                        "detected": False,
+                                        "certificate": {
+                                            "cn": "",
+                                            "valid": False,
+                                            "domain": None,
+                                            "key_algo": "",
+                                            "key_size": 0,
+                                            "not_after": "0001-01-01T00:00:00Z",
+                                            "not_before": "0001-01-01T00:00:00Z",
+                                            "fingerprint": "",
+                                            "issuer_name": "",
+                                        },
+                                        "cypher_suite": "",
+                                    },
+                                    "host": "78.47.222.185",
+                                    "http": {
+                                        "url": "",
+                                        "root": "",
+                                        "title": "",
+                                        "header": None,
+                                        "length": 0,
+                                        "status": 0,
+                                        "favicon_hash": "",
+                                    },
+                                    "leak": {
+                                        "type": "",
+                                        "stage": "",
+                                        "dataset": {
+                                            "rows": 0,
+                                            "size": 0,
+                                            "files": 0,
+                                            "infected": False,
+                                            "collections": 0,
+                                            "ransom_notes": None,
+                                        },
+                                        "severity": "",
+                                    },
+                                    "port": "22",
+                                    "tags": [],
+                                    "time": "2024-07-03T21:03:50.838009372Z",
+                                    "geoip": {
+                                        "location": {"lat": 50.6584, "lon": 7.8268},
+                                        "city_name": "Hachenburg",
+                                        "region_name": "Rheinland-Pfalz",
+                                        "country_name": "Germany",
+                                        "continent_name": "Europe",
+                                        "region_iso_code": "DE-RP",
+                                        "country_iso_code": "DE",
+                                    },
+                                    "vendor": "",
+                                    "network": {
+                                        "asn": 24940,
+                                        "network": "78.46.0.0/15",
+                                        "organization_name": "Hetzner Online GmbH",
+                                    },
+                                    "reverse": "",
+                                    "service": {
+                                        "software": {
+                                            "os": "",
+                                            "name": "",
+                                            "modules": None,
+                                            "version": "",
+                                            "fingerprint": "",
+                                        },
+                                        "credentials": {
+                                            "key": "",
+                                            "raw": None,
+                                            "noauth": False,
+                                            "password": "",
+                                            "username": "",
+                                        },
+                                    },
+                                    "summary": "",
+                                    "protocol": "ssh",
+                                    "transport": ["tcp"],
+                                    "event_type": "service",
+                                    "event_source": "SSHOpenPlugin",
+                                    "event_pipeline": [
+                                        "l9filter",
+                                        "tcpid",
+                                        "SSHOpenPlugin",
+                                    ],
+                                    "event_fingerprint": """fe6a4680fe6a4680fe6a4680fe
+                                    6a4680fe6a4680fe6a4680fe6a4680fe6a4680""",
+                                },
+                            ],
                         },
                         200,
                     ),

@@ -11,7 +11,7 @@
     "bootstrap": "^5.3.3",
     "classnames": "^2.5.1",
     "flag-icons": "^7.1.0",
-    "formik": "^2.4.5",
+    "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "md5": "^2.3.0",
     "prop-types": "^15.8.1",

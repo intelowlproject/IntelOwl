@@ -7,6 +7,7 @@ def migrate(apps, schema_editor):
     UserProfile = apps.get_model("authentication", "UserProfile")
     IngestorConfig = apps.get_model("ingestors_manager", "IngestorConfig")
     PluginConfig = apps.get_model("api_app", "PluginConfig")
+    PeriodicTask = apps.get_model("django_celery_beat", "PeriodicTask")
 
     users = User.objects.filter(username__endswith="Ingestor")
     for u in users:
@@ -23,7 +24,20 @@ def migrate(apps, schema_editor):
 
             related_ingestor = IngestorConfig.objects.get(name__iexact=username)
             related_ingestor.user = correct_user
+
+            wrong_task = related_ingestor.periodic_task
+            correct_task, created = PeriodicTask.objects.get_or_create(
+                name=f"{username.title()}Ingestor"
+            )
+            if created:
+                correct_task.crontab = wrong_task.crontab
+                correct_task.queue = wrong_task.queue
+                correct_task.kwargs = wrong_task.kwargs
+                correct_task.enabled = wrong_task.enabled
+                correct_task.save()
+            related_ingestor.periodic_task = correct_task
             related_ingestor.save()
+            wrong_task.delete()
 
             for pc in PluginConfig.objects.filter(owner=u):
                 pc.owner = correct_user

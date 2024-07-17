@@ -10,13 +10,17 @@ import re
 import zipfile
 from re import sub
 from typing import Dict, List
+from xml import etree
+from xml.dom import minidom
 
+import docxpy
 import olefile
 from defusedxml.ElementTree import fromstring
-from oletools import mraptor
+from oletools import mraptor, oleid, oleobj
 from oletools.common.clsid import KNOWN_CLSIDS
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
+from oletools.ooxml import XmlParser
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.models import MimeTypes
@@ -28,6 +32,10 @@ try:
     from XLMMacroDeobfuscator.xls_wrapper_2 import XLSWrapper2
 except Exception as e:
     logger.exception(e)
+
+XML_H_SCHEMA = (
+    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
+)
 
 
 class CannotDecryptException(Exception):
@@ -50,7 +58,7 @@ class DocInfo(FileAnalyzer):
         pass
 
     def run(self):
-        results = {}
+        results = {"uris": []}
 
         # olevba
         try:
@@ -110,7 +118,7 @@ class DocInfo(FileAnalyzer):
                     )
 
                 # analyze macros
-                analyzer_results = self.vbaparser.analyze_macros()
+                analyzer_results = self.vbaparser.analyze_macros(True, True)
                 # it gives None if it does not find anything
                 if analyzer_results:
                     analyze_macro_results = []
@@ -122,9 +130,12 @@ class DocInfo(FileAnalyzer):
                                 "description": description,
                             }
                             analyze_macro_results.append(analyze_macro_result)
+                        if kw_type == "IOC" and description == "URL":
+                            results["uris"].append(keyword)
                     self.olevba_results["analyze_macro"] = analyze_macro_results
 
                 results["extracted_CVEs"] = self.analyze_for_cve()
+                results["uris"].extend(self.get_external_relationships())
 
         except CannotDecryptException as e:
             logger.info(e)
@@ -147,6 +158,10 @@ class DocInfo(FileAnalyzer):
             MimeTypes.ZIP2.value,
         ]:
             results["follina"] = self.analyze_for_follina_cve()
+
+        results["uris"].extend(self.get_docx_urls())
+        results["uris"] = list(set(results["uris"]))
+
         return results
 
     def analyze_for_follina_cve(self) -> List[str]:
@@ -191,6 +206,53 @@ class DocInfo(FileAnalyzer):
                         }
                     )
         return results
+
+    def get_external_relationships(self) -> List:
+        external_relationships = []
+        oid = oleid.OleID(self.filepath)
+        if sum([i.value for i in oid.check() if i.id == "ext_rels"]) > 1:
+            xml_parser = XmlParser(self.filepath)
+            for relationship, target in oleobj.find_external_relationships(xml_parser):
+                external_relationships.append(
+                    {
+                        "relationship": relationship,
+                        "target": target,
+                    }
+                )
+        return external_relationships
+
+    def get_docx_urls(self) -> List:
+        urls = []
+
+        try:
+            document = zipfile.ZipFile(self.filepath)  # check if docx document
+            dxml = document.read("docProps/app.xml")
+            pages_count = (
+                minidom.parseString(dxml)
+                .getElementsByTagName("Pages")[0]
+                .childNodes[0]
+                .nodeValue
+            )
+        except Exception:
+            return []
+
+        # extract urls from text
+        if pages_count == 1:
+            try:
+                # extract urls from text
+                doc = docxpy.DOCReader(self.filepath)
+                urls.extend(doc.data["links"])
+
+                # also parse xml in case we missed some links
+                for relationship in list(
+                    etree.fromstring(document.read("word/_rels/document.xml.rels"))
+                ):
+                    if relationship["Type"] == XML_H_SCHEMA:
+                        urls.append(relationship["Target"])
+            except Exception:
+                pass
+
+        return list(set(urls))  # uniq
 
     def analyze_msodde(self):
         try:

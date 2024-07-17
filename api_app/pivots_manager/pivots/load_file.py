@@ -12,4 +12,5 @@ class LoadFile(Compare):
         pass
 
     def get_value_to_pivot_to(self) -> Any:
-        return base64.b64decode(self._value)
+        for v in self._value:
+            yield base64.b64decode(v)

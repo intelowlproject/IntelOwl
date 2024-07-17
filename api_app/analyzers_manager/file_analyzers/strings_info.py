@@ -4,6 +4,8 @@
 from json import dumps as json_dumps
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
+from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.analyzers_manager.models import MimeTypes
 
 
 class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
@@ -51,5 +53,34 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
         result = {
             "data": [row[: self.max_characters_for_string] for row in result],
             "exceeded_max_number_of_strings": exceed_max_strings,
+            "uris": [],
         }
+
+        if self.file_mimetype in [
+            MimeTypes.JAVASCRIPT1.value,
+            MimeTypes.JAVASCRIPT2.value,
+            MimeTypes.JAVASCRIPT3.value,
+            MimeTypes.VB_SCRIPT.value,
+            MimeTypes.ONE_NOTE.value,
+            MimeTypes.PDF.value,
+            MimeTypes.HTML.value,
+            MimeTypes.EXCEL1.value,
+            MimeTypes.EXCEL2.value,
+            MimeTypes.EXCEL_MACRO1.value,
+            MimeTypes.EXCEL_MACRO2.value,
+            MimeTypes.DOC.value,
+            MimeTypes.WORD1.value,
+            MimeTypes.WORD2.value,
+            MimeTypes.XML1.value,
+            MimeTypes.XML2.value,
+            MimeTypes.POWERPOINT.value,
+            MimeTypes.OFFICE.value,
+            MimeTypes.EML.value,
+            MimeTypes.JSON.value,
+        ]:
+            for d in result["data"]:
+                if ObservableTypes.calculate(d) == ObservableTypes.URL:
+                    result["uris"].append(d)
+            result["uris"] = list(set(result["uris"]))
+
         return result

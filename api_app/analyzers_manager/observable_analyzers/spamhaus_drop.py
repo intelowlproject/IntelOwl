@@ -1,7 +1,8 @@
+import bisect
+import ipaddress
 import json
 import logging
 import os
-import re
 
 import requests
 from django.conf import settings
@@ -21,14 +22,8 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         db_name = "drop_v4.json"
         return f"{settings.MEDIA_ROOT}/{db_name}"
 
-    @staticmethod
-    def is_valid_cidr(cidr) -> bool:
-        cidr_pattern = r"^([0-9]{1,3}\.){3}[0-9]{1,3}/(0|[1-2][0-9]|3[0-2])$"
-        return re.match(cidr_pattern, cidr) is not None
-
     def run(self):
-        if not self.is_valid_cidr(self.observable_name):
-            return {"not_supported": "not a valid CIDR"}
+        ip = ipaddress.ip_address(self.observable_name)
         database_location = self.location()
         if not os.path.exists(database_location):
             logger.info(
@@ -37,9 +32,22 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
             self.update()
         with open(database_location, "r") as f:
             db = json.load(f)
-        for i in db:
-            if i["cidr"] == self.observable_name:
-                return {"found": True}
+
+        insertion = bisect.bisect_left(
+            db, ip, key=lambda x: ipaddress.ip_network(x["cidr"]).network_address
+        )
+        matches = []
+        # Check entries at and after the insertion point
+        # there maybe one or more subnets contained in the ip
+        for i in range(insertion, len(db)):
+            network = ipaddress.ip_network(db[i]["cidr"])
+            if ip in network:
+                matches.append(db[i])
+            elif network.network_address > ip:
+                break
+        if matches:
+            return {"found": True, "details": matches}
+
         return {"found": False}
 
     @classmethod

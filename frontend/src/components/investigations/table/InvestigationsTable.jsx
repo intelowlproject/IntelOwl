@@ -3,18 +3,14 @@ import React from "react";
 import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
-import {
-  ElasticTimePicker,
-  SyncButton,
-  TableHintIcon,
-  useDataTable,
-  useTimePickerStore,
-} from "@certego/certego-ui";
+import { SyncButton, TableHintIcon, useDataTable } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
+import { TimePicker } from "../../common/TimePicker";
+import { useTimePickerStore } from "../../../stores/useTimePickerStore";
 
 // constants
 const toPassTableProps = {
@@ -34,8 +30,11 @@ export default function InvestigationsTable() {
   // page title
   useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
 
-  // consume zustand store
-  const { range, fromTimeIsoStr, onTimeIntervalChange } = useTimePickerStore();
+  // store
+  const [toDateValue, fromDateValue] = useTimePickerStore((state) => [
+    state.toDateValue,
+    state.fromDateValue,
+  ]);
 
   // state
   const [initialLoading, setInitialLoading] = React.useState(true);
@@ -45,7 +44,8 @@ export default function InvestigationsTable() {
     {
       url: INVESTIGATION_BASE_URI,
       params: {
-        start_time__gte: fromTimeIsoStr,
+        start_time__gte: fromDateValue,
+        start_time__lte: toDateValue,
       },
       initialParams: {
         ordering: "-start_time",
@@ -88,12 +88,7 @@ export default function InvestigationsTable() {
           </div>
         </Col>
         <Col className="align-self-center">
-          <ElasticTimePicker
-            className="float-end"
-            size="sm"
-            defaultSelected={range}
-            onChange={onTimeIntervalChange}
-          />
+          <TimePicker />
         </Col>
       </Row>
       {/* Actions */}

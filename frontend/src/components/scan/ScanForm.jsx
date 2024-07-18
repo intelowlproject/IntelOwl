@@ -173,9 +173,11 @@ export default function ScanForm() {
       }
       if (
         values.analysisOptionValues === ScanTypes.analyzers_and_connectors &&
-        values.analyzers.length === 0
+        values.analyzers.length === 0 &&
+        values.connectors.length === 0
       ) {
-        errors.analyzers = "analyzers required";
+        errors.analyzers = "analyzers or connectors required";
+        errors.connectors = "analyzers or connectors required";
       }
 
       if (!TlpChoices.includes(values.tlp)) {

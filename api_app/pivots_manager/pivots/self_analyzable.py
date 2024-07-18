@@ -19,11 +19,13 @@ class SelfAnalyzable(Pivot):
             # the configs that the playbook execute that could match
             playbook_configs = set(
                 related_config_class.objects.filter(
-                    playbooks=self._config.playbook_to_execute
+                    playbooks__in=self._config.playbooks_choice.all().values_list(
+                        "pk", flat=True
+                    )
                 ).values_list("pk", flat=True)
             )
             if related_configs_pk.issubset(playbook_configs):
-                return False, f"Found infinite loop in {self._config.name}."
+                return False, f"Found possible infinite loop in {self._config.name}."
         return to_run, motivation
 
     def get_value_to_pivot_to(self) -> Any:

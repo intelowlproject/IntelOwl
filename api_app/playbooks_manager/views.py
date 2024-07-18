@@ -25,7 +25,7 @@ class PlaybookConfigViewSet(
     ModelWithOwnershipViewSet, AbstractConfigViewSet, mixins.CreateModelMixin
 ):
     serializer_class = PlaybookConfigSerializer
-    ordering = ["-weight", "-executed_by_pivot", "name"]
+    ordering = ["-weight", "-executed_by_pivots", "name"]
     permission_classes = [IsAuthenticated]
     queryset = PlaybookConfig.objects.all()
 

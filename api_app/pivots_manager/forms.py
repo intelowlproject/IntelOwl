@@ -22,5 +22,5 @@ class PivotConfigAdminForm(forms.ModelForm):
             "python_module",
             "related_analyzer_configs",
             "related_connector_configs",
-            "playbook_to_execute",
+            "playbooks_choice",
         ]

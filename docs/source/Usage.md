@@ -125,7 +125,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [edelucia Yara rules](https://github.com/edelucia/rules/tree/main/yara)
   * [LOLDrivers Yara Rules](https://github.com/magicsword-io/LOLDrivers)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
-
+* `GoReSym`:[GoReSym](https://github.com/mandiant/GoReSym) is a Go symbol parser that extracts program metadata (such as CPU architecture, OS, endianness, compiler version, etc), function metadata (start & end addresses, names, sources), filename and line number metadata, and embedded structures and types.
 ###### External services
 
 - `CapeSandbox`: [CAPESandbox](https://capesandbox.com) automatically scans suspicious files using the CapeSandbox API. Analyzer works for private instances as well.
@@ -261,6 +261,12 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Vulners`: [Vulners](vulners.com) is the most complete and the only fully correlated security intelligence database, which goes through constant updates and links 200+ data sources in a unified machine-readable format. It contains 8 mln+ entries, including CVEs, advisories, exploits, and IoCs — everything you need to stay abreast on the latest security threats.
 * `AILTypoSquatting`:[AILTypoSquatting](https://github.com/typosquatter/ail-typo-squatting) is a Python library to generate list of potential typo squatting domains with domain name permutation engine to feed AIL and other systems.
 * `MalprobSearch`:[Malprob](https://malprob.io/) is a leading malware detection and identification service, powered by cutting-edge AI technology.
+* `OrklSearch`:[Orkl](https://orkl.eu/) is the Community Driven Cyber Threat Intelligence Library.
+* `Crt_sh`:[Crt_Sh](https://crt.sh/) lets you get certificates info about a domain.
+* `Spamhaus_WQS`:[Spamhaus_WQS](https://docs.spamhaus.com/datasets/docs/source/70-access-methods/web-query-service/000-intro.html) The Spamhaus Web Query Service (WQS) is a method of accessing Spamhaus block lists using the HTTPS protocol. 
+* `Adguard`: [Adguard](https://github.com/AdguardTeam/AdguardSDNSFilter), a filter composed of several other filters (AdGuard Base filter, Social media filter, Tracking Protection filter, Mobile Ads filter, EasyList and EasyPrivacy) and simplified specifically to be better compatible with DNS-level ad blocking.* `Adguard`: [Adguard](https://github.com/AdguardTeam/AdguardSDNSFilter), a filter composed of several other filters (AdGuard Base filter, Social media filter, Tracking Protection filter, Mobile Ads filter, EasyList and EasyPrivacy) and simplified specifically to be better compatible with DNS-level ad blocking.
+* `JA4_DB`:[JA4_DB](https://ja4db.com/) lets you search a fingerprint in JA4 databse.
+* `LeakIX`:[LeakIX](https://leakix.net/) is a red-team search engine indexing mis-configurations and vulnerabilities online.
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
@@ -367,6 +373,7 @@ To simplify the process, take example from the pre-built visualizers listed belo
 - `Domain_Reputation`: Visualizer for the Playbook "Popular_URL_Reputation_Services"
 - `IP_Reputation`: Visualizer for the Playbook "Popular_IP_Reputation_Services"
 - `Pivot`: Visualizer that can be used in a Playbook to show the Pivot execution result. See [Pivots](#pivots) for more info.
+- `Passive_DNS`: Visualizer for the Playbook "Passive_DNS".
 
 ### Ingestors
 
@@ -382,6 +389,7 @@ A very powerful use is case is to **combine Ingestors with Connectors** to autom
 
 #### List of pre-built Ingestors
 - `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
+- `MalwareBazaar`: Retrieves hourly samples from `https://bazaar.abuse.ch/` and analyze them.
 
 ### Playbooks
 
@@ -408,6 +416,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 - `Takedown_Request`: Start investigation to request to take down a malicious domain. A mail will be sent to the domain's abuse contacts found
 - `Abuse_IP`: Playbook containing the Abusix analyzer. It is executed after the Takedown_Request playbook
 - `Send_Abuse_Email`: Playbook containing the AbuseSubmitter connector to send an email to request to take down a malicious domain. It is executed after the Abuse_IP playbook
+- `Passive_DNS`: Playbook containing the analyzers that retrieve information from Passive DNS
 
 #### Playbooks creation and customization
 

@@ -27,7 +27,7 @@ plugin = {
     "type": "observable",
     "docker_based": False,
     "maximum_tlp": "AMBER",
-    "observable_supported": ["generic"],
+    "observable_supported": ["ip"],
     "supported_filetypes": [],
     "run_hash": False,
     "run_hash_type": "",

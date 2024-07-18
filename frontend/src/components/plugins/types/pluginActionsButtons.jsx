@@ -11,7 +11,7 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
-import { EditPlaybookConfigForm } from "./EditPlaybookConfigForm";
+import { PlaybookConfigForm } from "./PlaybookConfigForm";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -296,9 +296,10 @@ export function PlaybooksEditButton({ playbookConfig }) {
           <small className="text-info">Edit playbook config</small>
         </ModalHeader>
         <ModalBody className="m-2">
-          <EditPlaybookConfigForm
+          <PlaybookConfigForm
             playbookConfig={playbookConfig}
             toggle={setShowModal}
+            isEditing
           />
         </ModalBody>
       </Modal>

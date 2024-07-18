@@ -65,6 +65,29 @@ export function runtimeConfigurationParam(
     });
   }
 
+  // case 4: create new playbook
+  if (
+    !formik.values.analysisOptionValues &&
+    Object.keys(formik.values.runtime_configuration).length === 0 &&
+    (formik.values.analyzers.length !== 0 ||
+      formik.values.connectors.length !== 0 ||
+      formik.values.pivots.length !== 0 ||
+      formik.values.visualizers.length !== 0)
+  ) {
+    ["analyzers", "connectors", "visualizers", "pivots"].forEach(
+      (pluginType) => {
+        selectedPluginsInFormik[pluginType] =
+          formik.values[pluginType]?.map((plugin) => plugin.value) || [];
+      },
+    );
+  }
+
+  if (
+    !formik.values.analysisOptionValues &&
+    Object.keys(formik.values.runtime_configuration).length === 0
+  )
+    return [selectedPluginsParams, editableConfig];
+
   console.debug("EditRuntimeConfiguration - selectedPluginsInFormik:");
   console.debug(selectedPluginsInFormik);
 

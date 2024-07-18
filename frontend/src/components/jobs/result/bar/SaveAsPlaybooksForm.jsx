@@ -6,7 +6,8 @@ import PropTypes from "prop-types";
 
 import { addToast, PopupFormButton } from "@certego/certego-ui";
 
-import { saveJobAsPlaybook } from "./jobBarApi";
+import { usePluginConfigurationStore } from "../../../../stores/usePluginConfigurationStore";
+import { PluginsTypes } from "../../../../constants/pluginConst";
 
 // constants
 const initialValues = {
@@ -35,12 +36,29 @@ const onValidate = (values) => {
 
 // Invitation Form
 export function SaveAsPlaybookForm({ onFormSubmit }) {
-  console.debug("InvitationForm rendered!");
+  console.debug("SaveAsPlaybookForm rendered!");
+
+  // store
+  const [createPluginConfig] = usePluginConfigurationStore((state) => [
+    state.createPluginConfig,
+  ]);
 
   const onSubmit = React.useCallback(
     async (values, formik) => {
+      const payloadData = {
+        name: values.name,
+        description: values.description,
+        analyzers: values.analyzers,
+        connectors: values.connectors,
+        pivots: values.pivots,
+        runtime_configuration: values.runtimeConfiguration,
+        tags_labels: values.tags_labels,
+        tlp: values.tlp,
+        scan_mode: values.scan_mode,
+        scan_check_time: values.scan_check_time,
+      };
       try {
-        await saveJobAsPlaybook(values);
+        await createPluginConfig(PluginsTypes.PLAYBOOK, payloadData);
         onFormSubmit();
       } catch (error) {
         addToast(<span>Error!</span>, error.parsedMsg, "warning");
@@ -48,6 +66,7 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
         formik.setSubmitting(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onFormSubmit],
   );
 

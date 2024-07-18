@@ -23,13 +23,10 @@ import {
   ErrorMessage,
 } from "formik";
 import useTitle from "react-use/lib/useTitle";
-import ReactSelect from "react-select";
 
 import {
   ContentSection,
   IconButton,
-  Loader,
-  selectStyles,
   useDebounceInput,
 } from "@certego/certego-ui";
 
@@ -47,8 +44,6 @@ import {
   ScanModesNumeric,
 } from "../../constants/advancedSettingsConst";
 import { JobResultSections } from "../../constants/miscConst";
-import { markdownToHtml } from "../common/markdownToHtml";
-import { JobTag } from "../common/JobTag";
 import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
 import { MultipleObservablesModal } from "./utils/MultipleObservablesModal";
 import RecentScans from "./utils/RecentScans";
@@ -65,6 +60,8 @@ import { SpinnerIcon } from "../common/icon/icons";
 import {
   AnalyzersMultiSelectDropdownInput,
   ConnectorsMultiSelectDropdownInput,
+  playbookOptions,
+  PlaybookMultiSelectDropdownInput,
 } from "../common/form/pluginsMultiSelectDropdownInput";
 import {
   TLPSelectInputLabel,
@@ -276,57 +273,6 @@ export default function ScanForm() {
     visualizersLoading ||
     pivotsLoading;
 
-  const playbooksGrouped = React.useMemo(() => {
-    const grouped = {
-      ip: [],
-      hash: [],
-      domain: [],
-      url: [],
-      generic: [],
-      file: [],
-    };
-    playbooks.forEach((obj) => {
-      // filter on basis of type if the playbook is not disabled in org
-      if (organizationPluginsState[obj.name] === undefined) {
-        obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
-      }
-    });
-    console.debug("Playbooks", grouped);
-    return grouped;
-  }, [playbooks, organizationPluginsState]);
-
-  const playbookOptions = (classification) =>
-    playbooksGrouped[classification]
-      .map((playbook) => ({
-        isDisabled: playbook.disabled,
-        starting: playbook.starting,
-        value: playbook.name,
-        analyzers: playbook.analyzers,
-        connectors: playbook.connectors,
-        visualizers: playbook.visualizers,
-        pivots: playbook.pivots,
-        label: (
-          <div className="d-flex justify-content-start align-items-start flex-column">
-            <div className="d-flex justify-content-start align-items-baseline flex-column">
-              <div>{playbook.name}&nbsp;</div>
-              <div className="small text-left text-muted">
-                {markdownToHtml(playbook.description)}
-              </div>
-            </div>
-          </div>
-        ),
-        labelDisplay: playbook.name,
-        tags: playbook.tags.map((tag) => ({
-          value: tag,
-          label: <JobTag tag={tag} />,
-        })),
-        tlp: playbook.tlp,
-        scan_mode: `${playbook.scan_mode}`,
-        scan_check_time: playbook.scan_check_time,
-        runtime_configuration: playbook.runtime_configuration,
-      }))
-      .filter((item) => !item.isDisabled && item.starting);
-
   const updateAdvancedConfig = (
     tags,
     tlp,
@@ -370,12 +316,19 @@ export default function ScanForm() {
       formik.setFieldValue("classification", newClassification, false);
       // in case a playbook is available and i changed classification or no playbook is selected i select a playbook
       if (
-        playbookOptions(newClassification).length > 0 &&
+        playbookOptions(playbooks, newClassification, organizationPluginsState)
+          .length > 0 &&
         (oldClassification !== newClassification ||
           Object.keys(formik.values.playbook).length === 0) &&
         formik.values.analysisOptionValues === ScanTypes.playbooks
       ) {
-        updateSelectedPlaybook(playbookOptions(newClassification)[0]);
+        updateSelectedPlaybook(
+          playbookOptions(
+            playbooks,
+            newClassification,
+            organizationPluginsState,
+          )[0],
+        );
       }
     }
     const observableNames = formik.values.observable_names;
@@ -419,7 +372,11 @@ export default function ScanForm() {
           Object.keys(formik.values.playbook).length === 0)
       ) {
         updateSelectedPlaybook(
-          playbookOptions(formik.values.classification)[0],
+          playbookOptions(
+            playbooks,
+            formik.values.classification,
+            organizationPluginsState,
+          )[0],
         );
         formik.setFieldValue("analyzers", [], false); // reset
         formik.setFieldValue("connectors", [], false); // reset
@@ -437,7 +394,13 @@ export default function ScanForm() {
         Object.keys(formik.values.playbook).length === 0 &&
         formik.values.analysisOptionValues === ScanTypes.playbooks)
     ) {
-      updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
+      updateSelectedPlaybook(
+        playbookOptions(
+          playbooks,
+          formik.values.classification,
+          organizationPluginsState,
+        )[0],
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbooksLoading]);
@@ -679,11 +642,21 @@ export default function ScanForm() {
                       formik.setFieldValue("classification", "file", false);
                       if (
                         Object.keys(formik.values.playbook).length === 0 &&
-                        playbookOptions("file").length > 0 &&
+                        playbookOptions(
+                          playbooks,
+                          "file",
+                          organizationPluginsState,
+                        ).length > 0 &&
                         formik.values.analysisOptionValues ===
                           ScanTypes.playbooks
                       ) {
-                        updateSelectedPlaybook(playbookOptions("file")[0]);
+                        updateSelectedPlaybook(
+                          playbookOptions(
+                            playbooks,
+                            "file",
+                            organizationPluginsState,
+                          )[0],
+                        );
                       }
                     }}
                     className="input-dark"
@@ -777,20 +750,11 @@ export default function ScanForm() {
                   Select Playbook
                 </Label>
                 <Col sm={9}>
-                  <Loader
-                    loading={playbooksLoading}
-                    error={playbooksError}
-                    render={() => (
-                      <ReactSelect
-                        isClearable={false}
-                        options={playbookOptions(formik.values.classification)}
-                        styles={selectStyles}
-                        value={formik.values.playbook}
-                        onChange={(selectedPlaybook) =>
-                          updateSelectedPlaybook(selectedPlaybook)
-                        }
-                      />
-                    )}
+                  <PlaybookMultiSelectDropdownInput
+                    formik={formik}
+                    onChange={(selectedPlaybook) =>
+                      updateSelectedPlaybook(selectedPlaybook)
+                    }
                   />
                   {DangerErrorMessage("playbook")}
                 </Col>

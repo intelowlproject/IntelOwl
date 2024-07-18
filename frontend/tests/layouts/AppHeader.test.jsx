@@ -106,7 +106,6 @@ describe("test AppHeader component", () => {
 
     const pluginsButton = screen.getByText("Plugins");
     expect(pluginsButton).toBeInTheDocument();
-    expect(pluginsButton.closest("a").href).toContain("/plugins");
 
     const scanButton = screen.getByText("Scan");
     expect(scanButton).toBeInTheDocument();
@@ -128,10 +127,15 @@ describe("test AppHeader component", () => {
 
     await user.hover(pluginsButton);
     await waitFor(() => {
-      expect(screen.getByText("User Plugin Config")).toBeInTheDocument();
-      expect(
-        screen.getByText("Organization Plugin Config"),
-      ).toBeInTheDocument();
+      const pluginsListButton = screen.getByText("Plugins List");
+      expect(pluginsListButton).toBeInTheDocument();
+      expect(pluginsListButton.closest("a").href).toContain("/plugins");
+      const pluginsConfigButton = screen.getByText("User Plugin Config");
+      expect(pluginsConfigButton).toBeInTheDocument();
+      expect(pluginsConfigButton.closest("a").href).toContain("/me/config");
+      const pluginsOrgConfigButton = screen.getByText("Organization Plugin Config");
+      expect(pluginsOrgConfigButton).toBeInTheDocument();
+      expect(pluginsOrgConfigButton.closest("a").href).toContain("/me/organization/config");
     });
   });
 
@@ -169,7 +173,6 @@ describe("test AppHeader component", () => {
 
     const pluginsButton = screen.getByText("Plugins");
     expect(pluginsButton).toBeInTheDocument();
-    expect(pluginsButton.closest("a").href).toContain("/plugins");
 
     const scanButton = screen.getByText("Scan");
     expect(scanButton).toBeInTheDocument();
@@ -191,7 +194,12 @@ describe("test AppHeader component", () => {
 
     await user.hover(pluginsButton);
     await waitFor(() => {
-      expect(screen.getByText("User Plugin Config")).toBeInTheDocument();
+      const pluginsListButton = screen.getByText("Plugins List");
+      expect(pluginsListButton).toBeInTheDocument();
+      expect(pluginsListButton.closest("a").href).toContain("/plugins");
+      const pluginsConfigButton = screen.getByText("User Plugin Config");
+      expect(pluginsConfigButton).toBeInTheDocument();
+      expect(pluginsConfigButton.closest("a").href).toContain("/me/config");
     });
   });
 });

@@ -14,12 +14,19 @@ import {
   TLPSelectInput,
   TLPSelectInputLabel,
 } from "../../common/form/TLPSelectInput";
-import { AllPluginSupportedTypes } from "../../../constants/pluginConst";
+import {
+  AllPluginSupportedTypes,
+  PluginsTypes,
+} from "../../../constants/pluginConst";
 import { ScanConfigSelectInput } from "../../common/form/ScanConfigSelectInput";
 import { parseScanCheckTime } from "../../../utils/time";
 import { TagSelectInput } from "../../common/form/TagSelectInput";
 import { JobTag } from "../../common/JobTag";
-import { TlpChoices } from "../../../constants/advancedSettingsConst";
+import {
+  TlpChoices,
+  TLPs,
+  ScanModesNumeric,
+} from "../../../constants/advancedSettingsConst";
 import {
   EditRuntimeConfiguration,
   runtimeConfigurationParam,
@@ -33,46 +40,66 @@ const stateSelector = (state) => [
   state.visualizers,
   state.pivots,
   state.editPlaybookConfig,
+  state.createPluginConfig,
 ];
 
-export function EditPlaybookConfigForm({ playbookConfig, toggle }) {
-  console.debug("EditPlaybookConfigForm rendered!");
+export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
+  console.debug("PlaybookConfigForm rendered!");
 
+  // states
+  const [selectedPluginsParams, setSelectedPluginsParams] = React.useState({});
+  const [editableConfig, setEditableConfig] = React.useState({});
   const [jsonInput, setJsonInput] = React.useState({});
-  const [analyzers, connectors, visualizers, pivots, editPlaybookConfig] =
-    usePluginConfigurationStore(stateSelector);
-
   const [responseError, setResponseError] = React.useState(null);
+
+  // store
+  const [
+    analyzers,
+    connectors,
+    visualizers,
+    pivots,
+    editPlaybookConfig,
+    createPluginConfig,
+  ] = usePluginConfigurationStore(stateSelector);
 
   const formik = useFormik({
     initialValues: {
-      name: playbookConfig.name,
-      description: playbookConfig.description,
-      type: playbookConfig.type,
-      analyzers: playbookConfig.analyzers.map((analyzer) => ({
-        value: analyzer,
-        label: analyzer,
-      })),
-      connectors: playbookConfig.connectors.map((connector) => ({
-        value: connector,
-        label: connector,
-      })),
-      visualizers: playbookConfig.visualizers.map((visualizer) => ({
-        value: visualizer,
-        label: visualizer,
-      })),
-      pivots: playbookConfig.pivots.map((pivot) => ({
-        value: pivot,
-        label: pivot,
-      })),
-      tags: playbookConfig.tags.map((tag) => ({
-        value: tag,
-        label: <JobTag tag={tag} />,
-      })),
-      tlp: playbookConfig.tlp,
-      scan_mode: `${playbookConfig.scan_mode}`,
-      scan_check_time: parseScanCheckTime(playbookConfig.scan_check_time),
-      runtime_configuration: playbookConfig.runtime_configuration,
+      name: playbookConfig?.name || "",
+      description: playbookConfig?.description || "",
+      type: playbookConfig?.type || [],
+      analyzers:
+        playbookConfig?.analyzers?.map((analyzer) => ({
+          value: analyzer,
+          label: analyzer,
+        })) || [],
+      connectors:
+        playbookConfig?.connectors?.map((connector) => ({
+          value: connector,
+          label: connector,
+        })) || [],
+      visualizers:
+        playbookConfig?.visualizers?.map((visualizer) => ({
+          value: visualizer,
+          label: visualizer,
+        })) || [],
+      pivots:
+        playbookConfig?.pivots?.map((pivot) => ({
+          value: pivot,
+          label: pivot,
+        })) || [],
+      tags:
+        playbookConfig?.tags?.map((tag) => ({
+          value: tag,
+          label: <JobTag tag={tag} />,
+        })) || [],
+      tlp: playbookConfig?.tlp || TLPs.AMBER,
+      scan_mode: playbookConfig?.scan_mode
+        ? `${playbookConfig?.scan_mode}`
+        : ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS,
+      scan_check_time: parseScanCheckTime(
+        playbookConfig?.scan_check_time || "01:00:00:00",
+      ),
+      runtime_configuration: playbookConfig?.runtime_configuration || {},
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -107,10 +134,40 @@ export function EditPlaybookConfigForm({ playbookConfig, toggle }) {
       return errors;
     },
     onSubmit: async () => {
-      const response = await editPlaybookConfig(
-        formik.initialValues.name,
-        formik.values,
-      );
+      let response;
+      const payloadData = {
+        name: formik.values.name,
+        description: formik.values.description,
+        type: formik.values.type,
+        analyzers: formik.values.analyzers.map((analyzer) => analyzer.value),
+        connectors: formik.values.connectors.map(
+          (connector) => connector.value,
+        ),
+        visualizers: formik.values.visualizers.map(
+          (visualizer) => visualizer.value,
+        ),
+        pivots: formik.values.pivots.map((pivot) => pivot.value),
+        runtime_configuration: formik.values.runtime_configuration,
+        tags_labels: formik.values.tags.map((tag) => tag.value.label),
+        tlp: formik.values.tlp,
+        scan_mode: parseInt(formik.values.scan_mode, 10),
+        scan_check_time: null,
+      };
+      if (
+        formik.values.scan_mode === ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS
+      ) {
+        payloadData.scan_check_time = `${formik.values.scan_check_time}:00:00`;
+      }
+
+      if (isEditing) {
+        const playbookToEdit =
+          formik.initialValues.name !== formik.values.name
+            ? formik.initialValues.name
+            : formik.values.name;
+        response = await editPlaybookConfig(playbookToEdit, payloadData);
+      } else {
+        response = await createPluginConfig(PluginsTypes.PLAYBOOK, payloadData);
+      }
 
       if (response?.success) {
         formik.setSubmitting(false);
@@ -122,16 +179,27 @@ export function EditPlaybookConfigForm({ playbookConfig, toggle }) {
     },
   });
 
-  console.debug("Edit Playbook Config - formik");
+  console.debug("Playbook Config - formik");
   console.debug(formik);
 
-  const [selectedPluginsParams, editableConfig] = runtimeConfigurationParam(
-    formik,
-    analyzers,
-    connectors,
-    visualizers,
-    pivots,
-  );
+  React.useEffect(() => {
+    const [params, config] = runtimeConfigurationParam(
+      formik,
+      analyzers,
+      connectors,
+      visualizers,
+      pivots,
+    );
+    setSelectedPluginsParams(params);
+    setEditableConfig(config);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formik.values.analyzers,
+    formik.values.connectors,
+    formik.values.pivots,
+    formik.values.visualizers,
+  ]);
 
   React.useEffect(() => {
     saveRuntimeConfiguration(
@@ -140,6 +208,7 @@ export function EditPlaybookConfigForm({ playbookConfig, toggle }) {
       selectedPluginsParams,
       editableConfig,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jsonInput]);
 
   /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
@@ -309,7 +378,8 @@ export function EditPlaybookConfigForm({ playbookConfig, toggle }) {
   );
 }
 
-EditPlaybookConfigForm.propTypes = {
+PlaybookConfigForm.propTypes = {
   playbookConfig: PropTypes.object.isRequired,
   toggle: PropTypes.func.isRequired,
+  isEditing: PropTypes.bool.isRequired,
 };

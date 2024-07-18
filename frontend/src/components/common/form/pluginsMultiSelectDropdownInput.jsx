@@ -1,11 +1,18 @@
 import React from "react";
 import PropTypes from "prop-types";
+import ReactSelect from "react-select";
 
-import { Loader, MultiSelectDropdownInput } from "@certego/certego-ui";
+import {
+  Loader,
+  MultiSelectDropdownInput,
+  selectStyles,
+} from "@certego/certego-ui";
 
 import { markdownToHtml } from "../markdownToHtml";
+import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { JobTypes } from "../../../constants/jobConst";
+import { JobTag } from "../JobTag";
 
 function dropdownOptions(plugins) {
   return plugins
@@ -75,17 +82,26 @@ export function AnalyzersMultiSelectDropdownInput(props) {
   }, [analyzers]);
 
   const analyzersOptions = React.useMemo(() => {
-    // case 1: scan page
+    // case 1: scan page (classification in formik)
     if (formik.values.classification)
       return dropdownOptions(analyzersGrouped[formik.values.classification]);
-    // case 2: editing playbook config (no classification in formik)
-    const multipleSupportedTypes = [
-      ...new Set(
-        formik.values.type.map((type) => analyzersGrouped[type]).flat(),
-      ),
-    ];
-    return dropdownOptions(multipleSupportedTypes);
-  }, [analyzersGrouped, formik.values.classification, formik.values.type]);
+    // case 2: editing/creating playbook config (no classification in formik)
+    if (formik.values.type) {
+      const multipleSupportedTypes = [
+        ...new Set(
+          formik.values.type.map((type) => analyzersGrouped[type]).flat(),
+        ),
+      ];
+      return dropdownOptions(multipleSupportedTypes);
+    }
+    // case 3: creating pivot config (no classification or type in formik)
+    return dropdownOptions(analyzers);
+  }, [
+    analyzersGrouped,
+    formik.values.classification,
+    formik.values.type,
+    analyzers,
+  ]);
 
   return (
     <Loader
@@ -208,4 +224,120 @@ export function PivotsMultiSelectDropdownInput({ formik }) {
 
 PivotsMultiSelectDropdownInput.propTypes = {
   formik: PropTypes.object.isRequired,
+};
+
+const playbooksGrouped = (playbooks, organizationPluginsState) => {
+  const grouped = {
+    ip: [],
+    hash: [],
+    domain: [],
+    url: [],
+    generic: [],
+    file: [],
+  };
+  playbooks.forEach((obj) => {
+    // filter on basis of type if the playbook is not disabled in org
+    if (organizationPluginsState[obj.name] === undefined) {
+      obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
+    }
+  });
+  console.debug("Playbooks", grouped);
+  return grouped;
+};
+
+export const playbookOptions = (
+  playbooks,
+  classification = null,
+  organizationPluginsState = {},
+) => {
+  const playbooksOptionsGrouped = classification
+    ? playbooksGrouped(playbooks, organizationPluginsState)[classification]
+    : playbooks;
+
+  return playbooksOptionsGrouped
+    .map((playbook) => ({
+      isDisabled: playbook.disabled,
+      starting: playbook.starting,
+      value: playbook.name,
+      analyzers: playbook.analyzers,
+      connectors: playbook.connectors,
+      visualizers: playbook.visualizers,
+      pivots: playbook.pivots,
+      label: (
+        <div className="d-flex justify-content-start align-items-start flex-column">
+          <div className="d-flex justify-content-start align-items-baseline flex-column">
+            <div>{playbook.name}&nbsp;</div>
+            <div className="small text-left text-muted">
+              {markdownToHtml(playbook.description)}
+            </div>
+          </div>
+        </div>
+      ),
+      labelDisplay: playbook.name,
+      tags: playbook.tags.map((tag) => ({
+        value: tag,
+        label: <JobTag tag={tag} />,
+      })),
+      tlp: playbook.tlp,
+      scan_mode: `${playbook.scan_mode}`,
+      scan_check_time: playbook.scan_check_time,
+      runtime_configuration: playbook.runtime_configuration,
+    }))
+    .filter((item) => !item.isDisabled && item.starting);
+};
+
+export function PlaybookMultiSelectDropdownInput(props) {
+  const { formik, onChange } = props;
+  console.debug("PlaybookMultiSelectDropdownInput - formik:");
+  console.debug(formik);
+
+  // API/ store
+  const { pluginsState: organizationPluginsState } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        pluginsState: state.pluginsState,
+      }),
+      [],
+    ),
+  );
+
+  const [playbooksLoading, playbooksError, playbooks] =
+    usePluginConfigurationStore((state) => [
+      state.playbooksLoading,
+      state.playbooksError,
+      state.playbooks,
+    ]);
+
+  const dropdownPlaybookOptions = React.useMemo(() => {
+    // case 1: scan page (classification in formik)
+    if (formik.values.classification)
+      return playbookOptions(
+        playbooks,
+        formik.values.classification,
+        organizationPluginsState,
+      );
+    // case 2: creating pivot config (no classification in formik)
+    return playbookOptions(playbooks, null, organizationPluginsState);
+  }, [playbooks, formik.values.classification, organizationPluginsState]);
+
+  return (
+    <Loader
+      loading={playbooksLoading}
+      error={playbooksError}
+      render={() => (
+        <ReactSelect
+          isClearable={false}
+          options={dropdownPlaybookOptions}
+          styles={selectStyles}
+          value={formik.values.playbook}
+          onChange={(selectedPlaybook) => onChange(selectedPlaybook)}
+        />
+      )}
+    />
+  );
+}
+
+PlaybookMultiSelectDropdownInput.propTypes = {
+  formik: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
 };

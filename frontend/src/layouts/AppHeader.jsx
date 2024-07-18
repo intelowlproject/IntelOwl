@@ -19,7 +19,7 @@ import {
   RiGuideLine,
   RiTwitterXFill,
 } from "react-icons/ri";
-import { FaGithub, FaGoogle, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaGoogle, FaLinkedin, FaList } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { TbReport } from "react-icons/tb";
 import { BsPeopleFill, BsSliders } from "react-icons/bs";
@@ -85,11 +85,8 @@ function AuthLinks({ noOrganization }) {
           <span className="ms-1">History</span>
         </NavLink>
       </NavItem>
-      <NavItem id="plugins-menu">
-        <NavLink className="d-flex-start-center" to="/plugins">
-          <RiPlugFill />
-          <span className="ms-1">Plugins</span>
-        </NavLink>
+      <NavItem id="plugins-menu" className="d-flex-start-center nav-link">
+        <RiPlugFill className="me-1" /> Plugins
       </NavItem>
       <UncontrolledPopover
         target="plugins-menu"
@@ -97,10 +94,14 @@ function AuthLinks({ noOrganization }) {
         trigger="hover"
         popperClassName="p-2 bg-dark d-flex justify-conten-center"
         hideArrow
-        delay={{ show: 0, hide: 400 }}
+        delay={{ show: 0, hide: 300 }}
         offset={[20, -3]}
       >
-        <NavLink className="d-flex-start-center p-1" to="/me/config">
+        <NavLink className="d-flex-start-center p-1 pb-2" to="/plugins">
+          <FaList className="me-2" /> Plugins List
+        </NavLink>
+        <hr className="my-0" />
+        <NavLink className="d-flex-start-center p-1 pt-2" to="/me/config">
           <BsSliders className="me-2" /> User Plugin Config
         </NavLink>
         {!noOrganization && (

@@ -238,10 +238,12 @@ export const mockedPlaybooks = {
 export const mockedUsePluginConfigurationStore = {
   analyzersLoading: false,
   connectorsLoading: false,
+  pivotsLoading: false,
   visualizersLoading: false,
   playbooksLoading: false,
   analyzersError: null,
   connectorsError: null,
+  pivotsErrors: null,
   playbooksError: null,
   visualizersError: null,
   analyzers: [
@@ -310,6 +312,7 @@ export const mockedUsePluginConfigurationStore = {
       plugin_type: "2",
     },
   ],
+  pivots: [],
   visualizers: [],
   ingestors: [],
   playbooks: [

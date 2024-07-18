@@ -5,7 +5,7 @@ import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { PLAYBOOKS_CONFIG_URI } from "../../../../src/constants/apiURLs";
-import { EditPlaybookConfigForm } from "../../../../src/components/plugins/types/EditPlaybookConfigForm";
+import { PlaybookConfigForm } from "../../../../src/components/plugins/types/PlaybookConfigForm";
 
 jest.mock("axios");
 // mock runtimeConfigurationParam
@@ -49,7 +49,7 @@ jest.mock(
   }),
 );
 
-describe("EditPlaybookConfigForm test", () => {
+describe("PlaybookConfigForm test", () => {
   const playbookConfig = {
     id: 13,
     name: "test",
@@ -84,10 +84,9 @@ describe("EditPlaybookConfigForm test", () => {
   };
 
   test("form fields", async () => {
-    const userAction = userEvent.setup();
-    const { container } = render(
+    render(
       <BrowserRouter>
-        <EditPlaybookConfigForm
+        <PlaybookConfigForm
           playbookConfig={playbookConfig}
           toggle={jest.fn()}
         />
@@ -171,9 +170,9 @@ describe("EditPlaybookConfigForm test", () => {
     const userAction = userEvent.setup();
     axios.patch.mockImplementation(() => Promise.resolve({ status: 200 }));
 
-    const { container } = render(
+    render(
       <BrowserRouter>
-        <EditPlaybookConfigForm
+        <PlaybookConfigForm
           playbookConfig={playbookConfig}
           toggle={jest.fn()}
         />
@@ -264,6 +263,120 @@ describe("EditPlaybookConfigForm test", () => {
 
     await waitFor(() => {
       expect(axios.patch).toHaveBeenCalledWith(`${PLAYBOOKS_CONFIG_URI}/test`, {
+        name: "myNewPlaybook",
+        description: "playbook: test",
+        type: ["domain", "ip"],
+        analyzers: ["TEST_ANALYZER"],
+        connectors: ["TEST_CONNECTOR"],
+        visualizers: [],
+        pivots: [],
+        runtime_configuration: {
+          pivots: {},
+          analyzers: { TEST_ANALYZER: { query_type: "A" } },
+          connectors: {},
+          visualizers: {},
+        },
+        tags_labels: [],
+        tlp: "GREEN",
+        scan_mode: 2,
+        scan_check_time: "24:00:00",
+      });
+    });
+  });
+
+  test("create playbook config", async () => {
+    const userAction = userEvent.setup();
+    axios.post.mockImplementation(() => Promise.resolve({ status: 201 }));
+
+    render(
+      <BrowserRouter>
+        <PlaybookConfigForm
+          playbookConfig={{}}
+          toggle={jest.fn()}
+        />
+      </BrowserRouter>,
+    );
+
+    // form fields
+    const nameInputField = screen.getByLabelText("Name:");
+    expect(nameInputField).toBeInTheDocument();
+
+    const descriptionInputField = screen.getByLabelText("Description:");
+    expect(descriptionInputField).toBeInTheDocument();
+
+    const typeInputField = screen.getByText("Supported types:");
+    expect(typeInputField).toBeInTheDocument();
+    const ipCheckbox = screen.getAllByRole("checkbox")[0];
+    expect(ipCheckbox).not.toBeChecked();
+    const urlCheckbox = screen.getAllByRole("checkbox")[1];
+    expect(urlCheckbox).not.toBeChecked();
+    const domainCheckbox = screen.getAllByRole("checkbox")[2];
+    expect(domainCheckbox).not.toBeChecked();
+    const hashCheckbox = screen.getAllByRole("checkbox")[3];
+    expect(hashCheckbox).not.toBeChecked();
+    const genericCheckbox = screen.getAllByRole("checkbox")[4];
+    expect(genericCheckbox).not.toBeChecked();
+    const fileCheckbox = screen.getAllByRole("checkbox")[5];
+    expect(fileCheckbox).not.toBeChecked();
+
+    const analyzersInputField = screen.getByText("Analyzers:");
+    expect(analyzersInputField).toBeInTheDocument();
+    const connectorsInputField = screen.getByText("Connectors:");
+    expect(connectorsInputField).toBeInTheDocument();
+    const pivotsInputField = screen.getByText("Pivots:");
+    expect(pivotsInputField).toBeInTheDocument();
+    const visualizersInputField = screen.getByText("Visualizers:");
+    expect(visualizersInputField).toBeInTheDocument();
+
+    const tlpInputField = screen.getByText("TLP");
+    expect(tlpInputField).toBeInTheDocument();
+    const amberTLP = screen.getByRole("radio", { name: "AMBER" });
+    expect(amberTLP).toBeInTheDocument();
+    expect(amberTLP).toBeChecked();
+
+    const tagsInputField = screen.getByText("Tags:");
+    expect(tagsInputField).toBeInTheDocument();
+
+    const scanConfigInputField = screen.getByText("Scan Configuration:");
+    expect(scanConfigInputField).toBeInTheDocument();
+    const newAnalysisRadio = screen.getByRole("radio", {
+      name: "Do not execute if a similar analysis is currently running or reported without fails",
+    });
+    expect(newAnalysisRadio).toBeInTheDocument();
+
+    const runtimeConfigInputField = screen.getByText("Runtime Configuration:");
+    expect(runtimeConfigInputField).toBeInTheDocument();
+    const runtimeConfigModalWarning = screen.getByText(
+      "Note: Edit this only if you know what you are doing!",
+    );
+    expect(runtimeConfigModalWarning).toBeInTheDocument();
+    const editableRuntimeConfigSection =
+      runtimeConfigModalWarning.closest("div");
+    const editableRuntimeConfig = editableRuntimeConfigSection.querySelector(
+      "#edit_runtime_configuration-modal",
+    );
+    expect(editableRuntimeConfig).toBeInTheDocument();
+    // to test the contents of the json editor we need to use this format
+    expect(editableRuntimeConfig.textContent).toBe(
+      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'A'    }  },  connectors: {    TEST_CONNECTOR: {}  },  pivots: {},  visualizers: {}}",
+    );
+
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toBeInTheDocument();
+    expect(saveButton.className).toContain("disabled");
+
+    // clear editor and type new playbook name
+    await userAction.clear(nameInputField);
+    await userAction.type(nameInputField, "myNewPlaybook");
+
+    // add ip in supported types
+    await userAction.click(ipCheckbox);
+
+    expect(saveButton.className).not.toContain("disabled");
+    await userAction.click(saveButton);
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(`${PLAYBOOKS_CONFIG_URI}`, {
         name: "myNewPlaybook",
         description: "playbook: test",
         type: ["domain", "ip"],

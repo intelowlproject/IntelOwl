@@ -28,29 +28,40 @@ class IocEctract(FileAnalyzer):
         binary_data = self.read_file_bytes()
         text_data = binary_data.decode("utf-8")
         if self.extract_iocs:
-            report = list(
-                i.extract_iocs(text_data, refang=self.refang, strip=self.strip)
-            )
-        else:
-            report = {}
-
-            if self.extract_urls:
-                report["urls"] = list(
-                    i.extract_urls(
-                        text_data,
-                        refang=self.refang,
-                        strip=self.strip,
-                        defang=self.defang,
-                    )
+            return {
+                "all_iocs": list(
+                    i.extract_iocs(text_data, refang=self.refang, strip=self.strip)
                 )
-            if self.extract_ips:
-                report["ips"] = list(i.extract_ips(text_data, refang=self.refang))
-            if self.extract_emails:
-                report["emails"] = list(i.extract_emails(text_data, refang=self.refang))
-            if self.extract_hashes:
-                report["hashes"] = list(i.extract_hashes(text_data))
-            if self.extract_yara_rules:
-                report["yara_rules"] = list(i.extract_yara_rules(text_data))
-            if self.extract_telephone_nums:
-                report["telephone_nums"] = list(i.extract_telephone_nums(text_data))
-        return report
+            }
+
+        extraction_methods = {
+            "urls": (
+                self.extract_urls,
+                lambda: i.extract_urls(
+                    text_data, refang=self.refang, strip=self.strip, defang=self.defang
+                ),
+            ),
+            "ips": (
+                self.extract_ips,
+                lambda: i.extract_ips(text_data, refang=self.refang),
+            ),
+            "emails": (
+                self.extract_emails,
+                lambda: i.extract_emails(text_data, refang=self.refang),
+            ),
+            "hashes": (self.extract_hashes, lambda: i.extract_hashes(text_data)),
+            "yara_rules": (
+                self.extract_yara_rules,
+                lambda: i.extract_yara_rules(text_data),
+            ),
+            "telephone_nums": (
+                self.extract_telephone_nums,
+                lambda: i.extract_telephone_nums(text_data),
+            ),
+        }
+
+        return {
+            key: list(method())
+            for key, (flag, method) in extraction_methods.items()
+            if flag
+        }

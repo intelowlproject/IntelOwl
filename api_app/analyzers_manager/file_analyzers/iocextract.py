@@ -61,7 +61,5 @@ class IocEctract(FileAnalyzer):
         }
 
         return {
-            key: list(method())
-            for key, (flag, method) in extraction_methods.items()
-            if flag
+            key: method() for key, (flag, method) in extraction_methods.items() if flag
         }

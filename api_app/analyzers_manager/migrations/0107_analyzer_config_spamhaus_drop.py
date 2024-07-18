@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
         ("api_app", "0062_alter_parameter_python_module"),
         (
             "analyzers_manager",
-            "0105_alter_analyzerconfig_not_supported_filetypes_and_more",
+            "0106_analyzer_config_leakix",
         ),
     ]
 

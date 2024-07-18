@@ -84,23 +84,11 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
                 patch(
                     "requests.get",
                     return_value=MockUpResponse(
-                        [
-                            {
+                        """{
                                 "cidr": "1.10.16.0/20",
                                 "sblid": "SBL256894",
                                 "rir": "apnic",
-                            },
-                            {
-                                "cidr": "1.19.0.0/16",
-                                "sblid": "SBL434604",
-                                "rir": "apnic",
-                            },
-                            {
-                                "cidr": "1.32.128.0/18",
-                                "sblid": "SBL286275",
-                                "rir": "apnic",
-                            },
-                        ],
+                            }""",
                         200,
                     ),
                 ),

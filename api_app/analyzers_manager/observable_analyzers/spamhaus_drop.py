@@ -79,10 +79,10 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        mock_data = """
-            {"cidr": "1.10.16.0/20", "sblid": "SBL256894", "rir": "apnic"}\n
-            {"cidr": "2.56.192.0/22", "sblid": "SBL459831", "rir": "ripencc"}
-            """
+        mock_data = (
+            '{"cidr": "1.10.16.0/20", "sblid": "SBL256894", "rir": "apnic"}\n'
+            '{"cidr": "2.56.192.0/22", "sblid": "SBL459831", "rir": "ripencc"}'
+        )
         patches = [
             if_mock_connections(
                 patch(

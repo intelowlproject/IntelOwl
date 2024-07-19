@@ -23,43 +23,48 @@ class IocExtract(FileAnalyzer):
         pass
 
     def run(self):
+        logger.info(f"Running IocExtract on {self.filename}")
         binary_data = self.read_file_bytes()
         text_data = binary_data.decode("utf-8")
+        result = {}
         if self.extract_iocs:
-            return {
-                "all_iocs": list(
-                    i.extract_iocs(text_data, refang=self.refang, strip=self.strip)
-                )
-            }
+            all_iocs = list(
+                i.extract_iocs(text_data, refang=self.refang, strip=self.strip)
+            )
+            result["all_iocs"] = all_iocs
 
-        extraction_methods = {
-            "urls": (
-                self.extract_urls,
-                lambda: i.extract_urls(
-                    text_data, refang=self.refang, strip=self.strip, defang=self.defang
+        else:
+            extraction_methods = {
+                "urls": (
+                    self.extract_urls,
+                    lambda: i.extract_urls(
+                        text_data,
+                        refang=self.refang,
+                        strip=self.strip,
+                        defang=self.defang,
+                    ),
                 ),
-            ),
-            "ips": (
-                self.extract_ips,
-                lambda: i.extract_ips(text_data, refang=self.refang),
-            ),
-            "emails": (
-                self.extract_emails,
-                lambda: i.extract_emails(text_data, refang=self.refang),
-            ),
-            "hashes": (self.extract_hashes, lambda: i.extract_hashes(text_data)),
-            "yara_rules": (
-                self.extract_yara_rules,
-                lambda: i.extract_yara_rules(text_data),
-            ),
-            "telephone_nums": (
-                self.extract_telephone_nums,
-                lambda: i.extract_telephone_nums(text_data),
-            ),
-        }
-
-        return {
-            key: list(method())
-            for key, (flag, method) in extraction_methods.items()
-            if flag
-        }
+                "ips": (
+                    self.extract_ips,
+                    lambda: i.extract_ips(text_data, refang=self.refang),
+                ),
+                "emails": (
+                    self.extract_emails,
+                    lambda: i.extract_emails(text_data, refang=self.refang),
+                ),
+                "hashes": (self.extract_hashes, lambda: i.extract_hashes(text_data)),
+                "yara_rules": (
+                    self.extract_yara_rules,
+                    lambda: i.extract_yara_rules(text_data),
+                ),
+                "telephone_nums": (
+                    self.extract_telephone_nums,
+                    lambda: i.extract_telephone_nums(text_data),
+                ),
+            }
+            for key, (flag, method) in extraction_methods.items():
+                if flag:
+                    extracted = list(method())
+                    result[key] = extracted
+        logger.info(f"Extracted IOCs: {result}")
+        return result

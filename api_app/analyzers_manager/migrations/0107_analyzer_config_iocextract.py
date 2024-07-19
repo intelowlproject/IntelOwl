@@ -129,6 +129,17 @@ params = [
         "is_secret": False,
         "required": False,
     },
+    {
+        "python_module": {
+            "module": "iocextract.IocExtract",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "extract_iocs",
+        "type": "bool",
+        "description": "Extract all IOCs!",
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
 values = []

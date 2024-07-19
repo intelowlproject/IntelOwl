@@ -1,5 +1,3 @@
-# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
-# See the file 'LICENSE' for copying permission.
 import logging
 
 import iocextract as i
@@ -9,7 +7,7 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 logger = logging.getLogger(__name__)
 
 
-class IocEctract(FileAnalyzer):
+class IocExtract(FileAnalyzer):
     refang: bool = False
     defang: bool = False
     strip: bool = False
@@ -61,5 +59,7 @@ class IocEctract(FileAnalyzer):
         }
 
         return {
-            key: method() for key, (flag, method) in extraction_methods.items() if flag
+            key: list(method())
+            for key, (flag, method) in extraction_methods.items()
+            if flag
         }

@@ -222,7 +222,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0106_analyzer_config_leakix"),
+        ("analyzers_manager", "0107_analyzer_config_apivoid"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

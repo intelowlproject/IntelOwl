@@ -67,6 +67,9 @@ class SpamhausDropV4(classes.ObservableAnalyzer):
         lines = input_string.strip().split("\n")
         json_objects = []
         for line in lines:
+            line = line.strip()
+            if not line:
+                continue
             try:
                 json_obj = json.loads(line)
                 json_objects.append(json_obj)

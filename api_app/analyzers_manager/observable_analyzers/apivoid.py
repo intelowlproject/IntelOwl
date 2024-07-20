@@ -1,4 +1,6 @@
 # flake8: noqa
+# done for the mocked respose,
+# everything else is linted and tested
 import requests
 
 from api_app.analyzers_manager import classes

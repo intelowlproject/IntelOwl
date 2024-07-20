@@ -23,7 +23,7 @@ class IocExtract(FileAnalyzer):
         pass
 
     def run(self):
-        logger.info(f"Running IocExtract on {self.filename}")
+        logger.info(f"Running IocExtract on {self.filename} with md5: {self.md5}")
         binary_data = self.read_file_bytes()
         text_data = binary_data.decode("utf-8")
         result = {}
@@ -66,5 +66,5 @@ class IocExtract(FileAnalyzer):
                 if flag:
                     extracted = list(method())
                     result[key] = extracted
-        logger.info(f"Extracted IOCs: {result}")
+
         return result

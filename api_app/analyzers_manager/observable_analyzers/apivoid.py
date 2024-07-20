@@ -58,7 +58,7 @@ class ApiVoidAnalyzer(classes.ObservableAnalyzer):
                                                 "0": {
                                                     "engine": "0spam",
                                                     "detected": False,
-                                                    "reference": "https:\/\/0spam.org\/",  # nosec
+                                                    "reference": "https://0spam.org/",
                                                     "elapsed": "0.09",
                                                 },
                                             },

@@ -526,7 +526,6 @@ class ApiVoidAnalyzer(classes.ObservableAnalyzer):
                                                 "78": {
                                                     "engine": "ZeroDot1 Miner IPs",
                                                     "detected": False,
-                                                    "reference": "https:\/\/zerodot1.gitlab.io\/CoinBlockerListsWeb\/index.html",
                                                     "elapsed": "0.00",
                                                 },
                                             },

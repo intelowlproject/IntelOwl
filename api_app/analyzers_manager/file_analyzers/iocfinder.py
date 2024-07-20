@@ -8,14 +8,14 @@ logger = logging.getLogger(__name__)
 
 
 class IocFinder(FileAnalyzer):
-    parse_domain_from_url: bool = (True,)
-    parse_from_url_path: bool = (True,)
-    parse_domain_from_email_address: bool = (True,)
-    parse_address_from_cidr: bool = (True,)
-    parse_domain_name_from_xmpp_address: bool = (True,)
-    parse_urls_without_scheme: bool = (True,)
-    parse_imphashes: bool = (True,)
-    parse_authentihashes: bool = (True,)
+    parse_domain_from_url: bool = True
+    parse_from_url_path: bool = True
+    parse_domain_from_email_address: bool = True
+    parse_address_from_cidr: bool = True
+    parse_domain_name_from_xmpp_address: bool = True
+    parse_urls_without_scheme: bool = True
+    parse_imphashes: bool = True
+    parse_authentihashes: bool = True
 
     def update(self):
         pass

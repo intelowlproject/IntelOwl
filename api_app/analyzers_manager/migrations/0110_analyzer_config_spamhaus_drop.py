@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
         ("api_app", "0062_alter_parameter_python_module"),
         (
             "analyzers_manager",
-            "0107_analyzer_config_apivoid",
+            "0109_analyzer_config_iocfinder",
         ),
     ]
 

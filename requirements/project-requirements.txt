@@ -79,6 +79,9 @@ blint==2.1.5
 hfinger==0.2.2
 permhash==0.1.4
 ail_typo_squatting==2.7.4
+iocextract==1.16.1
+ioc-finder==7.0.0
+
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8
 xlrd2==1.3.4

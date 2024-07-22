@@ -1,3 +1,4 @@
+import base64
 import logging
 import traceback
 import typing
@@ -7,6 +8,7 @@ from pathlib import PosixPath
 import requests
 from billiard.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+from django.core.files import File
 from django.utils import timezone
 from django.utils.functional import cached_property
 from requests import HTTPError
@@ -121,9 +123,19 @@ class Plugin(metaclass=ABCMeta):
         self.report.save()
 
     def after_run_success(self, content: typing.Any):
-        if isinstance(content, typing.Generator):
-            content = list(content)
-        self.report.report = content
+        # avoiding JSON serialization errors for types: File and bytes
+        report_content = content
+        if isinstance(report_content, typing.List):
+            report_content = []
+            for n in content:
+                if isinstance(n, File):
+                    report_content.append(base64.b64encode(n.read()).decode("utf-8"))
+                elif isinstance(n, bytes):
+                    report_content.append(base64.b64encode(n).decode("utf-8"))
+                else:
+                    report_content.append(n)
+
+        self.report.report = report_content
         self.report.status = self.report.Status.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
 

@@ -125,7 +125,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [edelucia Yara rules](https://github.com/edelucia/rules/tree/main/yara)
   * [LOLDrivers Yara Rules](https://github.com/magicsword-io/LOLDrivers)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
-* `GoReSym`:[GoReSym](https://github.com/mandiant/GoReSym) is a Go symbol parser that extracts program metadata (such as CPU architecture, OS, endianness, compiler version, etc), function metadata (start & end addresses, names, sources), filename and line number metadata, and embedded structures and types.
+  * `GoReSym`:[GoReSym](https://github.com/mandiant/GoReSym) is a Go symbol parser that extracts program metadata (such as CPU architecture, OS, endianness, compiler version, etc), function metadata (start & end addresses, names, sources), filename and line number metadata, and embedded structures and types.
+  * `IocFinder`:[IocFinder](https://github.com/fhightower/ioc-finder) a library to find different types of indicators of compromise (a.k.a observables) and data pertinent to indicators of compromise!
 ###### External services
 
 - `CapeSandbox`: [CAPESandbox](https://capesandbox.com) automatically scans suspicious files using the CapeSandbox API. Analyzer works for private instances as well.

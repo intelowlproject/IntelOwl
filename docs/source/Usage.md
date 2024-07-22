@@ -154,6 +154,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 -  `Zippy_scan` : [Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated; takes in `lzma`,`zlib`,`brotli` as input based engines; `ensemble` being default.
 - `Blint`: [Blint](https://github.com/owasp-dep-scan/blint) is a Binary Linter that checks the security properties and capabilities of your executables. Supported binary formats: - Android (apk, aab) - ELF (GNU, musl) - PE (exe, dll) - Mach-O (x64, arm64)
 - `MalprobScan` : [Malprob](https://malprob.io/) is a leading malware detection and identification service, powered by cutting-edge AI technology.
+- `IocExtract`: [IocExtract](https://github.com/InQuest/iocextract) package is a library and command line interface (CLI) for extracting URLs, IP addresses, MD5/SHA hashes, email addresses, and YARA rules from text corpora. It allows for you to extract encoded and "defanged" IOCs and optionally decode or refang them.
 
 ##### Observable analyzers (ip, domain, url, hash)
 

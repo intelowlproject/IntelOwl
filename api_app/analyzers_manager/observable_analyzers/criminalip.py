@@ -17,6 +17,9 @@ class CriminalIp(classes.ObservableAnalyzer):
     banner_search: bool = True
     banner_stats: bool = False
 
+    def update(self):
+        pass
+
     def make_request(self, url: str, params: Dict[str, str] = None) -> Dict:
         headers = {"x-api-key": self._api_key}
         r = requests.get(url, headers=headers, params=params)
@@ -79,7 +82,8 @@ class CriminalIp(classes.ObservableAnalyzer):
                             },
                             "message": "api success",
                             "status": 200,
-                        }
+                        },
+                        200,
                     ),
                 )
             )

@@ -7,7 +7,7 @@ from api_app.analyzers_manager import classes
 logger = logging.getLogger(__name__)
 
 
-class domainCheck(classes.ObservableAnalyzer):
+class DomainCheck(classes.ObservableAnalyzer):
     resolver: str = "8.8.8.8"
 
     def run(self):

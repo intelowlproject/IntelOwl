@@ -26,17 +26,26 @@ class CriminalIp(classes.ObservableAnalyzer):
     def run(self):
         URLs = {
             self.ObservableTypes.IP.value: {
-                "malicious_info": "/v1/feature/ip/malicious-info",
-                "privacy_threat": "/v1/feature/ip/privacy-threat",
-                "is_safe_dns_server": "/v1/feature/ip/is-safe-dns-server",
-                "suspicious_info": "/v2/feature/ip/suspicious-info",
+                "endpoints": {
+                    "malicious_info": "/v1/feature/ip/malicious-info",
+                    "privacy_threat": "/v1/feature/ip/privacy-threat",
+                    "is_safe_dns_server": "/v1/feature/ip/is-safe-dns-server",
+                    "suspicious_info": "/v2/feature/ip/suspicious-info",
+                },
+                "params": {"ip": self.observable_name},
             },
             self.ObservableTypes.DOMAIN.value: {
-                "default": "/v1/domain/quick/hash/view"
+                "endpoints": {
+                    "default": "/v1/domain/quick/hash/view",
+                },
+                "params": {"domain": self.observable_name},
             },
             self.ObservableTypes.GENERIC.value: {
-                "banner_search": "/v1/banner/search",
-                "banner_stats": "/v1/banner/stats",
+                "endpoints": {
+                    "banner_search": "/v1/banner/search",
+                    "banner_stats": "/v1/banner/stats",
+                },
+                "params": {"query": self.observable_name},
             },
         }
 
@@ -44,11 +53,11 @@ class CriminalIp(classes.ObservableAnalyzer):
             return "invalid classification"
 
         r = {}
-        for key in URLs[self.observable_classification]:
+        for key, endpoint in URLs[self.observable_classification]["endpoints"].items():
             if getattr(self, key):
                 r[key] = self.make_request(
-                    f"{self.url}{URLs[self.observable_classification][key]}",
-                    params={"query": self.observable_name},
+                    f"{self.url}{endpoint}",
+                    params=URLs[self.observable_classification]["params"],
                 )
 
         return r

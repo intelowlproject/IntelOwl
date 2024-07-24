@@ -10,12 +10,13 @@ class CriminalIp(classes.ObservableAnalyzer):
     url = "https://api.criminalip.io"
     _api_key: str = None
 
-    malicious_info: bool = True
+    malicious_info: bool = True  # IP
     privacy_threat: bool = False
     is_safe_dns_server: bool = False
     suspicious_info: bool = False
-    banner_search: bool = True
+    banner_search: bool = True  # generic
     banner_stats: bool = False
+    hash_view: bool = True  # domain
 
     def update(self):
         pass
@@ -39,7 +40,7 @@ class CriminalIp(classes.ObservableAnalyzer):
             },
             self.ObservableTypes.DOMAIN.value: {
                 "endpoints": {
-                    "default": "/v1/domain/quick/hash/view",
+                    "hash_view": "/v1/domain/quick/hash/view",
                 },
                 "params": {"domain": self.observable_name},
             },

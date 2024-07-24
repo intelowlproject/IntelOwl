@@ -132,7 +132,6 @@ echo "Adding environment files"
 cp -n docker/env_file_app_template docker/env_file_app
 cp -n docker/env_file_postgres_template docker/env_file_postgres
 cp -n docker/env_file_integrations_template docker/env_file_integrations
-cp -n frontend/public/env_template.js frontend/public/env.js
 echo "Added environment files"
 
 check_django_secret

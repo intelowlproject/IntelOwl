@@ -56,15 +56,15 @@ class CriminalIp(classes.ObservableAnalyzer):
         if self.observable_classification not in URLs:
             return "invalid classification"
 
-        r = {}
+        resp = {}
         for key, endpoint in URLs[self.observable_classification]["endpoints"].items():
             if getattr(self, key):
-                r[key] = self.make_request(
+                resp[key] = self.make_request(
                     f"{self.url}{endpoint}",
                     params=URLs[self.observable_classification]["params"],
                 )
 
-        return r
+        return resp
 
     @classmethod
     def _monkeypatch(cls):

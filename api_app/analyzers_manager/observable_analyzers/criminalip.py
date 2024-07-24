@@ -23,9 +23,9 @@ class CriminalIp(classes.ObservableAnalyzer):
 
     def make_request(self, url: str, params: Dict[str, str] = None) -> Dict:
         headers = {"x-api-key": self._api_key}
-        r = requests.get(url, headers=headers, params=params)
-        r.raise_for_status()
-        return r.json()
+        resp = requests.get(url, headers=headers, params=params)
+        resp.raise_for_status()
+        return resp.json()
 
     def run(self):
         URLs = {

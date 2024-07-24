@@ -8,7 +8,6 @@ import {
 } from "../../../../src/components/auth/utils/validator";
 import { HACKER_MEME_STRING } from "../../../../src/constants/miscConst";
 
-
 describe("Compare Password", () => {
   test("Password do match", () => {
     const password = "intelowlpassword";

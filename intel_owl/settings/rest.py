@@ -64,13 +64,6 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
     "VERSION": VERSION,
 }
-USE_RECAPTCHA = get_secret("USE_RECAPTCHA", False) == "True"
-# drf-recaptcha
-DRF_RECAPTCHA_SECRET_KEY = str(get_secret("RECAPTCHA_SECRET_KEY", ""))
-# this is necessary to avoid to have the related Django app to yell
-# and to have this populated also for people who upgraded from previous versions
-if not DRF_RECAPTCHA_SECRET_KEY:
-    DRF_RECAPTCHA_SECRET_KEY = "fake"
 
-DRF_RECAPTCHA_TESTING = not USE_RECAPTCHA
-DRF_RECAPTCHA_TESTING_PASS = True
+# required by the certego-saas, but GreedyBear doesn't use the recaptcha, for this reason is filled with a placeholder
+DRF_RECAPTCHA_SECRET_KEY = "not-active"

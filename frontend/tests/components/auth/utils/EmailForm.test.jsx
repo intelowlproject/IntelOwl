@@ -6,9 +6,6 @@ import userEvent from "@testing-library/user-event";
 import EmailForm from "../../../../src/components/auth/utils/EmailForm";
 
 jest.mock("axios");
-jest.mock("../../../../src/constants/environment", () => ({
-  RECAPTCHA_SITEKEY: "",
-}));
 
 describe("EmailForm component", () => {
   test("Submit email form", async () => {

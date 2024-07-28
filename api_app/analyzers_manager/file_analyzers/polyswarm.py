@@ -63,8 +63,6 @@ class Polyswarm(FileAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch.object(PolyswarmAPI, "wait_for", return_value=None),
-                patch.object(PolyswarmAPI, "submit", return_value=None),
                 patch.object(
                     Polyswarm,
                     "run",

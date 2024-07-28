@@ -52,9 +52,65 @@ params = [
         "is_secret": False,
         "required": False,
     },
+    {
+        "python_module": {
+            "module": "polyswarm.Polyswarm",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "polyswarm_community",
+        "type": "str",
+        "description": 'polyswarm_community for polyswarm analyzer, default is "default"',
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "polyswarm.Polyswarm",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "timeout",
+            "type": "int",
+            "description": "timeout for Polyswarm api, default is 900s",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Polyswarm",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 900,
+        "updated_at": "2024-07-28T18:00:00.981259Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "polyswarm.Polyswarm",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "polyswarm_community",
+            "type": "str",
+            "description": 'polyswarm_community for polyswarm analyzer, default is "default"',
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Polyswarm",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": "default",
+        "updated_at": "2024-07-28T18:00:01.001510Z",
+        "owner": None,
+    },
+]
 
 
 def _get_real_obj(Model, field, value):

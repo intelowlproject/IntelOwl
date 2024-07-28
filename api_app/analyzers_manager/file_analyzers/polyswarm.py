@@ -20,7 +20,8 @@ class Polyswarm(FileAnalyzer):
     def update(self):
         pass
 
-    def construct_result(self, result):
+    @staticmethod
+    def construct_result(result):
         res = {"assertions": []}
         positives = 0
         total = 0
@@ -57,6 +58,9 @@ class Polyswarm(FileAnalyzer):
         result = self.construct_result(result)
         logger.info(f"Polyswarm result: {result}")
         return result
+
+    def update(self):
+        pass
 
     @classmethod
     def _monkeypatch(cls):

@@ -17,9 +17,6 @@ class Polyswarm(FileAnalyzer):
     timeout: int = 60 * 15  # default as in the package settings
     polyswarm_community: str = "default"
 
-    def update(self):
-        pass
-
     @staticmethod
     def construct_result(result):
         res = {"assertions": []}

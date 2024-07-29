@@ -5,7 +5,7 @@
 
 
 def malicious_detector_response(
-    observable: str, malicious: bool, timeout: bool = False
+    observable: str, malicious: bool, timeout: bool = False, note: str = None
 ) -> dict:
     """Standard response for malicious detector analyzers
 
@@ -15,6 +15,8 @@ def malicious_detector_response(
     :type malicious: bool
     :param timeout: set if the DNS query timed-out
     :type timeout bool
+    :param note: additional note to add to the report, default to None
+    :type note: str, optional
     :return:
     :rtype: dict
     """
@@ -23,6 +25,8 @@ def malicious_detector_response(
 
     if timeout:
         report["timeout"] = True
+    if note:
+        report["note"] = note
 
     return report
 

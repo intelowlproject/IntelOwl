@@ -125,7 +125,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [edelucia Yara rules](https://github.com/edelucia/rules/tree/main/yara)
   * [LOLDrivers Yara Rules](https://github.com/magicsword-io/LOLDrivers)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
-
+  * `GoReSym`:[GoReSym](https://github.com/mandiant/GoReSym) is a Go symbol parser that extracts program metadata (such as CPU architecture, OS, endianness, compiler version, etc), function metadata (start & end addresses, names, sources), filename and line number metadata, and embedded structures and types.
+  * `IocFinder`:[IocFinder](https://github.com/fhightower/ioc-finder) a library to find different types of indicators of compromise (a.k.a observables) and data pertinent to indicators of compromise!
 ###### External services
 
 - `CapeSandbox`: [CAPESandbox](https://capesandbox.com) automatically scans suspicious files using the CapeSandbox API. Analyzer works for private instances as well.
@@ -153,6 +154,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 -  `Zippy_scan` : [Zippy](https://github.com/thinkst/zippy): Fast method to classify text as AI or human-generated; takes in `lzma`,`zlib`,`brotli` as input based engines; `ensemble` being default.
 - `Blint`: [Blint](https://github.com/owasp-dep-scan/blint) is a Binary Linter that checks the security properties and capabilities of your executables. Supported binary formats: - Android (apk, aab) - ELF (GNU, musl) - PE (exe, dll) - Mach-O (x64, arm64)
 - `MalprobScan` : [Malprob](https://malprob.io/) is a leading malware detection and identification service, powered by cutting-edge AI technology.
+- `IocExtract`: [IocExtract](https://github.com/InQuest/iocextract) package is a library and command line interface (CLI) for extracting URLs, IP addresses, MD5/SHA hashes, email addresses, and YARA rules from text corpora. It allows for you to extract encoded and "defanged" IOCs and optionally decode or refang them.
 
 ##### Observable analyzers (ip, domain, url, hash)
 
@@ -263,7 +265,14 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MalprobSearch`:[Malprob](https://malprob.io/) is a leading malware detection and identification service, powered by cutting-edge AI technology.
 * `OrklSearch`:[Orkl](https://orkl.eu/) is the Community Driven Cyber Threat Intelligence Library.
 * `Crt_sh`:[Crt_Sh](https://crt.sh/) lets you get certificates info about a domain.
-* `Spamhaus_WQS`:[Spamhaus_WQS](https://docs.spamhaus.com/datasets/docs/source/70-access-methods/web-query-service/000-intro.html) : The Spamhaus Web Query Service (WQS) is a method of accessing Spamhaus block lists using the HTTPS protocol. 
+* `Spamhaus_WQS`:[Spamhaus_WQS](https://docs.spamhaus.com/datasets/docs/source/70-access-methods/web-query-service/000-intro.html) The Spamhaus Web Query Service (WQS) is a method of accessing Spamhaus block lists using the HTTPS protocol. 
+* `Adguard`:[Adguard](https://github.com/AdguardTeam/AdguardSDNSFilter), a filter composed of several other filters (AdGuard Base filter, Social media filter, Tracking Protection filter, Mobile Ads filter, EasyList and EasyPrivacy) and simplified specifically to be better compatible with DNS-level ad blocking.
+* `JA4_DB`:[JA4_DB](https://ja4db.com/) lets you search a fingerprint in JA4 databse.
+* `LeakIX`:[LeakIX](https://leakix.net/) is a red-team search engine indexing mis-configurations and vulnerabilities online.
+* `ApiVoid`:[ApiVoid](https://www.apivoid.com/) provides JSON APIs useful for cyber threat analysis, threat detection and
+threat prevention, reducing and automating the manual work of security analysts.
+* `Spamhaus_DROP`:[Spamhaus_DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/) protects from activity directly originating from rogue networks, such as spam campaigns, encryption via ransomware, DNS-hijacking and exploit attempts, authentication attacks to discover working access credentials, harvesting, DDoS attacks.
+* `CriminalIp`: [Criminal IP](https://www.criminalip.io/) is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
@@ -386,6 +395,7 @@ A very powerful use is case is to **combine Ingestors with Connectors** to autom
 
 #### List of pre-built Ingestors
 - `ThreatFox`: Retrieves daily ioc from `https://threatfox.abuse.ch/` and analyze them.
+- `MalwareBazaar`: Retrieves hourly samples from `https://bazaar.abuse.ch/` and analyze them.
 
 ### Playbooks
 

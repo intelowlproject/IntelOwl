@@ -12,7 +12,7 @@ plugin = {
         "module": "criminalip.criminalip_scan.CriminalIpScan",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
-    "name": "CriminalIp",
+    "name": "CriminalIpScan",
     "description": "[Criminal IP](https://www.criminalip.io/) is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.",
     "disabled": False,
     "soft_time_limit": 10,
@@ -184,7 +184,7 @@ def migrate(apps, schema_editor):
         module="criminalip.CriminalIp",
         base_path="api_app.analyzers_manager.observable_analyzers",
     )
-    pm.module = "criminalip.criminalip_scan.CriminalIp"
+    pm.module = "criminalip.criminalip.CriminalIp"
     pm.save()
     Model.objects.filter(name="CriminalIp").update(python_module=pm)
 
@@ -195,7 +195,7 @@ def reverse_migrate(apps, schema_editor):
     Model.objects.get(name=plugin["name"]).delete()
     PythonModule = apps.get_model("api_app", "PythonModule")
     pm = PythonModule.objects.get(
-        module="criminalip.criminalip_scan.CriminalIp",
+        module="criminalip.criminalip.CriminalIp",
         base_path="api_app.analyzers_manager.observable_analyzers",
     )
     pm.module = "criminalip.CriminalIp"

@@ -177,12 +177,15 @@ def migrate(apps, schema_editor):
                 _create_object(Parameter, param)
             for value in values:
                 _create_object(PluginConfig, value)
+
     PythonModule = apps.get_model("api_app", "PythonModule")
     # we will update the python module path
     pm = PythonModule.objects.get(
-        module="criminalip.criminalip_scan.CriminalIpScan",
+        module="criminalip.CriminalIp",
         base_path="api_app.analyzers_manager.observable_analyzers",
     )
+    pm.module = "criminalip.criminalip_scan.CriminalIp"
+    pm.save()
     Model.objects.filter(name="CriminalIp").update(python_module=pm)
 
 
@@ -192,9 +195,11 @@ def reverse_migrate(apps, schema_editor):
     Model.objects.get(name=plugin["name"]).delete()
     PythonModule = apps.get_model("api_app", "PythonModule")
     pm = PythonModule.objects.get(
-        module="criminalip.CriminalIp",
+        module="criminalip.criminalip_scan.CriminalIp",
         base_path="api_app.analyzers_manager.observable_analyzers",
     )
+    pm.module = "criminalip.CriminalIp"
+    pm.save()
     Model.objects.filter(name="CriminalIp").update(python_module=pm)
 
 

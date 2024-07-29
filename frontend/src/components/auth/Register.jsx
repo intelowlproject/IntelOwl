@@ -16,8 +16,7 @@ import useTitle from "react-use/lib/useTitle";
 
 import { ContentSection, Select } from "@certego/certego-ui";
 
-import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
-import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
+import { PUBLIC_URL } from "../../constants/environment";
 import {
   AfterRegistrationModalAlert,
   InviteOnlyAlert,
@@ -27,7 +26,6 @@ import { registerUser, checkConfiguration } from "./authApi";
 import {
   EmailValidator,
   PasswordValidator,
-  RecaptchaValidator,
   UserFieldsValidator,
   ProfileValidator,
   UsernameValidator,
@@ -69,7 +67,6 @@ const INITIAL_VALUES = {
   company_role: "",
   twitter_handle: "",
   discover_from: "other",
-  recaptcha: "noKey",
 };
 
 const REGISTRATION_FORM_STORAGE_KEY = "registrationForm";
@@ -117,7 +114,6 @@ const onValidate = (values) => {
       ...values,
       password: "",
       confirmPassword: "",
-      recaptcha: "noKey",
     }),
   );
   Object.keys(initialValues).forEach((key) => {
@@ -142,12 +138,6 @@ const onValidate = (values) => {
   }
   if (comparePasswordErrors.confirmPassword) {
     errors.confirmPassword = comparePasswordErrors.confirmPassword;
-  }
-
-  // recaptcha
-  const recaptchaErrors = RecaptchaValidator(values.recaptcha);
-  if (recaptchaErrors.recaptcha) {
-    errors.recaptcha = recaptchaErrors.recaptcha;
   }
 
   console.debug("Errors", errors);
@@ -190,7 +180,6 @@ export default function Register() {
         username: values.username,
         email: values.email,
         password: values.password,
-        recaptcha: values.recaptcha,
         profile: {
           company_name: values.company_name,
           company_role: values.company_role,
@@ -529,15 +518,6 @@ export default function Register() {
                       }
                     />
                   </Col>
-                </FormGroup>
-                {/* reCAPTCHA */}
-                <FormGroup className="mt-3 d-flex">
-                  {RECAPTCHA_SITEKEY && (
-                    <ReCAPTCHAInput
-                      id="RegisterForm__recaptcha"
-                      className="m-3 mx-auto"
-                    />
-                  )}
                 </FormGroup>
                 {/* Submit */}
                 <FormGroup className="mt-3 d-flex">

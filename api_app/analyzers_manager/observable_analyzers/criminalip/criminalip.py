@@ -1,3 +1,4 @@
+import logging
 from typing import Dict
 
 import requests
@@ -5,11 +6,12 @@ import requests
 from api_app.analyzers_manager import classes
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+from .criminalip_base import CriminalIpBase
 
-class CriminalIp(classes.ObservableAnalyzer):
-    url = "https://api.criminalip.io"
-    _api_key: str = None
+logger = logging.getLogger(__name__)
 
+
+class CriminalIp(classes.ObservableAnalyzer, CriminalIpBase):
     malicious_info: bool = True  # IP
     privacy_threat: bool = False
     is_safe_dns_server: bool = False
@@ -18,14 +20,12 @@ class CriminalIp(classes.ObservableAnalyzer):
     banner_stats: bool = False
     hash_view: bool = True  # domain
 
-    def update(self):
-        pass
-
     def make_request(self, url: str, params: Dict[str, str] = None) -> Dict:
-        headers = {"x-api-key": self._api_key}
-        resp = requests.get(url, headers=headers, params=params)
+        resp = requests.get(url, headers=self.getHeaders(), params=params)
         resp.raise_for_status()
-        return resp.json()
+        resp = resp.json()
+        logger.info(f"response from CriminalIp for {self.observable_name} -> {resp}")
+        return resp
 
     def run(self):
         URLs = {

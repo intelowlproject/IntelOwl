@@ -9,7 +9,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "criminalip_scan.CriminalIpScan",
+        "module": "criminalip.criminalip_scan.CriminalIpScan",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "CriminalIp_Scan",
@@ -32,7 +32,7 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "criminalip_scan.CriminalIpScan",
+            "module": "criminalip.criminalip_scan.CriminalIpScan",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "timeout",
@@ -43,7 +43,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "criminalip_scan.CriminalIpScan",
+            "module": "criminalip.criminalip_scan.CriminalIpScan",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "api_key",
@@ -58,7 +58,7 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "criminalip_scan.CriminalIpScan",
+                "module": "criminalip.criminalip_scan.CriminalIpScan",
                 "base_path": "api_app.analyzers_manager.observable_analyzers",
             },
             "name": "timeout",

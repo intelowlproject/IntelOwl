@@ -1,3 +1,4 @@
+import logging
 import time
 
 import requests
@@ -6,21 +7,23 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+from .criminalip_base import CriminalIpBase
 
-class CriminalIpScan(classes.ObservableAnalyzer):
-    url = "https://api.criminalip.io"
+logger = logging.getLogger(__name__)
+
+
+class CriminalIpScan(classes.ObservableAnalyzer, CriminalIpBase):
     status_endpoint = "/v1/domain/status/"
     scan_endpoint = "/v1/domain/scan/"
     private_scan_endpoint = "/v1/domain/scan/private"
     report_endpoint = "/v1/domain/report/"
-    _api_key: str = None
     timeout: int = 20
 
     def update(self):
         pass
 
     def run(self):
-        HEADER = {"x-api-key": self._api_key}
+        HEADER = self.getHeaders()
         poll_distance = 5  # seconds
         resp = requests.post(
             url=f"{self.url}{self.scan_endpoint}",
@@ -28,6 +31,10 @@ class CriminalIpScan(classes.ObservableAnalyzer):
             data={"query": self.observable_name},
         )
         resp.raise_for_status()
+        logger.info(
+            f"response from CriminalIp_scan for {self.observable_name} -> {resp.text}"
+        )
+
         id = resp.json()["data"]["scan_id"]
         while True:
             resp = requests.get(
@@ -46,7 +53,11 @@ class CriminalIpScan(classes.ObservableAnalyzer):
                 )
         resp = requests.get(url=f"{self.url}{self.report_endpoint}{id}", headers=HEADER)
         resp.raise_for_status()
-        return resp.json()
+        resp = resp.json()
+        logger.info(
+            f"response from CriminalIp_scan for {self.observable_name} -> {resp}"
+        )
+        return resp
 
     @classmethod
     def _monkeypatch(cls):

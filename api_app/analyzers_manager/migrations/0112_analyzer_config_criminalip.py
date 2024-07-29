@@ -9,7 +9,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "criminalip.CriminalIp",
+        "module": "criminalip.criminalip.CriminalIp",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "CriminalIp",
@@ -32,7 +32,7 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "criminalip.CriminalIp",
+            "module": "criminalip.criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "api_key",
@@ -43,7 +43,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "criminalip.CriminalIp",
+            "module": "criminalip.criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "malicious_info",
@@ -54,7 +54,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "criminalip.CriminalIp",
+            "module": "criminalip.criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "privacy_threat",
@@ -65,7 +65,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "criminalip.CriminalIp",
+            "module": "criminalip.criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "is_safe_dns_server",
@@ -76,7 +76,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "criminalip.CriminalIp",
+            "module": "criminalip.criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "suspicious_info",
@@ -87,7 +87,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "criminalip.CriminalIp",
+            "module": "criminalip.criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "banner_search",
@@ -98,7 +98,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "criminalip.CriminalIp",
+            "module": "criminalip.criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "banner_stats",

@@ -7,21 +7,14 @@ import useTitle from "react-use/lib/useTitle";
 import { ContentSection } from "@certego/certego-ui";
 
 import { UUID_REGEX } from "../../constants/regexConst";
-import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { resetPassword } from "./authApi";
-import { RECAPTCHA_SITEKEY } from "../../constants/environment";
-import {
-  PasswordValidator,
-  RecaptchaValidator,
-  ComparePassword,
-} from "./utils/validator";
+import { PasswordValidator, ComparePassword } from "./utils/validator";
 
 // constants
 const reMatcher = new RegExp(UUID_REGEX);
 const initialValues = {
   password: "",
   confirmPassword: "",
-  recaptcha: "noKey",
 };
 const onValidate = (values) => {
   const errors = {};
@@ -44,12 +37,6 @@ const onValidate = (values) => {
   }
   if (comparePasswordErrors.confirmPassword) {
     errors.confirmPassword = comparePasswordErrors.confirmPassword;
-  }
-
-  // recaptcha
-  const recaptchaErrors = RecaptchaValidator(values.recaptcha);
-  if (recaptchaErrors.recaptcha) {
-    errors.recaptcha = recaptchaErrors.recaptcha;
   }
 
   console.debug(errors);
@@ -81,7 +68,6 @@ export default function ResetPassword() {
       const body = {
         key,
         password: values.password,
-        recaptcha: values.recaptcha,
       };
       try {
         await resetPassword(body);
@@ -173,15 +159,6 @@ export default function ResetPassword() {
                     onChange={() => setPasswordShown(!passwordShown)}
                   />
                   <Label check>Show password</Label>
-                </FormGroup>
-                {/* reCAPTCHA */}
-                <FormGroup className="mt-3 d-flex">
-                  {RECAPTCHA_SITEKEY && (
-                    <ReCAPTCHAInput
-                      id="ResetPassword__recaptcha"
-                      className="m-3 mx-auto"
-                    />
-                  )}
                 </FormGroup>
                 {/* Submit */}
                 <FormGroup className="mt-3 d-flex">

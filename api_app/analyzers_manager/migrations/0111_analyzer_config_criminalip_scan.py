@@ -9,19 +9,19 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "criminalip.criminalip_scan.CriminalIpScan",
+        "module": "criminalip.CriminalIp",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
-    "name": "CriminalIp_Scan",
-    "description": "CriminalIp_Scan is an application of scan APIs provided by [CriminalIp](https://www.criminalip.io/) specifically for domains. Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.",
+    "name": "CriminalIp",
+    "description": "[Criminal IP](https://www.criminalip.io/) is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.",
     "disabled": False,
-    "soft_time_limit": 30,
+    "soft_time_limit": 10,
     "routing_key": "default",
     "health_check_status": True,
     "type": "observable",
     "docker_based": False,
     "maximum_tlp": "AMBER",
-    "observable_supported": ["domain"],
+    "observable_supported": ["ip", "domain", "generic"],
     "supported_filetypes": [],
     "run_hash": False,
     "run_hash_type": "",
@@ -32,52 +32,84 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "criminalip.criminalip_scan.CriminalIpScan",
+            "module": "criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
-        "name": "timeout",
-        "type": "int",
-        "description": "timeout for polling of status endpoint",
+        "name": "api_key",
+        "type": "str",
+        "description": "api key for criminal ip",
+        "is_secret": True,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "criminalip.CriminalIp",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "malicious_info",
+        "type": "bool",
+        "description": "for IP, default endpoint",
         "is_secret": False,
         "required": False,
     },
     {
         "python_module": {
-            "module": "criminalip.criminalip_scan.CriminalIpScan",
+            "module": "criminalip.CriminalIp",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
-        "name": "api_key",
-        "type": "str",
-        "description": "api key for criminal ip scan",
-        "is_secret": True,
+        "name": "privacy_threat",
+        "type": "bool",
+        "description": "for IP, privacy-threat endpoint",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "criminalip.CriminalIp",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "is_safe_dns_server",
+        "type": "bool",
+        "description": "for IP, is-safe-dns-server endpoint",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "criminalip.CriminalIp",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "suspicious_info",
+        "type": "bool",
+        "description": "for IP, suspicious_info endpoint",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "criminalip.CriminalIp",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "banner_search",
+        "type": "bool",
+        "description": "for generics",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "criminalip.CriminalIp",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "banner_stats",
+        "type": "bool",
+        "description": "for generics",
+        "is_secret": False,
         "required": False,
     },
 ]
 
-values = [
-    {
-        "parameter": {
-            "python_module": {
-                "module": "criminalip.criminalip_scan.CriminalIpScan",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
-            },
-            "name": "timeout",
-            "type": "int",
-            "description": "timeout for polling of status endpoint",
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": "CriminalIp_Scan",
-        "connector_config": None,
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": 20,
-        "updated_at": "2024-07-24T16:54:15.685411Z",
-        "owner": None,
-    }
-]
+values = []
 
 
 def _get_real_obj(Model, field, value):

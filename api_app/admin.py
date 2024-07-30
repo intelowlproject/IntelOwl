@@ -1,8 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from gettext import ngettext
 from typing import Any
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin import widgets
 from django.db.models import JSONField, ManyToManyField
 from django.http import HttpRequest
@@ -193,6 +194,7 @@ class AbstractConfigAdminView(CustomAdminView):
     list_filter = ("disabled",)
     # allow to clone the object
     save_as = True
+    actions = ["disable", "enable"]
 
     @admin.display(description="Disabled in orgs")
     def disabled_in_orgs(self, instance: AbstractConfig):
@@ -201,6 +203,34 @@ class AbstractConfigAdminView(CustomAdminView):
                 "organization__name", flat=True
             )
         )
+
+    def disable(self, request, queryset):
+        counter = queryset.update(disabled=True)
+        self.message_user(
+            request,
+            ngettext(
+                f"{counter} {queryset.model._meta.verbose_name} was disabled.",
+                f"{counter} {queryset.model._meta.verbose_name_plural} were disabled.",
+                counter,
+            ),
+            messages.SUCCESS,
+        )
+
+    disable.short_description = "Disable configurations"
+
+    def enable(self, request, queryset):
+        counter = queryset.update(disabled=False)
+        self.message_user(
+            request,
+            ngettext(
+                f"{counter} {queryset.model._meta.verbose_name} was enabled.",
+                f"{counter} {queryset.model._meta.verbose_name_plural} were enabled.",
+                counter,
+            ),
+            messages.SUCCESS,
+        )
+
+    enable.short_description = "Enable configurations"
 
 
 class PythonConfigAdminView(AbstractConfigAdminView):

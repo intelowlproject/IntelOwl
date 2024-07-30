@@ -305,7 +305,7 @@ export const pivotTableColumns = [
     id: "playbook",
     accessor: "playbooks_choice",
     Cell: ({ value }) => (
-      <TableCell isCopyToClipboard isTruncate value={value} />
+      <TableCellList value={value} ulKey={value} size={20} />
     ),
     Filter: SelectColumnFilter,
     maxWidth: 145,

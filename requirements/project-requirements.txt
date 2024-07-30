@@ -79,7 +79,7 @@ blint==2.1.5
 hfinger==0.2.2
 permhash==0.1.4
 ail_typo_squatting==2.7.4
-selenium==4.20.0
+selenium==4.23.0
 iocextract==1.16.1
 ioc-finder==7.0.0
 

@@ -303,7 +303,7 @@ export const pivotTableColumns = [
   {
     Header: "Playbook to execute",
     id: "playbook",
-    accessor: "playbook_to_execute",
+    accessor: "playbooks_choice",
     Cell: ({ value }) => (
       <TableCell isCopyToClipboard isTruncate value={value} />
     ),

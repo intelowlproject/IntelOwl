@@ -32,7 +32,7 @@ class IPDataModel(models.Model):
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns
-    asn = models.IntegerField(null=True)  # BGPRanking
+    asn = models.IntegerField(null=True)  # BGPRanking, MaxMind
     asn_rank = models.DecimalField(null=True)  # BGPRanking
     circl_pssl_certificates = models.JSONField(null=True)  # CIRCL_PSSL
     behavior = models.CharField(null=True)  # Crowdsec
@@ -43,6 +43,11 @@ class IPDataModel(models.Model):
     riot = models.BooleanField(null=True)  # GreyNoise
     org_name = models.CharField(null=True)  # GreyNoise
     vx_family = models.CharField(null=True)  # HybridAnalysisObservable
+    country = models.CharField(null=True)  # MaxMind, AbuseIPDB
+    country_code = models.CharField(null=True)  # MaxMind, AbuseIPDB
+    registered_country = models.CharField(null=True)  # MaxMind, AbuseIPDB
+    registered_country_code = models.CharField(null=True)  # MaxMind, AbuseIPDB
+    isp = models.CharField(null=True)  # AbuseIPDB
 
 
 class HashDataModel(models.Model):

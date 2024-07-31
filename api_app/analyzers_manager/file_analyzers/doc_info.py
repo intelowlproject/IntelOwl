@@ -10,8 +10,8 @@ import re
 import zipfile
 from re import sub
 from typing import Dict, List
-from xml import etree
 from xml.dom import minidom
+from xml.etree import ElementTree
 
 import docxpy
 import olefile
@@ -36,6 +36,11 @@ except Exception as e:
 XML_H_SCHEMA = (
     "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
 )
+SCHEMA_DOMAINS = [
+    "schemas.openxmlformats.org",
+    "schemas-microsoft-com",
+    "schemas.microsoft.com",
+]
 
 
 class CannotDecryptException(Exception):
@@ -123,19 +128,14 @@ class DocInfo(FileAnalyzer):
                 if analyzer_results:
                     analyze_macro_results = []
                     for kw_type, keyword, description in analyzer_results:
-                        if kw_type != "Hex String":
+                        if kw_type not in ("Hex String", "Base64 String"):
                             analyze_macro_result = {
                                 "type": kw_type,
                                 "keyword": keyword,
                                 "description": description,
                             }
                             analyze_macro_results.append(analyze_macro_result)
-                        if kw_type == "IOC" and description == "URL":
-                            results["uris"].append(keyword)
                     self.olevba_results["analyze_macro"] = analyze_macro_results
-
-                results["extracted_CVEs"] = self.analyze_for_cve()
-                results["uris"].extend(self.get_external_relationships())
 
         except CannotDecryptException as e:
             logger.info(e)
@@ -158,11 +158,34 @@ class DocInfo(FileAnalyzer):
             MimeTypes.ZIP2.value,
         ]:
             results["follina"] = self.analyze_for_follina_cve()
+            results["uris"].extend(self.get_docx_urls())
 
-        results["uris"].extend(self.get_docx_urls())
-        results["uris"] = list(set(results["uris"]))
+        results["extracted_CVEs"] = self.analyze_for_cve()
+        results["uris"].extend(self.get_external_relationships())
+        results["uris"].extend(self.extract_urls_from_IOCs())
+
+        results["uris"] = list(set(results["uris"]))  # uniq
 
         return results
+
+    def extract_urls_from_IOCs(self):
+        urls = []
+        try:
+            vbaparser = VBA_Parser(self.filepath)
+            analyzer_results = vbaparser.analyze_macros(True, True)
+        except Exception as e:
+            error_message = f"job_id {self.job_id} vba parser failed. Error: {e}"
+            logger.warning(error_message, stack_info=True)
+            self.report.errors.append(error_message)
+        else:
+            # it gives None if it does not find anything
+            if analyzer_results:
+                for kw_type, keyword, description in analyzer_results:
+                    if kw_type == "IOC" and description == "URL":
+                        urls.append(keyword)
+            if vbaparser:
+                vbaparser.close()
+        return urls
 
     def analyze_for_follina_cve(self) -> List[str]:
         hits = []
@@ -193,66 +216,115 @@ class DocInfo(FileAnalyzer):
     def analyze_for_cve(self) -> List:
         pattern = r"CVE-\d{4}-\d{4,7}"
         results = []
-        ole = olefile.OleFileIO(self.filepath)
-        for entry in sorted(ole.listdir(storages=True)):
-            clsid = ole.getclsid(entry)
-            if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
-                if "cve" in clsid_text.lower():
-                    results.append(
-                        {
-                            "clsid": clsid,
-                            "info": clsid_text,
-                            "CVEs": list(re.findall(pattern, clsid_text)),
-                        }
-                    )
+        try:
+            olefile.isOleFile(self.filepath)
+            ole = olefile.OleFileIO(self.filepath)
+        except olefile.olefile.NotOleFileError:
+            # not an OLE2 structured storage file
+            # do not proceed
+            return results
+        else:
+            for entry in sorted(ole.listdir(storages=True)):
+                clsid = ole.getclsid(entry)
+                if clsid_text := KNOWN_CLSIDS.get(clsid.upper(), None):
+                    if "cve" in clsid_text.lower():
+                        results.append(
+                            {
+                                "clsid": clsid,
+                                "info": clsid_text,
+                                "CVEs": list(re.findall(pattern, clsid_text)),
+                            }
+                        )
         return results
 
     def get_external_relationships(self) -> List:
         external_relationships = []
-        oid = oleid.OleID(self.filepath)
-        if sum([i.value for i in oid.check() if i.id == "ext_rels"]) > 1:
-            xml_parser = XmlParser(self.filepath)
-            for relationship, target in oleobj.find_external_relationships(xml_parser):
-                external_relationships.append(
-                    {
-                        "relationship": relationship,
-                        "target": target,
-                    }
-                )
+        try:
+            olefile.isOleFile(self.filepath)
+            oid = oleid.OleID(self.filepath)
+        except olefile.olefile.NotOleFileError:
+            # not an OLE2 structured storage file
+            # do not proceed
+            return external_relationships
+        else:
+            if sum([i.value for i in oid.check() if i.id == "ext_rels"]) > 1:
+                xml_parser = XmlParser(self.filepath)
+                for relationship, target in oleobj.find_external_relationships(
+                    xml_parser
+                ):
+                    external_relationships.append(
+                        {
+                            "relationship": relationship,
+                            "target": target,
+                        }
+                    )
         return external_relationships
 
     def get_docx_urls(self) -> List:
         urls = []
+        pages_count = 0
 
         try:
             document = zipfile.ZipFile(self.filepath)  # check if docx document
-            dxml = document.read("docProps/app.xml")
-            pages_count = (
-                minidom.parseString(dxml)
-                .getElementsByTagName("Pages")[0]
-                .childNodes[0]
-                .nodeValue
-            )
-        except Exception:
-            return []
-
-        # extract urls from text
-        if pages_count == 1:
+        except zipfile.BadZipFile as e:
+            error_message = f"job_id {self.job_id} docx bad zip file: {e}"
+            logger.warning(error_message, stack_info=False)
+            self.report.errors.append(error_message)
+        else:
             try:
-                # extract urls from text
-                doc = docxpy.DOCReader(self.filepath)
-                urls.extend(doc.data["links"])
-
-                # also parse xml in case we missed some links
-                for relationship in list(
-                    etree.fromstring(document.read("word/_rels/document.xml.rels"))
-                ):
-                    if relationship["Type"] == XML_H_SCHEMA:
-                        urls.append(relationship["Target"])
-            except Exception:
+                dxml = document.read("docProps/app.xml")
+                pages_count = int(
+                    minidom.parseString(dxml)
+                    .getElementsByTagName("Pages")[0]
+                    .childNodes[0]
+                    .nodeValue
+                )
+            except KeyError:
+                # number of pages not found, maybe the file is malformed
+                # proceed anyway in order to not lose the possibly contained IOCs
                 pass
 
-        return list(set(urls))  # uniq
+            if pages_count <= 1:
+                # extract urls from text
+                try:
+                    doc = docxpy.DOCReader(self.filepath)
+                    doc.process()
+                except Exception as e:
+                    error_message = (
+                        f"job_id {self.job_id} docxpy url extraction failed. Error: {e}"
+                    )
+                    logger.warning(error_message, stack_info=True)
+                    self.report.errors.append(error_message)
+                else:
+                    # decode bytes like links
+                    links = [
+                        link.decode() if isinstance(link, bytes) else link
+                        for link in doc.data["links"][0]
+                    ]
+                    # remove empty strings
+                    links = [link for link in links if link != ""]
+                    urls.extend(links)
+                # also parse xml in case docxpy missed some links
+                try:
+                    for relationship in list(
+                        ElementTree.fromstring(
+                            document.read("word/_rels/document.xml.rels")
+                        )
+                    ):
+                        # exclude xml schema urls
+                        if relationship.attrib["Type"] == XML_H_SCHEMA and any(
+                            domain in relationship.attrib["Target"]
+                            for domain in SCHEMA_DOMAINS
+                        ):
+                            urls.append(relationship.attrib["Target"])
+                except KeyError as e:
+                    error_message = (
+                        f"job_id {self.job_id} no xml rels found. Error: {e}"
+                    )
+                    logger.warning(error_message, stack_info=False)
+                    self.report.errors.append(error_message)
+
+        return urls
 
     def analyze_msodde(self):
         try:

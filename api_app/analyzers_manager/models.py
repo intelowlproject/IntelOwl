@@ -87,6 +87,7 @@ class MimeTypes(models.TextChoices):
     CRX = "application/x-chrome-extension"
     JSON = "application/json"
     EXECUTABLE = "application/x-executable"
+    LNK = "application/x-ms-shortcut"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:

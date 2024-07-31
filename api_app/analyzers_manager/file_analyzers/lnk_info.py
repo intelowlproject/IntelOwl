@@ -14,11 +14,18 @@ logger = logging.getLogger(__name__)
 class LnkInfo(FileAnalyzer):
     def run(self):
         result = {"uris": []}
-
-        args = pylnk3.parse(self.filepath).arguments.split()
-        for a in args:
-            if ObservableTypes.calculate(a) == ObservableTypes.URL:
-                result["uris"].append(a)
+        try:
+            parsed = pylnk3.parse(self.filepath)
+        except Exception as e:
+            error_message = f"job_id {self.job_id} cannot parse lnk file. Error: {e}"
+            logger.warning(error_message, stack_info=False)
+            self.report.errors.append(error_message)
+        else:
+            if arguments := getattr(parsed, "arguments", None):
+                args = arguments.split()
+                for a in args:
+                    if ObservableTypes.calculate(a) == ObservableTypes.URL:
+                        result["uris"].append(a)
 
         result["uris"] = list(set(result["uris"]))
         return result

@@ -112,13 +112,6 @@ Configuration required to enable integration with Slack:
 * `SLACK_TOKEN`: Slack token of your Slack application that will be used to send/receive notifications
 * `DEFAULT_SLACK_CHANNEL`: ID of the Slack channel you want to post the message to
 
-Configuration required to enable Re-Captcha in the Login and the Registration Page:
-In the `docker/env_file_app`:
-* `USE_RECAPTCHA`: if you want to use recaptcha on your login
-* `RECAPTCHA_SECRET_KEY`: your recaptcha secret key
-In the `frontend/public/env.js`:
-* `RECAPTCHA_SITEKEY`: Recaptcha Key for your site
-
 Configuration required to have InteOwl sending Emails (registration requests, mail verification, password reset/change, etc)
 * `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager (example: `noreply@mydomain.com`)
 * `DEFAULT_EMAIL`: email address used for correspondence with users (example: `info@mydomain.com`)

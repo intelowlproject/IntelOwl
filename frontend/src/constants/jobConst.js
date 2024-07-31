@@ -85,6 +85,7 @@ export const FileMimeTypes = Object.freeze({
   X_SHELLSCRIPT: "text/x-shellscript",
   CRX: "application/x-chrome-extension",
   JSON: "application/json",
+  EXECUTABLE: "application/x-executable",
 });
 
 export const ObservableClassifications = Object.freeze({

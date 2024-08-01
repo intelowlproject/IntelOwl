@@ -54,7 +54,7 @@ class IPDataModel(models.Model):
     is_tor_exit_node = models.BooleanField(null=True)  # TorProject, Crowdsec
 
 
-class HashDataModel(models.Model):
+class FileDataModel(models.Model):
     classification_tags = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # HybridAnalysisFileAnalyzer

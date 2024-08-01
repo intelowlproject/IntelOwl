@@ -12,9 +12,9 @@ class IETFReport(models.Model):
 
 class DomainDataModel(models.Model):
     evaluation = models.CharField(null=True)
-    classification = models.CharField(
-        null=True
-    )  # HybridAnalysisObservable (verdict), BasicMaliciousDetector
+    # HybridAnalysisObservable (verdict), BasicMaliciousDetector,
+    # GoogleSafeBrowsing, Crowdsec
+    classification = models.CharField(null=True)
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns
@@ -22,13 +22,14 @@ class DomainDataModel(models.Model):
     related_url = models.URLField(
         null=True
     )  # Crowdsec (link), UrlHaus (external_references)
+    threats = pg_fields.ArrayField(models.CharField(), null=True)  # GoogleSafeBrowsing
 
 
 class IPDataModel(models.Model):
     evaluation = models.CharField(null=True)
-    classification = models.CharField(
-        null=True
-    )  # Crowdsec, GreyNoise, HybridAnalysisObservable (verdict), BasicMaliciousDetector
+    # Crowdsec, GreyNoise, HybridAnalysisObservable (verdict),
+    # BasicMaliciousDetector, GoogleSafeBrowsing
+    classification = models.CharField(null=True)
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns
@@ -48,6 +49,9 @@ class IPDataModel(models.Model):
     registered_country = models.CharField(null=True)  # MaxMind, AbuseIPDB
     registered_country_code = models.CharField(null=True)  # MaxMind, AbuseIPDB
     isp = models.CharField(null=True)  # AbuseIPDB
+    threats = pg_fields.ArrayField(models.CharField(), null=True)  # GoogleSafeBrowsing
+    is_anonymizer = models.BooleanField(null=True)  # TorProject, Crowdsec
+    is_tor_exit_node = models.BooleanField(null=True)  # TorProject, Crowdsec
 
 
 class HashDataModel(models.Model):

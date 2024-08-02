@@ -37,8 +37,8 @@ class IPDataModel(models.Model):
     asn_rank = models.DecimalField(null=True)  # BGPRanking
     circl_pssl_certificates = models.JSONField(null=True)  # CIRCL_PSSL
     behavior = models.CharField(null=True)  # Crowdsec
-    related_url = models.URLField(
-        null=True
+    related_urls = pg_fields.ArrayField(
+        models.URLField(), null=True
     )  # Crowdsec (link), UrlHaus (external_references)
     noise = models.BooleanField(null=True)  # GreyNoise
     riot = models.BooleanField(null=True)  # GreyNoise
@@ -67,3 +67,6 @@ class FileDataModel(models.Model):
     compromised_hosts = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # HybridAnalysisFileAnalyzer
+    related_urls = pg_fields.ArrayField(
+        models.URLField(), null=True
+    )  # Crowdsec (link), UrlHaus (external_references), BoxJs

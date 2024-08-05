@@ -55,6 +55,7 @@ class IPDataModel(models.Model):
 
 
 class FileDataModel(models.Model):
+    evaluation = models.CharField(null=True)  # Cymru
     classification_tags = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # HybridAnalysisFileAnalyzer
@@ -70,3 +71,11 @@ class FileDataModel(models.Model):
     related_urls = pg_fields.ArrayField(
         models.URLField(), null=True
     )  # Crowdsec (link), UrlHaus (external_references), BoxJs
+    signatures = pg_fields.ArrayField(
+        models.CharField(), null=True
+    )  # ClamAvFileAnalyzer
+    family = models.CharField(null=True)
+    yara_rules = pg_fields.ArrayField(models.CharField(), null=True)
+    comments = pg_fields.ArrayField(models.CharField(), null=True)
+    file_information = pg_fields.ArrayField(models.JSONField(), null=True)
+    related_threats = pg_fields.ArrayField(models.CharField(), null=True)

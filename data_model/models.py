@@ -12,9 +12,10 @@ class IETFReport(models.Model):
 
 class DomainDataModel(models.Model):
     evaluation = models.CharField(null=True)
-    # HybridAnalysisObservable (verdict), BasicMaliciousDetector,
+    classification = models.CharField(
+        null=True
+    )  # HybridAnalysisObservable (verdict), BasicMaliciousDetector,
     # GoogleSafeBrowsing, Crowdsec
-    classification = models.CharField(null=True)
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns
@@ -27,9 +28,10 @@ class DomainDataModel(models.Model):
 
 class IPDataModel(models.Model):
     evaluation = models.CharField(null=True)
-    # Crowdsec, GreyNoise, HybridAnalysisObservable (verdict),
+    classification = models.CharField(
+        null=True
+    )  # Crowdsec, GreyNoise, HybridAnalysisObservable (verdict),
     # BasicMaliciousDetector, GoogleSafeBrowsing
-    classification = models.CharField(null=True)
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns
@@ -55,13 +57,15 @@ class IPDataModel(models.Model):
 
 
 class FileDataModel(models.Model):
-    evaluation = models.CharField(null=True)  # Cymru
+    evaluation = models.CharField(
+        null=True
+    )  # Cymru (found), Cuckoo (malscore), Intezer (verdict/sub_verdict)
     classification_tags = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # HybridAnalysisFileAnalyzer
     tags = pg_fields.ArrayField(
         models.CharField(), null=True
-    )  # HybridAnalysisFileAnalyzer
+    )  # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB
     domains = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # HybridAnalysisFileAnalyzer
@@ -70,12 +74,25 @@ class FileDataModel(models.Model):
     )  # HybridAnalysisFileAnalyzer
     related_urls = pg_fields.ArrayField(
         models.URLField(), null=True
-    )  # Crowdsec (link), UrlHaus (external_references), BoxJs
+    )  # Crowdsec (link), UrlHaus (external_references), BoxJs,
+    # Cuckoo (result_url/permalink), Intezer (link/analysis_url),
+    # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink)
     signatures = pg_fields.ArrayField(
         models.CharField(), null=True
-    )  # ClamAvFileAnalyzer
-    family = models.CharField(null=True)
-    yara_rules = pg_fields.ArrayField(models.CharField(), null=True)
-    comments = pg_fields.ArrayField(models.CharField(), null=True)
-    file_information = pg_fields.ArrayField(models.JSONField(), null=True)
-    related_threats = pg_fields.ArrayField(models.CharField(), null=True)
+    )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer
+    family = models.CharField(null=True)  # Intezer (family_name), Cuckoo, MwDB
+    yara_rules = pg_fields.ArrayField(
+        models.JSONField(), null=True
+    )  # MalwareBazaarFileAnalyzer
+    comments = pg_fields.ArrayField(
+        models.CharField(), null=True
+    )  # MalwareBazaarFileAnalyzer(?)
+    file_information = pg_fields.ArrayField(
+        models.JSONField(), null=True
+    )  # MalwareBazaarFileAnalyzer, OneNoteInfo
+    # (files)
+    related_threats = pg_fields.ArrayField(
+        models.CharField(), null=True
+    )  # MalwareBazaarFileAnalyzer(?)
+    peepdf_stats = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
+    pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo

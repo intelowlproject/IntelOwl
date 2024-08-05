@@ -96,3 +96,5 @@ class FileDataModel(models.Model):
     )  # MalwareBazaarFileAnalyzer(?)
     peepdf_stats = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
     pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
+    imphash = models.CharField(null=True)  # PeInfo
+    type = models.CharField(null=True)  # PeInfo

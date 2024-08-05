@@ -18,6 +18,10 @@ class PDFInfo(FileAnalyzer):
     def flatten(list_of_lists: List[List[Any]]) -> List[Any]:
         return [item for sublist in list_of_lists for item in sublist]
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         self.results = {"peepdf": {}, "pdfid": {}}
         # the analysis fails only when BOTH fails
@@ -25,6 +29,19 @@ class PDFInfo(FileAnalyzer):
         pdfid_success = self.__pdfid_analysis()
         if not peepdf_success and not pdfid_success:
             raise AnalyzerRunException("both peepdf and pdfid failed")
+
+        # pivot uris in the pdf only if we have one page
+        if "reports" in self.results["pdfid"] and isinstance(
+            self.results["pdfid"]["reports"], list
+        ):
+            for elem in self.results["pdfid"]["reports"]:
+                if "/Page" in elem and elem["/Page"] == 1:
+                    self.results["uris"] = []
+                    for s in self.results["peepdf"]["stats"]:
+                        self.results["uris"].extend(s["uris"])
+
+        logger.info(f"extracted urls from file {self.md5}: {self.results['uris']}")
+
         return self.results
 
     def __peepdf_analysis(self):

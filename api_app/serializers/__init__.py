@@ -1,18 +1,16 @@
 from django.conf import settings
-from django.utils.timezone import now
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import Field
-from rest_framework.serializers import ModelSerializer
 
 from api_app.interfaces import OwnershipAbstractModel
 from certego_saas.apps.organization.organization import Organization
+from certego_saas.ext.upload.elastic import BISerializer
 
 
-class AbstractBIInterface(ModelSerializer):
+class AbstractBIInterface(BISerializer):
     application = rfs.CharField(read_only=True, default="IntelOwl")
     environment = rfs.SerializerMethodField(method_name="get_environment")
-    timestamp: Field
     username: Field
     name: Field
     class_instance = rfs.SerializerMethodField(
@@ -23,10 +21,7 @@ class AbstractBIInterface(ModelSerializer):
     end_time: Field
 
     class Meta:
-        fields = [
-            "application",
-            "environment",
-            "timestamp",
+        fields = BISerializer.Meta.fields + [
             "username",
             "name",
             "class_instance",
@@ -48,12 +43,8 @@ class AbstractBIInterface(ModelSerializer):
             return "test"
 
     @staticmethod
-    def to_elastic_dict(data):
-        return {
-            "_source": data,
-            "_index": settings.ELASTICSEARCH_BI_INDEX + "-" + now().strftime("%Y.%m"),
-            "_op_type": "index",
-        }
+    def get_index():
+        return settings.ELASTICSEARCH_BI_INDEX
 
 
 class ModelWithOwnershipSerializer(rfs.ModelSerializer):

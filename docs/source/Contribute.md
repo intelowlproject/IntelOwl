@@ -70,6 +70,8 @@ Now, you can execute IntelOwl in development mode by selecting the mode `test` w
 ./start test up
 ```
 
+A user `admin` with password `admin` should automatically be created for development instances.
+
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
 
 - if you changed the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
@@ -337,7 +339,11 @@ To do so, some utility classes have been made:
   </tr>
   <tr>
     <td class="tg-7n4c">VisualizableLevel</td>
-    <td class="tg-0pky">Each level corresponds to a line in the final frontend visualizations. Every level is made of a <span class="tg-zh46">VisualizableHorizontalList</span>.</td>
+    <td class="tg-0pky">
+      Each level corresponds to a line in the final frontend visualizations. Every level is made of a 
+      <span class="tg-zh46">VisualizableHorizontalList</span>.
+      The dimension of the level can be customized with the size parameter (1 is the biggest, 6 is the smallest). 
+    </td>
     <td class="tg-c3ow"><img alt="Visualizable Level example" src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/visualizableLevel_example.png"></td>
   </tr>
   <tr>

@@ -2,7 +2,10 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
-## [v6.0.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.1)
+## [v6.0.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.4)
+Mostly adjusts and fixes with few new analyzers: Vulners and AILTypoSquatting Library.
+
+## [v6.0.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.2)
 Major fixes and adjustments. We improved the documentation to help the transition to the new major version.
 
 We added **Pivot** buttons to enable manual Pivoting from an Observable/File analysis to another. See [Doc](https://intelowl.readthedocs.io/en/latest/Usage.html#pivots) for more info

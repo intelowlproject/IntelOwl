@@ -5,18 +5,18 @@ import { MdInfoOutline } from "react-icons/md";
 
 import {
   Loader,
-  ElasticTimePicker,
   SyncButton,
   TableHintIcon,
   useDataTable,
-  useTimePickerStore,
 } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 import { jobTableColumns } from "./jobTableColumns";
+import { TimePicker } from "../../common/TimePicker";
 
 import { JOB_BASE_URI } from "../../../constants/apiURLs";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
+import { useTimePickerStore } from "../../../stores/useTimePickerStore";
 
 // constants
 const toPassTableProps = {
@@ -40,8 +40,10 @@ export default function JobsTable() {
   // page title
   useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
 
-  // consume zustand store
-  const { range, fromTimeIsoStr, onTimeIntervalChange } = useTimePickerStore();
+  const [toDateValue, fromDateValue] = useTimePickerStore((state) => [
+    state.toDateValue,
+    state.fromDateValue,
+  ]);
 
   // state
   const [initialLoading, setInitialLoading] = React.useState(true);
@@ -51,7 +53,8 @@ export default function JobsTable() {
     {
       url: JOB_BASE_URI,
       params: {
-        received_request_time__gte: fromTimeIsoStr,
+        received_request_time__gte: fromDateValue,
+        received_request_time__lte: toDateValue,
       },
       initialParams: {
         ordering: "-received_request_time",
@@ -98,12 +101,7 @@ export default function JobsTable() {
               </div>
             </Col>
             <Col className="align-self-center">
-              <ElasticTimePicker
-                className="float-end"
-                size="sm"
-                defaultSelected={range}
-                onChange={onTimeIntervalChange}
-              />
+              <TimePicker />
             </Col>
           </Row>
           {/* Actions */}

@@ -85,8 +85,3 @@ WEBSOCKETS_URL=redis://redis:6379/0
 
 FLOWER_USER=flower
 FLOWER_PWD=flower
-
-USE_RECAPTCHA=False
-# drf-recaptcha
-## localhost, internal deployments
-RECAPTCHA_SECRET_KEY=""

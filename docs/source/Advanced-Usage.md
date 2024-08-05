@@ -60,19 +60,9 @@ After a user registration has been made, an email is sent to the user to verify 
 Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
 If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
 
-To have the "Registration" page to work correctly, you must configure some variables before starting IntelOwl. See [Optional Environment Configuration](/Installation.md#other-optional-configuration-to-enable-specific-services-features)
+To have the "Registration" page to work correctly, you must configure some variables before starting IntelOwl. See [Optional Environment Configuration](https://intelowl.readthedocs.io/en/latest/Installation.html#other-optional-configuration-to-enable-specific-services-features)
 
 In a development environment the emails that would be sent are written to the standard output.
-
-#### Recaptcha configuration
-The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
-
-If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE).
-
-Then you need to add the generated Recaptcha Secret in the `RECAPTCHA_SECRET_KEY` value in the `env_file_app` file.
-
-Afterwards you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `frontend/public/env.js` file.
-In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
 
 
 ## Optional Analyzers

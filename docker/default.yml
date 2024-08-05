@@ -12,7 +12,6 @@ services:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
-      - ../frontend/public/env.js:/var/www/reactapp/env.js # this is needed because we have to mount the file from the server to the image BEFORE staticfiles
       - static_content:/opt/deploy/intel_owl/static
       - shared_files:/opt/deploy/files_required
     entrypoint:
@@ -26,8 +25,8 @@ services:
       test: [ "CMD-SHELL", "nc -z localhost 8001 || exit 1" ]
       interval: 5s
       timeout: 2s
-      start_period: 3s
-      retries: 15
+      start_period: 300s
+      retries: 2
 
   daphne:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
@@ -52,7 +51,6 @@ services:
       uwsgi:
         condition: service_healthy
 
-
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_nginx
@@ -64,8 +62,6 @@ services:
       - ../configuration/nginx/locations.conf:/etc/nginx/locations.conf
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
-    ports:
-      - "80:80"
     depends_on:
       uwsgi:
         condition: service_healthy

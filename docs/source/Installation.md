@@ -13,6 +13,7 @@ In some systems you could find pre-installed older versions. Please check this a
 <ul>
 <li>The project uses public docker images that are available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
 <li>IntelOwl is tested and supported to work in a Debian distro. More precisely we suggest using Ubuntu. Other Linux-based OS <i>should</i> work but that has not been tested much. It <i>may</i> also run on Windows, but that is not officially supported.</li>
+<li>IntelOwl does not support ARM at the moment. We'll fix this with the next v6.0.5 release
 <li>Before installing remember that you must comply with the <a href="https://github.com/certego/IntelOwl/blob/master/LICENSE">LICENSE</a> and the <a href="https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md">Legal Terms</a></li>
 </ul>
 </div>
@@ -35,7 +36,10 @@ However, if you feel lazy, you could just install and test IntelOwl with the fol
 git clone https://github.com/intelowlproject/IntelOwl
 cd IntelOwl/
 
-# verify installed dependencies and start the app
+# run helper script to verify installed dependencies and configure basic stuff
+./initialize.sh
+
+# start the app
 ./start prod up
 # now the application is running on http://localhost:80
 
@@ -108,13 +112,6 @@ Configuration required to enable integration with Slack:
 * `SLACK_TOKEN`: Slack token of your Slack application that will be used to send/receive notifications
 * `DEFAULT_SLACK_CHANNEL`: ID of the Slack channel you want to post the message to
 
-Configuration required to enable Re-Captcha in the Login and the Registration Page:
-In the `docker/env_file_app`:
-* `USE_RECAPTCHA`: if you want to use recaptcha on your login
-* `RECAPTCHA_SECRET_KEY`: your recaptcha secret key
-In the `frontend/public/env.js`:
-* `RECAPTCHA_SITEKEY`: Recaptcha Key for your site
-
 Configuration required to have InteOwl sending Emails (registration requests, mail verification, password reset/change, etc)
 * `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager (example: `noreply@mydomain.com`)
 * `DEFAULT_EMAIL`: email address used for correspondence with users (example: `info@mydomain.com`)
@@ -181,9 +178,12 @@ There are 3 options to execute the web server:
 
     We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
 
-    Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
+    Before using the production deployment, you should change the configuration file `docker/traefik_prod.yml` by customising every line which has a "# CHANGE THIS" comment appended to reflect your environment. For a detailed explanation follow the official documentation: [Traefix doc](https://doc.traefik.io/traefik/).
+
+    The development deployment is ready to go and running on localhost. 
     
-    After the configuration is done, you can add the option `--traefik` while executing [`./start`](#run)
+    After the configuration is done, you can add the option `--traefik_prod` for a production ready deployment while executing [`./start`](#run)
+    If you just want to test things out you can add the option `--traefik_local` for a development deployment.
 
 ## Run
 
@@ -300,6 +300,7 @@ Before upgrading, some important things should be checked by the administrator:
   * This change is transparent if you use our `start` script to run IntelOwl. That would spawn a Redis instance instead of a Rabbit-MQ one locally.
   * If you were using an external broker like AWS SQS or a managed Rabbit-MQ, they are still supported but we suggest to move to a Redis supported service to simplify the architecture (because Redis is now mandatory for Websockets)
 * Support for multiple jobs with multiple playbooks has been removed. Every Observable or File in the request will be processed by a single playbook. 
+* If you have problems with something like: `daphne.log does not exist`, please create this directory with `mkdir /var/lib/docker/volumes/intel_owl_generic_logs/_data/asgi`
 * We upgraded the base PostgreSQL image from version 12 to version 16. You have 2 choice:
   * remove your actual database and start from scratch with a new one
   * maintain your database and do not update Postgres. This could break the application at anytime because we do not support it anymore.

@@ -76,11 +76,14 @@ class FileDataModel(models.Model):
         models.URLField(), null=True
     )  # Crowdsec (link), UrlHaus (external_references), BoxJs,
     # Cuckoo (result_url/permalink), Intezer (link/analysis_url),
-    # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink)
+    # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink),
+    # StringsInfo (data), Triage (permalink)
     signatures = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer
-    family = models.CharField(null=True)  # Intezer (family_name), Cuckoo, MwDB
+    family = models.CharField(
+        null=True
+    )  # Intezer (family_name), Cuckoo, MwDB, Triage (analysis.family)
     yara_rules = pg_fields.ArrayField(
         models.JSONField(), null=True
     )  # MalwareBazaarFileAnalyzer
@@ -90,10 +93,11 @@ class FileDataModel(models.Model):
     file_information = pg_fields.ArrayField(
         models.JSONField(), null=True
     )  # MalwareBazaarFileAnalyzer, OneNoteInfo
-    # (files)
+    # (files), QuarkEngineAPK (crimes.confidence, threat_level, total_score)
+    # RtfInfo (exploit_equation_editor, exploit_ole2link_vuln)
     related_threats = pg_fields.ArrayField(
         models.CharField(), null=True
-    )  # MalwareBazaarFileAnalyzer(?)
+    )  # MalwareBazaarFileAnalyzer(?), QuarkEngineAPK (crimes.crime)
     peepdf_stats = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
     pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
     imphash = models.CharField(null=True)  # PeInfo

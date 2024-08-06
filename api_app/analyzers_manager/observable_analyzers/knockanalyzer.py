@@ -37,7 +37,8 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
             bruteforce=self.bruteforce,
         )
 
-        return json.dumps(results)
+        results = json.dumps(results)
+        logger.info(f"results from knock: {results}")
 
     @classmethod
     def _monkeypatch(cls):

@@ -78,13 +78,14 @@ class FileDataModel(models.Model):
     )  # Crowdsec (link), UrlHaus (external_references), BoxJs,
     # Cuckoo (result_url/permalink), Intezer (link/analysis_url),
     # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink),
-    # StringsInfo (data), Triage (permalink)
+    # StringsInfo (data), Triage (permalink), UnpacMe (permalink)
     signatures = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer
     family = models.CharField(
         null=True
-    )  # Intezer (family_name), Cuckoo, MwDB, Triage (analysis.family)
+    )  # Intezer (family_name), Cuckoo, MwDB, Triage (analysis.family),
+    # UnpacMe (results.malware_id.malware_family)
     yara_rules = pg_fields.ArrayField(
         models.JSONField(), null=True
     )  # MalwareBazaarFileAnalyzer

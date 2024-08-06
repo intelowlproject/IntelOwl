@@ -59,7 +59,8 @@ class IPDataModel(models.Model):
 class FileDataModel(models.Model):
     evaluation = models.CharField(
         null=True
-    )  # Cymru (found), Cuckoo (malscore), Intezer (verdict/sub_verdict)
+    )  # Cymru (found), Cuckoo (malscore), Intezer (verdict/sub_verdict),
+    # Triage (analysis.score)
     classification_tags = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # HybridAnalysisFileAnalyzer

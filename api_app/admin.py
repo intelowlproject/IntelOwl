@@ -70,10 +70,12 @@ class JobAdminView(CustomAdminView):
     )
     list_filter = ("status", "user", "tags")
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
+    @staticmethod
+    def has_add_permission(request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    @staticmethod
+    def has_change_permission(request: HttpRequest, obj=None) -> bool:
         return False
 
     @admin.display(description="Tags")
@@ -152,7 +154,8 @@ class AbstractReportAdminView(CustomAdminView):
     def has_add_permission(request):
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    @staticmethod
+    def has_change_permission(request: HttpRequest, obj=None) -> bool:
         return False
 
 

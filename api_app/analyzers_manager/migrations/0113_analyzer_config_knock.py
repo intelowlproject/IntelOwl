@@ -85,6 +85,17 @@ params = [
         "is_secret": False,
         "required": False,
     },
+    {
+        "python_module": {
+            "module": "knockanalyzer.KnockAnalyzer",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "dns",
+        "type": "str",
+        "description": "dns for knockpy",
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
 values = [

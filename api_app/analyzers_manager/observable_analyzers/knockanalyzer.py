@@ -39,6 +39,7 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
 
         results = json.dumps(results)
         logger.info(f"results from knock: {results}")
+        return results
 
     @classmethod
     def _monkeypatch(cls):

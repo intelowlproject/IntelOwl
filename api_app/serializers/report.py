@@ -27,6 +27,7 @@ class AbstractReportBISerializer(AbstractBIInterface):
 
     class Meta:
         fields = AbstractBIInterface.Meta.fields + [
+            "name",
             "parameters",
         ]
         list_serializer_class = rfs.ListSerializer

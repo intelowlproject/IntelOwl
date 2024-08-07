@@ -71,7 +71,7 @@ quark-engine==24.7.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
-greynoise==2.2.0
+greynoise==2.3.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0

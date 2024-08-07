@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "api_app.investigations_manager",
     # auth
     "rest_email_auth",
-    "drf_recaptcha",
     # performance debugging
     "silk",
     # celery

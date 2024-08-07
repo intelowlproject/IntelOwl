@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import json
 import logging
 
 from polyswarm_api.api import PolyswarmAPI
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Polyswarm(FileAnalyzer):
-    url = " https://api.polyswarm.network/v3"
+    url = "https://api.polyswarm.network/v3"
     _api_key: str = None
     timeout: int = 60 * 15  # default as in the package settings
     polyswarm_community: str = "default"
@@ -39,8 +40,8 @@ class Polyswarm(FileAnalyzer):
         res["md5"] = result.md5
         res["sha1"] = result.sha1
         res["extended_type"] = result.extended_type
-        res["first_seen"] = result.first_seen
-        res["last_seen"] = result.last_seen
+        res["first_seen"] = result.first_seen.isoformat()
+        res["last_seen"] = result.last_seen.isoformat()
         res["permalink"] = result.permalink
         return res
 
@@ -53,6 +54,10 @@ class Polyswarm(FileAnalyzer):
                 f"Failed to get results from Polyswarm for {self.md5}"
             )
         result = self.construct_result(result)
+
+        json_result = json.dumps(result)
+        logger.info(f"Polyswarm result: {json_result}")
+
         return result
 
     def update(self):
@@ -89,8 +94,8 @@ class Polyswarm(FileAnalyzer):
                         "md5": "76deca20806c16df50ffeda163fd50e9",
                         "sha1": "99ff1cd17aea94feb355e7bdb01e9f788a4971bb",
                         "extended_type": "GIF image data, version 89a, 821 x 500",
-                        "first_seen": "datetime.datetime(2024, 7, 27, 20, 20, 12, 121980)",
-                        "last_seen": "datetime.datetime(2024, 7, 27, 20, 20, 12, 121980)",
+                        "first_seen": "2024-07-27T20:20:12.121980",
+                        "last_seen": "2024-07-27T20:20:12.121980",
                         "permalink": "https://polyswarm.network/scan/results/file/50f4d8be8d47d26ecb04f1a24f17a39f3ea194d8cdc3b833aef2df88e1ce828b/76218824984622961",
                     },
                 ),

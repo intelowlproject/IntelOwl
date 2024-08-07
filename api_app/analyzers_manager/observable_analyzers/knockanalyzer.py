@@ -14,7 +14,6 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
     This analyzer is a wrapper for the knockpy project.
     """
 
-    observable_name: str
     dns: str = None
     useragent: str = None
     timeout: int = None
@@ -38,7 +37,6 @@ class KnockAnalyzer(classes.ObservableAnalyzer):
         )
 
         results = json.dumps(results)
-        logger.info(f"results from knock: {results}")
         return results
 
     @classmethod

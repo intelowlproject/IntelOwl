@@ -53,7 +53,6 @@ class Polyswarm(FileAnalyzer):
                 f"Failed to get results from Polyswarm for {self.md5}"
             )
         result = self.construct_result(result)
-        logger.info(f"Polyswarm result: {result}")
         return result
 
     def update(self):

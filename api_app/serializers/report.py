@@ -23,6 +23,7 @@ class AbstractReportBISerializer(AbstractBIInterface):
     timestamp = rfs.DateTimeField(source="start_time")
     username = rfs.CharField(source="job.user.username")
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
+    job_id = rfs.CharField(source="job.pk")
 
     class Meta:
         fields = AbstractBIInterface.Meta.fields + [

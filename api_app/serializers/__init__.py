@@ -19,6 +19,7 @@ class AbstractBIInterface(BISerializer):
     process_time: Field
     status: Field
     end_time: Field
+    job_id: Field
 
     class Meta:
         fields = BISerializer.Meta.fields + [
@@ -28,6 +29,7 @@ class AbstractBIInterface(BISerializer):
             "process_time",
             "status",
             "end_time",
+            "job_id",
         ]
 
     @staticmethod

@@ -1095,6 +1095,7 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
     name = rfs.CharField(source="pk")
     end_time = rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
+    job_id = rfs.CharField(source="pk")
 
     class Meta:
         model = Job

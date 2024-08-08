@@ -76,7 +76,7 @@ def m2m_changed_pivots_playbook_config(
         if wrong_pivots.exists():
             raise ValidationError(
                 {
-                    "detail": f"You can't set pivots"
+                    "detail": "You can't set pivots"
                     f" {','.join(wrong_pivots.values_list('name', flat=True))} because"
                     " the playbook does not have all the required plugins"
                 }

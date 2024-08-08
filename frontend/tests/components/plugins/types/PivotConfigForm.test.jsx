@@ -30,16 +30,16 @@ describe("PivotConfigForm test", () => {
     delay: "00:00:00",
     health_check_task: null,
     config: {
-      "queue": "default",
-      "soft_time_limit": 60
+      queue: "default",
+      soft_time_limit: 60,
     },
     secrets: {},
     params: {},
     verification: {
       configured: true,
       details: "Ready to use!",
-      missing_secrets: []
-    }
+      missing_secrets: [],
+    },
   };
 
   test("form fields", async () => {
@@ -214,7 +214,7 @@ describe("PivotConfigForm test", () => {
           attribute: "field_to_compare",
           value: "test.value",
           config_type: 1,
-        }
+        },
       });
     });
   });
@@ -243,7 +243,9 @@ describe("PivotConfigForm test", () => {
     expect(descriptionInputField).toBeInTheDocument();
     expect(descriptionInputField).toHaveValue("pivot: test");
 
-    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
+    const pythonModuleInputField = screen.getByText(
+      "Field that will be analyzed:",
+    );
     expect(pythonModuleInputField).toBeInTheDocument();
 
     const playbookInputField = screen.getByText("Playbook to Execute:");
@@ -269,5 +271,4 @@ describe("PivotConfigForm test", () => {
       });
     });
   });
-
 });

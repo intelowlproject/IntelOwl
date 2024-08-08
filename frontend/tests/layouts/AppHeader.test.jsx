@@ -133,9 +133,13 @@ describe("test AppHeader component", () => {
       const pluginsConfigButton = screen.getByText("User Plugin Config");
       expect(pluginsConfigButton).toBeInTheDocument();
       expect(pluginsConfigButton.closest("a").href).toContain("/me/config");
-      const pluginsOrgConfigButton = screen.getByText("Organization Plugin Config");
+      const pluginsOrgConfigButton = screen.getByText(
+        "Organization Plugin Config",
+      );
       expect(pluginsOrgConfigButton).toBeInTheDocument();
-      expect(pluginsOrgConfigButton.closest("a").href).toContain("/me/organization/config");
+      expect(pluginsOrgConfigButton.closest("a").href).toContain(
+        "/me/organization/config",
+      );
     });
   });
 

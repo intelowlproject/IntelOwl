@@ -393,7 +393,7 @@ describe("PlaybookConfigForm test", () => {
     const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
     expect(analyzerDropdownButton).toBeInTheDocument();
     await userAction.click(analyzerDropdownButton);
-      
+
     const testAnalyzerButton = screen.getAllByRole("option")[0];
     expect(testAnalyzerButton).toBeInTheDocument();
     await userAction.click(testAnalyzerButton);

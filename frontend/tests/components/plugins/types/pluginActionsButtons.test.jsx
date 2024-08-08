@@ -4,9 +4,7 @@ import axios from "axios";
 import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import {
-  API_BASE_URI,
-} from "../../../../src/constants/apiURLs";
+import { API_BASE_URI } from "../../../../src/constants/apiURLs";
 import Toast from "../../../../src/layouts/Toast";
 import {
   PluginHealthCheckButton,
@@ -103,12 +101,12 @@ describe("PluginDeletionButton test", () => {
     // playbook
     {
       pluginName: "PlaybookTest",
-      pluginType_: "playbook"
+      pluginType_: "playbook",
     },
     // pivot
     {
       pluginName: "PivotTest",
-      pluginType_: "pivot"
+      pluginType_: "pivot",
     },
   ])("(%s) deletion", async ({ pluginName, pluginType_ }) => {
     const userAction = userEvent.setup();
@@ -116,7 +114,10 @@ describe("PluginDeletionButton test", () => {
 
     const { container } = render(
       <BrowserRouter>
-        <PluginDeletionButton pluginName={pluginName} pluginType_={pluginType_} />
+        <PluginDeletionButton
+          pluginName={pluginName}
+          pluginType_={pluginType_}
+        />
         <Toast />
       </BrowserRouter>,
     );
@@ -139,10 +140,16 @@ describe("PluginDeletionButton test", () => {
 
     await userAction.click(deleteButton);
     await waitFor(() => {
-      expect(axios.delete).toHaveBeenCalledWith(`${API_BASE_URI}/${pluginType_}/${pluginName}`);
+      expect(axios.delete).toHaveBeenCalledWith(
+        `${API_BASE_URI}/${pluginType_}/${pluginName}`,
+      );
     });
     // toast
-    expect(screen.getByText(`${pluginType_} with name ${pluginName} deleted with success`)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `${pluginType_} with name ${pluginName} deleted with success`,
+      ),
+    ).toBeInTheDocument();
   });
 });
 

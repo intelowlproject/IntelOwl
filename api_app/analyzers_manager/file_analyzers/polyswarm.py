@@ -67,9 +67,6 @@ class Polyswarm(FileAnalyzer, PolyswarmBase):
 
         return result
 
-    def update(self):
-        pass
-
     @classmethod
     def _monkeypatch(cls):
         patches = [

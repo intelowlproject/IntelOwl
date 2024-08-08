@@ -155,6 +155,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `Blint`: [Blint](https://github.com/owasp-dep-scan/blint) is a Binary Linter that checks the security properties and capabilities of your executables. Supported binary formats: - Android (apk, aab) - ELF (GNU, musl) - PE (exe, dll) - Mach-O (x64, arm64)
 - `MalprobScan` : [Malprob](https://malprob.io/) is a leading malware detection and identification service, powered by cutting-edge AI technology.
 - `IocExtract`: [IocExtract](https://github.com/InQuest/iocextract) package is a library and command line interface (CLI) for extracting URLs, IP addresses, MD5/SHA hashes, email addresses, and YARA rules from text corpora. It allows for you to extract encoded and "defanged" IOCs and optionally decode or refang them.
+- `Polyswarm`: Scan a file using the [Polyswarm](https://docs.polyswarm.io/) API.
 
 ##### Observable analyzers (ip, domain, url, hash)
 
@@ -274,6 +275,7 @@ threat prevention, reducing and automating the manual work of security analysts.
 * `Spamhaus_DROP`:[Spamhaus_DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/) protects from activity directly originating from rogue networks, such as spam campaigns, encryption via ransomware, DNS-hijacking and exploit attempts, authentication attacks to discover working access credentials, harvesting, DDoS attacks.
 * `CriminalIp`: [Criminal IP](https://www.criminalip.io/) is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.
 * `CriminalIp_Scan`:CriminalIp_Scan is an implementation of scan APIs provided by [CriminalIp](https://www.criminalip.io/) specifically for domains. Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.
+* `PolyswarmObs`: Scan an observable using [Polyswarm](https://docs.polyswarm.io/) API. Paid plan is required for IP and Domain scans. Hash scan is free.
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 

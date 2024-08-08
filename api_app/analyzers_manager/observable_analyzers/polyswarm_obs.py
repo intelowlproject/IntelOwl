@@ -8,10 +8,10 @@ from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
-from ..file_analyzers.polyswarm import Polyswarm
+from ..file_analyzers.polyswarm import PolyswarmBase
 
 
-class PolyswarmObs(ObservableAnalyzer, Polyswarm):
+class PolyswarmObs(ObservableAnalyzer, PolyswarmBase):
     def run(self):
         api = PolyswarmAPI(key=self._api_key, community=self.polyswarm_community)
         if self.observable_classification == self.ObservableTypes.HASH.value:

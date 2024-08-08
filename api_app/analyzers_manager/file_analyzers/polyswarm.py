@@ -10,14 +10,21 @@ from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
+import abc
 
-class Polyswarm(FileAnalyzer):
+from api_app.analyzers_manager.classes import BaseAnalyzerMixin
+
+
+class PolyswarmBase(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     # this class also acts as a super class
     #  for PolyswarmObs in observable analyzers
     url = "https://api.polyswarm.network/v3"
     _api_key: str = None
     timeout: int = 60 * 15  # default as in the package settings
     polyswarm_community: str = "default"
+
+    def update(self):
+        pass
 
     @staticmethod
     def construct_result(result):
@@ -46,6 +53,8 @@ class Polyswarm(FileAnalyzer):
         res["permalink"] = result.permalink
         return res
 
+
+class Polyswarm(FileAnalyzer, PolyswarmBase):
     def run(self):
         api = PolyswarmAPI(key=self._api_key, community=self.polyswarm_community)
         instance = api.submit(self.filepath)

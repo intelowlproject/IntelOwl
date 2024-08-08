@@ -41,8 +41,8 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             <div className="small text-left text-muted">
               Create a custom Pivot from a specific value extracted from the
               results of the analyzers/connectors. <br />
-              Set the parameter field to compare with the dotted path to the
-              field you would like to extract the value from.
+              Set the parameter with the dotted path to the field you would like
+              to extract the value from.
             </div>
           </div>
         </div>
@@ -254,7 +254,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             </FormGroup>
             <FormGroup row className="d-flex align-items-center">
               <Label className="me-2 mb-0" for="pivot-analyzers">
-                Field that will be analyzed:
+                Type of pivot:
               </Label>
               <ReactSelect
                 isClearable={false}
@@ -273,7 +273,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
                   for="pivot-field-to-compare"
                   style={{ minWidth: "15%" }}
                 >
-                  Field to compare:
+                  Field that will be analyzed:
                 </Label>
                 <Input
                   id="pivot-field-to-compare"

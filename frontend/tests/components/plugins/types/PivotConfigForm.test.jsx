@@ -61,7 +61,7 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
-    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
+    const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
     const playbookInputField = screen.getByText("Playbook to Execute:");
@@ -94,7 +94,7 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
-    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
+    const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
     const playbookInputField = screen.getByText("Playbook to Execute:");
@@ -161,7 +161,7 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
-    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
+    const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
     const playbookInputField = screen.getByText("Playbook to Execute:");

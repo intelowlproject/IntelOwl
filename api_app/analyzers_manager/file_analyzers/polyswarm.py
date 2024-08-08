@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import json
 import logging
 
 from polyswarm_api.api import PolyswarmAPI

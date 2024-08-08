@@ -1,10 +1,11 @@
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 
-from api_app.models import Job
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.plugin import (
+    PluginConfigSerializer,
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
@@ -56,15 +57,29 @@ class PivotConfigSerializer(PythonConfigSerializer):
     playbooks_choice = rfs.SlugRelatedField(
         queryset=PlaybookConfig.objects.all(), slug_field="name", many=True
     )
-
-    name = rfs.CharField(read_only=True)
-    description = rfs.CharField(read_only=True)
     related_configs = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
+    python_module = rfs.SlugRelatedField(
+        queryset=PythonModule.objects.all(), slug_field="module"
+    )
+    plugin_config = rfs.DictField(write_only=True, required=False)
 
     class Meta:
         model = PivotConfig
         exclude = ["related_analyzer_configs", "related_connector_configs"]
         list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
+
+    def create(self, validated_data):
+        plugin_config = validated_data.pop("plugin_config", {})
+        pc = super().create(validated_data)
+
+        # create plugin config
+        if plugin_config:
+            plugin_config_serializer = PluginConfigSerializer(
+                data=plugin_config, context={"request": self.context["request"]}
+            )
+            plugin_config_serializer.is_valid(raise_exception=True)
+            plugin_config_serializer.save()
+        return pc
 
 
 class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):

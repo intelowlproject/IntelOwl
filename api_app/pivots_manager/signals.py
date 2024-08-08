@@ -38,7 +38,7 @@ def pre_save_pivot_config(
     sender, instance: PivotConfig, raw, using, update_fields, *args, **kwargs
 ):
     try:
-        if instance.pk:
+        if instance.pk and not instance.description:
             instance.description = instance._generate_full_description()
         else:
             instance.description = (

@@ -248,18 +248,6 @@ export const usePluginConfigurationStore = create((set, get) => ({
       return error.response.status;
     }
   },
-  deletePlaybook: async (playbook) => {
-    try {
-      const response = await axios.delete(
-        `${PLAYBOOKS_CONFIG_URI}/${playbook}`,
-      );
-      addToast(`${playbook} deleted`, null, "info");
-      return Promise.resolve(response);
-    } catch (error) {
-      addToast("Failed!", prettifyErrors(error), "danger");
-      return null;
-    }
-  },
   enablePluginInOrg: async (type, pluginName, pluginOwner) => {
     if (type === PluginsTypes.PLAYBOOK && pluginOwner !== null) {
       try {
@@ -331,54 +319,5 @@ export const usePluginConfigurationStore = create((set, get) => ({
       );
       return null;
     }
-  },
-  editPlaybookConfig: async (playbookName, data) => {
-    let success = false;
-    try {
-      const response = await axios.patch(
-        `${PLAYBOOKS_CONFIG_URI}/${playbookName}`,
-        data,
-      );
-      success = response.status === 200;
-      addToast(`${data.name} configuration saved`, null, "success");
-      get().retrievePlaybooksConfiguration();
-    } catch (error) {
-      addToast(
-        `Failed to edited ${data.name} configuration.`,
-        prettifyErrors(error),
-        "danger",
-        true,
-        10000,
-      );
-      return { success, error: prettifyErrors(error) };
-    }
-    return { success };
-  },
-  createPluginConfig: async (type, data) => {
-    let success = false;
-    try {
-      const response = await axios.post(`${API_BASE_URI}/${type}`, data);
-      success = response.status === 201;
-      if (success) {
-        addToast(
-          `${type} with name ${response.data.name} created with success`,
-          null,
-          "success",
-        );
-        if (type === PluginsTypes.PLAYBOOK)
-          get().retrievePlaybooksConfiguration();
-        if (type === PluginsTypes.PIVOT) get().retrievePivotsConfiguration();
-      }
-    } catch (error) {
-      addToast(
-        `Failed creation of ${type} with name ${data.name}`,
-        prettifyErrors(error),
-        "warning",
-        true,
-        10000,
-      );
-      return { success, error: prettifyErrors(error) };
-    }
-    return { success };
   },
 }));

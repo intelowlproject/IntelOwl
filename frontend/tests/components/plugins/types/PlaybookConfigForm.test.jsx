@@ -6,6 +6,13 @@ import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { PLAYBOOKS_CONFIG_URI } from "../../../../src/constants/apiURLs";
 import { PlaybookConfigForm } from "../../../../src/components/plugins/types/PlaybookConfigForm";
+import { mockedUsePluginConfigurationStore } from "../../../mock";
+
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
+  usePluginConfigurationStore: jest.fn((state) =>
+    state(mockedUsePluginConfigurationStore),
+  ),
+}));
 
 jest.mock("axios");
 // mock runtimeConfigurationParam
@@ -89,6 +96,8 @@ describe("PlaybookConfigForm test", () => {
         <PlaybookConfigForm
           playbookConfig={playbookConfig}
           toggle={jest.fn()}
+          isOpen
+          pluginsLoading={false}
         />
       </BrowserRouter>,
     );
@@ -175,6 +184,9 @@ describe("PlaybookConfigForm test", () => {
         <PlaybookConfigForm
           playbookConfig={playbookConfig}
           toggle={jest.fn()}
+          isOpen
+          pluginsLoading={false}
+          isEditing
         />
       </BrowserRouter>,
     );
@@ -293,6 +305,9 @@ describe("PlaybookConfigForm test", () => {
         <PlaybookConfigForm
           playbookConfig={{}}
           toggle={jest.fn()}
+          isOpen
+          pluginsLoading={false}
+          isEditing={false}
         />
       </BrowserRouter>,
     );
@@ -356,10 +371,6 @@ describe("PlaybookConfigForm test", () => {
       "#edit_runtime_configuration-modal",
     );
     expect(editableRuntimeConfig).toBeInTheDocument();
-    // to test the contents of the json editor we need to use this format
-    expect(editableRuntimeConfig.textContent).toBe(
-      "{  analyzers: {    TEST_ANALYZER: {      query_type: 'A'    }  },  connectors: {    TEST_CONNECTOR: {}  },  pivots: {},  visualizers: {}}",
-    );
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
@@ -369,29 +380,43 @@ describe("PlaybookConfigForm test", () => {
     await userAction.clear(nameInputField);
     await userAction.type(nameInputField, "myNewPlaybook");
 
+    // clear editor and type new description
+    await userAction.clear(descriptionInputField);
+    await userAction.type(descriptionInputField, "myNewPlaybook description");
+
     // add ip in supported types
     await userAction.click(ipCheckbox);
 
-    expect(saveButton.className).not.toContain("disabled");
-    await userAction.click(saveButton);
+    // select the test analyzer
+    /* the id change in case you run a single test or all of them.
+      we need this strange way to access instead of the id */
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await userAction.click(analyzerDropdownButton);
+      
+    const testAnalyzerButton = screen.getAllByRole("option")[0];
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await userAction.click(testAnalyzerButton);
+
+    userAction.click(saveButton);
 
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(`${PLAYBOOKS_CONFIG_URI}`, {
         name: "myNewPlaybook",
-        description: "playbook: test",
-        type: ["domain", "ip"],
+        description: "myNewPlaybook description",
+        type: ["ip"],
         analyzers: ["TEST_ANALYZER"],
-        connectors: ["TEST_CONNECTOR"],
+        connectors: [],
         visualizers: [],
         pivots: [],
         runtime_configuration: {
           pivots: {},
-          analyzers: { TEST_ANALYZER: { query_type: "A" } },
+          analyzers: {},
           connectors: {},
           visualizers: {},
         },
         tags_labels: [],
-        tlp: "GREEN",
+        tlp: "AMBER",
         scan_mode: 2,
         scan_check_time: "24:00:00",
       });

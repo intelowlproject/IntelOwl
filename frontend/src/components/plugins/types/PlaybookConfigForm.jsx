@@ -1,5 +1,14 @@
 import React from "react";
-import { FormGroup, Label, Button, Spinner, Input } from "reactstrap";
+import {
+  FormGroup,
+  Label,
+  Button,
+  Spinner,
+  Input,
+  Modal,
+  ModalHeader,
+  ModalBody,
+} from "reactstrap";
 import { Form, useFormik, FormikProvider } from "formik";
 import PropTypes from "prop-types";
 
@@ -32,6 +41,7 @@ import {
   runtimeConfigurationParam,
   saveRuntimeConfiguration,
 } from "../../common/form/runtimeConfigurationInput";
+import { editPluginConfig, createPluginConfig } from "../pluginsApi";
 
 // constants
 const stateSelector = (state) => [
@@ -39,11 +49,16 @@ const stateSelector = (state) => [
   state.connectors,
   state.visualizers,
   state.pivots,
-  state.editPlaybookConfig,
-  state.createPluginConfig,
+  state.retrievePlaybooksConfiguration,
 ];
 
-export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
+export function PlaybookConfigForm({
+  playbookConfig,
+  toggle,
+  isEditing,
+  isOpen,
+  pluginsLoading,
+}) {
   console.debug("PlaybookConfigForm rendered!");
 
   // states
@@ -58,8 +73,7 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
     connectors,
     visualizers,
     pivots,
-    editPlaybookConfig,
-    createPluginConfig,
+    retrievePlaybooksConfiguration,
   ] = usePluginConfigurationStore(stateSelector);
 
   const formik = useFormik({
@@ -99,7 +113,12 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
       scan_check_time: parseScanCheckTime(
         playbookConfig?.scan_check_time || "01:00:00:00",
       ),
-      runtime_configuration: playbookConfig?.runtime_configuration || {},
+      runtime_configuration: playbookConfig?.runtime_configuration || {
+        analyzers: {},
+        connectors: {},
+        pivots: {},
+        visualizers: {},
+      },
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -164,7 +183,11 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
           formik.initialValues.name !== formik.values.name
             ? formik.initialValues.name
             : formik.values.name;
-        response = await editPlaybookConfig(playbookToEdit, payloadData);
+        response = await editPluginConfig(
+          PluginsTypes.PLAYBOOK,
+          playbookToEdit,
+          payloadData,
+        );
       } else {
         response = await createPluginConfig(PluginsTypes.PLAYBOOK, payloadData);
       }
@@ -172,7 +195,9 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
       if (response?.success) {
         formik.setSubmitting(false);
         setResponseError(null);
+        formik.resetForm();
         toggle(false);
+        retrievePlaybooksConfiguration();
       } else {
         setResponseError(response?.error);
       }
@@ -183,22 +208,24 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
   console.debug(formik);
 
   React.useEffect(() => {
-    const [params, config] = runtimeConfigurationParam(
-      formik,
-      analyzers,
-      connectors,
-      visualizers,
-      pivots,
-    );
-    setSelectedPluginsParams(params);
-    setEditableConfig(config);
-
+    if (!pluginsLoading) {
+      const [params, config] = runtimeConfigurationParam(
+        formik,
+        analyzers,
+        connectors,
+        visualizers,
+        pivots,
+      );
+      setSelectedPluginsParams(params);
+      setEditableConfig(config);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     formik.values.analyzers,
     formik.values.connectors,
     formik.values.pivots,
     formik.values.visualizers,
+    pluginsLoading,
   ]);
 
   React.useEffect(() => {
@@ -228,153 +255,177 @@ export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
+  const title = isEditing ? "Edit playbook config" : "Create a new playbook";
+
   return (
-    <FormikProvider value={formik}>
-      <Form onSubmit={formik.handleSubmit}>
-        {formik.touched.name && formik.errors.name && (
-          <small className="text-danger">Name: {formik.errors.name}</small>
-        )}
-        <FormGroup className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-name">
-            Name:
-          </Label>
-          <Input
-            id="playbook-name"
-            type="text"
-            name="name"
-            value={formik.values.name}
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}
-            valid={!formik.errors.name && formik.touched.name}
-            invalid={formik.touched.name && formik.errors.name}
-            className="bg-darker border-0"
-          />
-        </FormGroup>
-        {formik.touched.description && formik.errors.description && (
-          <small className="text-danger">
-            Description: {formik.errors.description}
-          </small>
-        )}
-        <FormGroup className="d-flex align-items-start">
-          <Label className="me-2 mb-0" for="playbook-description">
-            Description:
-          </Label>
-          <Input
-            id="playbook-description"
-            type="text"
-            name="description"
-            value={formik.values.description}
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}
-            valid={!formik.errors.description && formik.touched.description}
-            invalid={formik.touched.description && formik.errors.description}
-            className="bg-darker border-0"
-            style={{
-              minHeight: "100px",
-              overflowX: "scroll",
-            }}
-          />
-        </FormGroup>
-        {formik.touched.type && formik.errors.type && (
-          <small className="text-danger">Type: {formik.errors.type}</small>
-        )}
-        <FormGroup>
-          <Label className="me-4 mb-0" for="supportedType">
-            Supported types:
-          </Label>
-          {Object.values(AllPluginSupportedTypes).map((type) => (
-            <FormGroup check inline key={`supportedType__${type}`}>
+    <Modal
+      id="playbook-config-modal"
+      autoFocus
+      centered
+      zIndex="1050"
+      size="lg"
+      keyboard={false}
+      backdrop="static"
+      labelledBy="Playbook config modal"
+      isOpen={isOpen}
+      style={{ minWidth: "60%" }}
+    >
+      <ModalHeader className="mx-2" toggle={() => toggle(false)}>
+        <small className="text-info">{title}</small>
+      </ModalHeader>
+      <ModalBody className="m-2">
+        <FormikProvider value={formik}>
+          <Form onSubmit={formik.handleSubmit}>
+            {formik.touched.name && formik.errors.name && (
+              <small className="text-danger">Name: {formik.errors.name}</small>
+            )}
+            <FormGroup className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-name">
+                Name:
+              </Label>
               <Input
-                id={`supportedType__${type}`}
-                type="checkbox"
-                name="type"
-                value={type}
-                checked={formik.values.type.includes(type)}
+                id="playbook-name"
+                type="text"
+                name="name"
+                value={formik.values.name}
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
+                valid={!formik.errors.name && formik.touched.name}
+                invalid={formik.touched.name && formik.errors.name}
+                className="bg-darker border-0"
               />
-              <Label check>{type}</Label>
             </FormGroup>
-          ))}
-        </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-analyzers">
-            Analyzers:
-          </Label>
-          <AnalyzersMultiSelectDropdownInput formik={formik} />
-        </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-connectors">
-            Connectors:
-          </Label>
-          <ConnectorsMultiSelectDropdownInput formik={formik} />
-        </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-visualizers">
-            Visualizers:
-          </Label>
-          <VisualizersMultiSelectDropdownInput formik={formik} />
-        </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-pivots">
-            Pivots:
-          </Label>
-          <PivotsMultiSelectDropdownInput formik={formik} />
-        </FormGroup>
-        <FormGroup className="d-flex">
-          <TLPSelectInputLabel size={1} />
-          <TLPSelectInput formik={formik} />
-        </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-tags">
-            Tags:
-          </Label>
-          <TagSelectInput
-            id="playbook-tagselectinput"
-            selectedTags={formik.values.tags}
-            setSelectedTags={(selectedTags) =>
-              formik.setFieldValue("tags", selectedTags, false)
-            }
-          />
-        </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-scan-config">
-            Scan Configuration:
-          </Label>
-          <ScanConfigSelectInput formik={formik} />
-        </FormGroup>
-        <FormGroup row className="d-flex align-items-center">
-          <Label className="me-2 mb-0" for="playbook-scan-config">
-            Runtime Configuration:
-          </Label>
-          <EditRuntimeConfiguration
-            setJsonInput={setJsonInput}
-            selectedPluginsParams={selectedPluginsParams}
-            editableConfig={editableConfig}
-          />
-        </FormGroup>
+            {formik.touched.description && formik.errors.description && (
+              <small className="text-danger">
+                Description: {formik.errors.description}
+              </small>
+            )}
+            <FormGroup className="d-flex align-items-start">
+              <Label className="me-2 mb-0" for="playbook-description">
+                Description:
+              </Label>
+              <Input
+                id="playbook-description"
+                type="textarea"
+                name="description"
+                value={formik.values.description}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                valid={!formik.errors.description && formik.touched.description}
+                invalid={
+                  formik.touched.description && formik.errors.description
+                }
+                className="bg-darker border-0"
+                style={{
+                  minHeight: "100px",
+                  overflowX: "scroll",
+                }}
+              />
+            </FormGroup>
+            {formik.touched.type && formik.errors.type && (
+              <small className="text-danger">Type: {formik.errors.type}</small>
+            )}
+            <FormGroup>
+              <Label className="me-4 mb-0" for="supportedType">
+                Supported types:
+              </Label>
+              {Object.values(AllPluginSupportedTypes).map((type) => (
+                <FormGroup check inline key={`supportedType__${type}`}>
+                  <Input
+                    id={`supportedType__${type}`}
+                    type="checkbox"
+                    name="type"
+                    value={type}
+                    checked={formik.values.type.includes(type)}
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                  />
+                  <Label check>{type}</Label>
+                </FormGroup>
+              ))}
+            </FormGroup>
+            <FormGroup row className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-analyzers">
+                Analyzers:
+              </Label>
+              <AnalyzersMultiSelectDropdownInput formik={formik} />
+            </FormGroup>
+            <FormGroup row className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-connectors">
+                Connectors:
+              </Label>
+              <ConnectorsMultiSelectDropdownInput formik={formik} />
+            </FormGroup>
+            <FormGroup row className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-visualizers">
+                Visualizers:
+              </Label>
+              <VisualizersMultiSelectDropdownInput formik={formik} />
+            </FormGroup>
+            <FormGroup row className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-pivots">
+                Pivots:
+              </Label>
+              <PivotsMultiSelectDropdownInput formik={formik} />
+            </FormGroup>
+            <FormGroup className="d-flex">
+              <TLPSelectInputLabel size={1} />
+              <TLPSelectInput formik={formik} />
+            </FormGroup>
+            <FormGroup row className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-tags">
+                Tags:
+              </Label>
+              <TagSelectInput
+                id="playbook-tagselectinput"
+                selectedTags={formik.values.tags}
+                setSelectedTags={(selectedTags) =>
+                  formik.setFieldValue("tags", selectedTags, false)
+                }
+              />
+            </FormGroup>
+            <FormGroup row className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-scan-config">
+                Scan Configuration:
+              </Label>
+              <ScanConfigSelectInput formik={formik} />
+            </FormGroup>
+            <FormGroup row className="d-flex align-items-center">
+              <Label className="me-2 mb-0" for="playbook-scan-config">
+                Runtime Configuration:
+              </Label>
+              <EditRuntimeConfiguration
+                setJsonInput={setJsonInput}
+                selectedPluginsParams={selectedPluginsParams}
+                editableConfig={editableConfig}
+              />
+            </FormGroup>
 
-        <FormGroup className="d-flex justify-content-end align-items-center mt-3">
-          {responseError && formik.submitCount && (
-            <small className="text-danger">{responseError}</small>
-          )}
-          <Button
-            id="startScan"
-            type="submit"
-            /* dirty return True if values are different then default
+            <FormGroup className="d-flex justify-content-end align-items-center mt-3">
+              {responseError && formik.submitCount && (
+                <small className="text-danger">{responseError}</small>
+              )}
+              <Button
+                id="startScan"
+                type="submit"
+                /* dirty return True if values are different then default
                we cannot run the validation on mount or we get an infinite loop.
               */
-            disabled={!formik.dirty || !formik.isValid || formik.isSubmitting}
-            color="primary"
-            size="lg"
-            outline
-            className="mx-2 mt-2"
-          >
-            {formik.isSubmitting && <Spinner size="sm" />}Save
-          </Button>
-        </FormGroup>
-      </Form>
-    </FormikProvider>
+                disabled={
+                  !formik.dirty || !formik.isValid || formik.isSubmitting
+                }
+                color="primary"
+                size="lg"
+                outline
+                className="mx-2 mt-2"
+              >
+                {formik.isSubmitting && <Spinner size="sm" />}Save
+              </Button>
+            </FormGroup>
+          </Form>
+        </FormikProvider>
+      </ModalBody>
+    </Modal>
   );
 }
 
@@ -382,4 +433,10 @@ PlaybookConfigForm.propTypes = {
   playbookConfig: PropTypes.object.isRequired,
   toggle: PropTypes.func.isRequired,
   isEditing: PropTypes.bool.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  pluginsLoading: PropTypes.bool,
+};
+
+PlaybookConfigForm.defaultProps = {
+  pluginsLoading: false,
 };

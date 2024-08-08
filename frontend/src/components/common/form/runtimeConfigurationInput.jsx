@@ -32,48 +32,49 @@ export function runtimeConfigurationParam(
   console.debug("EditRuntimeConfiguration - formik:");
   console.debug(formik);
 
+  const isScanPage = formik.values.analysisOptionValues || false;
+
   // IMPORTANT: We want to group the plugins in the categories (analyzers, connectors, etc...)
   const selectedPluginsInFormik = { analyzers: {}, connectors: {} };
   const selectedPluginsParams = { analyzers: {}, connectors: {} };
   const editableConfig = { analyzers: {}, connectors: {} };
 
-  // case 1: analysis with analyzers/connectors
-  if (
-    formik.values.analysisOptionValues === ScanTypes.analyzers_and_connectors
-  ) {
-    selectedPluginsInFormik.analyzers = formik.values.analyzers.map(
-      (analyzer) => analyzer.value,
-    );
-    selectedPluginsInFormik.connectors = formik.values.connectors.map(
-      (connector) => connector.value,
-    );
-  }
-
-  // case 2: analysis with playbooks
-  if (formik.values.analysisOptionValues === ScanTypes.playbooks) {
-    Object.keys(formik.values.runtime_configuration).forEach((pluginType) => {
-      selectedPluginsInFormik[pluginType] =
-        formik.values.playbook[pluginType] || [];
-    });
-  }
-
-  // case 3: edit playbook config
-  if (!formik.values.analysisOptionValues) {
-    Object.keys(formik.values.runtime_configuration).forEach((pluginType) => {
-      selectedPluginsInFormik[pluginType] =
-        formik.values[pluginType].map((plugin) => plugin.value) || [];
-    });
-  }
-
-  // case 4: create new playbook
-  if (
-    !formik.values.analysisOptionValues &&
-    Object.keys(formik.values.runtime_configuration).length === 0 &&
-    (formik.values.analyzers.length !== 0 ||
-      formik.values.connectors.length !== 0 ||
-      formik.values.pivots.length !== 0 ||
-      formik.values.visualizers.length !== 0)
-  ) {
+  // case A: scan page
+  if (isScanPage) {
+    // case 1: analysis with analyzers/connectors
+    if (
+      formik.values.analysisOptionValues === ScanTypes.analyzers_and_connectors
+    ) {
+      selectedPluginsInFormik.analyzers = formik.values.analyzers.map(
+        (analyzer) => analyzer.value,
+      );
+      selectedPluginsInFormik.connectors = formik.values.connectors.map(
+        (connector) => connector.value,
+      );
+    }
+    // case 2: analysis with playbooks
+    if (formik.values.analysisOptionValues === ScanTypes.playbooks) {
+      Object.keys(formik.values.runtime_configuration).forEach((pluginType) => {
+        selectedPluginsInFormik[pluginType] =
+          formik.values.playbook[pluginType] || [];
+      });
+    }
+  } else {
+    // case B: create new playbook (no plugin selected)
+    if (
+      formik.values.analyzers.length === 0 &&
+      formik.values.connectors.length === 0 &&
+      formik.values.pivots.length === 0 &&
+      formik.values.visualizers.length === 0
+    ) {
+      console.debug("Runtime config - create new playbook");
+      selectedPluginsParams.pivots = {};
+      selectedPluginsParams.visualizers = {};
+      editableConfig.pivots = {};
+      editableConfig.visualizers = {};
+      return [selectedPluginsParams, editableConfig];
+    }
+    // case C:  edit playbook config
     ["analyzers", "connectors", "visualizers", "pivots"].forEach(
       (pluginType) => {
         selectedPluginsInFormik[pluginType] =
@@ -81,12 +82,6 @@ export function runtimeConfigurationParam(
       },
     );
   }
-
-  if (
-    !formik.values.analysisOptionValues &&
-    Object.keys(formik.values.runtime_configuration).length === 0
-  )
-    return [selectedPluginsParams, editableConfig];
 
   console.debug("EditRuntimeConfiguration - selectedPluginsInFormik:");
   console.debug(selectedPluginsInFormik);

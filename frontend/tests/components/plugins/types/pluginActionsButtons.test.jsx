@@ -6,12 +6,11 @@ import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import {
   API_BASE_URI,
-  PLAYBOOKS_CONFIG_URI,
 } from "../../../../src/constants/apiURLs";
 import Toast from "../../../../src/layouts/Toast";
 import {
   PluginHealthCheckButton,
-  PlaybooksDeletionButton,
+  PluginDeletionButton,
   OrganizationPluginStateToggle,
   PluginPullButton,
   PlaybooksEditButton,
@@ -99,24 +98,35 @@ describe("PluginHealthCheckButton test", () => {
   });
 });
 
-describe("PlaybooksDeletionButton test", () => {
-  test("playbook deletion", async () => {
+describe("PluginDeletionButton test", () => {
+  test.each([
+    // playbook
+    {
+      pluginName: "PlaybookTest",
+      pluginType_: "playbook"
+    },
+    // pivot
+    {
+      pluginName: "PivotTest",
+      pluginType_: "pivot"
+    },
+  ])("(%s) deletion", async ({ pluginName, pluginType_ }) => {
     const userAction = userEvent.setup();
     axios.delete.mockImplementation(() => Promise.resolve({ data: {} }));
 
     const { container } = render(
       <BrowserRouter>
-        <PlaybooksDeletionButton playbookName="test" />
+        <PluginDeletionButton pluginName={pluginName} pluginType_={pluginType_} />
         <Toast />
       </BrowserRouter>,
     );
 
-    const playbookDeletionIcon = container.querySelector(
-      "#playbook-deletion-test",
+    const pluginDeletionIcon = container.querySelector(
+      `#plugin-deletion-${pluginName}`,
     );
-    expect(playbookDeletionIcon).toBeInTheDocument();
+    expect(pluginDeletionIcon).toBeInTheDocument();
 
-    await userAction.click(playbookDeletionIcon);
+    await userAction.click(pluginDeletionIcon);
     await expect(screen.getByRole("document", {})).toBeInTheDocument();
     const deleteButton = screen.getByRole("button", {
       name: "Delete",
@@ -129,10 +139,10 @@ describe("PlaybooksDeletionButton test", () => {
 
     await userAction.click(deleteButton);
     await waitFor(() => {
-      expect(axios.delete).toHaveBeenCalledWith(`${PLAYBOOKS_CONFIG_URI}/test`);
+      expect(axios.delete).toHaveBeenCalledWith(`${API_BASE_URI}/${pluginType_}/${pluginName}`);
     });
     // toast
-    expect(screen.getByText("test deleted")).toBeInTheDocument();
+    expect(screen.getByText(`${pluginType_} with name ${pluginName} deleted with success`)).toBeInTheDocument();
   });
 });
 

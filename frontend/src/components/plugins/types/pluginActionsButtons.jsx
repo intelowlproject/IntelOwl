@@ -12,6 +12,9 @@ import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
 import { PlaybookConfigForm } from "./PlaybookConfigForm";
+import { PivotConfigForm } from "./PivotConfigForm";
+import { deletePluginConfig } from "../pluginsApi";
+import { PluginsTypes } from "../../../constants/pluginConst";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -127,15 +130,27 @@ OrganizationPluginStateToggle.defaultProps = {
   pluginOwner: null,
 };
 
-export function PlaybooksDeletionButton({ playbookName }) {
+export function PluginDeletionButton({ pluginName, pluginType_ }) {
   const [showModal, setShowModal] = React.useState(false);
 
-  const { deletePlaybook, retrievePlaybooksConfiguration } =
+  const user = useAuthStore(React.useCallback((state) => state.user, []));
+  const { noOrg, isUserAdmin } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        fetchAll: state.fetchAll,
+        noOrg: state.noOrg,
+        isUserAdmin: state.isUserAdmin,
+      }),
+      [],
+    ),
+  );
+
+  const { retrievePlaybooksConfiguration, retrievePivotsConfiguration } =
     usePluginConfigurationStore(
       React.useCallback(
         (state) => ({
-          deletePlaybook: state.deletePlaybook,
           retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
+          retrievePivotsConfiguration: state.retrievePivotsConfiguration,
         }),
         [],
       ),
@@ -143,43 +158,51 @@ export function PlaybooksDeletionButton({ playbookName }) {
 
   const onClick = async () => {
     try {
-      await deletePlaybook(playbookName);
+      await deletePluginConfig(pluginType_, pluginName);
+      if (pluginType_ === PluginsTypes.PLAYBOOK)
+        retrievePlaybooksConfiguration();
+      if (pluginType_ === PluginsTypes.PIVOT) retrievePivotsConfiguration();
       setShowModal(false);
-      await retrievePlaybooksConfiguration();
     } catch {
-      // handle error in deletePlaybook
+      // handle error in deletePlugin
     }
   };
+
+  // disabled icon for all plugins except playbooks if the user is not an admin of the org or a superuser
+  const disabled =
+    pluginType_ !== "playbook" &&
+    ((!noOrg && !isUserAdmin(user.username)) || (noOrg && !user.is_staff));
 
   return (
     <div className="px-2">
       <IconButton
-        id={`playbook-deletion-${playbookName}`}
+        id={`plugin-deletion-${pluginName}`}
         color="danger"
         size="sm"
         Icon={MdDelete}
-        title="Delete playbook"
+        title="Delete plugin"
         onClick={() => setShowModal(true)}
+        disabled={disabled}
         titlePlacement="top"
       />
       <Modal
-        id={`modal-playbook-deletion-${playbookName}`}
+        id={`modal-plugin-deletion-${pluginName}`}
         autoFocus
         centered
         zIndex="1050"
         size="lg"
         keyboard={false}
         backdrop="static"
-        labelledBy="Playbook deletion modal"
+        labelledBy="Plugin deletion modal"
         isOpen={showModal}
       >
         <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
-          <small className="text-info">Delete playbook</small>
+          <small className="text-info">Delete plugin</small>
         </ModalHeader>
         <ModalBody className="d-flex justify-content-between my-2 mx-2">
           <div>
-            Do you want to delete the playbook:{" "}
-            <span className="text-info">{playbookName}</span>?
+            Do you want to delete the plugin:{" "}
+            <span className="text-info">{pluginName}</span>?
           </div>
           <div className="d-flex justify-content-between">
             <Button className="mx-2" color="danger" size="sm" onClick={onClick}>
@@ -199,8 +222,15 @@ export function PlaybooksDeletionButton({ playbookName }) {
   );
 }
 
-PlaybooksDeletionButton.propTypes = {
-  playbookName: PropTypes.string.isRequired,
+PluginDeletionButton.propTypes = {
+  pluginName: PropTypes.string.isRequired,
+  pluginType_: PropTypes.oneOf([
+    "analyzer",
+    "connector",
+    "ingestor",
+    "pivot",
+    "playbook",
+  ]).isRequired,
 };
 
 export function PluginPullButton({ pluginName, pluginType_ }) {
@@ -280,33 +310,62 @@ export function PlaybooksEditButton({ playbookConfig }) {
         }}
         titlePlacement="top"
       />
-      <Modal
-        id={`modal-playbook-edit-btn__${playbookConfig?.name}`}
-        autoFocus
-        centered
-        zIndex="1050"
-        size="lg"
-        keyboard={false}
-        backdrop="static"
-        labelledBy="Playbook edit modal"
+      <PlaybookConfigForm
+        playbookConfig={playbookConfig}
+        toggle={setShowModal}
+        isEditing
         isOpen={showModal}
-        style={{ minWidth: "60%" }}
-      >
-        <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
-          <small className="text-info">Edit playbook config</small>
-        </ModalHeader>
-        <ModalBody className="m-2">
-          <PlaybookConfigForm
-            playbookConfig={playbookConfig}
-            toggle={setShowModal}
-            isEditing
-          />
-        </ModalBody>
-      </Modal>
+        pluginsLoading={pluginsLoading}
+      />
     </div>
   );
 }
 
 PlaybooksEditButton.propTypes = {
   playbookConfig: PropTypes.object.isRequired,
+};
+
+export function PivotsEditButton({ pivotConfig }) {
+  const [showModal, setShowModal] = React.useState(false);
+
+  const user = useAuthStore(React.useCallback((state) => state.user, []));
+  const { noOrg, isUserAdmin } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        fetchAll: state.fetchAll,
+        noOrg: state.noOrg,
+        isUserAdmin: state.isUserAdmin,
+      }),
+      [],
+    ),
+  );
+
+  // disabled icon if the user is not an admin of the org or a superuser
+  const disabled =
+    (!noOrg && !isUserAdmin(user.username)) || (noOrg && !user.is_staff);
+
+  return (
+    <div className="d-flex flex-column align-items-center px-2">
+      <IconButton
+        id={`pivot-edit-btn__${pivotConfig?.name}`}
+        color="info"
+        size="sm"
+        Icon={MdEdit}
+        title="Edit pivot config"
+        onClick={() => setShowModal(true)}
+        disabled={disabled}
+        titlePlacement="top"
+      />
+      <PivotConfigForm
+        pivotConfig={pivotConfig}
+        toggle={setShowModal}
+        isEditing
+        isOpen={showModal}
+      />
+    </div>
+  );
+}
+
+PivotsEditButton.propTypes = {
+  pivotConfig: PropTypes.object.isRequired,
 };

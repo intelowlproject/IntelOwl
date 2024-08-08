@@ -6,8 +6,8 @@ import PropTypes from "prop-types";
 
 import { addToast, PopupFormButton } from "@certego/certego-ui";
 
-import { usePluginConfigurationStore } from "../../../../stores/usePluginConfigurationStore";
 import { PluginsTypes } from "../../../../constants/pluginConst";
+import { createPluginConfig } from "../../../plugins/pluginsApi";
 
 // constants
 const initialValues = {
@@ -37,11 +37,6 @@ const onValidate = (values) => {
 // Invitation Form
 export function SaveAsPlaybookForm({ onFormSubmit }) {
   console.debug("SaveAsPlaybookForm rendered!");
-
-  // store
-  const [createPluginConfig] = usePluginConfigurationStore((state) => [
-    state.createPluginConfig,
-  ]);
 
   const onSubmit = React.useCallback(
     async (values, formik) => {

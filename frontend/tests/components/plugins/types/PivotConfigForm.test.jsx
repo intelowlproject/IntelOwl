@@ -1,21 +1,55 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import axios from "axios";
-import { screen, render } from "@testing-library/react";
+import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-// import { API_BASE_URI } from "../../../../src/constants/apiURLs";
+import { API_BASE_URI } from "../../../../src/constants/apiURLs";
 import { PivotConfigForm } from "../../../../src/components/plugins/types/PivotConfigForm";
+import { mockedUsePluginConfigurationStore } from "../../../mock";
+
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
+  usePluginConfigurationStore: jest.fn((state) =>
+    state(mockedUsePluginConfigurationStore),
+  ),
+}));
 
 jest.mock("axios");
 
 describe("PivotConfigForm test", () => {
+  const pivotConfig = {
+    id: 13,
+    name: "test",
+    description: "pivot: test",
+    python_module: "self_analyzable.SelfAnalyzable",
+    playbooks_choice: ["DNS"],
+    disabled: false,
+    soft_time_limit: 60,
+    routing_key: "default",
+    health_check_status: true,
+    delay: "00:00:00",
+    health_check_task: null,
+    config: {
+      "queue": "default",
+      "soft_time_limit": 60
+    },
+    secrets: {},
+    params: {},
+    verification: {
+      configured: true,
+      details: "Ready to use!",
+      missing_secrets: []
+    }
+  };
+
   test("form fields", async () => {
     render(
       <BrowserRouter>
         <PivotConfigForm
-          playbookConfig={{}}
+          pivotConfig={{}}
           toggle={jest.fn()}
+          isEditing={false}
+          isOpen
         />
       </BrowserRouter>,
     );
@@ -24,7 +58,10 @@ describe("PivotConfigForm test", () => {
     const nameInputField = screen.getByLabelText("Name:");
     expect(nameInputField).toBeInTheDocument();
 
-    const pythonModuleInputField = screen.getByText("Python Module:");
+    const descriptionInputField = screen.getByLabelText("Description:");
+    expect(descriptionInputField).toBeInTheDocument();
+
+    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
     const playbookInputField = screen.getByText("Playbook to Execute:");
@@ -35,15 +72,17 @@ describe("PivotConfigForm test", () => {
     expect(saveButton.className).toContain("disabled");
   });
 
-  test("create pivot config", async () => {
+  test("create pivot config - SelfAnalyzable", async () => {
     const userAction = userEvent.setup();
     axios.post.mockImplementation(() => Promise.resolve({ status: 201 }));
 
     render(
       <BrowserRouter>
         <PivotConfigForm
-          playbookConfig={{}}
+          pivotConfig={{}}
           toggle={jest.fn()}
+          isEditing={false}
+          isOpen
         />
       </BrowserRouter>,
     );
@@ -52,7 +91,10 @@ describe("PivotConfigForm test", () => {
     const nameInputField = screen.getByLabelText("Name:");
     expect(nameInputField).toBeInTheDocument();
 
-    const pythonModuleInputField = screen.getByText("Python Module:");
+    const descriptionInputField = screen.getByLabelText("Description:");
+    expect(descriptionInputField).toBeInTheDocument();
+
+    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
     const playbookInputField = screen.getByText("Playbook to Execute:");
@@ -66,17 +108,166 @@ describe("PivotConfigForm test", () => {
     await userAction.clear(nameInputField);
     await userAction.type(nameInputField, "myNewPivot");
 
-    // expect(saveButton.className).not.toContain("disabled");
-    // await userAction.click(saveButton);
+    // select the python module
+    const pythonModuleDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(pythonModuleDropdownButton).toBeInTheDocument();
+    await userAction.click(pythonModuleDropdownButton);
 
-    // await waitFor(() => {
-    //   expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/pivot`, {
-    //     name: "myNewPlaybook",
-    //     description: "playbook: test",
-    //     related_analyzers: ["TEST_ANALYZER"],
-    //     related_connectors: ["TEST_CONNECTOR"],
-    //     soft_time_limit: 2,
-    //   });
-    // });
+    const pythonModuleButton = screen.getAllByRole("option")[1]; // self analyzable
+    expect(pythonModuleButton).toBeInTheDocument();
+    await userAction.click(pythonModuleButton);
+
+    // select the playbook
+    const playbookDropdownButton = screen.getAllByRole("combobox")[1];
+    expect(playbookDropdownButton).toBeInTheDocument();
+    await userAction.click(playbookDropdownButton);
+
+    const playbookButton = screen.getAllByRole("option")[1];
+    expect(playbookButton).toBeInTheDocument();
+    await userAction.click(playbookButton);
+
+    expect(saveButton.className).not.toContain("disabled");
+    await userAction.click(saveButton);
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/pivot`, {
+        name: "myNewPivot",
+        description: "",
+        python_module: "self_analyzable.SelfAnalyzable",
+        playbooks_choice: ["TEST_PLAYBOOK_URL"],
+      });
+    });
   });
+
+  test("create pivot config - AnyCompare", async () => {
+    const userAction = userEvent.setup();
+    axios.post.mockImplementation(() => Promise.resolve({ status: 201 }));
+
+    render(
+      <BrowserRouter>
+        <PivotConfigForm
+          pivotConfig={{}}
+          toggle={jest.fn()}
+          isEditing={false}
+          isOpen
+        />
+      </BrowserRouter>,
+    );
+
+    // form fields
+    const nameInputField = screen.getByLabelText("Name:");
+    expect(nameInputField).toBeInTheDocument();
+
+    const descriptionInputField = screen.getByLabelText("Description:");
+    expect(descriptionInputField).toBeInTheDocument();
+
+    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
+    expect(pythonModuleInputField).toBeInTheDocument();
+
+    const playbookInputField = screen.getByText("Playbook to Execute:");
+    expect(playbookInputField).toBeInTheDocument();
+
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toBeInTheDocument();
+    expect(saveButton.className).toContain("disabled");
+
+    // clear editor and type new playbook name
+    await userAction.clear(nameInputField);
+    await userAction.type(nameInputField, "myNewPivot");
+
+    // select the python module
+    const pythonModuleDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(pythonModuleDropdownButton).toBeInTheDocument();
+    await userAction.click(pythonModuleDropdownButton);
+
+    const testPythonModuleButton = screen.getAllByRole("option")[0]; // any compare
+    expect(testPythonModuleButton).toBeInTheDocument();
+    await userAction.click(testPythonModuleButton);
+
+    const fieldToCompareInputField = screen.getByText("Field to compare:");
+    expect(fieldToCompareInputField).toBeInTheDocument();
+
+    // type field_to_compare
+    await userAction.type(fieldToCompareInputField, "test.value");
+
+    // select the playbook
+    const playbookDropdownButton = screen.getAllByRole("combobox")[1];
+    expect(playbookDropdownButton).toBeInTheDocument();
+    await userAction.click(playbookDropdownButton);
+
+    const playbookButton = screen.getAllByRole("option")[1];
+    expect(playbookButton).toBeInTheDocument();
+    await userAction.click(playbookButton);
+
+    expect(saveButton.className).not.toContain("disabled");
+    await userAction.click(saveButton);
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/pivot`, {
+        name: "myNewPivot",
+        description: "",
+        python_module: "any_compare.AnyCompare",
+        playbooks_choice: ["TEST_PLAYBOOK_URL"],
+        plugin_config: {
+          type: 5,
+          plugin_name: "myNewPivot",
+          attribute: "field_to_compare",
+          value: "test.value",
+          config_type: 1,
+        }
+      });
+    });
+  });
+
+  test("edit pivot config", async () => {
+    const userAction = userEvent.setup();
+    axios.patch.mockImplementation(() => Promise.resolve({ status: 200 }));
+
+    render(
+      <BrowserRouter>
+        <PivotConfigForm
+          pivotConfig={pivotConfig}
+          toggle={jest.fn()}
+          isEditing
+          isOpen
+        />
+      </BrowserRouter>,
+    );
+
+    // form fields
+    const nameInputField = screen.getByLabelText("Name:");
+    expect(nameInputField).toBeInTheDocument();
+    expect(nameInputField).toHaveValue("test");
+
+    const descriptionInputField = screen.getByLabelText("Description:");
+    expect(descriptionInputField).toBeInTheDocument();
+    expect(descriptionInputField).toHaveValue("pivot: test");
+
+    const pythonModuleInputField = screen.getByText("Field that will be analyzed:");
+    expect(pythonModuleInputField).toBeInTheDocument();
+
+    const playbookInputField = screen.getByText("Playbook to Execute:");
+    expect(playbookInputField).toBeInTheDocument();
+
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toBeInTheDocument();
+    expect(saveButton.className).toContain("disabled");
+
+    // clear editor and type new playbook name
+    await userAction.clear(nameInputField);
+    await userAction.type(nameInputField, "myNewPivot");
+
+    expect(saveButton.className).not.toContain("disabled");
+    await userAction.click(saveButton);
+
+    await waitFor(() => {
+      expect(axios.patch).toHaveBeenCalledWith(`${API_BASE_URI}/pivot/test`, {
+        name: "myNewPivot",
+        description: "pivot: test",
+        python_module: "self_analyzable.SelfAnalyzable",
+        playbooks_choice: ["DNS"],
+      });
+    });
+  });
+
 });

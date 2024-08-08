@@ -6,7 +6,7 @@ import { MdInput } from "react-icons/md";
 import { PiGraphFill } from "react-icons/pi";
 import { BsFillPlusCircleFill } from "react-icons/bs";
 import { useLocation } from "react-router-dom";
-import { Button, Col, Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Button, Col } from "reactstrap";
 
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../../contexts/GuideContext";
@@ -161,58 +161,18 @@ export default function PluginsContainer() {
           &nbsp;Create {pluginsPage}
         </Button>
       )}
-      <Modal
-        id="modal-create-new-playbook"
-        autoFocus
-        centered
-        zIndex="1050"
-        size="lg"
-        keyboard={false}
-        backdrop="static"
-        labelledBy="Playbook create modal"
+      <PlaybookConfigForm
+        playbookConfig={{}}
+        toggle={setShowModalCreatePlaybook}
+        isEditing={false}
         isOpen={showModalCreatePlaybook}
-        style={{ minWidth: "60%" }}
-      >
-        <ModalHeader
-          className="mx-2"
-          toggle={() => setShowModalCreatePlaybook(false)}
-        >
-          <small className="text-info">Create a new playbook</small>
-        </ModalHeader>
-        <ModalBody className="m-2">
-          <PlaybookConfigForm
-            playbookConfig={{}}
-            toggle={setShowModalCreatePlaybook}
-            isEditing={false}
-          />
-        </ModalBody>
-      </Modal>
-      <Modal
-        id="modal-create-new-pivot"
-        autoFocus
-        centered
-        zIndex="1050"
-        size="lg"
-        keyboard={false}
-        backdrop="static"
-        labelledBy="Pivot create modal"
+      />
+      <PivotConfigForm
+        pivotConfig={{}}
+        toggle={setShowModalCreatePivot}
+        isEditing={false}
         isOpen={showModalCreatePivot}
-        style={{ minWidth: "60%" }}
-      >
-        <ModalHeader
-          className="mx-2"
-          toggle={() => setShowModalCreatePivot(false)}
-        >
-          <small className="text-info">Create a new pivot</small>
-        </ModalHeader>
-        <ModalBody className="m-2">
-          <PivotConfigForm
-            pivotConfig={{}}
-            toggle={setShowModalCreatePivot}
-            isEditing={false}
-          />
-        </ModalBody>
-      </Modal>
+      />
     </Col>
   );
 

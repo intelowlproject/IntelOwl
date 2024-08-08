@@ -276,6 +276,7 @@ threat prevention, reducing and automating the manual work of security analysts.
 * `CriminalIp`: [Criminal IP](https://www.criminalip.io/) is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.
 * `CriminalIp_Scan`:CriminalIp_Scan is an implementation of scan APIs provided by [CriminalIp](https://www.criminalip.io/) specifically for domains. Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting. It offers extensive cyber threat intelligence, including device reputation, geolocation, IP reputation for C2 or scanners, domain safety, malicious link detection, and APT attack vectors via search and API.
 * `PolyswarmObs`: Scan an observable using [Polyswarm](https://docs.polyswarm.io/) API. Paid plan is required for IP and Domain scans. Hash scan is free.
+* `Knock`:[Knock](https://github.com/guelfoweb/knock) or Knockpy is a portable and modular python3 tool designed to quickly enumerate subdomains on a target domain through passive reconnaissance and dictionary scan.         
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 

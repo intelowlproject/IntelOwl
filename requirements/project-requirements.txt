@@ -82,6 +82,7 @@ ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
 polyswarm-api==3.8.0
+knock-subdomains==7.0.1
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

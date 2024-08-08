@@ -57,9 +57,6 @@ class Polyswarm(FileAnalyzer):
             )
         result = self.construct_result(result)
 
-        # json_result = json.dumps(result)
-        # logger.info(f"Polyswarm result: {json_result}")
-
         return result
 
     def update(self):

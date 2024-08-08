@@ -1,4 +1,3 @@
-import json
 import logging
 
 from polyswarm_api.api import PolyswarmAPI
@@ -36,9 +35,7 @@ class PolyswarmObs(ObservableAnalyzer, Polyswarm):
                 raise AnalyzerRunException(
                     f"Failed to get assertions from Polyswarm for {self.observable_name}"
                 )
-            result = self.construct_result(result)
-
-        return result
+            return self.construct_result(result)
 
     @classmethod
     def _monkeypatch(cls):

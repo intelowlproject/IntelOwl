@@ -42,7 +42,7 @@ class PolyswarmObs(ObservableAnalyzer, Polyswarm):
         patches = [
             if_mock_connections(
                 patch.object(
-                    Polyswarm,
+                    PolyswarmObs,
                     "run",
                     # flake8: noqa
                     return_value={

@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class Polyswarm(FileAnalyzer):
+    # this class also acts as a super class
+    #  for PolyswarmObs in observable analyzers
     url = "https://api.polyswarm.network/v3"
     _api_key: str = None
     timeout: int = 60 * 15  # default as in the package settings
@@ -55,8 +57,8 @@ class Polyswarm(FileAnalyzer):
             )
         result = self.construct_result(result)
 
-        json_result = json.dumps(result)
-        logger.info(f"Polyswarm result: {json_result}")
+        # json_result = json.dumps(result)
+        # logger.info(f"Polyswarm result: {json_result}")
 
         return result
 

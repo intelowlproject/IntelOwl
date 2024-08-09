@@ -104,7 +104,9 @@ class FileDataModel(models.Model):
     related_threats = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # MalwareBazaarFileAnalyzer(?), QuarkEngineAPK (crimes.crime)
-    peepdf_stats = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
+    stats = pg_fields.ArrayField(
+        models.JSONField(), null=True
+    )  # PdfInfo (peepdf_stats)
     pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
     imphash = models.CharField(null=True)  # PeInfo
     type = models.CharField(null=True)  # PeInfo

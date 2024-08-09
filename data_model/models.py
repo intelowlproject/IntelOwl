@@ -37,7 +37,7 @@ class IPDataModel(models.Model):
     )  # pdns
     asn = models.IntegerField(null=True)  # BGPRanking, MaxMind
     asn_rank = models.DecimalField(null=True)  # BGPRanking
-    circl_pssl_certificates = models.JSONField(null=True)  # CIRCL_PSSL
+    certificates = models.JSONField(null=True)  # CIRCL_PSSL
     behavior = models.CharField(null=True)  # Crowdsec
     related_urls = pg_fields.ArrayField(
         models.URLField(), null=True
@@ -78,17 +78,18 @@ class FileDataModel(models.Model):
     )  # Crowdsec (link), UrlHaus (external_references), BoxJs,
     # Cuckoo (result_url/permalink), Intezer (link/analysis_url),
     # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink),
-    # StringsInfo (data), Triage (permalink), UnpacMe (permalink)
+    # StringsInfo (data), Triage (permalink), UnpacMe (permalink), XlmMacroDeobfuscator,
+    # Yara (report.list_el.url/rule_url), Yaraify (link)
     signatures = pg_fields.ArrayField(
         models.CharField(), null=True
-    )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer
+    )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer, Yara (report.list_el.match)
     family = models.CharField(
         null=True
     )  # Intezer (family_name), Cuckoo, MwDB, Triage (analysis.family),
     # UnpacMe (results.malware_id.malware_family)
     yara_rules = pg_fields.ArrayField(
         models.JSONField(), null=True
-    )  # MalwareBazaarFileAnalyzer
+    )  # MalwareBazaarFileAnalyzer, Yaraify (report.data.tasks.static_result)
     comments = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # MalwareBazaarFileAnalyzer(?)

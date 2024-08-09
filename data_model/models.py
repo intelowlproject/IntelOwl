@@ -66,10 +66,8 @@ class FileDataModel(models.Model):
     )  # HybridAnalysisFileAnalyzer
     tags = pg_fields.ArrayField(
         models.CharField(), null=True
-    )  # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB
-    domains = pg_fields.ArrayField(
-        models.CharField(), null=True
-    )  # HybridAnalysisFileAnalyzer
+    )  # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
+    # VirusTotalV3FileAnalyzer (report.data.tags)
     compromised_hosts = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # HybridAnalysisFileAnalyzer
@@ -79,20 +77,25 @@ class FileDataModel(models.Model):
     # Cuckoo (result_url/permalink), Intezer (link/analysis_url),
     # MalwareBazaarFileAnalyzer (permalink/file_information.value), MwDB (permalink),
     # StringsInfo (data), Triage (permalink), UnpacMe (permalink), XlmMacroDeobfuscator,
-    # Yara (report.list_el.url/rule_url), Yaraify (link)
+    # Yara (report.list_el.url/rule_url), Yaraify (link),
+    # HybridAnalysisFileAnalyzer (domains),
+    # VirusTotalV3FileAnalyzer (data.relationships.contacted_urls/contacted_domains)
     signatures = pg_fields.ArrayField(
         models.CharField(), null=True
     )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer, Yara (report.list_el.match)
     family = models.CharField(
         null=True
     )  # Intezer (family_name), Cuckoo, MwDB, Triage (analysis.family),
-    # UnpacMe (results.malware_id.malware_family)
+    # UnpacMe (results.malware_id.malware_family),
+    # VirusTotalV3FileAnalyzer
+    # (attributes.last_analysis_results.list_el.results/attributes.names)
     yara_rules = pg_fields.ArrayField(
         models.JSONField(), null=True
     )  # MalwareBazaarFileAnalyzer, Yaraify (report.data.tasks.static_result)
     comments = pg_fields.ArrayField(
         models.CharField(), null=True
-    )  # MalwareBazaarFileAnalyzer(?)
+    )  # MalwareBazaarFileAnalyzer,
+    # VirusTotalV3FileAnalyzer (data.relationships.comments)
     file_information = pg_fields.ArrayField(
         models.JSONField(), null=True
     )  # MalwareBazaarFileAnalyzer, OneNoteInfo

@@ -50,7 +50,6 @@ class PDFInfoTestCase(CustomTestCase):
         downloader_pdf_report = self._analyze(
             "downloader.pdf", "d7be84a4e07b0aadfffb12cbcbd668eb", "application/pdf"
         )
-        print(f"{downloader_pdf_report=}")
         self.assertEqual(
             sorted(downloader_pdf_report["uris"]),
             sorted(

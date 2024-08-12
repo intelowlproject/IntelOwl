@@ -78,9 +78,20 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
             MimeTypes.EML.value,
             MimeTypes.JSON.value,
         ]:
+            import re
+
             for d in result["data"]:
                 if ObservableTypes.calculate(d) == ObservableTypes.URL:
-                    result["uris"].append(d)
+                    extracted_urls = re.findall(
+                        r"[a-z]{1,5}://[a-z\d-]{1,200}"
+                        r"(?:\.[a-zA-Z\d\u2044\u2215!#$&(-;=?-\[\]_~]{1,200})+"
+                        r"(?::\d{2,6})?"
+                        r"(?:/[a-zA-Z\d\u2044\u2215!#$&(-;=?-\[\]_~]{1,200})*"
+                        r"(?:\.\w+)?",
+                        d,
+                    )
+                    for u in extracted_urls:
+                        result["uris"].append(u)
             result["uris"] = list(set(result["uris"]))
 
         return result

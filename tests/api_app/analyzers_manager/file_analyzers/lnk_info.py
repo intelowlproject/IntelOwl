@@ -52,7 +52,6 @@ class LnkInfoTestCase(CustomTestCase):
             "4fa46e8663b40ca77dc70dbd952c84ef",
             "application/x-ms-shortcut",
         )
-        print(f"{downloader_lnk_report=}")
         self.assertEqual(
             downloader_lnk_report["uris"],
             ["https://vidstreemz.b-cdn.net/matodown"],

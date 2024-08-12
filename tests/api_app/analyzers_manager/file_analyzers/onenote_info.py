@@ -52,7 +52,6 @@ class OneNoteInfoTestCase(CustomTestCase):
         downloader_onenote_report = self._analyze(
             "downloader.one", "c35b7e980b618f8cf19c5a7a801c3e5b", "application/onenote"
         )
-        print(f"{downloader_onenote_report=}")
         self.assertEqual(len(downloader_onenote_report["stored_base64"]), 1)
         decoded = base64.b64decode(
             downloader_onenote_report["stored_base64"][0]

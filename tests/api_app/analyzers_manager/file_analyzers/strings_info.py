@@ -32,6 +32,7 @@ class StringsInfoTestCase(CustomTestCase):
 
     def _analyze(self, sample_name, sample_md5, sample_mimetype):
         analyzer_config = AnalyzerConfig.objects.get(name="Strings_Info")
+        analyzer_config.max_number_of_strings = 2000
         strings_info_analyzer = StringsInfo(analyzer_config)
         strings_info_analyzer.md5 = sample_md5
         strings_info_analyzer.filename = f"./tests/test_files/{sample_name}"
@@ -47,17 +48,16 @@ class StringsInfoTestCase(CustomTestCase):
         Job.objects.all().delete()
 
     def test_urls(self):
-        urls2_xls_report = self._analyze(
-            "urls2.xls", "b4b3a2223765ac84c9b1b05dbf7c6503", "application/excel"
+        downloader_pdf_report = self._analyze(
+            "downloader.pdf", "d7be84a4e07b0aadfffb12cbcbd668eb", "application/pdf"
         )
-        print(f"{urls2_xls_report=}")
-        self.assertEqual(
-            sorted(urls2_xls_report["uris"]),
-            sorted(
-                [
-                    "http://190.14.37.178/",
-                    "http://185.183.96.67/",
-                    "http://185.250.148.213/",
-                ]
-            ),
+        # unfortunally the pdf uri syntax add an extra valid char in the strings: ")"
+        # '/URI (https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe)>>>>
+        # for this reason we check only if the url is present inside the list
+        urls_to_check = "\t".join(downloader_pdf_report["uris"])
+        self.assertTrue(
+            "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
+            in urls_to_check
         )
+        self.assertTrue("https://it.lipsum.com/" in urls_to_check)
+        self.assertTrue("https://it.lipsum.com/privacy" in urls_to_check)

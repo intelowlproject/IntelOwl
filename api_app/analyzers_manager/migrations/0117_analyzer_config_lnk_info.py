@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
         ("api_app", "0062_alter_parameter_python_module"),
         (
             "analyzers_manager",
-            "0115_analyzer_config_knock",
+            "0116_alter_analyzerconfig_not_supported_filetypes_and_more",
         ),
     ]
 

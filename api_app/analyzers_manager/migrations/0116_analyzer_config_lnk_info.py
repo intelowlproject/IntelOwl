@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
         ("api_app", "0062_alter_parameter_python_module"),
         (
             "analyzers_manager",
-            "0112_analyzer_config_criminalip_scan",
+            "0115_analyzer_config_knock",
         ),
     ]
 

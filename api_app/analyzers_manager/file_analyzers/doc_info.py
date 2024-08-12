@@ -10,11 +10,11 @@ import re
 import zipfile
 from re import sub
 from typing import Dict, List
-from xml.dom import minidom
 
 import docxpy
 import olefile
 from defusedxml.ElementTree import fromstring
+from defusedxml.minidom import parseString
 from oletools import mraptor, oleid, oleobj
 from oletools.common.clsid import KNOWN_CLSIDS
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
@@ -279,7 +279,7 @@ class DocInfo(FileAnalyzer):
             try:
                 dxml = document.read("docProps/app.xml")
                 pages_count = int(
-                    minidom.parseString(dxml)
+                    parseString(dxml)
                     .getElementsByTagName("Pages")[0]
                     .childNodes[0]
                     .nodeValue

@@ -252,7 +252,7 @@ class DocInfo(FileAnalyzer):
             # do not proceed
             return external_relationships
         else:
-            if sum([i.value for i in oid.check() if i.id == "ext_rels"]) > 1:
+            if sum(i.value for i in oid.check() if i.id == "ext_rels") > 1:
                 xml_parser = XmlParser(self.filepath)
                 for relationship, target in oleobj.find_external_relationships(
                     xml_parser

@@ -25,6 +25,9 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
     # CARE!! ranked_strings could be cpu/ram intensive and very slow
     rank_strings: int
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         # get binary
         binary = self.read_file_bytes()

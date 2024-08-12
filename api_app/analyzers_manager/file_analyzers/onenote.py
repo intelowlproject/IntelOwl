@@ -13,11 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 class OneNoteInfo(FileAnalyzer):
+    def update(self) -> bool:
+        pass
+
     def run(self):
         with open(self.filepath, "rb") as file:
             results = json.loads(process_onenote_file(file, "", "", True))
             results["stored_base64"] = []
-            for guid, f in results["files"].items():
+            for _, f in results["files"].items():
                 if f["extension"] not in (".png", ".jpg"):
                     results["stored_base64"].append(
                         base64.b64encode(bytes.fromhex(f["content"])).decode("ascii")

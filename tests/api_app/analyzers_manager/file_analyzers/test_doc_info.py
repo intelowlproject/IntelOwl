@@ -34,10 +34,10 @@ class DocInfoTestCase(CustomTestCase):
         analyzer_config = AnalyzerConfig.objects.get(name="Doc_Info")
         doc_info_analyzer = DocInfo(analyzer_config)
         doc_info_analyzer.md5 = sample_md5
-        doc_info_analyzer.filename = f"./tests/test_files/{sample_name}"
+        doc_info_analyzer.filename = f"./test_files/{sample_name}"
         doc_info_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./tests/test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         doc_info_analyzer.start(job.id, {}, 1)
         return doc_info_analyzer.report.report

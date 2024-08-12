@@ -35,10 +35,10 @@ class StringsInfoTestCase(CustomTestCase):
         analyzer_config.max_number_of_strings = 2000
         strings_info_analyzer = StringsInfo(analyzer_config)
         strings_info_analyzer.md5 = sample_md5
-        strings_info_analyzer.filename = f"./tests/test_files/{sample_name}"
+        strings_info_analyzer.filename = f"./test_files/{sample_name}"
         strings_info_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./tests/test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         strings_info_analyzer.start(job.id, {}, 1)
         return strings_info_analyzer.report.report

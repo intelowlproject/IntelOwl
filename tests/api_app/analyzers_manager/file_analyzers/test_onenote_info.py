@@ -36,10 +36,10 @@ class OneNoteInfoTestCase(CustomTestCase):
         analyzer_config = AnalyzerConfig.objects.get(name="OneNote_Info")
         onenote_info_analyzer = OneNoteInfo(analyzer_config)
         onenote_info_analyzer.md5 = sample_md5
-        onenote_info_analyzer.filename = f"./tests/test_files/{sample_name}"
+        onenote_info_analyzer.filename = f"./test_files/{sample_name}"
         onenote_info_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./tests/test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         onenote_info_analyzer.start(job.id, {}, 1)
         return onenote_info_analyzer.report.report

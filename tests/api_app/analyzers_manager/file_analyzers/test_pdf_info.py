@@ -34,10 +34,10 @@ class PDFInfoTestCase(CustomTestCase):
         analyzer_config = AnalyzerConfig.objects.get(name="PDF_Info")
         pdf_info_analyzer = PDFInfo(analyzer_config)
         pdf_info_analyzer.md5 = sample_md5
-        pdf_info_analyzer.filename = f"./tests/test_files/{sample_name}"
+        pdf_info_analyzer.filename = f"./test_files/{sample_name}"
         pdf_info_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./tests/test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         pdf_info_analyzer.start(job.id, {}, 1)
         return pdf_info_analyzer.report.report

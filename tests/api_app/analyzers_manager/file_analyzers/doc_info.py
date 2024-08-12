@@ -48,17 +48,29 @@ class DocInfoTestCase(CustomTestCase):
 
     def test_follina(self):
         follina_docx_report = self._analyze(
-            "follina.docx",
-            "0d37337ead8492e1b2395f6cd4f724fc",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "follina.doc",
+            "15b691f0c5d627e71fed8a5d34fb0328",
+            "application/msword",
         )
-        print(f"{follina_docx_report=}")
+        self.assertEqual(
+            follina_docx_report["follina"],
+            ["mhtml:https://qaz.im/load/diy5ah/b6d42680-56fd-4f98-ae0e-ff81e3799df6!"],
+        )
+
+        follina2_docx_report = self._analyze(
+            "follina2.doc",
+            "eb5e57e7db3af792b4c9e9f28525843b",
+            "application/msword",
+        )
+        self.assertEqual(
+            follina2_docx_report["follina"],
+            ["http://13.234.135.58/loadingupdate.html!"],
+        )
 
     def test_macro(self):
         document_doc_report = self._analyze(
             "document.doc", "094268e03ab9e2e23f0d24554cb81a1b", "application/msword"
         )
-        print(f"{document_doc_report=}")
         analyzed_macros = document_doc_report["olevba"]["analyze_macro"]
         keywords = [macro["keyword"] for macro in analyzed_macros]
         self.assertTrue("AutoOpen" in keywords)
@@ -75,7 +87,6 @@ class DocInfoTestCase(CustomTestCase):
         cve_xls_report = self._analyze(
             "cve.xls", "d5c0296562466d2f4a76a065bc3376e2", "application/excel"
         )
-        print(f"{cve_xls_report=}")
         self.assertEqual(
             cve_xls_report["extracted_CVEs"][0]["CVEs"],
             ["CVE-2017-0199", "CVE-2017-8570", "CVE-2017-8759", "CVE-2018-8174"],
@@ -87,21 +98,18 @@ class DocInfoTestCase(CustomTestCase):
             "c35b7e980b618f8cf19c5a7a801c3e5b",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-        print(f"{downloader_docx_report=}")
-        urls1_xls_report = self._analyze(
-            "urls1.xls", "7facca44e3c764b946cb370de32168bd", "application/excel"
-        )
-        print(f"{urls1_xls_report=}")
-        urls2_xls_report = self._analyze(
-            "urls2.xls", "b4b3a2223765ac84c9b1b05dbf7c6503", "application/excel"
-        )
-        print(f"{urls2_xls_report=}")
         self.assertEqual(
             downloader_docx_report["uris"],
             ["https://malware.document.test/testmalware.txt"],
         )
+        urls1_xls_report = self._analyze(
+            "urls1.xls", "7facca44e3c764b946cb370de32168bd", "application/excel"
+        )
         self.assertTrue(
             "https://kendallvilleglass.com/vers/ber.php" in urls1_xls_report["uris"]
+        )
+        urls2_xls_report = self._analyze(
+            "urls2.xls", "b4b3a2223765ac84c9b1b05dbf7c6503", "application/excel"
         )
         self.assertEqual(
             sorted(urls2_xls_report["uris"]),

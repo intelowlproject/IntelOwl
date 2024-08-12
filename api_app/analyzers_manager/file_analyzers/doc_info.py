@@ -11,7 +11,6 @@ import zipfile
 from re import sub
 from typing import Dict, List
 from xml.dom import minidom
-from xml.etree import ElementTree
 
 import docxpy
 import olefile
@@ -210,7 +209,13 @@ class DocInfo(FileAnalyzer):
                     target = xml_node.attrib.get("Target")
                     if target:
                         target = target.strip().lower()
-                        hits += re.findall(r"mhtml:(https?://.*?)!", target)
+                        # join the list as uniq string due to the other non-matched
+                        # group in the OR mutual exclusive expressions
+                        matches = re.findall(
+                            r"((?<!mhtml:)https?://.*\.html!)|(mhtml:https?://.*?!)",
+                            target,
+                        )
+                        hits += ["".join(x) for x in matches]
         return hits
 
     def analyze_for_cve(self) -> List:
@@ -268,7 +273,7 @@ class DocInfo(FileAnalyzer):
             document = zipfile.ZipFile(self.filepath)  # check if docx document
         except zipfile.BadZipFile as e:
             error_message = f"job_id {self.job_id} docx bad zip file: {e}"
-            logger.warning(error_message, stack_info=False)
+            logger.warning(error_message, stack_info=True)
             self.report.errors.append(error_message)
         else:
             try:
@@ -307,9 +312,7 @@ class DocInfo(FileAnalyzer):
                 # also parse xml in case docxpy missed some links
                 try:
                     for relationship in list(
-                        ElementTree.fromstring(
-                            document.read("word/_rels/document.xml.rels")
-                        )
+                        fromstring(document.read("word/_rels/document.xml.rels"))
                     ):
                         # exclude xml schema urls
                         if relationship.attrib["Type"] == XML_H_SCHEMA and any(
@@ -321,7 +324,7 @@ class DocInfo(FileAnalyzer):
                     error_message = (
                         f"job_id {self.job_id} no xml rels found. Error: {e}"
                     )
-                    logger.warning(error_message, stack_info=False)
+                    logger.warning(error_message, stack_info=True)
                     self.report.errors.append(error_message)
 
         return urls

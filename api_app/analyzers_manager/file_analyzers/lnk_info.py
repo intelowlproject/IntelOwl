@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import re
 
 import pylnk3
 
@@ -25,6 +26,8 @@ class LnkInfo(FileAnalyzer):
                 args = arguments.split()
                 for a in args:
                     if ObservableTypes.calculate(a) == ObservableTypes.URL:
+                        # remove strings delimiters used in commands
+                        a = re.sub(r"[\"\']", "", a)
                         result["uris"].append(a)
 
         result["uris"] = list(set(result["uris"]))

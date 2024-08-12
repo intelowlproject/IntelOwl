@@ -64,8 +64,8 @@ class CreateJobsFromPlaybookInterface:
                 values, tlp, user, playbook_to_execute=playbook_to_execute, delay=delay
             )
 
+    @staticmethod
     def _get_observable_serializer(
-        self,
         values: Iterable[Any],
         tlp: str,
         user: User,

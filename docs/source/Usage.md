@@ -83,6 +83,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `File_Info`: static generic File analysis (hashes, magic and [exiftool](https://exiftool.org/))
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
 * `Hfinger`: create fingerprints of malware HTTPS requests using [Hfinger](https://github.com/CERT-Polska/hfinger)
+* `Lnk_Info`: static LNK url extraction by using [PyLnk](https://github.com/strayge/pylnk)
+* `OneNote`: static ONE malicious file extraction by using [pyOneNote](https://github.com/DissectMalware/pyOneNote)
 * `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Permhash`: create hash of manifest permssions found in APK, Android manifest, Chrome extensions or Chrome extension manifest using [Permhash](https://github.com/google/permhash)
@@ -96,7 +98,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Signature_Info`: PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)
 * `Speakeasy`: [Mandiant Speakeasy](https://github.com/mandiant/speakeasy) binary emulation
 * `SpeakEasy_Shellcode`: [Mandiant Speakeasy](https://github.com/mandiant/speakeasy) shellcode emulation
-* `Strings_Info`: Strings extraction. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)
+* `Strings_Info`: Strings extraction + URLs extraction for the most common malware downloaders. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)
 * `Suricata`: Analyze PCAPs with open IDS signatures with [Suricata engine](https://github.com/OISF/suricata)
 * `Thug_HTML_Info`: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 * `Xlm_Macro_Deobfuscator`: [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) deobfuscate xlm macros

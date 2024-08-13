@@ -208,7 +208,7 @@ You may want to look at a few existing examples to start to build a new one, suc
 - [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
 - [malpedia_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/malpedia_scan.py), if you are creating a file analyzer
 - [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
-- **Please note:** If the new analyzer that you are adding is free for the user to use, please add it in the `FREE_TO_USE_ANALYZERS` playbook. To do this you have to make a migration file; you can use `0026_add_mmdb_analyzer_free_to_use` as a template.
+- **Please note:** If the new analyzer that you are adding is free for the user to use, please add it in the `FREE_TO_USE_ANALYZERS` playbook. To do this you have to make a migration file; you can use `0025_add_mmdb_analyzer_free_to_use` as a template.
 
 After having written the new python module, you have to remember to:
 

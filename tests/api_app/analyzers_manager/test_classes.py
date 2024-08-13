@@ -46,7 +46,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "document.rtf",
                 "document.xls",
                 "document.doc",
-                "file.dll",
+                "downloader.lnk" "file.dll",
                 "file.exe",
                 "shellcode.bin",
                 "Sublime-Standard-Test-String.eml",
@@ -67,6 +67,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/rtf",
                 "application/vnd.ms-excel",
                 "application/msword",
+                "application/x-ms-shortcut"
                 "application/vnd.microsoft.portable-executable",
                 "application/vnd.microsoft.portable-executable",
                 "application/octet-stream",

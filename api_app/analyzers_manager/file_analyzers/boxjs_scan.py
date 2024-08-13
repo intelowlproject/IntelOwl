@@ -16,6 +16,10 @@ class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling (in secs)
     poll_distance: int = 12
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         # construct a valid filename into which thug will save the result
         fname = str(self.filename).replace("/", "_").replace(" ", "_")

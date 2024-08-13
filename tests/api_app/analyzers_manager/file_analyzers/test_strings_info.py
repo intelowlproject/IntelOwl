@@ -53,7 +53,7 @@ class StringsInfoTestCase(CustomTestCase):
         )
         # unfortunally the pdf uri syntax add an extra valid char in the strings: ")"
         # '/URI (https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe)>>>>
-        # for this reason we check only if the url is present inside the list
+        # for this reason we check only if the url is present inside the joined list
         urls_to_check = "\t".join(downloader_pdf_report["uris"])
         self.assertTrue(
             "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"

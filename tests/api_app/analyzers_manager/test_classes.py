@@ -68,7 +68,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/rtf",
                 "application/vnd.ms-excel",
                 "application/msword",
-                "application/x-ms-shortcut"
+                "application/x-ms-shortcut",
                 "application/vnd.microsoft.portable-executable",
                 "application/vnd.microsoft.portable-executable",
                 "application/octet-stream",

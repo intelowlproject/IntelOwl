@@ -34,10 +34,10 @@ class PDFInfoTestCase(CustomTestCase):
         analyzer_config = AnalyzerConfig.objects.get(name="PDF_Info")
         pdf_info_analyzer = PDFInfo(analyzer_config)
         pdf_info_analyzer.md5 = sample_md5
-        pdf_info_analyzer.filename = f"./test_files/{sample_name}"
+        pdf_info_analyzer.filename = f"test_files/{sample_name}"
         pdf_info_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         pdf_info_analyzer.start(job.id, {}, 1)
         return pdf_info_analyzer.report.report
@@ -50,14 +50,11 @@ class PDFInfoTestCase(CustomTestCase):
         downloader_pdf_report = self._analyze(
             "downloader.pdf", "d7be84a4e07b0aadfffb12cbcbd668eb", "application/pdf"
         )
-        self.assertEqual(
-            sorted(downloader_pdf_report["uris"]),
-            sorted(
-                [
-                    "https://cdn.akamai.steamstatic.com/client/"
-                    "installer/SteamSetup.exe",
-                    "https://it.lipsum.com/",
-                    "https://it.lipsum.com/privacy",
-                ]
-            ),
+        self.assertCountEqual(
+            downloader_pdf_report["uris"],
+            [
+                "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe",
+                "https://it.lipsum.com/",
+                "https://it.lipsum.com/privacy",
+            ],
         )

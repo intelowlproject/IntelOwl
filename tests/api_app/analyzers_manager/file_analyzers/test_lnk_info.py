@@ -34,10 +34,10 @@ class LnkInfoTestCase(CustomTestCase):
         analyzer_config = AnalyzerConfig.objects.get(name="Lnk_Info")
         lnk_info_analyzer = LnkInfo(analyzer_config)
         lnk_info_analyzer.md5 = sample_md5
-        lnk_info_analyzer.filename = f"./test_files/{sample_name}"
+        lnk_info_analyzer.filename = f"test_files/{sample_name}"
         lnk_info_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         lnk_info_analyzer.start(job.id, {}, 1)
         return lnk_info_analyzer.report.report

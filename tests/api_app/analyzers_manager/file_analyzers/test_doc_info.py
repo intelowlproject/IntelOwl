@@ -34,10 +34,10 @@ class DocInfoTestCase(CustomTestCase):
         analyzer_config = AnalyzerConfig.objects.get(name="Doc_Info")
         doc_info_analyzer = DocInfo(analyzer_config)
         doc_info_analyzer.md5 = sample_md5
-        doc_info_analyzer.filename = f"./test_files/{sample_name}"
+        doc_info_analyzer.filename = f"test_files/{sample_name}"
         doc_info_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         doc_info_analyzer.start(job.id, {}, 1)
         return doc_info_analyzer.report.report
@@ -111,13 +111,11 @@ class DocInfoTestCase(CustomTestCase):
         urls2_xls_report = self._analyze(
             "urls2.xls", "b4b3a2223765ac84c9b1b05dbf7c6503", "application/excel"
         )
-        self.assertEqual(
-            sorted(urls2_xls_report["uris"]),
-            sorted(
-                [
-                    "http://190.14.37.178/",
-                    "http://185.183.96.67/",
-                    "http://185.250.148.213/",
-                ]
-            ),
+        self.assertCountEqual(
+            urls2_xls_report["uris"],
+            [
+                "http://190.14.37.178/",
+                "http://185.183.96.67/",
+                "http://185.250.148.213/",
+            ],
         )

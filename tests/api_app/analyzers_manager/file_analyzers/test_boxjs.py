@@ -34,10 +34,10 @@ class BoxJSTestCase(CustomTestCase):
         analyzer_config = AnalyzerConfig.objects.get(name="BoxJS")
         boxjs_analyzer = BoxJS(analyzer_config)
         boxjs_analyzer.md5 = sample_md5
-        boxjs_analyzer.filename = f"./test_files/{sample_name}"
+        boxjs_analyzer.filename = f"test_files/{sample_name}"
         boxjs_analyzer.file_mimetype = sample_mimetype
         job = self._create_job(
-            f"./test_files/{sample_name}", sample_mimetype, analyzer_config
+            f"test_files/{sample_name}", sample_mimetype, analyzer_config
         )
         boxjs_analyzer.start(job.id, {}, 1)
         return boxjs_analyzer.report.report
@@ -52,12 +52,10 @@ class BoxJSTestCase(CustomTestCase):
             "06423b5a0a4d4f444ea943e2bdaa5461",
             "application/javascript",
         )
-        self.assertEqual(
-            sorted(downloader_js_report["uris"]),
-            sorted(
-                [
-                    "http://horus-protector.pro/c/s4.txt"
-                    "http://horus-protector.pro/c/r4.txt"
-                ]
-            ),
+        self.assertCountEqual(
+            downloader_js_report["uris"],
+            [
+                "http://horus-protector.pro/c/s4.txt",
+                "http://horus-protector.pro/c/r4.txt",
+            ],
         )

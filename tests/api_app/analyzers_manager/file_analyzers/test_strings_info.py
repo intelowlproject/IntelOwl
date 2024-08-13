@@ -55,9 +55,9 @@ class StringsInfoTestCase(CustomTestCase):
         # '/URI (https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe)>>>>
         # for this reason we check only if the url is present inside the joined list
         urls_to_check = "\t".join(downloader_pdf_report["uris"])
-        self.assertTrue(
-            "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
-            in urls_to_check
+        self.assertIn(
+            "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe",
+            urls_to_check,
         )
-        self.assertTrue("https://it.lipsum.com/" in urls_to_check)
-        self.assertTrue("https://it.lipsum.com/privacy" in urls_to_check)
+        self.assertIn("https://it.lipsum.com/", urls_to_check)
+        self.assertIn("https://it.lipsum.com/privacy", urls_to_check)

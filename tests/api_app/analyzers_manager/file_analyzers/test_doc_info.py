@@ -73,15 +73,15 @@ class DocInfoTestCase(CustomTestCase):
         )
         analyzed_macros = document_doc_report["olevba"]["analyze_macro"]
         keywords = [macro["keyword"] for macro in analyzed_macros]
-        self.assertTrue("AutoOpen" in keywords)
-        self.assertTrue("Shell" in keywords)
-        self.assertTrue("WScript.Shell" in keywords)
-        self.assertTrue("Run" in keywords)
-        self.assertTrue("powershell" in keywords)
-        self.assertTrue("Call" in keywords)
-        self.assertTrue("CreateObject" in keywords)
-        self.assertTrue("Exec" in keywords)
-        self.assertTrue("Hex Strings" in keywords)
+        self.assertIn("AutoOpen", keywords)
+        self.assertIn("Shell", keywords)
+        self.assertIn("WScript.Shell", keywords)
+        self.assertIn("Run", keywords)
+        self.assertIn("powershell", keywords)
+        self.assertIn("Call", keywords)
+        self.assertIn("CreateObject", keywords)
+        self.assertIn("Exec", keywords)
+        self.assertIn("Hex Strings", keywords)
 
     def test_cve(self):
         cve_xls_report = self._analyze(
@@ -105,8 +105,8 @@ class DocInfoTestCase(CustomTestCase):
         urls1_xls_report = self._analyze(
             "urls1.xls", "7facca44e3c764b946cb370de32168bd", "application/excel"
         )
-        self.assertTrue(
-            "https://kendallvilleglass.com/vers/ber.php" in urls1_xls_report["uris"]
+        self.assertIn(
+            "https://kendallvilleglass.com/vers/ber.php", urls1_xls_report["uris"]
         )
         urls2_xls_report = self._analyze(
             "urls2.xls", "b4b3a2223765ac84c9b1b05dbf7c6503", "application/excel"

@@ -56,4 +56,4 @@ class OneNoteInfoTestCase(CustomTestCase):
         decoded = base64.b64decode(
             downloader_onenote_report["stored_base64"][0]
         ).decode()
-        self.assertTrue("91.207.183.9" in decoded)
+        self.assertIn("91.207.183.9", decoded)

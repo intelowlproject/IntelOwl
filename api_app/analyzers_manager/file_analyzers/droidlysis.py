@@ -25,9 +25,6 @@ class DroidLysis(FileAnalyzer, DockerBasedAnalyzer):
             f"@{fname}",
             "-o",
             "/opt/deploy/droidlysis/out",
-            "-c",
-            "--disable-json",
-            "--disable-report",
             "--config",
             "/opt/deploy/droidlysis/conf/general.conf",
         ]

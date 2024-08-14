@@ -91,8 +91,7 @@ jobs:
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
         run: |
-          cp docker/env_file_integrations_template docker/env_file_integrations
-          ./start ci up --all_analyzers -- --build -d
+          ./start ci up -- --build -d
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"

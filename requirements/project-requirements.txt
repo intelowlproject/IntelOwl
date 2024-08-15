@@ -3,7 +3,7 @@ Django==4.2.14
 psycopg2-binary==2.9.6
 django-auth-ldap==4.8.0
 django-radius==1.5.0
-django-filter==24.2
+django-filter==24.3
 django-storages==1.14
 django-celery-beat==2.6.0
 django-celery-results==2.5.0
@@ -35,13 +35,13 @@ whitenoise==6.7.0
 daphne==4.1.0
 channels==4.1.0
 channels-redis==4.2.0
-elasticsearch-dsl==8.14.0
+elasticsearch-dsl==8.15.0
 
 # plugins
 GitPython==3.1.41
 checkdmarc==5.4.0
 dnspython==2.6.1
-dnstwist[full]==20240116
+dnstwist[full]==20240812
 google>=3.0.0
 google-cloud-webrisk==1.14.0
 intezer-sdk==1.21
@@ -67,7 +67,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==24.7.1
+quark-engine==24.8.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
@@ -81,7 +81,7 @@ permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
-polyswarm-api==3.8.0
+polyswarm-api==3.9.0
 knock-subdomains==7.0.1
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages

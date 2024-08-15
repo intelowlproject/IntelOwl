@@ -10,7 +10,7 @@ class DroidLysis(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "android_analyzer"
     url: str = "http://malware_tools_analyzers:4002/droidlysis"
     # interval between http request polling
-    poll_distance: int = 5
+    poll_distance: int = 2
     # http request polling max number of tries
     max_tries: int = 5
 

@@ -53,8 +53,8 @@ class PivotMapSerializer(rfs.ModelSerializer):
 
 
 class PivotConfigSerializer(PythonConfigSerializer):
-    playbook_to_execute = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(), slug_field="name"
+    playbooks_choice = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), slug_field="name", many=True
     )
 
     name = rfs.CharField(read_only=True)
@@ -74,7 +74,9 @@ class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):
     related_connector_configs = rfs.SlugRelatedField(
         read_only=True, many=True, slug_field="name"
     )
-    playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
+    playbooks_choice = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
 
     class Meta:
         model = PivotConfig

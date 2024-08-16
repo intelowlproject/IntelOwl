@@ -4,19 +4,21 @@ from typing import Type
 
 from django.contrib.contenttypes.fields import GenericRelation
 
+from api_app.pivots_manager.exceptions import PivotConfigurationException
 from api_app.pivots_manager.queryset import PivotConfigQuerySet, PivotReportQuerySet
 from api_app.queryset import PythonConfigQuerySet
 
 if typing.TYPE_CHECKING:
     from api_app.serializers.plugin import PythonConfigSerializer
 
+from datetime import timedelta
+
 from django.db import models
 from django.utils.functional import cached_property
 
 from api_app.choices import PythonModuleBasePaths
-from api_app.interfaces import CreateJobsFromPlaybookInterface
+from api_app.interfaces import CreateJobsFromPlaybookInterface  # skipcq: PYL-R0401
 from api_app.models import AbstractReport, Job, PythonConfig, PythonModule
-from api_app.pivots_manager.exceptions import PivotConfigurationException
 
 logger = logging.getLogger(__name__)
 
@@ -88,15 +90,15 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
     related_connector_configs = models.ManyToManyField(
         "connectors_manager.ConnectorConfig", related_name="pivots", blank=True
     )
-    playbook_to_execute = models.ForeignKey(
+    playbooks_choice = models.ManyToManyField(
         "playbooks_manager.PlaybookConfig",
-        on_delete=models.PROTECT,
-        related_name="executed_by_pivot",
-        null=False,
-        blank=False,
+        related_name="executed_by_pivots",
     )
     orgs_configuration = GenericRelation(
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
+    )
+    delay = models.DurationField(
+        default=timedelta, help_text="Expects data in the format 'DD HH:MM:SS'"
     )
 
     def _generate_full_description(self) -> str:
@@ -106,7 +108,7 @@ class PivotConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         return (
             f"Pivot for plugins {plugins_name}"
             " that executes"
-            f" playbook {self.playbook_to_execute.name}"
+            f" playbooks {self.playbooks_names}"
         )
 
     @property

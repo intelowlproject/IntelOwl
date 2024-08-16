@@ -99,8 +99,8 @@ export const investigationTableColumns = [
         (tag) =>
           tag !== null && (
             <JobTag
-              key={`jobtable-tags-${tag?.label}`}
-              tag={tag}
+              key={`jobtable-tags-${tag}`}
+              tag={{ label: tag, color: "#1655D3" }}
               className="ms-2"
             />
           ),

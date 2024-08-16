@@ -13,7 +13,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.c = CreateJobsFromPlaybookInterface()
-        self.c.playbook_to_execute = PlaybookConfig.objects.get(
+        self.c.playbooks_choice = PlaybookConfig.objects.filter(
             name="FREE_TO_USE_ANALYZERS"
         )
         self.c.name = "test"
@@ -24,14 +24,19 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
             observable_classification="domain",
             user=self.user,
         )
-        serializer = self.c._get_file_serializer([b"test"], tlp="CLEAR", user=self.user)
+        serializer = self.c._get_file_serializer(
+            [b"test"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
+        )
         self.assertIsInstance(serializer, MultipleFileJobSerializer)
         serializer.is_valid(raise_exception=True)
         jobs = serializer.save(send_task=False, parent=parent_job)
         self.assertEqual(len(jobs), 1)
         job = jobs[0]
         self.assertEqual(job.analyzed_object_name, "test.0")
-        self.assertEqual(job.playbook_to_execute, self.c.playbook_to_execute)
+        self.assertEqual(job.playbook_to_execute, self.c.playbooks_choice.first())
         self.assertEqual(job.tlp, "CLEAR")
         self.assertEqual(job.file.read(), b"test")
         self.assertIsNone(job.investigation)
@@ -45,7 +50,10 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
             user=self.user,
         )
         serializer = self.c._get_observable_serializer(
-            ["google.com"], tlp="CLEAR", user=self.user
+            ["google.com"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
         )
         self.assertIsInstance(serializer, MultipleObservableJobSerializer)
         serializer.is_valid(raise_exception=True)
@@ -53,7 +61,7 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         self.assertEqual(len(jobs), 1)
         job = jobs[0]
         self.assertEqual(job.analyzed_object_name, "google.com")
-        self.assertEqual(job.playbook_to_execute, self.c.playbook_to_execute)
+        self.assertEqual(job.playbook_to_execute, self.c.playbooks_choice.first())
         self.assertEqual(job.tlp, "CLEAR")
         self.assertEqual(job.observable_classification, "domain")
         self.assertIsNone(job.investigation)
@@ -69,7 +77,10 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         )
         self.assertIsNone(parent_job.investigation)
         serializer = self.c._get_observable_serializer(
-            ["google.com", "google2.com"], tlp="CLEAR", user=self.user
+            ["google.com", "google2.com"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
         )
         self.assertIsInstance(serializer, MultipleObservableJobSerializer)
         serializer.is_valid(raise_exception=True)
@@ -100,7 +111,10 @@ class CreateJobFromPlaybookInterfaceTestCase(CustomTestCase):
         # the parent has an investigation
         self.assertIsNotNone(parent_job.investigation)
         serializer = self.c._get_observable_serializer(
-            ["google.com", "google2.com"], tlp="CLEAR", user=self.user
+            ["google.com", "google2.com"],
+            tlp="CLEAR",
+            user=self.user,
+            playbook_to_execute=self.c.playbooks_choice.first(),
         )
         self.assertIsInstance(serializer, MultipleObservableJobSerializer)
         serializer.is_valid(raise_exception=True)

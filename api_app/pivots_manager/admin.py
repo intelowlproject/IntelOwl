@@ -18,9 +18,13 @@ class PivotReportAdminView(AbstractReportAdminView):
 class PivotConfigAdminView(PythonConfigAdminView):
     list_display = PythonConfigAdminView.list_display + (
         "get_related_configs",
-        "playbook_to_execute",
+        "get_playbooks_choice",
     )
     form = PivotConfigAdminForm
+
+    @admin.display(description="Playbooks choice")
+    def get_playbooks_choice(self, instance: PivotConfig):
+        return instance.playbooks_names
 
     @admin.display(description="Related Configs")
     def get_related_configs(self, instance: PivotConfig):
@@ -31,8 +35,10 @@ class PivotConfigAdminView(PythonConfigAdminView):
 class PivotMapAdminView(admin.ModelAdmin):
     list_display = ["pk", "starting_job", "pivot_config", "ending_job", "owner"]
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
+    @staticmethod
+    def has_add_permission(request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    @staticmethod
+    def has_change_permission(request: HttpRequest, obj=None) -> bool:
         return False

@@ -23,16 +23,18 @@ class AbstractReportBISerializer(AbstractBIInterface):
     timestamp = rfs.DateTimeField(source="start_time")
     username = rfs.CharField(source="job.user.username")
     name = rfs.SlugRelatedField(read_only=True, source="config", slug_field="name")
+    job_id = rfs.CharField(source="job.pk")
 
     class Meta:
         fields = AbstractBIInterface.Meta.fields + [
+            "name",
             "parameters",
         ]
         list_serializer_class = rfs.ListSerializer
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
-        return self.to_elastic_dict(data)
+        return self.to_elastic_dict(data, self.get_index())
 
     def get_class_instance(self, instance: AbstractReport):
         return super().get_class_instance(instance).split("report")[0]

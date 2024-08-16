@@ -129,7 +129,7 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(md5, job.md5)
 
         self.assertCountEqual(
-            ["Suricata", "YARAify_File_Scan", "Hfinger"],
+            ["Suricata", "YARAify_File_Scan", "Hfinger", "DetectItEasy", "Polyswarm"],
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
         )
 

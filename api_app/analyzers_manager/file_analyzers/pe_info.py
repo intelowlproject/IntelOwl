@@ -11,8 +11,10 @@ import os
 from datetime import datetime
 
 import lief
+import magic
 import pefile
 import pyimpfuzzy
+from dotnetfile import DotNetPE
 from PIL import Image
 
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -35,6 +37,20 @@ class No_Icon_Error(Exception):
 class PEInfo(FileAnalyzer):
     def run(self):
         results = {}
+        magic.fr
+        file_type = magic.from_buffer(self.read_file_bytes())
+        if ".Net" in file_type:
+            dotnet_file = DotNetPE(self.filepath)
+            dotnet_info = {
+                "runtime_target_version": dotnet_file.get_runtime_target_version(),
+                "number_of_streams": dotnet_file.get_number_of_streams(),
+                "has_resources": dotnet_file.has_resources(),
+                "is_mixed_assembly": dotnet_file.is_mixed_assembly(),
+                "has_native_entry_point": dotnet_file.has_native_entry_point(),
+                "is_native_image": dotnet_file.is_native_image(),
+                "is_windows_forms_app": dotnet_file.is_windows_forms_app(),
+            }
+            results["dotnet_info"] = dotnet_info
         try:
             pe = pefile.PE(self.filepath)
             if not pe:

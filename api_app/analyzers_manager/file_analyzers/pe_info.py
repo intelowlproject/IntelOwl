@@ -35,9 +35,11 @@ class No_Icon_Error(Exception):
 
 
 class PEInfo(FileAnalyzer):
+    def update(self):
+        pass
+
     def run(self):
         results = {}
-        magic.fr
         file_type = magic.from_buffer(self.read_file_bytes())
         if ".Net" in file_type:
             dotnet_file = DotNetPE(self.filepath)

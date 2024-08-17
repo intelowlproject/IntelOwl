@@ -88,6 +88,11 @@ class MimeTypes(models.TextChoices):
     JSON = "application/json"
     EXECUTABLE = "application/x-executable"
 
+    JAVA2 = "text/x-java"
+    KOTLIN = "text/x-kotlin"
+    SWIFT = "text/x-swift"
+    OBJECTIVE_C_CODE = "text/x-objective-c"
+
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:
         if file_name.endswith(".js") or file_name.endswith(".jse"):
@@ -102,6 +107,15 @@ class MimeTypes(models.TextChoices):
             mimetype = cls.DEX
         elif file_name.endswith(".one"):
             mimetype = cls.ONE_NOTE
+        elif file_name.endswith(".java"):
+            mimetype = cls.JAVA2
+        elif file_name.endswith(".swift"):
+            mimetype = cls.SWIFT
+        elif file_name.endswith(".kt"):
+            mimetype = cls.KOTLIN
+        elif file_name.endswith(".m"):
+            mimetype = cls.OBJECTIVE_C_CODE
+
         else:
             return None
         return mimetype

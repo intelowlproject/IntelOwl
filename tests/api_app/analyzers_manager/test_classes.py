@@ -55,6 +55,10 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "sample.crx",
                 "manifest.json",
                 "main.out",
+                "java_vuln.java",
+                "kotlin.kt",
+                "objectivec.m",
+                "swift.swift",
             ],
             [
                 "application/onenote",
@@ -76,6 +80,10 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/x-chrome-extension",
                 "application/json",
                 "application/x-executable",
+                "text/x-java",
+                "text/x-kotlin",
+                "text/x-objective-c",
+                "text/x-swift",
             ],
         ):
             try:

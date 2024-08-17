@@ -1,5 +1,5 @@
 # django libs
-Django==4.2.14
+Django==4.2.15
 psycopg2-binary==2.9.6
 django-auth-ldap==4.8.0
 django-radius==1.5.0
@@ -75,7 +75,6 @@ greynoise==2.3.0
 XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0
-blint==2.1.5
 hfinger==0.2.2
 permhash==0.1.4
 ail_typo_squatting==2.7.4

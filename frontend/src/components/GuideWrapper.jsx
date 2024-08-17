@@ -17,8 +17,8 @@ export default function GuideWrapper() {
           <p>
             Welcome to IntelOwls Guide for First Time Visitors! For further
             questions you could either check out our{" "}
-            <a href="https://intelowlproject.github.io/docs/">docs</a> or
-            reach us out on{" "}
+            <a href="https://intelowlproject.github.io/docs/">docs</a> or reach
+            us out on{" "}
             <a href="https://gsoc-slack.honeynet.org/">
               the official IntelOwl slack channel
             </a>

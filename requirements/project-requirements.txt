@@ -83,8 +83,6 @@ ioc-finder==7.0.0
 polyswarm-api==3.9.0
 knock-subdomains==7.0.1
 attrs==22.2.0
-mobsfscan==0.3.9
-
 
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages

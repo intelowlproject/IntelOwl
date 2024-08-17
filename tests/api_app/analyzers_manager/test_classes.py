@@ -55,6 +55,8 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "sample.crx",
                 "manifest.json",
                 "main.out",
+                "files.zip",
+                "sample.dex",
             ],
             [
                 "application/onenote",
@@ -76,6 +78,8 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/x-chrome-extension",
                 "application/json",
                 "application/x-executable",
+                "application/zip",
+                "application/x-dex",
             ],
         ):
             try:

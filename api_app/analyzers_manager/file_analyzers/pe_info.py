@@ -52,7 +52,11 @@ class PEInfo(FileAnalyzer):
                 "is_native_image": dotnet_file.is_native_image(),
                 "is_windows_forms_app": dotnet_file.is_windows_forms_app(),
             }
+            results["is_dotnet"] = True
             results["dotnet_info"] = dotnet_info
+        else:
+            results["is_dotnet"] = False
+
         try:
             pe = pefile.PE(self.filepath)
             if not pe:

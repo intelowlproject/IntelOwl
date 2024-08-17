@@ -32,6 +32,7 @@ class CreateJobsFromPlaybookInterface:
         name (str): The name of the job.
         delay (datetime.timedelta): The delay before the job is executed.
     """
+
     playbooks_choice: QuerySet
     name: str
     delay: datetime.timedelta
@@ -228,6 +229,7 @@ class OwnershipAbstractModel(models.Model):
         for_organization (bool): Whether the model is for an organization.
         owner (ForeignKey): The owner of the model, linked to the user.
     """
+
     for_organization = models.BooleanField(default=False)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

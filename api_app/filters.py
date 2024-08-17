@@ -30,6 +30,7 @@ class JobFilter(filters.FilterSet):
         type (CharFilter): Custom filter method to filter by type (observable classification or file MIME type).
         name (CharFilter): Custom filter method to filter by name (observable or file name).
     """
+
     is_sample = filters.BooleanFilter()
     md5 = filters.CharFilter(lookup_expr="icontains")
     observable_name = filters.CharFilter(lookup_expr="icontains")

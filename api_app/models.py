@@ -77,6 +77,7 @@ class PythonModule(models.Model):
         update_task (PeriodicTask): The task associated with updating the module.
         health_check_schedule (CrontabSchedule): The schedule for health checks.
     """
+
     module = models.CharField(max_length=120, db_index=True)
     base_path = models.CharField(
         max_length=120, db_index=True, choices=PythonModuleBasePaths.choices
@@ -243,7 +244,8 @@ class Tag(models.Model):
     Attributes:
         label (str): The label of the tag.
         color (str): The color of the tag in hex format.
-    """ 
+    """
+
     label = models.CharField(
         max_length=50,
         blank=False,
@@ -273,6 +275,7 @@ class Comment(models.Model):
         created_at (datetime): The date and time when the comment was created.
         updated_at (datetime): The date and time when the comment was last updated.
     """
+
     # make the user null if the user is deleted
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -317,6 +320,7 @@ class Job(MP_Node):
         analyzers_report (ManyToManyField): The analyzers report for the job.
         analyzers_started (ManyToManyField): The analyzers started for the job.
     """
+
     objects = JobQuerySet.as_manager()
 
     class Meta:
@@ -774,6 +778,7 @@ class Parameter(models.Model):
         required (bool): Indicates if the parameter is mandatory.
         python_module (ForeignKey): The Python module associated with the parameter.
     """
+
     objects = ParameterQuerySet.as_manager()
 
     name = models.CharField(null=False, blank=False, max_length=50)
@@ -830,6 +835,7 @@ class PluginConfig(OwnershipAbstractModel):
         ingestor_config (ForeignKey): The ingestor configuration this config belongs to.
         pivot_config (ForeignKey): The pivot configuration this config belongs to.
     """
+
     objects = PluginConfigQuerySet.as_manager()
     value = models.JSONField(blank=True, null=True)
 
@@ -1046,6 +1052,7 @@ class OrganizationPluginConfiguration(models.Model):
         rate_limit_timeout (DurationField): The duration for which rate limits apply.
         rate_limit_enable_task (ForeignKey): The task to re-enable the configuration after a rate limit.
     """
+
     objects = OrganizationPluginConfigurationQuerySet.as_manager()
     content_type = models.ForeignKey(
         ContentType,
@@ -1074,7 +1081,7 @@ class OrganizationPluginConfiguration(models.Model):
         unique_together = [("object_id", "organization", "content_type")]
 
     def __str__(self):
-        """Returns a string representation of the organization plugin configuration.""" 
+        """Returns a string representation of the organization plugin configuration."""
         return f"{self.config} ({self.organization})"
 
     def disable_for_rate_limit(self):
@@ -1166,6 +1173,7 @@ class ListCachable(models.Model):
         delete_class_cache_keys(user: User): Deletes cached keys for the class.
         python_path: Returns the Python path of the class.
     """
+
     class Meta:
         abstract = True
 
@@ -1204,6 +1212,7 @@ class AbstractConfig(ListCachable):
         disabled (bool): Indicates if the configuration is disabled.
         orgs_configuration (GenericRelation): The organization configurations for this config.
     """
+
     objects = AbstractConfigQuerySet.as_manager()
     name = models.CharField(
         max_length=100,
@@ -1334,6 +1343,7 @@ class AbstractReport(models.Model):
         parameters (JSONField): The parameters used for generating the report.
         sent_to_bi (bool): Indicates if the report has been sent to business intelligence (BI) systems.
     """
+
     objects = AbstractReportQuerySet.as_manager()
     # constants
     Status = ReportStatus
@@ -1421,6 +1431,7 @@ class PythonConfig(AbstractConfig):
         health_check_task (OneToOneField): The periodic task for health checks.
         health_check_status (bool): The current health check status of the plugin.
     """
+
     objects = PythonConfigQuerySet.as_manager()
     soft_time_limit = models.IntegerField(default=60, validators=[MinValueValidator(0)])
     routing_key = models.CharField(max_length=50, default="default")

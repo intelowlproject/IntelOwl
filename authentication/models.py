@@ -19,7 +19,7 @@ __all__ = [
 class DiscoverFromChoices(models.TextChoices):
     """
     Choices for how the user discovered the platform.
-    
+
     Attributes:
         SEARCH_ENGINE (str): Discovered via search engine.
         WAS_RECOMMENDED (str): Recommended by a friend or colleague.
@@ -27,6 +27,7 @@ class DiscoverFromChoices(models.TextChoices):
         BLOG_OR_PUBLICATION (str): Discovered via a blog or publication.
         OTHER (str): Discovered through other means.
     """
+
     SEARCH_ENGINE = "search_engine", "Search Engine (Google, DuckDuckGo, etc.)"
     WAS_RECOMMENDED = "was_recommended", "Recommended by friend or colleague"
     SOCIAL_MEDIA = "social_media", "Social media"
@@ -40,7 +41,7 @@ class DiscoverFromChoices(models.TextChoices):
 class UserProfile(models.Model):
     """
     Model representing a user profile.
-    
+
     Attributes:
         user (OneToOneField): One-to-one relationship with the user model.
         company_name (CharField): Name of the company the user is associated with.
@@ -50,6 +51,7 @@ class UserProfile(models.Model):
         task_priority (IntegerField): Priority of the user's tasks.
         is_robot (BooleanField): Indicates if the user is a robot.
     """
+
     # constants
     DiscoverFromChoices = DiscoverFromChoices
 

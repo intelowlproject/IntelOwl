@@ -15,6 +15,7 @@ class IsObjectOwnerPermission(BasePermission):
     Methods:
         has_object_permission(request, view, obj): Checks if the requesting user is the owner of the object.
     """
+
     @staticmethod
     def has_object_permission(request, view, obj):
         """
@@ -41,6 +42,7 @@ class IsObjectSameOrgPermission(BasePermission):
     Methods:
         has_object_permission(request, view, obj): Checks if the requesting user and the object owner are in the same organization.
     """
+
     @staticmethod
     def has_object_permission(request, view, obj):
         """
@@ -72,6 +74,7 @@ class IsObjectAdminPermission(BasePermission):
     Methods:
         has_object_permission(request, view, obj): Checks if the requesting user is an admin in the object's organization.
     """
+
     @staticmethod
     def has_object_permission(request, view, obj):
         """

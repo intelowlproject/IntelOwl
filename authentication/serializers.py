@@ -1,9 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-"""This module contains various serializers used in the authentication process 
-for the IntelOwl project. These serializers handle user access, user profile,
-registration, email verification, login, and token generation.
+"""This module contains various serializers used in the authentication process
+    for the IntelOwl project. These serializers handle user access, user profile,
+    registration, email verification, login, and token generation.
 """
 
 import logging
@@ -44,11 +44,12 @@ __all__ = [
 class _AccessSerializer(rfs.ModelSerializer):
     """
     Serializer to get user job statistics such as total and monthly submissions.
-    
+
     Attributes:
         total_submissions (int): Total number of submissions by the user.
         month_submissions (int): Number of submissions by the user in the current month.
     """
+
     class Meta:
         model = User
         fields = (
@@ -72,11 +73,12 @@ class _AccessSerializer(rfs.ModelSerializer):
 class UserAccessSerializer(CertegoUserAccessSerializer):
     """
     Serializer to get user access details including staff status.
-    
+
     Attributes:
         user (dict): User details including staff status.
         access (dict): Access details of the user.
-    """ 
+    """
+
     class Meta:
         model = User
         fields = (
@@ -99,6 +101,7 @@ class UserAccessSerializer(CertegoUserAccessSerializer):
 
 class HiddenUserSerializer(UserSerializer):
     """Serializer for user details with hidden password."""
+
     class Meta:
         model = User
         fields = (
@@ -113,6 +116,7 @@ class HiddenUserSerializer(UserSerializer):
 
 class ProfileSerializer(rfs.ModelSerializer):
     """Serializer for the UserProfile model."""
+
     user = HiddenUserSerializer(read_only=True)
 
     class Meta:
@@ -127,6 +131,7 @@ class UserProfileSerializer(UserSerializer):
     This serializer includes the user's username and their associated profile.
     The profile field is read-only and is serialized using the ProfileSerializer.
     """
+
     profile = ProfileSerializer(read_only=True)
 
     class Meta:
@@ -137,11 +142,12 @@ class UserProfileSerializer(UserSerializer):
 class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer):
     """
     Serializer for user registration.
-    
+
     Attributes:
         profile (UserProfileSerializer): Nested serializer for user profile.
         is_active (bool): Indicates if the user is active.
     """
+
     class Meta:
         model = User
         fields = (
@@ -174,7 +180,7 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
     def validate_profile(self, profile):
         """
         Validate the user profile.
-        
+
         Args:
             profile (dict): Profile data.
 
@@ -190,7 +196,7 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
     def validate_password(self, password):
         """
         Validate the user's password against a regex pattern.
-        
+
         Args:
             password (str): The password to validate.
 
@@ -211,7 +217,7 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
         """
         Create a new user and handle profile updates.
 
-        This method creates a new user with the provided validated data and sets 
+        This method creates a new user with the provided validated data and sets
         the user as inactive by default. It also handles the creation and update
         of the associated user profile.
 
@@ -249,10 +255,11 @@ class EmailVerificationSerializer(
 
     Customizes the error messages for invalid or expired verification keys.
     """
+
     def validate_key(self, key):
         """
         Validate the email verification key.
-        
+
         Args:
             key (str): The verification key to validate.
 
@@ -323,13 +330,14 @@ class EmailVerificationSerializer(
 class LoginSerializer(AuthTokenSerializer):
     """
     Serializer for user login.
-    
+
     Customizes error messages for inactive or unverified users.
     """
+
     def validate(self, attrs):
         """
         Validate the login credentials.
-        
+
         Args:
             attrs (dict): The login credentials.
 
@@ -367,11 +375,12 @@ class LoginSerializer(AuthTokenSerializer):
 class TokenSerializer(rfs.ModelSerializer):
     """
     Serializer for API tokens.
-    
+
     Attributes:
         key (str): The token key.
         created (datetime): The creation time of the token.
     """
+
     class Meta:
         model = Token
         fields = [
@@ -386,7 +395,7 @@ class TokenSerializer(rfs.ModelSerializer):
     def validate(self, data):
         """
         Validate that a token has not already been issued to the user.
-        
+
         Args:
             data (dict): The data to validate.
 

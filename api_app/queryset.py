@@ -55,6 +55,7 @@ class SendToBiQuerySet(models.QuerySet):
     Methods:
     - send_to_elastic_as_bi: Sends the queryset's data to an Elasticsearch BI index.
     """
+
     @classmethod
     def _get_bi_serializer_class(cls) -> Type["AbstractBIInterface"]:
         """
@@ -89,7 +90,7 @@ class SendToBiQuerySet(models.QuerySet):
 
         Returns:
             bool: True if there were errors during the operation, False otherwise.
-        """ 
+        """
         from elasticsearch.helpers import bulk
 
         logger.info("BI start")
@@ -130,6 +131,7 @@ class CleanOnCreateQuerySet(models.QuerySet):
     - create: Creates and saves an object, ensuring its `clean` method is called.
     - many_to_many_to_array: Annotates the queryset with an array of related objects' primary keys.
     """
+
     def create(self, **kwargs):
         """
         Creates and saves an object, ensuring its `clean` method is called.
@@ -180,6 +182,7 @@ class OrganizationPluginConfigurationQuerySet(models.QuerySet):
     Methods:
     - filter_for_config: Filters configurations based on content type and object ID.
     """
+
     def filter_for_config(self, config_class, config_pk: str):
         """
         Filters configurations based on content type and object ID.
@@ -204,6 +207,7 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
     - alias_disabled_in_organization: Annotates the queryset with a boolean indicating if the configuration is disabled in the organization.
     - annotate_runnable: Annotates the queryset with a boolean indicating if the configuration is runnable by a user.
     """
+
     def alias_disabled_in_organization(self, organization):
         """
         Annotates the queryset with a boolean indicating if the configuration is disabled in the organization.
@@ -262,6 +266,7 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
     - annotate_importance: Annotates jobs with an overall importance score.
     - running: Filters jobs that are currently running.
     """
+
     def create(self, parent=None, **kwargs):
         """
         Creates a job, setting it as a child of the specified parent if provided.
@@ -425,6 +430,7 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     - _alias_for_test: Aliases values for testing environments.
     - annotate_value_for_user: Annotates the final value for a user, considering runtime, owner, organization, default, and test values.
     """
+
     def annotate_configured(
         self, config: "PythonConfig", user: User = None
     ) -> "ParameterQuerySet":
@@ -655,6 +661,7 @@ class AbstractReportQuerySet(SendToBiQuerySet):
     - filter_retryable: Filters reports that are retryable.
     - get_configurations: Retrieves configurations associated with the reports.
     """
+
     def filter_completed(self):
         """
         Filters reports that are completed.
@@ -695,6 +702,7 @@ class ModelWithOwnershipQuerySet:
     - visible_for_user_owned: Filters values owned by a user.
     - visible_for_user: Filters values visible to a user.
     """
+
     def default_values(self):
         """
         Retrieves default values.
@@ -778,6 +786,7 @@ class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet):
     - CleanOnCreateQuerySet: Provides clean method for objects on creation.
     - ModelWithOwnershipQuerySet: Provides methods for filtering based on ownership.
     """
+
     ...
 
 
@@ -792,7 +801,6 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
     """
 
     def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
-
         """
         Annotates configurations indicating if they are fully configured.
 

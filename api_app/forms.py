@@ -12,7 +12,7 @@ from api_app.visualizers_manager.models import VisualizerConfig
 class MultilineJSONField(forms.JSONField):
     """
     A custom JSONField that handles multiline JSON input.
-    
+
     This field processes multiline input by replacing newline characters
     with the escape sequence '\\n', and also removes carriage returns and
     double quotes.
@@ -23,11 +23,12 @@ class MultilineJSONField(forms.JSONField):
         has_changed(initial, data): Checks if the field's data has changed from its initial value.
         bound_data(data, initial): Returns the data bound to the form field.
     """
+
     @staticmethod
     def _cleaning_and_multiline(value):
         """
         Process multiline input to escape newline characters and remove carriage returns and quotes.
-        
+
         Args:
             value (str): The input value to process.
 
@@ -90,6 +91,7 @@ class ParameterInlineForm(forms.ModelForm):
     Attributes:
         default (MultilineJSONField): The default value for the parameter, processed for multiline JSON input.
     """
+
     default = MultilineJSONField(required=False)
 
     class Meta:
@@ -116,6 +118,7 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
         playbook (ModelChoiceField): Field for selecting a PlaybookConfig.
         _plugins (list): List of plugin fields.
     """
+
     analyzer = forms.ModelChoiceField(
         queryset=AnalyzerConfig.objects.filter(orgs_configuration__isnull=True),
         required=False,

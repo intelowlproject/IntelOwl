@@ -15,6 +15,7 @@ class PaginationMixin:
     Attributes:
         pagination_class (CustomPageNumberPagination): The pagination class to use for paginating results.
     """
+
     pagination_class = CustomPageNumberPagination
 
     def list(self, request, *args, **kwargs):

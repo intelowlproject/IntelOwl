@@ -54,6 +54,7 @@ def prevent_signal_recursion(func):
     Returns:
         function: The wrapper function that prevents recursion.
     """
+
     @functools.wraps(func)
     def no_recursion(sender, instance=None, **kwargs):
         if not instance:

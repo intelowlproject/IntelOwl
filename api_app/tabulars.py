@@ -17,6 +17,7 @@ class PluginConfigInlineForParameter(admin.TabularInline):
     Inline admin class for displaying and editing PluginConfig instances
     related to a specific Parameter in a tabular form.
     """
+
     model = PluginConfig
     extra = 0
     fields = ["value"]
@@ -27,6 +28,7 @@ class PluginConfigInlineForPythonConfig(admin.TabularInline):
     Inline admin class for displaying and editing PluginConfig instances
     related to a specific PythonConfig in a tabular form.
     """
+
     model = PluginConfig
     extra = 0
     fields = ["parameter", "is_secret", "get_type", "value"]
@@ -106,6 +108,7 @@ class ParameterInline(admin.TabularInline):
     """
     Inline admin class for displaying and editing Parameter instances in a tabular form.
     """
+
     model = Parameter
     list_display = ParameterInlineForm.Meta.fields
     fields = list_display
@@ -121,6 +124,7 @@ class OrganizationPluginConfigurationInLine(GenericTabularInline):
     Inline admin class for displaying and editing OrganizationPluginConfiguration
     instances in a generic tabular form.
     """
+
     model = OrganizationPluginConfiguration
     list_display = [
         "organization",

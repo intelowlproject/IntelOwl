@@ -26,6 +26,7 @@ class JobConsumer(JsonWebsocketConsumer):
     about jobs. It manages group subscriptions based on user permissions and
     job status.
     """
+
     class JobChannelGroups:
         """
         Helper class to manage channel groups for a job.
@@ -34,6 +35,7 @@ class JobConsumer(JsonWebsocketConsumer):
         updates about a specific job. It provides methods to determine the
         appropriate group for a user based on their permissions.
         """
+
         def __init__(self, job: Job) -> None:
             """
             Initializes the JobChannelGroups with the given job.

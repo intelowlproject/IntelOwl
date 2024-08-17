@@ -42,9 +42,9 @@ It provides:
   - *playbooks* that are meant to make analysis easily repeatable
 
 
-### Documentation [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
+### Documentation
 We try hard to keep our documentation well written, easy to understand and always updated.
-All info about installation, usage, configuration and contribution can be found [here](https://intelowl.readthedocs.io/)
+All info about installation, usage, configuration and contribution can be found [here](https://intelowlproject.github.io/docs/)
 
 ### Publications and Media
 

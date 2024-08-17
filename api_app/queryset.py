@@ -1,3 +1,4 @@
+# flake8: noqa
 import datetime
 import json
 import uuid
@@ -285,15 +286,18 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         from api_app.models import PluginConfig
 
         return self.alias(
-            org_value=Subquery(
-                PluginConfig.objects.filter(
-                    parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
+            org_value=(
+                Subquery(
+                    PluginConfig.objects.filter(
+                        parameter__pk=OuterRef("pk"),
+                        **{config.snake_case_name: config.pk},
+                    )
+                    .visible_for_user_by_org(user)
+                    .values("value")[:1],
                 )
-                .visible_for_user_by_org(user)
-                .values("value")[:1],
-            )
-            if user and user.has_membership()
-            else Value(None, output_field=JSONField()),
+                if user and user.has_membership()
+                else Value(None, output_field=JSONField())
+            ),
         )
 
     def _alias_default_value(self, config: "PythonConfig") -> "ParameterQuerySet":
@@ -455,8 +459,7 @@ class ModelWithOwnershipQuerySet:
             return self.default_values()
 
 
-class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet):
-    ...
+class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet): ...
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):

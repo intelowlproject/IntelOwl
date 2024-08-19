@@ -9,9 +9,27 @@ logger = logging.getLogger(__name__)
 
 
 class PaginationMixin:
+    """
+    Mixin to add pagination and caching support to a Django Rest Framework view.
+
+    Attributes:
+        pagination_class (CustomPageNumberPagination): The pagination class to use for paginating results.
+    """
+
     pagination_class = CustomPageNumberPagination
 
     def list(self, request, *args, **kwargs):
+        """
+        Lists the objects, applying pagination and caching the results.
+
+        Args:
+            request (Request): The DRF request instance.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Response: The paginated and cached response containing serialized data.
+        """
         cache_name = (
             f"list_{self.serializer_class.Meta.model.__name__}_{request.user.username}"
         )

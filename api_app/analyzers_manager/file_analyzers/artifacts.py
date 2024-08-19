@@ -4,51 +4,37 @@ from tests.mock_utils import MockUpResponse
 
 
 class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
-    name: str = "executable_analyzer"
-    url: str = "http://malware_tools_analyzers:4002/goresym"
+    name: str = "apk_analyzer"
+    url: str = "http://malware_tools_analyzers:4002/artifacts"
     # interval between http request polling
     poll_distance: int = 5
     # http request polling max number of tries
     max_tries: int = 5
-    default: bool = False
-    paths: bool = False
-    types: bool = False
-    manual: str = ""
-    version: str = ""
+    report: bool = False
+    analysis: bool = True
 
     def update(self) -> bool:
         pass
 
     def getArgs(self):
         args = []
-        if self.default:
-            args.append("-d")
-        if self.paths:
-            args.append("-p")
-        if self.types:
-            args.append("-t")
-        if self.manual:
-            args.append("-m " + self.manual)
-        if self.version:
-            args.append("-v " + self.version)
+        if self.report:
+            args.append("--report")
         return args
 
     def run(self):
+        if self.report and self.analysis:
+            raise AnalyzerRunException(
+                "You can't run both report and analysis at the same time"
+            )
         binary = self.read_file_bytes()
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = self.getArgs()
-        args.append(f"@{fname}")
+        args = f"@{fname}"
+        args.append(self.getArgs())
         req_data = {"args": args}
         req_files = {fname: binary}
 
         result = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
-        if "error" in result:
-            er = (
-                "Failed to parse file: failed to read pclntab: failed to locate pclntab"
-            )
-            if result["error"] == er:
-                return f"Not a Go-compiled file: {result['error']}"
-            raise AnalyzerRunException(result["error"])
         return result
 
     @staticmethod

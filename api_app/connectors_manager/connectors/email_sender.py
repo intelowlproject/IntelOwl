@@ -1,3 +1,5 @@
+from typing import List
+
 from django.core.mail import EmailMessage
 
 from api_app.connectors_manager.classes import Connector
@@ -11,6 +13,7 @@ class EmailSender(Connector):
     header: str
     body: str
     footer: str
+    CCs: List[str] = []
 
     def run(self) -> dict:
         if hasattr(self, "sender") and self.sender:
@@ -27,6 +30,7 @@ class EmailSender(Connector):
             from_email=sender,
             to=[self._job.observable_name],
             body=body,
+            cc=self.CCs,
         )
         base_eml.send()
         return {

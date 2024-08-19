@@ -55,7 +55,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "sample.crx",
                 "manifest.json",
                 "main.out",
-                "files.zip",
+                "test.zip",
                 "sample.dex",
             ],
             [

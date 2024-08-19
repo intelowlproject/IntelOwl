@@ -38,9 +38,10 @@ class PEInfo(FileAnalyzer):
     def update(self):
         pass
 
-    def run(self):
+    def dotnetpe(self):
         results = {}
         file_type = magic.from_buffer(self.read_file_bytes())
+
         if ".Net" in file_type:
             dotnet_file = DotNetPE(self.filepath)
             dotnet_info = {
@@ -56,6 +57,11 @@ class PEInfo(FileAnalyzer):
             results["dotnet_info"] = dotnet_info
         else:
             results["is_dotnet"] = False
+        return results
+
+    def run(self):
+        results = {}
+        results["dotnet"] = self.dotnetpe()
 
         try:
             pe = pefile.PE(self.filepath)

@@ -9,28 +9,23 @@ class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling
     poll_distance: int = 5
     # http request polling max number of tries
-    max_tries: int = 5
-    report: bool = False
-    analysis: bool = True
+    max_tries: int = 10
+    artifacts_report: bool = False
+    artifacts_analysis: bool = True
 
     def update(self) -> bool:
         pass
 
-    def getArgs(self):
-        args = []
-        if self.report:
-            args.append("--report")
-        return args
-
     def run(self):
-        if self.report and self.analysis:
+        if self.artifacts_report and self.artifacts_analysis:
             raise AnalyzerRunException(
                 "You can't run both report and analysis at the same time"
             )
         binary = self.read_file_bytes()
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = f"@{fname}"
-        args.append(self.getArgs())
+        args = [f"@{fname}"]
+        if self.artifacts_report:
+            args.append("--report")
         req_data = {"args": args}
         req_files = {fname: binary}
 

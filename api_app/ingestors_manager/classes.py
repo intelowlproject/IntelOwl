@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class Ingestor(Plugin, metaclass=abc.ABCMeta):
+    """
+    Abstract Base class for Ingestors.
+    Ingestors are responsible for ingesting data and generating reports.
+    """
+
     def __init__(self, config: IngestorConfig, **kwargs):
         super().__init__(config, **kwargs)
 

@@ -40,7 +40,7 @@ class DroidLysis(FileAnalyzer, DockerBasedAnalyzer):
     def mocked_docker_analyzer_get(*args, **kwargs):
         return MockUpResponse(
             {
-                # mockup is made smaller as it was to big
+                # mockup is made smaller as it was too big
                 "kits": {
                     "flutter_libphonenumber": False,
                     "aitypemalvertingrelated": False,

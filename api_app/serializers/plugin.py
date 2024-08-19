@@ -258,7 +258,8 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
         exclude = ["id"]
 
 
-class AbstractConfigSerializer(rfs.ModelSerializer): ...
+class AbstractConfigSerializer(rfs.ModelSerializer):
+    ...
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):

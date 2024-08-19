@@ -8,7 +8,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 
 # flake8: noqa
 @admin.register(AnalyzerReport)
-class AnalyzerReportAdminView(AbstractReportAdminView): ...
+class AnalyzerReportAdminView(AbstractReportAdminView):
+    ...
 
 
 @admin.register(AnalyzerConfig)

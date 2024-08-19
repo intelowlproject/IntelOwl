@@ -10,7 +10,8 @@ from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 
 
 @admin.register(PivotReport)
-class PivotReportAdminView(AbstractReportAdminView): ...
+class PivotReportAdminView(AbstractReportAdminView):
+    ...
 
 
 @admin.register(PivotConfig)

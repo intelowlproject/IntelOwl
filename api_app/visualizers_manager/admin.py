@@ -8,8 +8,7 @@ from api_app.visualizers_manager.models import VisualizerConfig, VisualizerRepor
 
 
 @admin.register(VisualizerReport)
-class VisualizerReportAdminView(AbstractReportAdminView):
-    ...
+class VisualizerReportAdminView(AbstractReportAdminView): ...
 
 
 @admin.register(VisualizerConfig)

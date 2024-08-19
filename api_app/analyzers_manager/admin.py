@@ -7,8 +7,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 
 
 @admin.register(AnalyzerReport)
-class AnalyzerReportAdminView(AbstractReportAdminView):
-    ...
+class AnalyzerReportAdminView(AbstractReportAdminView): ...
 
 
 @admin.register(AnalyzerConfig)

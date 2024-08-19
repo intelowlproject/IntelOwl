@@ -1,4 +1,4 @@
-<img src="docs/static/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
+<img src="static/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)](https://github.com/intelowlproject/IntelOwl/releases)
 [![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
@@ -42,9 +42,9 @@ It provides:
   - *playbooks* that are meant to make analysis easily repeatable
 
 
-### Documentation [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
+### Documentation
 We try hard to keep our documentation well written, easy to understand and always updated.
-All info about installation, usage, configuration and contribution can be found [here](https://intelowl.readthedocs.io/)
+All info about installation, usage, configuration and contribution can be found [here](https://intelowlproject.github.io/docs/)
 
 ### Publications and Media
 
@@ -73,7 +73,7 @@ Because of this, we joined [Open Collective](https://opencollective.com/intelowl
 
 #### Certego
 
-<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="docs/static/Certego.png" alt="Certego Logo"/></a>
+<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="static/Certego.png" alt="Certego Logo"/></a>
 
 [Certego](https://certego.net/?utm_source=intelowl) is a MDR (Managed Detection and Response) and Threat Intelligence Provider based in Italy.
 
@@ -81,14 +81,14 @@ IntelOwl was born out of Certego's Threat intelligence R&D division and is const
 
 #### The Honeynet Project
 
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=125 height=125 src="docs/static/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=125 height=125 src="static/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
 [The Honeynet Project](https://www.honeynet.org) is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
 
 Thanks to Honeynet, we are hosting a public demo of the application [here](https://intelowl.honeynet.org). If you are interested, please contact a member of Honeynet to get access to the public service.
 
 #### Google Summer of Code
-<a href="https://summerofcode.withgoogle.com/"> <img style="border: 0.2px solid black" width=150 height=89 src="docs/static/gsoc_logo.png" alt="GSoC logo"> </a>
+<a href="https://summerofcode.withgoogle.com/"> <img style="border: 0.2px solid black" width=150 height=89 src="static/gsoc_logo.png" alt="GSoC logo"> </a>
 
 Since its birth this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC)!
 
@@ -99,7 +99,7 @@ If you are interested in participating in the next Google Summer of Code, check 
 
 #### ThreatHunter.ai
 
-<a href="https://threathunter.ai?utm_source=intelowl"> <img style="border: 0.2px solid black" width=194 height=80 src="docs/static/threathunter_logo.png" alt="ThreatHunter.ai logo"> </a>
+<a href="https://threathunter.ai?utm_source=intelowl"> <img style="border: 0.2px solid black" width=194 height=80 src="static/threathunter_logo.png" alt="ThreatHunter.ai logo"> </a>
 
 [ThreatHunter.ai®](https://threathunter.ai?utm_source=intelowl), is a 100% Service-Disabled Veteran-Owned Small Business started in 2007 under the name Milton Security Group. ThreatHunter.ai is the global leader in Dynamic Threat Hunting. Operating a true 24x7x365 Security Operation Center with AI/ML-enhanced human Threat Hunters, ThreatHunter.ai has changed the industry in how threats are found, and mitigated in real time. For over 15 years, our teams of Threat Hunters have stopped hundreds of thousands of threats and assisted organizations in defending against threat actors around the clock.
 

@@ -73,9 +73,11 @@ class DomainReputationServices(Visualizer):
                     icon=VisualizableIcon.URLHAUS,
                 ),
                 self.Base(
-                    value=""
-                    if disabled
-                    else f'found {analyzer_report.report.get("urlhaus_status", "")}'
+                    value=(
+                        ""
+                        if disabled
+                        else f'found {analyzer_report.report.get("urlhaus_status", "")}'
+                    )
                 ),
                 disable=disabled,
             )

@@ -1,6 +1,10 @@
+import logging
+
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse
+
+logger = logging.getLogger(__name__)
 
 
 class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
@@ -28,7 +32,9 @@ class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
             args.append("--report")
         req_data = {"args": args}
         req_files = {fname: binary}
-
+        logger.info(
+            f"Running {self.analyzer_name} on {self.filename} with args: {args}"
+        )
         result = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
         return result
 

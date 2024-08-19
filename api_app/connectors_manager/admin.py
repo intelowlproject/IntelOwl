@@ -8,7 +8,8 @@ from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
 
 
 @admin.register(ConnectorReport)
-class ConnectorReportAdminView(AbstractReportAdminView): ...
+class ConnectorReportAdminView(AbstractReportAdminView):
+    ...
 
 
 @admin.register(ConnectorConfig)

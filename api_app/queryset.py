@@ -458,7 +458,8 @@ class ModelWithOwnershipQuerySet:
             return self.default_values()
 
 
-class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet): ...
+class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet):
+    ...
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):

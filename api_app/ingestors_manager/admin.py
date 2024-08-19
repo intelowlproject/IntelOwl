@@ -8,7 +8,8 @@ from api_app.ingestors_manager.models import IngestorConfig, IngestorReport
 
 
 @admin.register(IngestorReport)
-class IngestorReportAdminView(AbstractReportAdminView): ...
+class IngestorReportAdminView(AbstractReportAdminView):
+    ...
 
 
 @admin.register(IngestorConfig)

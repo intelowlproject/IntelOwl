@@ -70,5 +70,4 @@ class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
 
     # disable mockup connections for this class
     @classmethod
-    def _monkeypatch(cls, patches: list = None) -> None:
-        ...
+    def _monkeypatch(cls, patches: list = None) -> None: ...  # noqa: E704

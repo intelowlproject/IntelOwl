@@ -343,7 +343,8 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
                     type=ParamTypes.INT.value, then=Value(10, output_field=JSONField())
                 ),
                 When(
-                    type=ParamTypes.LIST.value, then=Value(["test"], output_field=JSONField())
+                    type=ParamTypes.LIST.value,
+                    then=Value(["test"], output_field=JSONField()),
                 ),
                 default=Value("test", output_field=JSONField()),
                 output_field=JSONField(),

@@ -14,10 +14,10 @@ plugin = {
     },
     "related_analyzer_configs": ["OneNote_Info"],
     "related_connector_configs": [],
-    "playbooks_choice": ["FREE_TO_USE_ANALYZERS"],
+    "playbooks_choice": ["Sample_Static_Analysis"],
     "name": "ExtractedOneNoteFiles",
     "description": "Pivot for plugins OneNote_Info that "
-    "executes playbooks FREE_TO_USE_ANALYZERS",
+    "executes playbooks Sample_Static_Analysis",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "stored_base64",

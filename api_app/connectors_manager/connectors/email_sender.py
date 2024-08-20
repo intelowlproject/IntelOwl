@@ -30,7 +30,7 @@ class EmailSender(Connector):
             from_email=sender,
             to=[self._job.observable_name],
             body=body,
-            cc=self.CCs,
+            cc=self.CCs if self.CCs else [],
         )
         base_eml.send()
         return {

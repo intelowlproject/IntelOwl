@@ -14,10 +14,10 @@ plugin = {
     },
     "related_analyzer_configs": ["DownloadFileFromUri"],
     "related_connector_configs": [],
-    "playbook_to_execute": "FREE_TO_USE_ANALYZERS",
+    "playbook_to_execute": "Sample_Static_Analysis",
     "name": "ResubmitDownloadedFile",
     "description": "Pivot for plugins DownloadFileFromUri "
-    "that executes playbook FREE_TO_USE_ANALYZERS",
+    "that executes playbook Sample_Static_Analysis",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "stored_base64",

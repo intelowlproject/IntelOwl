@@ -26,9 +26,9 @@ class MISP(classes.ObservableAnalyzer):
     enforce_warninglist: bool
     filter_on_type: bool
     strict_search: bool
-    timeout: int
-    published: bool = True
-    metadata: bool = True
+    timeout: int = 5
+    published: bool
+    metadata: bool
 
     def update(self):
         pass
@@ -51,12 +51,17 @@ class MISP(classes.ObservableAnalyzer):
         date_from = now - datetime.timedelta(days=self.from_days)
         params = {
             "limit": self.limit,
-            "enforce_warninglist": self.enforce_warninglist,
         }
+        if self.enforce_warninglist:
+            params["enforce_warninglist"] = self.enforce_warninglist
+        # https://pymisp.readthedocs.io/en/latest/modules.html#pymisp.PyMISP
+        # fixme: this should be None as default but is False
+        # so it's not possible to set it as False in this way.
+        #  migration required
         if self.published:
-            params["published"] = "true"
+            params["published"] = self.published
         if self.metadata:
-            params["metadata"] = "true"
+            params["metadata"] = self.metadata
 
         if self.strict_search:
             params["value"] = self.observable_name

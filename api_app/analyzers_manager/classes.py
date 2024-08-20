@@ -38,20 +38,24 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     @classmethod
     @property
     def config_exception(cls):
+        """Returns the AnalyzerConfigurationException class."""
         return AnalyzerConfigurationException
 
     @property
     def analyzer_name(self) -> str:
+        """Returns the name of the analyzer."""
         return self._config.name
 
     @classmethod
     @property
     def report_model(cls):
+        """Returns the AnalyzerReport model."""
         return AnalyzerReport
 
     @classmethod
     @property
     def config_model(cls):
+        """Returns the AnalyzerConfig model."""
         return AnalyzerConfig
 
     def get_exceptions_to_catch(self):
@@ -98,6 +102,12 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return result
 
     def after_run_success(self, content):
+        """
+        Handles actions after a successful run.
+
+        Args:
+            content (any): The content to process after a successful run.
+        """
         super().after_run_success(self._validate_result(content, max_recursion=15))
 
 
@@ -194,6 +204,11 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     @property
     def filepath(self) -> str:
+        """Returns the file path, retrieving the file from storage if necessary.
+
+        Returns:
+            str: The file path.
+        """
         if not self.__filepath:
             self.__filepath = self._job.file.storage.retrieve(
                 file=self._job.file, analyzer=self.analyzer_name

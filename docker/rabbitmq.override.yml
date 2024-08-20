@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   rabbitmq:
     image: library/rabbitmq:3.11-alpine

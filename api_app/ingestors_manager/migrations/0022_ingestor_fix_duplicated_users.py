@@ -37,7 +37,9 @@ def migrate(apps, schema_editor):
                 correct_task.save()
             related_ingestor.periodic_task = correct_task
             related_ingestor.save()
-            wrong_task.delete()
+
+            if wrong_task != correct_task:
+                wrong_task.delete()
 
             for pc in PluginConfig.objects.filter(owner=u):
                 pc.owner = correct_user

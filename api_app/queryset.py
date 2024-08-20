@@ -1,3 +1,9 @@
+# flake8: noqa
+"""
+This module defines custom query sets for various models used in the IntelOwl project.
+Each query set provides additional methods for filtering, annotating, and manipulating
+query results specific to the needs of the IntelOwl application.
+"""
 import datetime
 import json
 import uuid
@@ -43,12 +49,26 @@ logger = logging.getLogger(__name__)
 
 
 class SendToBiQuerySet(models.QuerySet):
+    """
+    A custom queryset that provides methods for sending data to a Business Intelligence (BI) system.
+
+    Methods:
+    - send_to_elastic_as_bi: Sends the queryset's data to an Elasticsearch BI index.
+    """
+
     @classmethod
     def _get_bi_serializer_class(cls) -> Type["AbstractBIInterface"]:
+        """
+        Abstract method to get the BI serializer class.
+        Must be implemented in subclasses.
+        """
         raise NotImplementedError()
 
     @staticmethod
     def _create_index_template():
+        """
+        Creates an index template in Elasticsearch for BI data.
+        """
         with open(
             settings.CONFIG_ROOT / "elastic_search_mappings" / "intel_owl_bi.json"
         ) as f:
@@ -62,6 +82,15 @@ class SendToBiQuerySet(models.QuerySet):
             )
 
     def send_to_elastic_as_bi(self, max_timeout: int = 60) -> bool:
+        """
+        Sends the queryset's data to an Elasticsearch BI index.
+
+        Args:
+            max_timeout (int): The maximum request timeout in seconds.
+
+        Returns:
+            bool: True if there were errors during the operation, False otherwise.
+        """
         from elasticsearch.helpers import bulk
 
         logger.info("BI start")
@@ -95,7 +124,24 @@ class SendToBiQuerySet(models.QuerySet):
 
 
 class CleanOnCreateQuerySet(models.QuerySet):
+    """
+    A custom queryset that ensures objects are cleaned before being saved to the database.
+
+    Methods:
+    - create: Creates and saves an object, ensuring its `clean` method is called.
+    - many_to_many_to_array: Annotates the queryset with an array of related objects' primary keys.
+    """
+
     def create(self, **kwargs):
+        """
+        Creates and saves an object, ensuring its `clean` method is called.
+
+        Args:
+            **kwargs: The fields to set on the created object.
+
+        Returns:
+            The created object.
+        """
         obj = self.model(**kwargs)
         obj: models.Model
         # we are forcing the clean method call.
@@ -107,6 +153,16 @@ class CleanOnCreateQuerySet(models.QuerySet):
         return obj
 
     def many_to_many_to_array(self, field: str, field_to_save: str = None):
+        """
+        Annotates the queryset with an array of related objects' primary keys.
+
+        Args:
+            field (str): The field name of the many-to-many relation.
+            field_to_save (str, optional): The name of the annotated field. Defaults to None.
+
+        Returns:
+            The annotated queryset.
+        """
         if not field_to_save:
             field_to_save = f"{field}_array"
         return self.annotate(
@@ -120,14 +176,48 @@ class CleanOnCreateQuerySet(models.QuerySet):
 
 
 class OrganizationPluginConfigurationQuerySet(models.QuerySet):
+    """
+    A custom queryset for filtering plugin configurations based on organization.
+
+    Methods:
+    - filter_for_config: Filters configurations based on content type and object ID.
+    """
+
     def filter_for_config(self, config_class, config_pk: str):
+        """
+        Filters configurations based on content type and object ID.
+
+        Args:
+            config_class: The class of the configuration.
+            config_pk (str): The primary key of the configuration object.
+
+        Returns:
+            The filtered queryset.
+        """
         return self.filter(
             content_type=config_class.get_content_type(), object_id=config_pk
         )
 
 
 class AbstractConfigQuerySet(CleanOnCreateQuerySet):
+    """
+    A custom queryset for filtering and annotating configuration objects.
+
+    Methods:
+    - alias_disabled_in_organization: Annotates the queryset with a boolean indicating if the configuration is disabled in the organization.
+    - annotate_runnable: Annotates the queryset with a boolean indicating if the configuration is runnable by a user.
+    """
+
     def alias_disabled_in_organization(self, organization):
+        """
+        Annotates the queryset with a boolean indicating if the configuration is disabled in the organization.
+
+        Args:
+            organization: The organization to check.
+
+        Returns:
+            The annotated queryset.
+        """
         from api_app.models import OrganizationPluginConfiguration
 
         opc = OrganizationPluginConfiguration.objects.filter(organization=organization)
@@ -141,6 +231,15 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
         )
 
     def annotate_runnable(self, user: User = None) -> QuerySet:
+        """
+        Annotates the queryset with a boolean indicating if the configuration is runnable by a user.
+
+        Args:
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            The annotated queryset.
+        """
         # the plugin is runnable IF
         # - it is not disabled
         # - the user is not inside an organization that have disabled the plugin
@@ -154,22 +253,65 @@ class AbstractConfigQuerySet(CleanOnCreateQuerySet):
 
 
 class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
+    """
+    A custom queryset for managing Job objects, providing methods for job creation, deletion, and filtering.
+
+    Methods:
+    - create: Creates a job, setting it as a child of the specified parent if provided.
+    - delete: Deletes jobs, ensuring the correct method is called.
+    - filter_completed: Filters jobs that have completed.
+    - visible_for_user: Filters jobs visible to a specific user based on TLP and user organization.
+    - _annotate_importance_date: Annotates jobs with a weight based on the completion date.
+    - _annotate_importance_user: Annotates jobs with a weight based on the user and their organization.
+    - annotate_importance: Annotates jobs with an overall importance score.
+    - running: Filters jobs that are currently running.
+    """
+
     def create(self, parent=None, **kwargs):
+        """
+        Creates a job, setting it as a child of the specified parent if provided.
+
+        Args:
+            parent (optional): The parent job, if any.
+            **kwargs: The fields to set on the created job.
+
+        Returns:
+            The created job.
+        """
         if parent:
             return parent.add_child(**kwargs)
         return self.model.add_root(**kwargs)
 
     def delete(self, *args, **kwargs):
+        """
+        Deletes jobs, ensuring the correct method is called.
+
+        Args:
+            *args: Additional arguments.
+            **kwargs: Additional keyword arguments.
+        """
         # just to be sure to call the correct method
         return MP_NodeQuerySet.delete(self, *args, **kwargs)
 
     @classmethod
     def _get_bi_serializer_class(cls):
+        """
+        Gets the BI serializer class for Job objects.
+
+        Returns:
+            The JobBISerializer class.
+        """
         from api_app.serializers.job import JobBISerializer
 
         return JobBISerializer
 
     def filter_completed(self):
+        """
+        Filters jobs that have completed.
+
+        Returns:
+            The filtered queryset.
+        """
         return self.filter(status__in=self.model.Status.final_statuses())
 
     def visible_for_user(self, user: User) -> "JobQuerySet":
@@ -195,6 +337,12 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         return self.filter(query)
 
     def _annotate_importance_date(self) -> "JobQuerySet":
+        """
+        Annotates jobs with a weight based on the completion date.
+
+        Returns:
+            The annotated queryset.
+        """
         # the scans in the last day get a 3x
         # the scans in the last week get a 2x
 
@@ -213,6 +361,15 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         )
 
     def _annotate_importance_user(self, user: User) -> "JobQuerySet":
+        """
+        Annotates jobs with a weight based on the user and their organization.
+
+        Args:
+            user (User): The user to check.
+
+        Returns:
+            The annotated queryset.
+        """
         # the scans from the user get a 3x
         # the scans from the same org get a 2x
         user_case = Case(When(user__pk=user.pk, then=Value(3)), default=Value(0))
@@ -227,6 +384,15 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         return self.annotate(user_weight=user_case)
 
     def annotate_importance(self, user: User) -> QuerySet:
+        """
+        Annotates jobs with an overall importance score.
+
+        Args:
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            The annotated queryset.
+        """
         return (
             self._annotate_importance_date()
             ._annotate_importance_user(user)
@@ -236,6 +402,12 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
     def running(
         self, check_pending: bool = False, minutes_ago: int = 25
     ) -> "JobQuerySet":
+        """
+        Filters jobs that are currently running.
+
+        Returns:
+            The filtered queryset.
+        """
         qs = self.exclude(
             status__in=[status.value for status in self.model.Status.final_statuses()]
         )
@@ -246,9 +418,32 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
 
 
 class ParameterQuerySet(CleanOnCreateQuerySet):
+    """
+    Custom queryset for managing parameters, providing methods for filtering and annotating based on user configuration.
+
+    Methods:
+    - annotate_configured: Annotates parameters indicating if they are configured for a specific user.
+    - _alias_owner_value_for_user: Aliases the owner value for a user.
+    - _alias_org_value_for_user: Aliases the organization value for a user.
+    - _alias_default_value: Aliases the default value for a parameter.
+    - _alias_runtime_config: Aliases runtime configuration values.
+    - _alias_for_test: Aliases values for testing environments.
+    - annotate_value_for_user: Annotates the final value for a user, considering runtime, owner, organization, default, and test values.
+    """
+
     def annotate_configured(
         self, config: "PythonConfig", user: User = None
     ) -> "ParameterQuerySet":
+        """
+        Annotates parameters indicating if they are configured for a specific user.
+
+        Args:
+            config (PythonConfig): The configuration to check against.
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            ParameterQuerySet: The annotated queryset.
+        """
         from api_app.models import PluginConfig
 
         # A parameter it is configured for a user if
@@ -265,6 +460,16 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_owner_value_for_user(
         self, config: "PythonConfig", user: User = None
     ) -> "ParameterQuerySet":
+        """
+        Aliases the owner value for a user.
+
+        Args:
+            config (PythonConfig): The configuration to check against.
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            ParameterQuerySet: The aliased queryset.
+        """
         from api_app.models import PluginConfig
 
         return self.alias(
@@ -282,21 +487,43 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def _alias_org_value_for_user(
         self, config: "PythonConfig", user: User = None
     ) -> "ParameterQuerySet":
+        """
+        Aliases the organization value for a user.
+
+        Args:
+            config (PythonConfig): The configuration to check against.
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            ParameterQuerySet: The aliased queryset.
+        """
         from api_app.models import PluginConfig
 
         return self.alias(
-            org_value=Subquery(
-                PluginConfig.objects.filter(
-                    parameter__pk=OuterRef("pk"), **{config.snake_case_name: config.pk}
+            org_value=(
+                Subquery(
+                    PluginConfig.objects.filter(
+                        parameter__pk=OuterRef("pk"),
+                        **{config.snake_case_name: config.pk},
+                    )
+                    .visible_for_user_by_org(user)
+                    .values("value")[:1],
                 )
-                .visible_for_user_by_org(user)
-                .values("value")[:1],
-            )
-            if user and user.has_membership()
-            else Value(None, output_field=JSONField()),
+                if user and user.has_membership()
+                else Value(None, output_field=JSONField())
+            ),
         )
 
     def _alias_default_value(self, config: "PythonConfig") -> "ParameterQuerySet":
+        """
+        Aliases the default value for a parameter.
+
+        Args:
+            config (PythonConfig): The configuration to check against.
+
+        Returns:
+            ParameterQuerySet: The aliased queryset.
+        """
         from api_app.models import PluginConfig
 
         return self.alias(
@@ -310,6 +537,15 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
     def _alias_runtime_config(self, runtime_config=None):
+        """
+        Aliases runtime configuration values.
+
+        Args:
+            runtime_config (dict, optional): The runtime configuration. Defaults to None.
+
+        Returns:
+            ParameterQuerySet: The aliased queryset.
+        """
         if not runtime_config:
             runtime_config = {}
         # we are creating conditions for when runtime config should be used
@@ -322,6 +558,12 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
         )
 
     def _alias_for_test(self):
+        """
+        Aliases values for testing environments.
+
+        Returns:
+            ParameterQuerySet: The aliased queryset.
+        """
         if not settings.STAGE_CI and not settings.MOCK_CONNECTIONS:
             return self.alias(
                 test_value=Value(
@@ -350,6 +592,17 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
     def annotate_value_for_user(
         self, config: "PythonConfig", user: User = None, runtime_config=None
     ) -> "ParameterQuerySet":
+        """
+        Annotates the final value for a user, considering runtime, owner, organization, default, and test values.
+
+        Args:
+            config (PythonConfig): The configuration to check against.
+            user (User, optional): The user to check. Defaults to None.
+            runtime_config (dict, optional): The runtime configuration. Defaults to None.
+
+        Returns:
+            ParameterQuerySet: The annotated queryset.
+        """
         return (
             self.prefetch_related("values")
             ._alias_owner_value_for_user(config, user)
@@ -400,23 +653,75 @@ class ParameterQuerySet(CleanOnCreateQuerySet):
 
 
 class AbstractReportQuerySet(SendToBiQuerySet):
+    """
+    Custom queryset for managing reports, providing methods for filtering based on status.
+
+    Methods:
+    - filter_completed: Filters reports that are completed.
+    - filter_retryable: Filters reports that are retryable.
+    - get_configurations: Retrieves configurations associated with the reports.
+    """
+
     def filter_completed(self):
+        """
+        Filters reports that are completed.
+
+        Returns:
+            AbstractReportQuerySet: The filtered queryset.
+        """
         return self.filter(status__in=self.model.Status.final_statuses())
 
     def filter_retryable(self):
+        """
+        Filters reports that are retryable.
+
+        Returns:
+            AbstractReportQuerySet: The filtered queryset.
+        """
         return self.filter(
             status__in=[self.model.Status.FAILED.value, self.model.Status.PENDING.value]
         )
 
     def get_configurations(self) -> AbstractConfigQuerySet:
+        """
+        Retrieves configurations associated with the reports.
+
+        Returns:
+            AbstractConfigQuerySet: The queryset of configurations.
+        """
         return self.model.config.objects.filter(pk__in=self.values("config__pk"))
 
 
 class ModelWithOwnershipQuerySet:
+    """
+    Custom queryset for managing models with ownership, providing methods for filtering based on ownership.
+
+    Methods:
+    - default_values: Retrieves default values.
+    - visible_for_user_by_org: Filters values visible to a user by their organization.
+    - visible_for_user_owned: Filters values owned by a user.
+    - visible_for_user: Filters values visible to a user.
+    """
+
     def default_values(self):
+        """
+        Retrieves default values.
+
+        Returns:
+            ModelWithOwnershipQuerySet: The filtered queryset.
+        """
         return self.filter(owner__isnull=True)
 
     def visible_for_user_by_org(self, user: User):
+        """
+        Filters values visible to a user by their organization.
+
+        Args:
+            user (User): The user to check.
+
+        Returns:
+            ModelWithOwnershipQuerySet: The filtered queryset.
+        """
         try:
             membership = Membership.objects.get(user=user)
         except Membership.DoesNotExist:
@@ -429,9 +734,27 @@ class ModelWithOwnershipQuerySet:
             )
 
     def visible_for_user_owned(self, user: User):
+        """
+        Filters values owned by a user.
+
+        Args:
+            user (User): The user to check.
+
+        Returns:
+            ModelWithOwnershipQuerySet: The filtered queryset.
+        """
         return self.filter(owner=user)
 
     def visible_for_user(self, user: User = None) -> "PluginConfigQuerySet":
+        """
+        Filters values visible to a user.
+
+        Args:
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            PluginConfigQuerySet: The filtered queryset.
+        """
         if user:
             # User-level custom configs should override organization-level configs,
             # we need to get the organization-level configs, if any, first.
@@ -456,11 +779,37 @@ class ModelWithOwnershipQuerySet:
 
 
 class PluginConfigQuerySet(CleanOnCreateQuerySet, ModelWithOwnershipQuerySet):
+    """
+    Custom queryset for PluginConfig model, extending CleanOnCreateQuerySet and ModelWithOwnershipQuerySet.
+
+    Inherits:
+    - CleanOnCreateQuerySet: Provides clean method for objects on creation.
+    - ModelWithOwnershipQuerySet: Provides methods for filtering based on ownership.
+    """
+
     ...
 
 
 class PythonConfigQuerySet(AbstractConfigQuerySet):
+    """
+    Custom queryset for PythonConfig model, providing methods for annotating configurations.
+
+    Methods:
+    - annotate_configured: Annotates configurations indicating if they are fully configured.
+    - annotate_runnable: Annotates configurations indicating if they are runnable.
+    - get_signatures: Generates task signatures for each configuration.
+    """
+
     def annotate_configured(self, user: User = None) -> "PythonConfigQuerySet":
+        """
+        Annotates configurations indicating if they are fully configured.
+
+        Args:
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            PythonConfigQuerySet: The annotated queryset.
+        """
         # a Python plugin is configured only if every required parameter is configured
         from api_app.models import Parameter, PluginConfig
 
@@ -519,6 +868,15 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
+        """
+        Annotates configurations indicating if they are runnable.
+
+        Args:
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            PythonConfigQuerySet: The annotated queryset.
+        """
         # we are excluding the plugins that has failed the health_check
         qs = (
             self.exclude(health_check_status=False)
@@ -544,6 +902,15 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
         )
 
     def get_signatures(self, job) -> Generator[Signature, None, None]:
+        """
+        Generates task signatures for each configuration.
+
+        Args:
+            job (Job): The job instance.
+
+        Yields:
+            Generator[Signature, None, None]: A generator of task signatures.
+        """
         from api_app.models import AbstractReport, Job, PythonConfig
         from intel_owl import tasks
 
@@ -585,7 +952,23 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
 
 
 class IngestorQuerySet(PythonConfigQuerySet):
+    """
+    Custom queryset for Ingestor model, providing methods for annotating configurations specific to ingestors.
+
+    Methods:
+    - annotate_runnable: Annotates ingestors indicating if they are runnable.
+    """
+
     def annotate_runnable(self, user: User = None) -> "PythonConfigQuerySet":
+        """
+        Annotates ingestors indicating if they are runnable.
+
+        Args:
+            user (User, optional): The user to check. Defaults to None.
+
+        Returns:
+            PythonConfigQuerySet: The annotated queryset.
+        """
         # the plugin is runnable IF
         # - it is not disabled
         qs = self.filter(

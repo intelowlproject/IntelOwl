@@ -230,12 +230,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 playbook.tags.all()
             )
 
-        analyzers_to_execute = attrs[
-            "analyzers_to_execute"
-        ] = self.set_analyzers_to_execute(**attrs)
-        connectors_to_execute = attrs[
-            "connectors_to_execute"
-        ] = self.set_connectors_to_execute(**attrs)
+        analyzers_to_execute = attrs["analyzers_to_execute"] = (
+            self.set_analyzers_to_execute(**attrs)
+        )
+        connectors_to_execute = attrs["connectors_to_execute"] = (
+            self.set_connectors_to_execute(**attrs)
+        )
         if not analyzers_to_execute and not connectors_to_execute:
             warnings = "\n".join(self.filter_warnings)
             raise ValidationError(

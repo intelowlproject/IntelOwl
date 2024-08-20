@@ -23,9 +23,9 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     we can guess that the domain was in the Quad9 blacklist.
     """
 
-    HEADERS = {"Accept": "application/dns-json"}
-    QUAD9_URL = "https://dns.quad9.net:5053/dns-query"
-    GOOGLE_URL = "https://dns.google.com/resolve"
+    headers: dict = {"Accept": "application/dns-json"}
+    url: str = "https://dns.quad9.net:5053/dns-query"
+    google_url: str = "https://dns.google.com/resolve"
 
     def update(self) -> bool:
         pass
@@ -64,7 +64,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         for attempt in range(0, attempt_number):
             try:
                 quad9_response = requests.get(
-                    self.QUAD9_URL, headers=self.HEADERS, params=params, timeout=10
+                    self.url, headers=self.headers, params=params, timeout=10
                 )
             except requests.exceptions.ConnectionError as exception:
                 # if the last attempt fails, raise an error
@@ -86,7 +86,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         :rtype: bool
         """
         params = {"name": observable}
-        google_response = requests.get(self.GOOGLE_URL, params=params)
+        google_response = requests.get(self.google_url, params=params)
         google_response.raise_for_status()
 
         return bool(google_response.json().get("Answer", None))

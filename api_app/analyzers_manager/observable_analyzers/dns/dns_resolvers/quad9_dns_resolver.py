@@ -15,16 +15,16 @@ from ..dns_responses import dns_resolver_response
 class Quad9DNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Quad9"""
 
+    url: str = "https://dns.quad9.net:5053/dns-query"
+    headers: dict = {"Accept": "application/dns-json"}
     query_type: str
 
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == "url":
+        if self.observable_classification == self.ObservableTypes.URL:
             observable = urlparse(self.observable_name).hostname
 
-        url = "https://dns.quad9.net:5053/dns-query"
-        headers = {"Accept": "application/dns-json"}
         params = {"name": observable, "type": self.query_type}
 
         # sometimes it can respond with 503, I suppose to avoid DoS.
@@ -34,7 +34,7 @@ class Quad9DNSResolver(classes.ObservableAnalyzer):
         for attempt in range(0, attempt_number):
             try:
                 quad9_response = requests.get(
-                    url, headers=headers, params=params, timeout=10
+                    self.url, headers=self.headers, params=params, timeout=10
                 )
             except requests.exceptions.ConnectionError as exception:
                 # if the last attempt fails, raise an error

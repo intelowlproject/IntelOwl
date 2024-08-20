@@ -43,11 +43,9 @@ class Slack(Connector):
     def _monkeypatch(cls):
         # flake8: noqa
         class MockClient:
-            def __init__(self, *args, **kwargs):
-                ...
+            def __init__(self, *args, **kwargs): ...
 
-            def chat_postMessage(self, *args, **kwargs):
-                ...
+            def chat_postMessage(self, *args, **kwargs): ...
 
         patches = [
             if_mock_connections(

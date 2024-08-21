@@ -65,7 +65,7 @@ class VirusheeFileUpload(FileAnalyzer):
         response_json = None
         url = f"{self.url}/file/task/{task_id}"
         for chance in range(self.max_tries):
-            logger.info(f"Polling try#{chance+1}")
+            logger.info(f"Polling try#{chance + 1}")
             response = self.__session.get(url)
             response.raise_for_status()
             response_json = response.json()

@@ -68,7 +68,6 @@ class PlaybookConfigViewSet(
     )
     @action(methods=["POST"], url_name="analyze_multiple_files", detail=False)
     def analyze_multiple_files(self, request):
-        logger.debug(f"{request.data=}")
         oas = FileJobSerializer(
             data=request.data, many=True, context={"request": request}
         )

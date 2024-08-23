@@ -81,6 +81,7 @@ function DangerErrorMessage(fieldName) {
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
+  const isSampleParam = searchParams.get("isSample") === "true";
   const investigationIdParam = searchParams.get("investigation") || null;
   const parentIdParam = searchParams.get("parent");
   const { guideState, setGuideState } = useGuideContext();
@@ -535,9 +536,16 @@ export default function ScanForm() {
     if (observableParam) {
       updateSelectedObservable(observableParam, 0);
       if (formik.playbook) updateSelectedPlaybook(formik.playbook);
+    } else if (isSampleParam) {
+      formik.setFieldValue(
+        "observableType",
+        // "files",
+        JobTypes.FILE,
+        false,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [observableParam, playbooksLoading]);
+  }, [observableParam, playbooksLoading, isSampleParam]);
 
   /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
   and leaves the UI with values not valid, for this reason the scan button is disabled, but if the user set focus on the UI the last

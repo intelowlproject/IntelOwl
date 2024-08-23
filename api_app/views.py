@@ -20,6 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from api_app.choices import ScanMode
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
@@ -180,6 +181,7 @@ def analyze_file(request):
 @api_view(["POST"])
 def analyze_multiple_files(request):
     logger.info(f"received analyze_multiple_files from user {request.user}")
+    logger.debug(f"{request.data=}")
     fas = FileJobSerializer(data=request.data, context={"request": request}, many=True)
     fas.is_valid(raise_exception=True)
     parent_job = fas.validated_data[0].get("parent_job", None)
@@ -351,6 +353,38 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             raise ValidationError({"detail": "Job is running"})
         job.retry()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def rescan(self, request, pk=None):
+        logger.info(f"rescan request for job: {pk}")
+        try:
+            existing_job: Job = Job.objects.get(pk=pk)
+        except Job.DoesNotExist:
+            raise ValidationError({"detail": "Job not found"})
+        # create a new job
+        data = {
+            "TLP": existing_job.TLP,
+            "runtime_configuration": existing_job.runtime_configuration,
+            "scan_mode": ScanMode.FORCE_NEW_ANALYSIS,
+        }
+        if existing_job.playbook_requested:
+            data["playbook_requested"] = existing_job.playbook_requested
+        else:
+            data["analyzers_requested"] = existing_job.analyzers_requested.all()
+            data["connectors_requested"] = existing_job.connectors_requested.all()
+        if existing_job.is_sample:
+            data["file"] = existing_job.file
+            fas = FileJobSerializer(data=data, context={"request": request})
+            fas.is_valid(raise_exception=True)
+            new_job = fas.save(send_task=True)
+        else:
+            data["observable_classification"] = existing_job.observable_classification
+            data["observable_name"] = existing_job.observable_name
+            oas = ObservableAnalysisSerializer(data=data, context={"request": request})
+            oas.is_valid(raise_exception=True)
+            new_job = oas.save(send_task=True)
+        logger.info(f"rescan request for job: {pk} generated job: {new_job.pk}")
+        return Response(data={"id": new_job.pk}, status=status.HTTP_202_ACCEPTED)
 
     @add_docs(
         description="Kill running job by closing celery tasks and marking as killed",

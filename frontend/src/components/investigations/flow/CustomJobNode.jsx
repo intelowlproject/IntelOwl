@@ -9,9 +9,12 @@ import { MdContentCopy } from "react-icons/md";
 
 import { CopyToClipboardButton, DateHoverable } from "@certego/certego-ui";
 
+import { useNavigate } from "react-router-dom";
 import { RemoveJob } from "./investigationActions";
 
 function CustomJobNode({ data }) {
+  const navigate = useNavigate();
+
   return (
     <>
       {/* Number of children */}
@@ -56,7 +59,13 @@ function CustomJobNode({ data }) {
             id="investigation-pivotbtn"
             className="mx-1 p-2"
             size="sm"
-            href={`/scan?parent=${data.id}&observable=${data.name}`}
+            onClick={() => {
+              let url = `/scan?parent=${data.id}`;
+              url += data.is_sample
+                ? "&isSample=true"
+                : `&observable=${data.name}`;
+              navigate(url);
+            }}
             target="_blank"
             rel="noreferrer"
           >
@@ -67,7 +76,8 @@ function CustomJobNode({ data }) {
             placement="top"
             fade={false}
           >
-            Analyze the same observable again
+            Analyze the same observable again. CAUTION! Samples require to
+            select again the file.
           </UncontrolledTooltip>
           {data.isFirstLevel && <RemoveJob data={data} />}
         </div>

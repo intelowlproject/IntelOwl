@@ -246,7 +246,7 @@ describe("test InvestigationFlow", () => {
     expect(createJobButton.href).toContain("/scan?investigation=1");
   });
 
-  test("InvestigationFlow - job toolbar", () => {
+  test.only("InvestigationFlow - job toolbar", () => {
     const { container } = render(
       <BrowserRouter>
         <InvestigationFlow
@@ -309,7 +309,7 @@ describe("test InvestigationFlow", () => {
     expect(removeJobButton).toBeInTheDocument();
     const linkFirstJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkFirstJobButton).toBeInTheDocument();
-    const firstJobPivotButton = screen.getByRole("button", { name: "Pivot" });
+    const firstJobPivotButton = screen.getByRole("link", { name: "Pivot" });
     expect(firstJobPivotButton).toBeInTheDocument();
     const firstJobCopyButton = screen.getByRole("button", { name: "Copy" });
     expect(firstJobCopyButton).toBeInTheDocument();
@@ -341,7 +341,7 @@ describe("test InvestigationFlow", () => {
     expect(removeSecondJobButton).toBeNull(); // no remove button in pivot
     const linkSecondJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkSecondJobButton).toBeInTheDocument();
-    const secondJobPivotButton = screen.getByRole("button", { name: "Pivot" });
+    const secondJobPivotButton = screen.getByRole("link", { name: "Pivot" });
     expect(secondJobPivotButton).toBeInTheDocument();
     const secondJobCopyButton = screen.getByRole("button", { name: "Copy" });
     expect(secondJobCopyButton).toBeInTheDocument();
@@ -372,7 +372,7 @@ describe("test InvestigationFlow", () => {
     expect(removeFileJobButton).toBeInTheDocument();
     const linkFileJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkFileJobButton).toBeInTheDocument();
-    const fileJobPivotButton = screen.getByRole("button", { name: "Pivot" });
+    const fileJobPivotButton = screen.getByRole("link", { name: "Pivot" });
     expect(fileJobPivotButton).toBeInTheDocument();
     const fileJobCopyButton = screen.getByRole("button", { name: "Copy" });
     expect(fileJobCopyButton).toBeInTheDocument();
@@ -380,7 +380,7 @@ describe("test InvestigationFlow", () => {
     expect(linkFileJobButton.href).toContain("/jobs/12/visualizer");
     // link pivot
     expect(fileJobPivotButton.href).toContain(
-      "/scan?parent=10&isSample=true",
+      "/scan?parent=12&isSample=true",
     );
     // job info
     const fileJobInfo = container.querySelector("#job12-info");

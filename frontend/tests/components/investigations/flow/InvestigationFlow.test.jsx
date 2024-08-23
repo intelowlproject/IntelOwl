@@ -91,6 +91,7 @@ describe("test InvestigationFlow", () => {
                 analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
+                is_sample: false,
                 children: [],
               },
             ],
@@ -125,6 +126,7 @@ describe("test InvestigationFlow", () => {
                 analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
+                is_sample: false,
                 children: [],
               },
               {
@@ -132,6 +134,7 @@ describe("test InvestigationFlow", () => {
                 analyzed_object_name: "test2.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
+                is_sample: false,
                 children: [],
               },
             ],
@@ -171,12 +174,14 @@ describe("test InvestigationFlow", () => {
                 analyzed_object_name: "test1.com",
                 playbook: "Dns",
                 status: "reported_without_fails",
+                is_sample: false,
                 children: [
                   {
                     pk: 11,
                     analyzed_object_name: "test11.com",
                     playbook: "Dns",
                     status: "reported_without_fails",
+                    is_sample: false,
                     children: [],
                   },
                 ],
@@ -255,6 +260,7 @@ describe("test InvestigationFlow", () => {
                 playbook: "Dns",
                 status: "reported_without_fails",
                 received_request_time: "2024-04-03T13:08:45.417245Z",
+                is_sample: false,
                 children: [
                   {
                     pk: 11,
@@ -263,9 +269,18 @@ describe("test InvestigationFlow", () => {
                     status: "reported_without_fails",
                     children: [],
                     received_request_time: "2024-04-03T13:09:45.417245Z",
+                    is_sample: false,
                   },
                 ],
               },
+              {
+                pk: 12,
+                analyzed_object_name: "test.sh",
+                playbook: null,
+                status: "reported_without_fails",
+                received_request_time: "2024-08-23T10:03:27.489939Z",
+                is_sample: true,
+              }
             ],
           }}
           investigationId={1}
@@ -280,16 +295,10 @@ describe("test InvestigationFlow", () => {
     expect(rootNode).toBeInTheDocument();
     expect(rootNode.textContent).toBe("My test");
 
-    // first job node
+    // observable job node
     const firstJobNode = container.querySelector("#job-10");
     expect(firstJobNode).toBeInTheDocument();
     expect(firstJobNode.textContent).toBe("test1.com");
-
-    // pivot node
-    const secondJobNode = container.querySelector("#job-11");
-    expect(secondJobNode).toBeInTheDocument();
-    expect(secondJobNode.textContent).toBe("test11.com");
-
     fireEvent.click(firstJobNode);
     // first job tollbar
     const jobTollbar = container.querySelector("#toolbar-job-10");
@@ -300,7 +309,7 @@ describe("test InvestigationFlow", () => {
     expect(removeJobButton).toBeInTheDocument();
     const linkFirstJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkFirstJobButton).toBeInTheDocument();
-    const firstJobPivotButton = screen.getByRole("link", { name: "Pivot" });
+    const firstJobPivotButton = screen.getByRole("button", { name: "Pivot" });
     expect(firstJobPivotButton).toBeInTheDocument();
     const firstJobCopyButton = screen.getByRole("button", { name: "Copy" });
     expect(firstJobCopyButton).toBeInTheDocument();
@@ -318,6 +327,10 @@ describe("test InvestigationFlow", () => {
     expect(jobInfo.textContent).toContain("Playbook:Dns");
     expect(jobInfo.textContent).toContain("Created:");
 
+    // observable child node
+    const secondJobNode = container.querySelector("#job-11");
+    expect(secondJobNode).toBeInTheDocument();
+    expect(secondJobNode.textContent).toBe("test11.com");
     fireEvent.click(secondJobNode);
     // pivot tollbar
     const secondJobTollbar = container.querySelector("#toolbar-job-11");
@@ -328,7 +341,7 @@ describe("test InvestigationFlow", () => {
     expect(removeSecondJobButton).toBeNull(); // no remove button in pivot
     const linkSecondJobButton = screen.getByRole("link", { name: "Link" });
     expect(linkSecondJobButton).toBeInTheDocument();
-    const secondJobPivotButton = screen.getByRole("link", { name: "Pivot" });
+    const secondJobPivotButton = screen.getByRole("button", { name: "Pivot" });
     expect(secondJobPivotButton).toBeInTheDocument();
     const secondJobCopyButton = screen.getByRole("button", { name: "Copy" });
     expect(secondJobCopyButton).toBeInTheDocument();
@@ -345,5 +358,36 @@ describe("test InvestigationFlow", () => {
     expect(secondJobInfo.textContent).toContain("Name:test11.com");
     expect(secondJobInfo.textContent).toContain("Playbook:Dns");
     expect(jobInfo.textContent).toContain("Created:");
+
+    const fileJobNode = container.querySelector("#job-12");
+    expect(fileJobNode).toBeInTheDocument();
+    expect(fileJobNode.textContent).toBe("test.sh");
+    fireEvent.click(fileJobNode);
+    // file job tollbar
+    const fileJobTollbar = container.querySelector("#toolbar-job-12");
+    expect(fileJobTollbar).toBeInTheDocument();
+    const removeFileJobButton = screen.getByRole("button", {
+      name: "Remove Branch",
+    });
+    expect(removeFileJobButton).toBeInTheDocument();
+    const linkFileJobButton = screen.getByRole("link", { name: "Link" });
+    expect(linkFileJobButton).toBeInTheDocument();
+    const fileJobPivotButton = screen.getByRole("button", { name: "Pivot" });
+    expect(fileJobPivotButton).toBeInTheDocument();
+    const fileJobCopyButton = screen.getByRole("button", { name: "Copy" });
+    expect(fileJobCopyButton).toBeInTheDocument();
+    // link to job page
+    expect(linkFileJobButton.href).toContain("/jobs/12/visualizer");
+    // link pivot
+    expect(fileJobPivotButton.href).toContain(
+      "/scan?parent=10&isSample=true",
+    );
+    // job info
+    const fileJobInfo = container.querySelector("#job12-info");
+    expect(fileJobInfo).toBeInTheDocument();
+    expect(fileJobInfo.textContent).toContain("Job:#12");
+    expect(fileJobInfo.textContent).toContain("Name:test.sh");
+    expect(fileJobInfo.textContent).toContain("Playbook:");
+    expect(fileJobInfo.textContent).toContain("Created:");
   });
 });

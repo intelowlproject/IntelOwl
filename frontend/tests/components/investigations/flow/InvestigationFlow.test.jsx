@@ -246,7 +246,7 @@ describe("test InvestigationFlow", () => {
     expect(createJobButton.href).toContain("/scan?investigation=1");
   });
 
-  test.only("InvestigationFlow - job toolbar", () => {
+  test("InvestigationFlow - job toolbar", () => {
     const { container } = render(
       <BrowserRouter>
         <InvestigationFlow

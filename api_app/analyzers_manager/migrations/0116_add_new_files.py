@@ -7,7 +7,7 @@ import api_app.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0104_analyzer_config_goresym"),
+        ("analyzers_manager", "0115_analyzer_config_knock"),
     ]
 
     operations = [

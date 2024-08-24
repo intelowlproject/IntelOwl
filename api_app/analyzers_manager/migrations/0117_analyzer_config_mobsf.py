@@ -1,11 +1,9 @@
-from django.db import migrations, models
+from django.db import migrations
 from django.db.models.fields.related_descriptors import (
     ForwardManyToOneDescriptor,
     ForwardOneToOneDescriptor,
     ManyToManyDescriptor,
 )
-
-import api_app.fields
 
 plugin = {
     "python_module": {
@@ -121,3 +119,5 @@ class Migration(migrations.Migration):
         ("api_app", "0062_alter_parameter_python_module"),
         ("analyzers_manager", "0116_add_new_files"),
     ]
+
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

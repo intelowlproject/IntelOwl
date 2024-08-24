@@ -87,7 +87,6 @@ class MimeTypes(models.TextChoices):
     CRX = "application/x-chrome-extension"
     JSON = "application/json"
     EXECUTABLE = "application/x-executable"
-
     JAVA2 = "text/x-java"
     KOTLIN = "text/x-kotlin"
     SWIFT = "text/x-swift"

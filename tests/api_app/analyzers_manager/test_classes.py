@@ -59,6 +59,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "kotlin.kt",
                 "objectivec.m",
                 "swift.swift",
+                "android.xml",
             ],
             [
                 "application/onenote",
@@ -84,6 +85,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/x-kotlin",
                 "text/x-objective-c",
                 "text/x-swift",
+                "text/xml",
             ],
         ):
             try:

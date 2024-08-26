@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+# flake8: noqa
 from django.contrib import admin
 from django.http import HttpRequest
 
@@ -10,8 +10,7 @@ from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 
 
 @admin.register(PivotReport)
-class PivotReportAdminView(AbstractReportAdminView):
-    ...
+class PivotReportAdminView(AbstractReportAdminView): ...
 
 
 @admin.register(PivotConfig)

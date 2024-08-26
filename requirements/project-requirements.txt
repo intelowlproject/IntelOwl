@@ -8,7 +8,7 @@ django-storages==1.14
 django-celery-beat==2.6.0
 django-celery-results==2.5.0
 django-ses == 4.1.0
-django-iam-dbauth==0.1.4
+django-iam-dbauth==0.2.0
 django-prettyjson==0.4.1
 django-silk==5.1.0
 django-elasticsearch-dsl==8.0
@@ -39,13 +39,13 @@ elasticsearch-dsl==8.15.0
 
 # plugins
 GitPython==3.1.41
-checkdmarc==5.4.0
+checkdmarc==5.5.0
 dnspython==2.6.1
 dnstwist[full]==20240812
 google>=3.0.0
 google-cloud-webrisk==1.14.0
 intezer-sdk==1.21
-lief==0.14.0
+lief==0.15.1
 maxminddb==2.6.0
 geoip2==4.8.0
 mwdblib==4.5.0
@@ -60,7 +60,7 @@ pyelftools==0.31
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
-pymisp==2.4.190
+pymisp==2.4.196
 pyOneNote==0.0.2
 pypdns==2.2.1
 pypssl==2.2
@@ -76,12 +76,14 @@ XLMMacroDeobfuscator[secure]==0.2.3
 thinkst-zippy==0.1.2
 querycontacts==2.0.0
 hfinger==0.2.2
+blint==2.2.2
 permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
 polyswarm-api==3.9.0
 knock-subdomains==7.0.1
+dotnetfile==0.2.4
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

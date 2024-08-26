@@ -1,5 +1,5 @@
 /* eslint-disable prefer-destructuring */
-export const INTELOWL_DOCS_URL = "https://intelowl.readthedocs.io/en/latest/";
+export const INTELOWL_DOCS_URL = "https://intelowlproject.github.io/docs/";
 export const PYINTELOWL_GH_URL =
   "https://github.com/intelowlproject/pyintelowl";
 export const INTELOWL_TWITTER_ACCOUNT = "intel_owl";

@@ -362,7 +362,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             raise ValidationError({"detail": "Job not found"})
         # create a new job
         data = {
-            "TLP": existing_job.TLP,
+            "tlp": existing_job.tlp,
             "runtime_configuration": existing_job.runtime_configuration,
             "scan_mode": ScanMode.FORCE_NEW_ANALYSIS,
         }
@@ -373,6 +373,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             data["connectors_requested"] = existing_job.connectors_requested.all()
         if existing_job.is_sample:
             data["file"] = existing_job.file
+            data["file_name"] = existing_job.file_name
             fas = FileJobSerializer(data=data, context={"request": request})
             fas.is_valid(raise_exception=True)
             new_job = fas.save(send_task=True)

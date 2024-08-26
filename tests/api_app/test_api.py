@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import datetime
 import hashlib
 import os
 from typing import Tuple
@@ -11,6 +12,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from api_app import models
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.playbooks_manager.models import PlaybookConfig
 
 from .. import CustomViewSetTestCase
 
@@ -425,3 +427,185 @@ class ApiViewTests(CustomViewSetTestCase):
         job_id = int(contents["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(job.tlp, "CLEAR", msg=msg)
+
+    def test_job_rescan__observable_analyzers(self):
+        job = models.Job.objects.create(
+            tlp="CLEAR",
+            user=self.user,
+            observable_name="test.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
+            - datetime.timedelta(days=5),
+            runtime_configuration={
+                "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+        job.analyzers_requested.set([AnalyzerConfig.objects.get(name="Classic_DNS")])
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 202, contents)
+        new_job_id = int(contents["id"])
+        new_job = models.Job.objects.get(pk=new_job_id)
+        self.assertEqual(new_job.observable_name, "test.com")
+        self.assertEqual(new_job.tlp, "CLEAR")
+        self.assertEqual(
+            list(new_job.analyzers_requested.all()),
+            [AnalyzerConfig.objects.get(name="Classic_DNS")],
+        )
+        self.assertEqual(
+            new_job.runtime_configuration,
+            {
+                "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+
+    def test_job_rescan__observable_playbook(self):
+        job = models.Job.objects.create(
+            tlp="CLEAR",
+            user=self.user,
+            observable_name="test.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
+            - datetime.timedelta(days=5),
+            playbook_requested=PlaybookConfig.objects.get(name="Dns"),
+            runtime_configuration={
+                "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 202, contents)
+        new_job_id = int(contents["id"])
+        new_job = models.Job.objects.get(pk=new_job_id)
+        self.assertEqual(new_job.observable_name, "test.com")
+        self.assertEqual(new_job.tlp, "CLEAR")
+        self.assertEqual(
+            new_job.playbook_requested, PlaybookConfig.objects.get(name="Dns")
+        )
+        self.assertEqual(
+            new_job.runtime_configuration,
+            {
+                "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+
+    def test_job_rescan__sample_analyzers(self):
+        job = models.Job.objects.create(
+            tlp="CLEAR",
+            md5=self.file_md5,
+            user=self.user,
+            is_sample=True,
+            file_name="file.exe",
+            file=self.uploaded_file,
+            status="reported_without_fails",
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
+            - datetime.timedelta(days=5),
+            runtime_configuration={
+                "analyzers": {
+                    "Strings_Info": {
+                        "max_number_of_strings": 5,
+                        "max_characters_for_string": 10,
+                    }
+                },
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+        job.analyzers_requested.set([AnalyzerConfig.objects.get(name="Strings_Info")])
+
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 202, contents)
+        new_job_id = int(contents["id"])
+        new_job = models.Job.objects.get(pk=new_job_id)
+        self.assertEqual(new_job.file_name, "file.exe")
+        self.assertEqual(new_job.file, job.file)
+        self.assertEqual(new_job.tlp, "CLEAR")
+        self.assertEqual(
+            list(new_job.analyzers_requested.all()),
+            [AnalyzerConfig.objects.get(name="Strings_Info")],
+        )
+        self.assertEqual(
+            new_job.runtime_configuration,
+            {
+                "analyzers": {
+                    "Strings_Info": {
+                        "max_number_of_strings": 5,
+                        "max_characters_for_string": 10,
+                    }
+                },
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+
+    def test_job_rescan__sample_playbook(self):
+
+        job = models.Job.objects.create(
+            tlp="CLEAR",
+            md5=self.file_md5,
+            user=self.user,
+            is_sample=True,
+            file_name="file.exe",
+            file=self.uploaded_file,
+            status="reported_without_fails",
+            playbook_requested=PlaybookConfig.objects.get(
+                name="Sample_Static_Analysis"
+            ),
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
+            - datetime.timedelta(days=5),
+            runtime_configuration={
+                "analyzers": {
+                    "Strings_Info": {
+                        "max_number_of_strings": 5,
+                        "max_characters_for_string": 10,
+                    }
+                },
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 202, contents)
+        new_job_id = int(contents["id"])
+        new_job = models.Job.objects.get(pk=new_job_id)
+        self.assertEqual(new_job.file_name, "file.exe")
+        self.assertEqual(new_job.file, job.file)
+        self.assertEqual(new_job.tlp, "CLEAR")
+        self.assertEqual(
+            new_job.playbook_requested,
+            PlaybookConfig.objects.get(name="Sample_Static_Analysis"),
+        )
+        self.assertEqual(
+            new_job.runtime_configuration,
+            {
+                "analyzers": {
+                    "Strings_Info": {
+                        "max_number_of_strings": 5,
+                        "max_characters_for_string": 10,
+                    }
+                },
+                "connectors": {},
+                "visualizers": {},
+            },
+        )

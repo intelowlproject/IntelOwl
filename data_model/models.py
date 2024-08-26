@@ -17,6 +17,9 @@ class BaseDataModel(models.Model):
     related_urls = pg_fields.ArrayField(
         models.URLField(), null=True
     )  # link/external_references/permalink/domains
+    threats = pg_fields.ArrayField(
+        models.CharField(max_length=100), null=True
+    )  # threats/related_threats
 
 
 class DomainDataModel(models.Model):

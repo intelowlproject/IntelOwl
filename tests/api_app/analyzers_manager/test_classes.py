@@ -60,6 +60,8 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "objectivec.m",
                 "swift.swift",
                 "android.xml",
+                "test.zip",
+                "sample.dex",
             ],
             [
                 "application/onenote",
@@ -86,6 +88,8 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/x-objective-c",
                 "text/x-swift",
                 "text/xml",
+                "application/zip",
+                "application/x-dex",
             ],
         ):
             try:

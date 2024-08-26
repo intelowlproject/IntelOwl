@@ -211,7 +211,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("analyzers_manager", "0111_analyzer_config_criminalip"),
+        ("analyzers_manager", "0112_analyzer_config_criminalip_scan"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

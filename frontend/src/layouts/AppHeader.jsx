@@ -68,7 +68,7 @@ const guestLinks = (
 );
 
 // eslint-disable-next-line react/prop-types
-function AuthLinks({ noOrganization }) {
+function AuthLinks({ isInOrganization }) {
   return (
     <>
       <NavItem>
@@ -104,7 +104,7 @@ function AuthLinks({ noOrganization }) {
         <NavLink className="d-flex-start-center p-1 pt-2" to="/me/config">
           <BsSliders className="me-2" /> User Plugin Config
         </NavLink>
-        {!noOrganization && (
+        {isInOrganization && (
           <NavLink
             className="d-flex-start-center p-1"
             to="/me/organization/config"
@@ -252,8 +252,8 @@ function AppHeader() {
   );
 
   // organization store
-  const noOrg = useOrganizationStore(
-    React.useCallback((state) => state.noOrg, []),
+  const isInOrganization = useOrganizationStore(
+    React.useCallback((state) => state.isInOrganization, []),
   );
 
   return (
@@ -282,7 +282,9 @@ function AppHeader() {
                 <span className="ms-1">Home</span>
               </NavLink>
             </NavItem>
-            {isAuthenticated && <AuthLinks noOrganization={noOrg} />}
+            {isAuthenticated && (
+              <AuthLinks isInOrganization={isInOrganization} />
+            )}
           </Nav>
           {/* Navbar Right Side */}
           <Nav

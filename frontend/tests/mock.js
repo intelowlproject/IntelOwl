@@ -43,7 +43,7 @@ export const mockedUseOrganizationStoreNoOrg = {
   loading: false,
   error: null,
   isUserOwner: false,
-  noOrg: true,
+  isInOrganization: false,
   organization: {},
   membersCount: undefined,
   members: [],
@@ -57,7 +57,7 @@ export const mockedUseOrganizationStoreOwner = {
   loading: false,
   error: null,
   isUserOwner: true,
-  noOrg: false,
+  isInOrganization: true,
   organization: {
     owner: {
       full_name: "user owner",

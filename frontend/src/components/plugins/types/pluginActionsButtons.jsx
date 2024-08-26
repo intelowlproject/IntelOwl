@@ -63,14 +63,14 @@ export function OrganizationPluginStateToggle({
 }) {
   const user = useAuthStore(React.useCallback((state) => state.user, []));
   const {
-    noOrg,
+    isInOrganization,
     fetchAll: fetchAllOrganizations,
     isUserAdmin,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         fetchAll: state.fetchAll,
-        noOrg: state.noOrg,
+        isInOrganization: state.isInOrganization,
         isUserAdmin: state.isUserAdmin,
       }),
       [],
@@ -102,8 +102,10 @@ export function OrganizationPluginStateToggle({
     refetch();
   };
   return (
-    <div className={`d-flex align-items-center ${noOrg ? "" : "px-2"}`}>
-      {!noOrg && (
+    <div
+      className={`d-flex align-items-center ${isInOrganization ? "px-2" : ""}`}
+    >
+      {isInOrganization && (
         <IconButton
           id={`table-pluginstatebtn__${pluginName}`}
           color={disabled ? "dark" : "success"}
@@ -134,11 +136,11 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
   const [showModal, setShowModal] = React.useState(false);
 
   const user = useAuthStore(React.useCallback((state) => state.user, []));
-  const { noOrg, isUserAdmin } = useOrganizationStore(
+  const { isInOrganization, isUserAdmin } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         fetchAll: state.fetchAll,
-        noOrg: state.noOrg,
+        isInOrganization: state.isInOrganization,
         isUserAdmin: state.isUserAdmin,
       }),
       [],
@@ -171,7 +173,8 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
   // disabled icon for all plugins except playbooks if the user is not an admin of the org or a superuser
   const disabled =
     pluginType_ !== "playbook" &&
-    ((!noOrg && !isUserAdmin(user.username)) || (noOrg && !user.is_staff));
+    ((isInOrganization && !isUserAdmin(user.username)) ||
+      (!isInOrganization && !user.is_staff));
 
   return (
     <div className="px-2">
@@ -329,11 +332,11 @@ export function PivotsEditButton({ pivotConfig }) {
   const [showModal, setShowModal] = React.useState(false);
 
   const user = useAuthStore(React.useCallback((state) => state.user, []));
-  const { noOrg, isUserAdmin } = useOrganizationStore(
+  const { isInOrganization, isUserAdmin } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         fetchAll: state.fetchAll,
-        noOrg: state.noOrg,
+        isInOrganization: state.isInOrganization,
         isUserAdmin: state.isUserAdmin,
       }),
       [],
@@ -342,7 +345,8 @@ export function PivotsEditButton({ pivotConfig }) {
 
   // disabled icon if the user is not an admin of the org or a superuser
   const disabled =
-    (!noOrg && !isUserAdmin(user.username)) || (noOrg && !user.is_staff);
+    (isInOrganization && !isUserAdmin(user.username)) ||
+    (!isInOrganization && !user.is_staff);
 
   return (
     <div className="d-flex flex-column align-items-center px-2">

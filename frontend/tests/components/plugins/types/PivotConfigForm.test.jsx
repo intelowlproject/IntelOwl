@@ -243,9 +243,7 @@ describe("PivotConfigForm test", () => {
     expect(descriptionInputField).toBeInTheDocument();
     expect(descriptionInputField).toHaveValue("pivot: test");
 
-    const pythonModuleInputField = screen.getByText(
-      "Type of pivot:",
-    );
+    const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
     const playbookInputField = screen.getByText("Playbook to Execute:");

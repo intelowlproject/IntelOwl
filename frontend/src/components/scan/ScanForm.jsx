@@ -417,6 +417,23 @@ export default function ScanForm() {
       }))
       .filter((item) => !item.isDisabled && item.starting);
 
+  const selectObservableType = (value) => {
+    formik.setFieldValue("observableType", value, false);
+    formik.setFieldValue(
+      "classification",
+      value === JobTypes.OBSERVABLE
+        ? ObservableClassifications.GENERIC
+        : JobTypes.FILE,
+    );
+    formik.setFieldValue("observable_names", [""], false);
+    formik.setFieldValue("files", [""], false);
+    formik.setFieldValue("analysisOptionValues", ScanTypes.playbooks, false);
+    setScanType(ScanTypes.playbooks);
+    formik.setFieldValue("playbook", "", false); // reset
+    formik.setFieldValue("analyzers", [], false); // reset
+    formik.setFieldValue("connectors", [], false); // reset
+  };
+
   const updateAdvancedConfig = (
     tags,
     tlp,
@@ -537,12 +554,7 @@ export default function ScanForm() {
       updateSelectedObservable(observableParam, 0);
       if (formik.playbook) updateSelectedPlaybook(formik.playbook);
     } else if (isSampleParam) {
-      formik.setFieldValue(
-        "observableType",
-        // "files",
-        JobTypes.FILE,
-        false,
-      );
+      selectObservableType(JobTypes.FILE);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [observableParam, playbooksLoading, isSampleParam]);
@@ -622,30 +634,9 @@ export default function ScanForm() {
                         type="radio"
                         name="observableType"
                         value={jobType}
-                        onClick={(event) => {
-                          formik.setFieldValue(
-                            "observableType",
-                            event.target.value,
-                            false,
-                          );
-                          formik.setFieldValue(
-                            "classification",
-                            event.target.value === JobTypes.OBSERVABLE
-                              ? ObservableClassifications.GENERIC
-                              : JobTypes.FILE,
-                          );
-                          formik.setFieldValue("observable_names", [""], false);
-                          formik.setFieldValue("files", [""], false);
-                          formik.setFieldValue(
-                            "analysisOptionValues",
-                            ScanTypes.playbooks,
-                            false,
-                          );
-                          setScanType(ScanTypes.playbooks);
-                          formik.setFieldValue("playbook", "", false); // reset
-                          formik.setFieldValue("analyzers", [], false); // reset
-                          formik.setFieldValue("connectors", [], false); // reset
-                        }}
+                        onClick={(event) =>
+                          selectObservableType(event.target.value)
+                        }
                       />
                       <Label check>
                         {jobType === JobTypes.OBSERVABLE

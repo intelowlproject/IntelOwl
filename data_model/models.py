@@ -49,7 +49,7 @@ class IPDataModel(models.Model):
     noise = models.BooleanField(null=True)  # GreyNoise
     riot = models.BooleanField(null=True)  # GreyNoise
     org_name = models.CharField(max_length=100, null=True)  # GreyNoise
-    vx_family = models.CharField(max_length=100, null=True)  # HybridAnalysisObservable
+    family = models.CharField(max_length=100, null=True)  # HybridAnalysisObservable
     country = models.CharField(max_length=100, null=True)  # MaxMind, AbuseIPDB
     country_code = models.CharField(max_length=100, null=True)  # MaxMind, AbuseIPDB
     registered_country = models.CharField(
@@ -71,10 +71,7 @@ class FileDataModel(models.Model):
         max_length=100,
         null=True,
     )  # Cymru (found), Cuckoo (malscore), Intezer (verdict/sub_verdict),
-    # Triage (analysis.score)
-    classification_tags = pg_fields.ArrayField(
-        models.CharField(max_length=100), null=True
-    )  # HybridAnalysisFileAnalyzer
+    # Triage (analysis.score), HybridAnalysisFileAnalyzer (classification_tags)
     tags = pg_fields.ArrayField(
         models.CharField(max_length=100), null=True
     )  # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,

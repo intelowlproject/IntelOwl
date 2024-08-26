@@ -27,8 +27,10 @@ class PhishingAnalyzer(ObservableAnalyzer):
         if self.proxy_address:
             options = self._config_proxy_server()
         self.driver = webdriver.Chrome(options=options)
+        logger.info("Finished opening driver for Chrome")
 
     def _config_proxy_server(self) -> Options:
+        logger.info("Starting adding options for proxy in driver")
         options = webdriver.ChromeOptions()
         options.add_argument(
             f"--proxy-server={self.proxy_protocol+'://' if self.proxy_address else ''}"
@@ -40,11 +42,15 @@ class PhishingAnalyzer(ObservableAnalyzer):
         options.add_argument(
             "--remote-debugging-pipe"
         )  # due to https://github.com/SeleniumHQ/selenium/issues/12841
+        logger.info("Finished adding options for proxy in driver")
         return options
 
     def run(self):
+        logger.info(f"Starting opening {self.observable_name} page")
         self.driver.get(self.observable_name)
+        logger.info(f"Finished opening {self.observable_name} page")
 
+        logger.info(f"Starting opening {self.observable_name} page in requests")
         response = requests.get(
             url=self.observable_name,
             proxies=f"{self.proxy_protocol}://"
@@ -56,6 +62,7 @@ class PhishingAnalyzer(ObservableAnalyzer):
             return {"not_found": True}
 
         html_page: str = self.driver.page_source
+        logger.info(f"Extracting source from driver page {html_page}")
 
         self.driver.close()
 

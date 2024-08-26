@@ -11,18 +11,16 @@ class IETFReport(models.Model):
 
 
 class DomainDataModel(models.Model):
-    evaluation = models.CharField(max_length=100, null=True)
-    classification = models.CharField(
-        max_length=100,
-        null=True,
-    )  # HybridAnalysisObservable (verdict), BasicMaliciousDetector,
-    # GoogleSafeBrowsing, Crowdsec
+    evaluation = models.CharField(
+        max_length=100, null=True
+    )  # HybridAnalysisObservable (verdict),
+    # BasicMaliciousDetector, GoogleSafeBrowsing, Crowdsec (classification)
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns
     tranco_rank = models.IntegerField(null=True)  # Tranco
-    related_url = models.URLField(
-        null=True
+    related_urls = pg_fields.ArrayField(
+        models.URLField(), null=True
     )  # Crowdsec (link), UrlHaus (external_references)
     threats = pg_fields.ArrayField(
         models.CharField(max_length=100), null=True
@@ -30,12 +28,10 @@ class DomainDataModel(models.Model):
 
 
 class IPDataModel(models.Model):
-    evaluation = models.CharField(max_length=100, null=True)
-    classification = models.CharField(
-        max_length=100,
-        null=True,
-    )  # Crowdsec, GreyNoise, HybridAnalysisObservable (verdict),
-    # BasicMaliciousDetector, GoogleSafeBrowsing
+    evaluation = models.CharField(
+        max_length=100, null=True
+    )  # HybridAnalysisObservable (verdict),
+    # Crowdsec, GreyNoise, BasicMaliciousDetector, GoogleSafeBrowsing (classification)
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns

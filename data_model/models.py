@@ -10,6 +10,15 @@ class IETFReport(models.Model):
     time_last = models.DateTimeField()
 
 
+class BaseDataModel(models.Model):
+    evaluation = models.CharField(
+        max_length=100, null=True
+    )  # classification/verdict/found/score
+    related_urls = pg_fields.ArrayField(
+        models.URLField(), null=True
+    )  # link/external_references/permalink/domains
+
+
 class DomainDataModel(models.Model):
     evaluation = models.CharField(
         max_length=100, null=True

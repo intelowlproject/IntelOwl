@@ -11,7 +11,7 @@ class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "apk_analyzer"
     url: str = "http://malware_tools_analyzers:4002/artifacts"
     # interval between http request polling
-    poll_distance: int = 5
+    poll_distance: int = 2
     # http request polling max number of tries
     max_tries: int = 10
     artifacts_report: bool = False

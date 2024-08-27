@@ -22,7 +22,12 @@ plugin = {
     "docker_based": False,
     "maximum_tlp": "RED",
     "observable_supported": [],
-    "supported_filetypes": ["application/vnd.android.package-archive"],
+    "supported_filetypes": [
+        "application/zip",
+        "application/java-archive",
+        "application/vnd.android.package-archive",
+        "application/x-dex",
+    ],
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],

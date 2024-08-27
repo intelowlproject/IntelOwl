@@ -49,7 +49,7 @@ class DomainDataModel(BaseDataModel):
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True
     )  # pdns
-    tranco_rank = models.IntegerField(null=True)  # Tranco
+    rank = models.IntegerField(null=True)  # Tranco
 
 
 class IPDataModel(BaseDataModel):
@@ -59,9 +59,6 @@ class IPDataModel(BaseDataModel):
     asn = models.IntegerField(null=True)  # BGPRanking, MaxMind
     asn_rank = models.DecimalField(null=True)  # BGPRanking
     certificates = models.JSONField(null=True)  # CIRCL_PSSL
-    behavior = models.CharField(max_length=100, null=True)  # Crowdsec
-    noise = models.BooleanField(null=True)  # GreyNoise
-    riot = models.BooleanField(null=True)  # GreyNoise
     org_name = models.CharField(max_length=100, null=True)  # GreyNoise
     country = models.CharField(max_length=100, null=True)  # MaxMind, AbuseIPDB
     country_code = models.CharField(max_length=100, null=True)  # MaxMind, AbuseIPDB
@@ -72,8 +69,12 @@ class IPDataModel(BaseDataModel):
         max_length=100, null=True
     )  # MaxMind, AbuseIPDB
     isp = models.CharField(max_length=100, null=True)  # AbuseIPDB
-    is_anonymizer = models.BooleanField(null=True)  # TorProject, Crowdsec
-    is_tor_exit_node = models.BooleanField(null=True)  # TorProject, Crowdsec
+    # additional_info
+    # behavior = models.CharField(max_length=100, null=True)  # Crowdsec
+    # noise = models.BooleanField(null=True)  # GreyNoise
+    # riot = models.BooleanField(null=True)  # GreyNoise
+    # is_anonymizer = models.BooleanField(null=True)  # TorProject, Crowdsec
+    # is_tor_exit_node = models.BooleanField(null=True)  # TorProject, Crowdsec
 
 
 class FileDataModel(BaseDataModel):
@@ -102,6 +103,7 @@ class FileDataModel(BaseDataModel):
     stats = pg_fields.ArrayField(
         models.JSONField(), null=True
     )  # PdfInfo (peepdf_stats)
-    pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
-    imphash = models.CharField(max_length=100, null=True)  # PeInfo
-    type = models.CharField(max_length=100, null=True)  # PeInfo
+    # additional_info
+    # pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
+    # imphash = models.CharField(max_length=100, null=True)  # PeInfo
+    # type = models.CharField(max_length=100, null=True)  # PeInfo

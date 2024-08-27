@@ -38,91 +38,45 @@ class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
         result = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
         return result
 
+    # flake8: noqa
     @staticmethod
     def mocked_docker_analyzer_get(*args, **kwargs):
         return MockUpResponse(
             {
                 "report": {
-                    "Version": "1.22.3",
-                    "BuildId": """nwVuB9ChiwRxUV3uqogj
-                    /gqLuN_Lt0hiTuOBT4YDw
-                /7ArmhPs-KKm8m0kwm8Ud/RNgWKMZv5-p8k3r8fJCp""",
-                    "Arch": "amd64",
-                    "OS": "linux",
-                    "TabMeta": {
-                        "VA": 8261824,
-                        "Version": "1.20",
-                        "Endianess": "LittleEndian",
-                        "CpuQuantum": 1,
-                        "CpuQuantumStr": "x86/x64/wasm",
-                        "PointerSize": 8,
-                    },
-                    "ModuleMeta": {
-                        "VA": 10005792,
-                        "TextVA": 4198400,
-                        "Types": 7045120,
-                        "ETypes": 8248647,
-                        "Typelinks": {"Data": 8251936, "Len": 1791, "Capacity": 1791},
-                        "ITablinks": {"Data": 8259104, "Len": 339, "Capacity": 339},
-                        "LegacyTypes": {"Data": 0, "Len": 0, "Capacity": 0},
-                    },
-                    "Types": None,
-                    "Interfaces": None,
-                    "BuildInfo": {
-                        "GoVersion": "go1.22.3",
-                        "Path": "github.com/g4ze/byoc/reverse-proxy",
-                        "Main": {
-                            "Path": "github.com/g4ze/byoc",
-                            "Version": "(devel)",
-                            "Sum": "",
-                            "Replace": None,
+                    "name": "APK_Artifacts",
+                    "process_time": 5.07,
+                    "status": "SUCCESS",
+                    "end_time": "2024-08-27T10:03:15.563886Z",
+                    "parameters": {},
+                    "type": "analyzer",
+                    "id": 72,
+                    "report": {
+                        "dex": ["classes.dex"],
+                        "md5": "8a05a189e58ccd7275f7ffdf88c2c191",
+                        "root": [],
+                        "family": {
+                            "name": "CryCrypto",
+                            "match": 11.11,
+                            "value": {
+                                "intent": 33.33,
+                                "permission": 0.0,
+                                "application": 0.0,
+                            },
                         },
-                        "Deps": [
-                            {
-                                "Path": "github.com/joho/godotenv",
-                                "Version": "v1.5.1",
-                                "Sum": """h1:7eLL/
-                                +HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=""",
-                                "Replace": None,
-                            },
-                            {
-                                "Path": "github.com/lib/pq",
-                                "Version": "v1.10.9",
-                                "Sum": """h1:YXG7RB+JIjhP29X
-                                +OtkiDnYaXQwpS4JEWq7dtCCRUEw=""",
-                                "Replace": None,
-                            },
+                        "string": {"known": [], "base64": [], "telegram_id": []},
+                        "library": [],
+                        "network": {"ip": [], "url": [], "param": []},
+                        "sandbox": [
+                            "https://tria.ge/s?q=8a05a189e58ccd7275f7ffdf88c2c191",
+                            "https://www.joesandbox.com/analysis/search?q=8a05a189e58ccd7275f7ffdf88c2c191",
+                            "https://www.virustotal.com/gui/search/8a05a189e58ccd7275f7ffdf88c2c191",
+                            "https://bazaar.abuse.ch/browse.php?search=md5:8a05a189e58ccd7275f7ffdf88c2c191",
+                            "https://koodous.com/apks?search=8a05a189e58ccd7275f7ffdf88c2c191",
                         ],
-                        "Settings": [
-                            {"Key": "-buildmode", "Value": "exe"},
-                            {"Key": "-compiler", "Value": "gc"},
-                            {"Key": "CGO_ENABLED", "Value": "1"},
-                            {"Key": "CGO_CFLAGS", "Value": ""},
-                            {"Key": "CGO_CPPFLAGS", "Value": ""},
-                            {"Key": "CGO_CXXFLAGS", "Value": ""},
-                            {"Key": "CGO_LDFLAGS", "Value": ""},
-                            {"Key": "GOARCH", "Value": "amd64"},
-                            {"Key": "GOOS", "Value": "linux"},
-                            {"Key": "GOAMD64", "Value": "v1"},
-                            {"Key": "vcs", "Value": "git"},
-                            {
-                                "Key": "vcs.revision",
-                                "Value": "34e6cafd47a85a15e9aeedd63786a2ba72e5b301",
-                            },
-                            {"Key": "vcs.time", "Value": "2024-06-24T07:44:25Z"},
-                            {"Key": "vcs.modified", "Value": "true"},
-                        ],
+                        "version": "1.1.1",
+                        "elapsed_time": 0.02,
                     },
-                    "Files": None,
-                    "UserFunctions": [
-                        {
-                            "Start": 7043712,
-                            "End": 7043758,
-                            "PackageName": "main",
-                            "FullName": "main.main.NewSingleHostReverseProxy.func1",
-                        },
-                    ],
-                    "StdFunctions": None,
                 }
             },
             200,

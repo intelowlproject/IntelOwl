@@ -1,3 +1,4 @@
+# flake8: noqa
 import json
 import logging
 from typing import Any
@@ -257,8 +258,7 @@ class PluginConfigCompleteSerializer(rfs.ModelSerializer):
         exclude = ["id"]
 
 
-class AbstractConfigSerializer(rfs.ModelSerializer):
-    ...
+class AbstractConfigSerializer(rfs.ModelSerializer): ...
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):

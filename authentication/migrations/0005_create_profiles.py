@@ -15,8 +15,8 @@ def migrate(apps, schema_editor):
             )
         else:
             profile = user.profile
-            profile.task_priority=7 if is_robot else 10
-            profile.is_robot=is_robot
+            profile.task_priority = 7 if is_robot else 10
+            profile.is_robot = is_robot
         profile.save()
 
 

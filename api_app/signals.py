@@ -26,6 +26,15 @@ logger = logging.getLogger(__name__)
 
 @receiver(models.signals.pre_save, sender=Job)
 def pre_save_job(sender, instance: Job, **kwargs):
+    """
+    Signal receiver for the pre_save signal of the Job model.
+    Calculates the MD5 hash for the job file or observable name if not already set.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (Job): The instance of the model being saved.
+        **kwargs: Additional keyword arguments.
+    """
     if not instance.md5:
         instance.md5 = calculate_md5(
             instance.file.read()
@@ -37,6 +46,16 @@ def pre_save_job(sender, instance: Job, **kwargs):
 @receiver(models.signals.post_save, sender=Job)
 @prevent_signal_recursion
 def post_save_job(sender, instance: Job, *args, **kwargs):
+    """
+    Signal receiver for the post_save signal of the Job model.
+    Calculates and sets the process time if the job has finished analysis time.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (Job): The instance of the model being saved.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     if instance.finished_analysis_time and instance.received_request_time:
         td = instance.finished_analysis_time - instance.received_request_time
         instance.process_time = round(td.total_seconds(), 2)
@@ -44,12 +63,30 @@ def post_save_job(sender, instance: Job, *args, **kwargs):
 
 @receiver(models.signals.pre_delete, sender=Job)
 def pre_delete_job(sender, instance: Job, **kwargs):
+    """
+    Signal receiver for the pre_delete signal of the Job model.
+    Deletes the associated file if it exists.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (Job): The instance of the model being deleted.
+        **kwargs: Additional keyword arguments.
+    """
     if instance.file:
         instance.file.delete()
 
 
 @receiver(models.signals.post_delete, sender=Job)
 def post_delete_job(sender, instance: Job, **kwargs):
+    """
+    Signal receiver for the post_delete signal of the Job model.
+    Deletes the associated investigation if no other jobs are linked to it.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (Job): The instance of the model being deleted.
+        **kwargs: Additional keyword arguments.
+    """
     if instance.investigation and instance.investigation.jobs.count() == 0:
         instance.investigation.delete()
 
@@ -61,6 +98,16 @@ def post_migrate_api_app(
     check_unapplied: bool = False,
     **kwargs,
 ):
+    """
+    Signal receiver for the custom migrate_finished signal.
+    Sets up periodic tasks for health checks and updates based on module configuration.
+
+    Args:
+        sender: The sender of the signal.
+        *args: Additional positional arguments.
+        check_unapplied (bool, optional): If true, does not proceed with setting up tasks. Defaults to False.
+        **kwargs: Additional keyword arguments.
+    """
     logger.info(f"Post migrate {args} {kwargs}")
     if check_unapplied:
         return
@@ -85,22 +132,62 @@ def post_migrate_api_app(
 
 @receiver(models.signals.post_save, sender=PluginConfig)
 def post_save_plugin_config(sender, instance: PluginConfig, *args, **kwargs):
+    """
+    Signal receiver for the post_save signal of the PluginConfig model.
+    Refreshes cache keys associated with the PluginConfig instance.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (PluginConfig): The instance of the model being saved.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     instance.refresh_cache_keys()
 
 
 @receiver(models.signals.post_delete, sender=PluginConfig)
 def post_delete_plugin_config(sender, instance: PluginConfig, *args, **kwargs):
+    """
+    Signal receiver for the post_delete signal of the PluginConfig model.
+    Refreshes cache keys associated with the PluginConfig instance after deletion.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (PluginConfig): The instance of the model being deleted.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     instance.refresh_cache_keys()
 
 
 @receiver(models.signals.post_save, sender=Parameter)
 def post_save_parameter(sender, instance: Parameter, *args, **kwargs):
+    """
+    Signal receiver for the post_save signal of the Parameter model.
+    Deletes the list view cache associated with the Parameter instance.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (Parameter): The instance of the model being saved.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     # delete list view cache
     instance.refresh_cache_keys()
 
 
 @receiver(models.signals.post_delete, sender=Parameter)
 def post_delete_parameter(sender, instance: Parameter, *args, **kwargs):
+    """
+    Signal receiver for the post_delete signal of the Parameter model.
+    Deletes the list view cache associated with the Parameter instance after deletion.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance (Parameter): The instance of the model being deleted.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     # delete list view cache
     instance.refresh_cache_keys()
 
@@ -109,6 +196,16 @@ def post_delete_parameter(sender, instance: Parameter, *args, **kwargs):
 def post_save_python_module_periodic_tasks(
     sender: Type[PythonModule], instance: PythonModule, *args, **kwargs
 ):
+    """
+    Signal receiver for the post_save signal of the PythonModule model.
+    Generates periodic tasks for updates and health checks based on module configurations.
+
+    Args:
+        sender (Type[PythonModule]): The model class sending the signal.
+        instance (PythonModule): The instance of the model being saved.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     instance.generate_update_periodic_task()
     for config in instance.configs.all():
         config.generate_health_check_periodic_task()
@@ -118,6 +215,18 @@ def post_save_python_module_periodic_tasks(
 def post_delete_python_module_periodic_tasks(
     sender: Type[PythonModule], instance: PythonModule, using, origin, *args, **kwargs
 ):
+    """
+    Signal receiver for the post_delete signal of the PythonModule model.
+    Deletes associated update tasks after the module is deleted.
+
+    Args:
+        sender (Type[PythonModule]): The model class sending the signal.
+        instance (PythonModule): The instance of the model being deleted.
+        using: The database alias being used.
+        origin: The origin of the delete signal.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     if hasattr(instance, "update_task") and instance.update_task:
         instance.update_task.delete()
 
@@ -126,6 +235,18 @@ def post_delete_python_module_periodic_tasks(
 def post_delete_python_config_periodic_tasks(
     sender: Type[PythonConfig], instance: PythonConfig, using, origin, *args, **kwargs
 ):
+    """
+    Signal receiver for the post_delete signal of the PythonConfig model.
+    Deletes associated health check tasks after the PythonConfig instance is deleted.
+
+    Args:
+        sender (Type[PythonConfig]): The model class sending the signal.
+        instance (PythonConfig): The instance of the model being deleted.
+        using: The database alias being used.
+        origin: The origin of the delete signal.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     if (
         issubclass(sender, PythonConfig)
         and hasattr(instance, "health_check_task")
@@ -136,11 +257,33 @@ def post_delete_python_config_periodic_tasks(
 
 @receiver(models.signals.post_save)
 def post_save_python_config_cache(sender, instance, *args, **kwargs):
+    """
+    Signal receiver for the post_save signal.
+    Deletes class cache keys for instances of ListCachable models.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance: The instance of the model being saved.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     if issubclass(sender, ListCachable):
         instance.delete_class_cache_keys()
 
 
 @receiver(models.signals.post_delete)
 def post_delete_python_config_cache(sender, instance, using, origin, *args, **kwargs):
+    """
+    Signal receiver for the post_delete signal.
+    Deletes class cache keys for instances of ListCachable models after deletion.
+
+    Args:
+        sender (Model): The model class sending the signal.
+        instance: The instance of the model being deleted.
+        using: The database alias being used.
+        origin: The origin of the delete signal.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+    """
     if issubclass(sender, ListCachable):
         instance.delete_class_cache_keys()

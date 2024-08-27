@@ -6,20 +6,15 @@ import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { JobActionsBar } from "../../../../../src/components/jobs/result/bar/JobActionBar";
 
-import {
-  JOB_BASE_URI,
-} from "../../../../../src/constants/apiURLs";
+import { JOB_BASE_URI } from "../../../../../src/constants/apiURLs";
 
 jest.mock("axios");
 describe("test JobActionsBar", () => {
   beforeAll(() => {
-    axios.post.mockImplementation(() =>
-      Promise.resolve({ data: {  id: 109 } }),
-    );
+    axios.post.mockImplementation(() => Promise.resolve({ data: { id: 109 } }));
   });
 
   test("rescan observable playbook", async () => {
-
     render(
       <BrowserRouter>
         <JobActionsBar
@@ -114,7 +109,7 @@ describe("test JobActionsBar", () => {
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        [`${JOB_BASE_URI  }/${108}/rescan`],
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
   });
@@ -214,13 +209,12 @@ describe("test JobActionsBar", () => {
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        [`${JOB_BASE_URI  }/${108}/rescan`],
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
   });
 
   test("rescan file playbook", async () => {
-
     render(
       <BrowserRouter>
         <JobActionsBar
@@ -299,7 +293,7 @@ describe("test JobActionsBar", () => {
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        [`${JOB_BASE_URI  }/${108}/rescan`],
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
   });
@@ -383,7 +377,7 @@ describe("test JobActionsBar", () => {
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        [`${JOB_BASE_URI  }/${108}/rescan`],
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
   });

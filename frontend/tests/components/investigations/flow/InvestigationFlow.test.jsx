@@ -280,7 +280,7 @@ describe("test InvestigationFlow", () => {
                 status: "reported_without_fails",
                 received_request_time: "2024-08-23T10:03:27.489939Z",
                 is_sample: true,
-              }
+              },
             ],
           }}
           investigationId={1}
@@ -379,9 +379,7 @@ describe("test InvestigationFlow", () => {
     // link to job page
     expect(linkFileJobButton.href).toContain("/jobs/12/visualizer");
     // link pivot
-    expect(fileJobPivotButton.href).toContain(
-      "/scan?parent=12&isSample=true",
-    );
+    expect(fileJobPivotButton.href).toContain("/scan?parent=12&isSample=true");
     // job info
     const fileJobInfo = container.querySelector("#job12-info");
     expect(fileJobInfo).toBeInTheDocument();

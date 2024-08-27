@@ -83,9 +83,7 @@ describe("ScanForm adavanced use", () => {
 
   test("test scan page with sample in the GET parameters", async () => {
     render(
-      <MemoryRouter
-        initialEntries={["/scan?isSample=true"]}
-      >
+      <MemoryRouter initialEntries={["/scan?isSample=true"]}>
         <Routes>
           <Route path="/scan" element={<ScanForm />} />
         </Routes>
@@ -98,7 +96,6 @@ describe("ScanForm adavanced use", () => {
     expect(fileSelectorRadioButton.checked).toBe(true);
     expect(screen.getByText("File(s)")).toBeInTheDocument();
   });
-
 
   test("test scan page with an investigation in the GET parameters", async () => {
     const user = userEvent.setup();

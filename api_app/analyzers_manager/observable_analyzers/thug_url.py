@@ -46,12 +46,13 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         args = self._thug_args_builder()
         # construct a valid directory name into which thug will save the result
         tmp_dir = secrets.token_hex(4)
+        tmp_dir_full_path = "/opt/deploy/thug" + tmp_dir
         # make request data
-        args.extend(["-n", "/home/thug/" + tmp_dir, self.observable_name])
+        args.extend(["-n", tmp_dir_full_path, self.observable_name])
 
         req_data = {
             "args": args,
-            "callback_context": {"read_result_from": tmp_dir},
+            "callback_context": {"read_result_from": tmp_dir_full_path},
         }
 
         return self._docker_run(req_data=req_data, req_files=None)

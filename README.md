@@ -48,11 +48,11 @@ All info about installation, usage, configuration and contribution can be found 
 
 ### Publications and Media
 
-To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowl.readthedocs.io/en/latest/Introduction.html#publications-and-media)
+To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowlproject.github.io/docs/IntelOwl/introduction/#publications-and-media)
 
 ### Available services or analyzers
 
-You can see the full list of all available analyzers in the [documentation](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers).
+You can see the full list of all available analyzers in the [documentation](https://intelowlproject.github.io/docs/IntelOwl/usage/#analyzers).
 
 | Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | -------------------------------------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -114,11 +114,6 @@ In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.do
 In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://www.digitalocean.com/open-source?utm_medium=opensource&utm_source=IntelOwl).
 
 
-### Other collaborations
- * [LimaCharlie](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner)
- * [Tines](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl)
-
-
 ## About the author and maintainers
 
 Feel free to contact the main developers at any time on Twitter:
@@ -127,3 +122,6 @@ Feel free to contact the main developers at any time on Twitter:
 - [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
 - [Daniele Rosetti](https://github.com/drosetti): Frontend Maintainer
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor
+
+### Consultancy
+IntelOwl's maintainers are available to offer [paid consultancy and mentorship](https://opencollective.com/intelowl-project).

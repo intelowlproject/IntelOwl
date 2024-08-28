@@ -93,7 +93,7 @@ class Pulsedive(ObservableAnalyzer):
         obj_repr = self.__repr__()
         for chance in range(self.max_tries):
             logger.info(
-                f"polling request #{chance+1} for observable: {self.observable_name}"
+                f"polling request #{chance + 1} for observable: {self.observable_name}"
                 f" <- {obj_repr}"
             )
             time.sleep(self.poll_distance)

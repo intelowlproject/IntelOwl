@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 # Check the documentation for the details on how to configure LDAP
-# https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#ldap
+# https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#ldap
 
 import ldap
 from django_auth_ldap.config import GroupOfNamesType, LDAPSearch

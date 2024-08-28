@@ -7,7 +7,7 @@ import api_app.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0115_analyzer_config_knock"),
+        ("analyzers_manager", "0119_analyzer_config_apk_artifacts"),
     ]
 
     operations = [

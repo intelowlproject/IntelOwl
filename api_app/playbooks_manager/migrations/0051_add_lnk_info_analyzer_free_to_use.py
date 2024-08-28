@@ -26,7 +26,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("playbooks_manager", "0050_add_goresym_to_sample_static_abalysis"),
-        ("analyzers_manager", "0120_analyzer_config_lnk_info"),
+        ("analyzers_manager", "0121_analyzer_config_lnk_info"),
     ]
 
     operations = [

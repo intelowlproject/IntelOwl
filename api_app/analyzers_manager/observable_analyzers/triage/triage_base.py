@@ -2,10 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import time
 from abc import ABCMeta
 from typing import Dict
 
 import requests
+from requests.exceptions import ChunkedEncodingError
 
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 from api_app.analyzers_manager.exceptions import (
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
     # using public endpoint as the default url
-    url: str = "https://api.tria.ge/v0/"
+    url: str = "https://tria.ge/api/v0/"
     private_url: str = "https://private.tria.ge/api/v0/"
     report_url: str = "https://tria.ge/"
 
@@ -40,6 +42,7 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.poll_distance = 3
         self.final_report = {}
         self.response = None
+        self.events_response = None
 
     @property
     def session(self):
@@ -57,7 +60,23 @@ class TriageMixin(BaseAnalyzerMixin, metaclass=ABCMeta):
         if sample_id is None:
             raise AnalyzerRunException("error sending sample")
 
-        self.session.get(self.url + f"samples/{sample_id}/events")
+        for _try in range(self.max_tries):
+            logger.info(f"triage events polling for result try #{_try + 1}")
+            try:
+                self.events_response = self.session.get(
+                    self.url + f"samples/{sample_id}/events"
+                )
+                if self.events_response.status_code == 200:
+                    break
+                time.sleep(self.poll_distance)
+            except ChunkedEncodingError as e:
+                logger.info(f"Detected {e} on try #{_try + 1}")
+                continue
+        else:
+            if self.events_response:
+                self.events_response.raise_for_status()
+            else:
+                raise AnalyzerRunException("error requesting sample events")
 
         self.final_report["overview"] = self.get_overview_report(sample_id)
 

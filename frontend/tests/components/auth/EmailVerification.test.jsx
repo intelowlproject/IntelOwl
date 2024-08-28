@@ -5,9 +5,6 @@ import { MemoryRouter } from "react-router-dom";
 import EmailVerification from "../../../src/components/auth/EmailVerification";
 
 jest.mock("axios");
-jest.mock("../../../src/constants/environment", () => ({
-  RECAPTCHA_SITEKEY: "",
-}));
 
 describe("EmailVerification component", () => {
   test("Test valid key", async () => {

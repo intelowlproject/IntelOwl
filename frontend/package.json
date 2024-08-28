@@ -6,22 +6,21 @@
   "dependencies": {
     "@certego/certego-ui": "^0.1.13",
     "@dagrejs/dagre": "^1.0.4",
-    "axios": "^1.6.0",
+    "axios": "^1.7.4",
     "axios-hooks": "^3.1.5",
-    "bootstrap": "^5.3.2",
+    "bootstrap": "^5.3.3",
     "classnames": "^2.5.1",
-    "flag-icons": "^7.1.0",
-    "formik": "^2.4.5",
+    "flag-icons": "^7.2.3",
+    "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "md5": "^2.3.0",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-error-boundary": "^4.0.11",
-    "react-google-recaptcha": "^2.1.0",
+    "react-error-boundary": "^4.0.13",
     "react-icons": "^4.12.0",
     "react-joyride": "^2.8.1",
-    "react-json-tree": "^0.18.0",
+    "react-json-tree": "^0.19.0",
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.22.0",
     "react-scripts": "^5.0.1",
@@ -31,7 +30,7 @@
     "reactflow": "^11.10.4",
     "reactstrap": "^9.2.1",
     "recharts": "^2.12.6",
-    "zustand": "^4.5.2"
+    "zustand": "^4.5.4"
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",
@@ -60,8 +59,8 @@
     ]
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.21.4",
-    "@babel/preset-react": "^7.23.3",
+    "@babel/preset-env": "^7.24.7",
+    "@babel/preset-react": "^7.24.7",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^14.5.2",

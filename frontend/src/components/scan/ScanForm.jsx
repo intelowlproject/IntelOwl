@@ -173,9 +173,11 @@ export default function ScanForm() {
       }
       if (
         values.analysisOptionValues === ScanTypes.analyzers_and_connectors &&
-        values.analyzers.length === 0
+        values.analyzers.length === 0 &&
+        values.connectors.length === 0
       ) {
-        errors.analyzers = "analyzers required";
+        errors.analyzers = "analyzers or connectors required";
+        errors.connectors = "analyzers or connectors required";
       }
 
       if (!TlpChoices.includes(values.tlp)) {
@@ -921,7 +923,7 @@ export default function ScanForm() {
                       <br />
                       For more info check the{" "}
                       <Link
-                        to="https://intelowl.readthedocs.io/en/latest/Usage.html#tlp-support"
+                        to="https://intelowlproject.github.io/docs/IntelOwl/usage/#tlp-support"
                         target="_blank"
                       >
                         official doc.

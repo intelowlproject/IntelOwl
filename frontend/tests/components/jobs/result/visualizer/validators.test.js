@@ -139,8 +139,8 @@ describe("visualizer data validation", () => {
             type: "table",
             columns: [],
             pageSize: undefined,
-            disableFilters: false,
-            disableSortBy: false,
+            sortById: "",
+            sortByDesc: false,
             data: [],
             disable: false,
           },
@@ -302,7 +302,15 @@ describe("visualizer data validation", () => {
             type: "table",
             size: "6",
             alignment: "start",
-            columns: ["column_name"],
+            columns: [
+              {
+                name: "column_name",
+                max_width: 300,
+                description: "test description",
+                disable_filters: true,
+                disable_sort_by: true,
+              },
+            ],
             data: [
               {
                 column_name: {
@@ -322,8 +330,8 @@ describe("visualizer data validation", () => {
               },
             ],
             page_size: 7,
-            disable_filters: true,
-            disable_sort_by: true,
+            sort_by_id: "",
+            sort_by_desc: false,
           },
         ],
       },
@@ -501,7 +509,15 @@ describe("visualizer data validation", () => {
             type: "table",
             size: "col-6",
             alignment: "start",
-            columns: ["column_name"],
+            columns: [
+              {
+                name: "column_name",
+                maxWidth: 300,
+                description: "test description",
+                disableFilters: true,
+                disableSortBy: true,
+              },
+            ],
             data: [
               {
                 column_name: {
@@ -522,8 +538,8 @@ describe("visualizer data validation", () => {
             ],
             disable: false,
             pageSize: 7,
-            disableFilters: true,
-            disableSortBy: true,
+            sortById: "",
+            sortByDesc: false,
           },
         ],
       },

@@ -25,7 +25,6 @@ from api_app.defaults import default_runtime
 from api_app.helpers import calculate_md5, gen_random_colorhex
 from api_app.investigations_manager.models import Investigation
 from api_app.models import Comment, Job, Tag
-from api_app.pivots_manager.models import PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import AbstractBIInterface
 from api_app.serializers.report import AbstractReportSerializerInterface
@@ -88,6 +87,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         fields = (
             "id",
             "user",
+            "delay",
             "is_sample",
             "tlp",
             "runtime_configuration",
@@ -104,6 +104,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     md5 = rfs.HiddenField(default=None)
     is_sample = rfs.HiddenField(write_only=True, default=False)
     user = rfs.HiddenField(default=rfs.CurrentUserDefault())
+    delay = rfs.IntegerField(default=0)
     scan_mode = rfs.ChoiceField(
         choices=ScanMode.choices,
         required=False,
@@ -229,12 +230,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 playbook.tags.all()
             )
 
-        analyzers_to_execute = attrs[
-            "analyzers_to_execute"
-        ] = self.set_analyzers_to_execute(**attrs)
-        connectors_to_execute = attrs[
-            "connectors_to_execute"
-        ] = self.set_connectors_to_execute(**attrs)
+        analyzers_to_execute = attrs["analyzers_to_execute"] = (
+            self.set_analyzers_to_execute(**attrs)
+        )
+        connectors_to_execute = attrs["connectors_to_execute"] = (
+            self.set_connectors_to_execute(**attrs)
+        )
         if not analyzers_to_execute and not connectors_to_execute:
             warnings = "\n".join(self.filter_warnings)
             raise ValidationError(
@@ -341,10 +342,25 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return qs.exclude(status__in=status_to_exclude).latest("received_request_time")
 
     def create(self, validated_data: Dict) -> Job:
+        # POP VALUES!
+        # this part is important because a Job doesn't need these fields and it
+        # wouldn't know how to handle it. we need these information only at this
+        # point of the job creation.
         warnings = validated_data.pop("warnings")
+        delay = validated_data.pop("delay")
         send_task = validated_data.pop("send_task", False)
         parent_job = validated_data.pop("parent_job", None)
-        if validated_data["scan_mode"] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value:
+
+        # if we have a parent job and a new playbook to excute force new analysis
+        # in order to avoid graph related issues
+        if validated_data[
+            "scan_mode"
+        ] == ScanMode.CHECK_PREVIOUS_ANALYSIS.value and not (
+            "parent" in validated_data
+            and validated_data["parent"]
+            and "playbook_to_execute" in validated_data
+            and validated_data["playbook_to_execute"]
+        ):
             try:
                 return self.check_previous_jobs(validated_data)
             except self.Meta.model.DoesNotExist:
@@ -354,6 +370,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         job.warnings = warnings
         job.save()
         logger.info(f"Job {job.pk} created")
+
+        from api_app.pivots_manager.models import PivotMap
+
         if parent_job:
             PivotMap.objects.create(
                 starting_job=validated_data["parent"], ending_job=job, pivot_config=None
@@ -367,6 +386,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 MessageGroupId=str(uuid.uuid4()),
                 priority=job.priority,
+                # countdown doesn't work as expected and it's just
+                # syntactic sugar for the expression below
+                eta=now() + datetime.timedelta(seconds=delay),
             )
 
         return job
@@ -686,6 +708,8 @@ class MultipleFileJobSerializer(MultipleJobSerializer):
                 item["file_name"] = data_to_check.getlist("file_names")[index]
             if data_to_check.get("file_mimetypes", []):
                 item["file_mimetype"] = data_to_check["file_mimetypes"][index]
+            if delay := data_to_check.get("delay", datetime.timedelta()):
+                item["delay"] = int(delay * index)
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
@@ -797,11 +821,17 @@ class MultipleObservableJobSerializer(MultipleJobSerializer):
         errors = []
         observables = data.pop("observables", [])
         # TODO we could change the signature, but this means change frontend + clients
-        for _, name in observables:
+        for index, (_, name) in enumerate(
+            observables
+        ):  # observable = (classification, name)
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
             item["observable_name"] = name
+
+            if delay := data.get("delay", datetime.timedelta()):
+                item["delay"] = int(delay * index)
+
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
@@ -1062,9 +1092,9 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 class JobBISerializer(AbstractBIInterface, ModelSerializer):
     timestamp = rfs.DateTimeField(source="received_request_time")
     username = rfs.CharField(source="user.username")
-    name = rfs.CharField(source="pk")
     end_time = rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
+    job_id = rfs.CharField(source="pk")
 
     class Meta:
         model = Job
@@ -1079,7 +1109,7 @@ class JobBISerializer(AbstractBIInterface, ModelSerializer):
 
     def to_representation(self, instance: Job):
         data = super().to_representation(instance)
-        return self.to_elastic_dict(data)
+        return self.to_elastic_dict(data, self.get_index())
 
     @staticmethod
     def get_playbook(instance: Job):

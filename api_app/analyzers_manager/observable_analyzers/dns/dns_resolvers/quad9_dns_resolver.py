@@ -2,13 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 """Quad9 DNS resolutions"""
-
 from urllib.parse import urlparse
 
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
@@ -17,26 +15,36 @@ from ..dns_responses import dns_resolver_response
 class Quad9DNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Quad9"""
 
+    url: str = "https://dns.quad9.net:5053/dns-query"
+    headers: dict = {"Accept": "application/dns-json"}
     query_type: str
 
     def run(self):
-        try:
-            observable = self.observable_name
-            # for URLs we are checking the relative domain
-            if self.observable_classification == "url":
-                observable = urlparse(self.observable_name).hostname
+        observable = self.observable_name
+        # for URLs we are checking the relative domain
+        if self.observable_classification == self.ObservableTypes.URL:
+            observable = urlparse(self.observable_name).hostname
 
-            headers = {"Accept": "application/dns-json"}
-            url = "https://dns.quad9.net:5053/dns-query"
-            params = {"name": observable, "type": self.query_type}
+        params = {"name": observable, "type": self.query_type}
 
-            quad9_response = requests.get(url, headers=headers, params=params)
-            quad9_response.raise_for_status()
-            resolutions = quad9_response.json().get("Answer", [])
-        except requests.RequestException:
-            raise AnalyzerRunException(
-                "an error occurred during the connection to Quad9"
-            )
+        # sometimes it can respond with 503, I suppose to avoid DoS.
+        # In 1k requests just 20 fails and at least with 30 requests between 2 failures
+        # with 2 or 3 attemps the analyzer should get the data
+        attempt_number = 3
+        for attempt in range(0, attempt_number):
+            try:
+                quad9_response = requests.get(
+                    self.url, headers=self.headers, params=params, timeout=10
+                )
+            except requests.exceptions.ConnectionError as exception:
+                # if the last attempt fails, raise an error
+                if attempt == attempt_number - 1:
+                    raise exception
+            else:
+                quad9_response.raise_for_status()
+                break
+
+        resolutions = quad9_response.json().get("Answer", [])
 
         return dns_resolver_response(self.observable_name, resolutions)
 

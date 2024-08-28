@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   celery_worker_local:
     image: intelowlproject/intelowl:test

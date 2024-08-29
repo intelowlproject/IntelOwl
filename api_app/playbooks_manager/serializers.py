@@ -61,7 +61,7 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
     scan_mode = rfs.ChoiceField(choices=ScanMode.choices, required=True)
     scan_check_time = DayDurationField(required=True, allow_null=True)
     tags = TagSerializer(required=False, allow_empty=True, many=True, read_only=True)
-    tlp = rfs.CharField()
+    tlp = rfs.CharField(read_only=True)
     weight = rfs.IntegerField(read_only=True, required=False, allow_null=True)
     is_editable = rfs.SerializerMethodField()
     tags_labels = rfs.ListField(

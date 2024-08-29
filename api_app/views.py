@@ -300,7 +300,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
     def get_permissions(self):
         permissions = super().get_permissions()
-        if self.action in ["destroy", "kill"]:
+        if self.action in ["destroy", "kill", "rescan"]:
             permissions.append(IsObjectUserOrSameOrgPermission())
         return permissions
 
@@ -356,10 +356,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     @action(detail=True, methods=["post"])
     def rescan(self, request, pk=None):
         logger.info(f"rescan request for job: {pk}")
-        try:
-            existing_job: Job = Job.objects.get(pk=pk)
-        except Job.DoesNotExist:
-            raise ValidationError({"detail": "Job not found"})
+        existing_job: Job = self.get_object()
         # create a new job
         data = {
             "tlp": existing_job.tlp,

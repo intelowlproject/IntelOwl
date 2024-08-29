@@ -69,12 +69,15 @@ describe("Observable validators tests", () => {
     });
   });
 
-  test.each(["test.exe", "test.pdf,", ",test.js,", "256.256.256.256", "google(.)com"])(
-    "test invalid domains (%s)",
-    (valueToValidate) => {
-      expect(observableValidators(valueToValidate)).toBeNull();
-    },
-  );
+  test.each([
+    "test.exe",
+    "test.pdf,",
+    ",test.js,",
+    "256.256.256.256",
+    "google(.)com",
+  ])("test invalid domains (%s)", (valueToValidate) => {
+    expect(observableValidators(valueToValidate)).toBeNull();
+  });
 
   test.each([
     "40ff44d9e619b17524bf3763204f9cbb",

@@ -1,7 +1,6 @@
 import logging
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)

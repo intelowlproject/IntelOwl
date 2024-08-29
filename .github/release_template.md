@@ -2,7 +2,7 @@
 
 - [ ] (optional) If we changed/added Docker Analyzers, we need to configure Docker Hub / Dependabot properly.
 - [ ] Update `CHANGELOG.md` for the new version
-- [ ] Change version number in `docs/source/schema.yml` and `docker/.env`
+- [ ] Change version number `docker/.env`
 - [ ] Verify CI Tests
 - [ ] Create release for the branch `develop`.
       Write the following statement there (change the version number):

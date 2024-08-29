@@ -61,6 +61,7 @@ describe("Observable validators tests", () => {
     "test.com ",
     "test.com;",
     " test.com ",
+    "(test.com)",
   ])("test valid domains (%s)", (valueToValidate) => {
     expect(observableValidators(valueToValidate)).toStrictEqual({
       classification: "domain",
@@ -68,7 +69,7 @@ describe("Observable validators tests", () => {
     });
   });
 
-  test.each(["test.exe", "test.pdf,", ",test.js,", "256.256.256.256"])(
+  test.each(["test.exe", "test.pdf,", ",test.js,", "256.256.256.256", "google(.)com"])(
     "test invalid domains (%s)",
     (valueToValidate) => {
       expect(observableValidators(valueToValidate)).toBeNull();

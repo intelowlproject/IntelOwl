@@ -114,10 +114,6 @@ In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.do
 In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://www.digitalocean.com/open-source?utm_medium=opensource&utm_source=IntelOwl).
 
 
-### Other collaborations
- * [LimaCharlie](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner)
- * [Tines](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl)
-
 ## About the author and maintainers
 
 Feel free to contact the main developers at any time on Twitter:

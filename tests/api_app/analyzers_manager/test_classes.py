@@ -63,6 +63,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "android.xml",
                 "test.zip",
                 "sample.dex",
+                "downloader.lnk",
             ],
             [
                 "application/onenote",
@@ -92,6 +93,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/xml",
                 "application/zip",
                 "application/x-dex",
+                "application/x-ms-shortcut",
             ],
         ):
             try:

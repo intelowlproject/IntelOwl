@@ -3,7 +3,7 @@
 from unittest import skipIf
 
 from api_app.analyzers_manager.file_analyzers.strings_info import StringsInfo
-from api_app.models import Job, PythonConfig
+from api_app.models import Job
 from tests import CustomTestCase
 
 
@@ -17,7 +17,7 @@ class StringsInfoTestCase(CustomTestCase):
         Job.objects.all().delete()
 
     @skipIf(
-        not StringsInfo(PythonConfig()).health_check(),
+        not StringsInfo(None).health_check(),
         "malware tools analyzer container not active",
     )
     def test_urls(self):

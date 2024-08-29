@@ -35,6 +35,8 @@ class IPDataModelAdminView(BaseDataModelAdminView):
         "registered_country",
         "registered_country_code",
         "isp",
+        "is_anonymizer",
+        "is_tor_exit_node",
     )
 
 

@@ -86,7 +86,7 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         pcs = PivotConfigSerializer(
             data={
                 "name": "test",
-                "description": "test",
+                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
                 "python_module": "self_analyzable.SelfAnalyzable",
                 "playbooks_choice": [PlaybookConfig.objects.first()],
             },
@@ -100,7 +100,7 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         pcs = PivotConfigSerializer(
             data={
                 "name": "pivot_test",
-                "description": "test",
+                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
                 "python_module": "any_compare.AnyCompare",
                 "playbooks_choice": [PlaybookConfig.objects.first()],
                 "plugin_config": {

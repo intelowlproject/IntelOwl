@@ -1,5 +1,6 @@
 from typing import Type
 
+from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.models import Job, Parameter, PluginConfig, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -101,7 +102,7 @@ class PivotConfigViewSetTestCase(
             self.URL,
             data={
                 "name": "TestCreate",
-                "description": "test",
+                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
                 "python_module": "self_analyzable.SelfAnalyzable",
                 "playbooks_choice": [PlaybookConfig.objects.first().name],
             },
@@ -129,7 +130,7 @@ class PivotConfigViewSetTestCase(
             self.URL,
             data={
                 "name": "TestCreate",
-                "description": "test",
+                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
                 "python_module": PythonModule.objects.filter(
                     base_path="api_app.pivots_manager.pivots"
                 )

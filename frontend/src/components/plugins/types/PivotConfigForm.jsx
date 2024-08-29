@@ -14,7 +14,11 @@ import PropTypes from "prop-types";
 import ReactSelect from "react-select";
 import { selectStyles } from "@certego/certego-ui";
 
-import { PlaybookMultiSelectDropdownInput } from "../../common/form/pluginsMultiSelectDropdownInput";
+import {
+  PlaybookMultiSelectDropdownInput,
+  AnalyzersMultiSelectDropdownInput,
+  ConnectorsMultiSelectDropdownInput,
+} from "../../common/form/pluginsMultiSelectDropdownInput";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { editPluginConfig, createPluginConfig } from "../pluginsApi";
@@ -40,7 +44,8 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             <div>Compare field&nbsp;</div>
             <div className="small text-left text-muted">
               Create a custom Pivot from a specific value extracted from the
-              results of the analyzers/connectors. <br />
+              first success result of the analyzers/connectors selected.
+              <br />
               Set the parameter with the dotted path to the field you would like
               to extract the value from.
             </div>
@@ -65,10 +70,14 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
     },
   ];
 
+  const isPythonModuleSelectable = pythonModuleOptions.find(
+    (element) => element.value === pivotConfig?.python_module,
+  );
+
   const formik = useFormik({
     initialValues: {
       name: pivotConfig?.name || "",
-      description: pivotConfig?.description || "",
+      description: pivotConfig?.description || "<generated automatically>",
       python_module:
         {
           value: pivotConfig?.python_module,
@@ -83,6 +92,16 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
           label: playbook,
         })) || [],
       field_to_compare: pivotConfig?.params?.field_to_compare?.value || "",
+      analyzers:
+        pivotConfig?.related_analyzer_configs?.map((analyzer) => ({
+          value: analyzer,
+          label: analyzer,
+        })) || [],
+      connectors:
+        pivotConfig?.related_connector_configs?.map((connector) => ({
+          value: connector,
+          label: connector,
+        })) || [],
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -108,6 +127,15 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
         errors.playbook = "This field is required.";
       }
 
+      if (values.analyzers.length === 0 && values.connectors.length === 0) {
+        errors.analyzers = "Analyzers or connectors required";
+        errors.connectors = "Analyzers or connectors required";
+      }
+      if (values.analyzers.length !== 0 && values.connectors.length !== 0) {
+        errors.analyzers = "You can't set both analyzers and connectors";
+        errors.connectors = "You can't set both analyzers and connectors";
+      }
+
       console.debug("formik validation errors");
       console.debug(errors);
       return errors;
@@ -117,9 +145,14 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
 
       const payloadData = {
         name: formik.values.name,
-        description: formik.values.description,
         python_module: formik.values.python_module.value,
         playbooks_choice: [formik.values.playbook[0].value],
+        related_analyzer_configs: formik.values.analyzers.map(
+          (analyzer) => analyzer.value,
+        ),
+        related_connector_configs: formik.values.connectors.map(
+          (connector) => connector.value,
+        ),
       };
       if (formik.values.field_to_compare) {
         payloadData.plugin_config = {
@@ -203,7 +236,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             )}
             <FormGroup className="d-flex align-items-center">
               <Label
-                className="me-2 mb-0"
+                className="me-2 mb-0 fw-bold"
                 for="pivot-name"
                 style={{ minWidth: "15%" }}
               >
@@ -228,7 +261,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             )}
             <FormGroup className="d-flex align-items-start">
               <Label
-                className="me-2 mb-0"
+                className="me-2 mb-0 fw-bold"
                 for="pivot-description"
                 style={{ minWidth: "15%" }}
               >
@@ -245,33 +278,82 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
                 invalid={
                   formik.touched.description && formik.errors.description
                 }
-                className="bg-darker border-0"
+                className="bg-darker border-0 text-gray"
                 style={{
                   minHeight: "100px",
                   overflowX: "scroll",
+                  cursor: "not-allowed",
                 }}
+                disabled
               />
             </FormGroup>
-            <FormGroup row className="d-flex align-items-center">
-              <Label className="me-2 mb-0" for="pivot-analyzers">
+            <div className="py-4">
+              <strong>
+                Select the analyzers or connectors after which the pivot will be
+                execute
+              </strong>
+              {formik.values.analyzers.length !== 0 &&
+                formik.values.connectors.length !== 0 && (
+                  <>
+                    <br />
+                    <small className="text-danger">
+                      {formik.errors.analyzers}
+                    </small>
+                  </>
+                )}
+              <FormGroup row className="d-flex align-items-center">
+                <Label className="me-2 mb-0" for="pivot-analyzers">
+                  Analyzers:
+                </Label>
+                <AnalyzersMultiSelectDropdownInput formik={formik} />
+              </FormGroup>
+              <FormGroup row className="d-flex align-items-center">
+                <Label className="me-2 mb-0" for="pivot-connectors">
+                  Connectors:
+                </Label>
+                <ConnectorsMultiSelectDropdownInput formik={formik} />
+              </FormGroup>
+            </div>
+            <FormGroup
+              className={`d-flex align-items-center ${
+                isEditing && !isPythonModuleSelectable ? "" : "row"
+              }`}
+            >
+              <Label
+                className="me-2 mb-0 fw-bold"
+                for="pivot-type"
+                style={{ minWidth: "15%" }}
+              >
                 Type of pivot:
               </Label>
-              <ReactSelect
-                isClearable={false}
-                options={pythonModuleOptions}
-                styles={selectStyles}
-                value={formik.values.python_module}
-                onChange={(value) =>
-                  formik.setFieldValue("python_module", value, false)
-                }
-              />
+              {isEditing && !isPythonModuleSelectable ? (
+                <Input
+                  id="pivot-type"
+                  type="text"
+                  name="python_module"
+                  value={formik.values.python_module.value}
+                  disabled
+                  className="bg-darker border-0 text-gray"
+                  style={{ cursor: "not-allowed" }}
+                />
+              ) : (
+                <ReactSelect
+                  isClearable={false}
+                  options={pythonModuleOptions}
+                  styles={selectStyles}
+                  value={formik.values.python_module}
+                  onChange={(value) =>
+                    formik.setFieldValue("python_module", value, false)
+                  }
+                />
+              )}
             </FormGroup>
             {formik.values.python_module.value === "any_compare.AnyCompare" && (
               <FormGroup className="d-flex align-items-center">
                 <Label
-                  className="me-2 mb-0"
+                  className="me-2 mb-0 fw-bold"
                   for="pivot-field-to-compare"
-                  style={{ minWidth: "15%" }}
+                  style={{ minWidth: "20%" }}
                 >
                   Field that will be analyzed:
                 </Label>
@@ -287,7 +369,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
               </FormGroup>
             )}
             <FormGroup row className="d-flex align-items-center">
-              <Label className="me-2 mb-0" for="pivot-connectors">
+              <Label className="me-2 mb-0 fw-bold" for="pivot-connectors">
                 Playbook to Execute:
               </Label>
               <PlaybookMultiSelectDropdownInput

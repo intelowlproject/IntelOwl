@@ -33,6 +33,7 @@ describe("PivotConfigForm test", () => {
       queue: "default",
       soft_time_limit: 60,
     },
+    related_analyzer_configs: ["TEST_ANALYZER"],
     secrets: {},
     params: {},
     verification: {
@@ -60,6 +61,16 @@ describe("PivotConfigForm test", () => {
 
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        "Select the analyzers or connectors after which the pivot will be execute",
+      ),
+    ).toBeInTheDocument();
+    const analyzersInputField = screen.getByText("Analyzers:");
+    expect(analyzersInputField).toBeInTheDocument();
+    const connectorsInputField = screen.getByText("Connectors:");
+    expect(connectorsInputField).toBeInTheDocument();
 
     const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
@@ -94,6 +105,16 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
+    expect(
+      screen.getByText(
+        "Select the analyzers or connectors after which the pivot will be execute",
+      ),
+    ).toBeInTheDocument();
+    const analyzersInputField = screen.getByText("Analyzers:");
+    expect(analyzersInputField).toBeInTheDocument();
+    const connectorsInputField = screen.getByText("Connectors:");
+    expect(connectorsInputField).toBeInTheDocument();
+
     const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
@@ -108,8 +129,17 @@ describe("PivotConfigForm test", () => {
     await userAction.clear(nameInputField);
     await userAction.type(nameInputField, "myNewPivot");
 
+    // select the test analyzer
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await userAction.click(analyzerDropdownButton);
+
+    const testAnalyzerButton = screen.getAllByRole("option")[0];
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await userAction.click(testAnalyzerButton);
+
     // select the python module
-    const pythonModuleDropdownButton = screen.getAllByRole("combobox")[0];
+    const pythonModuleDropdownButton = screen.getAllByRole("combobox")[2];
     expect(pythonModuleDropdownButton).toBeInTheDocument();
     await userAction.click(pythonModuleDropdownButton);
 
@@ -118,7 +148,7 @@ describe("PivotConfigForm test", () => {
     await userAction.click(pythonModuleButton);
 
     // select the playbook
-    const playbookDropdownButton = screen.getAllByRole("combobox")[1];
+    const playbookDropdownButton = screen.getAllByRole("combobox")[3];
     expect(playbookDropdownButton).toBeInTheDocument();
     await userAction.click(playbookDropdownButton);
 
@@ -132,9 +162,10 @@ describe("PivotConfigForm test", () => {
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/pivot`, {
         name: "myNewPivot",
-        description: "",
         python_module: "self_analyzable.SelfAnalyzable",
         playbooks_choice: ["TEST_PLAYBOOK_URL"],
+        related_analyzer_configs: ["TEST_ANALYZER"],
+        related_connector_configs: [],
       });
     });
   });
@@ -161,6 +192,16 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
+    expect(
+      screen.getByText(
+        "Select the analyzers or connectors after which the pivot will be execute",
+      ),
+    ).toBeInTheDocument();
+    const analyzersInputField = screen.getByText("Analyzers:");
+    expect(analyzersInputField).toBeInTheDocument();
+    const connectorsInputField = screen.getByText("Connectors:");
+    expect(connectorsInputField).toBeInTheDocument();
+
     const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
@@ -175,8 +216,17 @@ describe("PivotConfigForm test", () => {
     await userAction.clear(nameInputField);
     await userAction.type(nameInputField, "myNewPivot");
 
+    // select the test analyzer
+    const analyzerDropdownButton = screen.getAllByRole("combobox")[0];
+    expect(analyzerDropdownButton).toBeInTheDocument();
+    await userAction.click(analyzerDropdownButton);
+
+    const testAnalyzerButton = screen.getAllByRole("option")[0];
+    expect(testAnalyzerButton).toBeInTheDocument();
+    await userAction.click(testAnalyzerButton);
+
     // select the python module
-    const pythonModuleDropdownButton = screen.getAllByRole("combobox")[0];
+    const pythonModuleDropdownButton = screen.getAllByRole("combobox")[2];
     expect(pythonModuleDropdownButton).toBeInTheDocument();
     await userAction.click(pythonModuleDropdownButton);
 
@@ -184,14 +234,16 @@ describe("PivotConfigForm test", () => {
     expect(testPythonModuleButton).toBeInTheDocument();
     await userAction.click(testPythonModuleButton);
 
-    const fieldToCompareInputField = screen.getByText("Field to compare:");
+    const fieldToCompareInputField = screen.getByText(
+      "Field that will be analyzed:",
+    );
     expect(fieldToCompareInputField).toBeInTheDocument();
 
     // type field_to_compare
     await userAction.type(fieldToCompareInputField, "test.value");
 
     // select the playbook
-    const playbookDropdownButton = screen.getAllByRole("combobox")[1];
+    const playbookDropdownButton = screen.getAllByRole("combobox")[3];
     expect(playbookDropdownButton).toBeInTheDocument();
     await userAction.click(playbookDropdownButton);
 
@@ -205,7 +257,6 @@ describe("PivotConfigForm test", () => {
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/pivot`, {
         name: "myNewPivot",
-        description: "",
         python_module: "any_compare.AnyCompare",
         playbooks_choice: ["TEST_PLAYBOOK_URL"],
         plugin_config: {
@@ -215,6 +266,8 @@ describe("PivotConfigForm test", () => {
           value: "test.value",
           config_type: 1,
         },
+        related_analyzer_configs: ["TEST_ANALYZER"],
+        related_connector_configs: [],
       });
     });
   });
@@ -243,6 +296,16 @@ describe("PivotConfigForm test", () => {
     expect(descriptionInputField).toBeInTheDocument();
     expect(descriptionInputField).toHaveValue("pivot: test");
 
+    expect(
+      screen.getByText(
+        "Select the analyzers or connectors after which the pivot will be execute",
+      ),
+    ).toBeInTheDocument();
+    const analyzersInputField = screen.getByText("Analyzers:");
+    expect(analyzersInputField).toBeInTheDocument();
+    const connectorsInputField = screen.getByText("Connectors:");
+    expect(connectorsInputField).toBeInTheDocument();
+
     const pythonModuleInputField = screen.getByText("Type of pivot:");
     expect(pythonModuleInputField).toBeInTheDocument();
 
@@ -263,9 +326,10 @@ describe("PivotConfigForm test", () => {
     await waitFor(() => {
       expect(axios.patch).toHaveBeenCalledWith(`${API_BASE_URI}/pivot/test`, {
         name: "myNewPivot",
-        description: "pivot: test",
         python_module: "self_analyzable.SelfAnalyzable",
         playbooks_choice: ["DNS"],
+        related_analyzer_configs: ["TEST_ANALYZER"],
+        related_connector_configs: [],
       });
     });
   });

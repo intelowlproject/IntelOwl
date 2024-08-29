@@ -141,6 +141,20 @@ class DocInfo(FileAnalyzer):
             if self.file_mimetype != MimeTypes.ONE_NOTE.value:
                 results["msodde"] = self.analyze_msodde()
 
+        except CannotDecryptException as e:
+            logger.info(e)
+        except Exception as e:
+            error_message = (
+                f"job_id {self.job_id} doc info extraction failed. Error: {e}"
+            )
+            logger.warning(error_message, stack_info=True)
+            self.report.errors.append(error_message)
+            self.report.save()
+        finally:
+            if self.vbaparser:
+                self.vbaparser.close()
+
+        try:
             if self.file_mimetype in [
                 MimeTypes.WORD1.value,
                 MimeTypes.WORD2.value,
@@ -154,19 +168,13 @@ class DocInfo(FileAnalyzer):
             results["uris"].extend(self.get_external_relationships())
             results["uris"].extend(self.extract_urls_from_IOCs())
             results["uris"] = list(set(results["uris"]))  # make it uniq
-
-        except CannotDecryptException as e:
-            logger.info(e)
         except Exception as e:
             error_message = (
-                f"job_id {self.job_id} doc info extraction failed. Error: {e}"
+                f"job_id {self.job_id} special extractions failed. Error: {e}"
             )
             logger.warning(error_message, stack_info=True)
             self.report.errors.append(error_message)
             self.report.save()
-        finally:
-            if self.vbaparser:
-                self.vbaparser.close()
 
         return results
 

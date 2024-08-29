@@ -50,7 +50,7 @@ describe("test AppHeader component", () => {
     const docsButton = screen.getByText("Docs");
     expect(docsButton).toBeInTheDocument();
     expect(docsButton.closest("a").href).toBe(
-      "https://intelowl.readthedocs.io/en/latest/",
+      "https://intelowlproject.github.io/docs/",
     );
 
     const socialButton = screen.getByText("Social");
@@ -119,7 +119,7 @@ describe("test AppHeader component", () => {
     const docsButton = screen.getByText("Docs");
     expect(docsButton).toBeInTheDocument();
     expect(docsButton.closest("a").href).toBe(
-      "https://intelowl.readthedocs.io/en/latest/",
+      "https://intelowlproject.github.io/docs/",
     );
 
     const socialButton = screen.getByText("Social");
@@ -190,7 +190,7 @@ describe("test AppHeader component", () => {
     const docsButton = screen.getByText("Docs");
     expect(docsButton).toBeInTheDocument();
     expect(docsButton.closest("a").href).toBe(
-      "https://intelowl.readthedocs.io/en/latest/",
+      "https://intelowlproject.github.io/docs/",
     );
 
     const socialButton = screen.getByText("Social");

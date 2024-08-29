@@ -8,10 +8,12 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
+  UncontrolledTooltip,
 } from "reactstrap";
 import { Form, useFormik, FormikProvider } from "formik";
 import PropTypes from "prop-types";
 import ReactSelect from "react-select";
+import { MdInfoOutline } from "react-icons/md";
 import { selectStyles } from "@certego/certego-ui";
 
 import {
@@ -261,11 +263,27 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             )}
             <FormGroup className="d-flex align-items-start">
               <Label
-                className="me-2 mb-0 fw-bold"
+                className="me-2 mb-0 fw-bold d-flex"
                 for="pivot-description"
                 style={{ minWidth: "15%" }}
               >
                 Description:
+                <div className="ms-2">
+                  <MdInfoOutline
+                    id="pivot-description-infoicon"
+                    fontSize="20"
+                  />
+                  <UncontrolledTooltip
+                    trigger="hover"
+                    target="pivot-description-infoicon"
+                    placement="right"
+                    fade={false}
+                    innerClassName="p-2 text-start text-nowrap md-fit-content"
+                  >
+                    The description is automatically generated based on the
+                    configuration.
+                  </UncontrolledTooltip>
+                </div>
               </Label>
               <Input
                 id="pivot-description"

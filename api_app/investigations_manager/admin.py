@@ -19,7 +19,7 @@ class InvestigationAdminView(CustomAdminView):
             job: Job
             tree = job.get_tree(job)
             jobs_repr = " ".join(map(str, tree.values_list("pk", flat=True)))
-            string += f"Branch {i+1}: jobs -> {jobs_repr}; "
+            string += f"Branch {i + 1}: jobs -> {jobs_repr}; "
         return string
 
     @admin.display(description="Jobs at first level")

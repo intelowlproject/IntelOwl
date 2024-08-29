@@ -12,25 +12,26 @@ class AbstractBIInterface(BISerializer):
     application = rfs.CharField(read_only=True, default="IntelOwl")
     environment = rfs.SerializerMethodField(method_name="get_environment")
     username: Field
-    name: Field
     class_instance = rfs.SerializerMethodField(
         read_only=True, method_name="get_class_instance"
     )
     process_time: Field
     status: Field
     end_time: Field
+    job_id: Field
 
     class Meta:
         fields = BISerializer.Meta.fields + [
             "username",
-            "name",
             "class_instance",
             "process_time",
             "status",
             "end_time",
+            "job_id",
         ]
 
-    def get_class_instance(self, instance):
+    @staticmethod
+    def get_class_instance(instance):
         return instance.__class__.__name__.lower()
 
     @staticmethod

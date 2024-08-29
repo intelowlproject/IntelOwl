@@ -3,8 +3,6 @@
 
 """Check if the domains is reported as malicious in Quad9 database"""
 
-import logging
-from typing import Tuple
 from urllib.parse import urlparse
 
 import requests
@@ -13,8 +11,6 @@ from api_app.analyzers_manager import classes
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
-
-logger = logging.getLogger(__name__)
 
 
 class Quad9MaliciousDetector(classes.ObservableAnalyzer):
@@ -27,9 +23,9 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     we can guess that the domain was in the Quad9 blacklist.
     """
 
-    HEADERS = {"Accept": "application/dns-json"}
-    QUAD9_URL = "https://dns.quad9.net:5053/dns-query"
-    GOOGLE_URL = "https://dns.google.com/resolve"
+    headers: dict = {"Accept": "application/dns-json"}
+    url: str = "https://dns.quad9.net:5053/dns-query"
+    google_url: str = "https://dns.google.com/resolve"
 
     def update(self) -> bool:
         pass
@@ -40,7 +36,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         if self.observable_classification == self.ObservableTypes.URL:
             observable = urlparse(self.observable_name).hostname
 
-        quad9_answer, timeout = self._quad9_dns_query(observable)
+        quad9_answer = self._quad9_dns_query(observable)
         # if Quad9 has not an answer the site could be malicious
         if not quad9_answer:
             # Google dns request
@@ -50,38 +46,35 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
             if google_answer:
                 return malicious_detector_response(self.observable_name, True)
 
-        return malicious_detector_response(self.observable_name, False, timeout)
+        return malicious_detector_response(self.observable_name, False)
 
-    def _quad9_dns_query(self, observable) -> Tuple[bool, bool]:
+    def _quad9_dns_query(self, observable) -> bool:
         """Perform a DNS query with Quad9 service, return True if Quad9 answer the
         DNS query with a non-empty response.
 
         :param observable: domain to resolve
         :type observable: str
-        :return: True in case of answer for the DNS query else False.
-        :rtype: bool
         """
-        answer_found = False
-        timeout = False
         params = {"name": observable}
 
-        quad9_response = requests.get(
-            self.QUAD9_URL, headers=self.HEADERS, params=params
-        )
-        if quad9_response.status_code == 503:
-            msg = (
-                "503 status code! "
-                "It may be normal for this service to"
-                " happen from time to time"
-            )
-            logger.info(msg)
-            self.report.errors.append(msg)
-            timeout = True
-            return answer_found, timeout
-        quad9_response.raise_for_status()
-        answer_found = bool(quad9_response.json().get("Answer", None))
+        # sometimes it can respond with 503, I suppose to avoid DoS.
+        # In 1k requests just 20 fails and at least with 30 requests between 2 failures
+        # with 2 or 3 attemps the analyzer should get the data
+        attempt_number = 3
+        for attempt in range(0, attempt_number):
+            try:
+                quad9_response = requests.get(
+                    self.url, headers=self.headers, params=params, timeout=10
+                )
+            except requests.exceptions.ConnectionError as exception:
+                # if the last attempt fails, raise an error
+                if attempt == attempt_number - 1:
+                    raise exception
+            else:
+                quad9_response.raise_for_status()
+                break
 
-        return answer_found, timeout
+        return bool(quad9_response.json().get("Answer", None))
 
     def _google_dns_query(self, observable) -> bool:
         """Perform a DNS query with Google service, return True if Google answer the
@@ -93,7 +86,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         :rtype: bool
         """
         params = {"name": observable}
-        google_response = requests.get(self.GOOGLE_URL, params=params)
+        google_response = requests.get(self.google_url, params=params)
         google_response.raise_for_status()
 
         return bool(google_response.json().get("Answer", None))

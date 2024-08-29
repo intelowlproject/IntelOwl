@@ -28,10 +28,10 @@ export function sanitizeObservable(observable) {
       .replaceAll("[", "")
       .replaceAll("]", "")
       .trim()
-      .replace(/\W*$/, "")
+      .replace(/(?!\\(|\\))\W*$/, "")
       /* ignore + at the start of the string to support phone number:
     this could lead to a match problem in the loading observable feature */
-      .replace(/^(?!\+)\W/, "")
+      .replace(/^(?!\+|\\(|\\))\W/, "")
   );
 }
 

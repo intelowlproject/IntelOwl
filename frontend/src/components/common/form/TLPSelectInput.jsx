@@ -36,7 +36,7 @@ export function TLPSelectInputLabel(props) {
             <br />
             For more info check the{" "}
             <Link
-              to="https://intelowl.readthedocs.io/en/latest/Usage.html#tlp-support"
+              to="https://intelowlproject.github.io/docs/IntelOwl/usage/#tlp-support"
               target="_blank"
             >
               official doc.

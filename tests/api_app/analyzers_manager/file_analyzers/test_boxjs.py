@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from unittest import skipIf
+
 from api_app.analyzers_manager.file_analyzers.boxjs_scan import BoxJS
 from api_app.models import Job
 from tests import CustomTestCase
@@ -15,6 +17,7 @@ class BoxJSTestCase(CustomTestCase):
     def tearDown() -> None:
         Job.objects.all().delete()
 
+    @skipIf(BoxJS().healt_check(), False)
     def test_urls(self):
         downloader_js_report = self._analyze_sample(
             "downloader.js",

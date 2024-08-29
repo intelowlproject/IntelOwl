@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from unittest import skipIf
 
 from api_app.analyzers_manager.file_analyzers.strings_info import StringsInfo
 from api_app.models import Job
@@ -15,6 +16,7 @@ class StringsInfoTestCase(CustomTestCase):
     def tearDown() -> None:
         Job.objects.all().delete()
 
+    @skipIf(StringsInfo().healt_check(), False)
     def test_urls(self):
         downloader_pdf_report = self._analyze_sample(
             "downloader.pdf",

@@ -609,3 +609,32 @@ class ApiViewTests(CustomViewSetTestCase):
                 "visualizers": {},
             },
         )
+
+    def test_job_rescan__permission(self):
+        job = models.Job.objects.create(
+            tlp="CLEAR",
+            user=self.user,
+            observable_name="test.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+            finished_analysis_time=datetime.datetime(
+                2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
+            )
+            - datetime.timedelta(days=5),
+            playbook_requested=PlaybookConfig.objects.get(name="Dns"),
+            runtime_configuration={
+                "analyzers": {"Classic_DNS": {"query_type": "TXT"}},
+                "connectors": {},
+                "visualizers": {},
+            },
+        )
+        # same user
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 202, contents)
+        # another user
+        self.client.logout()
+        self.client.force_login(self.guest)
+        response = self.client.post(f"/api/jobs/{job.pk}/rescan", format="json")
+        contents = response.json()
+        self.assertEqual(response.status_code, 403, contents)

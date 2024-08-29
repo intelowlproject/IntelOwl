@@ -3,7 +3,7 @@
 from unittest import skipIf
 
 from api_app.analyzers_manager.file_analyzers.strings_info import StringsInfo
-from api_app.models import Job
+from api_app.models import Job, PythonConfig
 from tests import CustomTestCase
 
 
@@ -16,7 +16,10 @@ class StringsInfoTestCase(CustomTestCase):
     def tearDown() -> None:
         Job.objects.all().delete()
 
-    @skipIf(StringsInfo().healt_check(), False)
+    @skipIf(
+        not StringsInfo(PythonConfig()).health_check(),
+        "malware tools analyzer container not active",
+    )
     def test_urls(self):
         downloader_pdf_report = self._analyze_sample(
             "downloader.pdf",

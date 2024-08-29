@@ -17,7 +17,9 @@ class BoxJSTestCase(CustomTestCase):
     def tearDown() -> None:
         Job.objects.all().delete()
 
-    @skipIf(BoxJS().healt_check(), False)
+    @skipIf(
+        not BoxJS(None).health_check(), "malware tools analyzer container not active"
+    )
     def test_urls(self):
         downloader_js_report = self._analyze_sample(
             "downloader.js",

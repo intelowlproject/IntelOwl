@@ -19,7 +19,7 @@ class BaseDataModel(models.Model):
     # GreyNoise (classification), Cymru (found), Cuckoo (malscore),
     # Intezer (verdict/sub_verdict), Triage (analysis.score),
     # HybridAnalysisFileAnalyzer (classification_tags)
-    related_urls = pg_fields.ArrayField(
+    external_references = pg_fields.ArrayField(
         models.URLField(), null=True
     )  # link/external_references/permalink/domains
     # Crowdsec (link), UrlHaus (external_references), BoxJs,
@@ -33,7 +33,7 @@ class BaseDataModel(models.Model):
         models.CharField(max_length=100), null=True
     )  # threats/related_threats
     # GoogleSafeBrowsing, QuarkEngineAPK (crimes.crime)
-    family = models.CharField(
+    malware_family = models.CharField(
         max_length=100, null=True
     )  # family/family_name/malware_family
     # HybridAnalysisObservable, Intezer (family_name), Cuckoo, MwDB,

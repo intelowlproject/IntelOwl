@@ -7,9 +7,9 @@ from data_model.models import BaseDataModel, DomainDataModel, FileDataModel, IPD
 class BaseDataModelAdminView(admin.ModelAdmin):
     list_display = (
         "evaluation",
-        "related_urls",
+        "external_references",
         "related_threats",
-        "family",
+        "malware_family",
         "additional_info",
     )
 

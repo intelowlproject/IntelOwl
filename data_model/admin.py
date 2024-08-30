@@ -9,6 +9,7 @@ class BaseDataModelAdminView(admin.ModelAdmin):
         "evaluation",
         "external_references",
         "related_threats",
+        "tags",
         "malware_family",
         "additional_info",
     )
@@ -35,18 +36,13 @@ class IPDataModelAdminView(BaseDataModelAdminView):
         "registered_country",
         "registered_country_code",
         "isp",
-        "is_anonymizer",
-        "is_tor_exit_node",
     )
 
 
 @admin.register(FileDataModel)
 class FileDataModelAdminView(BaseDataModelAdminView):
     list_display = BaseDataModelAdminView.list_display + (
-        "tags",
-        "compromised_hosts",
         "signatures",
-        "yara_rules",
         "comments",
         "file_information",
         "stats",

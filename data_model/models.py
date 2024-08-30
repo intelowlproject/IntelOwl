@@ -1,6 +1,8 @@
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
 
+from data_model.enums import SignaturesChoices
+
 
 class IETFReport(models.Model):
     rrname = models.CharField(max_length=100)
@@ -8,6 +10,12 @@ class IETFReport(models.Model):
     rdata = pg_fields.ArrayField(models.CharField(max_length=100))
     time_first = models.DateTimeField()
     time_last = models.DateTimeField()
+
+
+class Signature(models.Model):
+    name = models.CharField(max_length=100)
+    SIGNATURES = SignaturesChoices
+    signature = models.JSONField()
 
 
 class BaseDataModel(models.Model):
@@ -84,10 +92,8 @@ class FileDataModel(BaseDataModel):
         models.CharField(max_length=100), null=True
     )  # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
     # VirusTotalV3FileAnalyzer (report.data.tags)
-    signatures = pg_fields.ArrayField(
-        models.CharField(max_length=100), null=True
-    )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer, Yara (report.list_el.match)
-    yara_rules = models.JSONField(null=True)  # MalwareBazaarFileAnalyzer,
+    signatures = models.ManyToManyField(Signature)  # ClamAvFileAnalyzer,
+    # MalwareBazaarFileAnalyzer (signatures/yara_rules), Yara (report.list_el.match)
     # Yaraify (report.data.tasks.static_result)
     comments = pg_fields.ArrayField(
         models.CharField(max_length=100), null=True

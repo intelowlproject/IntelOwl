@@ -145,6 +145,12 @@ class FileAnalyzerTestCase(CustomTestCase):
                         pass
                     else:
                         continue
+                    sub = subclass(
+                        config,
+                    )
+                    if config.docker_based and not sub.health_check():
+                        print(f"skipping {subclass.__name__} cause health check failed")
+                        continue
                     jobs = Job.objects.filter(file_mimetype=mimetype)
                     if jobs.exists():
                         found_one = True
@@ -154,9 +160,6 @@ class FileAnalyzerTestCase(CustomTestCase):
                             "\t\t"
                             f"Testing {job.file_name} with mimetype {mimetype}"
                             f" for {timeout_seconds} seconds"
-                        )
-                        sub = subclass(
-                            config,
                         )
                         signal.alarm(timeout_seconds)
                         try:

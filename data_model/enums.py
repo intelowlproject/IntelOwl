@@ -2,7 +2,7 @@ from django.db.models import Choices
 
 
 class SignaturesChoices(Choices):
-    CLAMAV = "Clamav"
+    CLAMAV = "ClamAV"
     SIGMA = "Sigma"
     YARA = "Yara"
     SURICATA = "Suricata"

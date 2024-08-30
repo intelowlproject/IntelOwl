@@ -1,7 +1,7 @@
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
 
-from data_model.enums import SignaturesChoices
+from data_model.enums import DataModelTags, SignaturesChoices
 
 
 class IETFReport(models.Model):
@@ -41,8 +41,14 @@ class BaseDataModel(models.Model):
     # VirusTotalV3FileAnalyzer (data.relationships.contacted_urls/contacted_domains)
     related_threats = pg_fields.ArrayField(
         models.CharField(max_length=100), null=True
-    )  # threats/related_threats
+    )  # threats/related_threats, used as a pointer to other IOCs
+    tags = pg_fields.ArrayField(
+        models.CharField(max_length=100), null=True
+    )  # used for generic tags like phishing, malware, social_engineering
+    # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
+    # VirusTotalV3FileAnalyzer (report.data.attributes.tags)
     # GoogleSafeBrowsing, QuarkEngineAPK (crimes.crime)
+    TAGS = DataModelTags
     malware_family = models.CharField(
         max_length=100, null=True
     )  # family/family_name/malware_family
@@ -88,10 +94,6 @@ class IPDataModel(BaseDataModel):
 
 
 class FileDataModel(BaseDataModel):
-    tags = pg_fields.ArrayField(
-        models.CharField(max_length=100), null=True
-    )  # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
-    # VirusTotalV3FileAnalyzer (report.data.tags)
     signatures = models.ManyToManyField(Signature)  # ClamAvFileAnalyzer,
     # MalwareBazaarFileAnalyzer (signatures/yara_rules), Yara (report.list_el.match)
     # Yaraify (report.data.tasks.static_result)

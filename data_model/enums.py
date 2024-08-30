@@ -6,3 +6,11 @@ class SignaturesChoices(Choices):
     SIGMA = "Sigma"
     YARA = "Yara"
     SURICATA = "Suricata"
+
+
+class DataModelTags(Choices):
+    PHISHING = "Phishing"
+    MALWARE = "Malware"
+    SOCIAL_ENGINEERING = "SocialEngineering"
+    ANONYMIZER = "Anonymizer"
+    TOR_EXIT_NODE = "TorExitNode"

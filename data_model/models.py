@@ -20,7 +20,9 @@ class BaseDataModel(models.Model):
     # Intezer (verdict/sub_verdict), Triage (analysis.score),
     # HybridAnalysisFileAnalyzer (classification_tags)
     external_references = pg_fields.ArrayField(
-        models.URLField(), blank=True, default=list,
+        models.URLField(),
+        blank=True,
+        default=list,
     )  # link/external_references/permalink/domains
     # Crowdsec (link), UrlHaus (external_references), BoxJs,
     # Cuckoo (result_url/permalink), Intezer (link/analysis_url),

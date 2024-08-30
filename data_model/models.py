@@ -87,9 +87,8 @@ class FileDataModel(BaseDataModel):
     signatures = pg_fields.ArrayField(
         models.CharField(max_length=100), null=True
     )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer, Yara (report.list_el.match)
-    yara_rules = pg_fields.ArrayField(
-        models.JSONField(), null=True
-    )  # MalwareBazaarFileAnalyzer, Yaraify (report.data.tasks.static_result)
+    yara_rules = models.JSONField(null=True)  # MalwareBazaarFileAnalyzer,
+    # Yaraify (report.data.tasks.static_result)
     comments = pg_fields.ArrayField(
         models.CharField(max_length=100), null=True
     )  # MalwareBazaarFileAnalyzer,
@@ -104,6 +103,6 @@ class FileDataModel(BaseDataModel):
     # compromised_hosts = pg_fields.ArrayField(
     #   models.CharField(max_length=100), null=True
     # )  # HybridAnalysisFileAnalyzer
-    # pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
+    # pdfid_reports = models.JSONField(null=True)  # PdfInfo
     # imphash = models.CharField(max_length=100, null=True)  # PeInfo
     # type = models.CharField(max_length=100, null=True)  # PeInfo

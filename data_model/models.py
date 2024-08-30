@@ -85,8 +85,6 @@ class IPDataModel(BaseDataModel):
         max_length=100, null=True
     )  # MaxMind, AbuseIPDB
     isp = models.CharField(max_length=100, null=True)  # AbuseIPDB
-    is_anonymizer = models.BooleanField(null=True)  # TorProject, Crowdsec
-    is_tor_exit_node = models.BooleanField(null=True)  # TorProject, Crowdsec
     # additional_info
     # behavior = models.CharField(max_length=100, null=True)  # Crowdsec
     # noise = models.BooleanField(null=True)  # GreyNoise

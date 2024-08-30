@@ -82,9 +82,6 @@ class FileDataModel(BaseDataModel):
         models.CharField(max_length=100), null=True
     )  # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
     # VirusTotalV3FileAnalyzer (report.data.tags)
-    compromised_hosts = pg_fields.ArrayField(
-        models.CharField(max_length=100), null=True
-    )  # HybridAnalysisFileAnalyzer
     signatures = pg_fields.ArrayField(
         models.CharField(max_length=100), null=True
     )  # ClamAvFileAnalyzer, MalwareBazaarFileAnalyzer, Yara (report.list_el.match)
@@ -95,15 +92,16 @@ class FileDataModel(BaseDataModel):
         models.CharField(max_length=100), null=True
     )  # MalwareBazaarFileAnalyzer,
     # VirusTotalV3FileAnalyzer (data.relationships.comments)
-    file_information = pg_fields.ArrayField(
-        models.JSONField(), null=True
-    )  # MalwareBazaarFileAnalyzer, OneNoteInfo
-    # (files), QuarkEngineAPK (crimes.confidence, threat_level, total_score)
+    file_information = models.JSONField(
+        null=True
+    )  # MalwareBazaarFileAnalyzer, OneNoteInfo (files),
+    # QuarkEngineAPK (crimes.confidence, threat_level, total_score)
     # RtfInfo (exploit_equation_editor, exploit_ole2link_vuln)
-    stats = pg_fields.ArrayField(
-        models.JSONField(), null=True
-    )  # PdfInfo (peepdf_stats)
+    stats = models.JSONField(null=True)  # PdfInfo (peepdf_stats)
     # additional_info
+    # compromised_hosts = pg_fields.ArrayField(
+    #   models.CharField(max_length=100), null=True
+    # )  # HybridAnalysisFileAnalyzer
     # pdfid_reports = pg_fields.ArrayField(models.JSONField(), null=True)  # PdfInfo
     # imphash = models.CharField(max_length=100, null=True)  # PeInfo
     # type = models.CharField(max_length=100, null=True)  # PeInfo

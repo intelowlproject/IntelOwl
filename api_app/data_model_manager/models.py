@@ -1,7 +1,7 @@
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
 
-from data_model.enums import DataModelTags, SignaturesChoices
+from api_app.data_model_manager.enums import DataModelTags, SignaturesChoices
 
 
 class IETFReport(models.Model):

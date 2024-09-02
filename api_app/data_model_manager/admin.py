@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from data_model.models import BaseDataModel, DomainDataModel, FileDataModel, IPDataModel
+from api_app.data_model_manager.models import (
+    BaseDataModel,
+    DomainDataModel,
+    FileDataModel,
+    IPDataModel,
+)
 
 
 @admin.register(BaseDataModel)

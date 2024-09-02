@@ -560,15 +560,15 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         if existing_job.is_sample:
             data["file"] = existing_job.file
             data["file_name"] = existing_job.file_name
-            fas = FileJobSerializer(data=data, context={"request": request})
-            fas.is_valid(raise_exception=True)
-            new_job = fas.save(send_task=True)
+            job_serializer = FileJobSerializer(data=data, context={"request": request})
         else:
             data["observable_classification"] = existing_job.observable_classification
             data["observable_name"] = existing_job.observable_name
-            oas = ObservableAnalysisSerializer(data=data, context={"request": request})
-            oas.is_valid(raise_exception=True)
-            new_job = oas.save(send_task=True)
+            job_serializer = ObservableAnalysisSerializer(
+                data=data, context={"request": request}
+            )
+        job_serializer.is_valid(raise_exception=True)
+        new_job = job_serializer.save(send_task=True)
         logger.info(f"rescan request for job: {pk} generated job: {new_job.pk}")
         return Response(data={"id": new_job.pk}, status=status.HTTP_202_ACCEPTED)
 

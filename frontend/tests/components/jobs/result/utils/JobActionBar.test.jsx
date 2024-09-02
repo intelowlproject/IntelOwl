@@ -6,39 +6,15 @@ import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { JobActionsBar } from "../../../../../src/components/jobs/result/bar/JobActionBar";
 
-import {
-  ANALYZE_MULTIPLE_OBSERVABLE_URI,
-  PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-} from "../../../../../src/constants/apiURLs";
+import { JOB_BASE_URI } from "../../../../../src/constants/apiURLs";
 
 jest.mock("axios");
 describe("test JobActionsBar", () => {
   beforeAll(() => {
-    axios.post.mockImplementation(() =>
-      Promise.resolve({ data: { results: [], count: 0 } }),
-    );
+    axios.post.mockImplementation(() => Promise.resolve({ data: { id: 109 } }));
   });
 
   test("rescan observable playbook", async () => {
-    axios.post.mockImplementation(() =>
-      Promise.resolve({
-        data: {
-          results: [
-            {
-              job_id: 108,
-              analyzers_running: ["Classic_DNS"],
-              connectors_running: [],
-              visualizers_running: [],
-              playbook_running: "test",
-              status: "accepted",
-              already_exists: true,
-            },
-          ],
-          count: 0,
-        },
-      }),
-    );
-
     render(
       <BrowserRouter>
         <JobActionsBar
@@ -124,30 +100,16 @@ describe("test JobActionsBar", () => {
       </BrowserRouter>,
     );
 
-    const scanBtn = screen.getByText("Rescan");
-    expect(scanBtn).toBeInTheDocument();
+    const rescanBtn = screen.getByText("Rescan");
+    expect(rescanBtn).toBeInTheDocument();
 
     const user = userEvent.setup();
-    await user.click(scanBtn);
+    await user.click(rescanBtn);
 
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        [
-          PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI,
-          {
-            observables: [["domain", "dns.google.com"]],
-            playbook_requested: "test",
-            tlp: "AMBER",
-            scan_mode: 1,
-            runtime_configuration: {
-              analyzers: {},
-              connectors: {},
-              visualizers: {},
-            },
-          },
-          { headers: { "Content-Type": "application/json" } },
-        ],
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
   });
@@ -238,55 +200,21 @@ describe("test JobActionsBar", () => {
       </BrowserRouter>,
     );
 
-    const scanBtn = screen.getByText("Rescan");
-    expect(scanBtn).toBeInTheDocument();
+    const rescanBtn = screen.getByText("Rescan");
+    expect(rescanBtn).toBeInTheDocument();
 
     const user = userEvent.setup();
-    await user.click(scanBtn);
+    await user.click(rescanBtn);
 
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        [
-          ANALYZE_MULTIPLE_OBSERVABLE_URI,
-          {
-            observables: [["domain", "dns.google.com"]],
-            analyzers_requested: ["Classic_DNS"],
-            connectors_requested: ["MISP", "OpenCTI", "Slack", "YETI"],
-            runtime_configuration: {
-              analyzers: {},
-              connectors: {},
-              visualizers: {},
-            },
-            tlp: "AMBER",
-            scan_mode: 1,
-          },
-          { headers: { "Content-Type": "application/json" } },
-        ],
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
   });
 
   test("rescan file playbook", async () => {
-    axios.post.mockImplementation(() =>
-      Promise.resolve({
-        data: {
-          results: [
-            {
-              job_id: 108,
-              analyzers_running: [],
-              connectors_running: [],
-              visualizers_running: [],
-              playbook_running: "test",
-              status: "accepted",
-              already_exists: true,
-            },
-          ],
-          count: 0,
-        },
-      }),
-    );
-
     render(
       <BrowserRouter>
         <JobActionsBar
@@ -356,23 +284,18 @@ describe("test JobActionsBar", () => {
       </BrowserRouter>,
     );
 
-    const scanBtn = screen.getByText("Rescan");
-    expect(scanBtn).toBeInTheDocument();
+    const rescanBtn = screen.getByText("Rescan");
+    expect(rescanBtn).toBeInTheDocument();
 
     const user = userEvent.setup();
-    await user.click(scanBtn);
+    await user.click(rescanBtn);
 
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        undefined,
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
-    setTimeout(() => {
-      expect(
-        screen.getByText("It's not possible to repeat a sample analysis"),
-      ).toBeInTheDocument();
-    }, 15 * 1000);
   });
 
   test("rescan file analyzer", async () => {
@@ -445,22 +368,17 @@ describe("test JobActionsBar", () => {
       </BrowserRouter>,
     );
 
-    const scanBtn = screen.getByText("Rescan");
-    expect(scanBtn).toBeInTheDocument();
+    const rescanBtn = screen.getByText("Rescan");
+    expect(rescanBtn).toBeInTheDocument();
 
     const user = userEvent.setup();
-    await user.click(scanBtn);
+    await user.click(rescanBtn);
 
     await waitFor(() => {
       expect(axios.post.mock.calls[0]).toEqual(
         // axios call
-        undefined,
+        [`${JOB_BASE_URI}/${108}/rescan`],
       );
     });
-    setTimeout(() => {
-      expect(
-        screen.getByText("It's not possible to repeat a sample analysis"),
-      ).toBeInTheDocument();
-    }, 15 * 1000);
   });
 });

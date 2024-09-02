@@ -50,6 +50,7 @@ class PlaybookConfigViewSet(
     )
     @action(methods=["POST"], url_name="analyze_multiple_observables", detail=False)
     def analyze_multiple_observables(self, request):
+        logger.debug(f"{request.data=}")
         oas = ObservableAnalysisSerializer(
             data=request.data, many=True, context={"request": request}
         )
@@ -68,11 +69,13 @@ class PlaybookConfigViewSet(
     )
     @action(methods=["POST"], url_name="analyze_multiple_files", detail=False)
     def analyze_multiple_files(self, request):
+        logger.debug(f"{request.data=}")
         oas = FileJobSerializer(
             data=request.data, many=True, context={"request": request}
         )
         oas.is_valid(raise_exception=True)
-        jobs = oas.save(send_task=True)
+        parent_job = oas.validated_data[0].get("parent_job", None)
+        jobs = oas.save(send_task=True, parent=parent_job)
         return Response(
             JobResponseSerializer(jobs, many=True).data,
             status=status.HTTP_200_OK,

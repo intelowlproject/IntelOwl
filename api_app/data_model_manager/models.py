@@ -11,6 +11,9 @@ class IETFReport(models.Model):
     time_first = models.DateTimeField()
     time_last = models.DateTimeField()
 
+    class Meta:
+        unique_together = ("rrname", "rrtype", "rdata")
+
 
 class Signature(models.Model):
     name = models.CharField(max_length=100)

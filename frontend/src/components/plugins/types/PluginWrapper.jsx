@@ -82,12 +82,12 @@ export default function PluginWrapper({
             <small className="text-muted">{dataList?.length} total</small>
           </h1>
           <span className="text-muted">
-            {description} Fore more info check the{" "}
+            {description} For more info check the{" "}
             <Link
               to="https://intelowlproject.github.io/docs/IntelOwl/usage/#plugins-framework"
               target="_blank"
             >
-              official doc
+              official doc.
             </Link>
           </span>
         </Col>

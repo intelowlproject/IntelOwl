@@ -8,9 +8,7 @@ import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
-import { downloadJobSample, deleteJob } from "../jobApi";
-import { createJob } from "../../../scan/scanApi";
-import { ScanModesNumeric } from "../../../../constants/advancedSettingsConst";
+import { downloadJobSample, deleteJob, rescanJob } from "../jobApi";
 import { JobResultSections } from "../../../../constants/miscConst";
 import {
   DeleteIcon,
@@ -53,33 +51,11 @@ export function JobActionsBar({ job }) {
   };
 
   const handleRetry = async () => {
-    if (job.is_sample) {
-      addToast(
-        "Rescan File!",
-        "It's not possible to repeat a sample analysis",
-        "warning",
-        false,
-        2000,
-      );
-    } else {
-      addToast("Retrying the same job...", null, "spinner", false, 2000);
-      const response = await createJob(
-        [job.observable_name],
-        job.observable_classification,
-        job.playbook_requested,
-        job.analyzers_requested,
-        job.connectors_requested,
-        job.runtime_configuration,
-        job.tags.map((optTag) => optTag.label),
-        job.tlp,
-        ScanModesNumeric.FORCE_NEW_ANALYSIS,
-        0,
-      );
+    addToast("Retrying the same job...", null, "spinner", false, 2000);
+    const newJobId = await rescanJob(job.id);
+    if (newJobId) {
       setTimeout(
-        () =>
-          navigate(
-            `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
-          ),
+        () => navigate(`/jobs/${newJobId}/${JobResultSections.VISUALIZER}/`),
         1000,
       );
     }

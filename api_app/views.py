@@ -20,6 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from api_app.choices import ScanMode
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
@@ -452,7 +453,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - List of applicable permissions.
         """
         permissions = super().get_permissions()
-        if self.action in ["destroy", "kill"]:
+        if self.action in ["destroy", "kill", "rescan"]:
             permissions.append(IsObjectUserOrSameOrgPermission())
         return permissions
 
@@ -540,6 +541,36 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             raise ValidationError({"detail": "Job is running"})
         job.retry()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def rescan(self, request, pk=None):
+        logger.info(f"rescan request for job: {pk}")
+        existing_job: Job = self.get_object()
+        # create a new job
+        data = {
+            "tlp": existing_job.tlp,
+            "runtime_configuration": existing_job.runtime_configuration,
+            "scan_mode": ScanMode.FORCE_NEW_ANALYSIS,
+        }
+        if existing_job.playbook_requested:
+            data["playbook_requested"] = existing_job.playbook_requested
+        else:
+            data["analyzers_requested"] = existing_job.analyzers_requested.all()
+            data["connectors_requested"] = existing_job.connectors_requested.all()
+        if existing_job.is_sample:
+            data["file"] = existing_job.file
+            data["file_name"] = existing_job.file_name
+            job_serializer = FileJobSerializer(data=data, context={"request": request})
+        else:
+            data["observable_classification"] = existing_job.observable_classification
+            data["observable_name"] = existing_job.observable_name
+            job_serializer = ObservableAnalysisSerializer(
+                data=data, context={"request": request}
+            )
+        job_serializer.is_valid(raise_exception=True)
+        new_job = job_serializer.save(send_task=True)
+        logger.info(f"rescan request for job: {pk} generated job: {new_job.pk}")
+        return Response(data={"id": new_job.pk}, status=status.HTTP_202_ACCEPTED)
 
     @add_docs(
         description="Kill running job by closing celery tasks and marking as killed",

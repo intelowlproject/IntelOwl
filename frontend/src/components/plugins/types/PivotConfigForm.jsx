@@ -46,7 +46,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             <div>Compare field&nbsp;</div>
             <div className="small text-left text-muted">
               Create a custom Pivot from a specific value extracted from the
-              first successful result of the selected analyzers/connectors.
+              first successful analyzers or connectors.
             </div>
           </div>
         </div>

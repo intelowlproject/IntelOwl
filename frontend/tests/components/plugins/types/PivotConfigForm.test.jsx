@@ -62,11 +62,6 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
-    expect(
-      screen.getByText(
-        "Select the analyzers or connectors after which the pivot will be execute",
-      ),
-    ).toBeInTheDocument();
     const analyzersInputField = screen.getByText("Analyzers:");
     expect(analyzersInputField).toBeInTheDocument();
     const connectorsInputField = screen.getByText("Connectors:");
@@ -105,11 +100,6 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
-    expect(
-      screen.getByText(
-        "Select the analyzers or connectors after which the pivot will be execute",
-      ),
-    ).toBeInTheDocument();
     const analyzersInputField = screen.getByText("Analyzers:");
     expect(analyzersInputField).toBeInTheDocument();
     const connectorsInputField = screen.getByText("Connectors:");
@@ -192,11 +182,6 @@ describe("PivotConfigForm test", () => {
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
 
-    expect(
-      screen.getByText(
-        "Select the analyzers or connectors after which the pivot will be execute",
-      ),
-    ).toBeInTheDocument();
     const analyzersInputField = screen.getByText("Analyzers:");
     expect(analyzersInputField).toBeInTheDocument();
     const connectorsInputField = screen.getByText("Connectors:");
@@ -235,7 +220,7 @@ describe("PivotConfigForm test", () => {
     await userAction.click(testPythonModuleButton);
 
     const fieldToCompareInputField = screen.getByText(
-      "Field that will be analyzed:",
+      "Dotted path to the field that will be extracted and then analyzed:",
     );
     expect(fieldToCompareInputField).toBeInTheDocument();
 
@@ -296,11 +281,6 @@ describe("PivotConfigForm test", () => {
     expect(descriptionInputField).toBeInTheDocument();
     expect(descriptionInputField).toHaveValue("pivot: test");
 
-    expect(
-      screen.getByText(
-        "Select the analyzers or connectors after which the pivot will be execute",
-      ),
-    ).toBeInTheDocument();
     const analyzersInputField = screen.getByText("Analyzers:");
     expect(analyzersInputField).toBeInTheDocument();
     const connectorsInputField = screen.getByText("Connectors:");

@@ -46,10 +46,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             <div>Compare field&nbsp;</div>
             <div className="small text-left text-muted">
               Create a custom Pivot from a specific value extracted from the
-              first success result of the analyzers/connectors selected.
-              <br />
-              Set the parameter with the dotted path to the field you would like
-              to extract the value from.
+              first successful result of the selected analyzers/connectors.
             </div>
           </div>
         </div>
@@ -238,7 +235,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             )}
             <FormGroup className="d-flex align-items-center">
               <Label
-                className="me-2 mb-0 fw-bold"
+                className="me-2 mb-0"
                 for="pivot-name"
                 style={{ minWidth: "15%" }}
               >
@@ -263,7 +260,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             )}
             <FormGroup className="d-flex align-items-start">
               <Label
-                className="me-2 mb-0 fw-bold d-flex"
+                className="me-2 mb-0 d-flex"
                 for="pivot-description"
                 style={{ minWidth: "15%" }}
               >
@@ -305,11 +302,16 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
                 disabled
               />
             </FormGroup>
+            <div className="bg-tertiary py-2 px-3 rounded">
+              <strong>Note:</strong> Pivots are designed to create a job from
+              another job after certain conditions are triggered. <br />
+              This plugin can only run automatically within a playbook so it is
+              important to select the analyzers or connectors after which the
+              pivot will be executed. <br />
+              Every playbook containing the following combination of
+              analyzers/connectors can have this Pivot attached to.
+            </div>
             <div className="py-4">
-              <strong>
-                Select the analyzers or connectors after which the pivot will be
-                execute
-              </strong>
               {formik.values.analyzers.length !== 0 &&
                 formik.values.connectors.length !== 0 && (
                   <>
@@ -338,7 +340,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
               }`}
             >
               <Label
-                className="me-2 mb-0 fw-bold"
+                className="me-2 mb-0"
                 for="pivot-type"
                 style={{ minWidth: "15%" }}
               >
@@ -369,11 +371,12 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
             {formik.values.python_module.value === "any_compare.AnyCompare" && (
               <FormGroup className="d-flex align-items-center">
                 <Label
-                  className="me-2 mb-0 fw-bold"
+                  className="me-2 mb-0"
                   for="pivot-field-to-compare"
-                  style={{ minWidth: "20%" }}
+                  style={{ minWidth: "45%" }}
                 >
-                  Field that will be analyzed:
+                  Dotted path to the field that will be extracted and then
+                  analyzed:
                 </Label>
                 <Input
                   id="pivot-field-to-compare"
@@ -387,7 +390,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
               </FormGroup>
             )}
             <FormGroup row className="d-flex align-items-center">
-              <Label className="me-2 mb-0 fw-bold" for="pivot-connectors">
+              <Label className="me-2 mb-0" for="pivot-connectors">
                 Playbook to Execute:
               </Label>
               <PlaybookMultiSelectDropdownInput

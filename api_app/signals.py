@@ -291,7 +291,7 @@ def post_delete_python_config_cache(sender, instance, *args, **kwargs):
 
 
 @receiver(models.signals.post_save, sender=LogEntry)
-def post_save_log_entry(sender, instance: LogEntry, using, origin, *args, **kwargs):
+def post_save_log_entry(sender, instance: LogEntry, *args, **kwargs):
     """
     Signal receiver for the post_save signal.
     Add a line of log

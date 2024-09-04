@@ -97,6 +97,18 @@ class PivotConfigViewSetTestCase(
         return PivotConfig
 
     def test_create(self):
+        # invalid fields
+        response = self.client.post(
+            self.URL,
+            data={
+                "name": "TestCreate",
+                "python_module": "self_analyzable.SelfAnalyzable",
+                "playbooks_choice": [PlaybookConfig.objects.first().name],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
         # no plugin config
         response = self.client.post(
             self.URL,

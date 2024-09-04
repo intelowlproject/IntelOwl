@@ -85,13 +85,16 @@ class PivotConfigSerializer(PythonConfigSerializer):
         list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
 
     def validate(self, attrs):
-        if "related_analyzer_configs" in attrs or "related_connector_configs" in attrs:
-            related_analyzer_configs = attrs.get("related_analyzer_configs", [])
-            related_connector_configs = attrs.get("related_connector_configs", [])
-            if not related_analyzer_configs and not related_connector_configs:
-                raise ValidationError(
-                    {"detail": "No Analyzers and Connectors attached to pivot"}
-                )
+        related_analyzer_configs = attrs.get("related_analyzer_configs", [])
+        related_connector_configs = attrs.get("related_connector_configs", [])
+        if (
+            not self.instance
+            and not related_analyzer_configs
+            and not related_connector_configs
+        ):
+            raise ValidationError(
+                {"detail": "No Analyzers and Connectors attached to pivot"}
+            )
         return attrs
 
     def create(self, validated_data):

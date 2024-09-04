@@ -1,7 +1,7 @@
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from api_app.pivots_manager.models import PivotMap, PivotReport
+from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.pivots_manager.permissions import (
     PivotActionsPermission,
     PivotOwnerPermission,
@@ -23,6 +23,12 @@ class PivotConfigViewSet(
         if self.action in ["destroy", "update", "partial_update"]:
             permissions.append(PivotActionsPermission())
         return permissions
+
+    def perform_destroy(self, instance: PivotConfig):
+        for pivot_map in PivotMap.objects.filter(pivot_config=instance):
+            pivot_map.pivot_config = None
+            pivot_map.save()
+        return super().perform_destroy(instance)
 
 
 class PivotActionViewSet(PythonReportActionViewSet):

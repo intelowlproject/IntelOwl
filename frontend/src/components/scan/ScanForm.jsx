@@ -192,9 +192,7 @@ export default function ScanForm() {
     onSubmit: async (values) => {
       const response = await createJob(
         values.observableType === JobTypes.OBSERVABLE
-          ? values.observable_names.map((observable) =>
-              sanitizeObservable(observable),
-            )
+          ? values.observable_names
           : values.files,
         values.classification,
         values.playbook.value,

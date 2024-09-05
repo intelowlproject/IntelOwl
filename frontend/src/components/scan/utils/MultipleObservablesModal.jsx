@@ -24,7 +24,7 @@ export function MultipleObservablesModal(props) {
 
     tokenizedText.forEach((string) => {
       const validationValue = observableValidators(string);
-      if (validationValue !== null)
+      if (validationValue.classification !== "generic")
         observables[validationValue.classification].push(
           validationValue.observable,
         );

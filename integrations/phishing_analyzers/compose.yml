@@ -1,0 +1,19 @@
+# IMPORTANT: The version must match the version of docker-compose.yml
+---
+version: '3.8'
+
+# All additional integrations should be added following this format only.
+
+services:
+  phishing_analyzers:
+    image: intelowlproject/intelowl_phishing_analyzers:${REACT_APP_INTELOWL_VERSION}
+    container_name: intelowl_phishing_analyzers
+    restart: unless-stopped
+    expose:
+      - "4005"
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi

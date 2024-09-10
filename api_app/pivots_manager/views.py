@@ -17,6 +17,18 @@ class PivotConfigViewSet(
     mixins.DestroyModelMixin,
 ):
     serializer_class = PivotConfigSerializer
+    queryset = PivotConfig.objects.all()
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "related_analyzer_configs",
+                "related_connector_configs",
+                "playbooks_choice",
+            )
+        )
 
     def get_permissions(self):
         permissions = super().get_permissions()

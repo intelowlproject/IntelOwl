@@ -1,86 +1,49 @@
 from logging import getLogger
 from typing import Dict
-from unittest.mock import patch
 
-import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By  # noqa: F401
-from selenium.webdriver.common.keys import Keys  # noqa: F401
-
-from api_app.analyzers_manager.classes import ObservableAnalyzer
-from tests.mock_utils import MockUpResponse, if_mock_connections
+from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.models import PythonConfig
 
 logger = getLogger(__name__)
 
 
-class PhishingAnalyzer(ObservableAnalyzer):
+class PhishingAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
+    name: str = "PhishingAnalyzer"
+    url: str = "http://phishing_analyzers:4005/phishing_analyzers"
+    max_tries: int = 20
+    poll_distance: int = 3
+
     proxy_protocol: str = ""
     proxy_address: str = ""
     proxy_port: int = 0
+    headless: bool = True
 
-    driver: webdriver.Chrome = None
+    def __init__(
+        self,
+        config: PythonConfig,
+        **kwargs,
+    ):
+        super().__init__(config, **kwargs)
+        self.args: list = []
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
-        options: Options = None
         if self.proxy_address:
-            options = self._config_proxy_server()
-        self.driver = webdriver.Chrome(options=options)
-        logger.info("Finished opening driver for Chrome")
+            self.args.append(f"--proxy_address={self.proxy_address}")
+            if self.proxy_protocol:
+                self.args.append(f"--proxy_protocol={self.proxy_protocol}")
+            if self.proxy_port:
+                self.args.append(f"--proxy_port={self.proxy_port}")
 
-    def _config_proxy_server(self) -> Options:
-        logger.info("Starting adding options for proxy in driver")
-        options = webdriver.ChromeOptions()
-        options.add_argument(
-            f"--proxy-server={self.proxy_protocol+'://' if self.proxy_address else ''}"
-            f"{self.proxy_address}{':'+str(self.proxy_port) if self.proxy_port else ''}"
-        )
-        options.add_argument(
-            f'--host-resolver-rules="MAP * ~NOTFOUND , EXCLUDE {self.proxy_address}"'
-        )
-        options.add_argument(
-            "--remote-debugging-pipe"
-        )  # due to https://github.com/SeleniumHQ/selenium/issues/12841
-        logger.info("Finished adding options for proxy in driver")
-        return options
+        if self.headless:
+            self.args.append("--headless")
 
     def run(self):
-        logger.info(f"Starting opening {self.observable_name} page")
-        self.driver.get(self.observable_name)
-        logger.info(f"Finished opening {self.observable_name} page")
-
-        logger.info(f"Starting opening {self.observable_name} page in requests")
-        response = requests.get(
-            url=self.observable_name,
-            proxies=f"{self.proxy_protocol}://"
-            f"{self.proxy_address}:{self.proxy_port}",
-            timeout=20,
-        )
-        response.raise_for_status()
-        if response.status_code == 404:
-            return {"not_found": True}
-
-        html_page: str = self.driver.page_source
-        logger.info(f"Extracting source from driver page {html_page}")
-
-        self.driver.close()
-
-        return {
-            "page_source": html_page,
-            "text_response": response.text,
-            "request_body": response.request.body.encode("utf-8"),
-            "request_headers": response.request.headers,
-        }
-
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse({}, 200),
-                ),
-            )
-        ]
-        return super()._monkeypatch(patches=patches)
+        req_data = {"args": [*self.args]}
+        report = self._docker_run(req_data)
+        if report.get("setup_error"):
+            raise AnalyzerRunException(report["setup_error"])
+        if report.get("execution_error"):
+            raise AnalyzerRunException(report["execution_error"])
+        return report

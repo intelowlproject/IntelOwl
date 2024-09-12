@@ -38,6 +38,8 @@ class PhishingAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
         if self.headless:
             self.args.append("--headless")
+        else:
+            self.args.append("--no-headless")
 
     def run(self):
         req_data = {"args": [*self.args]}

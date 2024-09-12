@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 from logging import getLogger
 
 import undetected_chromedriver as uc
@@ -88,7 +88,6 @@ if __name__ == "__main__":
     parser.add_argument("--proxy_address", type=str, required=False)
     parser.add_argument("--proxy_protocol", type=str, required=False)
     parser.add_argument("--proxy_port", type=int, required=False)
-    parser.add_argument("--headless", action="store_true", required=False)
+    parser.add_argument("--headless", action=BooleanOptionalAction, required=False)
     arguments = parser.parse_args()
     driver = DriverWrapper(**vars(arguments))
-    logger.info("funziona tutto vamonos")

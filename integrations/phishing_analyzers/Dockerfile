@@ -8,6 +8,7 @@ ENV HOME ${PYTHONPATH}
 # Add a new low-privileged user
 RUN useradd -ms /bin/bash ${USER}
 
+# Install Google Chrome and Chromium
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq \
     && apt-get install -y --no-install-recommends \
     libvulkan1 libu2f-udev fonts-liberation chromium \
@@ -22,16 +23,17 @@ RUN apt-get remove --purge -y gcc \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/* /usr/share/man/* > /dev/null 2>&1
 
-# 2. Build Flask REST API
+# Create application environment and files
 WORKDIR ${PROJECT_PATH}/phishing_analyzers
 COPY app.py requirements.txt entrypoint.sh analyze_phishing_site.py ./
-RUN mkdir -p ${LOG_PATH} \
+RUN chmod +x entrypoint.sh \
     && pip3 install -r requirements.txt --no-cache-dir \
-    && chmod +x entrypoint.sh \
+    && mkdir -p ${LOG_PATH} \
     && touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log \
     && chown -R ${USER}:${USER} .
 
-# Serve Flask application using gunicorn
+
+# Serve Flask application using gunicorn as low-privileged user
 USER ${USER}
 EXPOSE 4005
 ENTRYPOINT ["./entrypoint.sh"]

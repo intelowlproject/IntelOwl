@@ -42,7 +42,16 @@ class PhishingAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
             self.args.append("--no-headless")
 
     def run(self):
-        req_data = {"args": [*self.args]}
+        req_data: {} = {
+            "target": self.observable_name,
+            "classification": self.observable_classification,
+            "args": [
+                f"--target={self.observable_name}",
+                f"--classification={self.observable_classification}",
+                *self.args,
+            ],
+        }
+        logger.info(f"sending {req_data=}")
         report = self._docker_run(req_data)
         if report.get("setup_error"):
             raise AnalyzerRunException(report["setup_error"])

@@ -1,11 +1,31 @@
+import json
+import logging
+import os
 from argparse import ArgumentParser, BooleanOptionalAction
-from logging import getLogger
 
-import undetected_chromedriver as uc
 from selenium.common import WebDriverException
+from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.chrome.webdriver import WebDriver
 
-logger = getLogger(__name__)
+LOG_NAME = "analyze_phishing_site"
+
+# get flask-shell2http logger instance
+logger = logging.getLogger("analyze_phishing_site")
+# logger config
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+log_level = os.getenv("LOG_LEVEL", logging.INFO)
+log_path = os.getenv("LOG_PATH", f"/var/log/intel_owl/{LOG_NAME}")
+# create new file handlers, files are created if doesn't already exists
+fh = logging.FileHandler(f"{log_path}/{LOG_NAME}.log")
+fh.setFormatter(formatter)
+fh.setLevel(log_level)
+fh_err = logging.FileHandler(f"{log_path}/{LOG_NAME}_errors.log")
+fh_err.setFormatter(formatter)
+fh_err.setLevel(logging.ERROR)
+# add the handlers to the logger
+logger.addHandler(fh)
+logger.addHandler(fh_err)
+logger.setLevel(log_level)
 
 
 class Proxy:
@@ -16,6 +36,12 @@ class Proxy:
         self.address: str = proxy_address
         self.port: int = proxy_port
 
+    def __repr__(self):
+        return (
+            f"{self.protocol + '://' if self.address and self.protocol else ''}"
+            f"{self.address}{':' + str(self.port) if self.port else ''}"
+        )
+
 
 class DriverWrapper:
     def __init__(
@@ -24,6 +50,7 @@ class DriverWrapper:
         proxy_address: str = "",
         proxy_port: int = 0,
         headless: bool = True,
+        **kwargs,
     ):
         self.proxy: Proxy = Proxy(proxy_protocol, proxy_address, proxy_port)
         self.headless: bool = headless
@@ -31,26 +58,18 @@ class DriverWrapper:
         self.last_url: str = ""
 
     def _init_driver(self, headless: bool = True) -> WebDriver:
-        logger.info("Starting adding options for proxy in driver")
-        options: uc.ChromeOptions = uc.ChromeOptions()
+        options: ChromeOptions = ChromeOptions()
+        options.add_argument("--no-sandbox")
         if self.proxy.address:
-            options.add_argument(
-                "--proxy-server="
-                f"{self.proxy.protocol + '://' if self.proxy.address else ''}"
-                f"{self.proxy.address}"
-                f"{':' + str(self.proxy.port) if self.proxy.port else ''}"
-            )
+            logger.info(f"Adding proxy with option: {self.proxy}")
+            options.add_argument(f"--proxy-server={self.proxy}")
             options.add_argument(
                 f'--host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE {self.proxy.address}"'
             )
         if headless:
             options.add_argument("--headless=new")
-        logger.info("Finished adding options for proxy in driver")
-        return uc.Chrome(
-            use_subprocess=False,
-            browser_executable_path="/usr/bin/google-chrome",
-            options=options,
-        )
+        logger.info("Creating Chrome driver...")
+        return Chrome(options=options)
 
     def restart(self, motivation: str = ""):
         logger.info(f"Restarting driver: {motivation}")
@@ -63,14 +82,18 @@ class DriverWrapper:
         self.last_url = url
         try:
             self.driver.get(url)
-        except WebDriverException:
+        except WebDriverException as e:
+            logger.error("navigate")
+            logger.error(e)
             self.restart(motivation="navigate")
 
     @property
     def page_source(self) -> str:
         try:
             return self.driver.page_source
-        except WebDriverException:
+        except WebDriverException as e:
+            logger.error("page_source")
+            logger.error(e)
             self.restart(motivation="page_source")
             return self.page_source
 
@@ -78,16 +101,46 @@ class DriverWrapper:
     def current_url(self) -> str:
         try:
             return self.driver.current_url
-        except WebDriverException:
+        except WebDriverException as e:
+            logger.error("current_url")
+            logger.error(e)
             self.restart(motivation="current_url")
             return self.current_url
+
+    @property
+    def base64_screenshot(self) -> str:
+        try:
+            return self.driver.get_screenshot_as_base64()
+        except WebDriverException as e:
+            logger.error("base64_screenshot")
+            logger.error(e)
+            self.restart(motivation="base64_screenshot")
+            return self.base64_screenshot
+
+
+def analyze_target(**kwargs):
+    driver = DriverWrapper(**kwargs)
+    driver.navigate(url=kwargs["target"])
+    print(
+        json.dumps(
+            {
+                "report": {
+                    "page_source": driver.page_source,
+                    "page_view_base64": driver.base64_screenshot,
+                }
+            }
+        )
+    )
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
+    parser.add_argument("--target", type=str)
+    parser.add_argument("--classification", type=str)
     parser.add_argument("--proxy_address", type=str, required=False)
     parser.add_argument("--proxy_protocol", type=str, required=False)
     parser.add_argument("--proxy_port", type=int, required=False)
     parser.add_argument("--headless", action=BooleanOptionalAction, required=False)
     arguments = parser.parse_args()
-    driver = DriverWrapper(**vars(arguments))
+    logger.info(vars(arguments))
+    analyze_target(**vars(arguments))

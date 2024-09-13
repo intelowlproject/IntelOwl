@@ -27,13 +27,8 @@ RUN apt-get remove --purge -y gcc \
 WORKDIR ${PROJECT_PATH}/phishing_analyzers
 COPY app.py requirements.txt entrypoint.sh analyze_phishing_site.py ./
 RUN chmod +x entrypoint.sh \
-    && pip3 install -r requirements.txt --no-cache-dir \
-    && mkdir -p ${LOG_PATH} \
-    && touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log \
-    && chown -R ${USER}:${USER} .
-
+    && pip3 install -r requirements.txt --no-cache-dir
 
 # Serve Flask application using gunicorn as low-privileged user
-USER ${USER}
 EXPOSE 4005
 ENTRYPOINT ["./entrypoint.sh"]

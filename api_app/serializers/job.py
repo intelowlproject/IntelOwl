@@ -230,12 +230,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 playbook.tags.all()
             )
 
-        analyzers_to_execute = attrs[
-            "analyzers_to_execute"
-        ] = self.set_analyzers_to_execute(**attrs)
-        connectors_to_execute = attrs[
-            "connectors_to_execute"
-        ] = self.set_connectors_to_execute(**attrs)
+        analyzers_to_execute = attrs["analyzers_to_execute"] = (
+            self.set_analyzers_to_execute(**attrs)
+        )
+        connectors_to_execute = attrs["connectors_to_execute"] = (
+            self.set_connectors_to_execute(**attrs)
+        )
         if not analyzers_to_execute and not connectors_to_execute:
             warnings = "\n".join(self.filter_warnings)
             raise ValidationError(
@@ -478,6 +478,7 @@ class JobTreeSerializer(ModelSerializer):
             "playbook",
             "status",
             "received_request_time",
+            "is_sample",
         ]
 
     playbook = rfs.SlugRelatedField(
@@ -1092,9 +1093,9 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 class JobBISerializer(AbstractBIInterface, ModelSerializer):
     timestamp = rfs.DateTimeField(source="received_request_time")
     username = rfs.CharField(source="user.username")
-    name = rfs.CharField(source="pk")
     end_time = rfs.DateTimeField(source="finished_analysis_time")
     playbook = rfs.SerializerMethodField(source="get_playbook")
+    job_id = rfs.CharField(source="pk")
 
     class Meta:
         model = Job

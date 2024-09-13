@@ -47,16 +47,17 @@ class ThugFile(FileAnalyzer, DockerBasedAnalyzer):
         # construct a valid dir name into which thug will save the result
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         tmp_dir = f"{fname}_{secrets.token_hex(4)}"
+        tmp_dir_full_path = "/opt/deploy/thug" + tmp_dir
         # get the file to send
         binary = self.read_file_bytes()
         # append final arguments,
         # -n -> output directory
         # -l -> the local file to analyze
-        args.extend(["-n", "/home/thug/" + tmp_dir, "-l", f"@{fname}"])
+        args.extend(["-n", tmp_dir_full_path, "-l", f"@{fname}"])
         # make request parameters
         req_data = {
             "args": args,
-            "callback_context": {"read_result_from": tmp_dir},
+            "callback_context": {"read_result_from": tmp_dir_full_path},
         }
         req_files = {fname: binary}
 

@@ -13,7 +13,7 @@ import { prettifyErrors } from "../../utils/api";
 
 import { ScanModesNumeric } from "../../constants/advancedSettingsConst";
 import { JobTypes } from "../../constants/jobConst";
-import { getObservableClassification } from "../../utils/observables";
+import { observableValidators } from "../../utils/observables";
 
 function sampleArrayPayload(data, fieldName, payload) {
   Array.from(data).forEach((value) => {
@@ -54,7 +54,11 @@ function createJobPayload(
   } else {
     const observables = [];
     analyzables.forEach((observable) => {
-      observables.push([getObservableClassification(observable), observable]);
+      const validationValue = observableValidators(observable);
+      observables.push([
+        validationValue.classification,
+        validationValue.observable,
+      ]);
     });
     payload.append("observables", observables);
   }

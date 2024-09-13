@@ -5,6 +5,7 @@ from typing import Any
 
 from django.contrib import admin, messages
 from django.contrib.admin import widgets
+from django.contrib.admin.models import LogEntry
 from django.db.models import JSONField, ManyToManyField
 from django.http import HttpRequest
 from prettyjson.widgets import PrettyJSONWidget
@@ -70,10 +71,12 @@ class JobAdminView(CustomAdminView):
     )
     list_filter = ("status", "user", "tags")
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
+    @staticmethod
+    def has_add_permission(request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    @staticmethod
+    def has_change_permission(request: HttpRequest, obj=None) -> bool:
         return False
 
     @admin.display(description="Tags")
@@ -152,7 +155,8 @@ class AbstractReportAdminView(CustomAdminView):
     def has_add_permission(request):
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+    @staticmethod
+    def has_change_permission(request: HttpRequest, obj=None) -> bool:
         return False
 
 
@@ -251,3 +255,27 @@ class OrganizationPluginConfigurationAdminView(CustomAdminView):
     exclude = ["content_type", "object_id"]
     list_filter = ["organization", "content_type"]
     form = OrganizationPluginConfigurationForm
+
+
+@admin.register(LogEntry)
+class LogEntryAdmin(admin.ModelAdmin):
+    ordering = ["-action_time"]
+    list_display = [
+        "pk",
+        "user",
+        "object_repr",
+        "action_flag",
+        "change_message",
+        "action_time",
+    ]
+    list_filter = ["user", "action_flag", "action_time", "content_type"]
+    search_fields = ["user__username", "object_repr", "change_message"]
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

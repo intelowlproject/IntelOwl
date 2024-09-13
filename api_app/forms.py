@@ -10,8 +10,31 @@ from api_app.visualizers_manager.models import VisualizerConfig
 
 
 class MultilineJSONField(forms.JSONField):
+    """
+    A custom JSONField that handles multiline JSON input.
+
+    This field processes multiline input by replacing newline characters
+    with the escape sequence '\\n', and also removes carriage returns and
+    double quotes.
+
+    Methods:
+        _cleaning_and_multiline(value): Static method to process the multiline input.
+        to_python(value): Converts the input value to its Python representation.
+        has_changed(initial, data): Checks if the field's data has changed from its initial value.
+        bound_data(data, initial): Returns the data bound to the form field.
+    """
+
     @staticmethod
     def _cleaning_and_multiline(value):
+        """
+        Process multiline input to escape newline characters and remove carriage returns and quotes.
+
+        Args:
+            value (str): The input value to process.
+
+        Returns:
+            str: The processed value.
+        """
         if value is not None and "\n" in value:
             cleaned_value = []
             for line in value.splitlines():
@@ -23,16 +46,52 @@ class MultilineJSONField(forms.JSONField):
         return value
 
     def to_python(self, value):
+        """
+        Converts the input value to its Python representation after processing it.
+
+        Args:
+            value (str): The input value.
+
+        Returns:
+            any: The Python representation of the input value.
+        """
         return super().to_python(self._cleaning_and_multiline(value))
 
     def has_changed(self, initial, data):
+        """
+        Checks if the field's data has changed from its initial value after processing.
+
+        Args:
+            initial (any): The initial value of the field.
+            data (any): The current value of the field.
+
+        Returns:
+            bool: True if the field's data has changed, False otherwise.
+        """
         return super().has_changed(initial, self._cleaning_and_multiline(data))
 
     def bound_data(self, data, initial):
+        """
+        Returns the data bound to the form field after processing.
+
+        Args:
+            data (any): The current value of the field.
+            initial (any): The initial value of the field.
+
+        Returns:
+            any: The processed data bound to the field.
+        """
         return super().bound_data(self._cleaning_and_multiline(data), initial)
 
 
 class ParameterInlineForm(forms.ModelForm):
+    """
+    A form for the Parameter model that uses the custom MultilineJSONField for the 'default' field.
+
+    Attributes:
+        default (MultilineJSONField): The default value for the parameter, processed for multiline JSON input.
+    """
+
     default = MultilineJSONField(required=False)
 
     class Meta:
@@ -48,6 +107,18 @@ class ParameterInlineForm(forms.ModelForm):
 
 
 class OrganizationPluginConfigurationForm(forms.ModelForm):
+    """
+    A form for the OrganizationPluginConfiguration model, allowing configuration of various plugins.
+
+    Attributes:
+        analyzer (ModelChoiceField): Field for selecting an AnalyzerConfig.
+        connector (ModelChoiceField): Field for selecting a ConnectorConfig.
+        visualizer (ModelChoiceField): Field for selecting a VisualizerConfig.
+        pivot (ModelChoiceField): Field for selecting a PivotConfig.
+        playbook (ModelChoiceField): Field for selecting a PlaybookConfig.
+        _plugins (list): List of plugin fields.
+    """
+
     analyzer = forms.ModelChoiceField(
         queryset=AnalyzerConfig.objects.filter(orgs_configuration__isnull=True),
         required=False,
@@ -72,6 +143,12 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
     _plugins = ["analyzer", "connector", "visualizer", "pivot", "playbook"]
 
     def validate_unique(self) -> None:
+        """
+        Validates that exactly one plugin configuration is selected.
+
+        Raises:
+            ValidationError: If not exactly one configuration is selected.
+        """
         number_plugins = sum(
             bool(self.cleaned_data.get(val, False)) for val in self._plugins
         )
@@ -86,6 +163,18 @@ class OrganizationPluginConfigurationForm(forms.ModelForm):
         return super().validate_unique()
 
     def save(self, commit=True):
+        """
+        Saves the form instance, ensuring that exactly one plugin configuration is set.
+
+        Args:
+            commit (bool): Whether to commit the save to the database.
+
+        Returns:
+            OrganizationPluginConfiguration: The saved instance.
+
+        Raises:
+            ValidationError: If no configuration is set when saving a new instance.
+        """
         if not self.instance.pk:
             for field in self._plugins:
                 config = self.cleaned_data.get(field, None)

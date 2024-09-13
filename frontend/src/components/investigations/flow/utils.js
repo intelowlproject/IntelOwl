@@ -20,6 +20,7 @@ function addJobNode(
       investigation: investigationId,
       children: job.children || [],
       status: job.status,
+      is_sample: job.is_sample,
       refetchTree,
       refetchInvestigation,
       isFirstLevel: isFirstLevel || false,

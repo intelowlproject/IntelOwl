@@ -1,1 +1,1 @@
-Please refer to https://intelowl.readthedocs.io/en/latest/Contribute.html
+Please refer to https://intelowlproject.github.io/docs/IntelOwl/contribute/

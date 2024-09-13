@@ -48,7 +48,7 @@ jobs:
 
       - name: Black formatter
         run: |
-          black . --check --diff --exclude "migrations|venv"
+          black . --check --diff --exclude "migrations|venv|.ipython|docs_env|.cache"
 
       - name: Lint with flake8 (PEP8 enforcer + linter)
         run: |

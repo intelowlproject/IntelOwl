@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import React from "react";
+import { UncontrolledTooltip } from "reactstrap";
 
 import {
   DefaultColumnFilter,
   SelectOptionsFilter,
-  LinkOpenViewIcon,
   DateHoverable,
   CopyToClipboardButton,
 } from "@certego/certego-ui";
@@ -24,12 +24,21 @@ export const investigationTableColumns = [
     disableSortBy: true,
     Cell: ({ value: id }) => (
       <div className="d-flex flex-column justify-content-center">
-        <p>#{id}</p>
-        <LinkOpenViewIcon
-          id={id}
+        <a
+          id={`investigation-${id}`}
           href={`/investigation/${id}`}
-          tooltip="View investigation report"
-        />
+          target="_blank"
+          rel="noreferrer"
+        >
+          #{id}
+        </a>
+        <UncontrolledTooltip
+          target={`investigation-${id}`}
+          placement="top"
+          fade={false}
+        >
+          View Investigation Report
+        </UncontrolledTooltip>
       </div>
     ),
     Filter: DefaultColumnFilter,
@@ -99,8 +108,8 @@ export const investigationTableColumns = [
         (tag) =>
           tag !== null && (
             <JobTag
-              key={`jobtable-tags-${tag?.label}`}
-              tag={tag}
+              key={`jobtable-tags-${tag}`}
+              tag={{ label: tag, color: "#1655D3" }}
               className="ms-2"
             />
           ),

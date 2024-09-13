@@ -67,10 +67,12 @@ class DNS(Visualizer):
             name=self.Base(value=f"{printable_analyzer_name}", disable=disable_element),
             value=[
                 self.Base(
-                    value=dns_resolution["data"]
-                    if self._job.observable_classification
-                    == ObservableClassification.DOMAIN
-                    else dns_resolution,
+                    value=(
+                        dns_resolution["data"]
+                        if self._job.observable_classification
+                        == ObservableClassification.DOMAIN
+                        else dns_resolution
+                    ),
                     disable=False,
                 )
                 for dns_resolution in analyzer_report.report["resolutions"]

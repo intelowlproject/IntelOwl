@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
@@ -25,6 +26,18 @@ logger = logging.getLogger(__name__)
 
 
 class IngestorReport(AbstractReport):
+    """
+    Model representing an Ingestor Report.
+
+    Attributes:
+        config (ForeignKey): Reference to the IngestorConfig.
+        report (JSONField): JSON field storing the report data.
+        name (CharField): Name of the report.
+        task_id (UUIDField): Task ID associated with the report.
+        job (ForeignKey): Reference to the related Job.
+        max_size_report (IntegerField): Maximum size of the report.
+    """
+
     objects = IngestorReportQuerySet.as_manager()
     config = models.ForeignKey(
         "IngestorConfig", related_name="reports", on_delete=models.CASCADE
@@ -46,6 +59,9 @@ class IngestorReport(AbstractReport):
         indexes = AbstractReport.Meta.indexes
 
     def clean_report(self):
+        """
+        Cleans the report by trimming it to the maximum size if necessary.
+        """
         if isinstance(self.report, list) and self.max_size_report is not None:
             len_report = len(self.report)
             if len_report > self.max_size_report:
@@ -61,6 +77,20 @@ class IngestorReport(AbstractReport):
 
 
 class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
+    """
+    Model representing an Ingestor Configuration.
+
+    Attributes:
+        python_module (ForeignKey): Reference to the PythonModule.
+        playbooks_choice (ManyToManyField): Many-to-many relationship with PlaybookConfig.
+        user (ForeignKey): Reference to the user.
+        schedule (ForeignKey): Reference to the CrontabSchedule.
+        periodic_task (OneToOneField): One-to-one relationship with PeriodicTask.
+        maximum_jobs (IntegerField): Maximum number of jobs.
+        delay (DurationField): Delay between jobs.
+        org_configuration (None): Placeholder for organization configuration.
+    """
+
     objects = IngestorQuerySet.as_manager()
     python_module = models.ForeignKey(
         PythonModule,
@@ -68,10 +98,9 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         related_name="%(class)ss",
         limit_choices_to={"base_path": PythonModuleBasePaths.Ingestor.value},
     )
-    playbook_to_execute = models.ForeignKey(
+    playbooks_choice = models.ManyToManyField(
         PlaybookConfig,
         related_name="ingestors",
-        on_delete=models.CASCADE,
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -85,6 +114,9 @@ class IngestorConfig(PythonConfig, CreateJobsFromPlaybookInterface):
         PeriodicTask, related_name="ingestor", on_delete=models.PROTECT
     )
     maximum_jobs = models.IntegerField(default=10)
+    delay = models.DurationField(
+        default=timedelta, help_text="Expects data in the format 'DD HH:MM:SS'"
+    )
 
     org_configuration = None
 

@@ -81,6 +81,7 @@ function DangerErrorMessage(fieldName) {
 export default function ScanForm() {
   const [searchParams, _] = useSearchParams();
   const observableParam = searchParams.get(JobTypes.OBSERVABLE);
+  const isSampleParam = searchParams.get("isSample") === "true";
   const investigationIdParam = searchParams.get("investigation") || null;
   const parentIdParam = searchParams.get("parent");
   const { guideState, setGuideState } = useGuideContext();
@@ -191,9 +192,7 @@ export default function ScanForm() {
     onSubmit: async (values) => {
       const response = await createJob(
         values.observableType === JobTypes.OBSERVABLE
-          ? values.observable_names.map((observable) =>
-              sanitizeObservable(observable),
-            )
+          ? values.observable_names
           : values.files,
         values.classification,
         values.playbook.value,
@@ -416,6 +415,23 @@ export default function ScanForm() {
       }))
       .filter((item) => !item.isDisabled && item.starting);
 
+  const selectObservableType = (value) => {
+    formik.setFieldValue("observableType", value, false);
+    formik.setFieldValue(
+      "classification",
+      value === JobTypes.OBSERVABLE
+        ? ObservableClassifications.GENERIC
+        : JobTypes.FILE,
+    );
+    formik.setFieldValue("observable_names", [""], false);
+    formik.setFieldValue("files", [""], false);
+    formik.setFieldValue("analysisOptionValues", ScanTypes.playbooks, false);
+    setScanType(ScanTypes.playbooks);
+    formik.setFieldValue("playbook", "", false); // reset
+    formik.setFieldValue("analyzers", [], false); // reset
+    formik.setFieldValue("connectors", [], false); // reset
+  };
+
   const updateAdvancedConfig = (
     tags,
     tlp,
@@ -535,9 +551,11 @@ export default function ScanForm() {
     if (observableParam) {
       updateSelectedObservable(observableParam, 0);
       if (formik.playbook) updateSelectedPlaybook(formik.playbook);
+    } else if (isSampleParam) {
+      selectObservableType(JobTypes.FILE);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [observableParam, playbooksLoading]);
+  }, [observableParam, playbooksLoading, isSampleParam]);
 
   /* With the setFieldValue the validation and rerender don't work properly: the last update seems to not trigger the validation
   and leaves the UI with values not valid, for this reason the scan button is disabled, but if the user set focus on the UI the last
@@ -614,30 +632,9 @@ export default function ScanForm() {
                         type="radio"
                         name="observableType"
                         value={jobType}
-                        onClick={(event) => {
-                          formik.setFieldValue(
-                            "observableType",
-                            event.target.value,
-                            false,
-                          );
-                          formik.setFieldValue(
-                            "classification",
-                            event.target.value === JobTypes.OBSERVABLE
-                              ? ObservableClassifications.GENERIC
-                              : JobTypes.FILE,
-                          );
-                          formik.setFieldValue("observable_names", [""], false);
-                          formik.setFieldValue("files", [""], false);
-                          formik.setFieldValue(
-                            "analysisOptionValues",
-                            ScanTypes.playbooks,
-                            false,
-                          );
-                          setScanType(ScanTypes.playbooks);
-                          formik.setFieldValue("playbook", "", false); // reset
-                          formik.setFieldValue("analyzers", [], false); // reset
-                          formik.setFieldValue("connectors", [], false); // reset
-                        }}
+                        onClick={(event) =>
+                          selectObservableType(event.target.value)
+                        }
                       />
                       <Label check>
                         {jobType === JobTypes.OBSERVABLE
@@ -923,7 +920,7 @@ export default function ScanForm() {
                       <br />
                       For more info check the{" "}
                       <Link
-                        to="https://intelowl.readthedocs.io/en/latest/Usage.html#tlp-support"
+                        to="https://intelowlproject.github.io/docs/IntelOwl/usage/#tlp-support"
                         target="_blank"
                       >
                         official doc.

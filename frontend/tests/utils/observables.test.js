@@ -61,6 +61,7 @@ describe("Observable validators tests", () => {
     "test.com ",
     "test.com;",
     " test.com ",
+    "(test.com)",
   ])("test valid domains (%s)", (valueToValidate) => {
     expect(observableValidators(valueToValidate)).toStrictEqual({
       classification: "domain",
@@ -68,12 +69,17 @@ describe("Observable validators tests", () => {
     });
   });
 
-  test.each(["test.exe", "test.pdf,", ",test.js,", "256.256.256.256"])(
-    "test invalid domains (%s)",
-    (valueToValidate) => {
-      expect(observableValidators(valueToValidate)).toBeNull();
-    },
-  );
+  test.each([
+    "test.exe",
+    "test.pdf,",
+    ",test.js,",
+    "256.256.256.256",
+    "google(.)com",
+  ])("test invalid domains (%s)", (valueToValidate) => {
+    expect(observableValidators(valueToValidate).classification).toStrictEqual(
+      "generic",
+    );
+  });
 
   test.each([
     "40ff44d9e619b17524bf3763204f9cbb",
@@ -95,7 +101,9 @@ describe("Observable validators tests", () => {
     "40ff44d9e619b17524bf3763204f9cbbevdc40ff44d9e619b17524bf3763204f9cbbevdc", // >64
     "40ff44d9e619b17524bf3763204f9cbbevdc40ff44d9e619b17524bf3763204f9cbbevdc40ff44d9e619b17524bf3763204f9cbbevdc40ff44d9e619b17524bf3763204f9cbbevdc", // >128
   ])("test invalid hash (%s)", (valueToValidate) => {
-    expect(observableValidators(valueToValidate)).toBeNull();
+    expect(observableValidators(valueToValidate).classification).toStrictEqual(
+      "generic",
+    );
   });
 
   test.each([
@@ -118,7 +126,10 @@ describe("Observable validators tests", () => {
     "+391234567890;",
     " +391234567890 ",
   ])("test valid phone numbers (%s)", (valueToValidate) => {
-    expect(observableValidators(valueToValidate)).toBeNull();
+    expect(observableValidators(valueToValidate)).toStrictEqual({
+      classification: "generic",
+      observable: "+391234567890",
+    });
   });
 
   test.each([
@@ -137,31 +148,37 @@ describe("Observable validators tests", () => {
     If we want to support them store in the db the phone numbers always in the same format.
     */
     const validationResult = observableValidators(valueToValidate);
-    /* some of the elements match the ip regex, in case they don't match it return null:
-     use the ?. to access to the field for the null element and it will be undefined.
-    */
-    expect(["ip", undefined]).toContain(validationResult?.classification);
+    // some of the elements match the ip regex, in case they don't match it return "generic"
+    expect(["ip", "generic"]).toContain(validationResult.classification);
   });
 
   test.each([
-    "2024-05-10",
-    "2024-05-10 ",
-    "2024-05-10;",
-    " 2024-05-10 ",
     "10/10/21",
     "2024-05-10T12:30:40Z",
     "2024-05-10T12:30:40",
     "2024-05-10 12:30:40",
   ])("test valid date (%s)", (valueToValidate) => {
-    expect(observableValidators(valueToValidate)).toBeNull();
+    expect(observableValidators(valueToValidate).classification).toStrictEqual(
+      "generic",
+    );
   });
+
+  test.each(["2024-05-10", "2024-05-10 ", "2024-05-10;", " 2024-05-10 "])(
+    "test valid date (%s)",
+    (valueToValidate) => {
+      expect(observableValidators(valueToValidate)).toStrictEqual({
+        classification: "generic",
+        observable: "2024-05-10",
+      });
+    },
+  );
 
   test.each(["2024-05-40", "10/13/21", "2024-05-10 56:30:40"])(
     "test valid date (%s)",
     (valueToValidate) => {
       const validationResult = observableValidators(valueToValidate);
       // 2024-05-40 matches IP addess regex.
-      expect(["ip", undefined]).toContain(validationResult?.classification);
+      expect(["ip", "generic"]).toContain(validationResult.classification);
     },
   );
 });

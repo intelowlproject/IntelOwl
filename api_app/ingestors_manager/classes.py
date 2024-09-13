@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class Ingestor(Plugin, metaclass=abc.ABCMeta):
+    """
+    Abstract Base class for Ingestors.
+    Ingestors are responsible for ingesting data and generating reports.
+    """
+
     def __init__(self, config: IngestorConfig, **kwargs):
         super().__init__(config, **kwargs)
 
@@ -52,18 +57,27 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
 
     def before_run(self):
         self._config: IngestorConfig
-        self._config.validate_playbook_to_execute(self._user)
+        self._config.validate_playbooks(self._user)
+
+    def get_playbook_to_execute(self):
+        self._config: IngestorConfig
+        return self._config.playbooks_choice.first()
 
     def after_run_success(self, content):
+        # exhaust generator
+        if isinstance(content, typing.Generator):
+            content = list(content)
+
         super().after_run_success(content)
         self._config: IngestorConfig
-        # exhaust generator
         deque(
             self._config.create_jobs(
                 # every job created from an ingestor
                 content,
                 TLP.CLEAR.value,
                 self._user,
+                delay=self._config.delay,
+                playbook_to_execute=self.get_playbook_to_execute(),
             ),
             maxlen=0,
         )

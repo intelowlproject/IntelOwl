@@ -8,9 +8,6 @@ import Login from "../../../src/components/auth/Login";
 import { AUTH_BASE_URI } from "../../../src/constants/apiURLs";
 
 jest.mock("axios");
-jest.mock("../../../src/constants/environment", () => ({
-  RECAPTCHA_SITEKEY: "",
-}));
 
 describe("Login component", () => {
   // mock login request
@@ -48,7 +45,7 @@ describe("Login component", () => {
       // check request has been performed
       expect(axios.post).toHaveBeenCalledWith(
         `${AUTH_BASE_URI}/login`,
-        { password: "dummyPwd1", username: "test_user", recaptcha: "noKey" },
+        { password: "dummyPwd1", username: "test_user" },
         { certegoUIenableProgressBar: false },
       );
       // check redirect to home page

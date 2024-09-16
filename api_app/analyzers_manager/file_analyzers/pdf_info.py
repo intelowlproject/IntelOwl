@@ -35,7 +35,7 @@ class PDFInfo(FileAnalyzer):
             self.results["pdfid"]["reports"], list
         ):
             for elem in self.results["pdfid"]["reports"]:
-                if "/Page" in elem and elem["/Page"] == 1:
+                if "/Page" in elem and elem["/Page"] == 1 and peepdf_success:
                     self.results["uris"] = []
                     for s in self.results["peepdf"]["stats"]:
                         self.results["uris"].extend(s["uris"])

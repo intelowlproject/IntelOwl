@@ -31,8 +31,10 @@ class PDFInfo(FileAnalyzer):
             raise AnalyzerRunException("both peepdf and pdfid failed")
 
         # pivot uris in the pdf only if we have one page
-        if "reports" in self.results["pdfid"] and isinstance(
-            self.results["pdfid"]["reports"], list
+        if (
+            "reports" in self.results["pdfid"]
+            and isinstance(self.results["pdfid"]["reports"], list)
+            and peepdf_success
         ):
             for elem in self.results["pdfid"]["reports"]:
                 if "/Page" in elem and elem["/Page"] == 1:

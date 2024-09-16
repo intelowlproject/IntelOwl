@@ -265,20 +265,16 @@ class AbstractConfigSerializer(rfs.ModelSerializer): ...
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):
-    parameters = ParameterSerializer(write_only=True, many=True)
+    parameters = ParameterSerializer(write_only=True, many=True, required=False)
 
     class Meta:
         exclude = [
-            "python_module",
             "routing_key",
             "soft_time_limit",
             "health_check_status",
             "health_check_task",
         ]
         list_serializer_class = PythonConfigListSerializer
-
-    def to_internal_value(self, data):
-        raise NotImplementedError()
 
     def to_representation(self, instance: PythonConfig):
         result = super().to_representation(instance)

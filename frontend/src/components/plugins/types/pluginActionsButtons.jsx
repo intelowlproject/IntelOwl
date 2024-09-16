@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
-import { MdDelete, MdFileDownload } from "react-icons/md";
+import { MdDelete, MdFileDownload, MdEdit } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
 
 import { IconButton } from "@certego/certego-ui";
@@ -11,6 +11,7 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
+import { AnalyzerConfigForm } from "./AnalyzerConfigForm";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -238,4 +239,50 @@ PluginPullButton.propTypes = {
   pluginName: PropTypes.string.isRequired,
   pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
     .isRequired,
+};
+
+export function AnalyzersEditButton({ analyzerConfig }) {
+  const [showModal, setShowModal] = React.useState(false);
+
+  const user = useAuthStore(React.useCallback((state) => state.user, []));
+  const { isInOrganization, isUserAdmin } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        fetchAll: state.fetchAll,
+        isInOrganization: state.isInOrganization,
+        isUserAdmin: state.isUserAdmin,
+      }),
+      [],
+    ),
+  );
+
+  // disabled icon if the user is not an admin of the org or a superuser
+  const disabled =
+    (isInOrganization && !isUserAdmin(user.username)) ||
+    (!isInOrganization && !user.is_staff);
+
+  return (
+    <div className="d-flex flex-column align-items-center px-2">
+      <IconButton
+        id={`analyzer-edit-btn__${analyzerConfig?.name}`}
+        color="info"
+        size="sm"
+        Icon={MdEdit}
+        title="Edit analyzer config"
+        onClick={() => setShowModal(true)}
+        disabled={disabled}
+        titlePlacement="top"
+      />
+      <AnalyzerConfigForm
+        config={analyzerConfig}
+        toggle={setShowModal}
+        isEditing
+        isOpen={showModal}
+      />
+    </div>
+  );
+}
+
+AnalyzersEditButton.propTypes = {
+  analyzerConfig: PropTypes.object.isRequired,
 };

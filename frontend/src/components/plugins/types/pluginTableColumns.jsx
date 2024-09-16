@@ -23,6 +23,7 @@ import {
   PluginHealthCheckButton,
   PlaybooksDeletionButton,
   PluginPullButton,
+  AnalyzersEditButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -205,6 +206,7 @@ export const analyzersTableColumns = [
           pluginName={value.name}
           pluginType_={PluginsTypes.ANALYZER}
         />
+        <AnalyzersEditButton analyzerConfig={value} />
       </div>
     ),
     maxWidth: 100,

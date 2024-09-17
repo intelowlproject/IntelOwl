@@ -313,13 +313,14 @@ export function PlaybooksEditButton({ playbookConfig }) {
         }}
         titlePlacement="top"
       />
-      <PlaybookConfigForm
-        playbookConfig={playbookConfig}
-        toggle={setShowModal}
-        isEditing
-        isOpen={showModal}
-        pluginsLoading={pluginsLoading}
-      />
+      {showModal && (
+        <PlaybookConfigForm
+          playbookConfig={playbookConfig}
+          toggle={setShowModal}
+          isOpen={showModal}
+          pluginsLoading={pluginsLoading}
+        />
+      )}
     </div>
   );
 }
@@ -360,12 +361,13 @@ export function PivotsEditButton({ pivotConfig }) {
         disabled={disabled}
         titlePlacement="top"
       />
-      <PivotConfigForm
-        pivotConfig={pivotConfig}
-        toggle={setShowModal}
-        isEditing
-        isOpen={showModal}
-      />
+      {showModal && (
+        <PivotConfigForm
+          pivotConfig={pivotConfig}
+          toggle={setShowModal}
+          isOpen={showModal}
+        />
+      )}
     </div>
   );
 }

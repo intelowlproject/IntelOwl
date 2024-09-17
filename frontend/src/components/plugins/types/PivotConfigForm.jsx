@@ -25,7 +25,7 @@ import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurat
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { editPluginConfig, createPluginConfig } from "../pluginsApi";
 
-export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
+export function PivotConfigForm({ pivotConfig, toggle, isOpen }) {
   console.debug("PivotConfigForm rendered!");
 
   // states
@@ -72,6 +72,8 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
   const isPythonModuleSelectable = pythonModuleOptions.find(
     (element) => element.value === pivotConfig?.python_module,
   );
+
+  const isEditing = Object.keys(pivotConfig).length > 0;
 
   const formik = useFormik({
     initialValues: {
@@ -430,8 +432,11 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing, isOpen }) {
 }
 
 PivotConfigForm.propTypes = {
-  pivotConfig: PropTypes.object.isRequired,
+  pivotConfig: PropTypes.object,
   toggle: PropTypes.func.isRequired,
-  isEditing: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,
+};
+
+PivotConfigForm.defaultProps = {
+  pivotConfig: {},
 };

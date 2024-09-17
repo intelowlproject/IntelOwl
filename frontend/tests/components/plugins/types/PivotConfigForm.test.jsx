@@ -47,9 +47,7 @@ describe("PivotConfigForm test", () => {
     render(
       <BrowserRouter>
         <PivotConfigForm
-          pivotConfig={{}}
           toggle={jest.fn()}
-          isEditing={false}
           isOpen
         />
       </BrowserRouter>,
@@ -85,9 +83,7 @@ describe("PivotConfigForm test", () => {
     render(
       <BrowserRouter>
         <PivotConfigForm
-          pivotConfig={{}}
           toggle={jest.fn()}
-          isEditing={false}
           isOpen
         />
       </BrowserRouter>,
@@ -167,9 +163,7 @@ describe("PivotConfigForm test", () => {
     render(
       <BrowserRouter>
         <PivotConfigForm
-          pivotConfig={{}}
           toggle={jest.fn()}
-          isEditing={false}
           isOpen
         />
       </BrowserRouter>,
@@ -266,7 +260,6 @@ describe("PivotConfigForm test", () => {
         <PivotConfigForm
           pivotConfig={pivotConfig}
           toggle={jest.fn()}
-          isEditing
           isOpen
         />
       </BrowserRouter>,

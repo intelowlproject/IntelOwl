@@ -55,7 +55,6 @@ const stateSelector = (state) => [
 export function PlaybookConfigForm({
   playbookConfig,
   toggle,
-  isEditing,
   isOpen,
   pluginsLoading,
 }) {
@@ -66,6 +65,8 @@ export function PlaybookConfigForm({
   const [editableConfig, setEditableConfig] = React.useState({});
   const [jsonInput, setJsonInput] = React.useState({});
   const [responseError, setResponseError] = React.useState(null);
+
+  const isEditing = Object.keys(playbookConfig).length > 0;
 
   // store
   const [
@@ -430,13 +431,13 @@ export function PlaybookConfigForm({
 }
 
 PlaybookConfigForm.propTypes = {
-  playbookConfig: PropTypes.object.isRequired,
+  playbookConfig: PropTypes.object,
   toggle: PropTypes.func.isRequired,
-  isEditing: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,
   pluginsLoading: PropTypes.bool,
 };
 
 PlaybookConfigForm.defaultProps = {
+  playbookConfig: {},
   pluginsLoading: false,
 };

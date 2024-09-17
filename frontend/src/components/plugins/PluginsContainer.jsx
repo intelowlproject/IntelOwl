@@ -161,18 +161,18 @@ export default function PluginsContainer() {
           &nbsp;Create {pluginsPage}
         </Button>
       )}
-      <PlaybookConfigForm
-        playbookConfig={{}}
-        toggle={setShowModalCreatePlaybook}
-        isEditing={false}
-        isOpen={showModalCreatePlaybook}
-      />
-      <PivotConfigForm
-        pivotConfig={{}}
-        toggle={setShowModalCreatePivot}
-        isEditing={false}
-        isOpen={showModalCreatePivot}
-      />
+      {showModalCreatePlaybook && (
+        <PlaybookConfigForm
+          toggle={setShowModalCreatePlaybook}
+          isOpen={showModalCreatePlaybook}
+        />
+      )}
+      {showModalCreatePivot && (
+        <PivotConfigForm
+          toggle={setShowModalCreatePivot}
+          isOpen={showModalCreatePivot}
+        />
+      )}
     </Col>
   );
 

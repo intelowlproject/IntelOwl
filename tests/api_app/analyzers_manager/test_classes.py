@@ -46,6 +46,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "document.rtf",
                 "document.xls",
                 "document.doc",
+                "downloader.lnk",
                 "file.dll",
                 "file.exe",
                 "shellcode.bin",
@@ -74,6 +75,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/rtf",
                 "application/vnd.ms-excel",
                 "application/msword",
+                "application/x-ms-shortcut",
                 "application/vnd.microsoft.portable-executable",
                 "application/vnd.microsoft.portable-executable",
                 "application/octet-stream",
@@ -128,6 +130,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 timeout_seconds = min(timeout_seconds, 30)
                 print(f"\tTesting with config {config.name}")
                 found_one = False
+                skipped = False
                 for mimetype in MimeTypes.values:
                     if (
                         config.supported_filetypes
@@ -141,6 +144,13 @@ class FileAnalyzerTestCase(CustomTestCase):
                         pass
                     else:
                         continue
+                    sub = subclass(
+                        config,
+                    )
+                    if config.docker_based and not sub.health_check():
+                        print(f"skipping {subclass.__name__} cause health check failed")
+                        skipped = True
+                        continue
                     jobs = Job.objects.filter(file_mimetype=mimetype)
                     if jobs.exists():
                         found_one = True
@@ -150,9 +160,6 @@ class FileAnalyzerTestCase(CustomTestCase):
                             "\t\t"
                             f"Testing {job.file_name} with mimetype {mimetype}"
                             f" for {timeout_seconds} seconds"
-                        )
-                        sub = subclass(
-                            config,
                         )
                         signal.alarm(timeout_seconds)
                         try:
@@ -165,7 +172,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                             )
                         finally:
                             signal.alarm(0)
-                if not found_one:
+                if not found_one and not skipped:
                     self.fail(
                         f"No valid job found for analyzer {subclass.__name__}"
                         f" with configuration {config.name}"

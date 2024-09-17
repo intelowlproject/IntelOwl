@@ -84,6 +84,8 @@ ioc-finder==7.0.0
 polyswarm-api==3.9.0
 knock-subdomains==7.0.1
 dotnetfile==0.2.4
+docxpy==0.8.5
+pylnk3==0.4.2
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

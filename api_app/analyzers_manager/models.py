@@ -91,6 +91,7 @@ class MimeTypes(models.TextChoices):
     KOTLIN = "text/x-kotlin"
     SWIFT = "text/x-swift"
     OBJECTIVE_C_CODE = "text/x-objective-c"
+    LNK = "application/x-ms-shortcut"
 
     @classmethod
     def _calculate_from_filename(cls, file_name: str) -> Optional["MimeTypes"]:

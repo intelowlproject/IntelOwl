@@ -2,6 +2,8 @@ import logging
 from typing import Any, Iterable
 from unittest.mock import patch
 
+from django.utils import timezone
+
 from api_app.ingestors_manager.classes import Ingestor
 from api_app.mixins import VirusTotalv3AnalyzerMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections
@@ -15,7 +17,7 @@ def filter_vt_search_results(result):
     data = result.get("data", {})
     logger.info(f"Retrieved {len(data)} items from the query")
     for d in data:
-        attributes = data.get("attributes", {})
+        attributes = d.get("attributes", {})
 
         # https://virustotal.readme.io/reference/files
         threat_severity = attributes.get("threat_severity", {})
@@ -30,13 +32,15 @@ def filter_vt_search_results(result):
     return file_to_download
 
 
-class VirusTotal(VirusTotalv3AnalyzerMixin, Ingestor):
+class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
     # Download samples/IOCs that are up to X hours old
     hours: int
     # The query to execute
     query: str
     # Extract IOCs? Otherwise, download the file
     extract_IOCs: bool
+    # VT API key
+    _api_key_name: str
 
     @classmethod
     def update(cls) -> bool:
@@ -52,13 +56,14 @@ class VirusTotal(VirusTotalv3AnalyzerMixin, Ingestor):
             "order": "",
         }
         result, response = self._perform_get_request(
-            self.url + "intelligence/search", params=params
+            "intelligence/search", params=params
         )
         return result
 
     def run(self) -> Iterable[Any]:
         if "fs:" not in self.query:
-            self.query = f"fs:{self.hours}h+ " + self.query
+            delta_hours = timezone.datetime.now() - timezone.timedelta(hours=self.hours)
+            self.query = f"fs:{delta_hours.strftime('%Y-%m-%d%H:%M:%S')}+ " + self.query
         result = self._search(self.query)
         samples_hashes = filter_vt_search_results(result)
         for sample_hash in samples_hashes:

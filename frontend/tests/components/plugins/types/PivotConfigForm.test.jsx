@@ -46,10 +46,7 @@ describe("PivotConfigForm test", () => {
   test("form fields", async () => {
     render(
       <BrowserRouter>
-        <PivotConfigForm
-          toggle={jest.fn()}
-          isOpen
-        />
+        <PivotConfigForm toggle={jest.fn()} isOpen />
       </BrowserRouter>,
     );
 
@@ -82,10 +79,7 @@ describe("PivotConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PivotConfigForm
-          toggle={jest.fn()}
-          isOpen
-        />
+        <PivotConfigForm toggle={jest.fn()} isOpen />
       </BrowserRouter>,
     );
 
@@ -162,10 +156,7 @@ describe("PivotConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PivotConfigForm
-          toggle={jest.fn()}
-          isOpen
-        />
+        <PivotConfigForm toggle={jest.fn()} isOpen />
       </BrowserRouter>,
     );
 
@@ -257,11 +248,7 @@ describe("PivotConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PivotConfigForm
-          pivotConfig={pivotConfig}
-          toggle={jest.fn()}
-          isOpen
-        />
+        <PivotConfigForm pivotConfig={pivotConfig} toggle={jest.fn()} isOpen />
       </BrowserRouter>,
     );
 

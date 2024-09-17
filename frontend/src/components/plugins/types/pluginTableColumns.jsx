@@ -21,8 +21,10 @@ import {
 import {
   OrganizationPluginStateToggle,
   PluginHealthCheckButton,
-  PlaybooksDeletionButton,
   PluginPullButton,
+  PlaybooksEditButton,
+  PluginDeletionButton,
+  PivotsEditButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -331,11 +333,17 @@ export const pivotTableColumns = [
           pluginName={value.name}
           pluginType_={PluginsTypes.PIVOT}
         />
+        <PivotsEditButton pivotConfig={value} />
+        <PluginDeletionButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.PIVOT}
+        />
       </div>
     ),
     maxWidth: 125,
   },
 ];
+
 // Playbooks columns: these columns are shown for the playbooks
 export const playbookTableColumns = [
   ...pluginTableColumns,
@@ -425,8 +433,14 @@ export const playbookTableColumns = [
           type={PluginsTypes.PLAYBOOK}
           pluginOwner={value?.owner}
         />
-        {value.is_deletable && (
-          <PlaybooksDeletionButton playbookName={value?.name} />
+        {value.is_editable && (
+          <>
+            <PlaybooksEditButton playbookConfig={value} />
+            <PluginDeletionButton
+              pluginName={value?.name}
+              pluginType_={PluginsTypes.PLAYBOOK}
+            />
+          </>
         )}
       </div>
     ),

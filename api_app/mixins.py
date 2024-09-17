@@ -411,6 +411,39 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             raise AnalyzerRunException(error_message)
         return result, response
 
+    def _vt_download_file(self, file_hash):
+        try:
+            endpoint = self.url + f"files/{file_hash}/download"
+            response = requests.get(endpoint, headers=self.headers)
+        except Exception as e:
+            error_message = f"Cannot download the file {file_hash}. Raised Error: {e}."
+            raise AnalyzerRunException(error_message)
+        return response.content
+
+    def _vt_get_iocs_from_file(self, observable_name: str):
+        try:
+            params, uri, relationships_requested = self._get_requests_params_and_uri(
+                self.ObservableTypes.HASH, observable_name
+            )
+            result, response = self._perform_get_request(
+                uri, ignore_404=True, params=params
+            )
+            if response.status_code != 404:
+                relationships = result.get("data", {}).get("relationships", {})
+                contacted_ips = relationships.get("contacted_ips", {})
+                contacted_urls = relationships.get("contacted_urls", {})
+                contacted_domains = relationships.get("contacted_domains", {})
+                return {
+                    "contacted_ips": contacted_ips,
+                    "contacted_urls": contacted_urls,
+                    "contacted_domains": contacted_domains,
+                }
+        except Exception as e:
+            logger.error(
+                "something went wrong when extracting relationships"
+                f" for observable {observable_name}: {e}"
+            )
+
     def _fetch_behaviour_summary(self, observable_name: str) -> dict:
         endpoint = f"files/{observable_name}/behaviour_summary"
         result, _ = self._perform_get_request(endpoint, ignore_404=True)
@@ -421,6 +454,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
         result, _ = self._perform_get_request(endpoint, ignore_404=True)
         return result
 
+    # return available relationships from file mimetype
     @classmethod
     def _get_relationship_for_classification(cls, obs_clfn: str):
         # reference: https://developers.virustotal.com/reference/metadata
@@ -474,6 +508,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             )
         return relationships
 
+    # configure requests params from file mimetype to get relative relationships
     def _get_requests_params_and_uri(self, obs_clfn: str, observable_name: str):
         params = {}
         # in this way, you just retrieved metadata about relationships

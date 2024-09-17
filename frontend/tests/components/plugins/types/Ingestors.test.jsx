@@ -13,7 +13,7 @@ jest.mock("../../../../src/stores/useOrganizationStore", () => ({
       loading: false,
       error: null,
       isUserOwner: false,
-      noOrg: true,
+      isInOrganization: false,
       organization: {},
       membersCount: undefined,
       members: [],

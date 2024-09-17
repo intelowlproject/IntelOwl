@@ -91,19 +91,23 @@ export function PluginData({
     analyzers,
     connectors,
     pivots,
+    ingestors,
     visualizers,
     retrieveAnalyzersConfiguration,
     retrieveConnectorsConfiguration,
     retrievePivotsConfiguration,
+    retrieveIngestorsConfiguration,
     retrieveVisualizersConfiguration,
   ] = usePluginConfigurationStore((state) => [
     filterEmptyData(state.analyzers, dataName),
     filterEmptyData(state.connectors, dataName),
     filterEmptyData(state.pivots, dataName),
+    filterEmptyData(state.ingestors, dataName),
     filterEmptyData(state.visualizers, dataName),
     state.retrieveAnalyzersConfiguration,
     state.retrieveConnectorsConfiguration,
     state.retrievePivotsConfiguration,
+    state.retrieveIngestorsConfiguration,
     state.retrieveVisualizersConfiguration,
   ]);
 
@@ -124,6 +128,8 @@ export function PluginData({
             plugins = connectors;
           } else if (res.type === PluginTypesNumeric.VISUALIZER) {
             plugins = visualizers;
+          } else if (res.type === PluginTypesNumeric.INGESTOR) {
+            plugins = ingestors;
           } else if (res.type === PluginTypesNumeric.PIVOT) {
             plugins = pivots;
           } else {
@@ -139,12 +145,13 @@ export function PluginData({
     },
   );
 
-  // download the configs and again the analyzers with the update values
+  // download the configs and again the plugins with the update values
   const refetchAll = () => {
     refetchPluginData();
     retrieveAnalyzersConfiguration();
     retrieveConnectorsConfiguration();
     retrievePivotsConfiguration();
+    retrieveIngestorsConfiguration();
     retrieveVisualizersConfiguration();
   };
 
@@ -179,6 +186,10 @@ export function PluginData({
                               PluginTypesNumeric.VISUALIZER
                             ) {
                               plugins = visualizers;
+                            } else if (
+                              configuration.type === PluginTypesNumeric.INGESTOR
+                            ) {
+                              plugins = ingestors;
                             } else if (
                               configuration.type === PluginTypesNumeric.PIVOT
                             ) {

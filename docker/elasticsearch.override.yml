@@ -4,16 +4,16 @@ services:
       - elasticsearch
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: intelowl_elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9200 || exit 1"]
+      interval: 5s
+      timeout: 2s
+      start_period: 2s
+      retries: 6
+    env_file:
+      - env_file_app
     environment:
       - "discovery.type=single-node"
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.0
-    environment:
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-    ports:
-      - '5601:5601'
-    depends_on:
-      - elasticsearch
-
+      - ELASTIC_PASSWORD=changeme

@@ -24,16 +24,23 @@ if ELASTICSEARCH_BI_ENABLED:
             timeout=30,
         )
         if not ELASTICSEARCH_CLIENT.ping():
-            print("ELASTICSEARCH client configuration did not connect correctly")
+            print(
+                f"ELASTICSEARCH BI client configuration did not connect correctly: {ELASTICSEARCH_CLIENT.info()}"
+            )
 
 ELASTICSEARCH_DSL_ENABLED = (
     secrets.get_secret("ELASTICSEARCH_DSL_ENABLED", False) == "True"
 )
 if ELASTICSEARCH_DSL_ENABLED:
     ELASTICSEARCH_DSL_HOST = secrets.get_secret("ELASTICSEARCH_DSL_HOST")
+    ELASTICSEARCH_DSL_PASSWORD = secrets.get_secret("ELASTICSEARCH_DSL_PASSWORD")
 
     ELASTICSEARCH_DSL = {
-        "default": {"hosts": ELASTICSEARCH_DSL_HOST},
+        "default": {
+            "hosts": ELASTICSEARCH_DSL_HOST,
+            "basic_auth": ("elastic", ELASTICSEARCH_DSL_PASSWORD),
+            "verify_certs": False,
+        },
     }
     ELASTICSEARCH_DSL_INDEX_SETTINGS = {
         "number_of_shards": int(secrets.get_secret("ELASTICSEARCH_DSL_NO_OF_SHARDS")),

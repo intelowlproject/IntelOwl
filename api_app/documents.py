@@ -19,7 +19,7 @@ class JobDocument(Document):
     visualizers_to_execute = fields.NestedField(
         properties={"name": fields.KeywordField()}
     )
-    playbook_to_execute = fields.KeywordField()
+    playbook_to_execute = fields.ObjectField(properties={"name": fields.KeywordField()})
 
     # Normal fields
     errors = fields.TextField()

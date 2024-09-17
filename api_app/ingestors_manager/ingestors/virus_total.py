@@ -2,10 +2,7 @@ import logging
 from typing import Any, Iterable
 from unittest.mock import patch
 
-import requests
-
 from api_app.ingestors_manager.classes import Ingestor
-from api_app.ingestors_manager.exceptions import IngestorRunException
 from api_app.mixins import VirusTotalv3AnalyzerMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections
 
@@ -15,23 +12,28 @@ logger = logging.getLogger(__name__)
 # apply a filter to all query results, let's try to reduce the FPs
 def filter_vt_search_results(result):
     file_to_download = []
-    data = result["data"]
+    data = result.get("data", {})
+    logger.info(f"Retrieved {len(data)} items from the query")
     for d in data:
-        attributes = d["attributes"]
+        attributes = data.get("attributes", {})
+
         # https://virustotal.readme.io/reference/files
-        if "threat_severity" in attributes:
-            threat_severity = attributes["threat_severity"]
-            if "threat_severity_level" in threat_severity and threat_severity[
-                "threat_severity_level"
-            ] in ("SEVERITY_MEDIUM", "SEVERITY_HIGH"):
-                file_to_download.append(d["id"])
+        threat_severity = attributes.get("threat_severity", {})
+        threat_severity_level = threat_severity.get("threat_severity_level", "")
+
+        if threat_severity_level in ("SEVERITY_MEDIUM", "SEVERITY_HIGH"):
+            file_to_download.append(d["id"])
+    logger.info(
+        f"Filtered {len(data)-len(file_to_download)} FP elements, "
+        f"processing {len(file_to_download)} samples"
+    )
     return file_to_download
 
 
-class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
-    # Download samples that are up to X hours old
+class VirusTotal(VirusTotalv3AnalyzerMixin, Ingestor):
+    # Download samples/IOCs that are up to X hours old
     hours: int
-    # Run the query
+    # The query to execute
     query: str
     # Extract IOCs? Otherwise, download the file
     extract_IOCs: bool
@@ -42,21 +44,16 @@ class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
 
     # perform a query in VT and return the results
     def _search(self, query):
+        logger.info(f"Running VirusTotal query: {query}")
         # ref: https://developers.virustotal.com/reference/intelligence-search
-        base_url = "https://www.virustotal.com/api/v3/intelligence"
         params = {
             "query": query,
             "limit": 300,
             "order": "",
         }
-        try:
-            response = requests.get(
-                base_url + "/search", params=params, headers=self.headers
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise IngestorRunException(e)
-        result = response.json()
+        result, response = self._perform_get_request(
+            self.url + "intelligence/search", params=params
+        )
         return result
 
     def run(self) -> Iterable[Any]:

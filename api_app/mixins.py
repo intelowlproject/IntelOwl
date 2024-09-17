@@ -107,7 +107,11 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
-        self.force_active_scan = self._job.tlp == self._job.TLP.CLEAR.value
+        # An Ingestor does not have a corresponding job so we set the value to False,
+        # the aim of the ingestors usually is to download data not to upload.
+        self.force_active_scan = (
+            self._job.tlp == self._job.TLP.CLEAR.value if self._job else False
+        )
 
     def _vt_get_relationships(
         self,

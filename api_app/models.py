@@ -1419,6 +1419,24 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
+    def get_value(self, field: str) -> Any:
+        content = self.report
+
+        for key in field.split("."):
+            try:
+                content = content[key]
+            except TypeError:
+                if isinstance(content, list) and len(content) > 0:
+                    content = content[int(key)]
+                else:
+                    raise RuntimeError(f"Not found {field}")
+
+        if isinstance(content, (int, dict)):
+            raise ValueError(f"You can't use a {type(content)} as pivot")
+        if not content:
+            raise ValueError("Empty value")
+        return content
+
 
 class PythonConfig(AbstractConfig):
     """

@@ -1,7 +1,6 @@
 import logging
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse
 
 logger = logging.getLogger(__name__)
@@ -13,23 +12,15 @@ class Artifacts(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling
     poll_distance: int = 2
     # http request polling max number of tries
-    max_tries: int = 10
-    artifacts_report: bool = False
-    artifacts_analysis: bool = True
+    max_tries: int = 30
 
     def update(self) -> bool:
         pass
 
     def run(self):
-        if self.artifacts_report and self.artifacts_analysis:
-            raise AnalyzerRunException(
-                "You can't run both report and analysis at the same time"
-            )
         binary = self.read_file_bytes()
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}"]
-        if self.artifacts_report:
-            args.append("--report")
+        args = [f"@{fname}", "-a", "-r"]
         req_data = {"args": args}
         req_files = {fname: binary}
         logger.info(

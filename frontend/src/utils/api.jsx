@@ -12,7 +12,7 @@ export function prettifyErrors(errorResponse) {
       ]
     }
   */
-  if (Array.isArray(errorResponse.response.data?.errors?.detail)) {
+  if (Array.isArray(errorResponse.response?.data?.errors?.detail)) {
     let prettyHTMLList = [];
     errorResponse.response.data.errors.detail.forEach((errorElement) => {
       if (typeof errorElement === "object") {
@@ -36,7 +36,7 @@ export function prettifyErrors(errorResponse) {
       "detail": "Not implemented",
     }
   */
-  if (errorResponse.response.data?.errors?.detail) {
+  if (errorResponse.response?.data?.errors?.detail) {
     return errorResponse.response.data.errors.detail;
   }
   // error directly in response data
@@ -45,7 +45,7 @@ export function prettifyErrors(errorResponse) {
       "detail": "Method "POST" not allowed.",
     }
   */
-  if (errorResponse.response.data?.detail) {
+  if (errorResponse.response?.data?.detail) {
     return errorResponse.response.data.detail;
   }
   // model validation errors
@@ -55,7 +55,7 @@ export function prettifyErrors(errorResponse) {
       "another_key": ["error", "another error"],
     }
   */
-  if (errorResponse.response.data?.errors) {
+  if (errorResponse.response?.data?.errors) {
     const prettyHTMLList = [];
     Object.entries(errorResponse.response.data?.errors).forEach(
       ([errorField, errorItem]) => {
@@ -70,5 +70,5 @@ export function prettifyErrors(errorResponse) {
     return <ul>{prettyHTMLList}</ul>;
   }
 
-  return JSON.stringify(errorResponse.response.data);
+  return JSON.stringify(errorResponse.response?.data);
 }

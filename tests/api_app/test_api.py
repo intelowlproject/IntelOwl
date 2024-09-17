@@ -565,9 +565,7 @@ class ApiViewTests(CustomViewSetTestCase):
             file_name="file.exe",
             file=self.uploaded_file,
             status="reported_without_fails",
-            playbook_requested=PlaybookConfig.objects.get(
-                name="Sample_Static_Analysis"
-            ),
+            playbook_requested=PlaybookConfig.objects.get(name="FREE_TO_USE_ANALYZERS"),
             finished_analysis_time=datetime.datetime(
                 2024, 8, 24, 10, 10, tzinfo=datetime.timezone.utc
             )
@@ -594,7 +592,7 @@ class ApiViewTests(CustomViewSetTestCase):
         self.assertEqual(new_job.tlp, "CLEAR")
         self.assertEqual(
             new_job.playbook_requested,
-            PlaybookConfig.objects.get(name="Sample_Static_Analysis"),
+            PlaybookConfig.objects.get(name="FREE_TO_USE_ANALYZERS"),
         )
         self.assertEqual(
             new_job.runtime_configuration,

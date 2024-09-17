@@ -24,7 +24,7 @@ class DownloadFileFromUri(ObservableAnalyzer):
         pass
 
     def run(self):
-        result = {"stored_base64": ""}
+        result = {"stored_base64": []}
 
         proxies = {"http": self._http_proxy} if self._http_proxy else {}
         headers = {
@@ -46,8 +46,8 @@ class DownloadFileFromUri(ObservableAnalyzer):
         else:
             if r.content:
                 if "text/html" not in r.headers["Content-Type"]:
-                    result["stored_base64"] = base64.b64encode(r.content).decode(
-                        "ascii"
+                    result["stored_base64"].append(
+                        base64.b64encode(r.content).decode("ascii")
                     )
                 else:
                     logger.info(

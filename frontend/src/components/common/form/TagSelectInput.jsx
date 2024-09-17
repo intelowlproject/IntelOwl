@@ -17,7 +17,7 @@ import {
   addToast,
 } from "@certego/certego-ui";
 
-import { JobTag } from "../../common/JobTag";
+import { JobTag } from "../JobTag";
 import { useTagsStore } from "../../../stores/useTagsStore";
 
 // constants

@@ -261,6 +261,7 @@ def post_save_python_config_cache(sender, instance, *args, **kwargs):
     """
     Signal receiver for the post_save signal.
     Deletes class cache keys for instances of ListCachable models.
+    Refreshes cache keys associated with the PythonConfig instance.
 
     Args:
         sender (Model): The model class sending the signal.
@@ -270,6 +271,8 @@ def post_save_python_config_cache(sender, instance, *args, **kwargs):
     """
     if issubclass(sender, ListCachable):
         instance.delete_class_cache_keys()
+    if issubclass(sender, PythonConfig):
+        instance.refresh_cache_keys()
 
 
 @receiver(models.signals.post_delete)
@@ -277,6 +280,7 @@ def post_delete_python_config_cache(sender, instance, *args, **kwargs):
     """
     Signal receiver for the post_delete signal.
     Deletes class cache keys for instances of ListCachable models after deletion.
+    Refreshes cache keys associated with the PythonConfig instance after deletion.
 
     Args:
         sender (Model): The model class sending the signal.
@@ -288,10 +292,12 @@ def post_delete_python_config_cache(sender, instance, *args, **kwargs):
     """
     if issubclass(sender, ListCachable):
         instance.delete_class_cache_keys()
+    if issubclass(sender, PythonConfig):
+        instance.refresh_cache_keys()
 
 
 @receiver(models.signals.post_save, sender=LogEntry)
-def post_save_log_entry(sender, instance: LogEntry, using, origin, *args, **kwargs):
+def post_save_log_entry(sender, instance: LogEntry, *args, **kwargs):
     """
     Signal receiver for the post_save signal.
     Add a line of log

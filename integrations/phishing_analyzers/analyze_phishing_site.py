@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from argparse import ArgumentParser, BooleanOptionalAction
+from argparse import ArgumentParser
 
 from selenium.common import WebDriverException
 from selenium.webdriver import Chrome, ChromeOptions
@@ -49,32 +49,34 @@ class DriverWrapper:
         proxy_protocol: str = "",
         proxy_address: str = "",
         proxy_port: int = 0,
-        headless: bool = True,
         **kwargs,
     ):
         self.proxy: Proxy = Proxy(proxy_protocol, proxy_address, proxy_port)
-        self.headless: bool = headless
-        self.driver: WebDriver = self._init_driver(headless=self.headless)
+        self.driver: WebDriver = self._init_driver()
         self.last_url: str = ""
 
-    def _init_driver(self, headless: bool = True) -> WebDriver:
+    def _init_driver(self) -> WebDriver:
         options: ChromeOptions = ChromeOptions()
-        options.add_argument("--no-sandbox")
         if self.proxy.address:
             logger.info(f"Adding proxy with option: {self.proxy}")
             options.add_argument(f"--proxy-server={self.proxy}")
             options.add_argument(
                 f'--host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE {self.proxy.address}"'
             )
-        if headless:
-            options.add_argument("--headless=new")
+        # this is Chromium-based only, for firefox just user --headless
+        options.add_argument("--headless=new")
+        # this sucks but it's almost the only way to run chromium-based
+        # browsers in docker. browser is running ad unprivileged user and
+        # it's still in container: trade-off
+        options.add_argument("--no-sandbox")
+
         logger.info("Creating Chrome driver...")
         return Chrome(options=options)
 
     def restart(self, motivation: str = ""):
         logger.info(f"Restarting driver: {motivation}")
         self.driver.quit()
-        self.driver = self._init_driver(headless=self.headless)
+        self.driver = self._init_driver()
         if self.last_url:
             self.navigate(self.last_url)
 
@@ -119,28 +121,27 @@ class DriverWrapper:
 
 
 def analyze_target(**kwargs):
-    driver = DriverWrapper(**kwargs)
-    driver.navigate(url=kwargs["target"])
+    driver_wrapper = DriverWrapper(**kwargs)
+    driver_wrapper.navigate(url=kwargs["target"])
     print(
         json.dumps(
             {
                 "report": {
-                    "page_source": driver.page_source,
-                    "page_view_base64": driver.base64_screenshot,
+                    "page_source": driver_wrapper.page_source,
+                    "page_view_base64": driver_wrapper.base64_screenshot,
                 }
             }
         )
     )
+    driver_wrapper.driver.quit()
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--target", type=str)
-    parser.add_argument("--classification", type=str)
     parser.add_argument("--proxy_address", type=str, required=False)
     parser.add_argument("--proxy_protocol", type=str, required=False)
     parser.add_argument("--proxy_port", type=int, required=False)
-    parser.add_argument("--headless", action=BooleanOptionalAction, required=False)
     arguments = parser.parse_args()
     logger.info(vars(arguments))
     analyze_target(**vars(arguments))

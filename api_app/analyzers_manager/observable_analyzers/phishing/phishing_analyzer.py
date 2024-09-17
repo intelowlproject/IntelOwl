@@ -17,7 +17,6 @@ class PhishingAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
     proxy_protocol: str = ""
     proxy_address: str = ""
     proxy_port: int = 0
-    headless: bool = True
 
     def __init__(
         self,
@@ -36,18 +35,12 @@ class PhishingAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
             if self.proxy_port:
                 self.args.append(f"--proxy_port={self.proxy_port}")
 
-        if self.headless:
-            self.args.append("--headless")
-        else:
-            self.args.append("--no-headless")
-
     def run(self):
         req_data: {} = {
             "target": self.observable_name,
             "classification": self.observable_classification,
             "args": [
                 f"--target={self.observable_name}",
-                f"--classification={self.observable_classification}",
                 *self.args,
             ],
         }

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
-import { MdEdit, MdInfoOutline } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
 import { RiFileAddLine } from "react-icons/ri";
 import {
   FormGroup,
@@ -8,14 +8,12 @@ import {
   Container,
   Col,
   Row,
-  FormText,
   Input,
   Spinner,
   Button,
-  UncontrolledTooltip,
   Collapse,
 } from "reactstrap";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Field,
   Form,
@@ -25,14 +23,10 @@ import {
   ErrorMessage,
 } from "formik";
 import useTitle from "react-use/lib/useTitle";
-import ReactSelect from "react-select";
 
 import {
   ContentSection,
   IconButton,
-  Loader,
-  MultiSelectDropdownInput,
-  selectStyles,
   useDebounceInput,
 } from "@certego/certego-ui";
 
@@ -41,7 +35,6 @@ import {
   IoIosArrowDropupCircle,
 } from "react-icons/io";
 import { useQuotaBadge } from "../../hooks";
-import { TLPColors } from "../../constants/colorConst";
 import { usePluginConfigurationStore } from "../../stores/usePluginConfigurationStore";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
 import {
@@ -50,14 +43,11 @@ import {
   ScanTypes,
   ScanModesNumeric,
 } from "../../constants/advancedSettingsConst";
-import { JobResultSections, TLPDescriptions } from "../../constants/miscConst";
-import { TLPTag } from "../common/TLPTag";
-import { markdownToHtml } from "../common/markdownToHtml";
-import { JobTag } from "../common/JobTag";
+import { JobResultSections } from "../../constants/miscConst";
 import { RuntimeConfigurationModal } from "./utils/RuntimeConfigurationModal";
 import { MultipleObservablesModal } from "./utils/MultipleObservablesModal";
 import RecentScans from "./utils/RecentScans";
-import { TagSelectInput } from "./utils/TagSelectInput";
+import { TagSelectInput } from "../common/form/TagSelectInput";
 import { createJob } from "./scanApi";
 import { useGuideContext } from "../../contexts/GuideContext";
 import { parseScanCheckTime } from "../../utils/time";
@@ -67,6 +57,17 @@ import {
   getObservableClassification,
 } from "../../utils/observables";
 import { SpinnerIcon } from "../common/icon/icons";
+import {
+  AnalyzersMultiSelectDropdownInput,
+  ConnectorsMultiSelectDropdownInput,
+  playbookOptions,
+  PlaybookMultiSelectDropdownInput,
+} from "../common/form/pluginsMultiSelectDropdownInput";
+import {
+  TLPSelectInputLabel,
+  TLPSelectInput,
+} from "../common/form/TLPSelectInput";
+import { ScanConfigSelectInput } from "../common/form/ScanConfigSelectInput";
 
 function DangerErrorMessage(fieldName) {
   return (
@@ -252,8 +253,6 @@ export default function ScanForm() {
     analyzersError,
     connectorsError,
     playbooksError,
-    analyzers,
-    connectors,
     playbooks,
   ] = usePluginConfigurationStore((state) => [
     state.analyzersLoading,
@@ -264,8 +263,6 @@ export default function ScanForm() {
     state.analyzersError,
     state.connectorsError,
     state.playbooksError,
-    state.analyzers,
-    state.connectors,
     state.playbooks,
   ]);
 
@@ -274,146 +271,6 @@ export default function ScanForm() {
     connectorsLoading ||
     visualizersLoading ||
     pivotsLoading;
-
-  const analyzersGrouped = React.useMemo(() => {
-    const grouped = {
-      ip: [],
-      hash: [],
-      domain: [],
-      url: [],
-      generic: [],
-      file: [],
-    };
-    analyzers.forEach((obj) => {
-      if (obj.type === JobTypes.FILE) {
-        grouped.file.push(obj);
-      } else {
-        obj.observable_supported.forEach((clsfn) => grouped[clsfn].push(obj));
-      }
-    });
-    return grouped;
-  }, [analyzers]);
-
-  const playbooksGrouped = React.useMemo(() => {
-    const grouped = {
-      ip: [],
-      hash: [],
-      domain: [],
-      url: [],
-      generic: [],
-      file: [],
-    };
-    playbooks.forEach((obj) => {
-      // filter on basis of type if the playbook is not disabled in org
-      if (organizationPluginsState[obj.name] === undefined) {
-        obj.type.forEach((clsfn) => grouped[clsfn].push(obj));
-      }
-    });
-    console.debug("Playbooks", grouped);
-    return grouped;
-  }, [playbooks, organizationPluginsState]);
-
-  const analyzersOptions = React.useMemo(
-    () =>
-      analyzersGrouped[formik.values.classification]
-        .map((analyzer) => ({
-          isDisabled: !analyzer.verification.configured || analyzer.disabled,
-          value: analyzer.name,
-          label: (
-            <div
-              id={`analyzer${analyzer.name}`}
-              className="d-flex justify-content-start align-items-start flex-column"
-            >
-              <div className="d-flex justify-content-start align-items-baseline flex-column">
-                <div>{analyzer.name}&nbsp;</div>
-                <div className="small text-start text-muted">
-                  {markdownToHtml(analyzer.description)}
-                </div>
-              </div>
-              {!analyzer.verification.configured && (
-                <div className="small text-danger">
-                  ⚠ {analyzer.verification.details}
-                </div>
-              )}
-            </div>
-          ),
-          labelDisplay: analyzer.name,
-        }))
-        .sort((currentAnalyzer, nextAnalyzer) =>
-          // eslint-disable-next-line no-nested-ternary
-          currentAnalyzer.isDisabled === nextAnalyzer.isDisabled
-            ? 0
-            : currentAnalyzer.isDisabled
-              ? 1
-              : -1,
-        ),
-    [analyzersGrouped, formik.values.classification],
-  );
-  const connectorOptions = React.useMemo(
-    () =>
-      connectors
-        .map((connector) => ({
-          isDisabled: !connector.verification.configured || connector.disabled,
-          value: connector.name,
-          label: (
-            <div className="d-flex justify-content-start align-items-start flex-column">
-              <div className="d-flex justify-content-start align-items-baseline flex-column">
-                <div>{connector.name}&nbsp;</div>
-                <div className="small text-start text-muted">
-                  {markdownToHtml(connector.description)}
-                </div>
-              </div>
-              {!connector.verification.configured && (
-                <div className="small text-danger">
-                  ⚠ {connector.verification.details}
-                </div>
-              )}
-            </div>
-          ),
-          labelDisplay: connector.name,
-        }))
-        .sort((currentConnector, nextConnector) =>
-          // eslint-disable-next-line no-nested-ternary
-          currentConnector.isDisabled === nextConnector.isDisabled
-            ? 0
-            : currentConnector.isDisabled
-              ? 1
-              : -1,
-        ),
-    [connectors],
-  );
-
-  const playbookOptions = (classification) =>
-    playbooksGrouped[classification]
-      .map((playbook) => ({
-        isDisabled: playbook.disabled,
-        starting: playbook.starting,
-        value: playbook.name,
-        analyzers: playbook.analyzers,
-        connectors: playbook.connectors,
-        visualizers: playbook.visualizers,
-        pivots: playbook.pivots,
-        label: (
-          <div className="d-flex justify-content-start align-items-start flex-column">
-            <div className="d-flex justify-content-start align-items-baseline flex-column">
-              <div>{playbook.name}&nbsp;</div>
-              <div className="small text-left text-muted">
-                {markdownToHtml(playbook.description)}
-              </div>
-            </div>
-          </div>
-        ),
-        labelDisplay: playbook.name,
-        tags: playbook.tags.map((tag) => ({
-          value: tag,
-          label: <JobTag tag={tag} />,
-        })),
-        tlp: playbook.tlp,
-        scan_mode: `${playbook.scan_mode}`,
-        scan_check_time: playbook.scan_check_time,
-        runtime_configuration: playbook.runtime_configuration,
-      }))
-      .filter((item) => !item.isDisabled && item.starting);
 
   const selectObservableType = (value) => {
     formik.setFieldValue("observableType", value, false);
@@ -475,12 +332,19 @@ export default function ScanForm() {
       formik.setFieldValue("classification", newClassification, false);
       // in case a playbook is available and i changed classification or no playbook is selected i select a playbook
       if (
-        playbookOptions(newClassification).length > 0 &&
+        playbookOptions(playbooks, newClassification, organizationPluginsState)
+          .length > 0 &&
         (oldClassification !== newClassification ||
           Object.keys(formik.values.playbook).length === 0) &&
         formik.values.analysisOptionValues === ScanTypes.playbooks
       ) {
-        updateSelectedPlaybook(playbookOptions(newClassification)[0]);
+        updateSelectedPlaybook(
+          playbookOptions(
+            playbooks,
+            newClassification,
+            organizationPluginsState,
+          )[0],
+        );
       }
     }
     const observableNames = formik.values.observable_names;
@@ -524,7 +388,11 @@ export default function ScanForm() {
           Object.keys(formik.values.playbook).length === 0)
       ) {
         updateSelectedPlaybook(
-          playbookOptions(formik.values.classification)[0],
+          playbookOptions(
+            playbooks,
+            formik.values.classification,
+            organizationPluginsState,
+          )[0],
         );
         formik.setFieldValue("analyzers", [], false); // reset
         formik.setFieldValue("connectors", [], false); // reset
@@ -542,7 +410,13 @@ export default function ScanForm() {
         Object.keys(formik.values.playbook).length === 0 &&
         formik.values.analysisOptionValues === ScanTypes.playbooks)
     ) {
-      updateSelectedPlaybook(playbookOptions(formik.values.classification)[0]);
+      updateSelectedPlaybook(
+        playbookOptions(
+          playbooks,
+          formik.values.classification,
+          organizationPluginsState,
+        )[0],
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbooksLoading]);
@@ -765,11 +639,21 @@ export default function ScanForm() {
                       formik.setFieldValue("classification", "file", false);
                       if (
                         Object.keys(formik.values.playbook).length === 0 &&
-                        playbookOptions("file").length > 0 &&
+                        playbookOptions(
+                          playbooks,
+                          "file",
+                          organizationPluginsState,
+                        ).length > 0 &&
                         formik.values.analysisOptionValues ===
                           ScanTypes.playbooks
                       ) {
-                        updateSelectedPlaybook(playbookOptions("file")[0]);
+                        updateSelectedPlaybook(
+                          playbookOptions(
+                            playbooks,
+                            "file",
+                            organizationPluginsState,
+                          )[0],
+                        );
                       }
                     }}
                     className="input-dark"
@@ -843,19 +727,7 @@ export default function ScanForm() {
                     Select Analyzers
                   </Label>
                   <Col sm={9}>
-                    <Loader
-                      loading={analyzersLoading}
-                      error={analyzersError}
-                      render={() => (
-                        <MultiSelectDropdownInput
-                          options={analyzersOptions}
-                          value={formik.values.analyzers}
-                          onChange={(value) =>
-                            formik.setFieldValue("analyzers", value, false)
-                          }
-                        />
-                      )}
-                    />
+                    <AnalyzersMultiSelectDropdownInput formik={formik} />
                     {DangerErrorMessage("analyzers")}
                   </Col>
                 </FormGroup>
@@ -864,15 +736,7 @@ export default function ScanForm() {
                     Select Connectors
                   </Label>
                   <Col sm={9}>
-                    {!(connectorsLoading || connectorsError) && (
-                      <MultiSelectDropdownInput
-                        options={connectorOptions}
-                        value={formik.values.connectors}
-                        onChange={(value) =>
-                          formik.setFieldValue("connectors", value, false)
-                        }
-                      />
-                    )}
+                    <ConnectorsMultiSelectDropdownInput formik={formik} />
                   </Col>
                 </FormGroup>
               </>
@@ -883,76 +747,20 @@ export default function ScanForm() {
                   Select Playbook
                 </Label>
                 <Col sm={9}>
-                  <Loader
-                    loading={playbooksLoading}
-                    error={playbooksError}
-                    render={() => (
-                      <ReactSelect
-                        isClearable={false}
-                        options={playbookOptions(formik.values.classification)}
-                        styles={selectStyles}
-                        value={formik.values.playbook}
-                        onChange={(selectedPlaybook) =>
-                          updateSelectedPlaybook(selectedPlaybook)
-                        }
-                      />
-                    )}
+                  <PlaybookMultiSelectDropdownInput
+                    formik={formik}
+                    onChange={(selectedPlaybook) =>
+                      updateSelectedPlaybook(selectedPlaybook)
+                    }
                   />
                   {DangerErrorMessage("playbook")}
                 </Col>
               </FormGroup>
             )}
             <FormGroup row>
-              <Label className="d-flex" sm={3}>
-                TLP
-                <div className="ms-2">
-                  <MdInfoOutline id="tlp-info-icon" />
-                  <UncontrolledTooltip
-                    target="tlp-info-icon"
-                    placement="right"
-                    fade={false}
-                    autohide={false}
-                    innerClassName="p-2 text-start text-nowrap md-fit-content"
-                  >
-                    <span>
-                      IntelOwl supports a customized version of the Traffic
-                      Light Protocol (TLP).
-                      <br />
-                      For more info check the{" "}
-                      <Link
-                        to="https://intelowlproject.github.io/docs/IntelOwl/usage/#tlp-support"
-                        target="_blank"
-                      >
-                        official doc.
-                      </Link>
-                    </span>
-                  </UncontrolledTooltip>
-                </div>
-              </Label>
+              <TLPSelectInputLabel size={3} />
               <Col sm={9}>
-                <div>
-                  {TlpChoices.map((tlp) => (
-                    <FormGroup inline check key={`tlpchoice__${tlp}`}>
-                      <Label check for={`tlpchoice__${tlp}`}>
-                        <TLPTag value={tlp} />
-                      </Label>
-                      <Field
-                        as={Input}
-                        id={`tlpchoice__${tlp}`}
-                        type="radio"
-                        name="tlp"
-                        value={tlp}
-                        invalid={formik.errors.tlp && formik.touched.tlp}
-                        onChange={formik.handleChange}
-                      />
-                    </FormGroup>
-                  ))}
-                </div>
-                <FormText>
-                  <span style={{ color: `${TLPColors[formik.values.tlp]}` }}>
-                    {TLPDescriptions[formik.values.tlp].replace("TLP: ", "")}
-                  </span>
-                </FormText>
+                <TLPSelectInput formik={formik} />
               </Col>
             </FormGroup>
             <hr />
@@ -987,68 +795,7 @@ export default function ScanForm() {
               <FormGroup row className="mt-2">
                 <Label sm={3}>Scan configuration</Label>
                 <Col sm={9}>
-                  <FormGroup check key="checkchoice__check_all">
-                    <Field
-                      as={Input}
-                      id="checkchoice__check_all"
-                      type="radio"
-                      name="scan_mode"
-                      value={ScanModesNumeric.CHECK_PREVIOUS_ANALYSIS}
-                      onChange={formik.handleChange}
-                    />
-                    <div className="d-flex align-items-center">
-                      <Label
-                        check
-                        for="checkchoice__check_all"
-                        className="col-8"
-                      >
-                        Do not execute if a similar analysis is currently
-                        running or reported without fails
-                      </Label>
-                      <div className="col-4 d-flex align-items-center">
-                        H:
-                        <div className="col-4 mx-1">
-                          <Field
-                            as={Input}
-                            id="checkchoice__check_all__minutes_ago"
-                            type="number"
-                            name="scan_check_time"
-                            onChange={formik.handleChange}
-                          />
-                        </div>
-                        <div className="col-2">
-                          <MdInfoOutline id="minutes-ago-info-icon" />
-                          <UncontrolledTooltip
-                            target="minutes-ago-info-icon"
-                            placement="right"
-                            fade={false}
-                            innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
-                          >
-                            <span>
-                              Max age (in hours) for the similar analysis.
-                              <br />
-                              The default value is 24 hours (1 day).
-                              <br />
-                              Empty value takes all the previous analysis.
-                            </span>
-                          </UncontrolledTooltip>
-                        </div>
-                      </div>
-                    </div>
-                  </FormGroup>
-                  <FormGroup check key="checkchoice__force_new">
-                    <Field
-                      as={Input}
-                      id="checkchoice__force_new"
-                      type="radio"
-                      name="scan_mode"
-                      value={ScanModesNumeric.FORCE_NEW_ANALYSIS}
-                      onChange={formik.handleChange}
-                    />
-                    <Label check for="checkchoice__force_new">
-                      Force new analysis
-                    </Label>
-                  </FormGroup>
+                  <ScanConfigSelectInput formik={formik} />
                 </Col>
               </FormGroup>
             </Collapse>

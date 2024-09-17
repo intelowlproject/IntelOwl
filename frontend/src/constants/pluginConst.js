@@ -33,3 +33,12 @@ export const PluginConfigTypesNumeric = Object.freeze({
   PARAMETER: "1",
   SECRET: "2",
 });
+
+export const AllPluginSupportedTypes = Object.freeze({
+  IP: "ip",
+  URL: "url",
+  DOMAIN: "domain",
+  HASH: "hash",
+  GENERIC: "generic",
+  FILE: "file",
+});

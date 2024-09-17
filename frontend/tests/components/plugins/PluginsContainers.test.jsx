@@ -42,6 +42,9 @@ describe("test PluginsContainer component", () => {
     const connectorsButton = screen.getByText("Connectors");
     expect(connectorsButton).toBeInTheDocument();
     expect(connectorsButton.closest("a").className).not.toContain("active"); // not selected
+    const pivotsButton = screen.getByText("Pivots");
+    expect(pivotsButton).toBeInTheDocument();
+    expect(pivotsButton.closest("a").className).not.toContain("active"); // not selected
     const visualizersButton = screen.getByText("Visualizers");
     expect(visualizersButton).toBeInTheDocument();
     expect(visualizersButton.closest("a").className).not.toContain("active"); // not selected
@@ -57,6 +60,18 @@ describe("test PluginsContainer component", () => {
     await waitFor(() => {
       expect(analyzersButton.closest("a").className).not.toContain("active"); // not selected
       expect(connectorsButton.closest("a").className).toContain("active"); // selected
+      expect(pivotsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(visualizersButton.closest("a").className).not.toContain("active"); // not selected
+      expect(ingestorsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(playbooksButton.closest("a").className).not.toContain("active"); // not selected
+    });
+
+    // pivots tab
+    await user.click(pivotsButton);
+    await waitFor(() => {
+      expect(analyzersButton.closest("a").className).not.toContain("active"); // not selected
+      expect(connectorsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(pivotsButton.closest("a").className).toContain("active"); // selected
       expect(visualizersButton.closest("a").className).not.toContain("active"); // not selected
       expect(ingestorsButton.closest("a").className).not.toContain("active"); // not selected
       expect(playbooksButton.closest("a").className).not.toContain("active"); // not selected
@@ -67,6 +82,7 @@ describe("test PluginsContainer component", () => {
     await waitFor(() => {
       expect(analyzersButton.closest("a").className).not.toContain("active"); // not selected
       expect(connectorsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(pivotsButton.closest("a").className).not.toContain("active"); // not selected
       expect(visualizersButton.closest("a").className).toContain("active"); // selected
       expect(ingestorsButton.closest("a").className).not.toContain("active"); // not selected
       expect(playbooksButton.closest("a").className).not.toContain("active"); // not selected
@@ -77,6 +93,7 @@ describe("test PluginsContainer component", () => {
     await waitFor(() => {
       expect(analyzersButton.closest("a").className).not.toContain("active"); // not selected
       expect(connectorsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(pivotsButton.closest("a").className).not.toContain("active"); // not selected
       expect(visualizersButton.closest("a").className).not.toContain("active"); // not selected
       expect(ingestorsButton.closest("a").className).not.toContain("active"); // not selected
       expect(playbooksButton.closest("a").className).toContain("active"); //  selected
@@ -87,6 +104,7 @@ describe("test PluginsContainer component", () => {
     await waitFor(() => {
       expect(analyzersButton.closest("a").className).not.toContain("active"); // not selected
       expect(connectorsButton.closest("a").className).not.toContain("active"); // not selected
+      expect(pivotsButton.closest("a").className).not.toContain("active"); // not selected
       expect(visualizersButton.closest("a").className).not.toContain("active"); // not selected
       expect(ingestorsButton.closest("a").className).toContain("active"); // selected
       expect(playbooksButton.closest("a").className).not.toContain("active"); // not selected

@@ -47,7 +47,6 @@ async function downloadAllPlugin(pluginUrl) {
 }
 
 export const usePluginConfigurationStore = create((set, get) => ({
-  // loading: true,
   analyzersLoading: true,
   connectorsLoading: true,
   pivotsLoading: true,
@@ -247,18 +246,6 @@ export const usePluginConfigurationStore = create((set, get) => ({
     } catch (error) {
       addToast("Plugin pull: failed", prettifyErrors(error), "danger", true);
       return error.response.status;
-    }
-  },
-  deletePlaybook: async (playbook) => {
-    try {
-      const response = await axios.delete(
-        `${PLAYBOOKS_CONFIG_URI}/${playbook}`,
-      );
-      addToast(`${playbook} deleted`, null, "info");
-      return Promise.resolve(response);
-    } catch (error) {
-      addToast("Failed!", prettifyErrors(error), "danger");
-      return null;
     }
   },
   enablePluginInOrg: async (type, pluginName, pluginOwner) => {

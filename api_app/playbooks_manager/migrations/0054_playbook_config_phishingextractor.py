@@ -8,13 +8,14 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "analyzers": [],
+    "analyzers": ["Phishing_Extractor"],
     "connectors": [],
-    "pivots": [],
+    "pivots": ["PhishingExtractorToAnalysis"],
     "for_organization": False,
-    "name": "PhishingAnalysis",
-    "description": "This playbook is used to perform a complete phishing analysis of "
-    "a given URL. It wraps all the analyzers for the purpose.",
+    "name": "PhishingExtractor",
+    "description": "This playbook is the first phase of the phishing analysis framework. "
+    "Its main purpose is to open the web page and dump its source code"
+    " and screenshot plus some other details.",
     "disabled": False,
     "type": ["url"],
     "runtime_configuration": {
@@ -23,10 +24,10 @@ plugin = {
         "connectors": {},
         "visualizers": {},
     },
-    "scan_mode": 1,
-    "scan_check_time": None,
-    "tlp": "AMBER",
-    "starting": False,
+    "scan_mode": 2,
+    "scan_check_time": "1 00:00:00",
+    "tlp": "RED",
+    "starting": True,
     "owner": None,
     "tags": [],
     "model": "playbooks_manager.PlaybookConfig",
@@ -118,7 +119,8 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("playbooks_manager", "0053_playbook_config_phishingextractor"),
+        ("playbooks_manager", "0053_playbook_config_phishinganalysis"),
+        ("analyzers_manager", "0123_analyzer_config_phishing_extractor"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

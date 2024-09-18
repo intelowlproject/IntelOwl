@@ -150,6 +150,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
         ("pivots_manager", "0034_changed_resubmitdownloadedfile_playbook_to_execute"),
+        ("playbooks_manager", "0053_playbook_config_phishinganalysis"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

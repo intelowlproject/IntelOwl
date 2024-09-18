@@ -7,6 +7,10 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class VirusTotalv3(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         result = self._vt_get_report(
             self.observable_classification,

@@ -261,9 +261,7 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             "limit": 300,  # this is a limit forced by VT service
             "order": "",  # not relevant, we will process all the results
         }
-        result, response = self._perform_get_request(
-            "intelligence/search", params=params
-        )
+        result, _ = self._perform_get_request("intelligence/search", params=params)
         return result
 
     def _vt_get_iocs_from_file(self, sample_hash: str):

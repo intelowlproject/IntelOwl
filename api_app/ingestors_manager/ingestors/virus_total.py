@@ -11,27 +11,6 @@ from tests.mock_utils import MockUpResponse, if_mock_connections
 logger = logging.getLogger(__name__)
 
 
-# apply a filter to all query results, let's try to reduce the FPs
-def filter_vt_search_results(result):
-    file_to_download = []
-    data = result.get("data", {})
-    logger.info(f"Retrieved {len(data)} items from the query")
-    for d in data:
-        attributes = d.get("attributes", {})
-
-        # https://virustotal.readme.io/reference/files
-        threat_severity = attributes.get("threat_severity", {})
-        threat_severity_level = threat_severity.get("threat_severity_level", "")
-
-        if threat_severity_level in ("SEVERITY_MEDIUM", "SEVERITY_HIGH"):
-            file_to_download.append(d["id"])
-    logger.info(
-        f"Filtered {len(data) - len(file_to_download)} FP elements, "
-        f"processing {len(file_to_download)} samples"
-    )
-    return file_to_download
-
-
 class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
     # Download samples/IOCs that are up to X hours old
     hours: int
@@ -50,8 +29,9 @@ class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
         if "fs:" not in self.query:
             delta_hours = timezone.datetime.now() - timezone.timedelta(hours=self.hours)
             self.query = f"fs:{delta_hours.strftime('%Y-%m-%d%H:%M:%S')}+ " + self.query
-        result = self._vt_intelligence_search(self.query)
-        samples_hashes = filter_vt_search_results(result)
+        data = self._vt_intelligence_search(self.query).get("data", {})
+        logger.info(f"Retrieved {len(data)} items from the query")
+        samples_hashes = [d["id"] for d in data]
         for sample_hash in samples_hashes:
             if self.extract_IOCs:
                 iocs = self._vt_get_iocs_from_file(sample_hash)

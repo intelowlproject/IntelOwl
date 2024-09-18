@@ -245,6 +245,8 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             endpoint = self.url + f"files/{file_hash}/download"
             logger.info(f"Requesting file from {endpoint}")
             response = requests.get(endpoint, headers=self.headers)
+            if not isinstance(response.content, bytes):
+                raise ValueError("VT downloaded file is not instance of bytes")
         except Exception as e:
             error_message = f"Cannot download the file {file_hash}. Raised Error: {e}."
             raise AnalyzerRunException(error_message)
@@ -269,12 +271,12 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             params, uri, relationships_requested = self._get_requests_params_and_uri(
                 self.ObservableTypes.HASH, sample_hash, True
             )
-            logger.info(f"Requesting IOCs [{relationships_requested}] from {uri}")
+            logger.info(f"Requesting IOCs {relationships_requested} from {uri}")
             result, response = self._perform_get_request(
                 uri, ignore_404=True, params=params
             )
             if response.status_code != 404:
-                relationships = result.get("data", {}).get("relationships", {})
+                relationships = result.get("data", [])[0].get("relationships", {})
                 contacted_ips = [
                     i["id"]
                     for i in relationships.get("contacted_ips", {}).get("data", [])

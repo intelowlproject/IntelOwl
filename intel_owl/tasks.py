@@ -66,7 +66,7 @@ def execute_ingestor(config_name: str):
     else:
         class_: typing.Type[Ingestor] = config.python_module.python_class
         obj: Ingestor = class_(config=config)
-        obj.start(runtime_configuration={}, job_id=None, task_id=None)
+        obj.start({}, None, None)  # runtime_configuration, job_id, task_id
         logger.info(f"Executing ingestor {config.name}")
 
 

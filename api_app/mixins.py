@@ -370,7 +370,7 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
         result = {}
         already_done_active_scan_because_report_was_old = False
         params, uri, relationships_requested = self._get_requests_params_and_uri(
-            obs_clfn, observable_name
+            obs_clfn, observable_name, False
         )
         for chance in range(self.max_tries):
             logger.info(
@@ -435,7 +435,7 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
                         else:
                             logger.info(
                                 f"hash {observable_name} found on VT"
-                                f" with AV reports and scan is recent"
+                                " with AV reports and scan is recent"
                             )
                             break
                     else:
@@ -579,7 +579,7 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
         else:
             message = (
                 f"[POLLING] (Job: {self.job_id}, {md5}) -> "
-                f"max polls tried, no result"
+                "max polls tried, no result"
             )
             # if we tried a rescan, we can still use the old report
             if rescan_instead:

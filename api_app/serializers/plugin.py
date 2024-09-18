@@ -12,6 +12,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.models import Parameter, PluginConfig, PythonConfig, PythonModule
+from api_app.pivots_manager.models import PivotConfig
 from api_app.serializers import ModelWithOwnershipSerializer
 from api_app.serializers.celery import CrontabScheduleSerializer
 from api_app.visualizers_manager.models import VisualizerConfig
@@ -35,7 +36,8 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
         )
 
     class CustomValueField(rfs.JSONField):
-        def to_internal_value(self, data):
+        @staticmethod
+        def to_internal_value(data):
             if not data:
                 raise ValidationError({"detail": "Empty insertion"})
             logger.info(f"verifying that value {data} ({type(data)}) is JSON compliant")
@@ -78,13 +80,14 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
                 return json.dumps(result)
             return result
 
-    type = rfs.ChoiceField(choices=["1", "2", "3", "4"])  # retrocompatibility
+    type = rfs.ChoiceField(choices=["1", "2", "3", "4", "5"])  # retrocompatibility
     config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
     value = CustomValueField()
 
-    def validate_value_type(self, value: Any, parameter: Parameter):
+    @staticmethod
+    def validate_value_type(value: Any, parameter: Parameter):
         if type(value).__name__ != parameter.type:
             raise ValidationError(
                 {
@@ -111,6 +114,8 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
             class_ = VisualizerConfig
         elif _type == "4":
             class_ = IngestorConfig
+        elif _type == "5":
+            class_ = PivotConfig
         else:
             raise RuntimeError("Not configured")
         # we set the pointers allowing retro-compatibility from the frontend
@@ -155,7 +160,8 @@ class ParameterSerializer(rfs.ModelSerializer):
         fields = ["name", "type", "description", "required", "value", "is_secret"]
         list_serializer_class = ParamListSerializer
 
-    def get_value(self, param: Parameter):
+    @staticmethod
+    def get_value(param: Parameter):
         if hasattr(param, "value") and hasattr(param, "is_from_org"):
             if param.is_secret and param.is_from_org:
                 return "redacted"
@@ -262,7 +268,7 @@ class AbstractConfigSerializer(rfs.ModelSerializer): ...
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):
-    parameters = ParameterSerializer(write_only=True, many=True)
+    parameters = ParameterSerializer(write_only=True, many=True, required=False)
 
     class Meta:
         exclude = [
@@ -273,9 +279,6 @@ class PythonConfigSerializer(AbstractConfigSerializer):
             "health_check_task",
         ]
         list_serializer_class = PythonConfigListSerializer
-
-    def to_internal_value(self, data):
-        raise NotImplementedError()
 
     def to_representation(self, instance: PythonConfig):
         result = super().to_representation(instance)

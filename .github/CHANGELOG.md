@@ -2,6 +2,15 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.1.0)
+This release merges all the developments performed by our Google Summer of Code contributors for this year. The program has just ended. You can read the related blogs for more info about:
+- [Nilay Gupta](https://x.com/guptanilay1): [New analyzers for IntelOwl](https://intelowlproject.github.io/blogs/gsoc24_new_analyzers_for_intelowl)
+- [Aryan Bhokare](https://www.linkedin.com/in/aryan-b-3803751a7/): [New Documentation Site for IntelOwl and friends](https://intelowlproject.github.io/blogs/gsoc24_New_documentation_site_summary)
+
+You'll get really tons of new analyzers this time to try out!
+
+Plus we have a new official [documentation site](https://intelowlproject.github.io/docs/)! Please refer to this one from now onwards.
+
 ## [v6.0.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.4)
 Mostly adjusts and fixes with few new analyzers: Vulners and AILTypoSquatting Library.
 

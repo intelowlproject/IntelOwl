@@ -7,7 +7,7 @@ export const useOrganizationStore = create((set, _get) => ({
   loading: false,
   error: null,
   isUserOwner: false,
-  noOrg: false,
+  isInOrganization: true,
   organization: {},
   membersCount: undefined,
   members: [],
@@ -45,7 +45,7 @@ export const useOrganizationStore = create((set, _get) => ({
         membersCount,
         members,
         pendingInvitations,
-        noOrg: false,
+        isInOrganization: true,
       });
       if (name) {
         const pluginsStateResp = await axios.get(`${ORG_PLUGIN_DISABLE_URI}/`);
@@ -62,7 +62,7 @@ export const useOrganizationStore = create((set, _get) => ({
           membersCount: undefined,
           members: [],
           pendingInvitations: [],
-          noOrg: true,
+          isInOrganization: false,
         });
 
       // update error

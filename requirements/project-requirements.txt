@@ -5,12 +5,12 @@ django-auth-ldap==4.8.0
 django-radius==1.5.0
 django-filter==24.3
 django-storages==1.14
-django-celery-beat==2.6.0
+django-celery-beat==2.7.0
 django-celery-results==2.5.0
 django-ses == 4.1.0
 django-iam-dbauth==0.2.0
 django-prettyjson==0.4.1
-django-silk==5.1.0
+django-silk==5.2.0
 django-elasticsearch-dsl==8.0
 django-treebeard==4.7
 
@@ -53,7 +53,7 @@ git+https://github.com/decalage2/oletools.git@ccf99d1a8f85e552f5cc130fbaa504cfe5
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
-pefile==2023.2.7
+pefile==2024.8.26
 Pillow==10.3.0
 pydeep==0.4
 pyelftools==0.31
@@ -84,6 +84,8 @@ ioc-finder==7.0.0
 polyswarm-api==3.9.0
 knock-subdomains==7.0.1
 dotnetfile==0.2.4
+docxpy==0.8.5
+pylnk3==0.4.2
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

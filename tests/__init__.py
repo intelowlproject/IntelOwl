@@ -4,11 +4,13 @@ from typing import Type
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files import File
 from django.db import connections
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from api_app.models import AbstractConfig, AbstractReport
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.models import AbstractConfig, AbstractReport, Job
 
 User = get_user_model()
 
@@ -26,6 +28,35 @@ class CustomTestCase(TestCase):
     def setUp(self) -> None:
         super().setUp()
         settings.DEBUG = True
+
+    def _create_job_from_file(self, sample, mimetype, analyzer_config) -> Job:
+        try:
+            with open(sample, "rb") as f:
+                _job = Job.objects.create(
+                    is_sample=True,
+                    file_name=sample,
+                    file_mimetype=mimetype,
+                    file=File(f),
+                    user=self.superuser,
+                )
+                _job.analyzers_to_execute.set([analyzer_config])
+                return _job
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def _analyze_sample(
+        self, sample_name, sample_md5, sample_mimetype, analyzer_name, analyzer_class
+    ):
+        analyzer_config = AnalyzerConfig.objects.get(name=analyzer_name)
+        analyzer = analyzer_class(analyzer_config)
+        analyzer.md5 = sample_md5
+        analyzer.filename = f"test_files/{sample_name}"
+        analyzer.file_mimetype = sample_mimetype
+        job = self._create_job_from_file(
+            f"test_files/{sample_name}", sample_mimetype, analyzer_config
+        )
+        analyzer.start(job.id, {}, 1)
+        return analyzer.report.report
 
     @classmethod
     def setUpTestData(cls):

@@ -23,7 +23,7 @@ class PDFInfo(FileAnalyzer):
         pass
 
     def run(self):
-        self.results = {"peepdf": {}, "pdfid": {}}
+        self.results = {"peepdf": {}, "pdfid": {}, "uris": []}
         # the analysis fails only when BOTH fails
         peepdf_success = self.__peepdf_analysis()
         pdfid_success = self.__pdfid_analysis()
@@ -31,12 +31,13 @@ class PDFInfo(FileAnalyzer):
             raise AnalyzerRunException("both peepdf and pdfid failed")
 
         # pivot uris in the pdf only if we have one page
-        if "reports" in self.results["pdfid"] and isinstance(
-            self.results["pdfid"]["reports"], list
+        if (
+            "reports" in self.results["pdfid"]
+            and isinstance(self.results["pdfid"]["reports"], list)
+            and peepdf_success
         ):
             for elem in self.results["pdfid"]["reports"]:
                 if "/Page" in elem and elem["/Page"] == 1:
-                    self.results["uris"] = []
                     for s in self.results["peepdf"]["stats"]:
                         self.results["uris"].extend(s["uris"])
 

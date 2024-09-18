@@ -12,7 +12,7 @@ class DroidLysis(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling
     poll_distance: int = 2
     # http request polling max number of tries
-    max_tries: int = 10
+    max_tries: int = 30
 
     def update(self) -> bool:
         pass

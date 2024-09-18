@@ -69,13 +69,12 @@ class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                # first search query
                 patch(
                     "requests.get",
-                    return_value=MockUpResponse(
-                        {
-                            "query_status": "ok",
-                            "data": {
+                    side_effect=[
+                        # for first search query
+                        MockUpResponse(
+                            {
                                 "data": [
                                     {
                                         "id": "b665290bc6bba034a69c32f54862518a86a2dab93787a7e99daaa552c708b23a",
@@ -220,130 +219,122 @@ class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
                                 },
                                 "links": {"self": "redacted"},
                             },
-                        },
-                        200,
-                    ),
-                ),
-                # covered only the extracted_IOCs=True case
-                patch(
-                    "requests.get",
-                    return_value=MockUpResponse(
-                        {
-                            "query_status": "ok",
-                            "data": {
-                                "data": {
-                                    "id": "b665290bc6bba034a69c32f54862518a86a2dab93787a7e99daaa552c708b23a",
-                                    "type": "file",
-                                    "links": {"self": "redacted"},
-                                    "relationships": {
-                                        "contacted_domains": {
-                                            "data": [
-                                                {
-                                                    "type": "domain",
-                                                    "id": "docs.google.com",
-                                                },
-                                                {
-                                                    "type": "domain",
-                                                    "id": "dropbox.com",
-                                                },
-                                                {
-                                                    "type": "domain",
-                                                    "id": "google.com",
-                                                },
-                                                {
-                                                    "type": "domain",
-                                                    "id": "www-env.dropbox-dns.com",
-                                                },
-                                                {
-                                                    "type": "domain",
-                                                    "id": "www.dropbox.com",
-                                                },
-                                            ],
-                                            "links": {
-                                                "self": "redacted",
-                                                "related": "redacted",
+                            200,
+                        ),
+                        # for extract_IOCs=True -> not covered download file case
+                        MockUpResponse(
+                            {
+                                "id": "b665290bc6bba034a69c32f54862518a86a2dab93787a7e99daaa552c708b23a",
+                                "type": "file",
+                                "links": {"self": "redacted"},
+                                "relationships": {
+                                    "contacted_domains": {
+                                        "data": [
+                                            {
+                                                "type": "domain",
+                                                "id": "docs.google.com",
                                             },
-                                        },
-                                        "contacted_ips": {
-                                            "data": [
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "108.177.119.113",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "108.177.96.113",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "162.125.1.18",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "162.125.65.18",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "172.253.117.100",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "172.253.117.101",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "172.253.117.102",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "172.253.117.113",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "172.253.117.138",
-                                                },
-                                                {
-                                                    "type": "ip_address",
-                                                    "id": "172.253.117.139",
-                                                },
-                                            ],
-                                            "links": {
-                                                "self": "redacted",
-                                                "related": "redacted",
+                                            {
+                                                "type": "domain",
+                                                "id": "dropbox.com",
                                             },
-                                        },
-                                        "contacted_urls": {
-                                            "data": [
-                                                {
-                                                    "type": "url",
-                                                    "id": "548d0ca19336d289e61ff43b87330"
-                                                    "780234e8461151b88a4a6b34fc5ba721dfe",
-                                                    "context_attributes": {
-                                                        "url": "https://docs.google.com/uc?id="
-                                                        "0BxsMXGfPIZfSVzUyaHFYVkQxeFk&export=download"
-                                                    },
-                                                },
-                                                {
-                                                    "type": "url",
-                                                    "id": "e24125e866d9b72a68ae4b1c457eb"
-                                                    "a59ee6a060efe3a1adb61ec328f42e85b7d",
-                                                    "context_attributes": {
-                                                        "url": "https://www.dropbox.com/s/"
-                                                        "zhp1b06imehwylq/Synaptics.rar?dl=1"
-                                                    },
-                                                },
-                                            ],
-                                            "links": {
-                                                "self": "redacted",
-                                                "related": "redacted",
+                                            {
+                                                "type": "domain",
+                                                "id": "google.com",
                                             },
+                                            {
+                                                "type": "domain",
+                                                "id": "www-env.dropbox-dns.com",
+                                            },
+                                            {
+                                                "type": "domain",
+                                                "id": "www.dropbox.com",
+                                            },
+                                        ],
+                                        "links": {
+                                            "self": "redacted",
+                                            "related": "redacted",
                                         },
                                     },
-                                }
+                                    "contacted_ips": {
+                                        "data": [
+                                            {
+                                                "type": "ip_address",
+                                                "id": "108.177.119.113",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "108.177.96.113",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "162.125.1.18",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "162.125.65.18",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "172.253.117.100",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "172.253.117.101",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "172.253.117.102",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "172.253.117.113",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "172.253.117.138",
+                                            },
+                                            {
+                                                "type": "ip_address",
+                                                "id": "172.253.117.139",
+                                            },
+                                        ],
+                                        "links": {
+                                            "self": "redacted",
+                                            "related": "redacted",
+                                        },
+                                    },
+                                    "contacted_urls": {
+                                        "data": [
+                                            {
+                                                "type": "url",
+                                                "id": "548d0ca19336d289e61ff43b87330"
+                                                "780234e8461151b88a4a6b34fc5ba721dfe",
+                                                "context_attributes": {
+                                                    "url": "https://docs.google.com/uc?id="
+                                                    "0BxsMXGfPIZfSVzUyaHFYVkQxeFk&export=download"
+                                                },
+                                            },
+                                            {
+                                                "type": "url",
+                                                "id": "e24125e866d9b72a68ae4b1c457eb"
+                                                "a59ee6a060efe3a1adb61ec328f42e85b7d",
+                                                "context_attributes": {
+                                                    "url": "https://www.dropbox.com/s/"
+                                                    "zhp1b06imehwylq/Synaptics.rar?dl=1"
+                                                },
+                                            },
+                                        ],
+                                        "links": {
+                                            "self": "redacted",
+                                            "related": "redacted",
+                                        },
+                                    },
+                                },
                             },
-                        },
-                        200,
-                    ),
+                            200,
+                        ),
+                    ],
                 ),
             )
         ]

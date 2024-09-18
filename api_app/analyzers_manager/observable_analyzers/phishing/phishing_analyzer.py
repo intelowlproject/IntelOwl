@@ -8,8 +8,8 @@ from api_app.models import PythonConfig
 logger = getLogger(__name__)
 
 
-class PhishingAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
-    name: str = "PhishingAnalyzer"
+class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
+    name: str = "PhishingExtractor"
     url: str = "http://phishing_analyzers:4005/phishing_analyzers"
     max_tries: int = 20
     poll_distance: int = 3
@@ -51,3 +51,6 @@ class PhishingAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
         if report.get("execution_error"):
             raise AnalyzerRunException(report["execution_error"])
         return report
+
+    def update(self) -> bool:
+        pass

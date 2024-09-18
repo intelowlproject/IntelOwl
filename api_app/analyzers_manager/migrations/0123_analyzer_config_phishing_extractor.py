@@ -11,7 +11,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "phishing.phishing_analyzer.PhishingAnalyzer",
+        "module": "phishing.phishing_analyzer.PhishingExtractor",
         "base_path": "api_app.analyzers_manager.observable_analyzers",
     },
     "name": "Phishing_Extractor",
@@ -34,7 +34,7 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "phishing.phishing_analyzer.PhishingAnalyzer",
+            "module": "phishing.phishing_analyzer.PhishingExtractor",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "proxy_protocol",
@@ -45,7 +45,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "phishing.phishing_analyzer.PhishingAnalyzer",
+            "module": "phishing.phishing_analyzer.PhishingExtractor",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "proxy_address",
@@ -56,7 +56,7 @@ params = [
     },
     {
         "python_module": {
-            "module": "phishing.phishing_analyzer.PhishingAnalyzer",
+            "module": "phishing.phishing_analyzer.PhishingExtractor",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
         "name": "proxy_port",
@@ -71,7 +71,7 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "phishing.phishing_analyzer.PhishingAnalyzer",
+                "module": "phishing.phishing_analyzer.PhishingExtractor",
                 "base_path": "api_app.analyzers_manager.observable_analyzers",
             },
             "name": "proxy_protocol",
@@ -93,7 +93,7 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "phishing.phishing_analyzer.PhishingAnalyzer",
+                "module": "phishing.phishing_analyzer.PhishingExtractor",
                 "base_path": "api_app.analyzers_manager.observable_analyzers",
             },
             "name": "proxy_address",
@@ -115,7 +115,7 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "phishing.phishing_analyzer.PhishingAnalyzer",
+                "module": "phishing.phishing_analyzer.PhishingExtractor",
                 "base_path": "api_app.analyzers_manager.observable_analyzers",
             },
             "name": "proxy_port",

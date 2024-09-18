@@ -274,7 +274,7 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
                 uri, ignore_404=True, params=params
             )
             if response.status_code != 404:
-                relationships = result.get("data", [])[0].get("relationships", {})
+                relationships = result.get("data", {}).get("relationships", {})
                 contacted_ips = [
                     i["id"]
                     for i in relationships.get("contacted_ips", {}).get("data", [])

@@ -46,33 +46,21 @@ class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
     def update(cls) -> bool:
         pass
 
-    # perform a query in VT and return the results
-    def _search(self, query):
-        logger.info(f"Running VirusTotal query: {query}")
-        # ref: https://developers.virustotal.com/reference/intelligence-search
-        params = {
-            "query": query,
-            "limit": 300,
-            "order": "",
-        }
-        result, response = self._perform_get_request(
-            "intelligence/search", params=params
-        )
-        return result
-
     def run(self) -> Iterable[Any]:
         if "fs:" not in self.query:
             delta_hours = timezone.datetime.now() - timezone.timedelta(hours=self.hours)
             self.query = f"fs:{delta_hours.strftime('%Y-%m-%d%H:%M:%S')}+ " + self.query
-        result = self._search(self.query)
+        result = self._vt_intelligence_search(self.query)
         samples_hashes = filter_vt_search_results(result)
         for sample_hash in samples_hashes:
             if self.extract_IOCs:
                 iocs = self._vt_get_iocs_from_file(sample_hash)
-                for category, ioc in iocs.items():
-                    logger.info(
-                        f"Extracted {category} from VT sample {sample_hash}: {ioc}"
-                    )
+                if iocs:
+                    for category, ioc in iocs.items():
+                        logger.info(
+                            f"Extracted {category} from VT sample {sample_hash}: {ioc}"
+                        )
+                        yield ioc
             else:
                 logger.info(f"Downloading VT sample: {sample_hash}")
                 yield self._vt_download_file(sample_hash)

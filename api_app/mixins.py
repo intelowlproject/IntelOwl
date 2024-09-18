@@ -77,9 +77,229 @@ class PaginationMixin:
         return Response(data)
 
 
-class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
+class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     url = "https://www.virustotal.com/api/v3/"
 
+    url_sub_path: str
+    _api_key_name: str
+
+    @property
+    def headers(self) -> dict:
+        return {"x-apikey": self._api_key_name}
+
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
+        # An Ingestor does not have a corresponding job so we set the value to False,
+        # the aim of the ingestors usually is to download data not to upload.
+        self.force_active_scan = (
+            self._job.tlp == self._job.TLP.CLEAR.value if self._job else False
+        )
+
+    def _perform_get_request(self, uri: str, ignore_404=False, **kwargs):
+        return self._perform_request(uri, method="GET", ignore_404=ignore_404, **kwargs)
+
+    def _perform_post_request(self, uri: str, ignore_404=False, **kwargs):
+        return self._perform_request(
+            uri, method="POST", ignore_404=ignore_404, **kwargs
+        )
+
+    def _perform_request(self, uri: str, method: str, ignore_404=False, **kwargs):
+        error = None
+        try:
+            url = self.url + uri
+            if method == "GET":
+                response = requests.get(url, headers=self.headers, **kwargs)
+            elif method == "POST":
+                response = requests.post(url, headers=self.headers, **kwargs)
+            else:
+                raise NotImplementedError()
+            logger.info(f"requests done to: {response.request.url} ")
+            logger.debug(f"text: {response.text}")
+            result = response.json()
+            # https://developers.virustotal.com/reference/errors
+            error = result.get("error", {})
+            # this case is not a real error,...
+            # .. it happens when a requested object is not found and that's normal
+            if not ignore_404 or not response.status_code == 404:
+                response.raise_for_status()
+        except Exception as e:
+            error_message = f"Raised Error: {e}. Error data: {error}"
+            raise AnalyzerRunException(error_message)
+        return result, response
+
+    # return available relationships from file mimetype
+    @classmethod
+    def _get_relationship_for_classification(cls, obs_clfn: str, iocs: bool):
+        # reference: https://developers.virustotal.com/reference/metadata
+        if obs_clfn == cls.ObservableTypes.DOMAIN:
+            relationships = [
+                "communicating_files",
+                "historical_whois",
+                "referrer_files",
+                "resolutions",
+                "siblings",
+                "subdomains",
+                "collections",
+                "historical_ssl_certificates",
+            ]
+        elif obs_clfn == cls.ObservableTypes.IP:
+            relationships = [
+                "communicating_files",
+                "historical_whois",
+                "referrer_files",
+                "resolutions",
+                "collections",
+                "historical_ssl_certificates",
+            ]
+        elif obs_clfn == cls.ObservableTypes.URL:
+            relationships = [
+                "last_serving_ip_address",
+                "collections",
+                "network_location",
+            ]
+        elif obs_clfn == cls.ObservableTypes.HASH:
+            if iocs:
+                relationships = [
+                    "contacted_domains",
+                    "contacted_ips",
+                    "contacted_urls",
+                ]
+            else:
+                relationships = [
+                    # behaviors is necessary to check if there are sandbox analysis
+                    "behaviours",
+                    "bundled_files",
+                    "comments",
+                    "contacted_domains",
+                    "contacted_ips",
+                    "contacted_urls",
+                    "execution_parents",
+                    "pe_resource_parents",
+                    "votes",
+                    "distributors",
+                    "pe_resource_children",
+                    "dropped_files",
+                    "collections",
+                ]
+        else:
+            raise AnalyzerRunException(
+                f"Not supported observable type {obs_clfn}. "
+                "Supported are: hash, ip, domain and url."
+            )
+        return relationships
+
+    # configure requests params from file mimetype to get relative relationships
+    def _get_requests_params_and_uri(
+        self, obs_clfn: str, observable_name: str, iocs: bool
+    ):
+        params = {}
+        # in this way, you just retrieved metadata about relationships
+        # if you like to get all the data about specific relationships,...
+        # ..you should perform another query
+        # check vt3 API docs for further info
+        relationships_requested = self._get_relationship_for_classification(
+            obs_clfn, iocs
+        )
+        if obs_clfn == self.ObservableTypes.DOMAIN:
+            uri = f"domains/{observable_name}"
+        elif obs_clfn == self.ObservableTypes.IP:
+            uri = f"ip_addresses/{observable_name}"
+        elif obs_clfn == self.ObservableTypes.URL:
+            url_id = (
+                base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
+            )
+            uri = f"urls/{url_id}"
+        elif obs_clfn == self.ObservableTypes.HASH:
+            uri = f"files/{observable_name}"
+        else:
+            raise AnalyzerRunException(
+                f"Not supported observable type {obs_clfn}. "
+                "Supported are: hash, ip, domain and url."
+            )
+
+        if relationships_requested:
+            # this won't cost additional quota
+            # it just helps to understand if there is something to look for there
+            # so, if there is, we can make API requests without wasting quotas
+            params["relationships"] = ",".join(relationships_requested)
+        if hasattr(self, "url_sub_path") and self.url_sub_path:
+            if not self.url_sub_path.startswith("/"):
+                uri += "/"
+            uri += self.url_sub_path
+        return params, uri, relationships_requested
+
+    def _fetch_behaviour_summary(self, observable_name: str) -> dict:
+        endpoint = f"files/{observable_name}/behaviour_summary"
+        logger.info(f"Requesting behaviour summary from {endpoint}")
+        result, _ = self._perform_get_request(endpoint, ignore_404=True)
+        return result
+
+    def _fetch_sigma_analyses(self, observable_name: str) -> dict:
+        endpoint = f"sigma_analyses/{observable_name}"
+        logger.info(f"Requesting sigma analyses from {endpoint}")
+        result, _ = self._perform_get_request(endpoint, ignore_404=True)
+        return result
+
+    def _vt_download_file(self, file_hash):
+        try:
+            endpoint = self.url + f"files/{file_hash}/download"
+            logger.info(f"Requesting file from {endpoint}")
+            response = requests.get(endpoint, headers=self.headers)
+        except Exception as e:
+            error_message = f"Cannot download the file {file_hash}. Raised Error: {e}."
+            raise AnalyzerRunException(error_message)
+        return response.content
+
+    # perform a query in VT and return the results
+    def _vt_intelligence_search(self, query):
+        logger.info(f"Running VirusTotal intelligence search query: {query}")
+        # ref: https://developers.virustotal.com/reference/intelligence-search
+        params = {
+            "query": query,
+            "limit": 300,  # this is a limit forced by VT service
+            "order": "",  # not relevant, we will process all the results
+        }
+        result, response = self._perform_get_request(
+            "intelligence/search", params=params
+        )
+        return result
+
+    def _vt_get_iocs_from_file(self, sample_hash: str):
+        try:
+            params, uri, relationships_requested = self._get_requests_params_and_uri(
+                self.ObservableTypes.HASH, sample_hash, True
+            )
+            logger.info(f"Requesting IOCs [{relationships_requested}] from {uri}")
+            result, response = self._perform_get_request(
+                uri, ignore_404=True, params=params
+            )
+            if response.status_code != 404:
+                relationships = result.get("data", {}).get("relationships", {})
+                contacted_ips = [
+                    i["id"]
+                    for i in relationships.get("contacted_ips", {}).get("data", [])
+                ]
+                contacted_domains = [
+                    i["id"]
+                    for i in relationships.get("contacted_domains", {}).get("data", [])
+                ]
+                contacted_urls = [
+                    i["context_attributes"]["url"]
+                    for i in relationships.get("contacted_urls", {}).get("data", [])
+                ]
+                return {
+                    "contacted_ips": contacted_ips,
+                    "contacted_urls": contacted_urls,
+                    "contacted_domains": contacted_domains,
+                }
+        except Exception as e:
+            logger.error(
+                "something went wrong when extracting iocs"
+                f" for sample {sample_hash}: {e}"
+            )
+
+
+class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
     max_tries: int
     poll_distance: int
     rescan_max_tries: int
@@ -90,12 +310,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     days_to_say_that_a_scan_is_old: int
     relationships_to_request: list
     relationships_elements: int
-    url_sub_path: str
-    _api_key_name: str
-
-    @property
-    def headers(self) -> dict:
-        return {"x-apikey": self._api_key_name}
 
     def _get_relationship_limit(self, relationship):
         # by default, just extract the first element
@@ -104,14 +318,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
         if relationship == "resolutions":
             limit = 40
         return limit
-
-    def config(self, runtime_configuration: Dict):
-        super().config(runtime_configuration)
-        # An Ingestor does not have a corresponding job so we set the value to False,
-        # the aim of the ingestors usually is to download data not to upload.
-        self.force_active_scan = (
-            self._job.tlp == self._job.TLP.CLEAR.value if self._job else False
-        )
 
     def _vt_get_relationships(
         self,
@@ -382,168 +588,3 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
                 raise AnalyzerRunException(message)
 
         return result
-
-    def _perform_get_request(self, uri: str, ignore_404=False, **kwargs):
-        return self._perform_request(uri, method="GET", ignore_404=ignore_404, **kwargs)
-
-    def _perform_post_request(self, uri: str, ignore_404=False, **kwargs):
-        return self._perform_request(
-            uri, method="POST", ignore_404=ignore_404, **kwargs
-        )
-
-    def _perform_request(self, uri: str, method: str, ignore_404=False, **kwargs):
-        error = None
-        try:
-            url = self.url + uri
-            if method == "GET":
-                response = requests.get(url, headers=self.headers, **kwargs)
-            elif method == "POST":
-                response = requests.post(url, headers=self.headers, **kwargs)
-            else:
-                raise NotImplementedError()
-            logger.info(f"requests done to: {response.request.url} ")
-            logger.debug(f"text: {response.text}")
-            result = response.json()
-            # https://developers.virustotal.com/reference/errors
-            error = result.get("error", {})
-            # this case is not a real error,...
-            # .. it happens when a requested object is not found and that's normal
-            if not ignore_404 or not response.status_code == 404:
-                response.raise_for_status()
-        except Exception as e:
-            error_message = f"Raised Error: {e}. Error data: {error}"
-            raise AnalyzerRunException(error_message)
-        return result, response
-
-    def _vt_download_file(self, file_hash):
-        try:
-            endpoint = self.url + f"files/{file_hash}/download"
-            response = requests.get(endpoint, headers=self.headers)
-        except Exception as e:
-            error_message = f"Cannot download the file {file_hash}. Raised Error: {e}."
-            raise AnalyzerRunException(error_message)
-        return response.content
-
-    def _vt_get_iocs_from_file(self, observable_name: str):
-        try:
-            params, uri, relationships_requested = self._get_requests_params_and_uri(
-                self.ObservableTypes.HASH, observable_name
-            )
-            result, response = self._perform_get_request(
-                uri, ignore_404=True, params=params
-            )
-            if response.status_code != 404:
-                relationships = result.get("data", {}).get("relationships", {})
-                contacted_ips = relationships.get("contacted_ips", {})
-                contacted_urls = relationships.get("contacted_urls", {})
-                contacted_domains = relationships.get("contacted_domains", {})
-                return {
-                    "contacted_ips": contacted_ips,
-                    "contacted_urls": contacted_urls,
-                    "contacted_domains": contacted_domains,
-                }
-        except Exception as e:
-            logger.error(
-                "something went wrong when extracting relationships"
-                f" for observable {observable_name}: {e}"
-            )
-
-    def _fetch_behaviour_summary(self, observable_name: str) -> dict:
-        endpoint = f"files/{observable_name}/behaviour_summary"
-        result, _ = self._perform_get_request(endpoint, ignore_404=True)
-        return result
-
-    def _fetch_sigma_analyses(self, observable_name: str) -> dict:
-        endpoint = f"sigma_analyses/{observable_name}"
-        result, _ = self._perform_get_request(endpoint, ignore_404=True)
-        return result
-
-    # return available relationships from file mimetype
-    @classmethod
-    def _get_relationship_for_classification(cls, obs_clfn: str):
-        # reference: https://developers.virustotal.com/reference/metadata
-        if obs_clfn == cls.ObservableTypes.DOMAIN:
-            relationships = [
-                "communicating_files",
-                "historical_whois",
-                "referrer_files",
-                "resolutions",
-                "siblings",
-                "subdomains",
-                "collections",
-                "historical_ssl_certificates",
-            ]
-        elif obs_clfn == cls.ObservableTypes.IP:
-            relationships = [
-                "communicating_files",
-                "historical_whois",
-                "referrer_files",
-                "resolutions",
-                "collections",
-                "historical_ssl_certificates",
-            ]
-        elif obs_clfn == cls.ObservableTypes.URL:
-            relationships = [
-                "last_serving_ip_address",
-                "collections",
-                "network_location",
-            ]
-        elif obs_clfn == cls.ObservableTypes.HASH:
-            relationships = [
-                # behaviors is necessary to check if there are sandbox analysis
-                "behaviours",
-                "bundled_files",
-                "comments",
-                "contacted_domains",
-                "contacted_ips",
-                "contacted_urls",
-                "execution_parents",
-                "pe_resource_parents",
-                "votes",
-                "distributors",
-                "pe_resource_children",
-                "dropped_files",
-                "collections",
-            ]
-        else:
-            raise AnalyzerRunException(
-                f"Not supported observable type {obs_clfn}. "
-                "Supported are: hash, ip, domain and url."
-            )
-        return relationships
-
-    # configure requests params from file mimetype to get relative relationships
-    def _get_requests_params_and_uri(self, obs_clfn: str, observable_name: str):
-        params = {}
-        # in this way, you just retrieved metadata about relationships
-        # if you like to get all the data about specific relationships,...
-        # ..you should perform another query
-        # check vt3 API docs for further info
-        relationships_requested = self._get_relationship_for_classification(obs_clfn)
-        if obs_clfn == self.ObservableTypes.DOMAIN:
-            uri = f"domains/{observable_name}"
-        elif obs_clfn == self.ObservableTypes.IP:
-            uri = f"ip_addresses/{observable_name}"
-        elif obs_clfn == self.ObservableTypes.URL:
-            url_id = (
-                base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
-            )
-            uri = f"urls/{url_id}"
-        elif obs_clfn == self.ObservableTypes.HASH:
-            uri = f"files/{observable_name}"
-        else:
-            raise AnalyzerRunException(
-                f"Not supported observable type {obs_clfn}. "
-                "Supported are: hash, ip, domain and url."
-            )
-
-        if relationships_requested:
-            # this won't cost additional quota
-            # it just helps to understand if there is something to look for there
-            # so, if there is, we can make API requests without wasting quotas
-            params["relationships"] = ",".join(relationships_requested)
-        if self.url_sub_path:
-            if not self.url_sub_path.startswith("/"):
-                uri += "/"
-            uri += self.url_sub_path
-        return params, uri, relationships_requested

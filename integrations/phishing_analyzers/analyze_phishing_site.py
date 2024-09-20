@@ -130,11 +130,9 @@ def analyze_target(**kwargs):
     print(
         json.dumps(
             {
-                "report": {
-                    "page_extraction": {
-                        "page_source": driver_wrapper.page_source,
-                        "page_view_base64": driver_wrapper.base64_screenshot,
-                    }
+                "page_extraction": {
+                    "page_source": driver_wrapper.page_source,
+                    "page_view_base64": driver_wrapper.base64_screenshot,
                 }
             }
         )

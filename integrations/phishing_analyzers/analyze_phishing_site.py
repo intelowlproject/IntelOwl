@@ -71,7 +71,10 @@ class DriverWrapper:
         options.add_argument("--no-sandbox")
 
         logger.info("Creating Chrome driver...")
-        return Chrome(options=options)
+        driver = Chrome(options=options)
+        # TODO: make window size a parameter
+        driver.set_window_size(1920, 1080)
+        return driver
 
     def restart(self, motivation: str = ""):
         logger.info(f"Restarting driver: {motivation}")

@@ -66,8 +66,8 @@ class DriverWrapper:
         # this is Chromium-based only, for firefox just user --headless
         options.add_argument("--headless=new")
         # this sucks but it's almost the only way to run chromium-based
-        # browsers in docker. browser is running ad unprivileged user and
-        # it's still in container: trade-off
+        # browsers in docker. browser is running as unprivileged user and
+        # it's in a container: trade-off
         options.add_argument("--no-sandbox")
 
         logger.info("Creating Chrome driver...")
@@ -81,6 +81,10 @@ class DriverWrapper:
             self.navigate(self.last_url)
 
     def navigate(self, url: str):
+        if not url:
+            logger.error("Empty URL! Something's wrong!")
+            return
+
         self.last_url = url
         try:
             self.driver.get(url)

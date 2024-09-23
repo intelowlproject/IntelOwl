@@ -4,8 +4,8 @@ import os
 from argparse import ArgumentParser
 
 from selenium.common import WebDriverException
-from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.chrome.webdriver import WebDriver
+from seleniumbase import Driver
 
 LOG_NAME = "analyze_phishing_site"
 
@@ -43,6 +43,8 @@ class Proxy:
         )
 
 
+# forse estendere il driver può permettere di usare questa classe come context manager.
+# potrebbe essere un buon compromesso. da provare lunedì.
 class DriverWrapper:
     def __init__(
         self,
@@ -56,22 +58,19 @@ class DriverWrapper:
         self.last_url: str = ""
 
     def _init_driver(self) -> WebDriver:
-        options: ChromeOptions = ChromeOptions()
-        if self.proxy.address:
-            logger.info(f"Adding proxy with option: {self.proxy}")
-            options.add_argument(f"--proxy-server={self.proxy}")
-            options.add_argument(
-                f'--host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE {self.proxy.address}"'
-            )
-        # this is Chromium-based only, for firefox just user --headless
-        options.add_argument("--headless=new")
-        # this sucks but it's almost the only way to run chromium-based
+        logger.info(f"Adding proxy with option: {self.proxy}")
+        logger.info("Creating Chrome driver...")
+        # no_sandbox=True sucks but it's almost the only way to run chromium-based
         # browsers in docker. browser is running as unprivileged user and
         # it's in a container: trade-off
-        options.add_argument("--no-sandbox")
-
-        logger.info("Creating Chrome driver...")
-        driver = Chrome(options=options)
+        driver = Driver(
+            headless=True,
+            headless2=True,
+            use_wire=True,
+            no_sandbox=True,
+            proxy=str(self.proxy) if self.proxy.address else None,
+            proxy_bypass_list=str(self.proxy.address) if self.proxy.address else None,
+        )
         # TODO: make window size a parameter
         driver.set_window_size(1920, 1080)
         return driver

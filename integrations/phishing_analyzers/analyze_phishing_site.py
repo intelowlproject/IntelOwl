@@ -4,8 +4,8 @@ import os
 from argparse import ArgumentParser
 
 from selenium.common import WebDriverException
-from selenium.webdriver.chrome.webdriver import WebDriver
 from seleniumbase import Driver
+from seleniumwire.webdriver import Chrome
 
 LOG_NAME = "analyze_phishing_site"
 
@@ -43,8 +43,6 @@ class Proxy:
         )
 
 
-# forse estendere il driver può permettere di usare questa classe come context manager.
-# potrebbe essere un buon compromesso. da provare lunedì.
 class DriverWrapper:
     def __init__(
         self,
@@ -54,10 +52,10 @@ class DriverWrapper:
         **kwargs,
     ):
         self.proxy: Proxy = Proxy(proxy_protocol, proxy_address, proxy_port)
-        self.driver: WebDriver = self._init_driver()
+        self.driver: Chrome = self._init_driver()
         self.last_url: str = ""
 
-    def _init_driver(self) -> WebDriver:
+    def _init_driver(self) -> Chrome:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chrome driver...")
         # no_sandbox=True sucks but it's almost the only way to run chromium-based
@@ -125,6 +123,9 @@ class DriverWrapper:
             self.restart(motivation="base64_screenshot")
             return self.base64_screenshot
 
+    def iter_requests(self):
+        return self.driver.iter_requests()
+
 
 def analyze_target(**kwargs):
     driver_wrapper = DriverWrapper(**kwargs)
@@ -135,6 +136,9 @@ def analyze_target(**kwargs):
                 "page_extraction": {
                     "page_source": driver_wrapper.page_source,
                     "page_view_base64": driver_wrapper.base64_screenshot,
+                    "page_http_traffic": [
+                        request for request in driver_wrapper.iter_requests()
+                    ],
                 }
             }
         )

@@ -6,16 +6,18 @@ import logging
 import time
 from abc import ABCMeta
 from pathlib import PosixPath
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 import requests
 from django.conf import settings
+from django.db.models import ForeignKey
 
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..choices import PythonModuleBasePaths
 from ..classes import Plugin
+from ..data_model_manager.models import BaseDataModel
 from ..models import PythonConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -34,6 +36,37 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     HashChoices = HashChoices
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
+
+    def create_data_model(self) -> Optional[BaseDataModel]:
+        self.report: AnalyzerReport
+        self._config: AnalyzerConfig
+        if not self._config.mapping_data_model:
+            return None
+        result = {}
+        data_model_class = self.report.get_data_model_class()
+        data_model_fields = data_model_class.get_fields()
+        for data_model_key, report_key in self._config.mapping_data_model.items():
+            # validation
+            if data_model_key not in data_model_fields.keys():
+                self.report.errors.append(f"Field {data_model_key} not present in {data_model_class.__name__}")
+                self.report.save()
+                continue
+            try:
+                value = self.report.get_value(report_key)
+            except Exception:
+                # validation
+                self.report.errors.append(f"Field {report_key} not present in report")
+                continue
+            else:
+                # create the related object if necessary
+                if isinstance(data_model_fields[data_model_key], ForeignKey):
+                    # to create an object we need at least
+                    if not isinstance(value, dict):
+                        self.report.errors.append(f"Field {report_key} has type {type(report_key)} while a dictionary is expected")
+                        continue
+                    value, _ = data_model_fields[data_model_key].related_model.objects.get_or_create(**value)
+                result[data_model_key] = value
+        return data_model_class.objects.create(**result)
 
     @classmethod
     @property
@@ -108,7 +141,9 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         Args:
             content (any): The content to process after a successful run.
         """
-        super().after_run_success(self._validate_result(content, max_recursion=15))
+        result = super().after_run_success(self._validate_result(content, max_recursion=15))
+        self.create_data_model()
+        return result
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):

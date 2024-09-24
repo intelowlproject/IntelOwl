@@ -1,7 +1,10 @@
+from typing import Dict
+
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
+from django.utils.timezone import now
 
-from api_app.data_model_manager.enums import DataModelTags, SignaturesChoices
+from api_app.data_model_manager.enums import DataModelTags, SignatureProviderChoices
 
 
 class IETFReport(models.Model):
@@ -16,12 +19,16 @@ class IETFReport(models.Model):
 
 
 class Signature(models.Model):
-    name = models.CharField(max_length=100)
-    SIGNATURES = SignaturesChoices
+    provider = models.CharField(max_length=100)
     signature = models.JSONField()
+
+    PROVIDERS = SignatureProviderChoices
 
 
 class BaseDataModel(models.Model):
+    analyzer_report = models.OneToOneField(
+        "analyzers_manager.AnalyzerReport", on_delete=models.CASCADE, related_name="data_model"
+    )
     evaluation = models.CharField(
         max_length=100, null=True
     )  # classification/verdict/found/score/malscore
@@ -51,7 +58,6 @@ class BaseDataModel(models.Model):
     # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
     # VirusTotalV3FileAnalyzer (report.data.attributes.tags)
     # GoogleSafeBrowsing, QuarkEngineAPK (crimes.crime)
-    TAGS = DataModelTags
     malware_family = models.CharField(
         max_length=100, null=True
     )  # family/family_name/malware_family
@@ -62,7 +68,12 @@ class BaseDataModel(models.Model):
     additional_info = (
         models.JSONField()
     )  # field for additional information related to a specific analyzer
+    date = models.DateTimeField(default=now)
+    TAGS = DataModelTags
 
+    @classmethod
+    def get_fields(cls) -> Dict:
+        return {field.name: field for field in cls._meta.fields}
 
 class DomainDataModel(BaseDataModel):
     ietf_report = models.ForeignKey(

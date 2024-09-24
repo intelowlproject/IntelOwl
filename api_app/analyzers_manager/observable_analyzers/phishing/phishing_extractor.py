@@ -2,7 +2,6 @@ from logging import getLogger
 from typing import Dict
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.models import PythonConfig
 
 logger = getLogger(__name__)
@@ -44,12 +43,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
             ],
         }
         logger.info(f"sending {req_data=}")
-        report = self._docker_run(req_data)
-        if report.get("setup_error"):
-            raise AnalyzerRunException(report["setup_error"])
-        if report.get("execution_error"):
-            raise AnalyzerRunException(report["execution_error"])
-        return report
+        return self._docker_run(req_data)
 
     def update(self) -> bool:
         pass

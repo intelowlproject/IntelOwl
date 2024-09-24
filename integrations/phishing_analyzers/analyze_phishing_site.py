@@ -4,8 +4,12 @@ import os
 from argparse import ArgumentParser
 
 from selenium.common import WebDriverException
-from selenium.webdriver import Chrome, ChromeOptions
-from selenium.webdriver.chrome.webdriver import WebDriver
+from seleniumbase import Driver
+from seleniumwire.webdriver import Chrome
+
+from integrations.phishing_analyzers.request_serializer import (
+    dump_seleniumwire_requests,
+)
 
 LOG_NAME = "analyze_phishing_site"
 
@@ -52,26 +56,24 @@ class DriverWrapper:
         **kwargs,
     ):
         self.proxy: Proxy = Proxy(proxy_protocol, proxy_address, proxy_port)
-        self.driver: WebDriver = self._init_driver()
+        self.driver: Chrome = self._init_driver()
         self.last_url: str = ""
 
-    def _init_driver(self) -> WebDriver:
-        options: ChromeOptions = ChromeOptions()
-        if self.proxy.address:
-            logger.info(f"Adding proxy with option: {self.proxy}")
-            options.add_argument(f"--proxy-server={self.proxy}")
-            options.add_argument(
-                f'--host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE {self.proxy.address}"'
-            )
-        # this is Chromium-based only, for firefox just user --headless
-        options.add_argument("--headless=new")
-        # this sucks but it's almost the only way to run chromium-based
+    def _init_driver(self) -> Chrome:
+        logger.info(f"Adding proxy with option: {self.proxy}")
+        logger.info("Creating Chrome driver...")
+        # no_sandbox=True sucks but it's almost the only way to run chromium-based
         # browsers in docker. browser is running as unprivileged user and
         # it's in a container: trade-off
-        options.add_argument("--no-sandbox")
-
-        logger.info("Creating Chrome driver...")
-        driver = Chrome(options=options)
+        driver = Driver(
+            headless=True,
+            headless2=True,
+            use_wire=True,
+            no_sandbox=True,
+            proxy=str(self.proxy) if self.proxy.address else None,
+            proxy_bypass_list=str(self.proxy.address) if self.proxy.address else None,
+            browser="chrome",
+        )
         # TODO: make window size a parameter
         driver.set_window_size(1920, 1080)
         return driver
@@ -126,6 +128,9 @@ class DriverWrapper:
             self.restart(motivation="base64_screenshot")
             return self.base64_screenshot
 
+    def iter_requests(self):
+        return self.driver.iter_requests()
+
 
 def analyze_target(**kwargs):
     driver_wrapper = DriverWrapper(**kwargs)
@@ -136,8 +141,13 @@ def analyze_target(**kwargs):
                 "page_extraction": {
                     "page_source": driver_wrapper.page_source,
                     "page_view_base64": driver_wrapper.base64_screenshot,
+                    "page_http_traffic": [
+                        dump_seleniumwire_requests(request)
+                        for request in driver_wrapper.iter_requests()
+                    ],
                 }
-            }
+            },
+            default=str,
         )
     )
     driver_wrapper.driver.quit()

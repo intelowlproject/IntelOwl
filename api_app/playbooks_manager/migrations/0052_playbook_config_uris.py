@@ -112,6 +112,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
         ("playbooks_manager", "0051_add_lnk_info_analyzer_free_to_use"),
+        ("pivots_manager", "0029_pivot_config_downloadfilefromuri"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

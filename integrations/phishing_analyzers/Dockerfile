@@ -25,7 +25,7 @@ RUN apt-get remove --purge -y gcc \
 
 # Create application environment and files
 WORKDIR ${PROJECT_PATH}/phishing_analyzers
-COPY app.py requirements.txt entrypoint.sh analyze_phishing_site.py ./
+COPY app.py requirements.txt entrypoint.sh analyze_phishing_site.py request_serializer.py ./
 RUN chmod u+x entrypoint.sh \
     && pip3 install -r requirements.txt --no-cache-dir
 

@@ -22,10 +22,9 @@ import {
   OrganizationPluginStateToggle,
   PluginHealthCheckButton,
   PluginPullButton,
-  AnalyzersEditButton,
   PlaybooksEditButton,
   PluginDeletionButton,
-  PivotsEditButton,
+  PluginEditButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -208,7 +207,19 @@ export const analyzersTableColumns = [
           pluginName={value.name}
           pluginType_={PluginsTypes.ANALYZER}
         />
-        <AnalyzersEditButton analyzerConfig={value} />
+        {value?.python_module ===
+          "basic_observable_analyzer.BasicObservableAnalyzer" && (
+          <>
+            <PluginEditButton
+              config={value}
+              pluginType_={PluginsTypes.ANALYZER}
+            />
+            <PluginDeletionButton
+              pluginName={value.name}
+              pluginType_={PluginsTypes.ANALYZER}
+            />
+          </>
+        )}
       </div>
     ),
     maxWidth: 100,
@@ -335,7 +346,7 @@ export const pivotTableColumns = [
           pluginName={value.name}
           pluginType_={PluginsTypes.PIVOT}
         />
-        <PivotsEditButton pivotConfig={value} />
+        <PluginEditButton config={value} pluginType_={PluginsTypes.PIVOT} />
         <PluginDeletionButton
           pluginName={value.name}
           pluginType_={PluginsTypes.PIVOT}

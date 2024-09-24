@@ -13,3 +13,14 @@ export const TLPDescriptions = Object.freeze({
 
 export const HACKER_MEME_STRING =
   "LoOk At YoU hAcKeR a PaThEtIc CrEaTuRe Of MeAt AnD bOnE";
+
+export const AuthScheme = Object.freeze({
+  BASIC: "Basic",
+  TOKEN: "Token",
+  BEARER: "Bearer",
+  X_API_KEY: "X-API-Key",
+  API_KEY: "API-Key",
+  X_AUTH_TOKEN: "X-Auth-Token",
+  X_KEY: "X-Key",
+  KEY: "key",
+});

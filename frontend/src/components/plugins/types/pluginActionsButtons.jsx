@@ -11,11 +11,11 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
-import { PlaybookConfigForm } from "./PlaybookConfigForm";
-import { PivotConfigForm } from "./PivotConfigForm";
+import { PlaybookConfigForm } from "../forms/PlaybookConfigForm";
+import { PivotConfigForm } from "../forms/PivotConfigForm";
 import { deletePluginConfig } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
-import { AnalyzerConfigForm } from "./AnalyzerConfigForm";
+import { AnalyzerConfigForm } from "../forms/AnalyzerConfigForm";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -330,7 +330,7 @@ PlaybooksEditButton.propTypes = {
   playbookConfig: PropTypes.object.isRequired,
 };
 
-export function PivotsEditButton({ pivotConfig }) {
+export function PluginEditButton({ config, pluginType_ }) {
   const [showModal, setShowModal] = React.useState(false);
 
   const user = useAuthStore(React.useCallback((state) => state.user, []));
@@ -353,18 +353,25 @@ export function PivotsEditButton({ pivotConfig }) {
   return (
     <div className="d-flex flex-column align-items-center px-2">
       <IconButton
-        id={`pivot-edit-btn__${pivotConfig?.name}`}
+        id={`plugin-edit-btn__${config?.name}`}
         color="info"
         size="sm"
         Icon={MdEdit}
-        title="Edit pivot config"
+        title="Edit config"
         onClick={() => setShowModal(true)}
         disabled={disabled}
         titlePlacement="top"
       />
-      {showModal && (
+      {showModal && pluginType_ === PluginsTypes.PIVOT && (
         <PivotConfigForm
-          pivotConfig={pivotConfig}
+          pivotConfig={config}
+          toggle={setShowModal}
+          isOpen={showModal}
+        />
+      )}
+      {showModal && pluginType_ === PluginsTypes.ANALYZER && (
+        <AnalyzerConfigForm
+          analyzerConfig={config}
           toggle={setShowModal}
           isOpen={showModal}
         />
@@ -373,52 +380,8 @@ export function PivotsEditButton({ pivotConfig }) {
   );
 }
 
-PivotsEditButton.propTypes = {
-  pivotConfig: PropTypes.object.isRequired,
-};
-
-export function AnalyzersEditButton({ analyzerConfig }) {
-  const [showModal, setShowModal] = React.useState(false);
-
-  const user = useAuthStore(React.useCallback((state) => state.user, []));
-  const { isInOrganization, isUserAdmin } = useOrganizationStore(
-    React.useCallback(
-      (state) => ({
-        fetchAll: state.fetchAll,
-        isInOrganization: state.isInOrganization,
-        isUserAdmin: state.isUserAdmin,
-      }),
-      [],
-    ),
-  );
-
-  // disabled icon if the user is not an admin of the org or a superuser
-  const disabled =
-    (isInOrganization && !isUserAdmin(user.username)) ||
-    (!isInOrganization && !user.is_staff);
-
-  return (
-    <div className="d-flex flex-column align-items-center px-2">
-      <IconButton
-        id={`analyzer-edit-btn__${analyzerConfig?.name}`}
-        color="info"
-        size="sm"
-        Icon={MdEdit}
-        title="Edit analyzer config"
-        onClick={() => setShowModal(true)}
-        disabled={disabled}
-        titlePlacement="top"
-      />
-      <AnalyzerConfigForm
-        config={analyzerConfig}
-        toggle={setShowModal}
-        isEditing
-        isOpen={showModal}
-      />
-    </div>
-  );
-}
-
-AnalyzersEditButton.propTypes = {
-  analyzerConfig: PropTypes.object.isRequired,
+PluginEditButton.propTypes = {
+  config: PropTypes.object.isRequired,
+  pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
+    .isRequired,
 };

@@ -3,7 +3,7 @@ FROM python:3.12.3
 ENV PROJECT_PATH=/opt/deploy
 ENV LOG_PATH=/var/log/intel_owl/phishing_analyzers
 ENV USER=phishing-user
-ENV HOME ${PYTHONPATH}
+ENV HOME=${PYTHONPATH}
 
 # Add a new low-privileged user
 RUN useradd -ms /bin/bash ${USER}

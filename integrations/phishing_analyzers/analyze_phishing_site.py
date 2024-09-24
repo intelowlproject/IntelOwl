@@ -7,6 +7,10 @@ from selenium.common import WebDriverException
 from seleniumbase import Driver
 from seleniumwire.webdriver import Chrome
 
+from integrations.phishing_analyzers.request_serializer import (
+    dump_seleniumwire_requests,
+)
+
 LOG_NAME = "analyze_phishing_site"
 
 # get flask-shell2http logger instance
@@ -68,6 +72,7 @@ class DriverWrapper:
             no_sandbox=True,
             proxy=str(self.proxy) if self.proxy.address else None,
             proxy_bypass_list=str(self.proxy.address) if self.proxy.address else None,
+            browser="chrome",
         )
         # TODO: make window size a parameter
         driver.set_window_size(1920, 1080)
@@ -137,10 +142,12 @@ def analyze_target(**kwargs):
                     "page_source": driver_wrapper.page_source,
                     "page_view_base64": driver_wrapper.base64_screenshot,
                     "page_http_traffic": [
-                        request for request in driver_wrapper.iter_requests()
+                        dump_seleniumwire_requests(request)
+                        for request in driver_wrapper.iter_requests()
                     ],
                 }
-            }
+            },
+            default=str,
         )
     )
     driver_wrapper.driver.quit()

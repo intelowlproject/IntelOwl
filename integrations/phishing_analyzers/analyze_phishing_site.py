@@ -3,13 +3,10 @@ import logging
 import os
 from argparse import ArgumentParser
 
+from request_serializer import dump_seleniumwire_requests
 from selenium.common import WebDriverException
 from seleniumbase import Driver
 from seleniumwire.webdriver import Chrome
-
-from integrations.phishing_analyzers.request_serializer import (
-    dump_seleniumwire_requests,
-)
 
 LOG_NAME = "analyze_phishing_site"
 

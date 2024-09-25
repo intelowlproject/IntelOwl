@@ -29,7 +29,7 @@ class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
         if "fs:" not in self.query:
             delta_hours = timezone.datetime.now() - timezone.timedelta(hours=self.hours)
             self.query = f"fs:{delta_hours.strftime('%Y-%m-%d%H:%M:%S')}+ " + self.query
-        data = self._vt_intelligence_search(self.query).get("data", {})
+        data = self._vt_intelligence_search(self.query, 300, "").get("data", {})
         logger.info(f"Retrieved {len(data)} items from the query")
         samples_hashes = [d["id"] for d in data]
         for sample_hash in samples_hashes:

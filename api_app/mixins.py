@@ -3,7 +3,7 @@ import base64
 import logging
 import time
 from datetime import datetime, timedelta
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import requests
 from django.core.cache import cache
@@ -80,6 +80,7 @@ class PaginationMixin:
 class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     url = "https://www.virustotal.com/api/v3/"
 
+    # If you want to query a specific subpath of the base endpoint, i.e: `analyses`
     url_sub_path: str
     _api_key_name: str
 
@@ -95,15 +96,19 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             self._job.tlp == self._job.TLP.CLEAR.value if self._job else False
         )
 
-    def _perform_get_request(self, uri: str, ignore_404=False, **kwargs):
+    def _perform_get_request(
+        self, uri: str, ignore_404: bool = False, **kwargs
+    ) -> Dict:
         return self._perform_request(uri, method="GET", ignore_404=ignore_404, **kwargs)
 
-    def _perform_post_request(self, uri: str, ignore_404=False, **kwargs):
+    def _perform_post_request(self, uri: str, ignore_404: bool = False, **kwargs):
         return self._perform_request(
             uri, method="POST", ignore_404=ignore_404, **kwargs
         )
 
-    def _perform_request(self, uri: str, method: str, ignore_404=False, **kwargs):
+    def _perform_request(
+        self, uri: str, method: str, ignore_404: bool = False, **kwargs
+    ) -> Dict:
         error = None
         try:
             url = self.url + uri
@@ -129,7 +134,7 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
 
     # return available relationships from file mimetype
     @classmethod
-    def _get_relationship_for_classification(cls, obs_clfn: str, iocs: bool):
+    def _get_relationship_for_classification(cls, obs_clfn: str, iocs: bool) -> List:
         # reference: https://developers.virustotal.com/reference/metadata
         if obs_clfn == cls.ObservableTypes.DOMAIN:
             relationships = [
@@ -191,7 +196,7 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     # configure requests params from file mimetype to get relative relationships
     def _get_requests_params_and_uri(
         self, obs_clfn: str, observable_name: str, iocs: bool
-    ):
+    ) -> Tuple[Dict, str, List]:
         params = {}
         # in this way, you just retrieved metadata about relationships
         # if you like to get all the data about specific relationships,...
@@ -228,19 +233,19 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             uri += self.url_sub_path
         return params, uri, relationships_requested
 
-    def _fetch_behaviour_summary(self, observable_name: str) -> dict:
+    def _fetch_behaviour_summary(self, observable_name: str) -> Dict:
         endpoint = f"files/{observable_name}/behaviour_summary"
         logger.info(f"Requesting behaviour summary from {endpoint}")
         result, _ = self._perform_get_request(endpoint, ignore_404=True)
         return result
 
-    def _fetch_sigma_analyses(self, observable_name: str) -> dict:
+    def _fetch_sigma_analyses(self, observable_name: str) -> Dict:
         endpoint = f"sigma_analyses/{observable_name}"
         logger.info(f"Requesting sigma analyses from {endpoint}")
         result, _ = self._perform_get_request(endpoint, ignore_404=True)
         return result
 
-    def _vt_download_file(self, file_hash):
+    def _vt_download_file(self, file_hash: str) -> bytes:
         try:
             endpoint = self.url + f"files/{file_hash}/download"
             logger.info(f"Requesting file from {endpoint}")
@@ -253,18 +258,29 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
         return response.content
 
     # perform a query in VT and return the results
-    def _vt_intelligence_search(self, query):
+    # ref: https://developers.virustotal.com/reference/intelligence-search
+    def _vt_intelligence_search(
+        self,
+        query: str,
+        limit: int,
+        order_by: str,
+    ) -> Dict:
         logger.info(f"Running VirusTotal intelligence search query: {query}")
-        # ref: https://developers.virustotal.com/reference/intelligence-search
+
+        if limit > 300:
+            limit = 300  # this is a limit forced by VT service
+
         params = {
             "query": query,
-            "limit": 300,  # this is a limit forced by VT service
-            "order": "",  # not relevant, we will process all the results
+            "limit": limit,
         }
+        if order_by:
+            params["order"] = order_by
+
         result, _ = self._perform_get_request("intelligence/search", params=params)
         return result
 
-    def _vt_get_iocs_from_file(self, sample_hash: str):
+    def _vt_get_iocs_from_file(self, sample_hash: str) -> Dict:
         try:
             params, uri, relationships_requested = self._get_requests_params_and_uri(
                 self.ObservableTypes.HASH, sample_hash, True
@@ -300,18 +316,33 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
 
 
 class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
+    # How many times we poll the VT API for scan results
     max_tries: int
+    # IntelOwl would sleep for this time between each poll to VT APIs
     poll_distance: int
+    # How many times we poll the VT API for RE-scan results (samples already available to VT)
     rescan_max_tries: int
+    # IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan
     rescan_poll_distance: int
+    # Include a summary of behavioral analysis reports alongside default scan report.
+    # This will cost additional quota.
     include_behaviour_summary: bool
+    # Include sigma analysis report alongside default scan report.
+    # This will cost additional quota.
     include_sigma_analyses: bool
+    # If the sample is old, it would be rescanned.
+    # This will cost additional quota.
     force_active_scan_if_old: bool
+    # How many days are required to consider a scan old to force rescan
     days_to_say_that_a_scan_is_old: int
+    # Include a list of relationships to request if available.
+    # Full list here https://developers.virustotal.com/reference/metadata.
+    # This will cost additional quota.
     relationships_to_request: list
+    # Number of elements to retrieve for each relationships
     relationships_elements: int
 
-    def _get_relationship_limit(self, relationship):
+    def _get_relationship_limit(self, relationship: str) -> int:
         # by default, just extract the first element
         limit = self.relationships_elements
         # resolutions data can be more valuable and it is not lot of data
@@ -325,7 +356,7 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
         relationships_requested: list,
         uri: str,
         result: dict,
-    ):
+    ) -> None:
         try:
             # skip relationship request if something went wrong
             if "error" not in result:
@@ -362,16 +393,99 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
                 f" for observable {observable_name}: {e}"
             )
 
-    def _vt_get_report(
+    def _get_url_prefix_postfix(self, result: Dict) -> Tuple[str, str]:
+        uri_postfix = self._job.observable_name
+        if self._job.observable_classification == ObservableClassification.DOMAIN.value:
+            uri_prefix = "domain"
+        elif self._job.observable_classification == ObservableClassification.IP.value:
+            uri_prefix = "ip-address"
+        elif self._job.observable_classification == ObservableClassification.URL.value:
+            uri_prefix = "url"
+            uri_postfix = result.get("data", {}).get("id", self._job.sha256)
+        else:  # hash
+            uri_prefix = "search"
+        return uri_prefix, uri_postfix
+
+    def _vt_scan_file(self, md5: str, rescan_instead: bool = False) -> Dict:
+        if rescan_instead:
+            logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested rescan")
+            files = {}
+            uri = f"files/{md5}/analyse"
+            poll_distance = self.rescan_poll_distance
+            max_tries = self.rescan_max_tries
+        else:
+            logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested scan")
+            try:
+                binary = self._job.file.read()
+            except Exception:
+                raise AnalyzerRunException(
+                    "IntelOwl error: couldn't retrieve the binary"
+                    f" to perform a scan (Job: {self.job_id}, {md5})"
+                )
+            files = {"file": binary}
+            uri = "files"
+            poll_distance = self.poll_distance
+            max_tries = self.max_tries
+
+        result, _ = self._perform_post_request(uri, files=files)
+
+        result_data = result.get("data", {})
+        scan_id = result_data.get("id", "")
+        if not scan_id:
+            raise AnalyzerRunException(
+                "no scan_id given by VirusTotal to retrieve the results"
+                f" (Job: {self.job_id}, {md5})"
+            )
+        # max 5 minutes waiting
+        got_result = False
+        uri = f"analyses/{scan_id}"
+        logger.info(
+            "Starting POLLING for Scan results. "
+            f"Poll Distance {poll_distance}, tries {max_tries}, ScanID {scan_id}"
+            f" (Job: {self.job_id}, {md5})"
+        )
+        for chance in range(max_tries):
+            time.sleep(poll_distance)
+            result, _ = self._perform_get_request(uri, files=files)
+            analysis_status = (
+                result.get("data", {}).get("attributes", {}).get("status", "")
+            )
+            logger.info(
+                f"[POLLING] (Job: {self.job_id}, {md5}) -> "
+                f"GET VT/v3/_vt_scan_file #{chance + 1}/{self.max_tries} "
+                f"status:{analysis_status}"
+            )
+            if analysis_status == "completed":
+                got_result = True
+                break
+
+        result = {}
+        if got_result:
+            # retrieve the FULL report, not only scans results.
+            # If it's a new sample, it's free of charge.
+            result = self._vt_get_report(self.ObservableTypes.HASH, md5)
+        else:
+            message = (
+                f"[POLLING] (Job: {self.job_id}, {md5}) -> "
+                "max polls tried, no result"
+            )
+            # if we tried a rescan, we can still use the old report
+            if rescan_instead:
+                logger.info(message)
+            else:
+                raise AnalyzerRunException(message)
+
+        return result
+
+    def _vt_poll_for_report(
         self,
-        obs_clfn: str,
         observable_name: str,
-    ) -> dict:
+        params: Dict,
+        uri: str,
+        obs_clfn: str,
+    ) -> Dict:
         result = {}
         already_done_active_scan_because_report_was_old = False
-        params, uri, relationships_requested = self._get_requests_params_and_uri(
-            obs_clfn, observable_name, False
-        )
         for chance in range(self.max_tries):
             logger.info(
                 f"[POLLING] (Job: {self.job_id}, observable {observable_name}) -> "
@@ -459,132 +573,83 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
         if already_done_active_scan_because_report_was_old:
             result["performed_rescan_because_report_was_old"] = True
 
+        return result
+
+    def _vt_include_behaviour_summary(
+        self,
+        result: Dict,
+        observable_name: str,
+    ) -> Dict:
+        sandbox_analysis = (
+            result.get("data", {})
+            .get("relationships", {})
+            .get("behaviours", {})
+            .get("data", [])
+        )
+        if sandbox_analysis:
+            logger.info(
+                f"found {len(sandbox_analysis)} sandbox analysis"
+                f" for {observable_name},"
+                " requesting the additional details"
+            )
+            return self._fetch_behaviour_summary(observable_name)
+
+    def _vt_include_sigma_analyses(
+        self,
+        result: Dict,
+        observable_name: str,
+    ) -> Dict:
+        sigma_analysis = (
+            result.get("data", {})
+            .get("relationships", {})
+            .get("sigma_analysis", {})
+            .get("data", [])
+        )
+        if sigma_analysis:
+            logger.info(
+                f"found {len(sigma_analysis)} sigma analysis"
+                f" for {observable_name},"
+                " requesting the additional details"
+            )
+            return self._fetch_sigma_analyses(observable_name)
+
+    def _vt_get_report(
+        self,
+        obs_clfn: str,
+        observable_name: str,
+    ) -> Dict:
+        params, uri, relationships_requested = self._get_requests_params_and_uri(
+            obs_clfn, observable_name, False
+        )
+
+        result = self._vt_poll_for_report(
+            observable_name,
+            params,
+            uri,
+            obs_clfn,
+        )
+
         if obs_clfn == self.ObservableTypes.HASH:
             # Include behavioral report, if flag enabled
+            # Attention: this will cost additional quota!
             if self.include_behaviour_summary:
-                sandbox_analysis = (
-                    result.get("data", {})
-                    .get("relationships", {})
-                    .get("behaviours", {})
-                    .get("data", [])
+                result["behaviour_summary"] = self._vt_include_behaviour_summary(
+                    result, observable_name
                 )
-                if sandbox_analysis:
-                    logger.info(
-                        f"found {len(sandbox_analysis)} sandbox analysis"
-                        f" for {observable_name},"
-                        " requesting the additional details"
-                    )
-                    result["behaviour_summary"] = self._fetch_behaviour_summary(
-                        observable_name
-                    )
 
             # Include sigma analysis report, if flag enabled
+            # Attention: this will cost additional quota!
             if self.include_sigma_analyses:
-                sigma_analysis = (
-                    result.get("data", {})
-                    .get("relationships", {})
-                    .get("sigma_analysis", {})
-                    .get("data", [])
+                result["sigma_analyses"] = self._vt_include_sigma_analyses(
+                    result, observable_name
                 )
-                if sigma_analysis:
-                    logger.info(
-                        f"found {len(sigma_analysis)} sigma analysis"
-                        f" for {observable_name},"
-                        " requesting the additional details"
-                    )
-                    result["sigma_analyses"] = self._fetch_sigma_analyses(
-                        observable_name
-                    )
 
         if self.relationships_to_request:
             self._vt_get_relationships(
                 observable_name, relationships_requested, uri, result
             )
+
         uri_prefix, uri_postfix = self._get_url_prefix_postfix(result)
         result["link"] = f"https://www.virustotal.com/gui/{uri_prefix}/{uri_postfix}"
-
-        return result
-
-    def _get_url_prefix_postfix(self, result: Dict) -> Tuple[str, str]:
-        uri_postfix = self._job.observable_name
-        if self._job.observable_classification == ObservableClassification.DOMAIN.value:
-            uri_prefix = "domain"
-        elif self._job.observable_classification == ObservableClassification.IP.value:
-            uri_prefix = "ip-address"
-        elif self._job.observable_classification == ObservableClassification.URL.value:
-            uri_prefix = "url"
-            uri_postfix = result.get("data", {}).get("id", self._job.sha256)
-        else:  # hash
-            uri_prefix = "search"
-        return uri_prefix, uri_postfix
-
-    def _vt_scan_file(self, md5: str, rescan_instead: bool = False) -> dict:
-        if rescan_instead:
-            logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested rescan")
-            files = {}
-            uri = f"files/{md5}/analyse"
-            poll_distance = self.rescan_poll_distance
-            max_tries = self.rescan_max_tries
-        else:
-            logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested scan")
-            try:
-                binary = self._job.file.read()
-            except Exception:
-                raise AnalyzerRunException(
-                    "IntelOwl error: couldn't retrieve the binary"
-                    f" to perform a scan (Job: {self.job_id}, {md5})"
-                )
-            files = {"file": binary}
-            uri = "files"
-            poll_distance = self.poll_distance
-            max_tries = self.max_tries
-
-        result, _ = self._perform_post_request(uri, files=files)
-
-        result_data = result.get("data", {})
-        scan_id = result_data.get("id", "")
-        if not scan_id:
-            raise AnalyzerRunException(
-                "no scan_id given by VirusTotal to retrieve the results"
-                f" (Job: {self.job_id}, {md5})"
-            )
-        # max 5 minutes waiting
-        got_result = False
-        uri = f"analyses/{scan_id}"
-        logger.info(
-            "Starting POLLING for Scan results. "
-            f"Poll Distance {poll_distance}, tries {max_tries}, ScanID {scan_id}"
-            f" (Job: {self.job_id}, {md5})"
-        )
-        for chance in range(max_tries):
-            time.sleep(poll_distance)
-            result, _ = self._perform_get_request(uri, files=files)
-            analysis_status = (
-                result.get("data", {}).get("attributes", {}).get("status", "")
-            )
-            logger.info(
-                f"[POLLING] (Job: {self.job_id}, {md5}) -> "
-                f"GET VT/v3/_vt_scan_file #{chance + 1}/{self.max_tries} "
-                f"status:{analysis_status}"
-            )
-            if analysis_status == "completed":
-                got_result = True
-                break
-
-        result = {}
-        if got_result:
-            # retrieve the FULL report, not only scans results.
-            # If it's a new sample, it's free of charge.
-            result = self._vt_get_report(self.ObservableTypes.HASH, md5)
-        else:
-            message = (
-                f"[POLLING] (Job: {self.job_id}, {md5}) -> "
-                "max polls tried, no result"
-            )
-            # if we tried a rescan, we can still use the old report
-            if rescan_instead:
-                logger.info(message)
-            else:
-                raise AnalyzerRunException(message)
 
         return result

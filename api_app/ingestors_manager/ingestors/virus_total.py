@@ -5,13 +5,13 @@ from unittest.mock import patch
 from django.utils import timezone
 
 from api_app.ingestors_manager.classes import Ingestor
-from api_app.mixins import VirusTotalv3AnalyzerMixin
+from api_app.mixins import VirusTotalv3BaseMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections
 
 logger = logging.getLogger(__name__)
 
 
-class VirusTotal(Ingestor, VirusTotalv3AnalyzerMixin):
+class VirusTotal(Ingestor, VirusTotalv3BaseMixin):
     # Download samples/IOCs that are up to X hours old
     hours: int
     # The query to execute

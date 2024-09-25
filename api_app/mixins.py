@@ -267,9 +267,7 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     ) -> Dict:
         logger.info(f"Running VirusTotal intelligence search query: {query}")
 
-        if limit > 300:
-            limit = 300  # this is a limit forced by VT service
-
+        limit = min(limit, 300)  # this is a limit forced by VT service
         params = {
             "query": query,
             "limit": limit,

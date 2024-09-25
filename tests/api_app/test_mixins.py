@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import pathlib
 from pathlib import PosixPath
 
 from api_app.analyzers_manager.constants import ObservableTypes
@@ -11,7 +12,12 @@ from tests import CustomTestCase
 
 class VirusTotalv3Base(VirusTotalv3BaseMixin):
     @classmethod
+    @property
     def python_base_path(cls) -> PosixPath:
+        return pathlib.PosixPath(r"/")
+
+    @classmethod
+    def update(cls) -> bool:
         pass
 
     def run(self) -> dict:
@@ -20,7 +26,12 @@ class VirusTotalv3Base(VirusTotalv3BaseMixin):
 
 class VirusTotalv3Analyzer(VirusTotalv3AnalyzerMixin):
     @classmethod
+    @property
     def python_base_path(cls) -> PosixPath:
+        return pathlib.PosixPath(r"/")
+
+    @classmethod
+    def update(cls) -> bool:
         pass
 
     def run(self) -> dict:

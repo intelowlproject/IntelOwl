@@ -16,14 +16,18 @@ def dump_seleniumwire_requests(request: Request) -> dict:
         "headers": request.headers.items(),
         "body": base64.b64encode(request.body).decode("utf-8"),
         "date": request.date.strftime("%Y-%m-%d, %H:%M:%S.%f"),
-        "ws_message": [
-            {
-                "from_client": message.from_client,
-                "content": base64.b64encode(message.content).decode("utf-8"),
-                "date": message.date.strftime("%Y-%m-%d, %H:%M:%S.%f"),
-            }
-            for message in request.ws_messages
-        ],
+        "ws_message": (
+            [
+                {
+                    "from_client": message.from_client,
+                    "content": base64.b64encode(message.content).decode("utf-8"),
+                    "date": message.date.strftime("%Y-%m-%d, %H:%M:%S.%f"),
+                }
+                for message in request.ws_messages
+            ]
+            if request.ws_messages
+            else []
+        ),
         "cert": request.cert,
         "response": (
             {
@@ -49,7 +53,7 @@ def load_seleniumwire_requests(to_load: dict) -> Request:
             reason=response_to_load["reason"],
             headers=response_to_load["headers"],
             # body gets re-encoded into utf-8 by its setter method
-            body=base64.b64encode(response_to_load["body"]),
+            body=base64.b64decode(response_to_load["body"]),
         )
         if response_to_load
         else None
@@ -59,18 +63,22 @@ def load_seleniumwire_requests(to_load: dict) -> Request:
         method=to_load["method"],
         url=to_load["url"],
         headers=to_load["headers"],
-        body=base64.b64encode(to_load["body"]),
+        body=base64.b64decode(to_load["body"]),
     )
     request.id = to_load["id"]
     request.date = datetime.strptime(to_load["date"], "%Y-%m-%d, %H:%M:%S.%f")
-    request.ws_messages = [
-        WebSocketMessage(
-            from_client=message["from_client"],
-            content=base64.b64encode(message["content"]),
-            date=datetime.strptime(message["date"], "%Y-%m-%d, %H:%M:%S.%f"),
-        )
-        for message in to_load["ws_messages"]
-    ]
+    request.ws_messages = (
+        [
+            WebSocketMessage(
+                from_client=message["from_client"],
+                content=base64.b64decode(message["content"]),
+                date=datetime.strptime(message["date"], "%Y-%m-%d, %H:%M:%S.%f"),
+            )
+            for message in to_load["ws_messages"]
+        ]
+        if "ws_messages" in to_load.keys()
+        else []
+    )
     request.cert = to_load["cert"]
 
     if response:

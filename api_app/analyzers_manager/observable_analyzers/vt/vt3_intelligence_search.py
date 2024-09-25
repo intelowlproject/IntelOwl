@@ -7,8 +7,6 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class VirusTotalv3Intelligence(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
-    url = "https://www.virustotal.com/api/v3/intelligence"
-
     limit: int
     order_by: str
 

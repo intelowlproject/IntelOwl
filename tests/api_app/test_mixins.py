@@ -8,6 +8,58 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.mixins import VirusTotalv3AnalyzerMixin, VirusTotalv3BaseMixin
 from tests import CustomTestCase
+from tests.mock_utils import MockUpResponse
+
+possible_responses = {
+    "_vt_get_iocs_from_file": MockUpResponse(
+        {
+            "data": {
+                "id": "b665290bc6bba034a69c32f54862518a86a2dab93787a7e99daaa552c708b23a",
+                "type": "file",
+                "links": {"self": "redacted"},
+                "attributes": {},
+                "relationships": {
+                    "contacted_urls": {
+                        "data": [
+                            {
+                                "type": "url",
+                                "id": "b33ca60c36a2dbdb354936f83e3232ae886eeb237f61bfdd19420410f585c0c2",
+                                "context_attributes": {
+                                    "url": "http://www.microsoft.com/pki/certs/MicRooCerAut_2010-06-23.crt"
+                                },
+                            },
+                            {
+                                "type": "url",
+                                "id": "e1deefc8a4613fe9c16014d5cce4de4a6e12f3caccf80838a04c82faa4b42434",
+                                "context_attributes": {
+                                    "url": "http://pki.goog/gsr1/gsr1.crt"
+                                },
+                            },
+                        ],
+                        "links": {"self": "redacted", "related": "redacted"},
+                    },
+                    "contacted_domains": {
+                        "data": [
+                            {"type": "domain", "id": "microsoft.com"},
+                            {"type": "domain", "id": "pki.goog"},
+                        ],
+                        "links": {"self": "redacted", "related": "redacted"},
+                    },
+                    "contacted_ips": {
+                        "data": [
+                            {"type": "ip_address", "id": "108.177.119.113"},
+                            {"type": "ip_address", "id": "108.177.96.113"},
+                            {"type": "ip_address", "id": "146.75.118.172"},
+                            {"type": "ip_address", "id": "162.125.1.18"},
+                        ],
+                        "links": {"self": "redacted", "related": "redacted"},
+                    },
+                },
+            }
+        },
+        200,
+    ),
+}
 
 
 class VirusTotalv3Base(VirusTotalv3BaseMixin):

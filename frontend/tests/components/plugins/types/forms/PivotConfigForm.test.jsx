@@ -4,9 +4,9 @@ import axios from "axios";
 import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { API_BASE_URI } from "../../../../src/constants/apiURLs";
-import { PivotConfigForm } from "../../../../src/components/plugins/forms/PivotConfigForm";
-import { mockedUsePluginConfigurationStore } from "../../../mock";
+import { API_BASE_URI } from "../../../../../src/constants/apiURLs";
+import { PivotConfigForm } from "../../../../../src/components/plugins/forms/PivotConfigForm";
+import { mockedUsePluginConfigurationStore } from "../../../../mock";
 
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>

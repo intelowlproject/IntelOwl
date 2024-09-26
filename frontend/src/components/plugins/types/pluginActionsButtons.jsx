@@ -148,16 +148,20 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
     ),
   );
 
-  const { retrievePlaybooksConfiguration, retrievePivotsConfiguration } =
-    usePluginConfigurationStore(
-      React.useCallback(
-        (state) => ({
-          retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
-          retrievePivotsConfiguration: state.retrievePivotsConfiguration,
-        }),
-        [],
-      ),
-    );
+  const {
+    retrievePlaybooksConfiguration,
+    retrievePivotsConfiguration,
+    retrieveAnalyzersConfiguration,
+  } = usePluginConfigurationStore(
+    React.useCallback(
+      (state) => ({
+        retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
+        retrievePivotsConfiguration: state.retrievePivotsConfiguration,
+        retrieveAnalyzersConfiguration: state.retrieveAnalyzersConfiguration,
+      }),
+      [],
+    ),
+  );
 
   const onClick = async () => {
     try {
@@ -165,6 +169,8 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
       if (pluginType_ === PluginsTypes.PLAYBOOK)
         retrievePlaybooksConfiguration();
       if (pluginType_ === PluginsTypes.PIVOT) retrievePivotsConfiguration();
+      if (pluginType_ === PluginsTypes.ANALYZER)
+        retrieveAnalyzersConfiguration();
       setShowModal(false);
     } catch {
       // handle error in deletePlugin

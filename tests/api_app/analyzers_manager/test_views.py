@@ -125,13 +125,15 @@ class AnalyzerConfigViewSetTestCase(
                 "python_module": "basic_observable_analyzer.BasicObservableAnalyzer",
                 "type": "observable",
                 "observable_supported": ["generic"],
-                "plugin_config": {
-                    "type": "1",
-                    "plugin_name": "TestCreate",
-                    "attribute": "url",
-                    "value": "https://mytesturl.com",
-                    "config_type": "1",
-                },
+                "plugin_config": [
+                    {
+                        "type": "1",
+                        "plugin_name": "TestCreate",
+                        "attribute": "url",
+                        "value": "https://mytesturl.com",
+                        "config_type": "1",
+                    }
+                ],
             },
             format="json",
         )

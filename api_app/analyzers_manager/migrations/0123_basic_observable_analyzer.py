@@ -45,7 +45,7 @@ def migrate_python_module_pivot(apps, schema_editor):
         is_secret=False,
         required=False,
         defaults={
-            "description": "HTTP method for the request",
+            "description": "HTTP method used for the request",
         },
     )
     Parameter.objects.get_or_create(
@@ -55,17 +55,17 @@ def migrate_python_module_pivot(apps, schema_editor):
         is_secret=False,
         required=False,
         defaults={
-            "description": "User agent",
+            "description": "User Agent used to connect to sites",
         },
     )
     Parameter.objects.get_or_create(
-        name="param_key",
+        name="param_name",
         type="str",
         python_module=pm,
         is_secret=False,
         required=False,
         defaults={
-            "description": "Query key",
+            "description": "Param name for the query string or request payload",
         },
     )
     Parameter.objects.get_or_create(
@@ -90,7 +90,7 @@ def reverse_migrate_module_pivot(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("analyzers_manager", "0119_analyzer_config_apk_artifacts"),
+        ("analyzers_manager", "0122_alter_soft_time_limit"),
     ]
     operations = [
         migrations.RunPython(migrate_python_module_pivot, reverse_migrate_module_pivot)

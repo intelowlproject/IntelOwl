@@ -4,9 +4,9 @@ import axios from "axios";
 import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { PLAYBOOKS_CONFIG_URI } from "../../../../src/constants/apiURLs";
-import { PlaybookConfigForm } from "../../../../src/components/plugins/forms/PlaybookConfigForm";
-import { mockedUsePluginConfigurationStore } from "../../../mock";
+import { PLAYBOOKS_CONFIG_URI } from "../../../../../src/constants/apiURLs";
+import { PlaybookConfigForm } from "../../../../../src/components/plugins/forms/PlaybookConfigForm";
+import { mockedUsePluginConfigurationStore } from "../../../../mock";
 
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>

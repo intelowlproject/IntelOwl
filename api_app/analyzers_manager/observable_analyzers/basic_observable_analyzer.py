@@ -14,7 +14,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
     url: str
     auth_scheme: str
     user_agent: str
-    param_key: str
+    param_name: str
     _certificate: str
     _api_key_name: str = None
     http_method: str = "get"
@@ -75,9 +75,9 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
 
         # request
         if self.http_method == "get":
-            if hasattr(self, "param_key"):
+            if hasattr(self, "param_name"):
                 params = {
-                    self.param_key: self.observable_name,
+                    self.param_name: self.observable_name,
                 }
                 response = requests.get(
                     self.url, params=params, headers=headers, verify=verify
@@ -88,7 +88,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
 
         if self.http_method == "post":
             json_body = {
-                self.param_key: self.observable_name,
+                self.param_name: self.observable_name,
             }
             response = requests.post(
                 self.url, headers=headers, json=json_body, verify=verify

@@ -192,7 +192,7 @@ export const analyzersTableColumns = [
     accessor: (analyzerConfig) => analyzerConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
-      <div className="d-flex justify-content-center mx-2">
+      <div className="d-flex justify-content-center flex-wrap mx-2">
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -209,7 +209,7 @@ export const analyzersTableColumns = [
         />
         {value?.python_module ===
           "basic_observable_analyzer.BasicObservableAnalyzer" && (
-          <>
+          <div className="d-flex mt-2">
             <PluginEditButton
               config={value}
               pluginType_={PluginsTypes.ANALYZER}
@@ -218,7 +218,7 @@ export const analyzersTableColumns = [
               pluginName={value.name}
               pluginType_={PluginsTypes.ANALYZER}
             />
-          </>
+          </div>
         )}
       </div>
     ),
@@ -551,7 +551,7 @@ export const ingestorTableColumns = [
   {
     Header: "Playbook to execute",
     id: "playbook",
-    accessor: "playbook_to_execute",
+    accessor: "playbooks_choice",
     Cell: ({ value }) => (
       <TableCell isCopyToClipboard isTruncate value={value} />
     ),

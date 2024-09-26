@@ -6,7 +6,11 @@ from argparse import ArgumentParser
 from request_serializer import dump_seleniumwire_requests
 from selenium.common import WebDriverException
 from seleniumbase import Driver
+from seleniumbase.config import settings
 from seleniumwire.webdriver import Chrome
+
+# remove annoying driver download message
+settings.HIDE_DRIVER_DOWNLOADS = True
 
 LOG_NAME = "analyze_phishing_site"
 

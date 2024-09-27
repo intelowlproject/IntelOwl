@@ -69,6 +69,7 @@ else:
         "priority_steps": list(range(10)),
         "sep": ":",
         "queue_order_strategy": "priority",
+        "task_default_priority": 7,
     }
 
 task_queues = [

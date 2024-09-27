@@ -49,7 +49,7 @@ lief==0.15.1
 maxminddb==2.6.0
 geoip2==4.8.0
 mwdblib==4.5.0
-git+https://github.com/decalage2/oletools.git@ccf99d1a8f85e552f5cc130fbaa504cfe5725a92
+oletools==0.60.2
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0

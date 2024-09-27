@@ -16,7 +16,7 @@ plugin = {
     "description": "This playbook is used to perform a complete phishing analysis of "
     "a given URL. It wraps all the analyzers for the purpose.",
     "disabled": False,
-    "type": ["url"],
+    "type": ["file"],
     "runtime_configuration": {
         "pivots": {},
         "analyzers": {},

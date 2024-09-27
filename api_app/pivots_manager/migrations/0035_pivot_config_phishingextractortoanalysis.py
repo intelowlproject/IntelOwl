@@ -11,7 +11,7 @@ plugin = {
     "python_module": {
         "health_check_schedule": None,
         "update_schedule": None,
-        "module": "compare.Compare",
+        "module": "load_file.LoadFile",
         "base_path": "api_app.pivots_manager.pivots",
     },
     "related_analyzer_configs": ["Phishing_Extractor"],
@@ -30,7 +30,7 @@ plugin = {
 params = [
     {
         "python_module": {
-            "module": "compare.Compare",
+            "module": "load_file.LoadFile",
             "base_path": "api_app.pivots_manager.pivots",
         },
         "name": "field_to_compare",
@@ -45,7 +45,7 @@ values = [
     {
         "parameter": {
             "python_module": {
-                "module": "compare.Compare",
+                "module": "load_file.LoadFile",
                 "base_path": "api_app.pivots_manager.pivots",
             },
             "name": "field_to_compare",
@@ -61,7 +61,7 @@ values = [
         "pivot_config": "PhishingExtractorToAnalysis",
         "for_organization": False,
         "value": "page_extraction",
-        "updated_at": "2024-09-17T15:07:59.883995Z",
+        "updated_at": "2024-09-25T13:45:58.643835Z",
         "owner": None,
     }
 ]

@@ -16,16 +16,16 @@ if ELASTICSEARCH_BI_ENABLED:
         print("Elasticsearch not correctly configured")
 
     else:
-        ELASTICSEARCH_CLIENT = Elasticsearch(
+        ELASTICSEARCH_BI_CLIENT = Elasticsearch(
             ELASTICSEARCH_BI_HOST,
             maxsize=20,
             max_retries=10,
             retry_on_timeout=True,
             timeout=30,
         )
-        if not ELASTICSEARCH_CLIENT.ping():
+        if not ELASTICSEARCH_BI_CLIENT.ping():
             print(
-                f"ELASTICSEARCH BI client configuration did not connect correctly: {ELASTICSEARCH_CLIENT.info()}"
+                f"ELASTICSEARCH BI client configuration did not connect correctly: {ELASTICSEARCH_BI_CLIENT.info()}"
             )
 
 ELASTICSEARCH_DSL_ENABLED = (
@@ -42,6 +42,9 @@ if ELASTICSEARCH_DSL_ENABLED:
             "verify_certs": False,
         },
     }
+    ELASTICSEARCH_CLIENT = Elasticsearch(**ELASTICSEARCH_DSL["default"])
+
+    # ELASTICSEARCH_DSL_AUTO_REFRESH = True  # TODO: it seems not to work
     ELASTICSEARCH_DSL_INDEX_SETTINGS = {
         "number_of_shards": int(secrets.get_secret("ELASTICSEARCH_DSL_NO_OF_SHARDS")),
         "number_of_replicas": int(

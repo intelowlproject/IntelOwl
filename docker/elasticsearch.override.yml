@@ -21,7 +21,7 @@ services:
       - discovery.type=single-node
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/elastic.key
-      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca.crt
+      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/elastic_ca.crt
       - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/elastic.crt
 
 volumes:

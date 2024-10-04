@@ -4,6 +4,7 @@
 from elasticsearch import Elasticsearch
 
 from intel_owl import secrets
+from intel_owl.settings.commons import STAGE_CI, STAGE_LOCAL
 
 ELASTICSEARCH_BI_ENABLED = (
     secrets.get_secret("ELASTICSEARCH_BI_ENABLED", False) == "True"
@@ -28,21 +29,19 @@ if ELASTICSEARCH_BI_ENABLED:
                 f"ELASTICSEARCH BI client configuration did not connect correctly: {ELASTICSEARCH_BI_CLIENT.info()}"
             )
 
-ELASTICSEARCH_DSL_ENABLED = (
-    secrets.get_secret("ELASTICSEARCH_DSL_ENABLED", False) == "True"
+ELASTIC_CLIENT_NAME = (
+    "default"  # use this as value for the param "using" in Search to use the client
 )
-if ELASTICSEARCH_DSL_ENABLED:
-    ELASTICSEARCH_DSL_HOST = secrets.get_secret("ELASTICSEARCH_DSL_HOST")
-    ELASTICSEARCH_DSL_PASSWORD = secrets.get_secret("ELASTICSEARCH_DSL_PASSWORD")
+ELASTIC_HOST = secrets.get_secret("ELASTIC_HOST")
+if ELASTIC_HOST:
+    ELASTIC_PASSWORD = secrets.get_secret("ELASTIC_PASSWORD")
 
-    ELASTICSEARCH_DSL = {
-        "default": {
-            "hosts": ELASTICSEARCH_DSL_HOST,
-            "basic_auth": ("elastic", ELASTICSEARCH_DSL_PASSWORD),
-            "verify_certs": False,
-        },
-    }
-    ELASTICSEARCH_CLIENT = Elasticsearch(**ELASTICSEARCH_DSL["default"])
+    elastic_client_settings = {"hosts": ELASTIC_HOST}
+    if ELASTIC_PASSWORD:
+        elastic_client_settings["basic_auth"] = ("elastic", ELASTIC_PASSWORD)
+    if STAGE_LOCAL or STAGE_CI:
+        elastic_client_settings["verify_certs"] = False
+    ELASTICSEARCH_DSL = {ELASTIC_CLIENT_NAME: elastic_client_settings}
 
     # ELASTICSEARCH_DSL_AUTO_REFRESH = True  # TODO: it seems not to work
     ELASTICSEARCH_DSL_INDEX_SETTINGS = {
@@ -54,5 +53,5 @@ if ELASTICSEARCH_DSL_ENABLED:
 else:
     ELASTICSEARCH_DSL_AUTOSYNC = False
     ELASTICSEARCH_DSL = {
-        "default": {"hosts": ""},
+        ELASTIC_CLIENT_NAME: {"hosts": ""},
     }

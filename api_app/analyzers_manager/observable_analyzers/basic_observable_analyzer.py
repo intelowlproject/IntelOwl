@@ -27,6 +27,9 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
             .replace("-----END_CERTIFICATE-----", "-----END CERTIFICATE-----")
         )
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         # optional authentication
         if hasattr(self, "_api_key_name") and "Authorization" in self.headers.keys():

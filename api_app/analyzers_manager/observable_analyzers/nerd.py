@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import requests
+from requests.exceptions import HTTPError
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
@@ -39,10 +40,17 @@ class NERD(ObservableAnalyzer):
             response = requests.get(self.url + uri, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+            try:
+                result = response.json()
+            except ValueError:
+                raise AnalyzerRunException(e)
+            if isinstance(e, HTTPError) and e.response.status_code == 404 and "NOT FOUND" in str(e):
+                return {"status": "NO DATA"}
+            else:
+                raise AnalyzerRunException(e)
 
         result = response.json()
-
+        
         return result
 
 

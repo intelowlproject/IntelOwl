@@ -1,49 +1,21 @@
 import base64
-import logging
 from tempfile import NamedTemporaryFile
 
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.constants import HTTPMethods
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
-
-logger = logging.getLogger(__name__)
 
 
 class BasicObservableAnalyzer(ObservableAnalyzer):
     url: str
-    auth_scheme: str
-    user_agent: str
-    param_name: str
+    headers: dict
+    params: dict
     _certificate: str
-    _api_key_name: str = None
+    _api_key_name: str
     http_method: str = "get"
-
-    def _get_auth_headers(self):
-        auth_headers = {}
-        if hasattr(self, "_api_key_name") and hasattr(self, "auth_scheme"):
-            api_key = self._api_key_name
-            if self.auth_scheme in [
-                "X-API-Key",
-                "API-Key",
-                "X-Auth-Token",
-                "X-Key",
-                "key",
-            ]:
-                auth_headers[self.auth_scheme] = api_key
-            else:
-                # Basic/Token/Bearer
-                if self.auth_scheme == "Basic":
-                    # the API uses basic auth so we need to base64 encode the auth payload
-                    api_key = base64.b64encode(self._api_key_name.encode()).decode()
-                auth_headers["Authorization"] = f"{self.auth_scheme} {api_key}"
-        else:
-            warning = "No API key retrieved"
-            logger.info(
-                f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
-            )
-            self.report.errors.append(warning)
-        return auth_headers
 
     @staticmethod
     def _clean_certificate(cert):
@@ -56,44 +28,56 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
         )
 
     def run(self):
-        headers = {"Accept": "application/json"}
-
         # optional authentication
-        headers.update(self._get_auth_headers())
-
-        # optional user agent
-        if hasattr(self, "user_agent"):
-            headers["User-Agent"] = self.user_agent
+        if hasattr(self, "_api_key_name") and "Authorization" in self.headers.keys():
+            api_key = self._api_key_name
+            auth_schema = self.headers["Authorization"].split(" ")[0]
+            if auth_schema == "Basic":
+                # the API uses basic auth so we need to base64 encode the auth payload
+                api_key = base64.b64encode(self._api_key_name.encode()).decode()
+            self.headers["Authorization"] = self.headers["Authorization"].replace(
+                "<api_key>", api_key
+            )
+        elif hasattr(self, "_api_key_name"):
+            for key in self.headers.keys():
+                self.headers[key] = self.headers[key].replace(
+                    "<api_key>", self._api_key_name
+                )
 
         # optional certificate
-        verify = True
-        if hasattr(self, "certificate"):
+        verify = True  # defualt
+        if hasattr(self, "_certificate"):
             self.__cert_file = NamedTemporaryFile(mode="w")
             self.__cert_file.write(self._clean_certificate(self._certificate))
             self.__cert_file.flush()
             verify = self.__cert_file.name
 
+        # replace <observable> placheholder
+        if hasattr(self, "params"):
+            for key in self.params.keys():
+                if self.params[key] == "<observable>":
+                    self.params[key] = self.observable_name
+
+        # validate url
+        if not hasattr(self, "url"):
+            raise AnalyzerConfigurationException("Instance URL is required")
+
         # request
-        if self.http_method == "get":
-            if hasattr(self, "param_name"):
-                params = {
-                    self.param_name: self.observable_name,
-                }
+        if self.http_method not in HTTPMethods.values:
+            raise AnalyzerConfigurationException("Http method is not valid")
+        if self.http_method == HTTPMethods.GET:
+            if hasattr(self, "params"):
                 response = requests.get(
-                    self.url, params=params, headers=headers, verify=verify
+                    self.url, params=self.params, headers=self.headers, verify=verify
                 )
             response = requests.get(
-                self.url + self.observable_name, headers=headers, verify=verify
+                self.url + self.observable_name, headers=self.headers, verify=verify
             )
-
-        if self.http_method == "post":
-            json_body = {
-                self.param_name: self.observable_name,
-            }
-            response = requests.post(
-                self.url, headers=headers, json=json_body, verify=verify
+        else:
+            request_method = getattr(requests, self.http_method)
+            response = request_method(
+                self.url, headers=self.headers, json=self.params, verify=verify
             )
-
         response.raise_for_status()
         return response.json()
 

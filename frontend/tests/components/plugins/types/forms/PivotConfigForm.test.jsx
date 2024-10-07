@@ -8,7 +8,7 @@ import { API_BASE_URI } from "../../../../../src/constants/apiURLs";
 import { PivotConfigForm } from "../../../../../src/components/plugins/forms/PivotConfigForm";
 import { mockedUsePluginConfigurationStore } from "../../../../mock";
 
-jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
+jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
     state(mockedUsePluginConfigurationStore),
   ),

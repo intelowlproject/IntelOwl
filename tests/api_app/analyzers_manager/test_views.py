@@ -130,7 +130,7 @@ class AnalyzerConfigViewSetTestCase(
                         "type": "1",
                         "plugin_name": "TestCreate",
                         "attribute": "url",
-                        "value": "https://mytesturl.com",
+                        "value": "https://www.mytesturl.com",
                         "config_type": "1",
                     }
                 ],
@@ -147,7 +147,7 @@ class AnalyzerConfigViewSetTestCase(
         except PluginConfig.DoesNotExist as e:
             self.fail(e)
         else:
-            self.assertEqual(plugin.value, "https://mytesturl.com")
+            self.assertEqual(plugin.value, "https://www.mytesturl.com")
             self.assertEqual(plugin.parameter, p)
 
             p.delete()

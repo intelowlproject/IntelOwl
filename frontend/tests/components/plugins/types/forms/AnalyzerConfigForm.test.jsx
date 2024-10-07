@@ -33,11 +33,20 @@ describe("AnalyzerConfigForm test", () => {
     },
     secrets: {},
     params: {
+      http_method : {
         attribute: "http_method",
         config_type: 1,
         plugin_name: "myNewAnalyzer",
         type: 1,
-        value: "get",
+        value: "get"
+      },
+      url : {
+        attribute: "url",
+        config_type: 1,
+        plugin_name: "myNewAnalyzer",
+        type: 1,
+        value: "https://www.service.com/"
+      },
     },
     verification: {
       configured: true,
@@ -76,20 +85,25 @@ describe("AnalyzerConfigForm test", () => {
     const tlpField = screen.getByText("TLP");
     expect(tlpField).toBeInTheDocument();
 
+    expect(screen.getByText("Plugin Config")).toBeInTheDocument();
+
     const urlInputField = screen.getByText("Url:");
     expect(urlInputField).toBeInTheDocument();
 
     const httpMethodInputField = screen.getByText("HTTP method:");
     expect(httpMethodInputField).toBeInTheDocument();
+    const getMethod = screen.getByRole("radio", { name: "GET" });
+    expect(getMethod).toBeInTheDocument();
+    expect(getMethod).toBeChecked();
+    const postMethod = screen.getByRole("radio", { name: "POST" });
+    expect(postMethod).toBeInTheDocument();
+    expect(postMethod).not.toBeChecked();
 
-    const paramNameInputField = screen.getByText("Param name:");
-    expect(paramNameInputField).toBeInTheDocument();
+    const paramsPayloadInputField = screen.getByText("Params/Payload:");
+    expect(paramsPayloadInputField).toBeInTheDocument();
 
-    const userAgentInputField = screen.getByText("User-Agent:");
-    expect(userAgentInputField).toBeInTheDocument();
-
-    const authSchemeInputField = screen.getByText("Authentication scheme:");
-    expect(authSchemeInputField).toBeInTheDocument();
+    const headersInputField = screen.getByText("Headers:");
+    expect(headersInputField).toBeInTheDocument();
 
     const apiKeyInputField = screen.getByText("Api key:");
     expect(apiKeyInputField).toBeInTheDocument();
@@ -99,7 +113,6 @@ describe("AnalyzerConfigForm test", () => {
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
-    expect(saveButton.className).toContain("disabled");
   });
 
   test("create analyzer config", async () => {
@@ -134,24 +147,29 @@ describe("AnalyzerConfigForm test", () => {
  
     const tlpField = screen.getByText("TLP");
     expect(tlpField).toBeInTheDocument();
-    const amberTLP = screen.getByRole("radio", { name: "RED" });
-    expect(amberTLP).toBeInTheDocument();
-    expect(amberTLP).toBeChecked();
+    const redTLP = screen.getByRole("radio", { name: "RED" });
+    expect(redTLP).toBeInTheDocument();
+    expect(redTLP).toBeChecked();
+
+    expect(screen.getByText("Plugin Config")).toBeInTheDocument();
 
     const urlInputField = screen.getByText("Url:");
     expect(urlInputField).toBeInTheDocument();
 
     const httpMethodInputField = screen.getByText("HTTP method:");
     expect(httpMethodInputField).toBeInTheDocument();
+    const getMethod = screen.getByRole("radio", { name: "GET" });
+    expect(getMethod).toBeInTheDocument();
+    expect(getMethod).toBeChecked();
+    const postMethod = screen.getByRole("radio", { name: "POST" });
+    expect(postMethod).toBeInTheDocument();
+    expect(postMethod).not.toBeChecked();
 
-    const paramNameInputField = screen.getByText("Param name:");
-    expect(paramNameInputField).toBeInTheDocument();
+    const paramsPayloadInputField = screen.getByText("Params/Payload:");
+    expect(paramsPayloadInputField).toBeInTheDocument();
 
-    const userAgentInputField = screen.getByText("User-Agent:");
-    expect(userAgentInputField).toBeInTheDocument();
-
-    const authSchemeInputField = screen.getByText("Authentication scheme:");
-    expect(authSchemeInputField).toBeInTheDocument();
+    const headersInputField = screen.getByText("Headers:");
+    expect(headersInputField).toBeInTheDocument();
 
     const apiKeyInputField = screen.getByText("Api key:");
     expect(apiKeyInputField).toBeInTheDocument();
@@ -161,7 +179,6 @@ describe("AnalyzerConfigForm test", () => {
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
-    expect(saveButton.className).toContain("disabled");
 
     // type name
     await userAction.type(nameInputField, "myNewAnalyzer");
@@ -198,6 +215,13 @@ describe("AnalyzerConfigForm test", () => {
                 type: 1,
                 value: "http://www.google.com",
             },
+            {
+              attribute: "headers",
+              config_type: 1,
+              plugin_name: "myNewAnalyzer",
+              type: 1,
+              value: "{\"Accept\":\"application/json\"}",
+            },
         ],
       });
     });
@@ -227,7 +251,7 @@ describe("AnalyzerConfigForm test", () => {
     const urlCheckbox = screen.getAllByRole("checkbox")[1];
     expect(urlCheckbox).not.toBeChecked();
     const domainCheckbox = screen.getAllByRole("checkbox")[2];
-    expect(domainCheckbox).not.toBeChecked();
+    expect(domainCheckbox).toBeChecked();
     const hashCheckbox = screen.getAllByRole("checkbox")[3];
     expect(hashCheckbox).not.toBeChecked();
     const genericCheckbox = screen.getAllByRole("checkbox")[4];
@@ -235,24 +259,29 @@ describe("AnalyzerConfigForm test", () => {
  
     const tlpField = screen.getByText("TLP");
     expect(tlpField).toBeInTheDocument();
-    const amberTLP = screen.getByRole("radio", { name: "RED" });
+    const amberTLP = screen.getByRole("radio", { name: "AMBER" });
     expect(amberTLP).toBeInTheDocument();
     expect(amberTLP).toBeChecked();
+
+    expect(screen.getByText("Plugin Config")).toBeInTheDocument();
 
     const urlInputField = screen.getByText("Url:");
     expect(urlInputField).toBeInTheDocument();
 
     const httpMethodInputField = screen.getByText("HTTP method:");
     expect(httpMethodInputField).toBeInTheDocument();
+    const getMethod = screen.getByRole("radio", { name: "GET" });
+    expect(getMethod).toBeInTheDocument();
+    expect(getMethod).toBeChecked();
+    const postMethod = screen.getByRole("radio", { name: "POST" });
+    expect(postMethod).toBeInTheDocument();
+    expect(postMethod).not.toBeChecked();
 
-    const paramNameInputField = screen.getByText("Param name:");
-    expect(paramNameInputField).toBeInTheDocument();
+    const paramsPayloadInputField = screen.getByText("Params/Payload:");
+    expect(paramsPayloadInputField).toBeInTheDocument();
 
-    const userAgentInputField = screen.getByText("User-Agent:");
-    expect(userAgentInputField).toBeInTheDocument();
-
-    const authSchemeInputField = screen.getByText("Authentication scheme:");
-    expect(authSchemeInputField).toBeInTheDocument();
+    const headersInputField = screen.getByText("Headers:");
+    expect(headersInputField).toBeInTheDocument();
 
     const apiKeyInputField = screen.getByText("Api key:");
     expect(apiKeyInputField).toBeInTheDocument();
@@ -262,7 +291,6 @@ describe("AnalyzerConfigForm test", () => {
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeInTheDocument();
-    expect(saveButton.className).toContain("disabled");
 
     // clear editor and type new analyzer name and description
     await userAction.clear(nameInputField);
@@ -278,10 +306,8 @@ describe("AnalyzerConfigForm test", () => {
         expect(axios.patch).toHaveBeenCalledWith(`${API_BASE_URI}/analyzer/test`, {
           name: "myNewAnalyzer",
           description: "myNewAnalyzer - description",
-          python_module: "basic_observable_analyzer.BasicObservableAnalyzer",
-          maximum_tlp: "RED",
-          observable_supported: ["ip"],
-          type: "observable",
+          maximum_tlp: "AMBER",
+          observable_supported: ["domain"],
           plugin_config: [
               {
                   attribute: "http_method",
@@ -295,7 +321,14 @@ describe("AnalyzerConfigForm test", () => {
                   config_type: 1,
                   plugin_name: "myNewAnalyzer",
                   type: 1,
-                  value: "http://www.google.com",
+                  value: "https://www.service.com/",
+              },
+              {
+                attribute: "headers",
+                config_type: 1,
+                plugin_name: "myNewAnalyzer",
+                type: 1,
+                value: "{\"Accept\":\"application/json\"}",
               },
           ],
         });

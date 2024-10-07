@@ -29,13 +29,13 @@ def migrate_python_module_pivot(apps, schema_editor):
         },
     )
     Parameter.objects.get_or_create(
-        name="auth_scheme",
-        type="str",
+        name="headers",
+        type="dict",
         python_module=pm,
         is_secret=False,
         required=False,
         defaults={
-            "description": "Authentication scheme",
+            "description": "Headers used for the request",
         },
     )
     Parameter.objects.get_or_create(
@@ -43,29 +43,19 @@ def migrate_python_module_pivot(apps, schema_editor):
         type="str",
         python_module=pm,
         is_secret=False,
-        required=False,
+        required=True,
         defaults={
             "description": "HTTP method used for the request",
         },
     )
     Parameter.objects.get_or_create(
-        name="user_agent",
-        type="str",
+        name="params",
+        type="dict",
         python_module=pm,
         is_secret=False,
         required=False,
         defaults={
-            "description": "User Agent used to connect to sites",
-        },
-    )
-    Parameter.objects.get_or_create(
-        name="param_name",
-        type="str",
-        python_module=pm,
-        is_secret=False,
-        required=False,
-        defaults={
-            "description": "Param name for the query string or request payload",
+            "description": "Params used for the query string or request payload",
         },
     )
     Parameter.objects.get_or_create(

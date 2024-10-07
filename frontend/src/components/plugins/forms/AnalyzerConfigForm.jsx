@@ -14,6 +14,7 @@ import {
 import { Link } from "react-router-dom";
 import { useFormik, FormikProvider } from "formik";
 import PropTypes from "prop-types";
+import { CustomJsonInput } from "@certego/certego-ui";
 
 import { editPluginConfig, createPluginConfig } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
@@ -24,7 +25,7 @@ import {
   TLPSelectInput,
   TLPSelectInputLabel,
 } from "../../common/form/TLPSelectInput";
-import { AuthScheme } from "../../../constants/miscConst";
+import { HTTPMethods } from "../../../constants/miscConst";
 
 export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
   console.debug("AnalyzerConfigForm rendered!");
@@ -33,6 +34,8 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
 
   // states
   const [responseError, setResponseError] = React.useState(null);
+  const [headersJsonInput, setHeadersJsonInput] = React.useState({});
+  const [paramsJsonInput, setParamsJsonInput] = React.useState({});
 
   // store
   const [retrieveAnalyzersConfiguration] = usePluginConfigurationStore(
@@ -47,11 +50,14 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
       tlp: analyzerConfig?.maximum_tlp || "RED",
       url: analyzerConfig?.params?.url?.value || "",
       http_method: analyzerConfig?.params?.http_method?.value || "get",
-      auth_scheme: analyzerConfig?.params?.auth_scheme.value || "",
-      api_key_name: analyzerConfig?.secrets?.api_key_name.value || "",
-      user_agent: analyzerConfig?.params?.user_agent.value || "",
-      param_name: analyzerConfig?.params?.param_name.value || "",
-      certificate: analyzerConfig?.secrets?.certificate.value || "",
+      headers: analyzerConfig?.params?.headers?.value || {
+        Accept: "application/json",
+      },
+      params: analyzerConfig?.params?.params?.value || {
+        param_name: "<observable>",
+      },
+      api_key_name: analyzerConfig?.secrets?.api_key_name?.value || "",
+      certificate: analyzerConfig?.secrets?.certificate?.value || "",
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -81,12 +87,6 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
       }
       if (!URL_REGEX.test(values.url)) {
         errors.url = "This is not a valid url.";
-      }
-      if (values.auth_scheme && !values.api_key_name) {
-        errors.api_key_name =
-          "You must set both authentication scheme and API key fields.";
-        errors.auth_scheme =
-          "You must set both authentication scheme and API key fields.";
       }
 
       console.debug("formik validation errors");
@@ -122,31 +122,21 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
           value: formik.values.url,
           config_type: 1,
         },
+        {
+          type: 1,
+          plugin_name: formik.values.name,
+          attribute: "headers",
+          value:
+            headersJsonInput?.json || JSON.stringify(formik.values.headers),
+          config_type: 1,
+        },
       ];
-      if (formik.values.auth_scheme) {
+      if (paramsJsonInput?.jsObject) {
         payloadData.plugin_config.push({
           type: 1,
           plugin_name: formik.values.name,
-          attribute: "auth_scheme",
-          value: formik.values.auth_scheme,
-          config_type: 1,
-        });
-      }
-      if (formik.values.param_name) {
-        payloadData.plugin_config.push({
-          type: 1,
-          plugin_name: formik.values.name,
-          attribute: "param_name",
-          value: formik.values.param_name,
-          config_type: 1,
-        });
-      }
-      if (formik.values.user_agent) {
-        payloadData.plugin_config.push({
-          type: 1,
-          plugin_name: formik.values.name,
-          attribute: "user_agent",
-          value: formik.values.user_agent,
+          attribute: "params",
+          value: paramsJsonInput?.json,
           config_type: 1,
         });
       }
@@ -354,9 +344,10 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                     valid={!formik.errors.url && formik.touched.url}
                     invalid={formik.errors.url && formik.touched.url}
                     className="bg-darker border-0"
+                    placeholder="ex: http://www.service.com/"
                   />
                   <div className="d-flex flex-column mt-1">
-                    <small className="mt-0 text-accent fst-italic">
+                    <small className="mt-0 fst-italic">
                       URL of the instance you want to connect to
                     </small>
                     {formik.touched.url && formik.errors.url && (
@@ -374,7 +365,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                   </Label>
                 </Col>
                 <Col>
-                  {["get", "post"].map((method) => (
+                  {Object.values(HTTPMethods).map((method) => (
                     <FormGroup check inline key={`http_method__${method}`}>
                       <Input
                         id={`http_method__${method}`}
@@ -385,111 +376,115 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                         onBlur={formik.handleBlur}
                         onChange={formik.handleChange}
                       />
-                      <Label check>{method}</Label>
+                      <Label check for={`http_method__${method}`}>
+                        {method.toUpperCase()}
+                      </Label>
                     </FormGroup>
                   ))}
                 </Col>
               </Row>
-            </FormGroup>
-            <FormGroup>
-              <Row>
-                <Col md={2}>
-                  <Label className="me-2 mb-0" for="analyzer-param_name">
-                    Param name:
-                  </Label>
-                </Col>
-                <Col>
-                  <Input
-                    id="analyzer-param_name"
-                    type="text"
-                    name="param_name"
-                    value={formik.values.param_name}
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    valid={
-                      !formik.errors.param_name && formik.touched.param_name
-                    }
-                    invalid={
-                      formik.errors.param_name && formik.touched.param_name
-                    }
-                    className="bg-darker border-0"
-                  />
-                  <div className="d-flex flex-column mt-1">
-                    <small className="mt-0 text-accent fst-italic">
-                      Param name for the query string or request payload
-                    </small>
-                    {formik.touched.param_name && formik.errors.param_name && (
-                      <small className="text-danger">
-                        {formik.errors.param_name}
+              {formik.values.http_method === HTTPMethods.GET ? (
+                <Row className="mt-2">
+                  <Col md={10} className="offset-2">
+                    <div className="d-flex flex-column">
+                      <small className="fst-italic">
+                        {" "}
+                        Default GET request format is:&nbsp;
+                        <strong className="text-primary fst-italic">
+                          www.service.com/&lt;observable&gt;
+                        </strong>
+                        .<br />
+                        If it is necessary to use a Query String, the section
+                        below must be filled in correctly. The format will
+                        be:&nbsp;
+                        <strong className="text-primary fst-italic">
+                          ?param_name=&lt;observable&gt;
+                        </strong>
                       </small>
-                    )}
-                  </div>
-                </Col>
-              </Row>
-            </FormGroup>
-            <FormGroup>
-              <Row>
-                <Col md={2}>
-                  <Label className="me-2 mb-0" for="analyzer-user_agent">
-                    User-Agent:
-                  </Label>
-                </Col>
-                <Col>
-                  <Input
-                    id="analyzer-user_agent"
-                    type="text"
-                    name="user_agent"
-                    value={formik.values.user_agent}
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    valid={
-                      !formik.errors.user_agent && formik.touched.user_agent
-                    }
-                    invalid={
-                      formik.errors.user_agent && formik.touched.user_agent
-                    }
-                    className="bg-darker border-0"
-                  />
-                  <div className="d-flex flex-column mt-1">
-                    <small className="mt-0 text-accent fst-italic">
-                      User Agent used to connect to sites
-                    </small>
-                    {formik.touched.user_agent && formik.errors.user_agent && (
-                      <small className="text-danger">
-                        {formik.errors.user_agent}
+                    </div>
+                  </Col>
+                </Row>
+              ) : (
+                <Row className="mt-2">
+                  <Col md={10} className="offset-2">
+                    <div className="d-flex">
+                      <small className="fst-italic">
+                        The entire dictionary in the section below will be used
+                        as the payload for the request.
                       </small>
-                    )}
-                  </div>
-                </Col>
-              </Row>
+                    </div>
+                  </Col>
+                </Row>
+              )}
             </FormGroup>
             <FormGroup>
               <Row>
                 <Col md={2}>
-                  <Label className="me-2 mb-0" for="analyzer-auth_scheme">
-                    Authentication scheme:
-                  </Label>
-                </Col>
-                <Col>
-                  <Input
-                    for="analyzer-auth_scheme"
-                    type="select"
-                    name="auth_scheme"
-                    value={formik.values.auth_scheme}
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    className="bg-darker border-0"
+                  <Label
+                    className={`me-2 mb-0 ${
+                      formik.values.http_method === HTTPMethods.GET
+                        ? ""
+                        : "required"
+                    }`}
+                    for="analyzer_json_param"
                   >
-                    <option value="">Select...</option>
-                    {Object.values(AuthScheme).map((type) => (
-                      <option>{type}</option>
-                    ))}
-                  </Input>
-                  {formik.touched.auth_scheme && formik.errors.auth_scheme && (
-                    <small className="text-danger">
-                      {formik.errors.auth_scheme}
+                    Params/Payload:
+                  </Label>
+                </Col>
+                <Col md={10}>
+                  <div style={{ maxHeight: "150px" }}>
+                    <CustomJsonInput
+                      id="analyzer_json_param"
+                      placeholder={formik.values.params}
+                      onChange={setParamsJsonInput}
+                      /* waitAfterKeyPress=1000 is the default value and we cannot change it:
+                          with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
+                          If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
+                          The library auto refresh and move the cursor too fast to make it editable.
+                        */
+                      waitAfterKeyPress={1000}
+                      height="150px"
+                    />
+                  </div>
+                  <div className="d-flex flex-column mt-1">
+                    <small className="mt-0 fst-italic">
+                      You have to change &apos;param_name&apos; key to the
+                      correct name. It is possible to add other parameters.
                     </small>
-                  )}
+                  </div>
+                </Col>
+              </Row>
+            </FormGroup>
+            <FormGroup>
+              <Row>
+                <Col md={2} sm={12}>
+                  <Label className="me-2 mb-0" for="analyzer_header">
+                    Headers:
+                  </Label>
+                </Col>
+                <Col md={10}>
+                  <div style={{ maxHeight: "150px" }}>
+                    <CustomJsonInput
+                      id="analyzer_header"
+                      placeholder={formik.values.headers}
+                      onChange={setHeadersJsonInput}
+                      /* waitAfterKeyPress=1000 is the default value and we cannot change it:
+                          with this value (or higher) in case the user press "save & close" too fast it doesn't take changes.
+                          If we decrease it (min allowed 100) we don't have this problems, but it's not possible to edit:
+                          The library auto refresh and move the cursor too fast to make it editable.
+                        */
+                      waitAfterKeyPress={1000}
+                      height="150px"
+                    />
+                  </div>
+                  <div className="d-flex flex-column mt-1">
+                    <small className="mt-0 fst-italic">
+                      Headers used for the request. <br />
+                      If <strong>Authorization</strong> is required, you must
+                      use the &lt;api_key&gt; placeholder insead of actual API
+                      key. ex: Authorization: &apos;Token &lt;api_key&gt;&apos;
+                    </small>
+                  </div>
                 </Col>
               </Row>
             </FormGroup>
@@ -517,8 +512,9 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                     className="bg-darker border-0"
                   />
                   <div className="d-flex flex-column mt-1">
-                    <small className="mt-0 text-accent fst-italic">
-                      API key required for authentication
+                    <small className="mt-0 fst-italic">
+                      API key required for authentication. It will replace the
+                      &lt;api_key&gt; placeholder in the header.
                     </small>
                     {formik.touched.api_key_name &&
                       formik.errors.api_key_name && (
@@ -558,7 +554,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                     }}
                   />
                   <div className="d-flex flex-column mt-1">
-                    <small className="mt-0 text-accent fst-italic">
+                    <small className="mt-0 fst-italic">
                       Instance SSL certificate
                     </small>
                     {formik.touched.certificate &&
@@ -584,7 +580,10 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                 outline
                 className="mx-2 mt-2"
                 disabled={
-                  !formik.dirty || !formik.isValid || formik.isSubmitting
+                  !formik.isValid ||
+                  formik.isSubmitting ||
+                  headersJsonInput?.error ||
+                  paramsJsonInput?.error
                 }
               >
                 Save

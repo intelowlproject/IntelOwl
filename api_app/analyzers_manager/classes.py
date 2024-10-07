@@ -42,6 +42,8 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         self._config: AnalyzerConfig
         if not self._config.mapping_data_model:
             return None
+        if not self.report.status == self.report.STATUSES.SUCCESS.value:
+            return None
         result = {}
         data_model_class = self.report.get_data_model_class()
         data_model_fields = data_model_class.get_fields()

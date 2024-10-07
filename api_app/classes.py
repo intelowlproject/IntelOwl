@@ -202,7 +202,7 @@ class Plugin(metaclass=ABCMeta):
                     report_content.append(n)
 
         self.report.report = report_content
-        self.report.status = self.report.Status.SUCCESS.value
+        self.report.status = self.report.STATUSES.SUCCESS.value
         self.report.save(update_fields=["status", "report"])
 
     def log_error(self, e):
@@ -230,7 +230,7 @@ class Plugin(metaclass=ABCMeta):
             e (Exception): The exception that caused the failure.
         """
         self.report.errors.append(str(e))
-        self.report.status = self.report.Status.FAILED
+        self.report.status = self.report.STATUSES.FAILED
         self.report.save(update_fields=["status", "errors"])
         if isinstance(e, HTTPError) and (
             hasattr(e, "response")
@@ -289,7 +289,7 @@ class Plugin(metaclass=ABCMeta):
         """
         self.job_id = job_id
         self.report: AbstractReport = self._config.generate_empty_report(
-            self._job, task_id, AbstractReport.Status.RUNNING.value
+            self._job, task_id, AbstractReport.STATUSES.RUNNING.value
         )
         try:
             self.config(runtime_configuration)
@@ -309,7 +309,7 @@ class Plugin(metaclass=ABCMeta):
         error_message = self.get_error_message(exc, is_base_err=is_base_err)
         logger.error(error_message)
         self.report.errors.append(str(exc))
-        self.report.status = self.report.Status.FAILED
+        self.report.status = self.report.STATUSES.FAILED
 
     @classmethod
     def _monkeypatch(cls, patches: list = None) -> None:

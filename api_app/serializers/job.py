@@ -604,7 +604,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
             # so we don't need to do anything because everything is already connected
             root = parent.get_root()
             if root.investigation:
-                root.investigation.status = root.investigation.Status.RUNNING.value
+                root.investigation.status = root.investigation.STATUSES.RUNNING.value
                 root.investigation.save()
                 return jobs
             # if we have a parent, it means we are pivoting from one job to another

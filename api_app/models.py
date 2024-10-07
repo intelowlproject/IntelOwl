@@ -584,7 +584,7 @@ class Job(MP_Node):
         reports = self.__get_config_reports(config)
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in AbstractReport.Status.values
+            for s in AbstractReport.STATUSES.values
         }
         return reports.aggregate(
             all=models.Count("status"),
@@ -616,8 +616,8 @@ class Job(MP_Node):
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
             reports = self.__get_config_reports(config).filter(
                 status__in=[
-                    AbstractReport.Status.PENDING,
-                    AbstractReport.Status.RUNNING,
+                    AbstractReport.STATUSES.PENDING,
+                    AbstractReport.STATUSES.RUNNING,
                 ]
             )
 
@@ -1346,10 +1346,10 @@ class AbstractReport(models.Model):
 
     objects = AbstractReportQuerySet.as_manager()
     # constants
-    Status = ReportStatus
+    STATUSES = ReportStatus
 
     # fields
-    status = models.CharField(max_length=50, choices=Status.choices)
+    status = models.CharField(max_length=50, choices=STATUSES.choices)
     report = models.JSONField(default=dict)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True

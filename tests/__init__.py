@@ -118,18 +118,18 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def test_kill_204(self):
-        _report = self.init_report(status=AbstractReport.Status.PENDING, user=self.user)
+        _report = self.init_report(status=AbstractReport.STATUSES.PENDING, user=self.user)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
         _report.refresh_from_db()
 
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(_report.status, AbstractReport.Status.KILLED)
+        self.assertEqual(_report.status, AbstractReport.STATUSES.KILLED)
 
     def test_kill_400(self):
         # create a new report whose status is not "running"/"pending"
-        _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
+        _report = self.init_report(status=AbstractReport.STATUSES.SUCCESS, user=self.user)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
@@ -145,7 +145,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_403(self):
         # create a new report which does not belong to user
-        _report = self.init_report(status=AbstractReport.Status.PENDING, user=None)
+        _report = self.init_report(status=AbstractReport.STATUSES.PENDING, user=None)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
@@ -162,7 +162,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
         # create new report with status "FAILED"
         _report = self.init_report(
-            status=AbstractReport.Status.FAILED, user=self.superuser
+            status=AbstractReport.STATUSES.FAILED, user=self.superuser
         )
         self.client.force_authenticate(self.superuser)
         pcs = []
@@ -191,7 +191,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_retry_400(self):
         # create a new report whose status is not "FAILED"/"KILLED"
-        _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
+        _report = self.init_report(status=AbstractReport.STATUSES.SUCCESS, user=self.user)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
         )
@@ -207,7 +207,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_retry_403(self):
         # create a new report which does not belong to user
-        _report = self.init_report(status=AbstractReport.Status.FAILED, user=None)
+        _report = self.init_report(status=AbstractReport.STATUSES.FAILED, user=None)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
         )

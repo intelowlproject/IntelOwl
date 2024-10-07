@@ -16,7 +16,7 @@ jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
 
 jest.mock("axios");
 
-describe("AnalyzerConfigForm test", () => {       
+describe("AnalyzerConfigForm test", () => {
   const analyzerConfig = {
     id: 13,
     name: "test",
@@ -33,19 +33,19 @@ describe("AnalyzerConfigForm test", () => {
     },
     secrets: {},
     params: {
-      http_method : {
+      http_method: {
         attribute: "http_method",
         config_type: 1,
         plugin_name: "myNewAnalyzer",
         type: 1,
-        value: "get"
+        value: "get",
       },
-      url : {
+      url: {
         attribute: "url",
         config_type: 1,
         plugin_name: "myNewAnalyzer",
         type: 1,
-        value: "https://www.service.com/"
+        value: "https://www.service.com/",
       },
     },
     verification: {
@@ -81,7 +81,7 @@ describe("AnalyzerConfigForm test", () => {
     expect(hashCheckbox).not.toBeChecked();
     const genericCheckbox = screen.getAllByRole("checkbox")[4];
     expect(genericCheckbox).not.toBeChecked();
- 
+
     const tlpField = screen.getByText("TLP");
     expect(tlpField).toBeInTheDocument();
 
@@ -144,7 +144,7 @@ describe("AnalyzerConfigForm test", () => {
     expect(hashCheckbox).not.toBeChecked();
     const genericCheckbox = screen.getAllByRole("checkbox")[4];
     expect(genericCheckbox).not.toBeChecked();
- 
+
     const tlpField = screen.getByText("TLP");
     expect(tlpField).toBeInTheDocument();
     const redTLP = screen.getByRole("radio", { name: "RED" });
@@ -188,7 +188,7 @@ describe("AnalyzerConfigForm test", () => {
     await userAction.click(ipCheckbox);
     // type url
     await userAction.type(urlInputField, "http://www.google.com");
-    
+
     expect(saveButton.className).not.toContain("disabled");
     await userAction.click(saveButton);
 
@@ -201,27 +201,27 @@ describe("AnalyzerConfigForm test", () => {
         observable_supported: ["ip"],
         type: "observable",
         plugin_config: [
-            {
-                attribute: "http_method",
-                config_type: 1,
-                plugin_name: "myNewAnalyzer",
-                type: 1,
-                value: "get",
-            },
-            {
-                attribute: "url",
-                config_type: 1,
-                plugin_name: "myNewAnalyzer",
-                type: 1,
-                value: "http://www.google.com",
-            },
-            {
-              attribute: "headers",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
-              value: "{\"Accept\":\"application/json\"}",
-            },
+          {
+            attribute: "http_method",
+            config_type: 1,
+            plugin_name: "myNewAnalyzer",
+            type: 1,
+            value: "get",
+          },
+          {
+            attribute: "url",
+            config_type: 1,
+            plugin_name: "myNewAnalyzer",
+            type: 1,
+            value: "http://www.google.com",
+          },
+          {
+            attribute: "headers",
+            config_type: 1,
+            plugin_name: "myNewAnalyzer",
+            type: 1,
+            value: '{"Accept":"application/json"}',
+          },
         ],
       });
     });
@@ -233,7 +233,11 @@ describe("AnalyzerConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <AnalyzerConfigForm analyzerConfig={analyzerConfig} toggle={jest.fn()} isOpen />
+        <AnalyzerConfigForm
+          analyzerConfig={analyzerConfig}
+          toggle={jest.fn()}
+          isOpen
+        />
       </BrowserRouter>,
     );
 
@@ -256,7 +260,7 @@ describe("AnalyzerConfigForm test", () => {
     expect(hashCheckbox).not.toBeChecked();
     const genericCheckbox = screen.getAllByRole("checkbox")[4];
     expect(genericCheckbox).not.toBeChecked();
- 
+
     const tlpField = screen.getByText("TLP");
     expect(tlpField).toBeInTheDocument();
     const amberTLP = screen.getByRole("radio", { name: "AMBER" });
@@ -303,35 +307,38 @@ describe("AnalyzerConfigForm test", () => {
     await userAction.click(saveButton);
 
     await waitFor(() => {
-        expect(axios.patch).toHaveBeenCalledWith(`${API_BASE_URI}/analyzer/test`, {
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/analyzer/test`,
+        {
           name: "myNewAnalyzer",
           description: "myNewAnalyzer - description",
           maximum_tlp: "AMBER",
           observable_supported: ["domain"],
           plugin_config: [
-              {
-                  attribute: "http_method",
-                  config_type: 1,
-                  plugin_name: "myNewAnalyzer",
-                  type: 1,
-                  value: "get",
-              },
-              {
-                  attribute: "url",
-                  config_type: 1,
-                  plugin_name: "myNewAnalyzer",
-                  type: 1,
-                  value: "https://www.service.com/",
-              },
-              {
-                attribute: "headers",
-                config_type: 1,
-                plugin_name: "myNewAnalyzer",
-                type: 1,
-                value: "{\"Accept\":\"application/json\"}",
-              },
+            {
+              attribute: "http_method",
+              config_type: 1,
+              plugin_name: "myNewAnalyzer",
+              type: 1,
+              value: "get",
+            },
+            {
+              attribute: "url",
+              config_type: 1,
+              plugin_name: "myNewAnalyzer",
+              type: 1,
+              value: "https://www.service.com/",
+            },
+            {
+              attribute: "headers",
+              config_type: 1,
+              plugin_name: "myNewAnalyzer",
+              type: 1,
+              value: '{"Accept":"application/json"}',
+            },
           ],
-        });
-      });
+        },
+      );
+    });
   });
 });

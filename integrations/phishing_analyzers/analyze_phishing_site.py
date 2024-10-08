@@ -2,11 +2,13 @@ import json
 import logging
 import os
 from argparse import ArgumentParser
+from typing import Iterator
 
 from request_serializer import dump_seleniumwire_requests
 from selenium.common import WebDriverException
 from seleniumbase import Driver
 from seleniumbase.config import settings
+from seleniumwire.request import Request
 from seleniumwire.webdriver import Chrome
 
 # remove annoying driver download message
@@ -129,29 +131,33 @@ class DriverWrapper:
             self.restart(motivation="base64_screenshot")
             return self.base64_screenshot
 
-    def iter_requests(self):
+    def iter_requests(self) -> Iterator[Request]:
         return self.driver.iter_requests()
+
+    def quit(self):
+        self.driver.quit()
+
+
+def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
+    return {
+        "page_source": driver_wrapper.page_source,
+        "page_view_base64": driver_wrapper.base64_screenshot,
+        "page_http_traffic": [
+            dump_seleniumwire_requests(request)
+            for request in driver_wrapper.iter_requests()
+        ],
+    }
 
 
 def analyze_target(**kwargs):
+    # TODO: handle the concept of open tabs to avoid possible memory overuse
     driver_wrapper = DriverWrapper(**kwargs)
-    driver_wrapper.navigate(url=kwargs["target"])
-    print(
-        json.dumps(
-            {
-                "page_extraction": {
-                    "page_source": driver_wrapper.page_source,
-                    "page_view_base64": driver_wrapper.base64_screenshot,
-                    "page_http_traffic": [
-                        dump_seleniumwire_requests(request)
-                        for request in driver_wrapper.iter_requests()
-                    ],
-                }
-            },
-            default=str,
-        )
-    )
-    driver_wrapper.driver.quit()
+    driver_wrapper.navigate(url=kwargs.get("target"))
+
+    result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
+    print(result)
+
+    driver_wrapper.quit()
 
 
 if __name__ == "__main__":

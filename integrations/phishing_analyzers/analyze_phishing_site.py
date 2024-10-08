@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import os
@@ -140,7 +141,7 @@ class DriverWrapper:
 
 def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
     return {
-        "page_source": driver_wrapper.page_source,
+        "page_source": base64.b64encode(driver_wrapper.page_source.encode("utf-8")),
         "page_view_base64": driver_wrapper.base64_screenshot,
         "page_http_traffic": [
             dump_seleniumwire_requests(request)

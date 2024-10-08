@@ -60,7 +60,7 @@ values = [
         "ingestor_config": None,
         "pivot_config": "PhishingExtractorToAnalysis",
         "for_organization": False,
-        "value": "page_extraction",
+        "value": "page_source",
         "updated_at": "2024-09-25T13:45:58.643835Z",
         "owner": None,
     }

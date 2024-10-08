@@ -33,7 +33,7 @@ executor = Executor(app)
 shell2http = Shell2HTTP(app, executor)
 
 shell2http.register_command(
-    endpoint="phishing_analyzers",
+    endpoint="phishing_extractor",
     command_name="/usr/local/bin/python3 "
     "/opt/deploy/phishing_analyzers/analyze_phishing_site.py",
 )

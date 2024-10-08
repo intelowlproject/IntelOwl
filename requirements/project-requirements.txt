@@ -60,7 +60,7 @@ pyelftools==0.31
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
-pymisp==2.4.196
+pymisp==2.5.0
 pyOneNote==0.0.2
 pypdns==2.2.1
 pypssl==2.2

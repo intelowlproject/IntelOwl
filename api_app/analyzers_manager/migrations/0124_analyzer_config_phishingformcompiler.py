@@ -8,28 +8,27 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "analyzers": ["PhishingFormCompiler"],
-    "connectors": [],
-    "pivots": [],
-    "for_organization": False,
-    "name": "PhishingAnalysis",
-    "description": "This playbook is used to perform a complete phishing analysis of "
-    "a given URL. It wraps all the analyzers for the purpose.",
-    "disabled": False,
-    "type": ["file"],
-    "runtime_configuration": {
-        "pivots": {},
-        "analyzers": {},
-        "connectors": {},
-        "visualizers": {},
+    "python_module": {
+        "health_check_schedule": None,
+        "update_schedule": None,
+        "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+        "base_path": "api_app.analyzers_manager.file_analyzers",
     },
-    "scan_mode": 1,
-    "scan_check_time": None,
-    "tlp": "AMBER",
-    "starting": False,
-    "owner": None,
-    "tags": [],
-    "model": "playbooks_manager.PlaybookConfig",
+    "name": "Phishing_Form_Compiler",
+    "description": "Analyzer that retrieves all forms in page and tries to compile and submit them.",
+    "disabled": False,
+    "soft_time_limit": 60,
+    "routing_key": "default",
+    "health_check_status": True,
+    "type": "file",
+    "docker_based": True,
+    "maximum_tlp": "RED",
+    "observable_supported": [],
+    "supported_filetypes": ["text/html"],
+    "run_hash": False,
+    "run_hash_type": "",
+    "not_supported_filetypes": [],
+    "model": "analyzers_manager.AnalyzerConfig",
 }
 
 params = []
@@ -118,8 +117,8 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("playbooks_manager", "0052_playbook_config_uris"),
-        ("analyzers_manager", "0124_analyzer_config_phishingformcompiler"),
+        ("api_app", "0062_alter_parameter_python_module"),
+        ("analyzers_manager", "0123_analyzer_config_phishing_extractor"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

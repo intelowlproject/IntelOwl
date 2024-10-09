@@ -24,7 +24,12 @@ plugin = {
     "docker_based": True,
     "maximum_tlp": "RED",
     "observable_supported": [],
-    "supported_filetypes": ["text/html"],
+    "supported_filetypes": [
+        "application/javascript",
+        "application/x-javascript",
+        "text/javascript",
+        "text/html",
+    ],
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],

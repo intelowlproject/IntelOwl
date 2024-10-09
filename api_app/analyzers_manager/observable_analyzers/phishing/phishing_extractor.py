@@ -36,7 +36,6 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
 
     def run(self):
         req_data: {} = {
-            "target": self.observable_name,
             "args": [
                 f"--target={self.observable_name}",
                 *self.args,

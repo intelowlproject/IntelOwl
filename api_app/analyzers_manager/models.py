@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from logging import getLogger
-from typing import Optional
+from typing import Optional, Type
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
@@ -16,6 +16,7 @@ from api_app.analyzers_manager.constants import (
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, PythonModuleBasePaths
+from api_app.data_model_manager.models import BaseDataModel, FileDataModel, DomainDataModel, IPDataModel
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
@@ -32,6 +33,14 @@ class AnalyzerReport(AbstractReport):
         unique_together = [("config", "job")]
         indexes = AbstractReport.Meta.indexes
 
+    def get_data_model_class(self) -> Type[BaseDataModel]:
+        if self.job.is_sample:
+            return FileDataModel
+        if self.job.observable_classification == ObservableTypes.IP.value:
+            return IPDataModel
+        if self.job.observable_classification == ObservableTypes.DOMAIN.value:
+            return DomainDataModel
+        raise NotImplementedError(f"Unable to find data model for {self.job.observable_classification}")
 
 class MimeTypes(models.TextChoices):
     # IMPORTANT! in case you update this Enum remember to update also the frontend
@@ -187,6 +196,10 @@ class AnalyzerConfig(PythonConfig):
     )
     orgs_configuration = GenericRelation(
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
+    )
+    mapping_data_model = models.JSONField(
+        default=dict,
+        help_text="the key is the key in the data model, the value is the key in the analyzer report "
     )
 
     @classmethod

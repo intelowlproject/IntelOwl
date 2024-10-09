@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class AnyCompare(Compare):
     def should_run(self) -> Tuple[bool, Optional[str]]:
         for report in self.related_reports.filter(
-            status=self.report_model.Status.SUCCESS.value
+            status=self.report_model.STATUSES.SUCCESS.value
         ):
             try:
                 self._value = report.get_value(self.field_to_compare)

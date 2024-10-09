@@ -261,7 +261,7 @@ def job_pipeline(
             + list(job.pivotreports.all())
             + list(job.visualizerreports.all())
         ):
-            report.status = report.Status.FAILED.value
+            report.status = report.STATUSES.FAILED.value
             report.save()
 
 
@@ -299,7 +299,7 @@ def run_plugin(
     except Exception as e:
         logger.exception(e)
         config.reports.filter(job__pk=job_id).update(
-            status=plugin.report_model.Status.FAILED.value
+            status=plugin.report_model.STATUSES.FAILED.value
         )
     job = Job.objects.get(pk=job_id)
     JobConsumer.serialize_and_send_job(job)

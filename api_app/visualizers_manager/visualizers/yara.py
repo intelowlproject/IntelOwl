@@ -86,7 +86,7 @@ class Yara(Visualizer):
             report = AnalyzerReport(
                 config=AnalyzerConfig.objects.get(name="Yara"),
                 job=Job.objects.first(),
-                status=AnalyzerReport.Status.SUCCESS,
+                status=AnalyzerReport.STATUSES.SUCCESS,
                 report={
                     "inquest_yara-rules": [
                         {

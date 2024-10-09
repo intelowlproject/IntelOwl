@@ -42,7 +42,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
                 *self.args,
             ],
         }
-        logger.info(f"sending {req_data=}")
+        logger.info(f"sending {req_data=} to {self.url}")
         return self._docker_run(req_data)
 
     def update(self) -> bool:

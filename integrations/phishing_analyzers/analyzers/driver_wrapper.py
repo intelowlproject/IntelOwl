@@ -4,8 +4,12 @@ from typing import Iterator
 
 from selenium.common import WebDriverException
 from seleniumbase import Driver
+from seleniumbase.config import settings
 from seleniumwire.request import Request
 from seleniumwire.webdriver import Chrome
+
+# remove annoying driver download message
+settings.HIDE_DRIVER_DOWNLOADS = True
 
 LOG_NAME = "driver_rapper"
 

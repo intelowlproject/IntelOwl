@@ -5,11 +5,7 @@ import os
 from argparse import ArgumentParser
 
 from driver_wrapper import DriverWrapper
-from seleniumbase.config import settings
 from seleniumwire_request_serializer import dump_seleniumwire_requests
-
-# remove annoying driver download message
-settings.HIDE_DRIVER_DOWNLOADS = True
 
 LOG_NAME = "extract_phishing_site"
 

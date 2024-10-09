@@ -222,6 +222,20 @@ describe("AnalyzerConfigForm test", () => {
             type: 1,
             value: '{"Accept":"application/json"}',
           },
+          {
+            attribute: "api_key_name",
+            config_type: 2,
+            plugin_name: "myNewAnalyzer",
+            type: 1,
+            value: '""',
+          },
+          {
+            attribute: "certificate",
+            config_type: 2,
+            plugin_name: "myNewAnalyzer",
+            type: 1,
+            value: '""',
+          },
         ],
       });
     });
@@ -335,6 +349,20 @@ describe("AnalyzerConfigForm test", () => {
               plugin_name: "myNewAnalyzer",
               type: 1,
               value: '{"Accept":"application/json"}',
+            },
+            {
+              attribute: "api_key_name",
+              config_type: 2,
+              plugin_name: "myNewAnalyzer",
+              type: 1,
+              value: '""',
+            },
+            {
+              attribute: "certificate",
+              config_type: 2,
+              plugin_name: "myNewAnalyzer",
+              type: 1,
+              value: '""',
             },
           ],
         },

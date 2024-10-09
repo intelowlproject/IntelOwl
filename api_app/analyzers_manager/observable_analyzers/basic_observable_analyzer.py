@@ -1,12 +1,18 @@
 import base64
+import logging
 from tempfile import NamedTemporaryFile
 
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.constants import HTTPMethods
-from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+
+logger = logging.getLogger(__name__)
 
 
 class BasicObservableAnalyzer(ObservableAnalyzer):
@@ -68,21 +74,34 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
         # request
         if self.http_method not in HTTPMethods.values:
             raise AnalyzerConfigurationException("Http method is not valid")
-        if self.http_method == HTTPMethods.GET:
-            if hasattr(self, "params"):
-                response = requests.get(
-                    self.url, params=self.params, headers=self.headers, verify=verify
+
+        try:
+            if self.http_method == HTTPMethods.GET:
+                if hasattr(self, "params"):
+                    response = requests.get(
+                        self.url,
+                        params=self.params,
+                        headers=self.headers,
+                        verify=verify,
+                    )
+                else:
+                    response = requests.get(
+                        self.url + self.observable_name,
+                        headers=self.headers,
+                        verify=verify,
+                    )
+            else:
+                request_method = getattr(requests, self.http_method)
+                response = request_method(
+                    self.url, headers=self.headers, json=self.params, verify=verify
                 )
-            response = requests.get(
-                self.url + self.observable_name, headers=self.headers, verify=verify
-            )
-        else:
-            request_method = getattr(requests, self.http_method)
-            response = request_method(
-                self.url, headers=self.headers, json=self.params, verify=verify
-            )
-        response.raise_for_status()
-        return response.json()
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
+
+        response_json = response.json()
+        logger.debug(f"response received: {response_json}")
+        return response_json
 
     @classmethod
     def _monkeypatch(cls):

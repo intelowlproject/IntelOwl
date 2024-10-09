@@ -130,6 +130,20 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
             headersJsonInput?.json || JSON.stringify(formik.values.headers),
           config_type: 1,
         },
+        {
+          type: 1,
+          plugin_name: formik.values.name,
+          attribute: "api_key_name",
+          value: JSON.stringify(formik.values.api_key_name),
+          config_type: 2,
+        },
+        {
+          type: 1,
+          plugin_name: formik.values.name,
+          attribute: "certificate",
+          value: JSON.stringify(formik.values.certificate),
+          config_type: 2,
+        },
       ];
       if (paramsJsonInput?.jsObject) {
         payloadData.plugin_config.push({
@@ -138,24 +152,6 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
           attribute: "params",
           value: paramsJsonInput?.json,
           config_type: 1,
-        });
-      }
-      if (formik.values.api_key_name) {
-        payloadData.plugin_config.push({
-          type: 1,
-          plugin_name: formik.values.name,
-          attribute: "api_key_name",
-          value: formik.values.api_key_name,
-          config_type: 2,
-        });
-      }
-      if (formik.values.certificate) {
-        payloadData.plugin_config.push({
-          type: 1,
-          plugin_name: formik.values.name,
-          attribute: "certificate",
-          value: formik.values.certificate,
-          config_type: 2,
         });
       }
 

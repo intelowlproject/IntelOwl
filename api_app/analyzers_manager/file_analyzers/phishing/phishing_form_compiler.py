@@ -27,7 +27,9 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
         super().config(runtime_configuration)
 
         if not (hasattr(self._job, "pivot_parent")):
-            raise AnalyzerRunException(f"Analyzer {self.analyzer_name}")
+            raise AnalyzerRunException(
+                f"Analyzer {self.analyzer_name} must be ran from PhishingAnalysis playbook."
+            )
 
         self.target_site = self._job.pivot_parent.starting_job.observable_name
         if self.target_site:

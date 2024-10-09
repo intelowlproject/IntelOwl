@@ -13,6 +13,7 @@ import { useGuideContext } from "../../contexts/GuideContext";
 import { PlaybookConfigForm } from "./forms/PlaybookConfigForm";
 import { PivotConfigForm } from "./forms/PivotConfigForm";
 import { AnalyzerConfigForm } from "./forms/AnalyzerConfigForm";
+import { PluginsTypes } from "../../constants/pluginConst";
 
 const Analyzers = React.lazy(() => import("./types/Analyzers"));
 const Connectors = React.lazy(() => import("./types/Connectors"));
@@ -118,9 +119,11 @@ export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
   const location = useLocation();
   const pluginsPage = location?.pathname.split("/")[2];
-  const enableCreateButton = ["analyzers", "pivots", "playbooks"].includes(
-    pluginsPage,
-  );
+  const enableCreateButton = [
+    `${PluginsTypes.ANALYZER}s`,
+    `${PluginsTypes.PIVOT}s`,
+    `${PluginsTypes.PLAYBOOK}s`,
+  ].includes(pluginsPage);
 
   const [showModalCreatePlaybook, setShowModalCreatePlaybook] =
     React.useState(false);
@@ -141,15 +144,15 @@ export default function PluginsContainer() {
 
   const onClick = async () => {
     // open modal for create playbook
-    if (pluginsPage === "playbooks") {
+    if (pluginsPage === `${PluginsTypes.PLAYBOOK}s`) {
       setShowModalCreatePlaybook(true);
     }
     // open modal for create pivot
-    if (pluginsPage === "pivots") {
+    if (pluginsPage === `${PluginsTypes.PIVOT}s`) {
       setShowModalCreatePivot(true);
     }
     // open modal for create analyzer
-    if (pluginsPage === "analyzers") {
+    if (pluginsPage === `${PluginsTypes.ANALYZER}s`) {
       setShowModalCreateAnalyzer(true);
     }
     return null;

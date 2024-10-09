@@ -13,3 +13,11 @@ export const TLPDescriptions = Object.freeze({
 
 export const HACKER_MEME_STRING =
   "LoOk At YoU hAcKeR a PaThEtIc CrEaTuRe Of MeAt AnD bOnE";
+
+export const HTTPMethods = Object.freeze({
+  GET: "get",
+  POST: "post",
+  PUT: "put",
+  PATCH: "patch",
+  DELETE: "delete",
+});

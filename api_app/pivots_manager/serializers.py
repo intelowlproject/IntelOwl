@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job, PythonModule
+from api_app.models import Job, PluginConfig, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.plugin import (
@@ -77,7 +77,9 @@ class PivotConfigSerializer(PythonConfigSerializer):
     python_module = rfs.SlugRelatedField(
         queryset=PythonModule.objects.all(), slug_field="module"
     )
-    plugin_config = rfs.DictField(write_only=True, required=False)
+    plugin_config = rfs.ListField(
+        child=rfs.DictField(), write_only=True, required=False
+    )
 
     class Meta:
         model = PivotConfig
@@ -102,12 +104,31 @@ class PivotConfigSerializer(PythonConfigSerializer):
         pc = super().create(validated_data)
 
         # create plugin config
-        if plugin_config:
+        for config in plugin_config:
             plugin_config_serializer = PluginConfigSerializer(
-                data=plugin_config, context={"request": self.context["request"]}
+                data=config, context={"request": self.context["request"]}
             )
             plugin_config_serializer.is_valid(raise_exception=True)
             plugin_config_serializer.save()
+        return pc
+
+    def update(self, instance, validated_data):
+        plugin_config = validated_data.pop("plugin_config", [])
+        pc = super().update(instance, validated_data)
+
+        # update plugin config
+        for config in plugin_config:
+            plugin_config_serializer = PluginConfigSerializer(
+                data=config, context={"request": self.context["request"]}
+            )
+            plugin_config_serializer.is_valid(raise_exception=True)
+            PluginConfig.objects.filter(
+                owner=self.context["request"].user,
+                analyzer_config=plugin_config_serializer.validated_data[
+                    "analyzer_config"
+                ],
+                parameter=plugin_config_serializer.validated_data["parameter"],
+            ).update_or_create(plugin_config_serializer.validated_data)
         return pc
 
 

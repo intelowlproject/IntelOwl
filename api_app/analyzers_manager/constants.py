@@ -83,3 +83,11 @@ class AllTypes(models.TextChoices):
     HASH = "hash"
     GENERIC = "generic"
     FILE = "file"
+
+
+class HTTPMethods(models.TextChoices):
+    GET = "get"
+    POST = "post"
+    PUT = "put"
+    PATCH = "patch"
+    DELETE = "delete"

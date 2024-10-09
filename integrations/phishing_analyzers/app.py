@@ -35,5 +35,11 @@ shell2http = Shell2HTTP(app, executor)
 shell2http.register_command(
     endpoint="phishing_extractor",
     command_name="/usr/local/bin/python3 "
-    "/opt/deploy/phishing_analyzers/analyze_phishing_site.py",
+    "/opt/deploy/phishing_analyzers/analyzers/extract_phishing_site.py",
+)
+
+shell2http.register_command(
+    endpoint="phishing_form_compiler",
+    command_name="/usr/local/bin/python3 "
+    "/opt/deploy/phishing_analyzers/analyzers/phishing_form_compiler.py",
 )

@@ -1,24 +1,16 @@
-import base64
-import json
 import logging
 import os
-from argparse import ArgumentParser
 from typing import Iterator
 
-from request_serializer import dump_seleniumwire_requests
 from selenium.common import WebDriverException
 from seleniumbase import Driver
-from seleniumbase.config import settings
 from seleniumwire.request import Request
 from seleniumwire.webdriver import Chrome
 
-# remove annoying driver download message
-settings.HIDE_DRIVER_DOWNLOADS = True
-
-LOG_NAME = "analyze_phishing_site"
+LOG_NAME = "driver_rapper"
 
 # get flask-shell2http logger instance
-logger = logging.getLogger("analyze_phishing_site")
+logger = logging.getLogger(LOG_NAME)
 # logger config
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log_level = os.getenv("LOG_LEVEL", logging.INFO)
@@ -137,38 +129,3 @@ class DriverWrapper:
 
     def quit(self):
         self.driver.quit()
-
-
-def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
-    return {
-        "page_source": base64.b64encode(
-            driver_wrapper.page_source.encode("utf-8")
-        ).decode("ascii"),
-        "page_view_base64": driver_wrapper.base64_screenshot,
-        "page_http_traffic": [
-            dump_seleniumwire_requests(request)
-            for request in driver_wrapper.iter_requests()
-        ],
-    }
-
-
-def analyze_target(**kwargs):
-    # TODO: handle the concept of open tabs to avoid possible memory overuse
-    driver_wrapper = DriverWrapper(**kwargs)
-    driver_wrapper.navigate(url=kwargs.get("target"))
-
-    result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
-    print(result)
-
-    driver_wrapper.quit()
-
-
-if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("--target", type=str)
-    parser.add_argument("--proxy_address", type=str, required=False)
-    parser.add_argument("--proxy_protocol", type=str, required=False)
-    parser.add_argument("--proxy_port", type=int, required=False)
-    arguments = parser.parse_args()
-    logger.info(vars(arguments))
-    analyze_target(**vars(arguments))

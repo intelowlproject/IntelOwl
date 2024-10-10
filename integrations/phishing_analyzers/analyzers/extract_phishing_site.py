@@ -59,5 +59,5 @@ if __name__ == "__main__":
     parser.add_argument("--proxy_protocol", type=str, required=False)
     parser.add_argument("--proxy_port", type=int, required=False)
     arguments = parser.parse_args()
-    logger.info(vars(arguments))
+    logger.info(f"Extracted arguments for {LOG_NAME}: {vars(arguments)}")
     analyze_target(**vars(arguments))

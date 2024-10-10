@@ -36,9 +36,44 @@ plugin = {
     "model": "analyzers_manager.AnalyzerConfig",
 }
 
-params = []
+params = [
+    {
+        "python_module": {
+            "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "xpath_selector",
+        "type": "str",
+        "description": "XPath expression to match a form on phishing page.",
+        "is_secret": False,
+        "required": False,
+    }
+]
 
-values = []
+values = [
+    {
+        "parameter": {
+            "python_module": {
+                "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "xpath_selector",
+            "type": "str",
+            "description": "XPath expression to match a form on phishing page.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "PhishingFormCompiler",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": "",
+        "updated_at": "2024-10-10T06:22:14.099894Z",
+        "owner": None,
+    }
+]
 
 
 def _get_real_obj(Model, field, value):

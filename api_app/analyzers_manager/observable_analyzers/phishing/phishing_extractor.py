@@ -8,7 +8,7 @@ logger = getLogger(__name__)
 
 
 class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
-    name: str = "PhishingExtractor"
+    name: str = "Phishing_Extractor"
     url: str = "http://phishing_analyzers:4005/phishing_extractor"
     max_tries: int = 20
     poll_distance: int = 3

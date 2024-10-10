@@ -218,7 +218,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("analyzers_manager", "0122_alter_soft_time_limit"),
+        ("analyzers_manager", "0123_analyzer_config_phishingformcompiler"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

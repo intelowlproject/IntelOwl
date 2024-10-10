@@ -63,7 +63,7 @@ values = [
             "is_secret": False,
             "required": False,
         },
-        "analyzer_config": "PhishingFormCompiler",
+        "analyzer_config": "Phishing_Form_Compiler",
         "connector_config": None,
         "visualizer_config": None,
         "ingestor_config": None,
@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0123_analyzer_config_phishing_extractor"),
+        ("analyzers_manager", "0122_alter_soft_time_limit"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

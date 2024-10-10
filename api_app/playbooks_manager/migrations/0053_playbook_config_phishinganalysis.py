@@ -8,7 +8,7 @@ from django.db.models.fields.related_descriptors import (
 )
 
 plugin = {
-    "analyzers": ["PhishingFormCompiler"],
+    "analyzers": ["Phishing_Form_Compiler"],
     "connectors": [],
     "pivots": [],
     "for_organization": False,
@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("playbooks_manager", "0052_playbook_config_uris"),
-        ("analyzers_manager", "0124_analyzer_config_phishingformcompiler"),
+        ("analyzers_manager", "0123_analyzer_config_phishingformcompiler"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

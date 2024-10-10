@@ -17,11 +17,7 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
     # good short guide for writing XPath expressions
     # https://upg-dh.newtfire.org/explainXPath.html
     # we're supporting XPath up to v3.1 with elementpath package
-    xpath_selector: str = (
-        "//form[.//input[lower-case(@type)='password']][.//input[not(@type) "
-        "or @type='' or lower-case(@type)='text']][.//input[lower-case(@type)="
-        "'submit'] or .//button[not(@type) or @type='' or lower-case(@type)='submit']]"
-    )
+    xpath_selector: str
 
     def __init__(
         self,

@@ -69,8 +69,8 @@ values = [
         "ingestor_config": None,
         "pivot_config": None,
         "for_organization": False,
-        "value": "",
-        "updated_at": "2024-10-10T06:22:14.099894Z",
+        "value": "//form[.//input[lower-case(@type)='password']][.//input[not(@type) or @type='' or lower-case(@type)='text']][.//input[lower-case(@type)='submit'] or .//button[not(@type) or @type='' or lower-case(@type)='submit']]",
+        "updated_at": "2024-10-10T09:29:36.730485Z",
         "owner": None,
     }
 ]

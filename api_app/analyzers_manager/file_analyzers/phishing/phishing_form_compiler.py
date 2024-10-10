@@ -9,10 +9,19 @@ logger = logging.getLogger(__name__)
 
 
 class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
-    name: str = "PhishingFormCompiler"
+    name: str = "Phishing_Form_Compiler"
     url: str = "http://phishing_analyzers:4005/phishing_form_compiler"
     max_tries: int = 20
     poll_distance: int = 3
+
+    # good short guide for writing XPath expressions
+    # https://upg-dh.newtfire.org/explainXPath.html
+    # we're supporting XPath up to v3.1 with elementpath package
+    xpath_selector: str = (
+        "//form[.//input[lower-case(@type)='password']][.//input[not(@type) "
+        "or @type='' or lower-case(@type)='text']][.//input[lower-case(@type)="
+        "'submit'] or .//button[not(@type) or @type='' or lower-case(@type)='submit']]"
+    )
 
     def __init__(
         self,
@@ -43,8 +52,11 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
 
     def run(self) -> dict:
         req_data: {} = {
-            "target": self.target_site,
-            "source_code": self.html_source_code,
+            "args": [
+                f"--target_site={self.target_site}",
+                f"--source_code={self.html_source_code}",
+                f"--xpath_selector={self.xpath_selector}",
+            ]
         }
         logger.info(f"sending {req_data=} to {self.url}")
         return self._docker_run(req_data)

@@ -43,6 +43,7 @@ if ELASTIC_HOST:
         elastic_client_settings["verify_certs"] = False
     ELASTICSEARCH_DSL = {ELASTIC_CLIENT_NAME: elastic_client_settings}
 
+    # ELASTICSEARCH_DSL_AUTO_REFRESH = True  # TODO: it seems not to work
     ELASTICSEARCH_DSL_INDEX_SETTINGS = {
         "number_of_shards": int(secrets.get_secret("ELASTICSEARCH_DSL_NO_OF_SHARDS")),
         "number_of_replicas": int(

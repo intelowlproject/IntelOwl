@@ -2,4 +2,3 @@ Flask-Shell2HTTP-fork==1.9.2
 gunicorn==23.0.0
 seleniumbase[selenium-wire]==4.30.8
 lxml==5.3.0
-elementpath==4.5.0 # support for XPath up to v3.1 based on lxml

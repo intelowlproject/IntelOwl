@@ -47,8 +47,12 @@ class IPDataModelAdminView(BaseDataModelAdminView):
 @admin.register(FileDataModel)
 class FileDataModelAdminView(BaseDataModelAdminView):
     list_display = BaseDataModelAdminView.list_display + (
-        "signatures",
+        "get_signatures",
         "comments",
         "file_information",
         "stats",
     )
+
+    @admin.display(description="Signatures")
+    def get_signatures(self, instance: FileDataModel):
+        return list(map(str, instance.signatures.all()))

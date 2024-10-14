@@ -199,7 +199,7 @@ class AnalyzerConfig(PythonConfig):
     )
     mapping_data_model = models.JSONField(
         default=dict,
-        help_text="the key is the key in the data model, the value is the key in the analyzer report "
+        help_text="Mapping data_model_key: analyzer_report_key. "
     )
 
     @classmethod

@@ -1399,12 +1399,12 @@ class AbstractReport(models.Model):
 
     # properties
     @property
-    def user(self) -> models.Model:
+    def user(self) -> User:
         """
         Returns the user associated with the job that generated the report.
 
         Returns:
-            models.Model: The user associated with the job.
+            User: The user associated with the job.
         """
         return self.job.user
 

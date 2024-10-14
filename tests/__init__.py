@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.db import connections
+from django.db.models import Model
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -224,7 +225,7 @@ class ViewSetTestCaseMixin:
     @classmethod
     @property
     @abstractmethod
-    def model_class(cls) -> Type[AbstractConfig]:
+    def model_class(cls) -> Type[Model]:
         raise NotImplementedError()
 
     def test_list(self):
@@ -243,15 +244,19 @@ class ViewSetTestCaseMixin:
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 200, response.json())
 
-    def test_get(self):
+    def test_get_user(self):
         plugin = self.get_object()
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 200, response.json())
 
+    def test_get_guest(self):
+        plugin = self.get_object()
         self.client.force_authenticate(None)
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 401, response.json())
 
+    def test_get_superuser(self):
+        plugin = self.get_object()
         self.client.force_authenticate(self.superuser)
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 200, response.json())

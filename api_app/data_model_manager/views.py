@@ -11,6 +11,8 @@ class BaseDataModelView(PaginationMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated, IsObjectOwnerOrSameOrgPermission]
     ordering = ["date"]
 
+    def get_queryset(self):
+        return self.serializer_class.Meta.model.objects.all()
 
 class DomainDataModelView(BaseDataModelView):
     serializer_class = DomainDataModelSerializer

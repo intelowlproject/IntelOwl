@@ -14,3 +14,10 @@ class DataModelTags(Choices):
     SOCIAL_ENGINEERING = "SocialEngineering"
     ANONYMIZER = "Anonymizer"
     TOR_EXIT_NODE = "TorExitNode"
+
+
+class DataModelEvaluations(Choices):
+    FALSE_POSITIVE = "FalsePositive"
+    CLEAN = "Clean"
+    SUSPICIOUS = "Suspicious"
+    MALICIOUS = "Malicious"

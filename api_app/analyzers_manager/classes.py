@@ -41,8 +41,11 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         self.report: AnalyzerReport
         self._config: AnalyzerConfig
         if not self._config.mapping_data_model:
+            logger.info(
+                f"Skipping data model of {self._config.name} for job {self._job.pk} because no data model")
             return None
         if not self.report.status == self.report.STATUSES.SUCCESS.value:
+            logger.info(f"Skipping data model of {self._config.name} for job {self._job.pk} because status is {self.report.status}")
             return None
         result = {}
         data_model_class = self.report.get_data_model_class()
@@ -68,7 +71,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
                         continue
                     value, _ = data_model_fields[data_model_key].related_model.objects.get_or_create(**value)
                 result[data_model_key] = value
-        return data_model_class.objects.create(**result)
+        return data_model_class.objects.create(**result, analyzer_report=self.report)
 
     @classmethod
     @property

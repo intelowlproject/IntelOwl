@@ -5,7 +5,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.db import models
 from django.utils.timezone import now
 
-from api_app.data_model_manager.enums import DataModelTags, SignatureProviderChoices
+from api_app.data_model_manager.enums import DataModelTags, SignatureProviderChoices, DataModelEvaluations
 from certego_saas.apps.user.models import User
 
 
@@ -86,6 +86,7 @@ class BaseDataModel(models.Model):
     )  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
     TAGS = DataModelTags
+    EVALUATIONS = DataModelEvaluations
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -94,6 +95,7 @@ class BaseDataModel(models.Model):
     @property
     def owner(self) -> User:
         return self.analyzer_report.user
+
 
 class DomainDataModel(BaseDataModel):
     ietf_report = models.ForeignKey(

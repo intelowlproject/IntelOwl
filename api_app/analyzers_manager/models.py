@@ -16,7 +16,12 @@ from api_app.analyzers_manager.constants import (
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, PythonModuleBasePaths
-from api_app.data_model_manager.models import BaseDataModel, FileDataModel, DomainDataModel, IPDataModel
+from api_app.data_model_manager.models import (
+    BaseDataModel,
+    DomainDataModel,
+    FileDataModel,
+    IPDataModel,
+)
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
@@ -40,7 +45,10 @@ class AnalyzerReport(AbstractReport):
             return IPDataModel
         if self.job.observable_classification == ObservableTypes.DOMAIN.value:
             return DomainDataModel
-        raise NotImplementedError(f"Unable to find data model for {self.job.observable_classification}")
+        raise NotImplementedError(
+            f"Unable to find data model for {self.job.observable_classification}"
+        )
+
 
 class MimeTypes(models.TextChoices):
     # IMPORTANT! in case you update this Enum remember to update also the frontend
@@ -198,8 +206,7 @@ class AnalyzerConfig(PythonConfig):
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
     mapping_data_model = models.JSONField(
-        default=dict,
-        help_text="Mapping data_model_key: analyzer_report_key. "
+        default=dict, help_text="Mapping data_model_key: analyzer_report_key. "
     )
 
     @classmethod

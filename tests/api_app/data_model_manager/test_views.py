@@ -3,11 +3,15 @@ from typing import Type
 from django.db.models import Model
 from kombu import uuid
 
-from api_app.analyzers_manager.models import AnalyzerReport, AnalyzerConfig
-from api_app.data_model_manager.models import DomainDataModel, FileDataModel, IPDataModel
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.data_model_manager.models import (
+    DomainDataModel,
+    FileDataModel,
+    IPDataModel,
+)
 from api_app.models import Job
 from tests import CustomViewSetTestCase, ViewSetTestCaseMixin
-from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
+
 
 def create_report(user):
     job = Job.objects.create(
@@ -26,10 +30,7 @@ def create_report(user):
     )
 
 
-class DomainDataModelViewSetTestCase(
-    ViewSetTestCaseMixin,
-    CustomViewSetTestCase
-):
+class DomainDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/data_model/domain"
 
     def test_url(self):
@@ -43,9 +44,7 @@ class DomainDataModelViewSetTestCase(
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.model_class.objects.create(
-            analyzer_report=create_report(cls.user)
-        )
+        cls.model_class.objects.create(analyzer_report=create_report(cls.user))
 
     @classmethod
     @property
@@ -55,7 +54,6 @@ class DomainDataModelViewSetTestCase(
     def get_object(self):
         return self.model_class.objects.order_by("?").first().pk
 
-
     def test_get_superuser(self):
         plugin = self.get_object()
         self.client.force_authenticate(self.superuser)
@@ -63,10 +61,7 @@ class DomainDataModelViewSetTestCase(
         self.assertEqual(response.status_code, 403, response.json())
 
 
-class IPDataModelViewSetTestCase(
-    ViewSetTestCaseMixin,
-    CustomViewSetTestCase
-):
+class IPDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/data_model/ip"
 
     @classmethod
@@ -80,9 +75,8 @@ class IPDataModelViewSetTestCase(
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.model_class.objects.create(
-            analyzer_report=create_report(cls.user)
-        )
+        cls.model_class.objects.create(analyzer_report=create_report(cls.user))
+
     def test_get_superuser(self):
         plugin = self.get_object()
         self.client.force_authenticate(self.superuser)
@@ -90,10 +84,7 @@ class IPDataModelViewSetTestCase(
         self.assertEqual(response.status_code, 403, response.json())
 
 
-class FileDataModelViewSetTestCase(
-    ViewSetTestCaseMixin,
-    CustomViewSetTestCase
-):
+class FileDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     URL = "/api/data_model/file"
 
     @classmethod
@@ -107,9 +98,7 @@ class FileDataModelViewSetTestCase(
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.model_class.objects.create(
-            analyzer_report=create_report(cls.user)
-        )
+        cls.model_class.objects.create(analyzer_report=create_report(cls.user))
 
     def test_get_superuser(self):
         plugin = self.get_object()

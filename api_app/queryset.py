@@ -683,7 +683,10 @@ class AbstractReportQuerySet(SendToBiQuerySet):
             AbstractReportQuerySet: The filtered queryset.
         """
         return self.filter(
-            status__in=[self.model.STATUSES.FAILED.value, self.model.STATUSES.PENDING.value]
+            status__in=[
+                self.model.STATUSES.FAILED.value,
+                self.model.STATUSES.PENDING.value,
+            ]
         )
 
     def get_configurations(self) -> AbstractConfigQuerySet:

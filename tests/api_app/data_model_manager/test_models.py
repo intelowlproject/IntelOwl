@@ -1,7 +1,6 @@
 from kombu import uuid
 
-from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.models import AnalyzerReport, AnalyzerConfig
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
 from api_app.models import Job
 from tests import CustomTestCase

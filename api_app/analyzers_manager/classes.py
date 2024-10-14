@@ -6,7 +6,7 @@ import logging
 import time
 from abc import ABCMeta
 from pathlib import PosixPath
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional, Tuple
 
 import requests
 from django.conf import settings
@@ -42,10 +42,13 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         self._config: AnalyzerConfig
         if not self._config.mapping_data_model:
             logger.info(
-                f"Skipping data model of {self._config.name} for job {self._job.pk} because no data model")
+                f"Skipping data model of {self._config.name} for job {self._job.pk} because no data model"
+            )
             return None
         if not self.report.status == self.report.STATUSES.SUCCESS.value:
-            logger.info(f"Skipping data model of {self._config.name} for job {self._job.pk} because status is {self.report.status}")
+            logger.info(
+                f"Skipping data model of {self._config.name} for job {self._job.pk} because status is {self.report.status}"
+            )
             return None
         result = {}
         data_model_class = self.report.get_data_model_class()
@@ -53,7 +56,9 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         for data_model_key, report_key in self._config.mapping_data_model.items():
             # validation
             if data_model_key not in data_model_fields.keys():
-                self.report.errors.append(f"Field {data_model_key} not present in {data_model_class.__name__}")
+                self.report.errors.append(
+                    f"Field {data_model_key} not present in {data_model_class.__name__}"
+                )
                 self.report.save()
                 continue
             try:
@@ -67,9 +72,13 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
                 if isinstance(data_model_fields[data_model_key], ForeignKey):
                     # to create an object we need at least
                     if not isinstance(value, dict):
-                        self.report.errors.append(f"Field {report_key} has type {type(report_key)} while a dictionary is expected")
+                        self.report.errors.append(
+                            f"Field {report_key} has type {type(report_key)} while a dictionary is expected"
+                        )
                         continue
-                    value, _ = data_model_fields[data_model_key].related_model.objects.get_or_create(**value)
+                    value, _ = data_model_fields[
+                        data_model_key
+                    ].related_model.objects.get_or_create(**value)
                 result[data_model_key] = value
         return data_model_class.objects.create(**result, analyzer_report=self.report)
 
@@ -146,7 +155,9 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         Args:
             content (any): The content to process after a successful run.
         """
-        result = super().after_run_success(self._validate_result(content, max_recursion=15))
+        result = super().after_run_success(
+            self._validate_result(content, max_recursion=15)
+        )
         self.create_data_model()
         return result
 

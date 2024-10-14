@@ -1,6 +1,12 @@
 from rest_flex_fields import FlexFieldsModelSerializer
 
-from api_app.data_model_manager.models import IETFReport, Signature, DomainDataModel, IPDataModel, FileDataModel
+from api_app.data_model_manager.models import (
+    DomainDataModel,
+    FileDataModel,
+    IETFReport,
+    IPDataModel,
+    Signature,
+)
 
 
 class IETFReportSerializer(FlexFieldsModelSerializer):
@@ -15,12 +21,12 @@ class SignatureSerializer(FlexFieldsModelSerializer):
         fields = "__all__"
 
 
-class BaseDataModelSerializer(FlexFieldsModelSerializer):
-    ...
+class BaseDataModelSerializer(FlexFieldsModelSerializer): ...
 
 
 class DomainDataModelSerializer(BaseDataModelSerializer):
     ietf_report = IETFReportSerializer()
+
     class Meta:
         model = DomainDataModel
         fields = "__all__"
@@ -36,6 +42,7 @@ class IPDataModelSerializer(BaseDataModelSerializer):
 
 class FileDataModelSerializer(BaseDataModelSerializer):
     signatures = SignatureSerializer(many=True)
+
     class Meta:
         model = FileDataModel
         fields = "__all__"

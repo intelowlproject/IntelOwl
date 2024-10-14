@@ -11,7 +11,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.models import AbstractConfig, AbstractReport, Job
+from api_app.models import AbstractReport, Job
 
 User = get_user_model()
 
@@ -119,7 +119,9 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def test_kill_204(self):
-        _report = self.init_report(status=AbstractReport.STATUSES.PENDING, user=self.user)
+        _report = self.init_report(
+            status=AbstractReport.STATUSES.PENDING, user=self.user
+        )
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
@@ -130,7 +132,9 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_400(self):
         # create a new report whose status is not "running"/"pending"
-        _report = self.init_report(status=AbstractReport.STATUSES.SUCCESS, user=self.user)
+        _report = self.init_report(
+            status=AbstractReport.STATUSES.SUCCESS, user=self.user
+        )
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
@@ -192,7 +196,9 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_retry_400(self):
         # create a new report whose status is not "FAILED"/"KILLED"
-        _report = self.init_report(status=AbstractReport.STATUSES.SUCCESS, user=self.user)
+        _report = self.init_report(
+            status=AbstractReport.STATUSES.SUCCESS, user=self.user
+        )
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
         )

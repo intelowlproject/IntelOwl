@@ -5,7 +5,11 @@ from django.contrib.postgres import fields as pg_fields
 from django.db import models
 from django.utils.timezone import now
 
-from api_app.data_model_manager.enums import DataModelTags, SignatureProviderChoices, DataModelEvaluations
+from api_app.data_model_manager.enums import (
+    DataModelEvaluations,
+    DataModelTags,
+    SignatureProviderChoices,
+)
 from certego_saas.apps.user.models import User
 
 
@@ -26,9 +30,10 @@ class IETFReport(models.Model):
                 "rrtype": self.rrtype,
                 "rdata": self.rdata,
                 "time_first": self.time_first.strftime("%Y-%m-%d %H:%M:%S"),
-                "time_last": self.time_last.strftime("%Y-%m-%d %H:%M:%S")
+                "time_last": self.time_last.strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
+
 
 class Signature(models.Model):
     provider = models.CharField(max_length=100)
@@ -40,10 +45,11 @@ class Signature(models.Model):
         return f"{self.provider}: {json.dumps(self.signature)}"
 
 
-
 class BaseDataModel(models.Model):
     analyzer_report = models.OneToOneField(
-        "analyzers_manager.AnalyzerReport", on_delete=models.CASCADE, related_name="data_model"
+        "analyzers_manager.AnalyzerReport",
+        on_delete=models.CASCADE,
+        related_name="data_model",
     )
     evaluation = models.CharField(
         max_length=100, null=True, blank=True, default=None
@@ -81,8 +87,8 @@ class BaseDataModel(models.Model):
     # Triage (analysis.family), UnpacMe (results.malware_id.malware_family),
     # VirusTotalV3FileAnalyzer
     # (attributes.last_analysis_results.list_el.results/attributes.names)
-    additional_info = (
-        models.JSONField(default=dict)
+    additional_info = models.JSONField(
+        default=dict
     )  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
     TAGS = DataModelTags
@@ -108,19 +114,31 @@ class IPDataModel(BaseDataModel):
     ietf_report = models.ForeignKey(
         IETFReport, on_delete=models.CASCADE, null=True, blank=True, default=None
     )  # pdns
-    asn = models.IntegerField(null=True, blank=True, default=None)  # BGPRanking, MaxMind
-    asn_rank = models.DecimalField(null=True, blank=True, default=None, decimal_places=2, max_digits=3)  # BGPRanking
+    asn = models.IntegerField(
+        null=True, blank=True, default=None
+    )  # BGPRanking, MaxMind
+    asn_rank = models.DecimalField(
+        null=True, blank=True, default=None, decimal_places=2, max_digits=3
+    )  # BGPRanking
     certificates = models.JSONField(null=True, blank=True, default=None)  # CIRCL_PSSL
-    org_name = models.CharField(max_length=100, null=True, blank=True, default=None)  # GreyNoise
-    country = models.CharField(max_length=100, null=True, blank=True, default=None)  # MaxMind, AbuseIPDB
-    country_code = models.CharField(max_length=100, null=True, blank=True, default=None)  # MaxMind, AbuseIPDB
+    org_name = models.CharField(
+        max_length=100, null=True, blank=True, default=None
+    )  # GreyNoise
+    country = models.CharField(
+        max_length=100, null=True, blank=True, default=None
+    )  # MaxMind, AbuseIPDB
+    country_code = models.CharField(
+        max_length=100, null=True, blank=True, default=None
+    )  # MaxMind, AbuseIPDB
     registered_country = models.CharField(
         max_length=100, null=True, blank=True, default=None
     )  # MaxMind, AbuseIPDB
     registered_country_code = models.CharField(
         max_length=100, null=True, blank=True, default=None
     )  # MaxMind, AbuseIPDB
-    isp = models.CharField(max_length=100, null=True, blank=True, default=None)  # AbuseIPDB
+    isp = models.CharField(
+        max_length=100, null=True, blank=True, default=None
+    )  # AbuseIPDB
     # additional_info
     # behavior = models.CharField(max_length=100, null=True)  # Crowdsec
     # noise = models.BooleanField(null=True)  # GreyNoise
@@ -136,7 +154,7 @@ class FileDataModel(BaseDataModel):
     )  # MalwareBazaarFileAnalyzer,
     # VirusTotalV3FileAnalyzer (data.relationships.comments)
     file_information = models.JSONField(
-        default=dict,blank=True
+        default=dict, blank=True
     )  # MalwareBazaarFileAnalyzer, OneNoteInfo (files),
     # QuarkEngineAPK (crimes.confidence, threat_level, total_score)
     # RtfInfo (exploit_equation_editor, exploit_ole2link_vuln)

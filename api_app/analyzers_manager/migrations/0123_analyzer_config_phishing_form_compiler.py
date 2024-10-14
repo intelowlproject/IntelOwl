@@ -69,7 +69,7 @@ values = [
         "ingestor_config": None,
         "pivot_config": None,
         "for_organization": False,
-        "value": "//form[.//input[lower-case(@type)='password']][.//input[not(@type) or @type='' or lower-case(@type)='text']][.//input[lower-case(@type)='submit'] or .//button[not(@type) or @type='' or lower-case(@type)='submit']]",
+        "value": "//*[self::form or self::iframe or self::fieldset][.//input[not(@type) or @type='' or @type='text']][.//input[@type='password']][.//input[@type='submit' or contains(@class, 'submit')] or .//button[not(@type) or @type='' or @type='submit' or contains(@class, 'submit')]]",
         "updated_at": "2024-10-10T09:29:36.730485Z",
         "owner": None,
     }

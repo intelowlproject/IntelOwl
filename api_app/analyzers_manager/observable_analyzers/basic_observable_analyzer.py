@@ -39,6 +39,8 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
     def run(self):
         # optional authentication
         if hasattr(self, "_api_key_name") and "Authorization" in self.headers.keys():
+            if not self._api_key_name:
+                AnalyzerConfigurationException("API key is not set.")
             api_key = self._api_key_name
             auth_schema = self.headers["Authorization"].split(" ")[0]
             if auth_schema == "Basic":
@@ -47,7 +49,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
             self.headers["Authorization"] = self.headers["Authorization"].replace(
                 "<api_key>", api_key
             )
-        elif hasattr(self, "_api_key_name"):
+        elif hasattr(self, "_api_key_name") and self._api_key_name:
             for key in self.headers.keys():
                 self.headers[key] = self.headers[key].replace(
                     "<api_key>", self._api_key_name
@@ -55,7 +57,7 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
 
         # optional certificate
         verify = True  # defualt
-        if hasattr(self, "_certificate"):
+        if hasattr(self, "_certificate") and self._certificate:
             self.__cert_file = NamedTemporaryFile(mode="w")
             self.__cert_file.write(self._clean_certificate(self._certificate))
             self.__cert_file.flush()

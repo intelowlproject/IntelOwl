@@ -1,5 +1,6 @@
 import logging
 import os
+from functools import cached_property
 from typing import Iterator
 
 from selenium.common import WebDriverException
@@ -45,6 +46,13 @@ class Proxy:
             f"{self.protocol + '://' if self.address and self.protocol else ''}"
             f"{self.address}{':' + str(self.port) if self.port else ''}"
         )
+
+    @cached_property
+    def for_requests(self) -> dict:
+        # defaults to HTTP if address is specified
+        if self.address:
+            return {"http": repr(self), "https": repr(self)}
+        return {}
 
 
 class DriverWrapper:

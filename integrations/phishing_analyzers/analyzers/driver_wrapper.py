@@ -2,6 +2,7 @@ import logging
 import os
 from functools import cached_property
 from typing import Iterator
+from urllib.parse import urlparse
 
 from selenium.common import WebDriverException
 from seleniumbase import Driver
@@ -34,10 +35,21 @@ logger.setLevel(log_level)
 
 
 class Proxy:
+    SUPPORTED_PROTOCOLS: [] = ["http", "https", "socks5"]
+
     def __init__(
         self, proxy_protocol: str = "", proxy_address: str = "", proxy_port: int = 0
     ):
-        self.protocol: str = proxy_protocol
+        if proxy_protocol and proxy_protocol.lower() not in self.SUPPORTED_PROTOCOLS:
+            raise ValueError(f"{proxy_protocol=} is not supported!")
+
+        if proxy_address and not urlparse(proxy_address).hostname:
+            raise ValueError(f"{proxy_address=} is not a valid hostname address!")
+
+        if proxy_port and not isinstance(proxy_port, int):
+            raise ValueError(f"{proxy_port} is not a valid port!")
+
+        self.protocol: str = proxy_protocol.lower()
         self.address: str = proxy_address
         self.port: int = proxy_port
 

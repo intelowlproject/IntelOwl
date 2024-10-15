@@ -40,7 +40,7 @@ class Proxy:
     def __init__(
         self, proxy_protocol: str = "", proxy_address: str = "", proxy_port: int = 0
     ):
-        if proxy_protocol and proxy_protocol.lower() not in self.SUPPORTED_PROTOCOLS:
+        if proxy_protocol and proxy_protocol not in self.SUPPORTED_PROTOCOLS:
             raise ValueError(f"{proxy_protocol=} is not supported!")
 
         if proxy_address and not urlparse(proxy_address).hostname:
@@ -49,7 +49,7 @@ class Proxy:
         if proxy_port and not isinstance(proxy_port, int):
             raise ValueError(f"{proxy_port} is not a valid port!")
 
-        self.protocol: str = proxy_protocol.lower()
+        self.protocol: str = proxy_protocol
         self.address: str = proxy_address
         self.port: int = proxy_port
 

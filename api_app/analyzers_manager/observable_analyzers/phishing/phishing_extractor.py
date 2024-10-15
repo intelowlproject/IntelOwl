@@ -23,7 +23,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
         **kwargs,
     ):
         super().__init__(config, **kwargs)
-        self.args: list = []
+        self.args: [] = []
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)

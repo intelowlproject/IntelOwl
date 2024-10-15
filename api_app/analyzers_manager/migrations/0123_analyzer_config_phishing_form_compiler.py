@@ -47,7 +47,40 @@ params = [
         "description": "XPath expression to match a form on phishing page.",
         "is_secret": False,
         "required": False,
-    }
+    },
+    {
+        "python_module": {
+            "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "proxy_protocol",
+        "type": "str",
+        "description": "Protocol used for proxy connection. Can be set only if proxy_address has been set.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "proxy_address",
+        "type": "str",
+        "description": "Address for proxy to use for requests.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "proxy_port",
+        "type": "int",
+        "description": "Port for proxy to use for requests. Can be set only if proxy_address has been set.",
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
 values = [
@@ -72,7 +105,73 @@ values = [
         "value": "//*[self::form or self::iframe or self::fieldset][.//input[not(@type) or @type='' or @type='text']][.//input[@type='password']][.//input[@type='submit' or contains(@class, 'submit')] or .//button[not(@type) or @type='' or @type='submit' or contains(@class, 'submit')]]",
         "updated_at": "2024-10-10T09:29:36.730485Z",
         "owner": None,
-    }
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "proxy_protocol",
+            "type": "str",
+            "description": "Protocol used for proxy connection. Can be set only if proxy_address has been set.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Phishing_Form_Compiler",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": "",
+        "updated_at": "2024-10-10T09:29:36.730485Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "proxy_address",
+            "type": "str",
+            "description": "Address for proxy to use for requests.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Phishing_Form_Compiler",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": "",
+        "updated_at": "2024-10-10T09:29:36.730485Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "phishing.phishing_form_compiler.PhishingFormCompiler",
+                "base_path": "api_app.analyzers_manager.file_analyzers",
+            },
+            "name": "proxy_port",
+            "type": "int",
+            "description": "Port for proxy to use for requests. Can be set only if proxy_address has been set.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Phishing_Form_Compiler",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 0,
+        "updated_at": "2024-10-10T09:29:36.730485Z",
+        "owner": None,
+    },
 ]
 
 

@@ -18,6 +18,9 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
     # https://upg-dh.newtfire.org/explainXPath.html
     # we're supporting XPath up to v3.1 with elementpath package
     xpath_selector: str
+    proxy_protocol: str = ""
+    proxy_address: str = ""
+    proxy_port: int = 0
 
     def __init__(
         self,
@@ -27,6 +30,7 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
         super().__init__(config, **kwargs)
         self.target_site: str = ""
         self.html_source_code: str = ""
+        self.args: [] = []
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -44,6 +48,13 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
                 "Target site from parent job not found! Proceeding with only source code."
             )
 
+        if self.proxy_address:
+            self.args.append(f"--proxy_address={self.proxy_address}")
+            if self.proxy_protocol:
+                self.args.append(f"--proxy_protocol={self.proxy_protocol}")
+            if self.proxy_port:
+                self.args.append(f"--proxy_port={self.proxy_port}")
+
         self.html_source_code = self.read_file_bytes()
 
     def run(self) -> dict:
@@ -52,6 +63,7 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
                 f"--target_site={self.target_site}",
                 f"--source_code={self.html_source_code}",
                 f"--xpath_selector={self.xpath_selector}",
+                *self.args,
             ]
         }
         logger.info(f"sending {req_data=} to {self.url}")

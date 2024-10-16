@@ -77,7 +77,7 @@ class PaginationMixin:
         return Response(data)
 
 
-class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
+class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
     url = "https://www.virustotal.com/api/v3/"
 
     # If you want to query a specific subpath of the base endpoint, i.e: `analyses`
@@ -87,14 +87,6 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     @property
     def headers(self) -> dict:
         return {"x-apikey": self._api_key_name}
-
-    def config(self, runtime_configuration: Dict):
-        super().config(runtime_configuration)
-        # An Ingestor does not have a corresponding job so we set the value to False,
-        # the aim of the ingestors usually is to download data not to upload.
-        self.force_active_scan = (
-            self._job.tlp == self._job.TLP.CLEAR.value if self._job else False
-        )
 
     def _perform_get_request(
         self, uri: str, ignore_404: bool = False, **kwargs
@@ -313,7 +305,9 @@ class VirusTotalv3BaseMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
             )
 
 
-class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
+class VirusTotalv3AnalyzerMixin(
+    VirusTotalv3BaseMixin, BaseAnalyzerMixin, metaclass=abc.ABCMeta
+):
     # How many times we poll the VT API for scan results
     max_tries: int
     # IntelOwl would sleep for this time between each poll to VT APIs
@@ -339,6 +333,10 @@ class VirusTotalv3AnalyzerMixin(VirusTotalv3BaseMixin, metaclass=abc.ABCMeta):
     relationships_to_request: list
     # Number of elements to retrieve for each relationships
     relationships_elements: int
+
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
+        self.force_active_scan = self._job.tlp == self._job.TLP.CLEAR.value
 
     def _get_relationship_limit(self, relationship: str) -> int:
         # by default, just extract the first element

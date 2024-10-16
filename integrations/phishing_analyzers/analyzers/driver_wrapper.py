@@ -13,7 +13,7 @@ from seleniumwire.webdriver import Chrome
 # remove annoying driver download message
 settings.HIDE_DRIVER_DOWNLOADS = True
 
-LOG_NAME = "driver_rapper"
+LOG_NAME = "driver_wrapper"
 
 # get flask-shell2http logger instance
 logger = logging.getLogger(LOG_NAME)

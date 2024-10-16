@@ -1,19 +1,36 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django_elasticsearch_dsl import Document, fields
+import datetime
+import json
+import logging
+
+import inflection
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django_elasticsearch_dsl import Document, Index, fields
 from django_elasticsearch_dsl.registries import registry
+from elasticsearch import ApiError
+from elasticsearch_dsl import connections
 
 from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.connectors_manager.models import ConnectorReport
-from api_app.ingestors_manager.models import IngestorReport
-from api_app.pivots_manager.models import PivotReport
-from api_app.visualizers_manager.models import VisualizerReport
+from api_app.choices import ReportStatus
+
+# from api_app.connectors_manager.models import ConnectorReport
+# from api_app.ingestors_manager.models import IngestorReport
+from api_app.models import AbstractReport
 
 from .models import Job
 
+# from api_app.pivots_manager.models import PivotReport
+# from api_app.visualizers_manager.models import VisualizerReport
 
-@registry.register_document
+
+logger = logging.getLogger(__name__)
+
+
+@registry.register_document  # TODO: maybe we can replace this with the signal and remove django elasticsearch dsl
 class JobDocument(Document):
     # Object/List fields
     analyzers_to_execute = fields.NestedField(
@@ -28,10 +45,8 @@ class JobDocument(Document):
     playbook_to_execute = fields.ObjectField(
         properties={
             "name": fields.KeywordField(),
-            # "scan_mode": fields.IntegerField()  # TODO: remove, just for testing
         },
     )
-    # scan_mode = fields.IntegerField()  # TODO: remove, just for testing
 
     # Normal fields
     errors = fields.TextField()
@@ -85,90 +100,59 @@ class JobDocument(Document):
         ]
 
 
-class AbstractReportDocument(Document):
-
-    job = fields.ObjectField(
-        properties={
-            "id": fields.IntegerField(),
+@receiver(post_save, sender=AnalyzerReport)
+# @receiver(post_save, sender=ConnectorReport)
+# @receiver(post_save, sender=PivotReport)
+# @receiver(post_save, sender=IngestorReport)
+# @receiver(post_save, sender=VisualizerReport)
+def plugin_report_save_signal_listener(sender, **kwargs):
+    logger.debug(f"{sender=} {sender.__name__} {type(sender.__name__)}")
+    logger.debug(f"{kwargs=}")
+    report: AbstractReport = kwargs["instance"]
+    logger.debug(f"{report.status=}")
+    if report.status in ReportStatus.final_statuses():
+        document_data = {
+            "config": {"name": report.config.name},
+            "job": {"id": report.job.id},
+            "start_time": report.start_time,
+            "end_time": report.end_time,
+            "status": report.status,
+            "report": report.report,
         }
-    )
-    config = fields.ObjectField(
-        properties={
-            "name": fields.KeywordField(),
-        }
-    )
-    report = fields.NestedField()
-    errors = fields.TextField()
-
-    class Django:
-        # The fields of the model you want to be indexed in Elasticsearch
-        fields = [
-            "status",
-            "start_time",
-            "end_time",
-        ]
+        logger.debug(f"{document_data=}")
+        PluginReportElastic.add_document(
+            # elasticsearch_dsl wants idexes in lowercase, use this lib to put _
+            plugin_report_name=sender.__name__,
+            document_data=document_data,
+        )
 
 
-@registry.register_document
-class AnalyzerReportDocument(AbstractReportDocument):
+class PluginReportElastic:
 
-    class Index:
-        # Name of the Elasticsearch index
-        name = "analyzer_reports"
-
-    class Django:
-        model = AnalyzerReport  # The model associated with this Document
-
-        fields = AbstractReportDocument.Django.fields + []
-
-
-@registry.register_document
-class ConnectorReportDocument(AbstractReportDocument):
-
-    class Index:
-        # Name of the Elasticsearch index
-        name = "connector_reports"
-
-    class Django:
-        model = ConnectorReport  # The model associated with this Document
-
-        fields = AbstractReportDocument.Django.fields + []
-
-
-@registry.register_document
-class IngestorReportDocument(AbstractReportDocument):
-
-    class Index:
-        # Name of the Elasticsearch index
-        name = "ingestor_reports"
-
-    class Django:
-        model = IngestorReport  # The model associated with this Document
-
-        fields = AbstractReportDocument.Django.fields + []
-
-
-@registry.register_document
-class PivotReportDocument(AbstractReportDocument):
-
-    class Index:
-        # Name of the Elasticsearch index
-        name = "pivot_reports"
-
-    class Django:
-        model = PivotReport  # The model associated with this Document
-
-        fields = AbstractReportDocument.Django.fields + []
-
-
-@registry.register_document
-class VisualizerReportDocument(AbstractReportDocument):
-
-    class Index:
-        # Name of the Elasticsearch index
-        name = "visualizer_reports"
-
-    class Django:
-        model = VisualizerReport  # The model associated with this Document
-
-        fields = AbstractReportDocument.Django.fields + []
+    @staticmethod
+    def add_document(plugin_report_name: str, document_data: dict) -> bool:
+        index_name = f"plugin-report-{inflection.underscore(plugin_report_name).replace('_', '-')}-{datetime.date.today()}"
+        # check if index exist or create it
+        if Index(index_name).exists():
+            logger.info(f"index {index_name} already exist, do nothing.")
+        else:
+            try:
+                with open(
+                    settings.CONFIG_ROOT
+                    / "elastic_search_mappings"
+                    / "plugin_report.json"
+                ) as file_content:
+                    body = json.load(file_content)
+                    connections.get_connection().indices.put_template(
+                        name="plugin-report", body=body
+                    )
+                    logger.info(
+                        "created/updated template for plugin report for Elastic named"
+                    )
+            except ApiError as error:
+                logger.critical(error)
+        # add document
+        try:
+            connections.get_connection().index(index=index_name, body=document_data)
+        except ApiError as error:
+            logger.critical(error)

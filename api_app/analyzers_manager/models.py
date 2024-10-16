@@ -1,12 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import json
 from logging import getLogger
-from typing import Optional
+from typing import Dict, Optional, Type
 
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import ForeignKey
 
 from api_app.analyzers_manager.constants import (
     HashChoices,
@@ -16,6 +18,12 @@ from api_app.analyzers_manager.constants import (
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, PythonModuleBasePaths
+from api_app.data_model_manager.models import (
+    BaseDataModel,
+    DomainDataModel,
+    FileDataModel,
+    IPDataModel,
+)
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
@@ -31,6 +39,83 @@ class AnalyzerReport(AbstractReport):
     class Meta:
         unique_together = [("config", "job")]
         indexes = AbstractReport.Meta.indexes
+
+    @property
+    def data_model_class(self) -> Type[BaseDataModel]:
+        if self.job.is_sample:
+            return FileDataModel
+        if self.job.observable_classification == ObservableTypes.IP.value:
+            return IPDataModel
+        if self.job.observable_classification == ObservableTypes.DOMAIN.value:
+            return DomainDataModel
+        raise NotImplementedError(
+            f"Unable to find data model for {self.job.observable_classification}"
+        )
+
+    def _validation_before_data_model(self) -> bool:
+        if not self.status == self.STATUSES.SUCCESS.value:
+            logger.info(
+                f"Skipping data model of {self.config.name} for job {self.config.pk} because status is "
+                f"{self.status}"
+            )
+            return False
+        data_model_keys = self.data_model_class.get_fields().keys()
+        for data_model_key in self.config.mapping_data_model.values():
+            if data_model_key not in data_model_keys:
+                self.errors.append(
+                    f"Field {data_model_key} not present in {self.data_model_class.__name__}"
+                )
+        return True
+
+    def _create_data_model_dictionary(self) -> Dict:
+        result = {}
+        data_model_fields = self.data_model_class.get_fields()
+        logger.info(f"Mapping is {json.dumps(self.config.mapping_data_model)}")
+        for report_key, data_model_key in self.config.mapping_data_model.items():
+            # this is a constant
+            if report_key.startswith("$"):
+                value = report_key
+            # this is a field of the report
+            else:
+                try:
+                    value = self.get_value(self.report, report_key.split("."))
+                    logger.info(f"Retrieved {value} from key {report_key}")
+                except Exception:
+                    # validation
+                    self.errors.append(f"Field {report_key} not present in report")
+                    continue
+                    # create the related object if necessary
+                if isinstance(data_model_fields[data_model_key], ForeignKey):
+                    # to create an object we need at least
+                    if not isinstance(value, dict):
+                        self.errors.append(
+                            f"Field {report_key} has type {type(report_key)} while a dictionary is expected"
+                        )
+                        continue
+                    value, _ = data_model_fields[
+                        data_model_key
+                    ].related_model.objects.get_or_create(**value)
+                elif isinstance(data_model_fields[data_model_key], ArrayField):
+                    if data_model_key not in result:
+                        result[data_model_key] = []
+                    if isinstance(value, list):
+                        result[data_model_key].extend(value)
+                    elif isinstance(value, dict):
+                        result[data_model_key].extend(list(value.keys()))
+                    else:
+                        result[data_model_key].append(value)
+            result[data_model_key] = value
+        return result
+
+    def create_data_model(self) -> Optional[BaseDataModel]:
+        if not self._validation_before_data_model():
+            return None
+        dictionary = self._create_data_model_dictionary()
+        data_model = self.data_model_class.objects.create(
+            **dictionary, analyzer_report=self
+        )
+
+        return data_model
 
 
 class MimeTypes(models.TextChoices):
@@ -187,6 +272,10 @@ class AnalyzerConfig(PythonConfig):
     )
     orgs_configuration = GenericRelation(
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
+    )
+    mapping_data_model = models.JSONField(
+        default=dict,
+        help_text="Mapping analyzer_report_key: data_model_key. Keys preceded by the symbol $ will be considered as constants.",
     )
 
     @classmethod

@@ -39,6 +39,12 @@ class URLHaus(classes.ObservableAnalyzer):
 
         return response.json()
 
+    def _do_create_data_model(self) -> bool:
+        return (
+            super()._do_create_data_model()
+            and self.report.report.get("query_status", "no_results") != "no_results"
+        )
+
     @classmethod
     def _monkeypatch(cls):
         patches = [

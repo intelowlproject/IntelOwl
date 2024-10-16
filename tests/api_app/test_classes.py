@@ -17,7 +17,7 @@ class PluginTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.job, _ = Job.objects.get_or_create(
-            user=self.user, status=Job.Status.REPORTED_WITHOUT_FAILS
+            user=self.user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS
         )
         self.cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
@@ -50,7 +50,7 @@ class PluginTestCase(CustomTestCase):
             except Exception as e:
                 self.fail(e)
             else:
-                self.assertEqual(plugin.report.status, plugin.report.Status.SUCCESS)
+                self.assertEqual(plugin.report.status, plugin.report.STATUSES.SUCCESS)
 
     def test_start_errors(self):
         def raise_error(self):
@@ -62,7 +62,7 @@ class PluginTestCase(CustomTestCase):
             plugin = Connector(self.cc)
             with self.assertRaises(TypeError):
                 plugin.start(self.job.pk, {}, uuid())
-            self.assertEqual(plugin.report.status, plugin.report.Status.FAILED)
+            self.assertEqual(plugin.report.status, plugin.report.STATUSES.FAILED)
             self.assertEqual(1, len(plugin.report.errors))
             self.assertEqual("Test", plugin.report.errors[0])
 

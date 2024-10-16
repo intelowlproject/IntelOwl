@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "api_app.pivots_manager",
     "api_app.ingestors_manager",
     "api_app.investigations_manager",
+    "api_app.data_model_manager",
     # auth
     "rest_email_auth",
     # performance debugging

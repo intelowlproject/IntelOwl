@@ -28,7 +28,7 @@ class Investigation(OwnershipAbstractModel, ListCachable):
         max_length=20,
         default=InvestigationStatusChoices.CREATED.value,
     )
-    Status = InvestigationStatusChoices
+    STATUSES = InvestigationStatusChoices
 
     objects = InvestigationQuerySet.as_manager()
 
@@ -66,20 +66,20 @@ class Investigation(OwnershipAbstractModel, ListCachable):
             for job in self.jobs.all():
                 job: Job
                 jobs = job.get_tree(job)
-                if jobs.exclude(status__in=Job.Status.final_statuses()).count() > 0:
-                    self.status = self.Status.RUNNING.value
+                if jobs.exclude(status__in=Job.STATUSES.final_statuses()).count() > 0:
+                    self.status = self.STATUSES.RUNNING.value
                     self.end_time = None
                     break
             # and they are all completed
             else:
-                self.status = self.Status.CONCLUDED.value
+                self.status = self.STATUSES.CONCLUDED.value
                 self.end_time = (
                     self.jobs.order_by("-finished_analysis_time")
                     .first()
                     .finished_analysis_time
                 )
         else:
-            self.status = self.Status.CREATED.value
+            self.status = self.STATUSES.CREATED.value
             self.end_time = None
         if save:
             self.save(update_fields=["status", "end_time"])

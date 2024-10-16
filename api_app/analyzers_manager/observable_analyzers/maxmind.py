@@ -230,16 +230,16 @@ class Maxmind(classes.ObservableAnalyzer):
         patches = [if_mock_connections(patch.object(cls, "run", return_value={}))]
         return super()._monkeypatch(patches=patches)
 
-    def _create_data_model_dictionary(self) -> Dict:
+    def _update_data_model(self, data_model) -> None:
         from api_app.analyzers_manager.models import AnalyzerReport
 
-        result = super()._create_data_model_dictionary()
+        super()._update_data_model(data_model)
         org = self.report.report.get("autonomous_system_organization", None)
         if org:
             org = org.lower()
             self.report: AnalyzerReport
             if org in ["fastly", "cloudflare", "akamai"]:
-                result["evaluation"] = (
+                data_model.evaluation = (
                     self.report.data_model_class.EVALUATIONS.CLEAN.value
                 )
             elif org in [
@@ -248,11 +248,10 @@ class Maxmind(classes.ObservableAnalyzer):
                 "microdata service srl",
                 "forcepoint",
             ]:
-                result["evaluation"] = (
+                data_model.evaluation = (
                     self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
                 )
             elif org in ["stark industries"]:
-                result["evaluation"] = (
+                data_model.evaluation = (
                     self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
                 )
-        return result

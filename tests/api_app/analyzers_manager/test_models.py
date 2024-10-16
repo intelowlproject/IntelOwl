@@ -20,7 +20,7 @@ class AnalyzerReportTestCase(CustomTestCase):
             status=Job.Status.ANALYZERS_RUNNING.value,
         )
         config = AnalyzerConfig.objects.first()
-        ar = AnalyzerReport.objects.create(
+        ar: AnalyzerReport = AnalyzerReport.objects.create(
             report={
                 "evaluation": "MALICIOUS",
                 "urls": [{"url": "www.intelowl.com"}, {"url": "www.intelowl.com"}],
@@ -38,9 +38,7 @@ class AnalyzerReportTestCase(CustomTestCase):
         }
         config.save()
         job.analyzers_to_execute.set([config])
-        obs = YARAify(config)
-        obs.report = ar
-        data_model = obs.create_data_model()
+        data_model = ar.create_data_model()
         data_model.refresh_from_db()
         self.assertIsNotNone(data_model)
         self.assertEqual(data_model.evaluation, "malicious")

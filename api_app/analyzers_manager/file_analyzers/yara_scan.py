@@ -455,10 +455,10 @@ class YaraScan(FileAnalyzer):
 
         return {"signatures": signatures}
 
-    def create_data_model(self):
+    def _update_data_model(self, data_model):
         from api_app.data_model_manager.models import FileDataModel
 
-        data_model = super().create_data_model()
+        super()._update_data_model(data_model)
         if data_model:
             data_model: FileDataModel
             signatures = data_model.signatures.count()
@@ -467,4 +467,3 @@ class YaraScan(FileAnalyzer):
             elif signatures > 10:
                 data_model.evaluation = data_model.EVALUATIONS.SUSPICIOUS.value
             data_model.save()
-        return data_model

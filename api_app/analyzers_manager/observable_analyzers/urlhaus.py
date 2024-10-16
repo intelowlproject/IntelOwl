@@ -39,9 +39,9 @@ class URLHaus(classes.ObservableAnalyzer):
 
         return response.json()
 
-    def _validation_before_data_model(self) -> bool:
+    def _do_create_data_model(self) -> bool:
         return (
-            super()._validation_before_data_model()
+            super()._do_create_data_model()
             and self.report.report["query_status"] != "no_results"
         )
 

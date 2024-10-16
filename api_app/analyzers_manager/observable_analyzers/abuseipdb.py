@@ -96,8 +96,8 @@ class AbuseIPDB(ObservableAnalyzer):
         ]
         return super()._monkeypatch(patches=patches)
 
-    def _create_data_model_dictionary(self) -> Dict:
-        result = super()._create_data_model_dictionary()
+    def _update_data_model(self, data_model) -> None:
+        super()._update_data_model(data_model)
         if self.report.report.get("totalReports", 0):
             self.report: AnalyzerReport
             if self.report.report["isWhitelisted"]:
@@ -106,5 +106,4 @@ class AbuseIPDB(ObservableAnalyzer):
                 )
             else:
                 evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
-            result["evaluation"] = evaluation
-        return result
+            data_model.evaluation = evaluation

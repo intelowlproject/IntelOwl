@@ -43,7 +43,7 @@ class Proxy:
         if proxy_protocol and proxy_protocol not in self.SUPPORTED_PROTOCOLS:
             raise ValueError(f"{proxy_protocol=} is not supported!")
 
-        if proxy_address and not urlparse(proxy_address).hostname:
+        if proxy_address and not urlparse(proxy_address).path:
             raise ValueError(f"{proxy_address=} is not a valid hostname address!")
 
         if proxy_port and not isinstance(proxy_port, int):

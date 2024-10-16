@@ -53,11 +53,6 @@ class AnalyzerReport(AbstractReport):
         )
 
     def _validation_before_data_model(self) -> bool:
-        if not self.config.mapping_data_model:
-            logger.info(
-                f"Skipping data model of {self.config.name} for job {self.config.pk} because no data model"
-            )
-            return False
         if not self.status == self.STATUSES.SUCCESS.value:
             logger.info(
                 f"Skipping data model of {self.config.name} for job {self.config.pk} because status is "

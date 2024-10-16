@@ -1,3 +1,4 @@
+import base64
 import logging
 from typing import Dict
 
@@ -29,7 +30,7 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
     ):
         super().__init__(config, **kwargs)
         self.target_site: str = ""
-        self.html_source_code: str = ""
+        self.html_source_code: bytes = b""
         self.args: [] = []
 
     def config(self, runtime_configuration: Dict):
@@ -61,7 +62,7 @@ class PhishingFormCompiler(FileAnalyzer, DockerBasedAnalyzer):
         req_data: {} = {
             "args": [
                 f"--target_site={self.target_site}",
-                f"--source_code={self.html_source_code}",
+                f"--source_code={base64.b64encode(self.html_source_code).decode('utf-8')}",
                 f"--xpath_selector={self.xpath_selector}",
                 *self.args,
             ]

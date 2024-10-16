@@ -1,3 +1,4 @@
+import base64
 import datetime
 import logging
 import os
@@ -137,9 +138,12 @@ def perform_request_to_form(
     if not dest_url:
         dest_url = target_site
 
+    logger.info(f"Sending {params=} to submit url {dest_url}")
+
     response = requests.post(
         url=dest_url, params=params, data=params, proxies=proxy_requests.for_requests
     )
+    response.raise_for_status()
     return response
 
 
@@ -163,6 +167,7 @@ def compile_phishing_form(
         logger.info(message)
         return {"err": message}
 
+    logger.info(f"Found {len(forms)} forms in page {target_site}")
     responses: [Response] = []
     for form in forms:
         responses.append(
@@ -187,9 +192,12 @@ if __name__ == "__main__":
         proxy_protocol=arguments.proxy_protocol,
         proxy_port=arguments.proxy_port,
     )
+    source_code_decoded = base64.b64decode(
+        arguments.source_code.encode("utf-8")
+    ).decode("utf-8")
     compile_phishing_form(
-        arguments.target_site,
-        arguments.source_code,
-        arguments.xpath_selector,
+        target_site=arguments.target_site,
+        source_code=source_code_decoded,
+        xpath_selector=arguments.xpath_selector,
         proxy_requests=proxy,
     )

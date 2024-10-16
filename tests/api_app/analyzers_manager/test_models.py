@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from kombu import uuid
 
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
 from api_app.choices import PythonModuleBasePaths
 from api_app.models import Job, PythonModule
 from tests import CustomTestCase

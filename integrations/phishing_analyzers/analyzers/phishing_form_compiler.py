@@ -10,7 +10,7 @@ import requests
 from driver_wrapper import Proxy
 from lxml import etree
 from lxml.html import HtmlElement, document_fromstring
-from requests import Response
+from requests import HTTPError, Response
 
 LOG_NAME = "phishing_form_compiler"
 
@@ -143,12 +143,33 @@ def perform_request_to_form(
     response = requests.post(
         url=dest_url, params=params, data=params, proxies=proxy_requests.for_requests
     )
-    response.raise_for_status()
     return response
 
 
-def analyze_responses(responses):
-    pass
+def handle_3xx_response(response: Response) -> [str]:
+    return [history.request.url for history in response.history]
+
+
+def handle_2xx_response(response: Response) -> []:
+    return response.request.url
+
+
+def analyze_responses(responses: [Response]) -> []:
+    result: [] = []
+    for response in responses:
+        try:
+            # handle 4xx and 5xx
+            response.raise_for_status()
+        except HTTPError as e:
+            message = f"Error during request to {response.request.url}: {e}"
+            logger.error(message)
+            return {"error": message}
+        if response.history:
+            result.extend(handle_3xx_response(response))
+        else:
+            result.append(handle_2xx_response(response))
+
+    return result
 
 
 def compile_phishing_form(
@@ -156,16 +177,16 @@ def compile_phishing_form(
     source_code: str,
     xpath_selector: str = "",
     proxy_requests: Proxy = None,
-):
+) -> []:
     if not target_site or not source_code:
-        return {"err": f"Missing {target_site} or {source_code}"}
+        return {"error": f"Missing {target_site} or {source_code}"}
     if not (forms := phishing_forms_exists(source_code, xpath_selector)):
         message = (
             f"Form not found in {target_site=} with {xpath_selector=}! "
             f"Manually check site to see if XPath selector requires some tuning."
         )
         logger.info(message)
-        return {"err": message}
+        return {"error": message}
 
     logger.info(f"Found {len(forms)} forms in page {target_site}")
     responses: [Response] = []
@@ -174,7 +195,7 @@ def compile_phishing_form(
             perform_request_to_form(target_site, form, proxy_requests=proxy_requests)
         )
 
-    analyze_responses(responses)
+    print(analyze_responses(responses))
 
 
 if __name__ == "__main__":
@@ -187,6 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("--proxy_port", type=int, required=False)
     arguments = parser.parse_args()
     logger.info(f"Extracted arguments for {LOG_NAME}: {vars(arguments)}")
+
     proxy: Proxy = Proxy(
         proxy_address=arguments.proxy_address,
         proxy_protocol=arguments.proxy_protocol,

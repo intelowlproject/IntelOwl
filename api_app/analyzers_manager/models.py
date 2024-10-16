@@ -38,7 +38,8 @@ class AnalyzerReport(AbstractReport):
         unique_together = [("config", "job")]
         indexes = AbstractReport.Meta.indexes
 
-    def get_data_model_class(self) -> Type[BaseDataModel]:
+    @property
+    def data_model_class(self) -> Type[BaseDataModel]:
         if self.job.is_sample:
             return FileDataModel
         if self.job.observable_classification == ObservableTypes.IP.value:
@@ -48,6 +49,8 @@ class AnalyzerReport(AbstractReport):
         raise NotImplementedError(
             f"Unable to find data model for {self.job.observable_classification}"
         )
+
+
 
 
 class MimeTypes(models.TextChoices):
@@ -206,7 +209,8 @@ class AnalyzerConfig(PythonConfig):
         "api_app.OrganizationPluginConfiguration", related_name="%(class)s"
     )
     mapping_data_model = models.JSONField(
-        default=dict, help_text="Mapping data_model_key: analyzer_report_key. "
+        default=dict,
+        help_text="Mapping analyzer_report_key: data_model_key. Keys preceded by the symbol $ will be considered as constants.",
     )
 
     @classmethod

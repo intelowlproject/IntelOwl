@@ -10,13 +10,14 @@ from api_app.data_model_manager.enums import (
     DataModelTags,
     SignatureProviderChoices,
 )
+from api_app.data_model_manager.fields import LowercaseCharField
 from certego_saas.apps.user.models import User
 
 
 class IETFReport(models.Model):
-    rrname = models.CharField(max_length=100)
-    rrtype = models.CharField(max_length=100)
-    rdata = pg_fields.ArrayField(models.CharField(max_length=100))
+    rrname = LowercaseCharField(max_length=100)
+    rrtype = LowercaseCharField(max_length=100)
+    rdata = pg_fields.ArrayField(LowercaseCharField(max_length=100))
     time_first = models.DateTimeField()
     time_last = models.DateTimeField()
 
@@ -36,7 +37,9 @@ class IETFReport(models.Model):
 
 
 class Signature(models.Model):
-    provider = models.CharField(max_length=100)
+    provider = LowercaseCharField(max_length=100)
+    url = models.URLField(default=None, null=True, blank=True)
+    score = models.PositiveIntegerField(default=0)
     signature = models.JSONField()
 
     PROVIDERS = SignatureProviderChoices
@@ -51,7 +54,7 @@ class BaseDataModel(models.Model):
         on_delete=models.CASCADE,
         related_name="data_model",
     )
-    evaluation = models.CharField(
+    evaluation = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
     )  # classification/verdict/found/score/malscore
     # HybridAnalysisObservable (verdict), BasicMaliciousDetector (malicious),
@@ -72,15 +75,15 @@ class BaseDataModel(models.Model):
     # HybridAnalysisFileAnalyzer (domains),
     # VirusTotalV3FileAnalyzer (data.relationships.contacted_urls/contacted_domains)
     related_threats = pg_fields.ArrayField(
-        models.CharField(max_length=100), default=list, blank=True
+        LowercaseCharField(max_length=100), default=list, blank=True
     )  # threats/related_threats, used as a pointer to other IOCs
     tags = pg_fields.ArrayField(
-        models.CharField(max_length=100), null=True, blank=True, default=None
+        LowercaseCharField(max_length=100), null=True, blank=True, default=None
     )  # used for generic tags like phishing, malware, social_engineering
     # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
     # VirusTotalV3FileAnalyzer (report.data.attributes.tags)
     # GoogleSafeBrowsing, QuarkEngineAPK (crimes.crime)
-    malware_family = models.CharField(
+    malware_family = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
     )  # family/family_name/malware_family
     # HybridAnalysisObservable, Intezer (family_name), Cuckoo, MwDB,
@@ -96,7 +99,9 @@ class BaseDataModel(models.Model):
 
     @classmethod
     def get_fields(cls) -> Dict:
-        return {field.name: field for field in cls._meta.fields}
+        return {
+            field.name: field for field in cls._meta.fields + cls._meta.many_to_many
+        }
 
     @property
     def owner(self) -> User:
@@ -121,26 +126,20 @@ class IPDataModel(BaseDataModel):
         null=True, blank=True, default=None, decimal_places=2, max_digits=3
     )  # BGPRanking
     certificates = models.JSONField(null=True, blank=True, default=None)  # CIRCL_PSSL
-    org_name = models.CharField(
+    org_name = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
     )  # GreyNoise
-    country = models.CharField(
+    country_code = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
     )  # MaxMind, AbuseIPDB
-    country_code = models.CharField(
+    registered_country_code = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
     )  # MaxMind, AbuseIPDB
-    registered_country = models.CharField(
-        max_length=100, null=True, blank=True, default=None
-    )  # MaxMind, AbuseIPDB
-    registered_country_code = models.CharField(
-        max_length=100, null=True, blank=True, default=None
-    )  # MaxMind, AbuseIPDB
-    isp = models.CharField(
-        max_length=100, null=True, blank=True, default=None
-    )  # AbuseIPDB
+    isp = LowercaseCharField(max_length=100, null=True, blank=True, default=None)
+    resolutions = pg_fields.ArrayField(models.URLField(), default=list)
+    # AbuseIPDB
     # additional_info
-    # behavior = models.CharField(max_length=100, null=True)  # Crowdsec
+    # behavior = LowercaseCharField(max_length=100, null=True)  # Crowdsec
     # noise = models.BooleanField(null=True)  # GreyNoise
     # riot = models.BooleanField(null=True)  # GreyNoise
 
@@ -150,7 +149,7 @@ class FileDataModel(BaseDataModel):
     # MalwareBazaarFileAnalyzer (signatures/yara_rules), Yara (report.list_el.match)
     # Yaraify (report.data.tasks.static_result)
     comments = pg_fields.ArrayField(
-        models.CharField(max_length=100), default=list, blank=True
+        LowercaseCharField(max_length=100), default=list, blank=True
     )  # MalwareBazaarFileAnalyzer,
     # VirusTotalV3FileAnalyzer (data.relationships.comments)
     file_information = models.JSONField(
@@ -161,8 +160,8 @@ class FileDataModel(BaseDataModel):
     stats = models.JSONField(default=dict, blank=True)  # PdfInfo (peepdf_stats)
     # additional_info
     # compromised_hosts = pg_fields.ArrayField(
-    #   models.CharField(max_length=100), null=True
+    #   LowercaseCharField(max_length=100), null=True
     # )  # HybridAnalysisFileAnalyzer
     # pdfid_reports = models.JSONField(null=True)  # PdfInfo
-    # imphash = models.CharField(max_length=100, null=True)  # PeInfo
-    # type = models.CharField(max_length=100, null=True)  # PeInfo
+    # imphash = LowercaseCharField(max_length=100, null=True)  # PeInfo
+    # type = LowercaseCharField(max_length=100, null=True)  # PeInfo

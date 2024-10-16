@@ -10,6 +10,7 @@ from typing import Dict, Optional, Tuple
 
 import requests
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import ForeignKey
 
 from certego_saas.apps.user.models import User
@@ -37,38 +38,45 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
-    def create_data_model(self) -> Optional[BaseDataModel]:
-        self.report: AnalyzerReport
+    def _validation_before_data_model(self) -> bool:
         self._config: AnalyzerConfig
         if not self._config.mapping_data_model:
             logger.info(
                 f"Skipping data model of {self._config.name} for job {self._job.pk} because no data model"
             )
-            return None
+            return False
         if not self.report.status == self.report.STATUSES.SUCCESS.value:
             logger.info(
-                f"Skipping data model of {self._config.name} for job {self._job.pk} because status is {self.report.status}"
+                f"Skipping data model of {self._config.name} for job {self._job.pk} because status is "
+                f"{self.report.status}"
             )
-            return None
+            return False
+        return True
+
+    def _create_data_model_dictionary(self) -> Dict:
+        self.report: AnalyzerReport
         result = {}
-        data_model_class = self.report.get_data_model_class()
+        data_model_class = self.report.data_model_class
         data_model_fields = data_model_class.get_fields()
-        for data_model_key, report_key in self._config.mapping_data_model.items():
-            # validation
-            if data_model_key not in data_model_fields.keys():
-                self.report.errors.append(
-                    f"Field {data_model_key} not present in {data_model_class.__name__}"
-                )
-                self.report.save()
-                continue
-            try:
-                value = self.report.get_value(report_key)
-            except Exception:
-                # validation
-                self.report.errors.append(f"Field {report_key} not present in report")
-                continue
+        logger.info(f"Mapping is {json.dumps(self._config.mapping_data_model)}")
+        for report_key, data_model_key in self._config.mapping_data_model.items():
+            # this is a constant
+            if report_key.startswith("$"):
+                value = report_key
+            # this is a field of the report
             else:
-                # create the related object if necessary
+                try:
+                    value = self.report.get_value(
+                        self.report.report, report_key.split(".")
+                    )
+                    logger.info(f"Retrieved {value} from key {report_key}")
+                except Exception:
+                    # validation
+                    self.report.errors.append(
+                        f"Field {report_key} not present in report"
+                    )
+                    continue
+                    # create the related object if necessary
                 if isinstance(data_model_fields[data_model_key], ForeignKey):
                     # to create an object we need at least
                     if not isinstance(value, dict):
@@ -79,8 +87,48 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
                     value, _ = data_model_fields[
                         data_model_key
                     ].related_model.objects.get_or_create(**value)
-                result[data_model_key] = value
-        return data_model_class.objects.create(**result, analyzer_report=self.report)
+                elif isinstance(data_model_fields[data_model_key], ArrayField):
+                    if data_model_key not in result:
+                        result[data_model_key] = []
+                    if isinstance(value, list):
+                        result[data_model_key].extend(value)
+                    elif isinstance(value, dict):
+                        result[data_model_key].extend(list(value.keys()))
+                    else:
+                        result[data_model_key].append(value)
+            result[data_model_key] = value
+        return result
+
+    def _create_data_model_mtm(self):
+        return {}
+
+    def _validation_after_data_model(self, result: Dict):
+        self.report: AnalyzerReport
+        data_model_class = self.report.data_model_class
+        data_model_fields = data_model_class.get_fields()
+        for key in list(result.keys()):
+            if key not in data_model_fields.keys():
+                self.report.errors.append(
+                    f"Field {key} not present in {data_model_class.__name__}"
+                )
+                del result[key]
+        self.report.save()
+
+    def create_data_model(self) -> Optional[BaseDataModel]:
+        if not self._validation_before_data_model():
+            return None
+        self.report: AnalyzerReport
+        data_model_class = self.report.data_model_class
+        dictionary = self._create_data_model_dictionary()
+        self._validation_after_data_model(dictionary)
+        data_model = data_model_class.objects.create(
+            **dictionary, analyzer_report=self.report
+        )
+        mtm = self._create_data_model_mtm()
+        for field_name, value in mtm.items():
+            field = getattr(data_model, field_name)
+            field.set(value)
+        return data_model
 
     @classmethod
     @property

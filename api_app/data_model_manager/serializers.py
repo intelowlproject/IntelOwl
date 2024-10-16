@@ -21,10 +21,7 @@ class SignatureSerializer(FlexFieldsModelSerializer):
         fields = "__all__"
 
 
-class BaseDataModelSerializer(FlexFieldsModelSerializer): ...
-
-
-class DomainDataModelSerializer(BaseDataModelSerializer):
+class DomainDataModelSerializer(FlexFieldsModelSerializer):
     ietf_report = IETFReportSerializer()
 
     class Meta:
@@ -32,7 +29,7 @@ class DomainDataModelSerializer(BaseDataModelSerializer):
         fields = "__all__"
 
 
-class IPDataModelSerializer(BaseDataModelSerializer):
+class IPDataModelSerializer(FlexFieldsModelSerializer):
     ietf_report = IETFReportSerializer()
 
     class Meta:
@@ -40,7 +37,7 @@ class IPDataModelSerializer(BaseDataModelSerializer):
         fields = "__all__"
 
 
-class FileDataModelSerializer(BaseDataModelSerializer):
+class FileDataModelSerializer(FlexFieldsModelSerializer):
     signatures = SignatureSerializer(many=True)
 
     class Meta:

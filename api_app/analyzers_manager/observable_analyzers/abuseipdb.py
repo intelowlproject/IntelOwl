@@ -1,9 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Dict
 
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.models import AnalyzerReport
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -93,3 +95,16 @@ class AbuseIPDB(ObservableAnalyzer):
             )
         ]
         return super()._monkeypatch(patches=patches)
+
+    def _create_data_model_dictionary(self) -> Dict:
+        result = super()._create_data_model_dictionary()
+        if self.report.report.get("totalReports", 0):
+            self.report: AnalyzerReport
+            if self.report.report["isWhitelisted"]:
+                evaluation = (
+                    self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
+                )
+            else:
+                evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+            result["evaluation"] = evaluation
+        return result

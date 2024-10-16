@@ -20,3 +20,6 @@ class AnalyzerConfigAdminView(PythonConfigAdminView):
     )
     list_filter = ["type", "maximum_tlp"] + PythonConfigAdminView.list_filter
     exclude = ["update_task"]
+
+
+    def validate_report_with_data_model(self):

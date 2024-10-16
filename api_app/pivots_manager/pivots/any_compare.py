@@ -12,7 +12,9 @@ class AnyCompare(Compare):
             status=self.report_model.STATUSES.SUCCESS.value
         ):
             try:
-                self._value = report.get_value(self.field_to_compare)
+                self._value = report.get_value(
+                    report.report, self.field_to_compare.split(".")
+                )
             except (RuntimeError, ValueError):
                 continue
             else:

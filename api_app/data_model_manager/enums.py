@@ -2,22 +2,22 @@ from django.db.models import Choices
 
 
 class SignatureProviderChoices(Choices):
-    CLAMAV = "ClamAV"
-    SIGMA = "Sigma"
-    YARA = "Yara"
-    SURICATA = "Suricata"
+    CLAMAV = "clam_av"
+    SIGMA = "sigma"
+    YARA = "yara"
+    SURICATA = "suricata"
 
 
 class DataModelTags(Choices):
-    PHISHING = "Phishing"
-    MALWARE = "Malware"
-    SOCIAL_ENGINEERING = "SocialEngineering"
-    ANONYMIZER = "Anonymizer"
-    TOR_EXIT_NODE = "TorExitNode"
+    PHISHING = "phishing"
+    MALWARE = "malware"
+    SOCIAL_ENGINEERING = "social_engineering"
+    ANONYMIZER = "anonymizer"
+    TOR_EXIT_NODE = "tor_exit_node"
 
 
 class DataModelEvaluations(Choices):
-    FALSE_POSITIVE = "FalsePositive"
-    CLEAN = "Clean"
-    SUSPICIOUS = "Suspicious"
-    MALICIOUS = "Malicious"
+    FALSE_POSITIVE = "false_positive"
+    CLEAN = "clean"
+    SUSPICIOUS = "suspicious"
+    MALICIOUS = "malicious"

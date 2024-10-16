@@ -36,9 +36,7 @@ class IPDataModelAdminView(BaseDataModelAdminView):
         "asn_rank",
         "certificates",
         "org_name",
-        "country",
         "country_code",
-        "registered_country",
         "registered_country_code",
         "isp",
     )

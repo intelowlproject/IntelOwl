@@ -256,6 +256,7 @@ class ViewSetTestCaseMixin:
         self.assertEqual(response.status_code, 200, response.json())
 
     def test_get_guest(self):
+        self.client.force_authenticate(self.user)
         plugin = self.get_object()
         self.client.force_authenticate(None)
         response = self.client.get(f"{self.URL}/{plugin}")

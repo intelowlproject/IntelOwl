@@ -121,7 +121,7 @@ def plugin_report_save_signal_listener(sender, **kwargs):
         }
         logger.debug(f"{document_data=}")
         PluginReportElastic.add_document(
-            # elasticsearch_dsl wants idexes in lowercase, use this lib to put _
+            # elasticsearch_dsl wants idexes in lowercase, also we use dash case
             plugin_report_name=sender.__name__,
             document_data=document_data,
         )

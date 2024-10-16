@@ -34,7 +34,7 @@ class CronTests(CustomTestCase):
 
         _job = Job.objects.create(
             user=self.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
             received_request_time=now(),
@@ -45,12 +45,12 @@ class CronTests(CustomTestCase):
         _job.save()
         self.assertCountEqual(check_stuck_analysis(), [_job.pk])
 
-        _job.status = Job.Status.PENDING.value
+        _job.status = Job.STATUSES.PENDING.value
         _job.save()
         self.assertCountEqual(check_stuck_analysis(check_pending=False), [])
 
         self.assertCountEqual(check_stuck_analysis(check_pending=True), [_job.pk])
-        _job.status = Job.Status.ANALYZERS_RUNNING.value
+        _job.status = Job.STATUSES.ANALYZERS_RUNNING.value
         _job.save()
         self.assertCountEqual(check_stuck_analysis(check_pending=False), [_job.pk])
         _job.delete()
@@ -60,7 +60,7 @@ class CronTests(CustomTestCase):
 
         _job = Job.objects.create(
             user=self.user,
-            status=Job.Status.FAILED.value,
+            status=Job.STATUSES.FAILED.value,
             observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
             received_request_time=now(),

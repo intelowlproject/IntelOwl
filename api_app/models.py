@@ -342,7 +342,7 @@ class Job(MP_Node):
 
     # constants
     TLP = TLP
-    Status = Status
+    STATUSES = Status
     investigation = models.ForeignKey(
         "investigations_manager.Investigation",
         on_delete=models.PROTECT,
@@ -365,7 +365,7 @@ class Job(MP_Node):
     file_name = models.CharField(max_length=512, blank=True)
     file_mimetype = models.CharField(max_length=80, blank=True)
     status = models.CharField(
-        max_length=32, blank=False, choices=Status.choices, default="pending"
+        max_length=32, blank=False, choices=STATUSES.choices, default="pending"
     )
 
     analyzers_requested = models.ManyToManyField(
@@ -513,7 +513,7 @@ class Job(MP_Node):
         """
         Retry the job by setting its status to running and re-executing the pipeline.
         """
-        self.status = self.Status.RUNNING
+        self.status = self.STATUSES.RUNNING
         self.save(update_fields=["status"])
 
         runner = self._get_pipeline(
@@ -532,7 +532,7 @@ class Job(MP_Node):
     def set_final_status(self) -> None:
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
 
-        if self.status == self.Status.FAILED:
+        if self.status == self.STATUSES.FAILED:
             logger.error(
                 f"[REPORT] {self}, status: failed. " "Do not process the report"
             )
@@ -541,13 +541,13 @@ class Job(MP_Node):
             logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
 
             if stats["success"] == stats["all"]:
-                self.status = self.Status.REPORTED_WITHOUT_FAILS
+                self.status = self.STATUSES.REPORTED_WITHOUT_FAILS
             elif stats["failed"] == stats["all"]:
-                self.status = self.Status.FAILED
+                self.status = self.STATUSES.FAILED
             elif stats["killed"] == stats["all"]:
-                self.status = self.Status.KILLED
+                self.status = self.STATUSES.KILLED
             elif stats["failed"] >= 1 or stats["killed"] >= 1:
-                self.status = self.Status.REPORTED_WITH_FAILS
+                self.status = self.STATUSES.REPORTED_WITH_FAILS
 
         self.finished_analysis_time = get_now()
 
@@ -626,9 +626,9 @@ class Job(MP_Node):
             # kill celery tasks using task ids
             celery_app.control.revoke(ids, terminate=True)
 
-            reports.update(status=self.Status.KILLED)
+            reports.update(status=self.STATUSES.KILLED)
 
-        self.status = self.Status.KILLED
+        self.status = self.STATUSES.KILLED
         self.save(update_fields=["status"])
         JobConsumer.serialize_and_send_job(self)
 
@@ -700,7 +700,7 @@ class Job(MP_Node):
         return runner
 
     def execute(self):
-        self.status = self.Status.RUNNING
+        self.status = self.STATUSES.RUNNING
         self.save(update_fields=["status"])
         runner = self._get_pipeline(
             self.analyzers_to_execute.all(),
@@ -739,7 +739,7 @@ class Job(MP_Node):
                     day=1, hour=0, minute=0, second=0, microsecond=0
                 )
             )
-            .exclude(status=cls.Status.FAILED)
+            .exclude(status=cls.STATUSES.FAILED)
             .count()
         )
 

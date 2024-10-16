@@ -16,7 +16,7 @@ class AnalyzerReportTestCase(CustomTestCase):
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
-            status=Job.Status.ANALYZERS_RUNNING.value,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
         )
         config = AnalyzerConfig.objects.first()
         ar: AnalyzerReport = AnalyzerReport.objects.create(
@@ -53,7 +53,7 @@ class AnalyzerReportTestCase(CustomTestCase):
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
-            status=Job.Status.ANALYZERS_RUNNING.value,
+            status=Job.STATUSES.ANALYZERS_RUNNING.value,
         )
         config = AnalyzerConfig.objects.first()
         ar = AnalyzerReport.objects.create(

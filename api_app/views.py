@@ -537,7 +537,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - No content (204) if the job is successfully retried.
         """
         job = self.get_object()
-        if job.status not in Job.Status.final_statuses():
+        if job.status not in Job.STATUSES.final_statuses():
             raise ValidationError({"detail": "Job is running"})
         job.retry()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -593,7 +593,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         job = self.get_object()
 
         # check if job running
-        if job.status in Job.Status.final_statuses():
+        if job.status in Job.STATUSES.final_statuses():
             raise ValidationError({"detail": "Job is not running"})
         # close celery tasks and mark reports as killed
         job.kill_if_ongoing()
@@ -687,7 +687,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         """
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
-            for key in Job.Status.values
+            for key in Job.STATUSES.values
         }
         return self.__aggregation_response_static(
             annotations, users=self.get_org_members(request)

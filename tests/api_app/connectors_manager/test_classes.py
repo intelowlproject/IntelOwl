@@ -61,7 +61,7 @@ class ConnectorTestCase(CustomTestCase):
         job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
-            status=Job.Status.CONNECTORS_RUNNING.value,
+            status=Job.STATUSES.CONNECTORS_RUNNING.value,
         )
         AnalyzerReport.objects.create(
             report={},

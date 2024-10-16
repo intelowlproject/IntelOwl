@@ -17,7 +17,7 @@ class PluginTestCase(CustomTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.job, _ = Job.objects.get_or_create(
-            user=self.user, status=Job.Status.REPORTED_WITHOUT_FAILS
+            user=self.user, status=Job.STATUSES.REPORTED_WITHOUT_FAILS
         )
         self.cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",

@@ -17,7 +17,7 @@ def create_report(user):
     job = Job.objects.create(
         observable_name="test.com",
         observable_classification="domain",
-        status=Job.Status.CONNECTORS_RUNNING.value,
+        status=Job.STATUSES.CONNECTORS_RUNNING.value,
         user=user,
     )
     return AnalyzerReport.objects.create(

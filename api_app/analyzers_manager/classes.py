@@ -51,8 +51,9 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         self.report: AnalyzerReport
         if self._do_create_data_model():
             data_model = self.report.create_data_model()
-            self._update_data_model(data_model)
-            data_model.save()
+            if data_model:
+                self._update_data_model(data_model)
+                data_model.save()
             return data_model
         return None
 
@@ -351,7 +352,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             return self.__polling(req_key, chance, re_poll_try=re_poll_try + 1)
         else:
             status = json_data.get("status", None)
-            if status and status == self._job.Status.RUNNING.value:
+            if status and status == self._job.STATUSES.RUNNING.value:
                 logger.info(
                     f"Poll number #{chance + 1}, "
                     f"status: 'running' <-- {self.__repr__()}"

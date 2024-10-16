@@ -6,7 +6,6 @@ import logging
 import os
 import shutil
 import tarfile
-from typing import Dict
 
 import maxminddb
 import requests

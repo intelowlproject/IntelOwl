@@ -6,19 +6,16 @@ import logging
 import time
 from abc import ABCMeta
 from pathlib import PosixPath
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 
 import requests
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField
-from django.db.models import ForeignKey
 
 from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..choices import PythonModuleBasePaths
 from ..classes import Plugin
-from ..data_model_manager.models import BaseDataModel
 from ..models import PythonConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -42,7 +39,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return True
 
     def _create_data_model_mtm(self):
-        ...
+        return {}
 
     def _update_data_model(self, data_model) -> None:
         mtm = self._create_data_model_mtm()
@@ -51,7 +48,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             field.set(value)
 
     def create_data_model(self):
-        self.report : AnalyzerReport
+        self.report: AnalyzerReport
         if self._do_create_data_model():
             data_model = self.report.create_data_model()
             self._update_data_model(data_model)

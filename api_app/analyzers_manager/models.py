@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import json
 from logging import getLogger
-from typing import Optional, Type, Dict
+from typing import Dict, Optional, Type
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
@@ -83,15 +83,11 @@ class AnalyzerReport(AbstractReport):
             # this is a field of the report
             else:
                 try:
-                    value = self.get_value(
-                        self.report, report_key.split(".")
-                    )
+                    value = self.get_value(self.report, report_key.split("."))
                     logger.info(f"Retrieved {value} from key {report_key}")
                 except Exception:
                     # validation
-                    self.errors.append(
-                        f"Field {report_key} not present in report"
-                    )
+                    self.errors.append(f"Field {report_key} not present in report")
                     continue
                     # create the related object if necessary
                 if isinstance(data_model_fields[data_model_key], ForeignKey):
@@ -116,7 +112,6 @@ class AnalyzerReport(AbstractReport):
             result[data_model_key] = value
         return result
 
-
     def create_data_model(self) -> Optional[BaseDataModel]:
         if not self._validation_before_data_model():
             return None
@@ -126,7 +121,6 @@ class AnalyzerReport(AbstractReport):
         )
 
         return data_model
-
 
 
 class MimeTypes(models.TextChoices):

@@ -40,11 +40,12 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
         # optional authentication
         if hasattr(self, "_api_key_name") and self._api_key_name:
             api_key = self._api_key_name
-            if "Authorization" in self.headers.keys():
-                auth_schema = self.headers["Authorization"].split(" ")[0]
-                if auth_schema == "Basic":
-                    # the API uses basic auth so we need to base64 encode the auth payload
-                    api_key = base64.b64encode(self._api_key_name.encode()).decode()
+            if (
+                "Authorization" in self.headers.keys()
+                and self.headers["Authorization"].split(" ")[0] == "Basic"
+            ):
+                # the API uses basic auth so we need to base64 encode the auth payload
+                api_key = base64.b64encode(self._api_key_name.encode()).decode()
             # replace <api_key> placeholder
             for key in self.headers.keys():
                 self.headers[key] = self.headers[key].replace("<api_key>", api_key)

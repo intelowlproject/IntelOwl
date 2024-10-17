@@ -10,8 +10,10 @@ import { Button, Col } from "reactstrap";
 
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../../contexts/GuideContext";
-import { PlaybookConfigForm } from "./types/PlaybookConfigForm";
-import { PivotConfigForm } from "./types/PivotConfigForm";
+import { PlaybookConfigForm } from "./forms/PlaybookConfigForm";
+import { PivotConfigForm } from "./forms/PivotConfigForm";
+import { AnalyzerConfigForm } from "./forms/AnalyzerConfigForm";
+import { PluginsTypes } from "../../constants/pluginConst";
 
 const Analyzers = React.lazy(() => import("./types/Analyzers"));
 const Connectors = React.lazy(() => import("./types/Connectors"));
@@ -117,12 +119,17 @@ export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
   const location = useLocation();
   const pluginsPage = location?.pathname.split("/")[2];
-  const enableCreateButton =
-    pluginsPage === "pivots" || pluginsPage === "playbooks";
+  const enableCreateButton = [
+    `${PluginsTypes.ANALYZER}s`,
+    `${PluginsTypes.PIVOT}s`,
+    `${PluginsTypes.PLAYBOOK}s`,
+  ].includes(pluginsPage);
 
   const [showModalCreatePlaybook, setShowModalCreatePlaybook] =
     React.useState(false);
   const [showModalCreatePivot, setShowModalCreatePivot] = React.useState(false);
+  const [showModalCreateAnalyzer, setShowModalCreateAnalyzer] =
+    React.useState(false);
 
   const { guideState, setGuideState } = useGuideContext();
 
@@ -137,12 +144,16 @@ export default function PluginsContainer() {
 
   const onClick = async () => {
     // open modal for create playbook
-    if (pluginsPage === "playbooks") {
+    if (pluginsPage === `${PluginsTypes.PLAYBOOK}s`) {
       setShowModalCreatePlaybook(true);
     }
     // open modal for create pivot
-    if (pluginsPage === "pivots") {
+    if (pluginsPage === `${PluginsTypes.PIVOT}s`) {
       setShowModalCreatePivot(true);
+    }
+    // open modal for create analyzer
+    if (pluginsPage === `${PluginsTypes.ANALYZER}s`) {
+      setShowModalCreateAnalyzer(true);
     }
     return null;
   };
@@ -171,6 +182,12 @@ export default function PluginsContainer() {
         <PivotConfigForm
           toggle={setShowModalCreatePivot}
           isOpen={showModalCreatePivot}
+        />
+      )}
+      {showModalCreateAnalyzer && (
+        <AnalyzerConfigForm
+          toggle={setShowModalCreateAnalyzer}
+          isOpen={showModalCreateAnalyzer}
         />
       )}
     </Col>

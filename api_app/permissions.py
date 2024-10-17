@@ -100,3 +100,13 @@ class IsObjectAdminPermission(BasePermission):
                 and obj_owner.membership.organization
                 == request.user.membership.organization
             )
+
+
+class isPluginActionsPermission(BasePermission):
+    @staticmethod
+    def has_object_permission(request, view, obj):
+        # only an admin or superuser can update or delete plugins
+        if request.user.has_membership():
+            return request.user.membership.is_admin
+        else:
+            return request.user.is_superuser

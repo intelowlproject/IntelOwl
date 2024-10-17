@@ -2,9 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 
+from rest_framework import mixins
+
+from ..permissions import isPluginActionsPermission
 from ..views import PythonConfigViewSet, PythonReportActionViewSet
 from .filters import AnalyzerConfigFilter
-from .models import AnalyzerReport
+from .models import AnalyzerConfig, AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
@@ -16,9 +19,21 @@ __all__ = [
 ]
 
 
-class AnalyzerConfigViewSet(PythonConfigViewSet):
+class AnalyzerConfigViewSet(
+    PythonConfigViewSet,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+):
     serializer_class = AnalyzerConfigSerializer
     filterset_class = AnalyzerConfigFilter
+    queryset = AnalyzerConfig.objects.all()
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action in ["destroy", "update", "partial_update"]:
+            permissions.append(isPluginActionsPermission())
+        return permissions
 
 
 class AnalyzerActionViewSet(PythonReportActionViewSet):

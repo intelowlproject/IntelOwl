@@ -123,7 +123,7 @@ jobs:
       - name: Set up NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: 15
+          node-version: 18
       - name: Cache node modules
         uses: actions/cache@v4
         with:

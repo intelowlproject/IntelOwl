@@ -103,13 +103,15 @@ class PivotConfigSerializerTestCase(CustomTestCase):
                 "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
                 "python_module": "any_compare.AnyCompare",
                 "playbooks_choice": [PlaybookConfig.objects.first()],
-                "plugin_config": {
-                    "type": "5",
-                    "plugin_name": "pivot_test",
-                    "attribute": "field_to_compare",
-                    "value": "my_field",
-                    "config_type": "1",
-                },
+                "plugin_config": [
+                    {
+                        "type": "5",
+                        "plugin_name": "pivot_test",
+                        "attribute": "field_to_compare",
+                        "value": "my_field",
+                        "config_type": "1",
+                    }
+                ],
             },
             context={"request": MockUpRequest(self.user)},
         )

@@ -33,19 +33,43 @@ logger.addHandler(fh_err)
 logger.setLevel(log_level)
 
 # fake inputs to compile forms with
-FAKE_USERNAME_INPUT: str = "fakeuser"
 FAKE_EMAIL_INPUT: str = "fake@email.com"
 FAKE_PASSWORD_INPUT: str = "Fakepassword123!"
 FAKE_TEL_INPUT: str = "+393333333333"
-FAKE_CARD_INPUT: str = "4111111111111111"
-FAKE_CARD_EXPIRATION_INPUT: str = (
-    datetime.date.today() + datetime.timedelta(days=randint(1, 1000))
-).strftime("%m/%y")
-FAKE_PIN_INPUT: str = "00000"
-FAKE_CVV_INPUT: str = "000"
+
+# mapping between name attribute of text <input>
+# and their corresponding fake values
+name_text_input_mapping: {list: str} = {
+    [
+        "username",
+        "user",
+        "name",
+        "first-name",
+        "last-name",
+    ]: "fakeuser",  # fake username input
+    [
+        "card",
+        "card_number",
+        "card-number",
+        "cc",
+        "cc-number",
+    ]: "4111111111111111",  # fake card number input
+    [
+        "pin",
+    ]: "00000",  # fake card pin input
+    ["cvv", "cvc"]: "000",  # fake card cvc/cvv input
+    [
+        "exp",
+        "date",
+        "expiration-date",
+        "exp-date",
+    ]: (datetime.date.today() + datetime.timedelta(days=randint(1, 1000))).strftime(
+        "%m/%y"
+    ),  # fake random expiration date
+}
 
 
-def search_phishing_forms_generic(page) -> list:
+def search_phishing_forms_generic(page) -> []:
     # extract using standard forms() method
     # looking for <form> tags only on HtmlElement type
     if isinstance(page, HtmlElement):
@@ -58,12 +82,12 @@ def search_phishing_forms_generic(page) -> list:
         return []
 
 
-def search_phishing_forms_xpath(page, xpath_selector: str = "") -> list:
+def search_phishing_forms_xpath(page, xpath_selector: str = "") -> []:
     # extract using a custom XPath selector if set
     return page.xpath(xpath_selector) if xpath_selector else []
 
 
-def phishing_forms_exists(source: str, xpath_selector: str = "") -> list:
+def phishing_forms_exists(source: str, xpath_selector: str = "") -> []:
     # recover=True tries to read not well-formed HTML
     html_parser = etree.HTMLParser(recover=True)
     page = document_fromstring(source, parser=html_parser)
@@ -73,35 +97,9 @@ def phishing_forms_exists(source: str, xpath_selector: str = "") -> list:
 
 
 def identify_text_input(input_name: str) -> str:
-    if input_name.lower() in [
-        "username",
-        "user",
-        "name",
-        "first-name",
-        "last-name",
-    ]:
-        return FAKE_USERNAME_INPUT
-    elif input_name.lower() in [
-        "card",
-        "card_number",
-        "card-number",
-        "cc",
-        "cc-number",
-    ]:
-        return FAKE_CARD_INPUT
-    elif input_name.lower() in [
-        "pin",
-    ]:
-        return FAKE_PIN_INPUT
-    elif input_name.lower() in ["cvv", "cvc"]:
-        return FAKE_CVV_INPUT
-    elif input_name.lower() in [
-        "exp",
-        "date",
-        "expiration-date",
-        "exp-date",
-    ]:
-        return FAKE_CARD_EXPIRATION_INPUT
+    for names, fake_value in name_text_input_mapping.items():
+        if input_name in names:
+            return fake_value
 
 
 def compile_form_field(form) -> (dict, str):
@@ -129,6 +127,7 @@ def compile_form_field(form) -> (dict, str):
                 value_to_set = FAKE_EMAIL_INPUT
             case _:
                 logger.info(f"{input_type.lower()} is not supported yet!")
+
         logger.info(f"Sending value {value_to_set} for {input_name=}")
         result.setdefault(input_name, value_to_set)
     return result, form_action
@@ -153,7 +152,7 @@ def handle_3xx_response(response: Response) -> [str]:
     return [history.request.url for history in response.history]
 
 
-def handle_2xx_response(response: Response) -> []:
+def handle_2xx_response(response: Response) -> str:
     return response.request.url
 
 

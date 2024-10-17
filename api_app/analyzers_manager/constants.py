@@ -51,8 +51,8 @@ class ObservableTypes(models.TextChoices):
             ):
                 classification = cls.URL
             elif re.match(
-                r"^([\[\\]?\.[\]\\]?)?[a-z\d-]{1,63}"
-                r"(([\[\\]?\.[\]\\]?)[a-z\d-]{1,63})+$",
+                r"^([\[\\]?\.[\]\\]?)?[a-z\d\-_]{1,63}"
+                r"(([\[\\]?\.[\]\\]?)[a-z\d\-_]{1,63})+$",
                 value,
                 re.IGNORECASE,
             ):

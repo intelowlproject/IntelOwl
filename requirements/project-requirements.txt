@@ -1,5 +1,5 @@
 # django libs
-Django==4.2.15
+Django==4.2.16
 psycopg2-binary==2.9.6
 django-auth-ldap==4.8.0
 django-radius==1.5.0
@@ -7,7 +7,7 @@ django-filter==24.3
 django-storages==1.14
 django-celery-beat==2.7.0
 django-celery-results==2.5.0
-django-ses == 4.1.0
+django-ses == 4.2.0
 django-iam-dbauth==0.2.0
 django-prettyjson==0.4.1
 django-silk==5.2.0
@@ -49,7 +49,7 @@ lief==0.15.1
 maxminddb==2.6.0
 geoip2==4.8.0
 mwdblib==4.5.0
-git+https://github.com/decalage2/oletools.git@ccf99d1a8f85e552f5cc130fbaa504cfe5725a92
+oletools==0.60.2
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
@@ -60,14 +60,14 @@ pyelftools==0.31
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
-pymisp==2.4.196
+pymisp==2.5.0
 pyOneNote==0.0.2
 pypdns==2.2.1
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==24.8.1
+quark-engine==24.10.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
@@ -81,7 +81,7 @@ permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
-polyswarm-api==3.9.0
+polyswarm-api==3.10.0
 knock-subdomains==7.0.1
 dotnetfile==0.2.4
 docxpy==0.8.5

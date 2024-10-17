@@ -67,7 +67,24 @@ class IngestorReportBISerializer(AbstractReportBISerializer):
 
     class Meta:
         model = IngestorReport
-        fields = AbstractReportBISerializer.Meta.fields
+        fields = (
+            [
+                "application",
+                "environment",
+                "timestamp",
+            ]
+            + [
+                "username",
+                "class_instance",
+                "process_time",
+                "status",
+                "end_time",
+            ]
+            + [
+                "name",
+                "parameters",
+            ]
+        )
         list_serializer_class = AbstractReportBISerializer.Meta.list_serializer_class
 
     @classmethod

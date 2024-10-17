@@ -442,10 +442,13 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
     with open(
         settings.CONFIG_ROOT / "elastic_search_mappings" / "plugin_report.json"
     ) as file_content:
-        connections.get_connection().indices.put_template(
-            name="plugin-report", body=json.load(file_content)
-        )
-        logger.info("created/updated template for plugin report for Elastic named")
+        try:
+            connections.get_connection().indices.put_template(
+                name="plugin-report", body=json.load(file_content)
+            )
+            logger.info("created/updated template for plugin report for Elastic named")
+        except ApiError as error:
+            logger.critical(error)
 
     # add document
     document_list = (

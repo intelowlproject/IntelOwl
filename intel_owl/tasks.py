@@ -8,7 +8,9 @@ import json
 import logging
 import typing
 import uuid
+from typing import Dict, List
 
+import inflection
 from celery import Task, shared_task, signals
 from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
@@ -16,8 +18,11 @@ from celery.worker.request import Request
 from django.conf import settings
 from django.utils.timezone import now
 from django_celery_beat.models import PeriodicTask
+from elasticsearch import ApiError
+from elasticsearch.helpers import bulk
+from elasticsearch_dsl import connections
 
-from api_app.choices import Status
+from api_app.choices import ReportStatus, Status
 from intel_owl import secrets
 from intel_owl.celery import app, get_queue_name
 
@@ -389,6 +394,71 @@ def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
         Job.objects.filter(sent_to_bi=False).filter_completed().order_by(
             "-received_request_time"
         )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)
+
+
+@shared_task(
+    base=FailureLoggedTask, name="send_plugin_report_to_elastic", soft_time_limit=300
+)
+def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
+
+    from api_app.analyzers_manager.models import AnalyzerReport
+    from api_app.connectors_manager.models import ConnectorReport
+    from api_app.ingestors_manager.models import IngestorReport
+    from api_app.models import AbstractReport
+    from api_app.pivots_manager.models import PivotReport
+    from api_app.visualizers_manager.models import VisualizerReport
+
+    def _convert_report_to_elastic_document(_class: AbstractReport) -> List[Dict]:
+        upper_threshold = now().replace(second=0, microsecond=0)
+        lower_threshold = upper_threshold - datetime.timedelta(
+            days=5
+        )  # TODO: set to 5 minutes
+        report_list: list(AbstractReport) = _class.objects.filter(
+            status__in=ReportStatus.final_statuses(),
+            end_time__lt=upper_threshold,
+            end_time__gte=lower_threshold,
+        )
+        return [
+            {
+                "_op_type": "index",
+                "_index": (
+                    "plugin-report-"
+                    f"{inflection.underscore(_class.__name__).replace('_', '-')}-"
+                    f"{datetime.date.today()}"
+                ),
+                "_source": {
+                    "config": {"name": report.config.name},
+                    "job": {"id": report.job.id},
+                    "start_time": report.start_time,
+                    "end_time": report.end_time,
+                    "status": report.status,
+                    "report": report.report,
+                },
+            }
+            for report in report_list
+        ]
+
+    # push template
+    with open(
+        settings.CONFIG_ROOT / "elastic_search_mappings" / "plugin_report.json"
+    ) as file_content:
+        connections.get_connection().indices.put_template(
+            name="plugin-report", body=json.load(file_content)
+        )
+        logger.info("created/updated template for plugin report for Elastic named")
+
+    # add document
+    document_list = (
+        _convert_report_to_elastic_document(AnalyzerReport)
+        + _convert_report_to_elastic_document(ConnectorReport)
+        + _convert_report_to_elastic_document(IngestorReport)
+        + _convert_report_to_elastic_document(PivotReport)
+        + _convert_report_to_elastic_document(VisualizerReport)
+    )
+    try:
+        bulk(connections.get_connection(), document_list)
+    except ApiError as error:
+        logger.critical(error)
 
 
 @shared_task(

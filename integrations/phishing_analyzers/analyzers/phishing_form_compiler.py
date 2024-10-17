@@ -33,10 +33,10 @@ logger.addHandler(fh_err)
 logger.setLevel(log_level)
 
 # fake inputs to compile forms with
+FAKE_USERNAME_INPUT: str = "fakeuser"
+FAKE_EMAIL_INPUT: str = "fake@email.com"
 FAKE_PASSWORD_INPUT: str = "Fakepassword123!"
 FAKE_TEL_INPUT: str = "+393333333333"
-FAKE_EMAIL_INPUT: str = "fake@email.com"
-FAKE_USER_INPUT: str = "fakeuser"
 FAKE_CARD_INPUT: str = "4111111111111111"
 FAKE_CARD_EXPIRATION_INPUT: str = (
     datetime.date.today() + datetime.timedelta(days=randint(1, 1000))
@@ -72,7 +72,7 @@ def phishing_forms_exists(source: str, xpath_selector: str = "") -> list:
     )  # + search_phishing_forms_generic(page)
 
 
-def identify_input(input_name: str) -> str:
+def identify_text_input(input_name: str) -> str:
     if input_name.lower() in [
         "username",
         "user",
@@ -80,7 +80,7 @@ def identify_input(input_name: str) -> str:
         "first-name",
         "last-name",
     ]:
-        return FAKE_USER_INPUT
+        return FAKE_USERNAME_INPUT
     elif input_name.lower() in [
         "card",
         "card_number",
@@ -111,23 +111,26 @@ def compile_form_field(form) -> (dict, str):
         input_type: str = element.get("type", None)
         input_name: str = element.get("name", None)
         input_value: str = element.get("value", None)
+        value_to_set: str = ""
         match input_type.lower():
             case "hidden":
                 logger.info(
                     f"Found hidden input tag with {input_name=} and {input_value=}"
                 )
-                result.setdefault(input_name, input_value)
+                value_to_set = input_value
 
             case "text":
-                result.setdefault(input_name, identify_input(input_name))
+                value_to_set = identify_text_input(input_name)
             case "password":
-                result.setdefault(input_name, FAKE_PASSWORD_INPUT)
+                value_to_set = FAKE_PASSWORD_INPUT
             case "tel":
-                result.setdefault(input_name, FAKE_TEL_INPUT)
+                value_to_set = FAKE_TEL_INPUT
             case "email":
-                result.setdefault(input_name, FAKE_EMAIL_INPUT)
+                value_to_set = FAKE_EMAIL_INPUT
             case _:
                 logger.info(f"{input_type.lower()} is not supported yet!")
+        logger.info(f"Sending value {value_to_set} for {input_name=}")
+        result.setdefault(input_name, value_to_set)
     return result, form_action
 
 
@@ -165,9 +168,10 @@ def analyze_responses(responses: [Response]) -> []:
             logger.error(message)
             return {"error": message}
         if response.history:
+            # extract all redirection history
             result.extend(handle_3xx_response(response))
-        else:
-            result.append(handle_2xx_response(response))
+        # extract successful url
+        result.append(handle_2xx_response(response))
 
     return result
 

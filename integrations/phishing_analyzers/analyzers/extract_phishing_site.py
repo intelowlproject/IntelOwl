@@ -41,10 +41,10 @@ def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
     }
 
 
-def analyze_target(**kwargs):
+def analyze_target(target_url: str, proxy_address: str):
     # TODO: handle the concept of open tabs to avoid possible memory overuse
-    driver_wrapper = DriverWrapper(**kwargs)
-    driver_wrapper.navigate(url=kwargs.get("target"))
+    driver_wrapper = DriverWrapper(proxy_address=proxy_address)
+    driver_wrapper.navigate(url=target_url)
 
     result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
     print(result)
@@ -54,10 +54,9 @@ def analyze_target(**kwargs):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--target", type=str)
+    parser.add_argument("--target", type=str, required=True)
     parser.add_argument("--proxy_address", type=str, required=False)
-    parser.add_argument("--proxy_protocol", type=str, required=False)
-    parser.add_argument("--proxy_port", type=int, required=False)
     arguments = parser.parse_args()
     logger.info(f"Extracted arguments for {LOG_NAME}: {vars(arguments)}")
-    analyze_target(**vars(arguments))
+
+    analyze_target(target_url=arguments.target, proxy_address=arguments.proxy_address)

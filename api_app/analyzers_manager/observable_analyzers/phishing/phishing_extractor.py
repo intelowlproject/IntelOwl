@@ -13,9 +13,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
     max_tries: int = 20
     poll_distance: int = 3
 
-    proxy_protocol: str = ""
     proxy_address: str = ""
-    proxy_port: int = 0
 
     def __init__(
         self,
@@ -27,17 +25,13 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
+        self.args.append(f"--target={self.observable_name}")
         if self.proxy_address:
             self.args.append(f"--proxy_address={self.proxy_address}")
-            if self.proxy_protocol:
-                self.args.append(f"--proxy_protocol={self.proxy_protocol}")
-            if self.proxy_port:
-                self.args.append(f"--proxy_port={self.proxy_port}")
 
     def run(self):
         req_data: {} = {
             "args": [
-                f"--target={self.observable_name}",
                 *self.args,
             ],
         }

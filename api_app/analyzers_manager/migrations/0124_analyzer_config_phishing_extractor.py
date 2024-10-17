@@ -37,59 +37,15 @@ params = [
             "module": "phishing.phishing_extractor.PhishingExtractor",
             "base_path": "api_app.analyzers_manager.observable_analyzers",
         },
-        "name": "proxy_protocol",
-        "type": "str",
-        "description": "Protocol used for proxy connection. Can be set only if proxy_address has been set.",
-        "is_secret": False,
-        "required": False,
-    },
-    {
-        "python_module": {
-            "module": "phishing.phishing_extractor.PhishingExtractor",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
         "name": "proxy_address",
         "type": "str",
         "description": "Address for proxy to use for requests.",
         "is_secret": False,
         "required": False,
     },
-    {
-        "python_module": {
-            "module": "phishing.phishing_extractor.PhishingExtractor",
-            "base_path": "api_app.analyzers_manager.observable_analyzers",
-        },
-        "name": "proxy_port",
-        "type": "int",
-        "description": "Port for proxy to use for requests. Can be set only if proxy_address has been set.",
-        "is_secret": False,
-        "required": False,
-    },
 ]
 
 values = [
-    {
-        "parameter": {
-            "python_module": {
-                "module": "phishing.phishing_extractor.PhishingExtractor",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
-            },
-            "name": "proxy_protocol",
-            "type": "str",
-            "description": "Protocol used for proxy connection. Can be set only if proxy_address has been set.",
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": "Phishing_Extractor",
-        "connector_config": None,
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": "",
-        "updated_at": "2024-09-17T09:05:25.617738Z",
-        "owner": None,
-    },
     {
         "parameter": {
             "python_module": {
@@ -110,28 +66,6 @@ values = [
         "for_organization": False,
         "value": "",
         "updated_at": "2024-09-17T09:05:25.665395Z",
-        "owner": None,
-    },
-    {
-        "parameter": {
-            "python_module": {
-                "module": "phishing.phishing_extractor.PhishingExtractor",
-                "base_path": "api_app.analyzers_manager.observable_analyzers",
-            },
-            "name": "proxy_port",
-            "type": "int",
-            "description": "Port for proxy to use for requests. Can be set only if proxy_address has been set.",
-            "is_secret": False,
-            "required": False,
-        },
-        "analyzer_config": "Phishing_Extractor",
-        "connector_config": None,
-        "visualizer_config": None,
-        "ingestor_config": None,
-        "pivot_config": None,
-        "for_organization": False,
-        "value": 0,
-        "updated_at": "2024-09-17T09:05:25.701822Z",
         "owner": None,
     },
 ]

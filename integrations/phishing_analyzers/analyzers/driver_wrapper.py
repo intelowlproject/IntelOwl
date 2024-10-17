@@ -1,8 +1,6 @@
 import logging
 import os
-from functools import cached_property
 from typing import Iterator
-from urllib.parse import urlparse
 
 from selenium.common import WebDriverException
 from seleniumbase import Driver
@@ -34,48 +32,9 @@ logger.addHandler(fh_err)
 logger.setLevel(log_level)
 
 
-class Proxy:
-    SUPPORTED_PROTOCOLS: [] = ["http", "https", "socks5"]
-
-    def __init__(
-        self, proxy_protocol: str = "", proxy_address: str = "", proxy_port: int = 0
-    ):
-        if proxy_protocol and proxy_protocol not in self.SUPPORTED_PROTOCOLS:
-            raise ValueError(f"{proxy_protocol=} is not supported!")
-
-        if proxy_address and not urlparse(proxy_address).path:
-            raise ValueError(f"{proxy_address=} is not a valid hostname address!")
-
-        if proxy_port and not isinstance(proxy_port, int):
-            raise ValueError(f"{proxy_port} is not a valid port!")
-
-        self.protocol: str = proxy_protocol
-        self.address: str = proxy_address
-        self.port: int = proxy_port
-
-    def __repr__(self):
-        return (
-            f"{self.protocol + '://' if self.address and self.protocol else ''}"
-            f"{self.address}{':' + str(self.port) if self.port else ''}"
-        )
-
-    @cached_property
-    def for_requests(self) -> dict:
-        # defaults to HTTP if address is specified
-        if self.address:
-            return {"http": repr(self), "https": repr(self)}
-        return {}
-
-
 class DriverWrapper:
-    def __init__(
-        self,
-        proxy_protocol: str = "",
-        proxy_address: str = "",
-        proxy_port: int = 0,
-        **kwargs,
-    ):
-        self.proxy: Proxy = Proxy(proxy_protocol, proxy_address, proxy_port)
+    def __init__(self, proxy_address: str = ""):
+        self.proxy: str = proxy_address
         self.driver: Chrome = self._init_driver()
         self.last_url: str = ""
 
@@ -90,8 +49,8 @@ class DriverWrapper:
             headless2=True,
             use_wire=True,
             no_sandbox=True,
-            proxy=str(self.proxy) if self.proxy.address else None,
-            proxy_bypass_list=str(self.proxy.address) if self.proxy.address else None,
+            proxy=self.proxy or None,
+            proxy_bypass_list=self.proxy or None,
             browser="chrome",
         )
         # TODO: make window size a parameter

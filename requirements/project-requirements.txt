@@ -95,5 +95,7 @@ defusedxml==0.7.1
 # required by MalwareBazaar Ingestor -> https://bazaar.abuse.ch/api/#download (read the warning)
 pyzipper==0.3.6
 
-#others
+# others
 dateparser==1.2.0
+# html parsing for phishing form compiler
+lxml==5.3.0

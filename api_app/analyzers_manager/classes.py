@@ -35,6 +35,28 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
+    def _do_create_data_model(self) -> bool:
+        return True
+
+    def _create_data_model_mtm(self):
+        return {}
+
+    def _update_data_model(self, data_model) -> None:
+        mtm = self._create_data_model_mtm()
+        for field_name, value in mtm.items():
+            field = getattr(data_model, field_name)
+            field.set(value)
+
+    def create_data_model(self):
+        self.report: AnalyzerReport
+        if self._do_create_data_model():
+            data_model = self.report.create_data_model()
+            if data_model:
+                self._update_data_model(data_model)
+                data_model.save()
+            return data_model
+        return None
+
     @classmethod
     @property
     def config_exception(cls):
@@ -108,7 +130,11 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         Args:
             content (any): The content to process after a successful run.
         """
-        super().after_run_success(self._validate_result(content, max_recursion=15))
+        result = super().after_run_success(
+            self._validate_result(content, max_recursion=15)
+        )
+        self.create_data_model()
+        return result
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -326,7 +352,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             return self.__polling(req_key, chance, re_poll_try=re_poll_try + 1)
         else:
             status = json_data.get("status", None)
-            if status and status == self._job.Status.RUNNING.value:
+            if status and status == self._job.STATUSES.RUNNING.value:
                 logger.info(
                     f"Poll number #{chance + 1}, "
                     f"status: 'running' <-- {self.__repr__()}"

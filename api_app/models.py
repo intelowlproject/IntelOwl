@@ -342,7 +342,7 @@ class Job(MP_Node):
 
     # constants
     TLP = TLP
-    Status = Status
+    STATUSES = Status
     investigation = models.ForeignKey(
         "investigations_manager.Investigation",
         on_delete=models.PROTECT,
@@ -365,7 +365,7 @@ class Job(MP_Node):
     file_name = models.CharField(max_length=512, blank=True)
     file_mimetype = models.CharField(max_length=80, blank=True)
     status = models.CharField(
-        max_length=32, blank=False, choices=Status.choices, default="pending"
+        max_length=32, blank=False, choices=STATUSES.choices, default="pending"
     )
 
     analyzers_requested = models.ManyToManyField(
@@ -513,7 +513,7 @@ class Job(MP_Node):
         """
         Retry the job by setting its status to running and re-executing the pipeline.
         """
-        self.status = self.Status.RUNNING
+        self.status = self.STATUSES.RUNNING
         self.save(update_fields=["status"])
 
         runner = self._get_pipeline(
@@ -532,7 +532,7 @@ class Job(MP_Node):
     def set_final_status(self) -> None:
         logger.info(f"[STARTING] set_final_status for <-- {self}.")
 
-        if self.status == self.Status.FAILED:
+        if self.status == self.STATUSES.FAILED:
             logger.error(
                 f"[REPORT] {self}, status: failed. " "Do not process the report"
             )
@@ -541,13 +541,13 @@ class Job(MP_Node):
             logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
 
             if stats["success"] == stats["all"]:
-                self.status = self.Status.REPORTED_WITHOUT_FAILS
+                self.status = self.STATUSES.REPORTED_WITHOUT_FAILS
             elif stats["failed"] == stats["all"]:
-                self.status = self.Status.FAILED
+                self.status = self.STATUSES.FAILED
             elif stats["killed"] == stats["all"]:
-                self.status = self.Status.KILLED
+                self.status = self.STATUSES.KILLED
             elif stats["failed"] >= 1 or stats["killed"] >= 1:
-                self.status = self.Status.REPORTED_WITH_FAILS
+                self.status = self.STATUSES.REPORTED_WITH_FAILS
 
         self.finished_analysis_time = get_now()
 
@@ -584,7 +584,7 @@ class Job(MP_Node):
         reports = self.__get_config_reports(config)
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in AbstractReport.Status.values
+            for s in AbstractReport.STATUSES.values
         }
         return reports.aggregate(
             all=models.Count("status"),
@@ -616,8 +616,8 @@ class Job(MP_Node):
         for config in [AnalyzerConfig, ConnectorConfig, VisualizerConfig]:
             reports = self.__get_config_reports(config).filter(
                 status__in=[
-                    AbstractReport.Status.PENDING,
-                    AbstractReport.Status.RUNNING,
+                    AbstractReport.STATUSES.PENDING,
+                    AbstractReport.STATUSES.RUNNING,
                 ]
             )
 
@@ -626,9 +626,9 @@ class Job(MP_Node):
             # kill celery tasks using task ids
             celery_app.control.revoke(ids, terminate=True)
 
-            reports.update(status=self.Status.KILLED)
+            reports.update(status=self.STATUSES.KILLED)
 
-        self.status = self.Status.KILLED
+        self.status = self.STATUSES.KILLED
         self.save(update_fields=["status"])
         JobConsumer.serialize_and_send_job(self)
 
@@ -700,7 +700,7 @@ class Job(MP_Node):
         return runner
 
     def execute(self):
-        self.status = self.Status.RUNNING
+        self.status = self.STATUSES.RUNNING
         self.save(update_fields=["status"])
         runner = self._get_pipeline(
             self.analyzers_to_execute.all(),
@@ -739,7 +739,7 @@ class Job(MP_Node):
                     day=1, hour=0, minute=0, second=0, microsecond=0
                 )
             )
-            .exclude(status=cls.Status.FAILED)
+            .exclude(status=cls.STATUSES.FAILED)
             .count()
         )
 
@@ -1346,10 +1346,10 @@ class AbstractReport(models.Model):
 
     objects = AbstractReportQuerySet.as_manager()
     # constants
-    Status = ReportStatus
+    STATUSES = ReportStatus
 
     # fields
-    status = models.CharField(max_length=50, choices=Status.choices)
+    status = models.CharField(max_length=50, choices=STATUSES.choices)
     report = models.JSONField(default=dict)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True
@@ -1399,12 +1399,12 @@ class AbstractReport(models.Model):
 
     # properties
     @property
-    def user(self) -> models.Model:
+    def user(self) -> User:
         """
         Returns the user associated with the job that generated the report.
 
         Returns:
-            models.Model: The user associated with the job.
+            User: The user associated with the job.
         """
         return self.job.user
 
@@ -1419,23 +1419,24 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
-    def get_value(self, field: str) -> Any:
-        content = self.report
-
-        for key in field.split("."):
+    def get_value(
+        self, search_from: typing.Any, fields: typing.List[str]
+    ) -> typing.Any:
+        if not fields:
+            return search_from
+        search_keyword = fields.pop(0)
+        if isinstance(search_from, list):
             try:
-                content = content[key]
-            except TypeError:
-                if isinstance(content, list) and len(content) > 0:
-                    content = content[int(key)]
-                else:
-                    raise RuntimeError(f"Not found {field}")
-
-        if isinstance(content, (int, dict)):
-            raise ValueError(f"You can't use a {type(content)} as pivot")
-        if not content:
-            raise ValueError("Empty value")
-        return content
+                index = int(search_keyword)
+            except ValueError:
+                result = []
+                for obj in search_from:
+                    result.append(self.get_value(obj, [search_keyword] + fields))
+                return result
+            else:
+                # a.b.0
+                return self.get_value(search_from[index], fields)
+        return self.get_value(search_from[search_keyword], fields)
 
 
 class PythonConfig(AbstractConfig):

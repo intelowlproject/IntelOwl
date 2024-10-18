@@ -410,9 +410,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
 
     def _convert_report_to_elastic_document(_class: AbstractReport) -> List[Dict]:
         upper_threshold = now().replace(second=0, microsecond=0)
-        lower_threshold = upper_threshold - datetime.timedelta(
-            days=5
-        )  # TODO: set to 5 minutes
+        lower_threshold = upper_threshold - datetime.timedelta(minutes=5)
         report_list: list(AbstractReport) = _class.objects.filter(
             status__in=ReportStatus.final_statuses(),
             end_time__lt=upper_threshold,

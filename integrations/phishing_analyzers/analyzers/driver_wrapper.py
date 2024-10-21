@@ -41,9 +41,9 @@ class DriverWrapper:
     def _init_driver(self) -> Chrome:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chrome driver...")
-        # no_sandbox=True sucks but it's almost the only way to run chromium-based
-        # browsers in docker. browser is running as unprivileged user and
-        # it's in a container: trade-off
+        # no_sandbox=True is a bad practice but it's almost the only way
+        # to run chromium-based browsers in docker. browser is running
+        # as unprivileged user and it's in a container: trade-off
         driver = Driver(
             headless=True,
             headless2=True,

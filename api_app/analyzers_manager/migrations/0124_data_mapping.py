@@ -45,6 +45,18 @@ def migrate_abuse_ipdb(apps, schema_editor):
     ac.save()
 
 
+def migrate_bgp_ranking(apps, schema_editor):
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    ac = AnalyzerConfig.objects.filter(name="BGP_Ranking").first()
+    if not ac:
+        return
+    ac.mapping_data_model = {
+        "asn": "asn",
+        "asn_rank": "asn_rank",
+    }
+    ac.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -55,4 +67,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate_maxmind, migrations.RunPython.noop),
         migrations.RunPython(migrate_abuse_ipdb, migrations.RunPython.noop),
         migrations.RunPython(migrate_urlhaus, migrations.RunPython.noop),
+        migrations.RunPython(migrate_bgp_ranking, migrations.RunPython.noop),
     ]

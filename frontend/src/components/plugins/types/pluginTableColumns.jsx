@@ -193,6 +193,13 @@ export const analyzersTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center flex-wrap mx-2">
+        {value?.python_module ===
+          "basic_observable_analyzer.BasicObservableAnalyzer" && (
+          <PluginEditButton
+            config={value}
+            pluginType_={PluginsTypes.ANALYZER}
+          />
+        )}
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -209,16 +216,10 @@ export const analyzersTableColumns = [
         />
         {value?.python_module ===
           "basic_observable_analyzer.BasicObservableAnalyzer" && (
-          <div className="d-flex mt-2">
-            <PluginEditButton
-              config={value}
-              pluginType_={PluginsTypes.ANALYZER}
-            />
-            <PluginDeletionButton
-              pluginName={value.name}
-              pluginType_={PluginsTypes.ANALYZER}
-            />
-          </div>
+          <PluginDeletionButton
+            pluginName={value.name}
+            pluginType_={PluginsTypes.ANALYZER}
+          />
         )}
       </div>
     ),

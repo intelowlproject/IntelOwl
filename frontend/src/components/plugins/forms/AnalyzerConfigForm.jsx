@@ -72,6 +72,11 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
         errors.name = `This field must be at least ${minLength} characters long`;
       }
 
+      if (!/^[a-zA-Z0-9_]+$/.test(values.name)) {
+        errors.name =
+          "This is not a valid name. It only supports alphanumeric characters and underscore";
+      }
+
       if (!values.description) {
         errors.description = "This field is required.";
       } else if (values.description.length < minLength) {

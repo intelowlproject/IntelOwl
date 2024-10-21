@@ -75,7 +75,7 @@ def get_secret(secret_name, default=""):
     """
     secret = os.environ.get(secret_name, default)
     aws_secrets_enabled = os.environ.get("AWS_SECRETS", False) == "True"
-    if not secret and aws_secrets_enabled:
+    if not secret and aws_secrets_enabled and not secret_name == "AWS_REGION":
         try:
             secret = aws_get_secret(secret_name)
         except RetrieveSecretException as e:

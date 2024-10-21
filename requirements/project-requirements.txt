@@ -1,5 +1,5 @@
 # django libs
-Django==4.2.15
+Django==4.2.16
 psycopg2-binary==2.9.6
 django-auth-ldap==4.8.0
 django-radius==1.5.0
@@ -7,7 +7,7 @@ django-filter==24.3
 django-storages==1.14
 django-celery-beat==2.7.0
 django-celery-results==2.5.0
-django-ses == 4.1.0
+django-ses == 4.2.0
 django-iam-dbauth==0.2.0
 django-prettyjson==0.4.1
 django-silk==5.2.0
@@ -60,14 +60,14 @@ pyelftools==0.31
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
-pymisp==2.4.196
+pymisp==2.5.0
 pyOneNote==0.0.2
 pypdns==2.2.1
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==24.9.1
+quark-engine==24.10.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0

@@ -241,7 +241,7 @@ describe("AnalyzerConfigForm test", () => {
             config_type: 1,
             plugin_name: "myNewAnalyzer",
             type: 1,
-            value: '{}',
+            value: "{}",
           },
         ],
       });
@@ -376,7 +376,7 @@ describe("AnalyzerConfigForm test", () => {
               config_type: 1,
               plugin_name: "myNewAnalyzer",
               type: 1,
-              value: '{}',
+              value: "{}",
             },
           ],
         },

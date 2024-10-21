@@ -35,7 +35,7 @@ export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   };
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`table-pluginhealthcheckbtn__${pluginName}`}
         color="info"
@@ -104,7 +104,7 @@ export function OrganizationPluginStateToggle({
   };
   return (
     <div
-      className={`d-flex align-items-center ${isInOrganization ? "px-2" : ""}`}
+      className={`d-flex align-items-center ${isInOrganization ? "p-1" : ""}`}
     >
       {isInOrganization && (
         <IconButton
@@ -184,7 +184,7 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
       (!isInOrganization && !user.is_staff));
 
   return (
-    <div className="px-2">
+    <div className="p-1">
       <IconButton
         id={`plugin-deletion-${pluginName}`}
         color="danger"
@@ -261,7 +261,7 @@ export function PluginPullButton({ pluginName, pluginType_ }) {
   };
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`table-pluginpullbtn__${pluginName}`}
         color="info"
@@ -357,7 +357,7 @@ export function PluginEditButton({ config, pluginType_ }) {
     (!isInOrganization && !user.is_staff);
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`plugin-edit-btn__${config?.name}`}
         color="info"

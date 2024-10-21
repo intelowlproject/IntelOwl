@@ -37,6 +37,16 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
         pass
 
     def run(self):
+        if not hasattr(self, "url"):
+            raise AnalyzerConfigurationException("Instance URL is required")
+        if self.http_method not in HTTPMethods.values:
+            raise AnalyzerConfigurationException("Http method is not valid")
+
+        # replace <observable> placheholder
+        for key in self.params.keys():
+            if self.params[key] == "<observable>":
+                self.params[key] = self.observable_name
+
         # optional authentication
         if hasattr(self, "_api_key_name") and self._api_key_name:
             api_key = self._api_key_name
@@ -58,35 +68,17 @@ class BasicObservableAnalyzer(ObservableAnalyzer):
             self.__cert_file.flush()
             verify = self.__cert_file.name
 
-        # replace <observable> placheholder
-        if hasattr(self, "params"):
-            for key in self.params.keys():
-                if self.params[key] == "<observable>":
-                    self.params[key] = self.observable_name
-
-        # validate url
-        if not hasattr(self, "url"):
-            raise AnalyzerConfigurationException("Instance URL is required")
-
-        # request
-        if self.http_method not in HTTPMethods.values:
-            raise AnalyzerConfigurationException("Http method is not valid")
-
         try:
             if self.http_method == HTTPMethods.GET:
-                if hasattr(self, "params"):
-                    response = requests.get(
-                        self.url,
-                        params=self.params,
-                        headers=self.headers,
-                        verify=verify,
-                    )
-                else:
-                    response = requests.get(
-                        self.url + self.observable_name,
-                        headers=self.headers,
-                        verify=verify,
-                    )
+                url = self.url
+                if not self.params.keys():
+                    url = self.url + self.observable_name
+                response = requests.get(
+                    url,
+                    params=self.params,
+                    headers=self.headers,
+                    verify=verify,
+                )
             else:
                 request_method = getattr(requests, self.http_method)
                 response = request_method(

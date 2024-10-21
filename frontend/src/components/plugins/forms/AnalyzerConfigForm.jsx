@@ -149,16 +149,14 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
           value: JSON.stringify(formik.values.certificate),
           config_type: 2,
         },
-      ];
-      if (paramsJsonInput?.jsObject) {
-        payloadData.plugin_config.push({
+        {
           type: 1,
           plugin_name: formik.values.name,
           attribute: "params",
-          value: paramsJsonInput?.json,
+          value: paramsJsonInput?.json || JSON.stringify({}),
           config_type: 1,
-        });
-      }
+        },
+      ];
 
       if (isEditing) {
         const analyzerToEdit =
@@ -389,18 +387,21 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                   <Col md={10} className="offset-2">
                     <div className="d-flex flex-column">
                       <small className="fst-italic">
-                        {" "}
-                        Default GET request format is:&nbsp;
+                        <strong className="fst-italic">Request formats</strong>
+                        <br />
+                        Query string (default):&nbsp;
                         <strong className="text-primary fst-italic">
-                          www.service.com/&lt;observable&gt;
+                          http://www.service.com?&lt;param_name&gt;=&lt;observable&gt;
                         </strong>
-                        .<br />
-                        If it is necessary to use a Query String, the section
-                        below must be filled in correctly. The format will
-                        be:&nbsp;
+                        . The section below must be filled in correctly.&nbsp;
+                        <br />
+                        REST:&nbsp;
                         <strong className="text-primary fst-italic">
-                          ?param_name=&lt;observable&gt;
+                          http://www.service.com/&lt;observable&gt;
                         </strong>
+                        . The params section below will be empty and the
+                        observable will be automatically added to the URL during
+                        the analysis.
                       </small>
                     </div>
                   </Col>
@@ -449,8 +450,11 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                   </div>
                   <div className="d-flex flex-column mt-1">
                     <small className="mt-0 fst-italic">
-                      You have to change &apos;param_name&apos; key to the
-                      correct name. It is possible to add other parameters.
+                      You have to change &lt;param_name&gt; key to the correct
+                      name. It is possible to add other parameters.
+                      <br />
+                      Note: the &lt;observable&gt; placeholder will be
+                      automatically replaced during the analysis.
                     </small>
                   </div>
                 </Col>

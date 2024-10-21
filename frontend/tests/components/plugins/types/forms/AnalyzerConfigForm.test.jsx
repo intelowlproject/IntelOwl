@@ -236,6 +236,13 @@ describe("AnalyzerConfigForm test", () => {
             type: 1,
             value: '""',
           },
+          {
+            attribute: "params",
+            config_type: 1,
+            plugin_name: "myNewAnalyzer",
+            type: 1,
+            value: '{}',
+          },
         ],
       });
     });
@@ -363,6 +370,13 @@ describe("AnalyzerConfigForm test", () => {
               plugin_name: "myNewAnalyzer",
               type: 1,
               value: '""',
+            },
+            {
+              attribute: "params",
+              config_type: 1,
+              plugin_name: "myNewAnalyzer",
+              type: 1,
+              value: '{}',
             },
           ],
         },

@@ -40,7 +40,7 @@ elasticsearch-dsl==8.15.0
 # plugins
 GitPython==3.1.41
 checkdmarc==5.5.0
-dnspython==2.6.1
+dnspython==2.7.0
 dnstwist[full]==20240812
 google>=3.0.0
 google-cloud-webrisk==1.14.0

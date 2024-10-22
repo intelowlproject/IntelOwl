@@ -40,7 +40,9 @@ class DriverWrapper:
         window_height: int = 1080,
     ):
         self.proxy: str = proxy_address
-        self.driver: Chrome = self._init_driver(window_width, window_height)
+        self.window_width: int = window_width
+        self.window_height: int = window_height
+        self.driver: Chrome = self._init_driver(self.window_width, self.window_height)
         self.last_url: str = ""
 
     def _init_driver(self, window_width: int, window_height: int) -> Chrome:
@@ -64,7 +66,9 @@ class DriverWrapper:
     def restart(self, motivation: str = ""):
         logger.info(f"Restarting driver: {motivation}")
         self.driver.quit()
-        self.driver = self._init_driver()
+        self.driver = self._init_driver(
+            window_width=self.window_width, window_height=self.window_height
+        )
         if self.last_url:
             self.navigate(self.last_url)
 

@@ -13,11 +13,7 @@ import { PluginsTypes } from "../../../constants/pluginConst";
 import { TlpChoices } from "../../../constants/advancedSettingsConst";
 import { markdownToHtml } from "../../common/markdownToHtml";
 import { TLPTag } from "../../common/TLPTag";
-import {
-  PluginInfoPopoverIcon,
-  PluginVerificationIcon,
-  PlaybooksCollapse,
-} from "./utils";
+import { PlaybooksCollapse } from "./utils";
 import {
   OrganizationPluginStateToggle,
   PluginHealthCheckButton,
@@ -25,6 +21,7 @@ import {
   PlaybooksEditButton,
   PluginDeletionButton,
   PivotsEditButton,
+  PluginConfigButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -89,14 +86,6 @@ function SelectColumnFilter({
 // Common columns: these columns are shown for every type of plugin
 const pluginTableColumns = [
   {
-    Header: "Info",
-    id: "info",
-    accessor: (pluginConfig) => pluginConfig,
-    Cell: ({ value }) => <PluginInfoPopoverIcon pluginInfo={value} />,
-    disableSortBy: true,
-    maxWidth: 50,
-  },
-  {
     Header: "Name",
     id: "name",
     accessor: "name",
@@ -122,21 +111,6 @@ const pluginTableColumns = [
 // Analyzers columns: these columns are shown for the analyzers
 export const analyzersTableColumns = [
   ...pluginTableColumns,
-  {
-    Header: "Configured",
-    id: "configured",
-    accessor: "verification.configured",
-    Cell: ({ row: { original } }) => (
-      <PluginVerificationIcon
-        pluginName={original?.name}
-        verification={original?.verification}
-      />
-    ),
-    Filter: SelectOptionsFilter,
-    selectOptions: ["true", "false"],
-    disableSortBy: true,
-    maxWidth: 60,
-  },
   {
     Header: "Description",
     id: "description",
@@ -193,6 +167,10 @@ export const analyzersTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
+        <PluginConfigButton
+          pluginConfig={value}
+          pluginType_={PluginsTypes.ANALYZER}
+        />
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -216,21 +194,6 @@ export const analyzersTableColumns = [
 // Connectors columns: these columns are shown for the connectors
 export const connectorTableColumns = [
   ...pluginTableColumns,
-  {
-    Header: "Configured",
-    id: "configured",
-    accessor: "verification.configured",
-    Cell: ({ row: { original } }) => (
-      <PluginVerificationIcon
-        pluginName={original?.name}
-        verification={original?.verification}
-      />
-    ),
-    Filter: SelectOptionsFilter,
-    selectOptions: ["true", "false"],
-    disableSortBy: true,
-    maxWidth: 60,
-  },
   {
     Header: "Description",
     id: "description",
@@ -278,21 +241,6 @@ export const connectorTableColumns = [
 
 export const pivotTableColumns = [
   ...pluginTableColumns,
-  {
-    Header: "Configured",
-    id: "configured",
-    accessor: "verification.configured",
-    Cell: ({ row: { original } }) => (
-      <PluginVerificationIcon
-        pluginName={original?.name}
-        verification={original?.verification}
-      />
-    ),
-    Filter: SelectOptionsFilter,
-    selectOptions: ["true", "false"],
-    disableSortBy: true,
-    maxWidth: 60,
-  },
   {
     Header: "Description",
     id: "description",
@@ -452,21 +400,6 @@ export const playbookTableColumns = [
 export const visualizerTableColumns = [
   ...pluginTableColumns,
   {
-    Header: "Configured",
-    id: "configured",
-    accessor: "verification.configured",
-    Cell: ({ row: { original } }) => (
-      <PluginVerificationIcon
-        pluginName={original?.name}
-        verification={original?.verification}
-      />
-    ),
-    Filter: SelectOptionsFilter,
-    selectOptions: ["true", "false"],
-    disableSortBy: true,
-    maxWidth: 60,
-  },
-  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -511,21 +444,6 @@ export const visualizerTableColumns = [
 // Ingestors columns: these columns are shown for the ingestors
 export const ingestorTableColumns = [
   ...pluginTableColumns,
-  {
-    Header: "Configured",
-    id: "configured",
-    accessor: "verification.configured",
-    Cell: ({ row: { original } }) => (
-      <PluginVerificationIcon
-        pluginName={original?.name}
-        verification={original?.verification}
-      />
-    ),
-    Filter: SelectOptionsFilter,
-    selectOptions: ["true", "false"],
-    disableSortBy: true,
-    maxWidth: 60,
-  },
   {
     Header: "Description",
     id: "description",

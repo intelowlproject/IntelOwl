@@ -4,6 +4,7 @@ import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
 import { MdDelete, MdFileDownload, MdEdit } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
+import { AiFillSetting } from "react-icons/ai";
 
 import { IconButton } from "@certego/certego-ui";
 
@@ -374,4 +375,31 @@ export function PivotsEditButton({ pivotConfig }) {
 
 PivotsEditButton.propTypes = {
   pivotConfig: PropTypes.object.isRequired,
+};
+
+export function PluginConfigButton({ pluginConfig, pluginType_ }) {
+  const [showModal, setShowModal] = React.useState(false);
+
+  console.debug(pluginType_);
+  console.debug(showModal);
+
+  return (
+    <div className="d-flex flex-column align-items-center px-2">
+      <IconButton
+        id={`plugin-config-btn__${pluginConfig?.name}`}
+        color={pluginConfig.verification.configured ? "success" : "warning"}
+        size="sm"
+        Icon={AiFillSetting}
+        title="Plugin config"
+        onClick={() => setShowModal(true)}
+        titlePlacement="top"
+      />
+    </div>
+  );
+}
+
+PluginConfigButton.propTypes = {
+  pluginConfig: PropTypes.object.isRequired,
+  pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
+    .isRequired,
 };

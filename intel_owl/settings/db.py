@@ -7,7 +7,8 @@ import sys
 
 from intel_owl import secrets
 
-from .aws import AWS_RDS_IAM_ROLE, AWS_REGION
+from .a_secrets import AWS_REGION
+from .aws import AWS_RDS_IAM_ROLE
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

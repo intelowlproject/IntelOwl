@@ -9,7 +9,7 @@ declare -A env_arguments=(["prod"]=1 ["test"]=1 ["ci"]=1)
 declare -A test_mode=(["test"]=1 ["ci"]=1)
 declare -A cmd_arguments=(["build"]=1 ["up"]=1 ["start"]=1 ["restart"]=1 ["down"]=1 ["stop"]=1 ["kill"]=1 ["logs"]=1 ["ps"]=1)
 
-declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.yml" ["traefik_prod"]="docker/traefik_prod.yml" ["traefik_local"]="docker/traefik_local.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["test_elastic"]="docker/test.elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml" ["redis"]="docker/redis.override.yml" ["nginx_default"]="docker/nginx.override.yml")
+declare -A path_mapping=(["default"]="docker/default.yml" ["postgres"]="docker/postgres.override.yml" ["rabbitmq"]="docker/rabbitmq.override.yml" ["test"]="docker/test.override.yml" ["ci"]="docker/ci.override.yml" ["custom"]="docker/custom.override.yml" ["traefik"]="docker/traefik.yml" ["traefik_prod"]="docker/traefik_prod.yml" ["traefik_local"]="docker/traefik_local.yml" ["multi_queue"]="docker/multi-queue.override.yml" ["test_multi_queue"]="docker/test.multi-queue.override.yml" ["flower"]="docker/flower.override.yml" ["test_flower"]="docker/test.flower.override.yml" ["elastic"]="docker/elasticsearch.override.yml" ["https"]="docker/https.override.yml" ["nfs"]="docker/nfs.override.yml" ["redis"]="docker/redis.override.yml" ["nginx_default"]="docker/nginx.override.yml")
 print_synopsis () {
   echo "SYNOPSIS"
   echo -e "    start <env> <command> [OPTIONS]"
@@ -297,7 +297,7 @@ done
 
 # add all the test files
 if [[ $env_argument == "test" ]]; then
-  test_values=("multi_queue" "flower", "elastic")
+  test_values=("multi_queue" "flower")
   for value in "${test_values[@]}"; do
     if [ "${params["$value"]}" ]; then
       compose_files+=("${path_mapping["test_$value"]}")

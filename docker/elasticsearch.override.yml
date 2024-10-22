@@ -2,6 +2,8 @@ services:
   uwsgi:
     depends_on:
       - elasticsearch
+    volumes:
+      - ../certs:/opt/deploy/intel_owl/certs
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
@@ -19,10 +21,7 @@ services:
       - ../certs:/usr/share/elasticsearch/config/certificates
     environment:
       - discovery.type=single-node
-      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/elastic.key
-      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/elastic_ca.crt
-      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/elastic.crt
+      - xpack.security.http.ssl.enabled=false
 
 volumes:
   elastic_data:

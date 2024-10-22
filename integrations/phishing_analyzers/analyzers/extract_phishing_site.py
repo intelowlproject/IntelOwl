@@ -41,9 +41,18 @@ def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
     }
 
 
-def analyze_target(target_url: str, proxy_address: str):
+def analyze_target(
+    target_url: str,
+    proxy_address: str,
+    window_width: int = 1920,
+    window_height: int = 1080,
+):
     # TODO: handle the concept of open tabs to avoid possible memory overuse
-    driver_wrapper = DriverWrapper(proxy_address=proxy_address)
+    driver_wrapper = DriverWrapper(
+        proxy_address=proxy_address,
+        window_width=window_width,
+        window_height=window_height,
+    )
     driver_wrapper.navigate(url=target_url)
 
     result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
@@ -56,7 +65,14 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--target", type=str, required=True)
     parser.add_argument("--proxy_address", type=str, required=False)
+    parser.add_argument("--window_width", type=int, required=False)
+    parser.add_argument("--window_height", type=int, required=False)
     arguments = parser.parse_args()
     logger.info(f"Extracted arguments for {LOG_NAME}: {vars(arguments)}")
 
-    analyze_target(target_url=arguments.target, proxy_address=arguments.proxy_address)
+    analyze_target(
+        target_url=arguments.target,
+        proxy_address=arguments.proxy_address,
+        window_width=arguments.window_width,
+        window_height=arguments.window_height,
+    )

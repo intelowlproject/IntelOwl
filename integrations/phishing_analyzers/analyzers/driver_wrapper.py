@@ -33,12 +33,17 @@ logger.setLevel(log_level)
 
 
 class DriverWrapper:
-    def __init__(self, proxy_address: str = ""):
+    def __init__(
+        self,
+        proxy_address: str = "",
+        window_width: int = 1920,
+        window_height: int = 1080,
+    ):
         self.proxy: str = proxy_address
-        self.driver: Chrome = self._init_driver()
+        self.driver: Chrome = self._init_driver(window_width, window_height)
         self.last_url: str = ""
 
-    def _init_driver(self) -> Chrome:
+    def _init_driver(self, window_width: int, window_height: int) -> Chrome:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chrome driver...")
         # no_sandbox=True is a bad practice but it's almost the only way
@@ -53,8 +58,7 @@ class DriverWrapper:
             proxy_bypass_list=self.proxy or None,
             browser="chrome",
         )
-        # TODO: make window size a parameter
-        driver.set_window_size(1920, 1080)
+        driver.set_window_size(window_width, window_height)
         return driver
 
     def restart(self, motivation: str = ""):

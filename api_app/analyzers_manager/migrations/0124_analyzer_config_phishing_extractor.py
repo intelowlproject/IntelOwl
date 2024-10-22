@@ -43,6 +43,28 @@ params = [
         "is_secret": False,
         "required": False,
     },
+    {
+        "python_module": {
+            "module": "phishing.phishing_extractor.PhishingExtractor",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "window_width",
+        "type": "int",
+        "description": "Width of Selenium browser. Default is 1920.",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "phishing.phishing_extractor.PhishingExtractor",
+            "base_path": "api_app.analyzers_manager.observable_analyzers",
+        },
+        "name": "window_height",
+        "type": "int",
+        "description": "Height of Selenium browser. Default is 1080.",
+        "is_secret": False,
+        "required": False,
+    },
 ]
 
 values = [
@@ -65,7 +87,51 @@ values = [
         "pivot_config": None,
         "for_organization": False,
         "value": "",
-        "updated_at": "2024-09-17T09:05:25.665395Z",
+        "updated_at": "2024-10-18T09:25:01.624934Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "phishing.phishing_extractor.PhishingExtractor",
+                "base_path": "api_app.analyzers_manager.observable_analyzers",
+            },
+            "name": "window_width",
+            "type": "int",
+            "description": "Width of Selenium browser. Default is 1920.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Phishing_Extractor",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 1920,
+        "updated_at": "2024-10-22T06:18:01.101202Z",
+        "owner": None,
+    },
+    {
+        "parameter": {
+            "python_module": {
+                "module": "phishing.phishing_extractor.PhishingExtractor",
+                "base_path": "api_app.analyzers_manager.observable_analyzers",
+            },
+            "name": "window_height",
+            "type": "int",
+            "description": "Height of Selenium browser. Default is 1080.",
+            "is_secret": False,
+            "required": False,
+        },
+        "analyzer_config": "Phishing_Extractor",
+        "connector_config": None,
+        "visualizer_config": None,
+        "ingestor_config": None,
+        "pivot_config": None,
+        "for_organization": False,
+        "value": 1080,
+        "updated_at": "2024-10-22T06:18:01.119554Z",
         "owner": None,
     },
 ]

@@ -35,6 +35,13 @@ if ELASTIC_HOST:
     ELASTIC_PASSWORD = secrets.get_secret("ELASTIC_PASSWORD")
     if ELASTIC_PASSWORD:
         elastic_client_settings["basic_auth"] = ("elastic", ELASTIC_PASSWORD)
+    ca_path = "/opt/deploy/intel_owl/certs/elastic_ca/ca.crt"
+    cert_path = "/opt/deploy/intel_owl/certs/elastic_instance/elasticsearch.crt"
+    if "elasticsearch:9200" in ELASTIC_HOST:
+        # in case we use Elastic as container we need the generated
+        # in case we use Elastic as external service it should have a valid cert
+        elastic_client_settings["verify_certs"] = cert_path
+        elastic_client_settings["ca_certs"] = ca_path
     ELASTICSEARCH_DSL = {"default": elastic_client_settings}
 
     ELASTICSEARCH_DSL_INDEX_SETTINGS = {

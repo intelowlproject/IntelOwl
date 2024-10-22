@@ -444,6 +444,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
         + _convert_report_to_elastic_document(PivotReport)
         + _convert_report_to_elastic_document(VisualizerReport)
     )
+    logger.info(f"documents to add to elastic: {len(document_list)}")
     try:
         bulk(connections.get_connection(), document_list)
     except ApiError as error:

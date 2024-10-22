@@ -201,6 +201,7 @@ while [[ $# -gt 0 ]]; do
   ;;
   --elastic)
     params["elastic"]=true
+    ./create_elastic_certs
     shift 1
   ;;
   --pycti-version)

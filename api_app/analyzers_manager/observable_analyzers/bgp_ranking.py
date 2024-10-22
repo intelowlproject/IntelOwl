@@ -89,6 +89,13 @@ class BGPRanking(classes.ObservableAnalyzer):
 
         return final_response
 
+    def _do_create_data_model(self):
+        return (
+            super()._do_create_data_model()
+            and self.report.report.get("asn_rank", 0)
+            and self.report.report.get("asn_position", None)
+        )
+
     def _update_data_model(self, data_model):
         from api_app.analyzers_manager.models import AnalyzerReport
 

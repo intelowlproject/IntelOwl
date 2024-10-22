@@ -57,6 +57,17 @@ def migrate_bgp_ranking(apps, schema_editor):
     ac.save()
 
 
+def migrate_circl_passive_ssl(apps, schema_editor):
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    ac = AnalyzerConfig.objects.filter(name="CIRCLPassiveSSL").first()
+    if not ac:
+        return
+    ac.mapping_data_model = {
+        "certificates": "certificates",
+    }
+    ac.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -68,4 +79,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate_abuse_ipdb, migrations.RunPython.noop),
         migrations.RunPython(migrate_urlhaus, migrations.RunPython.noop),
         migrations.RunPython(migrate_bgp_ranking, migrations.RunPython.noop),
+        migrations.RunPython(migrate_circl_passive_ssl, migrations.RunPython.noop),
     ]

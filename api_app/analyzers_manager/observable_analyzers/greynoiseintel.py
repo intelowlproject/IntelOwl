@@ -69,6 +69,11 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
 
         return response
 
+    def _do_create_data_model(self):
+        return super()._do_create_data_model() and not self.report.report.get(
+            "not_fount", False
+        )
+
     @classmethod
     def _monkeypatch(cls):
         patches = [

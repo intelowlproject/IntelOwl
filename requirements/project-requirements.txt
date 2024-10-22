@@ -1,7 +1,7 @@
 # django libs
 Django==4.2.16
 psycopg2-binary==2.9.6
-django-auth-ldap==4.8.0
+django-auth-ldap==5.1.0
 django-radius==1.5.0
 django-filter==24.3
 django-storages==1.14

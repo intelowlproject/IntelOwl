@@ -385,25 +385,27 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
               {formik.values.http_method === HTTPMethods.GET ? (
                 <Row className="mt-2">
                   <Col md={10} className="offset-2">
-                    <div className="d-flex flex-column">
-                      <small className="fst-italic">
-                        <strong className="fst-italic">Request formats</strong>
-                        <br />
-                        Query string (default):&nbsp;
-                        <strong className="text-primary fst-italic">
-                          http://www.service.com?&lt;param_name&gt;=&lt;observable&gt;
-                        </strong>
-                        . The section below must be filled in correctly.&nbsp;
-                        <br />
-                        REST:&nbsp;
-                        <strong className="text-primary fst-italic">
-                          http://www.service.com/&lt;observable&gt;
-                        </strong>
-                        . The params section below will be empty and the
-                        observable will be automatically added to the URL during
-                        the analysis.
-                      </small>
-                    </div>
+                    <small className="fst-italic">
+                      <strong>Request formats</strong>
+                      <ul>
+                        <li>
+                          Query string (default):&nbsp;
+                          <strong className="text-primary fst-italic">
+                            http://www.service.com?param_name=&lt;observable&gt;
+                          </strong>
+                          . The section below must be filled in correctly.&nbsp;
+                        </li>
+                        <li>
+                          REST:&nbsp;
+                          <strong className="text-primary fst-italic">
+                            http://www.service.com/&lt;observable&gt;
+                          </strong>
+                          . The params section below must be empty. In that case
+                          the analyzed observable will be automatically added to
+                          the URL during the analysis.
+                        </li>
+                      </ul>
+                    </small>
                   </Col>
                 </Row>
               ) : (
@@ -554,13 +556,14 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isOpen }) {
                     }
                     className="bg-darker border-0"
                     style={{
-                      minHeight: "100px",
+                      minHeight: "150px",
                       overflowX: "scroll",
                     }}
+                    placeholder={`-----BEGIN CERTIFICATE-----\n. . .\n-----END CERTIFICATE-----`}
                   />
                   <div className="d-flex flex-column mt-1">
                     <small className="mt-0 fst-italic">
-                      Instance SSL certificate
+                      Self signed SSL certificate for internal services
                     </small>
                     {formik.touched.certificate &&
                       formik.errors.certificate && (

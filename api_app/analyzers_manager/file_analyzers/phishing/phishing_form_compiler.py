@@ -17,12 +17,18 @@ logger = logging.getLogger(__name__)
 fake = Faker()
 
 
+def xpath_query_on_page(page, xpath_selector: str) -> []:
+    return page.xpath(xpath_selector)
+
+
 class PhishingFormCompiler(FileAnalyzer):
     # good short guide for writing XPath expressions
     # https://upg-dh.newtfire.org/explainXPath.html
     # we're supporting XPath up to v3.1 with elementpath package
-    xpath_selector: str
+    xpath_form_selector: str = ""
+    xpath_js_selector: str = ""
     proxy_address: str = ""
+
     name_matching: list = []
     cc_matching: list = []
     pin_matching: list = []
@@ -61,6 +67,7 @@ class PhishingFormCompiler(FileAnalyzer):
         super().__init__(config, **kwargs)
         self.target_site: str = ""
         self.html_source_code: str = ""
+        self.parsed_page = None
         self.args: [] = []
 
     def config(self, runtime_configuration: Dict):
@@ -87,31 +94,19 @@ class PhishingFormCompiler(FileAnalyzer):
         else:
             raise ValueError("Failed to extract source code from pivot!")
 
-    # @staticmethod
-    # def search_phishing_forms_generic(page) -> []:
-    #     # extract using standard forms() method
-    #     # looking for <form> tags only on HtmlElement type
-    #     if isinstance(page, HtmlElement):
-    #         return page.forms()
-    #
-    #     try:
-    #         return HtmlElement(page).forms()
-    #     except TypeError:
-    #         logger.error(f"Page of type {type(page)} can't be converted to HtmlElement")
-    #         return []
-
-    @staticmethod
-    def search_phishing_forms_xpath(page, xpath_selector: str = "") -> []:
-        # extract using a custom XPath selector if set
-        return page.xpath(xpath_selector) if xpath_selector else []
-
-    def phishing_forms_exists(self, source: str, xpath_selector: str = "") -> []:
         # recover=True tries to read not well-formed HTML
         html_parser = etree.HTMLParser(recover=True)
-        page = document_fromstring(source, parser=html_parser)
-        return self.search_phishing_forms_xpath(
-            page, xpath_selector
-        )  # + search_phishing_forms_generic(page)
+        self.parsed_page = document_fromstring(
+            self.html_source_code, parser=html_parser
+        )
+
+    def search_phishing_forms_xpath(self) -> []:
+        # extract using a custom XPath selector if set
+        return (
+            xpath_query_on_page(self.parsed_page, self.xpath_form_selector)
+            if self.xpath_form_selector
+            else []
+        )
 
     def identify_text_input(self, input_name: str) -> str:
         for names, fake_value in self._name_text_input_mapping.items():
@@ -120,7 +115,7 @@ class PhishingFormCompiler(FileAnalyzer):
 
     def compile_form_field(self, form) -> (dict, str):
         result: {} = {}
-        # setting default to page itself if not specified
+        # setting default to page itself if action is not specified
         if not (form_action := form.get("action", None)):
             form_action = self.target_site
         for element in form.findall(".//input"):
@@ -173,6 +168,12 @@ class PhishingFormCompiler(FileAnalyzer):
     def handle_2xx_response(response: Response) -> str:
         return response.request.url
 
+    def is_js_used_in_page(self) -> bool:
+        js_tag: [] = xpath_query_on_page(self.parsed_page, self.xpath_js_selector)
+        if js_tag:
+            logger.info(f"Found script tag: {js_tag}")
+        return bool(js_tag)
+
     def analyze_responses(self, responses: [Response]) -> {}:
         result: {str: list} = {"successful": [], "error": []}
         for response in responses:
@@ -192,13 +193,12 @@ class PhishingFormCompiler(FileAnalyzer):
         return result
 
     def run(self) -> dict:
+        result: {} = {}
         if not (
-            forms := self.phishing_forms_exists(
-                self.html_source_code, self.xpath_selector
-            )
+            forms := xpath_query_on_page(self.parsed_page, self.xpath_form_selector)
         ):
             message = (
-                f"Form not found in {self.target_site=} with {self.xpath_selector=}! "
+                f"Form not found in {self.target_site=} with {self.xpath_form_selector=}! "
                 f"Manually check site to see if XPath selector requires some tuning."
             )
             logger.info(message)
@@ -209,7 +209,9 @@ class PhishingFormCompiler(FileAnalyzer):
         for form in forms:
             responses.append(self.perform_request_to_form(form))
 
-        return self.analyze_responses(responses)
+        result.setdefault("submit_results", self.analyze_responses(responses))
+        result.setdefault("has_javascript", self.is_js_used_in_page())
+        return result
 
     def update(self) -> bool:
         pass

@@ -23,11 +23,27 @@ class PhishingFormCompiler(FileAnalyzer):
     # we're supporting XPath up to v3.1 with elementpath package
     xpath_selector: str
     proxy_address: str = ""
-    name_matching: list
-    cc_matching: list
-    pin_matching: list
-    cvv_matching: list
-    expiration_date_matching: list
+    name_matching: list = []
+    cc_matching: list = []
+    pin_matching: list = []
+    cvv_matching: list = []
+    expiration_date_matching: list = []
+
+    # mapping between name attribute of text <input>
+    # and their corresponding fake values
+    _name_text_input_mapping: {tuple: str} = {
+        tuple(name_matching): fake.user_name(),  # fake username input
+        tuple(cc_matching): fake.credit_card_number(),  # fake card number input
+        tuple(pin_matching): "00000",  # fake card pin input
+        tuple(
+            cvv_matching
+        ): fake.credit_card_security_code(),  # fake card cvc/cvv input
+        tuple(expiration_date_matching): fake.credit_card_expire(
+            start=date.today(),
+            end=date.today() + timedelta(days=fake.random.randint(1, 1000)),
+            date_format="%m/%y",
+        ),  # fake random expiration date
+    }
 
     FAKE_EMAIL_INPUT: str = fake.email()
     FAKE_PASSWORD_INPUT: str = fake.password(
@@ -100,25 +116,7 @@ class PhishingFormCompiler(FileAnalyzer):
         )  # + search_phishing_forms_generic(page)
 
     def identify_text_input(self, input_name: str) -> str:
-        # mapping between name attribute of text <input>
-        # and their corresponding fake values
-        _name_text_input_mapping: {tuple: str} = {
-            tuple(self.name_matching): fake.user_name(),  # fake username input
-            tuple(
-                self.cc_matching
-            ): fake.credit_card_number(),  # fake card number input
-            tuple(self.pin_matching): "00000",  # fake card pin input
-            tuple(
-                self.cvv_matching
-            ): fake.credit_card_security_code(),  # fake card cvc/cvv input
-            tuple(self.expiration_date_matching): fake.credit_card_expire(
-                start=date.today(),
-                end=date.today() + timedelta(days=fake.random.randint(1, 1000)),
-                date_format="%m/%y",
-            ),  # fake random expiration date
-        }
-
-        for names, fake_value in _name_text_input_mapping.items():
+        for names, fake_value in self._name_text_input_mapping.items():
             if input_name in names:
                 return fake_value
 

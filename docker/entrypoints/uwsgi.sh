@@ -28,6 +28,7 @@ echo "DEBUG: " $DEBUG
 echo "DJANGO_TEST_SERVER: " $DJANGO_TEST_SERVER
 echo "------------------------------"
 CHANGELOG_NOTIFICATION_COMMAND='python manage.py changelog_notification .github/CHANGELOG.md INTELOWL --number-of-releases 3'
+ELASTIC_TEMPLATE_COMMAND='python manage.py elastic_templates'
 
 if [[ $DEBUG == "True" ]] && [[ $DJANGO_TEST_SERVER == "True" ]];
 then
@@ -43,8 +44,10 @@ then
     fi
 
     $CHANGELOG_NOTIFICATION_COMMAND --debug
+    $ELASTIC_TEMPLATE_COMMAND
     python manage.py runserver 0.0.0.0:8001
 else
     $CHANGELOG_NOTIFICATION_COMMAND
+    $ELASTIC_TEMPLATE_COMMAND
     /usr/local/bin/uwsgi --ini /etc/uwsgi/sites/intel_owl.ini --stats 127.0.0.1:1717 --stats-http
 fi

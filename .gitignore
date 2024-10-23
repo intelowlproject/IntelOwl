@@ -16,6 +16,8 @@ compose-elk.yml
 .python_history
 .viminfo
 
+# certs
+certs/
 
 # docs
 docs_env/

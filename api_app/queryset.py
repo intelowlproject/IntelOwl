@@ -74,7 +74,7 @@ class SendToBiQuerySet(models.QuerySet):
         ) as f:
             body = json.load(f)
             body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
-            settings.ELASTICSEARCH_CLIENT.indices.put_template(
+            settings.ELASTICSEARCH_BI_CLIENT.indices.put_template(
                 name=settings.ELASTICSEARCH_BI_INDEX, body=body
             )
             logger.info(
@@ -105,7 +105,7 @@ class SendToBiQuerySet(models.QuerySet):
             serializer = self._get_bi_serializer_class()(instance=objects, many=True)
             objects_serialized = serializer.data
             _, errors = bulk(
-                settings.ELASTICSEARCH_CLIENT,
+                settings.ELASTICSEARCH_BI_CLIENT,
                 objects_serialized,
                 request_timeout=max_timeout,
             )

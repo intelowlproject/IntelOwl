@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+if [ ! -f ./certs/elastic_ca/ca.crt ] && [ ! -f ./certs/elastic_ca/ca.key ] && [ ! -f ./certs/elastic_instance/instance.crt ] && [ ! -f ./certs/elastic_instance/instance.key ]; then
+    # start container
+    docker pull docker.elastic.co/elasticsearch/elasticsearch:8.15.0 &&
+    docker run -d --name elasticsearch_cert -v ./elasticsearch_instances.yml:/usr/share/elasticsearch/elasticsearch_instances.yml -it docker.elastic.co/elasticsearch/elasticsearch:8.15.0 &&
+    # generate ca
+    docker exec -ti elasticsearch_cert ./bin/elasticsearch-certutil ca --pem --out ca.zip &&
+    docker exec -ti elasticsearch_cert unzip ca.zip &&
+    # generate cert signed with the ca previously generate
+    docker exec -ti elasticsearch_cert ./bin/elasticsearch-certutil cert --in /usr/share/elasticsearch/elasticsearch_instances.yml --pem --ca-cert ./ca/ca.crt --ca-key ./ca/ca.key --silent --out cert.zip &&
+    docker exec -ti elasticsearch_cert unzip cert.zip &&
+    # extract files from the container
+    docker cp elasticsearch_cert:/usr/share/elasticsearch/ca ./certs/elastic_ca &&
+    docker cp elasticsearch_cert:/usr/share/elasticsearch/elasticsearch ./certs/elastic_instance &&
+    # down container
+    docker kill elasticsearch_cert &&
+    docker rm elasticsearch_cert
+else
+    echo "files already exists"
+fi

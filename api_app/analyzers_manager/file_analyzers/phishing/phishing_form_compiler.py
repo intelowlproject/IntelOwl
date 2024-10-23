@@ -1,10 +1,10 @@
-import datetime
 import logging
-from random import randint
+from datetime import date, timedelta
 from typing import Dict
 from xml.etree.ElementTree import Element
 
 import requests
+from faker import Faker
 from lxml import etree
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
@@ -14,6 +14,7 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.models import PythonConfig
 
 logger = logging.getLogger(__name__)
+fake = Faker()
 
 
 class PhishingFormCompiler(FileAnalyzer):
@@ -22,39 +23,21 @@ class PhishingFormCompiler(FileAnalyzer):
     # we're supporting XPath up to v3.1 with elementpath package
     xpath_selector: str
     proxy_address: str = ""
+    name_matching: list
+    cc_matching: list
+    pin_matching: list
+    cvv_matching: list
+    expiration_date_matching: list
 
-    FAKE_EMAIL_INPUT: str = "fake@email.com"
-    FAKE_PASSWORD_INPUT: str = "Fakepassword123!"
-    FAKE_TEL_INPUT: str = "+393333333333"
-
-    # mapping between name attribute of text <input>
-    # and their corresponding fake values
-    _name_text_input_mapping: {tuple: str} = {
-        (
-            "username",
-            "user",
-            "name",
-            "first-name",
-            "last-name",
-        ): "fakeuser",  # fake username input
-        (
-            "card",
-            "card_number",
-            "card-number",
-            "cc",
-            "cc-number",
-        ): "4111111111111111",  # fake card number input
-        ("pin",): "00000",  # fake card pin input
-        ("cvv", "cvc"): "000",  # fake card cvc/cvv input
-        (
-            "exp",
-            "date",
-            "expiration-date",
-            "exp-date",
-        ): (datetime.date.today() + datetime.timedelta(days=randint(1, 1000))).strftime(
-            "%m/%y"
-        ),  # fake random expiration date
-    }
+    FAKE_EMAIL_INPUT: str = fake.email()
+    FAKE_PASSWORD_INPUT: str = fake.password(
+        length=16,
+        special_chars=True,
+        digits=True,
+        upper_case=True,
+        lower_case=True,
+    )
+    FAKE_TEL_INPUT: str = fake.phone_number()
 
     def __init__(
         self,
@@ -117,7 +100,25 @@ class PhishingFormCompiler(FileAnalyzer):
         )  # + search_phishing_forms_generic(page)
 
     def identify_text_input(self, input_name: str) -> str:
-        for names, fake_value in self._name_text_input_mapping.items():
+        # mapping between name attribute of text <input>
+        # and their corresponding fake values
+        _name_text_input_mapping: {tuple: str} = {
+            tuple(self.name_matching): fake.user_name(),  # fake username input
+            tuple(
+                self.cc_matching
+            ): fake.credit_card_number(),  # fake card number input
+            tuple(self.pin_matching): "00000",  # fake card pin input
+            tuple(
+                self.cvv_matching
+            ): fake.credit_card_security_code(),  # fake card cvc/cvv input
+            tuple(self.expiration_date_matching): fake.credit_card_expire(
+                start=date.today(),
+                end=date.today() + timedelta(days=fake.random.randint(1, 1000)),
+                date_format="%m/%y",
+            ),  # fake random expiration date
+        }
+
+        for names, fake_value in _name_text_input_mapping.items():
             if input_name in names:
                 return fake_value
 

@@ -97,5 +97,6 @@ pyzipper==0.3.6
 
 # others
 dateparser==1.2.0
-# html parsing for phishing form compiler
+# phishing form compiler module
 lxml==5.3.0
+Faker==30.8.0

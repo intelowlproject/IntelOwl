@@ -34,7 +34,7 @@ class PhishingFormCompiler(FileAnalyzer):
     _name_text_input_mapping: {tuple: str} = {
         tuple(name_matching): fake.user_name(),
         tuple(cc_matching): fake.credit_card_number(),
-        tuple(pin_matching): "00000",
+        tuple(pin_matching): fake.random.randint(low=10000, high=100000, dtype=str),
         tuple(cvv_matching): fake.credit_card_security_code(),
         tuple(expiration_date_matching): fake.credit_card_expire(
             start=date.today(),

@@ -165,7 +165,7 @@ class PEInfo(FileAnalyzer):
             )
             logger.warning(warning_message)
             self.report.errors.append(warning_message)
-            self.report.status = self.report.Status.FAILED
+            self.report.status = self.report.STATUSES.FAILED
             self.report.save()
 
         return results

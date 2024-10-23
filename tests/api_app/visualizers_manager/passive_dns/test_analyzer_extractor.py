@@ -24,7 +24,7 @@ class TestOTXQuery(CustomTestCase):
         super().setUpClass()
         cls.job = Job.objects.create(
             user=cls.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="195.22.26.248",
             observable_classification=ObservableTypes.IP,
             received_request_time=datetime.datetime.now(),
@@ -108,7 +108,7 @@ class TestThreatminer(CustomTestCase):
         super().setUpClass()
         cls.job = Job.objects.create(
             user=cls.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="test.com",
             observable_classification=ObservableTypes.DOMAIN,
             received_request_time=datetime.datetime.now(),
@@ -198,7 +198,7 @@ class TestValidin(CustomTestCase):
         super().setUpClass()
         cls.job = Job.objects.create(
             user=cls.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="test.com",
             observable_classification=ObservableTypes.DOMAIN,
             received_request_time=datetime.datetime.now(),
@@ -306,7 +306,7 @@ class TestDNSdb(CustomTestCase):
         super().setUpClass()
         cls.job = Job.objects.create(
             user=cls.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="www.farsightsecurity.com",
             observable_classification=ObservableTypes.DOMAIN,
             received_request_time=datetime.datetime.now(),
@@ -384,7 +384,7 @@ class TestRobtex(CustomTestCase):
         super().setUpClass()
         cls.job = Job.objects.create(
             user=cls.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="test.com",
             observable_classification=ObservableTypes.DOMAIN,
             received_request_time=datetime.datetime.now(),
@@ -459,7 +459,7 @@ class TestMnemonicPDNS(CustomTestCase):
         super().setUpClass()
         cls.job = Job.objects.create(
             user=cls.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="test.com",
             observable_classification=ObservableTypes.DOMAIN,
             received_request_time=datetime.datetime.now(),
@@ -534,7 +534,7 @@ class TestCIRCLPassiveDNS(CustomTestCase):
         super().setUpClass()
         cls.job = Job.objects.create(
             user=cls.user,
-            status=Job.Status.RUNNING.value,
+            status=Job.STATUSES.RUNNING.value,
             observable_name="test.com",
             observable_classification=ObservableTypes.DOMAIN,
             received_request_time=datetime.datetime.now(),

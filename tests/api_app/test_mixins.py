@@ -5,7 +5,6 @@ from pathlib import PosixPath
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.ingestors_manager.models import IngestorConfig
 from api_app.mixins import VirusTotalv3AnalyzerMixin, VirusTotalv3BaseMixin
 from tests import CustomTestCase
 from tests.mock_utils import MockUpResponse
@@ -92,9 +91,7 @@ class VirusTotalv3Analyzer(VirusTotalv3AnalyzerMixin):
 
 class VirusTotalMixinTestCase(CustomTestCase):
     def setUp(self) -> None:
-        self.base = VirusTotalv3Base(
-            IngestorConfig.objects.get(name="VirusTotal_Example_Query")
-        )
+        self.base = VirusTotalv3Base()
         self.analyzer_file = VirusTotalv3Analyzer(
             AnalyzerConfig.objects.get(name="VirusTotal_v3_Get_File")
         )

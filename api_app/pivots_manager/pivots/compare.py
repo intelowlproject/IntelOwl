@@ -17,8 +17,11 @@ class Compare(Pivot):
                 f"Unable to run pivot {self._config.name} "
                 "because attached to more than one configuration",
             )
+        report = self.related_reports.first()
         try:
-            self._value = self.related_reports.first().get_value(self.field_to_compare)
+            self._value = report.get_value(
+                report.report, self.field_to_compare.split(".")
+            )
         except (RuntimeError, ValueError) as e:
             return False, str(e)
         return super().should_run()

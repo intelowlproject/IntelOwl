@@ -19,6 +19,7 @@ else:
     WEB_CLIENT_URL = f"http://{WEB_CLIENT_DOMAIN}"
 
 CSRF_COOKIE_SAMESITE = "Strict"
+CSRF_TRUSTED_ORIGINS = [f"{WEB_CLIENT_URL}"]
 
 if STAGE_LOCAL:
     # required to allow requests from port 3001 (frontend development)

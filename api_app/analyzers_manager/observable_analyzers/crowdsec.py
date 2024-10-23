@@ -33,7 +33,7 @@ class Crowdsec(ObservableAnalyzer):
 
     def _do_create_data_model(self):
         return super()._do_create_data_model() and not self.report.report.get(
-            "not_fount", False
+            "not_found", False
         )
 
     def _update_data_model(self, data_model):
@@ -41,17 +41,6 @@ class Crowdsec(ObservableAnalyzer):
 
         self.report: AnalyzerReport
         super()._update_data_model(data_model)
-        external_refs = []
-        link = self.report.report.get("link", None)
-        if link:
-            external_refs.append(link)
-        references = self.report.report.get("references", [])
-        for reference in references:
-            refs = reference.get("references", [])
-            external_refs.extend(refs)
-        external_references = getattr(data_model, "external_references")
-        external_references.set(external_refs)
-
         highest_total_score = max(
             [
                 values["total"]

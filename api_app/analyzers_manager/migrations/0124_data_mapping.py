@@ -22,10 +22,10 @@ def migrate_maxmind(apps, schema_editor):
     if not ac:
         return
     ac.mapping_data_model = {
-        "country_code": "country.iso_code",
-        "registered_country_code": "registered_country_code.iso_code",
-        "asn": "autonomous_system_number",
-        "isp": "autonomous_system_organization",
+        "country.iso_code": "country_code",
+        "registered_country_code.iso_code": "registered_country_code",
+        "autonomous_system_number": "asn",
+        "autonomous_system_organization": "isp",
     }
     ac.save()
 
@@ -36,11 +36,11 @@ def migrate_abuse_ipdb(apps, schema_editor):
     if not ac:
         return
     ac.mapping_data_model = {
-        "country_code": "data.countryCode",
-        "external_references": "permalink",
-        "resolutions": "data.hostnames",
-        "isp": "data.isp",
-        "tags": "categories_found",
+        "data.countryCode": "country_code",
+        "permalink": "external_references",
+        "data.hostnames": "resolutions",
+        "data.isp": "isp",
+        "categories_found": "tags",
     }
     ac.save()
 
@@ -68,6 +68,30 @@ def migrate_circl_passive_ssl(apps, schema_editor):
     ac.save()
 
 
+def migrate_crowdsec(apps, schema_editor):
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    ac = AnalyzerConfig.objects.filter(name="Crowdsec").first()
+    if not ac:
+        return
+    ac.mapping_data_model = {
+        "references.references": "external_references",
+        "link": "external_references",
+    }
+    ac.save()
+
+
+def migrate_greynoise_community(apps, schema_editor):
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    ac = AnalyzerConfig.objects.filter(name="GreyNoiseCommunity").first()
+    if not ac:
+        return
+    ac.mapping_data_model = {
+        "name": "org_name",
+        "link": "external_references",
+    }
+    ac.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -80,4 +104,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate_urlhaus, migrations.RunPython.noop),
         migrations.RunPython(migrate_bgp_ranking, migrations.RunPython.noop),
         migrations.RunPython(migrate_circl_passive_ssl, migrations.RunPython.noop),
+        migrations.RunPython(migrate_crowdsec, migrations.RunPython.noop),
+        migrations.RunPython(migrate_greynoise_community, migrations.RunPython.noop),
     ]

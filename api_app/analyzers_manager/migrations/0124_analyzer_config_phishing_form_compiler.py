@@ -389,7 +389,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0122_alter_soft_time_limit"),
+        ("analyzers_manager", "0123_basic_observable_analyzer"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

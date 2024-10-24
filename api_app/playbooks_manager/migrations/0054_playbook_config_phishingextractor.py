@@ -120,7 +120,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("playbooks_manager", "0053_playbook_config_phishinganalysis"),
-        ("analyzers_manager", "0124_analyzer_config_phishing_extractor"),
+        ("analyzers_manager", "0125_analyzer_config_phishing_extractor"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

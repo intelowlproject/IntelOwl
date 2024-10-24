@@ -11,10 +11,11 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
-import { PlaybookConfigForm } from "./PlaybookConfigForm";
-import { PivotConfigForm } from "./PivotConfigForm";
+import { PlaybookConfigForm } from "../forms/PlaybookConfigForm";
+import { PivotConfigForm } from "../forms/PivotConfigForm";
 import { deletePluginConfig } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
+import { AnalyzerConfigForm } from "../forms/AnalyzerConfigForm";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -34,7 +35,7 @@ export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   };
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`table-pluginhealthcheckbtn__${pluginName}`}
         color="info"
@@ -103,7 +104,7 @@ export function OrganizationPluginStateToggle({
   };
   return (
     <div
-      className={`d-flex align-items-center ${isInOrganization ? "px-2" : ""}`}
+      className={`d-flex align-items-center ${isInOrganization ? "p-1" : ""}`}
     >
       {isInOrganization && (
         <IconButton
@@ -147,16 +148,20 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
     ),
   );
 
-  const { retrievePlaybooksConfiguration, retrievePivotsConfiguration } =
-    usePluginConfigurationStore(
-      React.useCallback(
-        (state) => ({
-          retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
-          retrievePivotsConfiguration: state.retrievePivotsConfiguration,
-        }),
-        [],
-      ),
-    );
+  const {
+    retrievePlaybooksConfiguration,
+    retrievePivotsConfiguration,
+    retrieveAnalyzersConfiguration,
+  } = usePluginConfigurationStore(
+    React.useCallback(
+      (state) => ({
+        retrievePlaybooksConfiguration: state.retrievePlaybooksConfiguration,
+        retrievePivotsConfiguration: state.retrievePivotsConfiguration,
+        retrieveAnalyzersConfiguration: state.retrieveAnalyzersConfiguration,
+      }),
+      [],
+    ),
+  );
 
   const onClick = async () => {
     try {
@@ -164,6 +169,8 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
       if (pluginType_ === PluginsTypes.PLAYBOOK)
         retrievePlaybooksConfiguration();
       if (pluginType_ === PluginsTypes.PIVOT) retrievePivotsConfiguration();
+      if (pluginType_ === PluginsTypes.ANALYZER)
+        retrieveAnalyzersConfiguration();
       setShowModal(false);
     } catch {
       // handle error in deletePlugin
@@ -177,7 +184,7 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
       (!isInOrganization && !user.is_staff));
 
   return (
-    <div className="px-2">
+    <div className="p-1">
       <IconButton
         id={`plugin-deletion-${pluginName}`}
         color="danger"
@@ -254,7 +261,7 @@ export function PluginPullButton({ pluginName, pluginType_ }) {
   };
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`table-pluginpullbtn__${pluginName}`}
         color="info"
@@ -329,7 +336,7 @@ PlaybooksEditButton.propTypes = {
   playbookConfig: PropTypes.object.isRequired,
 };
 
-export function PivotsEditButton({ pivotConfig }) {
+export function PluginEditButton({ config, pluginType_ }) {
   const [showModal, setShowModal] = React.useState(false);
 
   const user = useAuthStore(React.useCallback((state) => state.user, []));
@@ -350,20 +357,27 @@ export function PivotsEditButton({ pivotConfig }) {
     (!isInOrganization && !user.is_staff);
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
-        id={`pivot-edit-btn__${pivotConfig?.name}`}
+        id={`plugin-edit-btn__${config?.name}`}
         color="info"
         size="sm"
         Icon={MdEdit}
-        title="Edit pivot config"
+        title="Edit config"
         onClick={() => setShowModal(true)}
         disabled={disabled}
         titlePlacement="top"
       />
-      {showModal && (
+      {showModal && pluginType_ === PluginsTypes.PIVOT && (
         <PivotConfigForm
-          pivotConfig={pivotConfig}
+          pivotConfig={config}
+          toggle={setShowModal}
+          isOpen={showModal}
+        />
+      )}
+      {showModal && pluginType_ === PluginsTypes.ANALYZER && (
+        <AnalyzerConfigForm
+          analyzerConfig={config}
           toggle={setShowModal}
           isOpen={showModal}
         />
@@ -372,6 +386,8 @@ export function PivotsEditButton({ pivotConfig }) {
   );
 }
 
-PivotsEditButton.propTypes = {
-  pivotConfig: PropTypes.object.isRequired,
+PluginEditButton.propTypes = {
+  config: PropTypes.object.isRequired,
+  pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
+    .isRequired,
 };

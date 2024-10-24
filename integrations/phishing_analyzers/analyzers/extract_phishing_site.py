@@ -48,7 +48,6 @@ def analyze_target(
     window_width: int = 1920,
     window_height: int = 1080,
 ):
-    # TODO: handle the concept of open tabs to avoid possible memory overuse
     driver_wrapper = DriverWrapper(
         proxy_address=proxy_address,
         window_width=window_width,

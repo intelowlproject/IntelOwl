@@ -9,9 +9,31 @@ services:
     restart: unless-stopped
     expose:
       - "4005"
+      - "7007"  # selenium-wire proxy
     env_file:
       - env_file_integrations
     volumes:
       - generic_logs:/var/log/intel_owl
     depends_on:
       - uwsgi
+
+  chrome-webdriver:
+    image: selenium/node-chrome:latest
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_ENABLE_TRACING=false
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  selenium-hub:
+    image: selenium/hub:latest
+    container_name: selenium-hub
+    environment:
+      - SE_ENABLE_TRACING=false
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"

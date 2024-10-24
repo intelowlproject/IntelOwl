@@ -3,13 +3,8 @@ import os
 from typing import Iterator
 
 from selenium.common import WebDriverException
-from seleniumbase import Driver
-from seleniumbase.config import settings
 from seleniumwire.request import Request
-from seleniumwire.webdriver import Chrome
-
-# remove annoying driver download message
-settings.HIDE_DRIVER_DOWNLOADS = True
+from seleniumwire.webdriver import ChromeOptions, Remote
 
 LOG_NAME = "driver_wrapper"
 
@@ -42,25 +37,36 @@ class DriverWrapper:
         self.proxy: str = proxy_address
         self.window_width: int = window_width
         self.window_height: int = window_height
-        self.driver: Chrome = self._init_driver(self.window_width, self.window_height)
         self.last_url: str = ""
+        self.driver: Remote = self._init_driver(self.window_width, self.window_height)
 
-    def _init_driver(self, window_width: int, window_height: int) -> Chrome:
+    def _init_driver(self, window_width: int, window_height: int) -> Remote:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chrome driver...")
+        sw_options: {} = {
+            "auto_config": False,  # Ensure this is set to False
+            "enable_har": True,
+            "addr": "phishing_analyzers",  # where selenium-wire proxy will run
+            "port": 7007,
+        }
+        if self.proxy:
+            sw_options["proxy"] = {"http": self.proxy, "https": self.proxy}
+
+        options = ChromeOptions()
         # no_sandbox=True is a bad practice but it's almost the only way
         # to run chromium-based browsers in docker. browser is running
         # as unprivileged user and it's in a container: trade-off
-        driver = Driver(
-            headless=True,
-            headless2=True,
-            use_wire=True,
-            no_sandbox=True,
-            proxy=self.proxy or None,
-            proxy_bypass_list=self.proxy or None,
-            browser="chrome",
+        options.add_argument("--no-sandbox")
+        options.add_argument("--headless=new")
+        options.add_argument("ignore-certificate-errors")
+        options.add_argument(f"--window-size={window_width},{window_height}")
+        # traffic must go back to host running selenium-wire
+        options.add_argument("--proxy-server={}".format("phishing_analyzers:7007"))
+        driver = Remote(
+            command_executor="http://selenium-hub:4444/wd/hub",
+            options=options,
+            seleniumwire_options=sw_options,
         )
-        driver.set_window_size(window_width, window_height)
         return driver
 
     def restart(self, motivation: str = ""):

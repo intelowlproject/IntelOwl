@@ -38,7 +38,7 @@ def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
             dump_seleniumwire_requests(request)
             for request in driver_wrapper.iter_requests()
         ],
-        "page_http_har": driver_wrapper.driver.har,
+        "page_http_har": driver_wrapper.get_har(),
     }
 
 

@@ -38,7 +38,7 @@ class DriverWrapper:
         self.window_width: int = window_width
         self.window_height: int = window_height
         self.last_url: str = ""
-        self.driver: Remote = self._init_driver(self.window_width, self.window_height)
+        self._driver: Remote = self._init_driver(self.window_width, self.window_height)
 
     def _init_driver(self, window_width: int, window_height: int) -> Remote:
         logger.info(f"Adding proxy with option: {self.proxy}")
@@ -71,8 +71,8 @@ class DriverWrapper:
 
     def restart(self, motivation: str = ""):
         logger.info(f"Restarting driver: {motivation}")
-        self.driver.quit()
-        self.driver = self._init_driver(
+        self._driver.quit()
+        self._driver = self._init_driver(
             window_width=self.window_width, window_height=self.window_height
         )
         if self.last_url:
@@ -85,7 +85,7 @@ class DriverWrapper:
 
         self.last_url = url
         try:
-            self.driver.get(url)
+            self._driver.get(url)
         except WebDriverException as e:
             logger.error("navigate")
             logger.error(e)
@@ -94,7 +94,7 @@ class DriverWrapper:
     @property
     def page_source(self) -> str:
         try:
-            return self.driver.page_source
+            return self._driver.page_source
         except WebDriverException as e:
             logger.error("page_source")
             logger.error(e)
@@ -104,7 +104,7 @@ class DriverWrapper:
     @property
     def current_url(self) -> str:
         try:
-            return self.driver.current_url
+            return self._driver.current_url
         except WebDriverException as e:
             logger.error("current_url")
             logger.error(e)
@@ -114,7 +114,7 @@ class DriverWrapper:
     @property
     def base64_screenshot(self) -> str:
         try:
-            return self.driver.get_screenshot_as_base64()
+            return self._driver.get_screenshot_as_base64()
         except WebDriverException as e:
             logger.error("base64_screenshot")
             logger.error(e)
@@ -122,7 +122,10 @@ class DriverWrapper:
             return self.base64_screenshot
 
     def iter_requests(self) -> Iterator[Request]:
-        return self.driver.iter_requests()
+        return self._driver.iter_requests()
+
+    def get_har(self) -> str:
+        return self._driver.har
 
     def quit(self):
-        self.driver.quit()
+        self._driver.quit()

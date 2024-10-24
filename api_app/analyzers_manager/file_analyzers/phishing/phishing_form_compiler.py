@@ -1,11 +1,10 @@
 import logging
 from datetime import date, timedelta
 from typing import Dict
-from xml.etree.ElementTree import Element
 
 import requests
 from faker import Faker
-from lxml import etree
+from lxml.etree import HTMLParser
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
 
@@ -95,7 +94,7 @@ class PhishingFormCompiler(FileAnalyzer):
             raise ValueError("Failed to extract source code from pivot!")
 
         # recover=True tries to read not well-formed HTML
-        html_parser = etree.HTMLParser(recover=True)
+        html_parser = HTMLParser(recover=True, no_network=True)
         self.parsed_page = document_fromstring(
             self.html_source_code, parser=html_parser
         )
@@ -145,7 +144,7 @@ class PhishingFormCompiler(FileAnalyzer):
             result.setdefault(input_name, value_to_set)
         return result, form_action
 
-    def perform_request_to_form(self, form: Element) -> Response:
+    def perform_request_to_form(self, form) -> Response:
         params, dest_url = self.compile_form_field(form)
         logger.info(f"Sending {params=} to submit url {dest_url}")
         return requests.post(

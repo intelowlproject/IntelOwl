@@ -87,8 +87,17 @@ class PhishingFormCompiler(FileAnalyzer):
         # extract and decode source code from file
         self.html_source_code = self.read_file_bytes()
         if self.html_source_code:
-            self.html_source_code = self.html_source_code.decode("utf-8")
-            logger.info("Extracted html source code from pivot")
+            logger.info(f"{self.html_source_code=}")
+            try:
+                self.html_source_code = self.html_source_code.decode("utf-8")
+            except UnicodeDecodeError as e:
+                logger.warning(f"Error during HTML source page decoding: {e}")
+                logger.warning("Trying to fix the error...")
+                self.html_source_code = self.html_source_code.decode(
+                    "utf-8", errors="replace"
+                )
+            else:
+                logger.info("Extracted html source code from pivot")
         else:
             raise ValueError("Failed to extract source code from pivot!")
 

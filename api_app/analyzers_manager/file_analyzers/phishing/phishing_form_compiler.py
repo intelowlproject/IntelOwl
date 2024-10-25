@@ -9,7 +9,6 @@ from lxml.html import document_fromstring
 from requests import HTTPError, Response
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.models import PythonConfig
 
 logger = logging.getLogger(__name__)
@@ -71,13 +70,13 @@ class PhishingFormCompiler(FileAnalyzer):
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
-        if not (hasattr(self._job, "pivot_parent")):
-            raise AnalyzerRunException(
-                f"Analyzer {self.analyzer_name} must be ran from PhishingAnalysis playbook."
+        if hasattr(self._job, "pivot_parent"):
+            # extract target site from parent job
+            self.target_site = self._job.pivot_parent.starting_job.observable_name
+        else:
+            logger.warning(
+                f"Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook."
             )
-
-        # extract target site from parent job
-        self.target_site = self._job.pivot_parent.starting_job.observable_name
         if self.target_site:
             logger.info(f"Extracted {self.target_site} from parent job")
         else:

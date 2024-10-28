@@ -7,6 +7,10 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 
 
 class AndroguardAnalyzer(FileAnalyzer):
+
+    def update(self) -> bool:
+        pass
+
     def run(self):
 
         binary = self.read_file_bytes()

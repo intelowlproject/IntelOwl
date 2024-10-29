@@ -18,32 +18,20 @@ class NERD(ObservableAnalyzer):
     _api_key_name: str
     nerd_analysis: str
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
+        base_uri = f"/ip/{self.observable_name}"
+        headers = {
+            "Authorization": self._api_key_name,
+            "Accept": "application/json",
+        }
         match self.nerd_analysis:
             case "basic":
-                headers = {
-                    "Authorization": self._api_key_name,
-                    "Accept": "application/json",
-                }
-                uri = f"/ip/{self.observable_name}"
-            case "full":
-                headers = {
-                    "Authorization": self._api_key_name,
-                    "Accept": "application/json",
-                }
-                uri = f"/ip/{self.observable_name}/full"
-            case "rep":
-                headers = {
-                    "Authorization": self._api_key_name,
-                    "Accept": "application/json",
-                }
-                uri = f"/ip/{self.observable_name}/rep"
-            case "fmp":
-                headers = {
-                    "Authorization": self._api_key_name,
-                    "Accept": "application/json",
-                }
-                uri = f"/ip/{self.observable_name}/fmp"
+                uri = base_uri
+            case "full" | "rep" | "fmp" as option:
+                uri = f"{base_uri}/{option}"
             case _:
                 raise AnalyzerConfigurationException(
                     f"analysis type: '{self.nerd_analysis}' not supported."

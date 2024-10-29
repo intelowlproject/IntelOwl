@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 class DShield(ObservableAnalyzer):
     url: str = "https://isc.sans.edu/api"
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         headers = {"User-Agent": "IntelOwl"}
 

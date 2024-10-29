@@ -81,6 +81,8 @@ from django.db.models.fields.related_descriptors import (
     ForwardManyToOneDescriptor,
     ForwardOneToOneDescriptor,
     ManyToManyDescriptor,
+    ReverseManyToOneDescriptor,
+    ReverseOneToOneDescriptor,
 )
 """
 
@@ -108,8 +110,13 @@ def _get_real_obj(Model, field, value):
 
     if (
         type(getattr(Model, field))
-        in [ForwardManyToOneDescriptor, ForwardOneToOneDescriptor]
-        and value
+        in [
+            ForwardManyToOneDescriptor,
+            ReverseManyToOneDescriptor,
+            ReverseOneToOneDescriptor,
+            ForwardOneToOneDescriptor,
+        ]
+            and value
     ):
         other_model = getattr(Model, field).get_queryset().model
         value = _get_obj(Model, other_model, value)

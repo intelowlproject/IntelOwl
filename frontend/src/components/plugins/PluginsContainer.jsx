@@ -1,20 +1,19 @@
 import React, { Suspense } from "react";
 import { AiOutlineApi } from "react-icons/ai";
-import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { TiFlowChildren, TiBook } from "react-icons/ti";
 import { IoIosEye } from "react-icons/io";
 import { MdInput } from "react-icons/md";
 import { PiGraphFill } from "react-icons/pi";
-
-import {
-  RouterTabs,
-  FallBackLoading,
-  ContentSection,
-} from "@certego/certego-ui";
-import { Link } from "react-router-dom";
+import { BsFillPlusCircleFill } from "react-icons/bs";
+import { useLocation } from "react-router-dom";
 import { Button, Col } from "reactstrap";
-import { useOrganizationStore } from "../../stores/useOrganizationStore";
+
+import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../../contexts/GuideContext";
+import { PlaybookConfigForm } from "./forms/PlaybookConfigForm";
+import { PivotConfigForm } from "./forms/PivotConfigForm";
+import { AnalyzerConfigForm } from "./forms/AnalyzerConfigForm";
+import { PluginsTypes } from "../../constants/pluginConst";
 
 const Analyzers = React.lazy(() => import("./types/Analyzers"));
 const Connectors = React.lazy(() => import("./types/Connectors"));
@@ -118,20 +117,19 @@ const routes = [
 
 export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
-  const {
-    isUserOwner,
-    organization,
-    fetchAll: fetchAllOrganizations,
-  } = useOrganizationStore(
-    React.useCallback(
-      (state) => ({
-        isUserOwner: state.isUserOwner,
-        fetchAll: state.fetchAll,
-        organization: state.organization,
-      }),
-      [],
-    ),
-  );
+  const location = useLocation();
+  const pluginsPage = location?.pathname.split("/")[2];
+  const enableCreateButton = [
+    `${PluginsTypes.ANALYZER}s`,
+    `${PluginsTypes.PIVOT}s`,
+    `${PluginsTypes.PLAYBOOK}s`,
+  ].includes(pluginsPage);
+
+  const [showModalCreatePlaybook, setShowModalCreatePlaybook] =
+    React.useState(false);
+  const [showModalCreatePivot, setShowModalCreatePivot] = React.useState(false);
+  const [showModalCreateAnalyzer, setShowModalCreateAnalyzer] =
+    React.useState(false);
 
   const { guideState, setGuideState } = useGuideContext();
 
@@ -144,49 +142,56 @@ export default function PluginsContainer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // on component mount
-  React.useEffect(() => {
-    if (!isUserOwner) {
-      fetchAllOrganizations();
+  const onClick = async () => {
+    // open modal for create playbook
+    if (pluginsPage === `${PluginsTypes.PLAYBOOK}s`) {
+      setShowModalCreatePlaybook(true);
     }
-  }, [isUserOwner, fetchAllOrganizations]);
-  const configButtons = (
+    // open modal for create pivot
+    if (pluginsPage === `${PluginsTypes.PIVOT}s`) {
+      setShowModalCreatePivot(true);
+    }
+    // open modal for create analyzer
+    if (pluginsPage === `${PluginsTypes.ANALYZER}s`) {
+      setShowModalCreateAnalyzer(true);
+    }
+    return null;
+  };
+
+  const createButton = (
     <Col className="d-flex justify-content-end">
-      <ContentSection className="d-inline-flex mb-0 py-0">
-        {organization?.name ? (
-          <Link
-            className="d-flex"
-            to="/me/organization/config"
-            style={{ color: "inherit", textDecoration: "inherit" }}
-          >
-            <Button
-              size="sm"
-              color="darker"
-              onClick={() => null}
-              className="me-2"
-            >
-              <BsPeopleFill className="me-2" /> Organization {organization.name}
-              &apos;s plugin config
-            </Button>
-          </Link>
-        ) : null}
-        <Link
-          className="d-flex"
-          to="/me/config"
-          style={{ color: "inherit", textDecoration: "inherit" }}
+      {enableCreateButton && (
+        <Button
+          id="createbutton"
+          className="d-flex align-items-center"
+          size="sm"
+          color="darker"
+          onClick={onClick}
         >
-          <Button
-            id="pluginconfigbutton"
-            size="sm"
-            color="darker"
-            onClick={() => null}
-          >
-            <BsSliders className="me-2" id="plugin_config" />
-            Your plugin config
-          </Button>
-        </Link>
-      </ContentSection>
+          <BsFillPlusCircleFill />
+          &nbsp;Create {pluginsPage}
+        </Button>
+      )}
+      {showModalCreatePlaybook && (
+        <PlaybookConfigForm
+          toggle={setShowModalCreatePlaybook}
+          isOpen={showModalCreatePlaybook}
+        />
+      )}
+      {showModalCreatePivot && (
+        <PivotConfigForm
+          toggle={setShowModalCreatePivot}
+          isOpen={showModalCreatePivot}
+        />
+      )}
+      {showModalCreateAnalyzer && (
+        <AnalyzerConfigForm
+          toggle={setShowModalCreateAnalyzer}
+          isOpen={showModalCreateAnalyzer}
+        />
+      )}
     </Col>
   );
-  return <RouterTabs routes={routes} extraNavComponent={configButtons} />;
+
+  return <RouterTabs routes={routes} extraNavComponent={createButton} />;
 }

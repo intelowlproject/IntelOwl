@@ -56,7 +56,9 @@ function CustomJobNode({ data }) {
             id="investigation-pivotbtn"
             className="mx-1 p-2"
             size="sm"
-            href={`/scan?parent=${data.id}&observable=${data.name}`}
+            href={`/scan?parent=${data.id}&${
+              data.is_sample ? "isSample=true" : `observable=${data.name}`
+            }`}
             target="_blank"
             rel="noreferrer"
           >
@@ -67,7 +69,8 @@ function CustomJobNode({ data }) {
             placement="top"
             fade={false}
           >
-            Analyze the same observable again
+            Analyze the same observable again. CAUTION! Samples require to
+            select again the file.
           </UncontrolledTooltip>
           {data.isFirstLevel && <RemoveJob data={data} />}
         </div>

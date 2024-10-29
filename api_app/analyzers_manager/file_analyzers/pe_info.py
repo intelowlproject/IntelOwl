@@ -1,18 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-# this analyzer leverage a forked version of PEfile ...
-# ... that fixes one common problem encountered in a lot of analysis
-# original repository: https://github.com/erocarrera/pefile
-# forked repository: https://github.com/mlodic/pefile
-
 import logging
 import os
 from datetime import datetime
 
 import lief
+import magic
 import pefile
 import pyimpfuzzy
+from dotnetfile import DotNetPE
 from PIL import Image
 
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -33,8 +30,83 @@ class No_Icon_Error(Exception):
 
 
 class PEInfo(FileAnalyzer):
+    def update(self):
+        pass
+
+    def dotnetpe(self):
+        results = {}
+        file_type = magic.from_buffer(self.read_file_bytes())
+
+        if ".Net" in file_type:
+            dotnet_file = DotNetPE(self.filepath)
+            dotnet_info = {
+                "runtime_target_version": dotnet_file.get_runtime_target_version(),
+                "number_of_streams": dotnet_file.get_number_of_streams(),
+                "has_resources": dotnet_file.has_resources(),
+                "is_mixed_assembly": dotnet_file.is_mixed_assembly(),
+                "has_native_entry_point": dotnet_file.has_native_entry_point(),
+                "is_native_image": dotnet_file.is_native_image(),
+                "is_windows_forms_app": dotnet_file.is_windows_forms_app(),
+            }
+            results["is_dotnet"] = True
+            results["dotnet_info"] = dotnet_info
+        else:
+            results["is_dotnet"] = False
+        return results
+
+    @staticmethod
+    def _extract_sections(pe):
+        sections = []
+        for section in pe.sections:
+            try:
+                name = section.Name.decode()
+            except UnicodeDecodeError as e:
+                name = "UnableToDecode"
+                logger.warning(f"Unable to decode section {section.Name} exception {e}")
+            section_item = {
+                "name": name,
+                "address": hex(section.VirtualAddress),
+                "virtual_size": hex(section.Misc_VirtualSize),
+                "size": section.SizeOfRawData,
+                "entropy": section.get_entropy(),
+            }
+            sections.append(section_item)
+
+        return sections
+
+    @staticmethod
+    def _extract_import_table(pe):
+        import_table = []
+        directory_entry_import = getattr(pe, "DIRECTORY_ENTRY_IMPORT", [])
+        for entry in directory_entry_import:
+            imp = {
+                "entryname": entry.dll.decode() if entry.dll else None,
+                "symbols": [],
+            }
+            for symbol in entry.imports:
+                if symbol.name:
+                    imp["symbols"].append(symbol.name.decode())
+            import_table.append(imp)
+        return import_table
+
+    @staticmethod
+    def _extract_export_table(full_dump):
+        export_table = []
+        for entry in full_dump.get("Exported symbols", []):
+            symbol_name = entry.get("Name", None)
+            # in case it is a dictionary, we do not mind it
+            try:
+                export_table.append(symbol_name.decode())
+            except (UnicodeDecodeError, AttributeError) as e:
+                logger.debug(f"PE info error while decoding export table symbols: {e}")
+        # this is to reduce the output
+        export_table = export_table[:100]
+        return export_table
+
     def run(self):
         results = {}
+        results["dotnet"] = self.dotnetpe()
+
         try:
             pe = pefile.PE(self.filepath)
             if not pe:
@@ -52,25 +124,7 @@ class PEInfo(FileAnalyzer):
             elif pe.is_exe():
                 results["type"] = "EXE"
 
-            sections = []
-            for section in pe.sections:
-                try:
-                    name = section.Name.decode()
-                except UnicodeDecodeError as e:
-                    name = "UnableToDecode"
-                    logger.warning(
-                        f"Unable to decode section {section.Name} exception {e}"
-                    )
-                section_item = {
-                    "name": name,
-                    "address": hex(section.VirtualAddress),
-                    "virtual_size": hex(section.Misc_VirtualSize),
-                    "size": section.SizeOfRawData,
-                    "entropy": section.get_entropy(),
-                }
-                sections.append(section_item)
-
-            results["sections"] = sections
+            results["sections"] = self._extract_sections(pe)
 
             machine_value = pe.FILE_HEADER.Machine
             results["machine"] = machine_value
@@ -99,32 +153,8 @@ class PEInfo(FileAnalyzer):
                 timestamp
             ).strftime("%Y-%m-%d %H:%M:%S")
 
-            import_table = []
-            directory_entry_import = getattr(pe, "DIRECTORY_ENTRY_IMPORT", [])
-            for entry in directory_entry_import:
-                imp = {
-                    "entryname": entry.dll.decode() if entry.dll else None,
-                    "symbols": [],
-                }
-                for symbol in entry.imports:
-                    if symbol.name:
-                        imp["symbols"].append(symbol.name.decode())
-                import_table.append(imp)
-            results["import_table"] = import_table
-
-            export_table = []
-            for entry in full_dump.get("Exported symbols", []):
-                symbol_name = entry.get("Name", None)
-                # in case it is a dictionary, we do not mind it
-                try:
-                    export_table.append(symbol_name.decode())
-                except (UnicodeDecodeError, AttributeError) as e:
-                    logger.debug(
-                        f"PE info error while decoding export table symbols: {e}"
-                    )
-            # this is to reduce the output
-            export_table = export_table[:100]
-            results["export_table"] = export_table
+            results["import_table"] = self._extract_import_table(pe)
+            results["export_table"] = self._extract_export_table(full_dump)
 
             results["flags"] = full_dump.get("Flags", [])
 

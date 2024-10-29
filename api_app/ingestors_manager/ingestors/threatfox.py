@@ -12,17 +12,20 @@ logger = logging.getLogger(__name__)
 
 
 class ThreatFox(Ingestor):
+    # API endpoint
+    url = "https://threatfox-api.abuse.ch/api/v1/"
+    # Days to check. From 1 to 7
     days: int
 
-    BASE_URL = "https://threatfox-api.abuse.ch/api/v1/"
+    @classmethod
+    def update(cls) -> bool:
+        pass
 
     def run(self) -> Iterable[Any]:
-        result = requests.post(
-            self.BASE_URL, json={"query": "get_iocs", "days": self.days}
-        )
+        result = requests.post(self.url, json={"query": "get_iocs", "days": self.days})
         result.raise_for_status()
         content = result.json()
-        logger.info(f"Threatfox data is {content}")
+        logger.info(f"ThreatFox data is {content}")
         if content["query_status"] != "ok":
             raise IngestorRunException(
                 f"Query status is invalid: {content['query_status']}"

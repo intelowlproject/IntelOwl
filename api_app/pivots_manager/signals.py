@@ -91,3 +91,20 @@ def m2m_changed_pivot_config_connector_config(
     if action.startswith("post"):
         instance.description = instance._generate_full_description()
         instance.save()
+
+
+@receiver(m2m_changed, sender=PivotConfig.playbooks_choice.through)
+def m2m_changed_pivot_config_playbooks_choice(
+    sender,
+    instance: PivotConfig,
+    action: str,
+    reverse,
+    model,
+    pk_set,
+    using,
+    *args,
+    **kwargs,
+):
+    if action.startswith("post"):
+        instance.description = instance._generate_full_description()
+        instance.save()

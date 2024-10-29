@@ -22,17 +22,17 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
             description="test",
             disabled=True,
             schedule=crontab,
-            playbook_to_execute=PlaybookConfig.objects.first(),
         )
+        ic.playbooks_choice.add(PlaybookConfig.objects.first())
         self.assertIsNotNone(ic.periodic_task)
-        self.assertEqual(ic.periodic_task.name, "TestIngestor")
+        self.assertEqual(ic.periodic_task.name, "testIngestor")
         self.assertEqual(ic.periodic_task.task, "intel_owl.tasks.execute_ingestor")
         self.assertFalse(ic.periodic_task.enabled)
         self.assertEqual(ic.periodic_task.crontab, crontab)
         self.assertEqual(ic.periodic_task.queue, "default")
         self.assertEqual(json.loads(ic.periodic_task.kwargs)["config_name"], ic.name)
         self.assertIsNotNone(ic.user)
-        self.assertEqual(ic.user.username, "TestIngestor")
+        self.assertEqual(ic.user.username, "testIngestor")
         ic.delete()
         if created:
             crontab.delete()
@@ -48,8 +48,8 @@ class IngestorConfigSignalsTestCase(CustomTestCase):
             description="test",
             disabled=True,
             schedule=crontab,
-            playbook_to_execute=PlaybookConfig.objects.first(),
         )
+        ic.playbooks_choice.add(PlaybookConfig.objects.first())
         user = ic.user
         task = ic.periodic_task
         self.assertIsNotNone(task)

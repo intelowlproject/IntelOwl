@@ -1,11 +1,23 @@
 # Changelog
 
-[**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+[**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
-## [v6.0.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.1)
+## [v6.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.1.0)
+This release merges all the developments performed by our Google Summer of Code contributors for this year. The program has just ended. You can read the related blogs for more info about:
+- [Nilay Gupta](https://x.com/guptanilay1): [New analyzers for IntelOwl](https://intelowlproject.github.io/blogs/gsoc24_new_analyzers_for_intelowl)
+- [Aryan Bhokare](https://www.linkedin.com/in/aryan-b-3803751a7/): [New Documentation Site for IntelOwl and friends](https://intelowlproject.github.io/blogs/gsoc24_New_documentation_site_summary)
+
+You'll get really tons of new analyzers this time to try out!
+
+Plus we have a new official [documentation site](https://intelowlproject.github.io/docs/)! Please refer to this one from now onwards.
+
+## [v6.0.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.4)
+Mostly adjusts and fixes with few new analyzers: Vulners and AILTypoSquatting Library.
+
+## [v6.0.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.2)
 Major fixes and adjustments. We improved the documentation to help the transition to the new major version.
 
-We added **Pivot** buttons to enable manual Pivoting from an Observable/File analysis to another. See [Doc](https://intelowl.readthedocs.io/en/latest/Usage.html#pivots) for more info
+We added **Pivot** buttons to enable manual Pivoting from an Observable/File analysis to another. See [Doc](https://intelowlproject.github.io/docs/IntelOwl/usage/#pivots) for more info
 
 As usual, we add new plugins. This release brings the following new ones:
 * a complete **TakedownRequest** playbook to automate TakeDown requests for malicious domains
@@ -19,7 +31,7 @@ Little fixes for the major.
 ## [v6.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.0.0)
 This major release is another important milestone for this project! We have been working hard to transform IntelOwl from a *Data Extraction Platform* to a complete *Investigation Platform*!
 
-One of the most noticeable feature is the addition of the [**Investigation** framework](https://intelowl.readthedocs.io/en/latest/Usage.html#investigations-framework)!
+One of the most noticeable feature is the addition of the [**Investigation** framework](https://intelowlproject.github.io/docs/IntelOwl/usage/#investigations-framework)!
  
 Thanks to the this new feature, analysts can leverage IntelOwl as the starting point of their "Investigations", register their findings, correlate the information found, and collaborate...all in a single place.
 
@@ -31,7 +43,7 @@ You can also find us in [Fukuoka at the next FIRSTCON](https://www.first.org/con
 
 Many breaking changes have been introduced with this major release due to dependencies upgrades and architectural changes.
 
-You can find more details in the [Upgrade Guide](https://intelowl.readthedocs.io/en/latest/Installation.html#updating-to-6-0-0-from-a-5-x-x-version). Please read it and follow it carefully before upgrading your IntelOwl instance to this Major version.
+You can find more details in the [Upgrade Guide](https://intelowlproject.github.io/docs/IntelOwl/installation/#updating-to-600-from-a-5xx-version). Please read it and follow it carefully before upgrading your IntelOwl instance to this Major version.
 
 **New analyzers**
 
@@ -59,7 +71,7 @@ The support for Docker Compose v1 has been dropped. Please upgrade to Docker Com
 The python `start.py` script is being replaced with a more light Bash script called `script` at the next Major version.
 Thanks to this change the installation requirements are a lot less than before and it should be easier to install and execute IntelOwl.
 Please start to use the new `start` script from now to avoid future issues.
-For more information: [Installation docs](https://intelowl.readthedocs.io/en/develop/Installation.html) 
+For more information: [Installation docs](https://intelowlproject.github.io/docs/IntelOwl/installation/) 
 
 ## [v5.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.2.2)
 
@@ -67,8 +79,8 @@ This release has been done mainly to adjusts a broken database migration introdu
 
 **Main Improvements**
 * Added new analyzers for [DNS0](https://docs.dns0.eu/) PassiveDNS data
-* Added the chance to collect metrics ([Business Intelligence](https://intelowl.readthedocs.io/en/develop/Advanced-Configuration.html#business-intelligence) regarding Plugins Usage and send it to an ElasticSearch instance.
-* Added new buttons to test ["Healthcheck" and "Pull" operations](https://intelowl.readthedocs.io/en/latest/Usage.html#special-plugins-operations) for each Plugin (A feature introduced in the previous version)
+* Added the chance to collect metrics ([Business Intelligence](https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#business-intelligence) regarding Plugins Usage and send it to an ElasticSearch instance.
+* Added new buttons to test ["Healthcheck" and "Pull" operations](https://intelowlproject.github.io/docs/IntelOwl/usage/#special-plugins-operations) for each Plugin (A feature introduced in the previous version)
 
 **Other improvements**
 * Various generic fixes and adjustments in the GUI
@@ -113,8 +125,8 @@ If you are interested in helping us setting up a public instance of IntelOwl, **
 **General improvements**
 * Added First Visit Guide
 * Improved the documentation with the goal to help the users to understand better how all the available Plugins work.
-* For OpenCTI users having problems in integrating IntelOwl, now you can use a workaround: [doc](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#opencti)
-* A new organization role is available to better manage the org: `admin`. [Doc](https://intelowl.readthedocs.io/en/latest/Usage.html#organizations-and-user-management)
+* For OpenCTI users having problems in integrating IntelOwl, now you can use a workaround: [doc](https://intelowlproject.github.io/docs/advanced_configuration/#opencti)
+* A new organization role is available to better manage the org: `admin`. [Doc](https://intelowlproject.github.io/docs/usage/#organizations-and-user-management)
 * Improvements in the "Jobs History" table: now it shows executed Playbooks and file/observables types correctly.
 * We added a new "Pivot" section in the "Plugin" GUI for the new Plugin type introduced in the [v5.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v5.1.0) release. We added a new dedicated visualizer which allows the user to see when a Pivot has been executed in the "Job Result" page. We are still working on it and planning to add more documentation and GUI usability soon.
 * Improvements in the "Jobs Result" page: now playbooks are more relevant, warnings are shown next to errors, Raw JSON data has been moved next to the other raw data.
@@ -145,7 +157,7 @@ With this release we announce our new official site created by [Abheek Tripathy]
 Feel free to check it out! Official [blog post here](https://intelowlproject.github.io/blogs/official_site_revamped)!
 
 **Important changes**
-* We added a new type of Plugin called [Ingestor](https://intelowl.readthedocs.io/en/latest/Usage.html#ingestors). **Ingestors** allow to automatically insert IOC streams from outside sources to IntelOwl itself.
+* We added a new type of Plugin called [Ingestor](https://intelowlproject.github.io/docs/usage/#ingestors). **Ingestors** allow to automatically insert IOC streams from outside sources to IntelOwl itself.
 * Visualizers are not connected anymore to Analyzers/Connectors. They are connected to a single Playbook instead. This allows the users to create and manage the Visualizers in an easier way.
 * We added the new **Pivot** framework in the backend which allows to connect jobs to each other and to _pivot_ from one indicator to another. This is the first step to give the chance to the users to create more broader and complex investigation in IntelOwl. The next step will be to add the Frontend changes that allows the user to fully leverage the framework 
 
@@ -187,7 +199,7 @@ This framework is extremely powerful and allows every user to customize the GUI 
 
 That would speed the analysis of the results a lot if done correctly!
 
-To aid in this process we added a lot of [documentation and some very simple pre-built analyzers that you can use as example](https://intelowl.readthedocs.io/en/latest/Usage.html#visualizers):
+To aid in this process we added a lot of [documentation and some very simple pre-built analyzers that you can use as example](https://intelowlproject.github.io/docs/usage/#visualizers):
 
 Moreover this release anticipates other important crucial steps for IntelOwl:
 * On June 10th [Matteo Lodi](https://twitter.com/matte_lodi) and [Simone Berni](https://twitter.com/0ssig3no) are presenting IntelOwl at one of the most important Cyber Security events in Italy: [HackinBo](https://www.hackinbo.it/programma.php)
@@ -197,12 +209,12 @@ This release was possible thanks to the effort put in place by [Certego](https:/
 
 **Other important changes:**
 
-We have done some big refactor changes that could make your application do not work as expected after this major upgrade. Please follow the the [migration guide](https://intelowl.readthedocs.io/en/latest/Installation.html#updating-to-5-0-0-from-a-4-x-x-version) before upgrading IntelOwl to the new major release.
+We have done some big refactor changes that could make your application do not work as expected after this major upgrade. Please follow the the [migration guide](https://intelowlproject.github.io/docs/installation/#updating-to-5-0-0-from-a-4-x-x-version) before upgrading IntelOwl to the new major release.
 
 * We moved away from the old big `analyzer_config.json` which was storing all the base configuration of the Analyzers to a database model (we did the same for all the other plugins types too). This allows us to manage plugins creation/modification/deletion in a more reliable manner and via the Django Admin Interface. If you have created custom plugins and changed those `<plugins>_config.json` file manually, you would need to re-create those custom plugins again from the Django Admin Interface.
 
 * We have REMOVED all the environment configuration that we deprecated with the v4.0.0 release and the script to migrate them.
-* We have REMOVED/RENAMED all the analyzers that we deprecated during the v4 releases cycle plus some more (see [migration guide](https://intelowl.readthedocs.io/en/latest/Installation.html#updating-to-5-0-0-from-a-4-x-x-version)). You might need to change the analyzer names in your integrations.
+* We have REMOVED/RENAMED all the analyzers that we deprecated during the v4 releases cycle plus some more (see [migration guide](https://intelowlproject.github.io/docs/installation/#updating-to-5-0-0-from-a-4-x-x-version)). You might need to change the analyzer names in your integrations.
 * We did a lot of code refactors here and there to remove some spaghetti code that was generated by the high amount of different contributors that we had during the recent years. This should be transparent for the user
 
 **Other added minor features**
@@ -282,7 +294,7 @@ and restart IntelOwl. It should solve the permissions problem.
 * Fixed Cape Sandbox analyzer not working
 * Deprecated `ThreatMiner`, `SecurityTrails` and `Robtex` various analyzers and substituted with new versions.
 * Refactoring and features in preparation to add support for cluster deployments.
-* Added a new advanced Documentation section [Advanced Configuration](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html)
+* Added a new advanced Documentation section [Advanced Configuration](https://intelowlproject.github.io/docs/advanced_configuration)
   * Added more support for Cloud Deployments (in particular AWS)
 * Other minor adjustments and fixes
 
@@ -304,7 +316,7 @@ We added some improvements to handle recent Microsoft Office downloaders:
 
 **Deployments:**
 
-We are preparing to add more support for production deployments. We added some [documentation](https://intelowl.readthedocs.io/en/latest/Installation.md) regarding:
+We are preparing to add more support for production deployments. We added some [documentation](https://intelowlproject.github.io/docs/installation/) regarding:
 * Logrotate Configuration
 * Crontab Configuration
 
@@ -363,7 +375,7 @@ If you love this project and you would like to help us, we would love to get you
 
 ## [v4.1.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.2)
 
-This version mainly adds quality improvements to the recently released ["Playbook" feature](https://intelowl.readthedocs.io/en/latest/Usage.html#playbooks):
+This version mainly adds quality improvements to the recently released ["Playbook" feature](https://intelowlproject.github.io/docs/usage/#playbooks):
 * Now it is possible to create a new Playbook easily thanks to a proper button in the GUI. In this way you can save your own Playbooks and repeat them.
 * Now Playbooks support the check of already existing similar analysis like normal analysis already do. This saves computational and analysts' time.
 
@@ -402,12 +414,12 @@ I would like to thank them and all the mentors (@sp35, @eshaan7, @0ssigeno, @dro
 Looking forward for the Google Summer of Code 2023!
 
 **Time savers features**
-- New Plugin Type to allow to easily replicate the same type of analysis without having to select and/or configure groups of analyzers/connectors every time: **Playbooks** ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#playbooks))
-- Default Plugins Parameters can be customized from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#customize-analyzer-execution))
-- Plugins Secrets can now be managed from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Installation.html#deprecated-environment-configuration))
-- Organization admins can enable/disable analyzers for all the org ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#multi-tenancy))
-- Google Oauth authentication support ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#google-oauth2))
-- Added support for `extends` key to simplify Analyzer configuration and customization ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization))
+- New Plugin Type to allow to easily replicate the same type of analysis without having to select and/or configure groups of analyzers/connectors every time: **Playbooks** ([docs reference](https://intelowlproject.github.io/docs/usage/#playbooks))
+- Default Plugins Parameters can be customized from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowlproject.github.io/docs/advanced_usage/#customize-analyzer-execution))
+- Plugins Secrets can now be managed from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowlproject.github.io/docs/installation/#deprecated-environment-configuration))
+- Organization admins can enable/disable analyzers for all the org ([docs reference](https://intelowlproject.github.io/docs/usage/#multi-tenancy))
+- Google Oauth authentication support ([docs reference](https://intelowlproject.github.io/docs/Advanced-Configuration.html#google-oauth2))
+- Added support for `extends` key to simplify Analyzer configuration and customization ([docs reference](https://intelowlproject.github.io/docs/usage/#analyzers-customization))
 
 **Others**
 - Adjusted default time limits and configuration of some analyzers
@@ -442,15 +454,15 @@ The overall user feeling should be drastically improved. We hope you'll enjoy th
 
 While developing the new GUI, our main goal was to at least provide the same features that were available before. Anyway, we had the chance to add some important features:
 
-- A new way to manage users and their permissions: the "Organization" feature. Please refer to the [docs here](https://intelowl.readthedocs.io/en/latest/Usage.md#organizations-and-user-management).
-- A notification mechanism was added. Please refer to the [docs here](https://intelowl.readthedocs.io/en/latest/Usage.md#notifications).
+- A new way to manage users and their permissions: the "Organization" feature. Please refer to the [docs here](https://intelowlproject.github.io/docs/usage/#organizations-and-user-management).
+- A notification mechanism was added. Please refer to the [docs here](https://intelowlproject.github.io/docs/usage/#notifications).
 - Now it is possible to do more advanced lookups through the Jobs History and have an overall better way to filter them.
 - A new "API Access/Sessions" section was added to facilitate the management of API tokens and User sessions.
 - Now it is possible to submit multiple observables / files at the same time.
 
 **RETROCOMPATIBILITY INFO AND HOW TO UPDATE**
 
-Please refer to the [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-and-re-build)
+Please refer to the [**Upgrade Guide**](https://intelowlproject.github.io/docs/installation/#update-and-re-build)
 
 **New/Improved Analyzers:**
 - Added an analyzer which supports the new service provided for free by [The Honeynet Project](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/): [GreedyBear](https://github.com/honeynet/GreedyBear) 
@@ -459,7 +471,7 @@ Please refer to the [**Upgrade Guide**](https://intelowl.readthedocs.io/en/lates
 
 **Other:**
 
-- improved and updated the overall documentation (in particular the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.md) section) to help the developers to start to work on the project
+- improved and updated the overall documentation (in particular the [Contribute](https://intelowlproject.github.io/docs/contribute) section) to help the developers to start to work on the project
 - added DOCKER BUILDKIT, `--debug-build` and Watchman dependency to speed up development
 - now the Backend and the Frontend are respectively highly dependant from 2 new open source projects created by [Certego](https://www.certego.net/), [certego-saas](https://github.com/certego/certego-saas) and [certego-ui](https://github.com/certego/certego-ui).
 - a lot of dependencies upgrade, in particular in the new ReactJS Frontend.
@@ -512,7 +524,7 @@ We are proud to announce two new sponsorships today!
 If you are interested in helping the project through a donation, read [here](https://github.com/intelowlproject/IntelOwl/blob/master/.github/partnership_and_sponsors.md) how you can do it!
 
 **New/Improved Analyzers:**
-- New [CyberChef](https://gchq.githuba.io/CyberChef/) Analyzer! Run your own recipes in IntelOwl! Check the [docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#cyberchef)!
+- New [CyberChef](https://gchq.githuba.io/CyberChef/) Analyzer! Run your own recipes in IntelOwl! Check the [docs](https://intelowlproject.github.io/docs/advanced_usage/#cyberchef)!
 
 **Other:**
 - fixes: [#931](https://github.com/intelowlproject/IntelOwl/issues/931)
@@ -539,17 +551,17 @@ If you are interested in helping the project through a donation, read [here](htt
 ## [v3.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.0)
 
 **Notes:**
-- Added helper script that checks and installs [initial requirements](https://intelowl.readthedocs.io/en/develop/Installation.html#requirements). (`initialize.sh`)
-- Added [RADIUS authentication support](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#radius-authentication)
+- Added helper script that checks and installs [initial requirements](https://intelowlproject.github.io/docs/installation/#requirements). (`initialize.sh`)
+- Added [RADIUS authentication support](https://intelowlproject.github.io/docs/advanced_configuration/#radius-authentication)
 
 **New/Improved Analyzers:**
-- Added a new optional [Docker Analyzer](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) running [Onionscan](https://github.com/s-rah/onionscan)
+- Added a new optional [Docker Analyzer](https://intelowlproject.github.io/docs/advanced_usage/#optional-analyzers) running [Onionscan](https://github.com/s-rah/onionscan)
 - Added [CAPE Sandbox](https://capesandbox.com/) file analyzer
 - `Doc_Info` analyzer now runs [msodde](https://github.com/decalage2/oletools/wiki/msodde) together with `olevba` and `XMLMacroDeobfuscator`
 - `PE_Info` analyzer now calculates [impfuzzy](https://github.com/JPCERTCC/impfuzzy) and [dashicon](https://github.com/fr0gger/SuperPeHasher) hashes too.
 
 **Other:**
-- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#example-configuration)
+- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowlproject.github.io/docs/advanced_configuration/#example-configuration)
 - Security: Patched Django Critical Bug + Added Brute Force protection to the Admin page
 - Generic bug fixing and other maintenance work
 - Bump some python dependencies
@@ -594,7 +606,7 @@ If you are interested in helping the project through a donation, read [here](htt
 
 **For IntelOwl Contributors**
 
-We updated the documentation on how to [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#rules). Please read through them if interested in contributing in the project.
+We updated the documentation on how to [Contribute](https://intelowlproject.github.io/docs/contribute/#rules). Please read through them if interested in contributing in the project.
 
 ## [v3.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.2)
 
@@ -705,12 +717,12 @@ This is a minor patch release.
 **Features:**
 
 - Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables.
-- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#special-plugins-operations).
-- Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much more easier to use than before.
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowlproject.github.io/docs/usage/#special-plugins-operations).
+- Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowlproject.github.io/docs/usage/#tlp-support). This makes the analysis form much more easier to use than before.
 
 **New class of plugins called _Connectors_:**
 
-- Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
+- Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowlproject.github.io/docs/usage/#available-connectors).
 - Newly added connectors for threat-sharing:
   - `MISP`: automatically creates an event on your MISP instance.
   - `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance.
@@ -721,7 +733,7 @@ This is a minor patch release.
 
 - The `additional_config_params` attribute was split into the following 3 individual attributes.
   - `config`: Includes common parameters - `queue` and `soft_time_limit`.
-  - `params`: Includes default value, datatype and description for each [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization) or [Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific parameters that modify runtime behaviour.
+  - `params`: Includes default value, datatype and description for each [Analyzer](https://intelowlproject.github.io/docs/usage/#analyzers-customization) or [Connector](https://intelowlproject.github.io/docs/usage/#connectors-customization) specific parameters that modify runtime behaviour.
   - `secrets`: Includes analyzer or connector specific secrets (e.g. API Key) name along with the secret's description. All secrets are required.
 
 **New inbuilt analyzers/fixes to existing:**
@@ -735,7 +747,7 @@ This is a minor patch release.
 - New `ClamAV` analyzer: scan files for viruses/malwares/trojans using [ClamAV antivirus engine](https://docs.clamav.net/).
 - Fixed `Tranco` Analyzer pointing to the wrong `python_module`
 - Removed `CirclePDNS` default value in `env_file_app_template`
-- VirusTotal v3: New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution).
+- VirusTotal v3: New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file. See [Customize Analyzers](https://intelowlproject.github.io/docs/advanced_usage/#customize-analyzer-execution).
 
 **REST API changes:**
 
@@ -797,7 +809,7 @@ Then a lot of maintenance and overall project stability issues solved:
 - bumped new versions of a lot of dependencies
 - Improved "Installation" and "Contribute" documentation
 - added new badges to the README
-- added `--django-server` [option](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start) to speed up development
+- added `--django-server` [option](https://intelowlproject.github.io/docs/contribute/#how-to-start) to speed up development
 - analyzed files are now correctly deleted with the periodic cronjob
 - other little refactors and fixes
 
@@ -876,25 +888,25 @@ We changed `docker-compose` file names for optional analyzers. In the `v.2.0.0` 
 
 - moved docker and docker-compose files under `docker/` folder.
 - users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under `docker/`.
-- users are to use the new [start.py](https://intelowl.readthedocs.io/en/stable/Installation.html#run) method to build or start IntelOwl containers
+- users are to use the new [start.py](https://intelowlproject.github.io/docs/installation/#run) method to build or start IntelOwl containers
 - moved the following analyzers together in a specific optional docker container named `static_analyzers`.
   - [`Capa`](https://github.com/fireeye/capa)
   - [`PeFrame`](https://github.com/guelfoweb/peframe)
   - `Strings_Info_Classic` (based on [flarestrings](https://github.com/fireeye/stringsifter))
   - `Strings_Info_ML` (based on [stringsifter](https://github.com/fireeye/stringsifter))
 
-Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to enable these optional analyzers
+Please see [docs](https://intelowlproject.github.io/docs/advanced_usage/#optional-analyzers) to understand how to enable these optional analyzers
 
 **NEW INBUILT ANALYZERS:**
 
-- added [Qiling](https://github.com/qilingframework/qiling) file analyzer. This is an optional analyzer (see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to activate it).
+- added [Qiling](https://github.com/qilingframework/qiling) file analyzer. This is an optional analyzer (see [docs](https://intelowlproject.github.io/docs/advanced_usage.html#optional-analyzers) to understand how to activate it).
 - added [Stratosphere blacklists](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist) analyzer
 - added [FireEye Red Team Tool Countermeasures](https://github.com/fireeye/red_team_tool_countermeasures) Yara rules analyzer
 - added [emailrep.io](https://emailrep.io/) analyzer
 - added [Triage](https://tria.ge) analyzer for observables (`search` API)
 - added [InQuest](https://labs.inquest.net) analyzer
 - added [WiGLE](api.wigle.net) analyzer
-- new analyzers were added to the `static_analyzers` optional docker container (see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to activate it).
+- new analyzers were added to the `static_analyzers` optional docker container (see [docs](https://intelowlproject.github.io/docs/advanced_usage/#optional-analyzers) to understand how to activate it).
   - [`FireEye Floss`](https://github.com/fireeye/flare-floss) strings analysis.
   - [`Manalyze`](https://github.com/JusticeRage/Manalyze) file analyzer
 
@@ -902,7 +914,7 @@ Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#
 
 - upgraded main Dockerfile to python 3.8
 - added support for the `generic` observable type. In this way it is possible to build analyzers that can analyze everything and not only IPs, domains, URLs or hashes
-- added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Configuration.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
+- added [Multi-queue](https://intelowlproject.github.io/docs/advanced_configuration/#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
 - updated GUI to new [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v1.7.0) version
 - upgraded [Speakeasy](https://github.com/fireeye/speakeasy), [Quark-Engine](https://github.com/quark-engine/quark-engine) and [Dnstwist](https://github.com/elceef/dnstwist) analyzers to last versions
 - moved from Travis CI to Github CI
@@ -1033,7 +1045,7 @@ Patch after **v1.5.0**.
 
 **Breaking Changes:**
 
-- Moved `ldap_config.py` under `configuration/` directory. If you were using LDAP before this release, please refer the [updated docs](https://intelowl.readthedocs.io/en/develop/Advanced-Configuration.html#ldap).
+- Moved `ldap_config.py` under `configuration/` directory. If you were using LDAP before this release, please refer the [updated docs](https://intelowlproject.github.io/docs/advanced_configuration/#ldap).
 
 **Fixes:**
 

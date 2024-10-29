@@ -21,7 +21,7 @@ export default function OrgConfig() {
     organization,
     fetchAll,
     isUserAdmin,
-    noOrg,
+    isInOrganization,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
@@ -30,7 +30,7 @@ export default function OrgConfig() {
         organization: state.organization,
         fetchAll: state.fetchAll,
         isUserAdmin: state.isUserAdmin,
-        noOrg: state.noOrg,
+        isInOrganization: state.isInOrganization,
       }),
       [],
     ),
@@ -38,10 +38,10 @@ export default function OrgConfig() {
 
   // on component mount
   React.useEffect(() => {
-    if (Object.keys(organization).length === 0 && !noOrg) {
+    if (Object.keys(organization).length === 0 && isInOrganization) {
       fetchAll();
     }
-  }, [noOrg, organization, fetchAll]);
+  }, [isInOrganization, organization, fetchAll]);
 
   // page title
   useTitle(
@@ -56,7 +56,7 @@ export default function OrgConfig() {
       loading={loading}
       error={respErr}
       render={() => {
-        if (noOrg)
+        if (!isInOrganization)
           return (
             <Container>
               <Alert color="secondary" className="mt-3 mx-auto">

@@ -475,8 +475,8 @@ class JobTestCase(CustomTestCase):
                 base_path="api_app.pivots_manager.pivots",
                 module="self_analyzable.SelfAnalyzable",
             ),
-            playbook_to_execute=PlaybookConfig.objects.first(),
         )
+        pc.playbooks_choice.add(PlaybookConfig.objects.first())
 
         j1.analyzers_to_execute.set([ac, ac2])
         pc.related_analyzer_configs.set([ac, ac2])

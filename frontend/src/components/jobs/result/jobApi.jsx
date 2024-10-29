@@ -61,6 +61,33 @@ export async function deleteJob(jobId) {
   return success;
 }
 
+export async function rescanJob(jobId) {
+  try {
+    const response = await axios.post(`${JOB_BASE_URI}/${jobId}/rescan`);
+    const newJobId = response.data.id;
+    if (response.status === 202) {
+      addToast(
+        <span>
+          Sent rescan request for job #{jobId}. Created job #{newJobId}.
+        </span>,
+        null,
+        "success",
+        2000,
+      );
+    }
+    return newJobId;
+  } catch (error) {
+    addToast(
+      <span>
+        Failed. Operation: <em>rescan job #{jobId}</em>
+      </span>,
+      error.parsedMsg,
+      "warning",
+    );
+    return null;
+  }
+}
+
 export async function killPlugin(jobId, plugin) {
   const sure = await areYouSureConfirmDialog(
     `kill ${plugin.type} '${plugin.name}'`,

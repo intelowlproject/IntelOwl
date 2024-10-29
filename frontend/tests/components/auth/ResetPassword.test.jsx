@@ -8,9 +8,6 @@ import { AUTH_BASE_URI } from "../../../src/constants/apiURLs";
 import ResetPassword from "../../../src/components/auth/ResetPassword";
 
 jest.mock("axios");
-jest.mock("../../../src/constants/environment", () => ({
-  RECAPTCHA_SITEKEY: "",
-}));
 
 describe("ResetPassword component", () => {
   test("Test valid key", async () => {
@@ -49,7 +46,6 @@ describe("ResetPassword component", () => {
         {
           key: "c0236120-c905-4534-b8ba-aca5e94aa5da",
           password: "NewPassword1234",
-          recaptcha: "noKey",
         },
       );
     });

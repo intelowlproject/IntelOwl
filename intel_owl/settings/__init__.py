@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "api_app.investigations_manager",
     # auth
     "rest_email_auth",
-    "drf_recaptcha",
     # performance debugging
     "silk",
     # celery
@@ -55,6 +54,7 @@ INSTALLED_APPS = [
     "treebeard",
 ]
 
+from .a_secrets import *  # lgtm [py/polluting-import]
 from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]

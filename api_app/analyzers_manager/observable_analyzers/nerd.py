@@ -11,6 +11,7 @@ from api_app.analyzers_manager.exceptions import (
 )
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+
 class NERD(ObservableAnalyzer):
     url: str = "https://nerd.cesnet.cz/nerd/api/v1"
 
@@ -18,41 +19,52 @@ class NERD(ObservableAnalyzer):
     nerd_analysis: str
 
     def run(self):
-        if self.nerd_analysis == "basic":
-            headers = {"Authorization": self._api_key_name, "Accept": "application/json"}
-            uri = f"/ip/{self.observable_name}"
-        elif self.nerd_analysis == "full":
-            headers = {"Authorization": self._api_key_name, "Accept": "application/json"}
-            uri = f"/ip/{self.observable_name}/full"
-        elif self.nerd_analysis == "rep":
-            headers = {"Authorization": self._api_key_name, "Accept": "application/json"}
-            uri = f"/ip/{self.observable_name}/rep"
-        elif self.nerd_analysis == "fmp":
-            headers = {"Authorization": self._api_key_name, "Accept": "application/json"}
-            uri = f"/ip/{self.observable_name}/fmp"
-        else:
-            raise AnalyzerConfigurationException(
-                f"analysis type: '{self.nerd_analysis}' not supported."
-                "Supported are: 'basic', 'full', 'rep', 'fmp'."
-            )
+        match self.nerd_analysis:
+            case "basic":
+                headers = {
+                    "Authorization": self._api_key_name,
+                    "Accept": "application/json",
+                }
+                uri = f"/ip/{self.observable_name}"
+            case "full":
+                headers = {
+                    "Authorization": self._api_key_name,
+                    "Accept": "application/json",
+                }
+                uri = f"/ip/{self.observable_name}/full"
+            case "rep":
+                headers = {
+                    "Authorization": self._api_key_name,
+                    "Accept": "application/json",
+                }
+                uri = f"/ip/{self.observable_name}/rep"
+            case "fmp":
+                headers = {
+                    "Authorization": self._api_key_name,
+                    "Accept": "application/json",
+                }
+                uri = f"/ip/{self.observable_name}/fmp"
+            case _:
+                raise AnalyzerConfigurationException(
+                    f"analysis type: '{self.nerd_analysis}' not supported."
+                    "Supported are: 'basic', 'full', 'rep', 'fmp'."
+                )
 
         try:
             response = requests.get(self.url + uri, headers=headers)
             response.raise_for_status()
+            result = response.json()
         except requests.RequestException as e:
-            try:
-                result = response.json()
-            except ValueError:
-                raise AnalyzerRunException(e)
-            if isinstance(e, HTTPError) and e.response.status_code == 404 and "NOT FOUND" in str(e):
-                return {"status": "NO DATA"}
+            if (
+                isinstance(e, HTTPError)
+                and e.response.status_code == 404
+                and "NOT FOUND" in str(e)
+            ):
+                result = {"status": "NO DATA"}
             else:
                 raise AnalyzerRunException(e)
 
-        result = response.json()
-        
         return result
-
 
     @classmethod
     def _monkeypatch(cls):

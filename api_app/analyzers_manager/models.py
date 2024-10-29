@@ -85,26 +85,28 @@ class AnalyzerReport(AbstractReport):
                     self.errors.append(f"Field {report_key} not present in report")
                     continue
                     # create the related object if necessary
-                if isinstance(data_model_fields[data_model_key], ForeignKey):
-                    # to create an object we need at least
-                    if not isinstance(value, dict):
-                        self.errors.append(
-                            f"Field {report_key} has type {type(report_key)} while a dictionary is expected"
-                        )
-                        continue
-                    value, _ = data_model_fields[
-                        data_model_key
-                    ].related_model.objects.get_or_create(**value)
-                elif isinstance(data_model_fields[data_model_key], ArrayField):
-                    if data_model_key not in result:
-                        result[data_model_key] = []
-                    if isinstance(value, list):
-                        result[data_model_key].extend(value)
-                    elif isinstance(value, dict):
-                        result[data_model_key].extend(list(value.keys()))
-                    else:
-                        result[data_model_key].append(value)
-            result[data_model_key] = value
+            if isinstance(data_model_fields[data_model_key], ForeignKey):
+                # to create an object we need at least
+                if not isinstance(value, dict):
+                    self.errors.append(
+                        f"Field {report_key} has type {type(report_key)} while a dictionary is expected"
+                    )
+                    continue
+                value, _ = data_model_fields[
+                    data_model_key
+                ].related_model.objects.get_or_create(**value)
+                result[data_model_key] = value
+            elif isinstance(data_model_fields[data_model_key], ArrayField):
+                if data_model_key not in result:
+                    result[data_model_key] = []
+                if isinstance(value, list):
+                    result[data_model_key].extend(value)
+                elif isinstance(value, dict):
+                    result[data_model_key].extend(list(value.keys()))
+                else:
+                    result[data_model_key].append(value)
+            else:
+                result[data_model_key] = value
         return result
 
     def create_data_model(self) -> Optional[BaseDataModel]:

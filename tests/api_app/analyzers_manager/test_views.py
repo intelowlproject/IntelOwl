@@ -5,7 +5,10 @@ from unittest.mock import patch
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-from api_app.models import Job
+from api_app.choices import PythonModuleBasePaths
+from api_app.models import Job, Parameter, PluginConfig, PythonModule
+from certego_saas.apps.organization.membership import Membership
+from certego_saas.apps.organization.organization import Organization
 from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
 from tests.api_app.test_views import AbstractConfigViewSetTestCaseMixin
 
@@ -70,6 +73,156 @@ class AnalyzerConfigViewSetTestCase(
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
         self.assertEqual(result["errors"]["detail"], "No healthcheck implemented")
+
+    def test_create(self):
+        # invalid fields
+        response = self.client.post(
+            self.URL,
+            data={
+                "name": "TestCreate",
+                "python_module": "basic_observable_analyzer.BasicObservableAnalyzer",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+        # required fields
+        response = self.client.post(
+            self.URL,
+            data={
+                "name": "TestCreate",
+                "description": "test create",
+                "python_module": "basic_observable_analyzer.BasicObservableAnalyzer",
+                "type": "observable",
+                "observable_supported": ["generic"],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201, response.json())
+        try:
+            ac = AnalyzerConfig.objects.get(name="TestCreate")
+        except AnalyzerConfig.DoesNotExist as e:
+            self.fail(e)
+        else:
+            ac.delete()
+
+        # with plugin config
+        p, _ = Parameter.objects.get_or_create(
+            name="url",
+            python_module=PythonModule.objects.get(
+                base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
+                module="basic_observable_analyzer.BasicObservableAnalyzer",
+            ),
+            is_secret=False,
+            required=True,
+            type="str",
+        )
+        response = self.client.post(
+            self.URL,
+            data={
+                "name": "TestCreate",
+                "description": "test create",
+                "python_module": "basic_observable_analyzer.BasicObservableAnalyzer",
+                "type": "observable",
+                "observable_supported": ["generic"],
+                "plugin_config": [
+                    {
+                        "type": "1",
+                        "plugin_name": "TestCreate",
+                        "attribute": "url",
+                        "value": "https://www.mytesturl.com",
+                        "config_type": "1",
+                    }
+                ],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201, response.json())
+        try:
+            ac = AnalyzerConfig.objects.get(name="TestCreate")
+        except AnalyzerConfig.DoesNotExist as e:
+            self.fail(e)
+        try:
+            plugin = PluginConfig.objects.get(analyzer_config=ac.pk)
+        except PluginConfig.DoesNotExist as e:
+            self.fail(e)
+        else:
+            self.assertEqual(plugin.value, "https://www.mytesturl.com")
+            self.assertEqual(plugin.parameter, p)
+
+            p.delete()
+            plugin.delete()
+            ac.delete()
+
+    def test_update(self):
+        org1, _ = Organization.objects.get_or_create(name="test")
+        m_user, _ = Membership.objects.get_or_create(
+            user=self.user, organization=org1, is_owner=False
+        )
+
+        # user not in org can't update analyzer
+        self.client.force_authenticate(self.guest)
+        plugin = self.model_class.objects.order_by("?").first().name
+        response = self.client.patch(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 403, response.json())
+        # superuser not in org can update analyzer
+        self.client.force_authenticate(self.superuser)
+        response = self.client.patch(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 200, response.json())
+        # user in org can't update analyzer
+        self.client.force_authenticate(m_user.user)
+        plugin = self.model_class.objects.order_by("?").first().name
+        response = self.client.patch(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 403, response.json())
+        # owner/admin can update analyzer
+        m_user.is_owner = True
+        m_user.is_admin = True
+        m_user.save()
+        self.client.force_authenticate(m_user.user)
+        response = self.client.patch(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 200, response.json())
+
+    def test_delete(self):
+        org1, _ = Organization.objects.get_or_create(name="test")
+        m_user, _ = Membership.objects.get_or_create(
+            user=self.user, organization=org1, is_owner=False
+        )
+        ac = AnalyzerConfig(
+            name="test",
+            description="test delete",
+            python_module=PythonModule.objects.filter(
+                base_path=PythonModuleBasePaths.ObservableAnalyzer.value
+            ).first(),
+        )
+        ac.save()
+        ac1 = AnalyzerConfig(
+            name="test1",
+            description="test delete",
+            python_module=PythonModule.objects.filter(
+                base_path=PythonModuleBasePaths.ObservableAnalyzer.value
+            ).first(),
+        )
+        ac1.save()
+
+        # user not in org can't delete analyzer
+        self.client.force_authenticate(self.guest)
+        response = self.client.delete(f"{self.URL}/{ac.name}")
+        self.assertEqual(response.status_code, 403, response.json())
+        # superuser not in org can update analyzer
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.URL}/{ac.name}")
+        self.assertEqual(response.status_code, 204)
+        # user in org can't delete analyzer
+        self.client.force_authenticate(m_user.user)
+        response = self.client.delete(f"{self.URL}/{ac1.name}")
+        self.assertEqual(response.status_code, 403, response.json())
+        # owner/admin can delete analyzer
+        m_user.is_owner = True
+        m_user.is_admin = True
+        m_user.save()
+        self.client.force_authenticate(m_user.user)
+        response = self.client.delete(f"{self.URL}/{ac1.name}")
+        self.assertEqual(response.status_code, 204)
 
 
 class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestCase):

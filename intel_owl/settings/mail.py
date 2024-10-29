@@ -2,12 +2,17 @@
 # See the file 'LICENSE' for copying permission.
 
 from ._util import get_secret
-from .aws import AWS_REGION
+from .a_secrets import AWS_REGION
 from .commons import STAGE_CI, STAGE_LOCAL
 
 DEFAULT_FROM_EMAIL = get_secret("DEFAULT_FROM_EMAIL")
 DEFAULT_EMAIL = get_secret("DEFAULT_EMAIL")
 AWS_SES = get_secret("AWS_SES", False) == "True"
+
+EMAIL_HOST = get_secret("EMAIL_HOST")
+EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = get_secret("EMAIL_PORT")
 
 if STAGE_LOCAL:
     # The console backend writes the emails that would be sent to the standard output
@@ -28,9 +33,5 @@ else:
         AWS_SES_FROM_EMAIL = get_secret("EMAIL_HOST")
     else:
         EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-        EMAIL_HOST = get_secret("EMAIL_HOST")
-        EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
-        EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")
-        EMAIL_PORT = get_secret("EMAIL_PORT")
         EMAIL_USE_TLS = get_secret("EMAIL_USE_TLS", False) == "True"
         EMAIL_USE_SSL = get_secret("EMAIL_USE_SSL", False) == "True"

@@ -112,7 +112,7 @@ class MWDB_Scan(FileAnalyzer):
         else:
             try:
                 file_info = self.mwdb.query_file(query)
-            except HTTPError:
+            except (HTTPError, mwdblib.exc.ObjectNotFoundError):
                 result["not_found"] = True
                 return result
             else:

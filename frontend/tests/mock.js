@@ -12,6 +12,22 @@ export const mockedUseAuthStore = {
     total_submissions: 10,
     month_submissions: 2,
   },
+  isAuthenticated: () => true,
+  updateToken: () => {},
+  deleteToken: () => {},
+  service: {
+    fetchUserAccess: () => {},
+    loginUser: () => {},
+    logoutUser: () => {},
+    forceLogout: () => {},
+  },
+};
+
+export const mockedUseAuthStoreNoAuth = {
+  loading: false,
+  token: null,
+  user: {},
+  access: {},
   isAuthenticated: () => false,
   updateToken: () => {},
   deleteToken: () => {},
@@ -27,7 +43,7 @@ export const mockedUseOrganizationStoreNoOrg = {
   loading: false,
   error: null,
   isUserOwner: false,
-  noOrg: true,
+  isInOrganization: false,
   organization: {},
   membersCount: undefined,
   members: [],
@@ -41,7 +57,7 @@ export const mockedUseOrganizationStoreOwner = {
   loading: false,
   error: null,
   isUserOwner: true,
-  noOrg: false,
+  isInOrganization: true,
   organization: {
     owner: {
       full_name: "user owner",
@@ -222,10 +238,12 @@ export const mockedPlaybooks = {
 export const mockedUsePluginConfigurationStore = {
   analyzersLoading: false,
   connectorsLoading: false,
+  pivotsLoading: false,
   visualizersLoading: false,
   playbooksLoading: false,
   analyzersError: null,
   connectorsError: null,
+  pivotsErrors: null,
   playbooksError: null,
   visualizersError: null,
   analyzers: [
@@ -265,7 +283,36 @@ export const mockedUsePluginConfigurationStore = {
       plugin_type: "1",
     },
   ],
-  connectors: [],
+  connectors: [
+    {
+      name: "TEST_CONNECTOR",
+      config: {
+        queue: "default",
+        soft_time_limit: 30,
+      },
+      python_module: "test.Test",
+      description: "Test connector",
+      disabled: false,
+      type: "observable",
+      docker_based: false,
+      maximum_tlp: "AMBER",
+      observable_supported: ["domain", "generic", "hash", "ip", "url", "file"],
+      supported_filetypes: [],
+      run_hash: false,
+      run_hash_type: "",
+      not_supported_filetypes: [],
+      params: {},
+      secrets: {},
+      verification: {
+        configured: true,
+        details: "Ready to use!",
+        missing_secrets: [],
+      },
+      orgPluginDisabled: false,
+      plugin_type: "2",
+    },
+  ],
+  pivots: [],
   visualizers: [],
   ingestors: [],
   playbooks: [

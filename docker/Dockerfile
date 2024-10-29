@@ -64,8 +64,6 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
     && touch ${LOG_PATH}/asgi/daphne.log \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
-    # this is cause stringstifer creates this directory during the build and cause celery to crash
-    && rm -rf /root/.local \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download github stuff
     && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh

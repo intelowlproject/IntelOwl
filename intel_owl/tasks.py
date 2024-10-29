@@ -66,7 +66,7 @@ def execute_ingestor(config_name: str):
     else:
         class_: typing.Type[Ingestor] = config.python_module.python_class
         obj: Ingestor = class_(config=config)
-        obj.start(runtime_configuration={}, job_id=None, task_id=None)
+        obj.start({}, None, None)  # runtime_configuration, job_id, task_id
         logger.info(f"Executing ingestor {config.name}")
 
 
@@ -381,9 +381,11 @@ def send_bi_to_elastic(max_timeout: int = 60, max_objects: int = 10000):
             VisualizerReport,
         ]:
             report_class: typing.Type[AbstractReport]
-            report_class.objects.filter(sent_to_bi=False).filter_completed().order_by(
-                "-start_time"
-            )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)
+            report_class.objects.filter(sent_to_bi=False).filter_completed().defer(
+                "report"
+            ).order_by("-start_time")[:max_objects].send_to_elastic_as_bi(
+                max_timeout=max_timeout
+            )
         Job.objects.filter(sent_to_bi=False).filter_completed().order_by(
             "-received_request_time"
         )[:max_objects].send_to_elastic_as_bi(max_timeout=max_timeout)

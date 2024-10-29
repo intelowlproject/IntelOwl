@@ -1,0 +1,28 @@
+services:
+  traefik:
+    container_name: "intelowl_traefik_local"
+    command:
+      # Pleases refer to the official documentation: https://doc.traefik.io/traefik/
+      # LOGS
+      - "--log.level=DEBUG"
+      # DASHBOARD
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      # ENTRYPOINTS - redirect every request to use HTTPS
+      - "--entrypoints.web.address=:80"
+      # PROVIDERS
+      - "--providers.docker=true"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  nginx:
+      depends_on:
+        - traefik
+      labels:
+        - "traefik.http.routers.nginx.rule=Host(`localhost`)"
+        - "traefik.http.routers.nginx.entrypoints=web"

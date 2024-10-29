@@ -7,9 +7,9 @@ from api_app.admin import AbstractReportAdminView, PythonConfigAdminView
 from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 
 
+# flake8: noqa
 @admin.register(VisualizerReport)
-class VisualizerReportAdminView(AbstractReportAdminView):
-    ...
+class VisualizerReportAdminView(AbstractReportAdminView): ...
 
 
 @admin.register(VisualizerConfig)

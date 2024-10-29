@@ -1,50 +1,44 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
+
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+
+logger = logging.getLogger(__name__)
+
 
 class DShield(ObservableAnalyzer):
     url: str = "https://isc.sans.edu/api"
 
-    # _api_key_name: str
-    dshield_analysis: str
-
     def run(self):
-        if self.dshield_analysis == "ip":
-            # headers = {"Authorization": self._api_key_name, "Accept": "application/json"}
-            uri = f"/ip/{self.observable_name}?json"
-        elif self.dshield_analysis == "ipdetails":
-            # headers = {"Authorization": self._api_key_name, "Accept": "application/json"}
-            uri = f"/ipdetails/{self.observable_name}?json"
-        else:
-            raise AnalyzerConfigurationException(
-                f"analysis type: '{self.dshield_analysis}' not supported."
-                "Supported are: 'ip', 'ipdetails'."
-            )
+        headers = {"User-Agent": "IntelOwl"}
 
-        try:
-            # response = requests.get(self.url + uri, headers=headers)
-            response = requests.get(self.url + uri)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
+        result = {
+            "ip_info": {"uri": f"/ip/{self.observable_name}?json"},
+            "ip_details": {"uri": f"/ipdetails/{self.observable_name}?json"},
+        }
 
-        result = response.json()
+        for query_type, values in result.items():
+            try:
+                response = requests.get(self.url + values["uri"], headers=headers)
+                response.raise_for_status()
+            except requests.RequestException as e:
+                logger.warning(e, stack_info=True)
+                self.report.errors.append(
+                    f"{query_type} check failed for {self.observable_name}. Err {e}"
+                )
+                self.report.save()
+            else:
+                result[query_type] = response.json()
 
         return result
 
-
     @classmethod
     def _monkeypatch(cls):
-
-
         patches = [
             if_mock_connections(
                 patch(

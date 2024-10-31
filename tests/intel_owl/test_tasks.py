@@ -195,7 +195,8 @@ class SendElasticTestCase(CustomTestCase):
             send_plugin_report_to_elastic()
             self.assertTrue(mocked_elastic_bulk.assert_called_once)
             mocked_bulk_param = mocked_elastic_bulk.call_args.args[1]
-            print(f"debug ci test_initial: {mocked_bulk_param=}")
+            print("debug ci test_initial")
+            print(mocked_bulk_param)
             self.assertEqual(
                 mocked_bulk_param,
                 [
@@ -351,7 +352,8 @@ class SendElasticTestCase(CustomTestCase):
             send_plugin_report_to_elastic()
             self.assertTrue(mocked_elastic_bulk.assert_called_once)
             mocked_bulk_param = mocked_elastic_bulk.call_args.args[1]
-            print(f"debug ci test_update: {mocked_bulk_param=}")
+            print("debug ci test_update")
+            print(mocked_bulk_param)
             self.assertEqual(
                 mocked_bulk_param,
                 [

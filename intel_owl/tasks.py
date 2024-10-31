@@ -404,51 +404,90 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
     from api_app.analyzers_manager.models import AnalyzerReport
     from api_app.connectors_manager.models import ConnectorReport
     from api_app.ingestors_manager.models import IngestorReport
-    from api_app.models import AbstractReport
+    from api_app.models import AbstractReport, LastElasticReportUpdate
     from api_app.pivots_manager.models import PivotReport
     from api_app.visualizers_manager.models import VisualizerReport
 
-    def _convert_report_to_elastic_document(_class: AbstractReport) -> List[Dict]:
+    if settings.ELASTIC_HOST:
         upper_threshold = now().replace(second=0, microsecond=0)
-        lower_threshold = upper_threshold - datetime.timedelta(minutes=5)
-        report_list: list(AbstractReport) = _class.objects.filter(
-            status__in=ReportStatus.final_statuses(),
-            end_time__lt=upper_threshold,
-            end_time__gte=lower_threshold,
-        )
-        return [
-            {
-                "_op_type": "index",
-                "_index": (
-                    "plugin-report-"
-                    f"{inflection.underscore(_class.__name__).replace('_', '-')}-"
-                    f"{datetime.date.today()}"
-                ),
-                "_source": {
-                    "config": {"name": report.config.name},
-                    "job": {"id": report.job.id},
-                    "start_time": report.start_time,
-                    "end_time": report.end_time,
-                    "status": report.status,
-                    "report": report.report,
-                },
-            }
-            for report in report_list
-        ]
+        try:
+            last_elastic_report_update = LastElasticReportUpdate.objects.get()
+        except LastElasticReportUpdate.DoesNotExist:
+            # first time is missing, update some days of reports
+            first_run_start_date = upper_threshold - datetime.timedelta(days=30)
+            logger.warning(
+                f"not stored last update time, create it from: {first_run_start_date}"
+            )
+            last_elastic_report_update = LastElasticReportUpdate(
+                last_update_datetime=first_run_start_date
+            )
+            last_elastic_report_update.save()
 
-    # add document
-    document_list = (
-        _convert_report_to_elastic_document(AnalyzerReport)
-        + _convert_report_to_elastic_document(ConnectorReport)
-        + _convert_report_to_elastic_document(IngestorReport)
-        + _convert_report_to_elastic_document(PivotReport)
-        + _convert_report_to_elastic_document(VisualizerReport)
-    )
-    logger.info(f"documents to add to elastic: {len(document_list)}")
-    try:
-        bulk(connections.get_connection(), document_list)
-    except ApiError as error:
-        logger.critical(error)
+        lower_threshold = last_elastic_report_update.last_update_datetime
+        logger.info(
+            f"add to elastic reports from: {lower_threshold} to {upper_threshold}"
+        )
+
+        def _convert_report_to_elastic_document(
+            _class: AbstractReport,
+            start_time: datetime.datetime,
+            end_time: datetime.datetime,
+        ) -> List[Dict]:
+            report_list: list(AbstractReport) = _class.objects.filter(
+                status__in=ReportStatus.final_statuses(),
+                end_time__gte=start_time,
+                end_time__lt=end_time,
+            )
+            report_document_list = [
+                {
+                    "_op_type": "index",
+                    "_index": (
+                        "plugin-report-"
+                        f"{inflection.underscore(_class.__name__).replace('_', '-')}-"
+                        f"{now().date()}"
+                    ),
+                    "_source": {
+                        "config": {"name": report.config.name},
+                        "job": {"id": report.job.id},
+                        "start_time": report.start_time,
+                        "end_time": report.end_time,
+                        "status": report.status,
+                        "report": report.report,
+                    },
+                }
+                for report in report_list
+            ]
+            logger.info(
+                f"{_class.__name__} has {len(report_document_list)} new documents to upload"
+            )
+            return report_document_list
+
+        # add document
+        all_report_document_list = (
+            _convert_report_to_elastic_document(
+                AnalyzerReport, lower_threshold, upper_threshold
+            )
+            + _convert_report_to_elastic_document(
+                ConnectorReport, lower_threshold, upper_threshold
+            )
+            + _convert_report_to_elastic_document(
+                IngestorReport, lower_threshold, upper_threshold
+            )
+            + _convert_report_to_elastic_document(
+                PivotReport, lower_threshold, upper_threshold
+            )
+            + _convert_report_to_elastic_document(
+                VisualizerReport, lower_threshold, upper_threshold
+            )
+        )
+        logger.info(f"documents to add to elastic: {len(all_report_document_list)}")
+        try:
+            bulk(connections.get_connection(), all_report_document_list)
+        except ApiError as error:
+            logger.critical(error)
+        else:
+            last_elastic_report_update.last_update_datetime = upper_threshold
+            last_elastic_report_update.save()
 
 
 @shared_task(

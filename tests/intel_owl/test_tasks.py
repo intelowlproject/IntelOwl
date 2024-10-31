@@ -24,7 +24,7 @@ _now = datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC)
 class SendElasticTestCase(CustomTestCase):
 
     def setUp(self):
-        job = Job.objects.create(
+        self.job = Job.objects.create(
             observable_name="dns.google.com", tlp="AMBER", user=User.objects.first()
         )
         AnalyzerReport.objects.create(  # valid for initial, not for last 5 minutes
@@ -34,7 +34,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="dns.dns_malicious_detectors.cloudflare_malicious_detector.CloudFlareMaliciousDetector",
                 )
             ),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 4, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 4, 59, tzinfo=datetime.UTC),
             status=AnalyzerReport.Status.SUCCESS,
@@ -49,7 +49,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="dns.dns_malicious_detectors.dns0_eu_malicious_detector.DNS0EUMaliciousDetector",
                 )
             ),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             status=AnalyzerReport.Status.FAILED,
@@ -64,7 +64,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="dns.dns_malicious_detectors.quad9_malicious_detector.Quad9MaliciousDetector",
                 )
             ),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             status=AnalyzerReport.Status.KILLED,
@@ -78,7 +78,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
                 )
             ),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(
                 2024, 9, 29, 10, 58, 49, tzinfo=datetime.timezone.utc
             ),
@@ -97,7 +97,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="dns.dns_resolvers.cloudflare_dns_resolver.CloudFlareDNSResolver",
                 )
             ),
-            job=job,
+            job=self.job,
             status=AnalyzerReport.Status.RUNNING,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
@@ -111,7 +111,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="abuse_submitter.AbuseSubmitter",
                 )
             ),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             status=ConnectorReport.Status.SUCCESS,
@@ -131,7 +131,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="malware_bazaar.MalwareBazaar",
                 )
             ),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             status=IngestorReport.Status.SUCCESS,
@@ -146,7 +146,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="compare.Compare",
                 )
             ).first(),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             status=PivotReport.Status.SUCCESS,
@@ -161,7 +161,7 @@ class SendElasticTestCase(CustomTestCase):
                     module="dns.DNS",
                 )
             ),
-            job=job,
+            job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             status=VisualizerReport.Status.SUCCESS,
@@ -195,8 +195,6 @@ class SendElasticTestCase(CustomTestCase):
             send_plugin_report_to_elastic()
             self.assertTrue(mocked_elastic_bulk.assert_called_once)
             mocked_bulk_param = mocked_elastic_bulk.call_args.args[1]
-            print("debug ci test_initial")
-            print(mocked_bulk_param)
             self.assertEqual(
                 mocked_bulk_param,
                 [
@@ -205,7 +203,7 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_source": {
                             "config": {"name": "CloudFlare_Malicious_Detector"},
-                            "job": {"id": 1},
+                            "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 4, 49, tzinfo=datetime.timezone.utc
                             ),
@@ -224,7 +222,7 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_source": {
                             "config": {"name": "DNS0_EU_Malicious_Detector"},
-                            "job": {"id": 1},
+                            "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
@@ -240,7 +238,7 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_source": {
                             "config": {"name": "Quad9_Malicious_Detector"},
-                            "job": {"id": 1},
+                            "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
@@ -256,7 +254,7 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-connector-report-2024-10-29",
                         "_source": {
                             "config": {"name": "AbuseSubmitter"},
-                            "job": {"id": 1},
+                            "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
@@ -277,7 +275,7 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-ingestor-report-2024-10-29",
                         "_source": {
                             "config": {"name": "MalwareBazaar"},
-                            "job": {"id": 1},
+                            "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
@@ -293,7 +291,7 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-pivot-report-2024-10-29",
                         "_source": {
                             "config": {"name": "AbuseIpToSubmission"},
-                            "job": {"id": 1},
+                            "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
@@ -313,7 +311,7 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-visualizer-report-2024-10-29",
                         "_source": {
                             "config": {"name": "DNS"},
-                            "job": {"id": 1},
+                            "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
@@ -352,8 +350,6 @@ class SendElasticTestCase(CustomTestCase):
             send_plugin_report_to_elastic()
             self.assertTrue(mocked_elastic_bulk.assert_called_once)
             mocked_bulk_param = mocked_elastic_bulk.call_args.args[1]
-            print("debug ci test_update")
-            print(mocked_bulk_param)
             self.assertEqual(
                 mocked_bulk_param,
                 [
@@ -365,7 +361,7 @@ class SendElasticTestCase(CustomTestCase):
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
-                            "job": {"id": 2},
+                            "job": {"id": self.job.id},
                             "report": {},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
@@ -381,7 +377,7 @@ class SendElasticTestCase(CustomTestCase):
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
-                            "job": {"id": 2},
+                            "job": {"id": self.job.id},
                             "report": {},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
@@ -397,7 +393,7 @@ class SendElasticTestCase(CustomTestCase):
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
-                            "job": {"id": 2},
+                            "job": {"id": self.job.id},
                             "report": {
                                 "body": "hello world",
                                 "from": "sender@gmail.com",
@@ -418,7 +414,7 @@ class SendElasticTestCase(CustomTestCase):
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
-                            "job": {"id": 2},
+                            "job": {"id": self.job.id},
                             "report": {},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
@@ -434,7 +430,7 @@ class SendElasticTestCase(CustomTestCase):
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
-                            "job": {"id": 2},
+                            "job": {"id": self.job.id},
                             "report": {
                                 "created": True,
                                 "job_id": [1],
@@ -454,7 +450,7 @@ class SendElasticTestCase(CustomTestCase):
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
-                            "job": {"id": 2},
+                            "job": {"id": self.job.id},
                             "report": {
                                 "elements": {
                                     "alignment": "around",

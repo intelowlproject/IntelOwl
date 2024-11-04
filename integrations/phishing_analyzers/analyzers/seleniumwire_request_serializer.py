@@ -1,15 +1,19 @@
 import base64
 from datetime import datetime
+from logging import getLogger
 
 from seleniumwire.request import Request, Response, WebSocketMessage
+
+logger = getLogger(__name__)
 
 
 def dump_seleniumwire_requests(request: Request) -> dict:
     """
     Serializer for seleniumwire.request.Request
     """
+    logger.info("Starting to serialize seleniumwire request")
     response: Response = request.response
-    return {
+    serialized: {} = {
         "id": request.id if request.id else "",
         "method": request.method,
         "url": request.url,
@@ -43,11 +47,14 @@ def dump_seleniumwire_requests(request: Request) -> dict:
             else None
         ),
     }
+    logger.info("Finished serializing seleniumwire request")
+    return serialized
 
 
 # at the moment this method is not used. it can be used
 # to decode data encoded with the previous function
 def load_seleniumwire_requests(to_load: dict) -> Request:
+    logger.info("Starting to deserialize seleniumwire request")
     response_to_load = to_load["response"]
     response = (
         Response(
@@ -91,4 +98,5 @@ def load_seleniumwire_requests(to_load: dict) -> Request:
             response.cert = response_to_load["cert"]
         request.response = response
 
+    logger.info("Finished deserializing seleniumwire request")
     return request

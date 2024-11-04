@@ -22,7 +22,7 @@ plugin = {
     "health_check_status": True,
     "type": "observable",
     "docker_based": True,
-    "maximum_tlp": "RED",
+    "maximum_tlp": "CLEAR",
     "observable_supported": ["url", "domain"],
     "supported_filetypes": [],
     "run_hash": False,

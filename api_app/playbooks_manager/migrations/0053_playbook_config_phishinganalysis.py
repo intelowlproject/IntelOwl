@@ -25,7 +25,7 @@ plugin = {
     },
     "scan_mode": 1,
     "scan_check_time": None,
-    "tlp": "AMBER",
+    "tlp": "CLEAR",
     "starting": False,
     "owner": None,
     "tags": [],

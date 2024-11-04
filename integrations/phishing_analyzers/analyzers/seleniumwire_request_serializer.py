@@ -45,6 +45,8 @@ def dump_seleniumwire_requests(request: Request) -> dict:
     }
 
 
+# at the moment this method is not used. it can be used
+# to decode data encoded with the previous function
 def load_seleniumwire_requests(to_load: dict) -> Request:
     response_to_load = to_load["response"]
     response = (

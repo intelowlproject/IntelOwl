@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 from typing import Iterator
@@ -25,6 +26,27 @@ fh_err.setLevel(logging.ERROR)
 logger.addHandler(fh)
 logger.addHandler(fh_err)
 logger.setLevel(log_level)
+
+
+def driver_exception_handler(action: str = ""):
+    def _driver_exception_handler(func):
+        @functools.wraps(func)
+        def handle_exception(self, *args, **kwargs):
+            # if url is set the action should be "navigate"
+            url = kwargs.get("url", "")
+            try:
+                return func(self, *args, **kwargs)
+            except WebDriverException as e:
+                logger.error(
+                    f"Error while performing {action=}"
+                    f"{f" for {url=}" if url else ""}: {e}"
+                )
+                self.restart(motivation=action)
+                func(self, *args, **kwargs)
+
+        return handle_exception
+
+    return _driver_exception_handler
 
 
 class DriverWrapper:
@@ -70,7 +92,7 @@ class DriverWrapper:
         return driver
 
     def restart(self, motivation: str = ""):
-        logger.info(f"Restarting driver: {motivation}")
+        logger.info(f"Restarting driver: {motivation=}")
         self._driver.quit()
         self._driver = self._init_driver(
             window_width=self.window_width, window_height=self.window_height
@@ -79,45 +101,30 @@ class DriverWrapper:
             logger.info(f"Navigating to {self.last_url} after driver has restarted")
             self.navigate(self.last_url)
 
-    def navigate(self, url: str):
+    @driver_exception_handler(action="navigate")
+    def navigate(self, url: str = ""):
         if not url:
             logger.error("Empty URL! Something's wrong!")
             return
 
         self.last_url = url
-        try:
-            logger.info(f"Navigating to {url=}")
-            self._driver.get(url)
-        except WebDriverException as e:
-            logger.error(f"Error while navigating to {url=}: {e}")
-            self.restart(motivation="navigate")
+        logger.info(f"Navigating to {url=}")
+        self._driver.get(url)
 
-    @property
-    def page_source(self) -> str:
-        try:
-            return self._driver.page_source
-        except WebDriverException as e:
-            logger.error(f"Error while accessing page_source: {e}")
-            self.restart(motivation="page_source")
-            return self.page_source
+    @driver_exception_handler(action="page_source")
+    def get_page_source(self) -> str:
+        logger.info(f"Extracting page source for url {self.last_url}")
+        return self._driver.page_source
 
-    @property
-    def current_url(self) -> str:
-        try:
-            return self._driver.current_url
-        except WebDriverException as e:
-            logger.error(f"Error while accessing current_url: {e}")
-            self.restart(motivation="current_url")
-            return self.current_url
+    @driver_exception_handler(action="current_url")
+    def get_current_url(self) -> str:
+        logger.info("Extracting current URL of page")
+        return self._driver.current_url
 
-    @property
-    def base64_screenshot(self) -> str:
-        try:
-            return self._driver.get_screenshot_as_base64()
-        except WebDriverException as e:
-            logger.error(f"Error while dumping base64_screenshot: {e}")
-            self.restart(motivation="base64_screenshot")
-            return self.base64_screenshot
+    @driver_exception_handler(action="base64_screenshot")
+    def get_base64_screenshot(self) -> str:
+        logger.info(f"Extracting screenshot of page as base64 for url {self.last_url}")
+        return self._driver.get_screenshot_as_base64()
 
     def iter_requests(self) -> Iterator[Request]:
         return self._driver.iter_requests()

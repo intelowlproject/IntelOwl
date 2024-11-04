@@ -91,8 +91,9 @@ class PhishingFormCompiler(FileAnalyzer):
             try:
                 self.html_source_code = self.html_source_code.decode("utf-8")
             except UnicodeDecodeError as e:
-                logger.warning(f"Error during HTML source page decoding: {e}")
-                logger.warning("Trying to fix the error...")
+                logger.warning(
+                    f"Error during HTML source page decoding: {e}\nTrying to fix the error..."
+                )
                 self.html_source_code = self.html_source_code.decode(
                     "utf-8", errors="replace"
                 )

@@ -26,6 +26,7 @@ plugin = {
     "observable_supported": [],
     "supported_filetypes": [
         "application/javascript",
+        "application/octet-stream",
         "application/x-javascript",
         "text/javascript",
         "text/html",

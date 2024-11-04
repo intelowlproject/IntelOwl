@@ -29,15 +29,21 @@ logger.setLevel(log_level)
 
 
 def extract_driver_result(driver_wrapper: DriverWrapper) -> dict:
-    return {
-        "page_source": base64.b64encode(driver_wrapper.page_source.encode("utf-8")),
-        "page_screenshot_base64": driver_wrapper.base64_screenshot,
+    logger.info("Extracting driver result...")
+    driver_result: {} = {
+        "page_source": base64.b64encode(
+            driver_wrapper.get_page_source().encode("utf-8")
+        ),
+        "page_screenshot_base64": driver_wrapper.get_base64_screenshot(),
         "page_http_traffic": [
             dump_seleniumwire_requests(request)
             for request in driver_wrapper.iter_requests()
         ],
         "page_http_har": driver_wrapper.get_har(),
     }
+    logger.info("Finished extracting driver result")
+    logger.debug(f"{driver_result=}")
+    return driver_result
 
 
 def analyze_target(
@@ -54,6 +60,7 @@ def analyze_target(
     driver_wrapper.navigate(url=target_url)
 
     result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
+    logger.debug(f"JSON dump of driver {result=}")
     print(result)
 
     driver_wrapper.quit()

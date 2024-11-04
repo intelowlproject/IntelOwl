@@ -76,6 +76,7 @@ class DriverWrapper:
             window_width=self.window_width, window_height=self.window_height
         )
         if self.last_url:
+            logger.info(f"Navigating to {self.last_url} after driver has restarted")
             self.navigate(self.last_url)
 
     def navigate(self, url: str):
@@ -85,10 +86,10 @@ class DriverWrapper:
 
         self.last_url = url
         try:
+            logger.info(f"Navigating to {url=}")
             self._driver.get(url)
         except WebDriverException as e:
-            logger.error("navigate")
-            logger.error(e)
+            logger.error(f"Error while navigating to {url=}: {e}")
             self.restart(motivation="navigate")
 
     @property
@@ -96,8 +97,7 @@ class DriverWrapper:
         try:
             return self._driver.page_source
         except WebDriverException as e:
-            logger.error("page_source")
-            logger.error(e)
+            logger.error(f"Error while accessing page_source: {e}")
             self.restart(motivation="page_source")
             return self.page_source
 
@@ -106,8 +106,7 @@ class DriverWrapper:
         try:
             return self._driver.current_url
         except WebDriverException as e:
-            logger.error("current_url")
-            logger.error(e)
+            logger.error(f"Error while accessing current_url: {e}")
             self.restart(motivation="current_url")
             return self.current_url
 
@@ -116,8 +115,7 @@ class DriverWrapper:
         try:
             return self._driver.get_screenshot_as_base64()
         except WebDriverException as e:
-            logger.error("base64_screenshot")
-            logger.error(e)
+            logger.error(f"Error while dumping base64_screenshot: {e}")
             self.restart(motivation="base64_screenshot")
             return self.base64_screenshot
 

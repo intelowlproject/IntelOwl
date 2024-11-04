@@ -87,7 +87,7 @@ class PhishingFormCompiler(FileAnalyzer):
         # extract and decode source code from file
         self.html_source_code = self.read_file_bytes()
         if self.html_source_code:
-            logger.info(f"{self.html_source_code=}")
+            logger.debug(f"{self.html_source_code=}")
             try:
                 self.html_source_code = self.html_source_code.decode("utf-8")
             except UnicodeDecodeError as e:

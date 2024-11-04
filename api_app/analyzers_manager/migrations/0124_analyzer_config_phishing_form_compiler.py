@@ -15,7 +15,7 @@ plugin = {
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },
     "name": "Phishing_Form_Compiler",
-    "description": "Analyzer that retrieves all forms in page and tries to compile and submit them.",
+    "description": "Analyzer that retrieves all forms in a web page and tries to compile and submit them.",
     "disabled": False,
     "soft_time_limit": 60,
     "routing_key": "default",

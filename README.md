@@ -118,10 +118,8 @@ In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://
 
 Feel free to contact the main developers at any time on Twitter:
 
-- [Matteo Lodi](https://twitter.com/matte_lodi): Author and principal maintainer
+- [Matteo Lodi](https://twitter.com/matte_lodi): Author, Advisor and Administrator
+- [Daniele Rosetti](https://github.com/drosetti): Administrator and Frontend Maintainer
 - [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
-- [Daniele Rosetti](https://github.com/drosetti): Frontend Maintainer
+- [Federico Gibertoni](https://www.linkedin.com/in/federico-gibertoni-a0b2792a0/): Maintainer
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor
-
-### Consultancy
-IntelOwl's maintainers are available to offer [paid consultancy and mentorship](https://opencollective.com/intelowl-project).

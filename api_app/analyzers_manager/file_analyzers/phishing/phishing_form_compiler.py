@@ -206,7 +206,7 @@ class PhishingFormCompiler(FileAnalyzer):
         ):
             message = (
                 f"Form not found in {self.target_site=} with {self.xpath_form_selector=}! "
-                f"Manually check site to see if XPath selector requires some tuning."
+                f"This could mean that the XPath selector requires some tuning."
             )
             logger.info(message)
             return {"error": message}

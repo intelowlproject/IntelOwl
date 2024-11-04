@@ -403,10 +403,8 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
 
     from api_app.analyzers_manager.models import AnalyzerReport
     from api_app.connectors_manager.models import ConnectorReport
-    from api_app.ingestors_manager.models import IngestorReport
     from api_app.models import AbstractReport, LastElasticReportUpdate
     from api_app.pivots_manager.models import PivotReport
-    from api_app.visualizers_manager.models import VisualizerReport
 
     if settings.ELASTIC_HOST:
         upper_threshold = now().replace(second=0, microsecond=0)
@@ -462,7 +460,8 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
             )
             return report_document_list
 
-        # add document
+        # Add document. Remove ingestors and visualizers because they contain data useless in term of search functionality:
+        # ingestors contain samples and visualizers data about organizing the info inside the page.
         all_report_document_list = (
             _convert_report_to_elastic_document(
                 AnalyzerReport, lower_threshold, upper_threshold
@@ -471,13 +470,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                 ConnectorReport, lower_threshold, upper_threshold
             )
             + _convert_report_to_elastic_document(
-                IngestorReport, lower_threshold, upper_threshold
-            )
-            + _convert_report_to_elastic_document(
                 PivotReport, lower_threshold, upper_threshold
-            )
-            + _convert_report_to_elastic_document(
-                VisualizerReport, lower_threshold, upper_threshold
             )
         )
         logger.info(f"documents to add to elastic: {len(all_report_document_list)}")

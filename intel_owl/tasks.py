@@ -413,8 +413,8 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
         try:
             last_elastic_report_update = LastElasticReportUpdate.objects.get()
         except LastElasticReportUpdate.DoesNotExist:
-            # first time is missing, update some days of reports
-            first_run_start_date = upper_threshold - datetime.timedelta(days=30)
+            # first time is missing, use time schedule (5 minutes)
+            first_run_start_date = upper_threshold - datetime.timedelta(minutes=5)
             logger.warning(
                 f"not stored last update time, create it from: {first_run_start_date}"
             )

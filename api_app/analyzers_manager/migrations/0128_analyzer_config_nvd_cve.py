@@ -39,7 +39,7 @@ params = [
         },
         "name": "nvd_api_key",
         "type": "str",
-        "description": "API Key is optional. In case you want to increase the request quota to 50 requests in a rolling 30 second window, you need API key. Get yours at https://nvd.nist.gov/developers/request-an-api-key",
+        "description": "API Key is optional. In case you want to increase the request quota to 50 requests in a rolling 30 second window, you need API key. Get yours at [NIST](https://nvd.nist.gov/developers/request-an-api-key)",
         "is_secret": True,
         "required": False,
     }

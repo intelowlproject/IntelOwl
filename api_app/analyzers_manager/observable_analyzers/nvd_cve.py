@@ -19,7 +19,7 @@ class NVDDetails(ObservableAnalyzer):
         params = {"cveId": self.observable_name}
         try:
             response = requests.get(url=self.url, params=params, headers=headers)
-            response.raise_for_status
+            response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 

@@ -53,6 +53,7 @@ SLACK_TOKEN=
 DEFAULT_SLACK_CHANNEL=
 
 # Elastic Search Configuration
+ELASTIC_DSL_ENABLED=False
 ELASTIC_HOST=
 ELASTIC_PASSWORD=
 # consult to: https://django-elasticsearch-dsl.readthedocs.io/en/latest/settings.html

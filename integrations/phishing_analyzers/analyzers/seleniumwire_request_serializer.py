@@ -11,7 +11,7 @@ def dump_seleniumwire_requests(request: Request) -> dict:
     """
     Serializer for seleniumwire.request.Request
     """
-    logger.info("Starting to serialize seleniumwire request")
+    logger.info(f"Starting to serialize seleniumwire request for url {request.url}")
     response: Response = request.response
     serialized: {} = {
         "id": request.id if request.id else "",
@@ -47,14 +47,16 @@ def dump_seleniumwire_requests(request: Request) -> dict:
             else None
         ),
     }
-    logger.info("Finished serializing seleniumwire request")
+    logger.info(f"Finished serializing seleniumwire request for url {request.url}")
     return serialized
 
 
 # at the moment this method is not used. it can be used
 # to decode data encoded with the previous function
 def load_seleniumwire_requests(to_load: dict) -> Request:
-    logger.info("Starting to deserialize seleniumwire request")
+    logger.info(
+        f"Starting to deserialize seleniumwire request for url {to_load["url"]}"
+    )
     response_to_load = to_load["response"]
     response = (
         Response(
@@ -98,5 +100,5 @@ def load_seleniumwire_requests(to_load: dict) -> Request:
             response.cert = response_to_load["cert"]
         request.response = response
 
-    logger.info("Finished deserializing seleniumwire request")
+    logger.info(f"Finished deserializing seleniumwire request for url {to_load["url"]}")
     return request

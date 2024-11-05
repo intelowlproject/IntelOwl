@@ -19,7 +19,7 @@ services:
 
   chrome-webdriver:
     image: selenium/node-chrome:latest
-    shm_size: 2gb
+    shm_size: 2gb # https://github.com/SeleniumHQ/docker-selenium?tab=readme-ov-file#--shm-size2g
     depends_on:
       - selenium-hub
     environment:

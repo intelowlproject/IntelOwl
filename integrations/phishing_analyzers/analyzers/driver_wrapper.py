@@ -80,10 +80,10 @@ class DriverWrapper:
         # as unprivileged user and it's in a container: trade-off
         options.add_argument("--no-sandbox")
         options.add_argument("--headless=new")
-        options.add_argument("ignore-certificate-errors")
+        options.add_argument("--ignore-certificate-errors")
         options.add_argument(f"--window-size={window_width},{window_height}")
         # traffic must go back to host running selenium-wire
-        options.add_argument("--proxy-server='phishing_analyzers:7007'")
+        options.add_argument("--proxy-server=http://phishing_analyzers:7007")
         driver = Remote(
             command_executor="http://selenium-hub:4444/wd/hub",
             options=options,

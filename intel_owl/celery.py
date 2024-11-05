@@ -38,8 +38,6 @@ def get_queue_name(queue: str) -> str:
     return f"{queue}.fifo"
 
 
-print(dir(settings))
-
 if settings.AWS_SQS:
     PREDEFINED_QUEUES = {
         get_queue_name(queue): {

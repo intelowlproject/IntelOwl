@@ -222,7 +222,6 @@ class PhishingFormCompiler(FileAnalyzer):
             logger.warning(f"Job #{self.job_id}: " + message)
             self.report.errors.append(message)
             self.report.save()
-            return self.report
         logger.info(
             f"Job #{self.job_id}: Found {len(forms)} forms in page {self.target_site}"
         )

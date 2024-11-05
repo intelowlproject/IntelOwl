@@ -30,7 +30,7 @@
     "reactflow": "^11.11.4",
     "reactstrap": "^9.2.3",
     "recharts": "^2.13.0",
-    "zustand": "^4.5.4"
+    "zustand": "^5.0.1"
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",

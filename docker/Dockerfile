@@ -1,6 +1,6 @@
 # Stage 1: Frontend
 # Remove this part if it is conflicting with the frontend you are currently testing
-FROM node:lts-alpine3.18 as frontend-build
+FROM node:lts-alpine3.18 AS frontend-build
 
 WORKDIR /
 # copy react source code
@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.11.7 as backend-build
+FROM python:3.11.7 AS backend-build
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings

@@ -15,6 +15,9 @@
                         "fields": {
                             "keyword": {
                                 "type": "keyword"
+                            },
+                            "plugin_name": {
+                                "type": "keyword"
                             }
                         }
                     }

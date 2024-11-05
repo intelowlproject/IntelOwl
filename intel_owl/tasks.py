@@ -445,7 +445,10 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                         f"{now().date()}"
                     ),
                     "_source": {
-                        "config": {"name": report.config.name},
+                        "config": {
+                            "name": report.config.name,
+                            "plugin_name": report.config.plugin_name,
+                        },
                         "job": {"id": report.job.id},
                         "start_time": report.start_time,
                         "end_time": report.end_time,

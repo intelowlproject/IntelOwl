@@ -189,7 +189,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_source": {
-                            "config": {"name": "DNS0_EU_Malicious_Detector"},
+                            "config": {
+                                "name": "DNS0_EU_Malicious_Detector",
+                                "plugin_name": "Analyzer",
+                            },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
@@ -205,7 +208,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_source": {
-                            "config": {"name": "Quad9_Malicious_Detector"},
+                            "config": {
+                                "name": "Quad9_Malicious_Detector",
+                                "plugin_name": "Analyzer",
+                            },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
@@ -221,7 +227,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-connector-report-2024-10-29",
                         "_source": {
-                            "config": {"name": "AbuseSubmitter"},
+                            "config": {
+                                "name": "AbuseSubmitter",
+                                "plugin_name": "Connector",
+                            },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
@@ -242,7 +251,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-pivot-report-2024-10-29",
                         "_source": {
-                            "config": {"name": "AbuseIpToSubmission"},
+                            "config": {
+                                "name": "AbuseIpToSubmission",
+                                "plugin_name": "Pivot",
+                            },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
@@ -285,7 +297,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
-                            "config": {"name": "DNS0_EU_Malicious_Detector"},
+                            "config": {
+                                "name": "DNS0_EU_Malicious_Detector",
+                                "plugin_name": "Analyzer",
+                            },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
@@ -301,7 +316,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
-                            "config": {"name": "Quad9_Malicious_Detector"},
+                            "config": {
+                                "name": "Quad9_Malicious_Detector",
+                                "plugin_name": "Analyzer",
+                            },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
@@ -317,7 +335,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-connector-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
-                            "config": {"name": "AbuseSubmitter"},
+                            "config": {
+                                "name": "AbuseSubmitter",
+                                "plugin_name": "Connector",
+                            },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),
@@ -338,7 +359,10 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-pivot-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
-                            "config": {"name": "AbuseIpToSubmission"},
+                            "config": {
+                                "name": "AbuseIpToSubmission",
+                                "plugin_name": "Pivot",
+                            },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
                             ),

@@ -171,7 +171,8 @@ class SendElasticTestCase(CustomTestCase):
         VisualizerReport.objects.all().delete()
         LastElasticReportUpdate.objects.all().delete()
 
-    @override_settings(ELASTIC_HOST="https://elasticsearch:9200")
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
     def test_initial(self, *args, **kwargs):
         self.assertEqual(LastElasticReportUpdate.objects.count(), 0)
 
@@ -266,7 +267,8 @@ class SendElasticTestCase(CustomTestCase):
             datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC),
         )
 
-    @override_settings(ELASTIC_HOST="https://elasticsearch:9200")
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
     def test_update(self, *args, **kwargs):
         LastElasticReportUpdate.objects.create(
             last_update_datetime=_now - datetime.timedelta(minutes=5)

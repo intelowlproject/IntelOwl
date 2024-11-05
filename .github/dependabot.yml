@@ -67,6 +67,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
+      day: "tuesday"
     target-branch: "develop"
     reviewers:
       - drosetti
@@ -121,6 +122,18 @@ updates:
 
   - package-ecosystem: "docker"
     directory: "/integrations/malware_tools_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/phishing_analyzers"
     schedule:
       interval: "weekly"
       day: "tuesday"

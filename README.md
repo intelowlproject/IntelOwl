@@ -121,5 +121,5 @@ Feel free to contact the main developers at any time on Twitter:
 - [Matteo Lodi](https://twitter.com/matte_lodi): Author, Advisor and Administrator
 - [Daniele Rosetti](https://github.com/drosetti): Administrator and Frontend Maintainer
 - [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
-- [Federico Gibertoni](https://www.linkedin.com/in/federico-gibertoni-a0b2792a0/): Maintainer
+- [Federico Gibertoni](https://x.com/fgibertoni1): Maintainer and Community Assistant
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor

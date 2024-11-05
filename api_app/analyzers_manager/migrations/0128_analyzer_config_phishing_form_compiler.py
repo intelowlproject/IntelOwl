@@ -389,8 +389,8 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("api_app", "0062_alter_parameter_python_module"),
-        ("analyzers_manager", "0123_basic_observable_analyzer"),
+        ("api_app", "0063_singleton_and_elastic_report"),
+        ("analyzers_manager", "0127_analyzer_config_dshield"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

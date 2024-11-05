@@ -148,7 +148,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("api_app", "0062_alter_parameter_python_module"),
+        ("api_app", "0063_singleton_and_elastic_report"),
         ("pivots_manager", "0034_changed_resubmitdownloadedfile_playbook_to_execute"),
         ("playbooks_manager", "0053_playbook_config_phishinganalysis"),
     ]

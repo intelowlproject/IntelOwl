@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = "Create or update the index templates in Elasticsearch"
 
     def handle(self, *args, **options):
-        if settings.ELASTIC_DSL_ENABLED and settings.ELASTIC_HOST:
+        if settings.ELASTICSEARCH_DSL_ENABLED and settings.ELASTICSEARCH_DSL_HOST:
             self.stdout.write("Creating/updating the templates...")
             # push template
             with open(

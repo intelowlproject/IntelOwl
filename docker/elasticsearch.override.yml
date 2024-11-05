@@ -15,7 +15,7 @@ services:
       start_period: 2s
       retries: 6
     env_file:
-      - env_file_app
+      - env_file_elasticsearch
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
       - ../certs:/usr/share/elasticsearch/config/certificates

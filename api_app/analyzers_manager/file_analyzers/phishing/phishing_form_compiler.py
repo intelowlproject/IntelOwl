@@ -75,33 +75,33 @@ class PhishingFormCompiler(FileAnalyzer):
             self.target_site = self._job.pivot_parent.starting_job.observable_name
         else:
             logger.warning(
-                f"Job #{self._job.id}: Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook."
+                f"Job #{self.job_id}: Analyzer {self.analyzer_name} should be ran from PhishingAnalysis playbook."
             )
         if self.target_site:
             logger.info(
-                f"Job #{self._job.id}: Extracted {self.target_site} from parent job"
+                f"Job #{self.job_id}: Extracted {self.target_site} from parent job."
             )
         else:
             logger.info(
-                f"Job #{self._job.id}: Target site from parent job not found! Proceeding with only source code."
+                f"Job #{self.job_id}: Target site from parent job not found! Proceeding with only source code."
             )
 
         # extract and decode source code from file
         self.html_source_code = self.read_file_bytes()
         if self.html_source_code:
-            logger.debug(f"Job #{self._job.id}: {self.html_source_code=}")
+            logger.debug(f"Job #{self.job_id}: {self.html_source_code=}")
             try:
                 self.html_source_code = self.html_source_code.decode("utf-8")
             except UnicodeDecodeError as e:
                 logger.warning(
-                    f"Job #{self._job.id}: Error during HTML source page decoding: {e}\nTrying to fix the error..."
+                    f"Job #{self.job_id}: Error during HTML source page decoding: {e}\nTrying to fix the error..."
                 )
                 self.html_source_code = self.html_source_code.decode(
                     "utf-8", errors="replace"
                 )
             else:
                 logger.info(
-                    f"Job #{self._job.id}: Extracted html source code from pivot"
+                    f"Job #{self.job_id}: Extracted html source code from pivot."
                 )
         else:
             raise ValueError("Failed to extract source code from pivot!")
@@ -138,7 +138,7 @@ class PhishingFormCompiler(FileAnalyzer):
             match input_type.lower():
                 case "hidden":
                     logger.info(
-                        f"Job #{self._job.id}: Found hidden input tag with {input_name=} and {input_value=}"
+                        f"Job #{self.job_id}: Found hidden input tag with {input_name=} and {input_value=}"
                     )
                     value_to_set = input_value
 
@@ -152,18 +152,18 @@ class PhishingFormCompiler(FileAnalyzer):
                     value_to_set = self.FAKE_EMAIL_INPUT
                 case _:
                     logger.info(
-                        f"Job #{self._job.id}: {input_type.lower()} is not supported yet!"
+                        f"Job #{self.job_id}: {input_type.lower()} is not supported yet!"
                     )
 
             logger.info(
-                f"Job #{self._job.id}: Sending value {value_to_set} for {input_name=}"
+                f"Job #{self.job_id}: Sending value {value_to_set} for {input_name=}"
             )
             result.setdefault(input_name, value_to_set)
         return result, form_action
 
     def perform_request_to_form(self, form) -> Response:
         params, dest_url = self.compile_form_field(form)
-        logger.info(f"Job #{self._job.id}: Sending {params=} to submit url {dest_url}")
+        logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
         return requests.post(
             url=dest_url,
             params=params,
@@ -187,24 +187,25 @@ class PhishingFormCompiler(FileAnalyzer):
     def is_js_used_in_page(self) -> bool:
         js_tag: [] = xpath_query_on_page(self.parsed_page, self.xpath_js_selector)
         if js_tag:
-            logger.info(f"Job #{self._job.id}: Found script tag: {js_tag}")
+            logger.info(f"Job #{self.job_id}: Found script tag: {js_tag}")
         return bool(js_tag)
 
     def analyze_responses(self, responses: [Response]) -> {}:
-        result: {str: list} = {"successful": [], "error": []}
+        result: [] = []
         for response in responses:
             try:
                 # handle 4xx and 5xx
                 response.raise_for_status()
             except HTTPError as e:
-                message = f"Job #{self._job.id}: Error during request to {response.request.url}: {e}"
-                logger.error(message)
-                result["error"].append(message)
+                message = f"Error during request to {response.request.url}: {e}"
+                logger.error(f"Job #{self.job_id}:" + message)
+                self.report.errors.append(message)
             else:
                 if response.history:
-                    result["successful"].extend(self.handle_3xx_response(response))
+                    result.extend(self.handle_3xx_response(response))
 
-                result["successful"].append(self.handle_2xx_response(response))
+                result.append(self.handle_2xx_response(response))
+        self.report.save()
 
         return result
 
@@ -214,21 +215,23 @@ class PhishingFormCompiler(FileAnalyzer):
             forms := xpath_query_on_page(self.parsed_page, self.xpath_form_selector)
         ):
             message = (
-                f"Job #{self._job.id}: Form not found in {self.target_site=} with "
+                f"Form not found in {self.target_site=} with "
                 f"{self.xpath_form_selector=}! This could mean that the XPath"
                 f" selector requires some tuning."
             )
-            logger.info(message)
-            return {"error": message}
+            logger.warning(f"Job #{self.job_id}: " + message)
+            self.report.errors.append(message)
+            self.report.save()
+            return self.report
         logger.info(
-            f"Job #{self._job.id}: Found {len(forms)} forms in page {self.target_site}"
+            f"Job #{self.job_id}: Found {len(forms)} forms in page {self.target_site}"
         )
 
         responses: [Response] = []
         for form in forms:
             responses.append(self.perform_request_to_form(form))
 
-        result.setdefault("submit_results", self.analyze_responses(responses))
+        result.setdefault("extracted_urls", self.analyze_responses(responses))
         result.setdefault("has_javascript", self.is_js_used_in_page())
         return result
 

@@ -119,7 +119,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("playbooks_manager", "0053_playbook_config_phishinganalysis"),
+        ("playbooks_manager", "0054_playbook_config_phishinganalysis"),
         ("analyzers_manager", "0129_analyzer_config_phishing_extractor"),
     ]
 

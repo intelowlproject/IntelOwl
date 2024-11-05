@@ -118,8 +118,8 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("playbooks_manager", "0052_playbook_config_uris"),
-        ("analyzers_manager", "0129_analyzer_config_phishing_form_compiler"),
+        ("playbooks_manager", "0053_add_androguard_to_free_to_use_analyzers"),
+        ("analyzers_manager", "0128_analyzer_config_phishing_form_compiler"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

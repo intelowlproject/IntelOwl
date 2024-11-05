@@ -150,7 +150,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("api_app", "0063_singleton_and_elastic_report"),
         ("pivots_manager", "0034_changed_resubmitdownloadedfile_playbook_to_execute"),
-        ("playbooks_manager", "0053_playbook_config_phishinganalysis"),
+        ("playbooks_manager", "0054_playbook_config_phishinganalysis"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

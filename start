@@ -46,7 +46,7 @@ print_help () {
   echo "    --custom                    Uses custom.override.yml to leverage your"
   echo "                                customized configuration."
   echo "    --debug-build               See more verbose output from the build."
-  echo "    --elastic                   This spins up Elasticsearch and Kibana on your"
+  echo "    --elastic                   This spins up Elasticsearch on your"
   echo "                                machine (might need >=16GB of RAM)."
   echo "    --https                     This leverage the https.override.yml file that"
   echo "                                can be used to host IntelOwl with HTTPS and your"
@@ -205,6 +205,7 @@ while [[ $# -gt 0 ]]; do
   ;;
   --elastic)
     params["elastic"]=true
+    ./create_elastic_certs
     shift 1
   ;;
   --pycti-version)

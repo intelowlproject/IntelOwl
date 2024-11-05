@@ -2,18 +2,29 @@ services:
   uwsgi:
     depends_on:
       - elasticsearch
+    volumes:
+      - ../certs:/opt/deploy/intel_owl/certs
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: intelowl_elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 9200 || exit 1"]
+      interval: 5s
+      timeout: 2s
+      start_period: 2s
+      retries: 6
+    env_file:
+      - env_file_app
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+      - ../certs:/usr/share/elasticsearch/config/certificates
     environment:
-      - "discovery.type=single-node"
+      - discovery.type=single-node
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/elastic_instance/elasticsearch.key
+      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/elastic_ca/ca.crt
+      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/elastic_instance/elasticsearch.crt
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.0
-    environment:
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-    ports:
-      - '5601:5601'
-    depends_on:
-      - elasticsearch
-
+volumes:
+  elastic_data:

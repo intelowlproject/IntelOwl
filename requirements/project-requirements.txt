@@ -31,7 +31,7 @@ dataclasses==0.6
 flower==2.0.0
 uWSGI==2.0.22
 uwsgitop==0.12
-whitenoise==6.7.0
+whitenoise==6.8.1
 daphne==4.1.0
 channels==4.1.0
 channels-redis==4.2.0
@@ -43,7 +43,7 @@ checkdmarc==5.5.0
 dnspython==2.6.1
 dnstwist[full]==20240812
 google>=3.0.0
-google-cloud-webrisk==1.14.0
+google-cloud-webrisk==1.15.0
 intezer-sdk==1.21
 lief==0.15.1
 maxminddb==2.6.0
@@ -86,6 +86,7 @@ knock-subdomains==7.0.1
 dotnetfile==0.2.4
 docxpy==0.8.5
 pylnk3==0.4.2
+androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==24.10.1
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8

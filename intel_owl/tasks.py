@@ -406,7 +406,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
     from api_app.models import AbstractReport, LastElasticReportUpdate
     from api_app.pivots_manager.models import PivotReport
 
-    if settings.ELASTIC_HOST:
+    if settings.ELASTICSEARCH_DSL_ENABLED and settings.ELASTICSEARCH_DSL_HOST:
         upper_threshold = now().replace(second=0, microsecond=0)
         try:
             last_elastic_report_update = LastElasticReportUpdate.objects.get()

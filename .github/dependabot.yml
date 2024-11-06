@@ -67,7 +67,6 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-      day: "tuesday"
     target-branch: "develop"
     reviewers:
       - drosetti

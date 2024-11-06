@@ -11,15 +11,10 @@
             "config": {
                 "properties": {
                     "name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword"
-                            },
-                            "plugin_name": {
-                                "type": "keyword"
-                            }
-                        }
+                        "type": "keyword"
+                    },
+                    "plugin_name": {
+                        "type": "keyword"
                     }
                 }
             },
@@ -37,13 +32,10 @@
                 "type": "date"
             },
             "status": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                }
+                "type": "keyword"
+            },
+            "errors": {
+                "type": "text"
             },
             "report": {
                 "type": "flattened"

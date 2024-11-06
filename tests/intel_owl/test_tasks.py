@@ -38,7 +38,7 @@ class SendElasticTestCase(CustomTestCase):
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             status=AnalyzerReport.Status.FAILED,
-            errors=["error"],
+            errors=["error1", "error2"],
             task_id=uuid(),
             parameters={},
         )
@@ -203,6 +203,7 @@ class SendElasticTestCase(CustomTestCase):
                             ),
                             "status": "FAILED",
                             "report": {},
+                            "errors": ["error1", "error2"],
                         },
                     },
                     {
@@ -222,6 +223,7 @@ class SendElasticTestCase(CustomTestCase):
                             ),
                             "status": "KILLED",
                             "report": {},
+                            "errors": [],
                         },
                     },
                     {
@@ -246,6 +248,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "from": "sender@gmail.com",
                                 "subject": "Subject",
                             },
+                            "errors": [],
                         },
                     },
                     {
@@ -269,6 +272,7 @@ class SendElasticTestCase(CustomTestCase):
                                 "created": True,
                                 "motivation": None,
                             },
+                            "errors": [],
                         },
                     },
                 ],
@@ -312,6 +316,7 @@ class SendElasticTestCase(CustomTestCase):
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
                             "status": "FAILED",
+                            "errors": ["error1", "error2"],
                         },
                     },
                     {
@@ -331,6 +336,7 @@ class SendElasticTestCase(CustomTestCase):
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
                             "status": "KILLED",
+                            "errors": [],
                         },
                     },
                     {
@@ -355,6 +361,7 @@ class SendElasticTestCase(CustomTestCase):
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
                             "status": "SUCCESS",
+                            "errors": [],
                         },
                     },
                     {
@@ -378,6 +385,7 @@ class SendElasticTestCase(CustomTestCase):
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
                             ),
                             "status": "SUCCESS",
+                            "errors": [],
                         },
                     },
                 ],

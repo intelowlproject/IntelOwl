@@ -15,6 +15,7 @@ from .views import (
     analyze_observable,
     ask_analysis_availability,
     ask_multi_analysis_availability,
+    plugin_report_queries,
     plugin_state_viewer,
 )
 
@@ -40,6 +41,7 @@ urlpatterns = [
         analyze_multiple_observables,
         name="analyze_multiple_observables",
     ),
+    path("plugin_report_queries", plugin_report_queries),
     # router viewsets
     path("", include(router.urls)),
     # Plugins

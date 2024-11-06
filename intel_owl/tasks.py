@@ -454,6 +454,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                         "end_time": report.end_time,
                         "status": report.status,
                         "report": report.report,
+                        "errors": report.errors,
                     },
                 }
                 for report in report_list

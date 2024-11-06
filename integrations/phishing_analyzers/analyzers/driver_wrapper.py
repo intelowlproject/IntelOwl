@@ -39,7 +39,7 @@ def driver_exception_handler(action: str = ""):
             except WebDriverException as e:
                 logger.error(
                     f"Error while performing {action=}"
-                    f"{' for url=' + url if action == "navigate" else ''}: {e}"
+                    f"{' for url=' + url if action == 'navigate' else ''}: {e}"
                 )
                 self.restart(motivation=action)
                 func(self, *args, **kwargs)

@@ -55,7 +55,7 @@ def dump_seleniumwire_requests(request: Request) -> dict:
 # to decode data encoded with the previous function
 def load_seleniumwire_requests(to_load: dict) -> Request:
     logger.info(
-        f"Starting to deserialize seleniumwire request for url {to_load["url"]}"
+        f"Starting to deserialize seleniumwire request for url {to_load['url']}"
     )
     response_to_load = to_load["response"]
     response = (
@@ -100,5 +100,5 @@ def load_seleniumwire_requests(to_load: dict) -> Request:
             response.cert = response_to_load["cert"]
         request.response = response
 
-    logger.info(f"Finished deserializing seleniumwire request for url {to_load["url"]}")
+    logger.info(f"Finished deserializing seleniumwire request for url {to_load['url']}")
     return request

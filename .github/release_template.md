@@ -1,6 +1,7 @@
 # Checklist for creating a new release
 
-- [ ] (optional) If we changed/added Docker Analyzers, we need to configure Docker Hub / Dependabot properly.
+- [ ] If we changed/added Docker Analyzers, we need to configure Docker Hub / Dependabot properly.
+- [ ] I have already checked if all Dependabot issues have been solved before creating this PR.
 - [ ] Update `CHANGELOG.md` for the new version
 - [ ] Change version number `docker/.env`
 - [ ] Verify CI Tests

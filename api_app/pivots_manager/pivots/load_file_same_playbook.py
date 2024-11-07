@@ -2,7 +2,7 @@ from api_app.pivots_manager.models import PivotConfig
 from api_app.pivots_manager.pivots.load_file import LoadFile
 
 
-class LoadFileSamvmePlaybook(LoadFile):
+class LoadFileSamePlaybook(LoadFile):
     field_to_compare: str
 
     @classmethod

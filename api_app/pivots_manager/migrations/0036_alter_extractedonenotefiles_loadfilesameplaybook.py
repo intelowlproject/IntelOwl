@@ -6,7 +6,7 @@ def migrate(apps, schema_editor):
     Parameter = apps.get_model("api_app", "Parameter")
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     PivotConfig = apps.get_model("pivots_manager", "PivotConfig")
-    pivot_to_update = PivotConfig.objects.get(name="ExtractedOneNoteFiles")
+    pivots_to_update = PivotConfig.objects.filter(name__in=["ExtractedOneNoteFiles", "ResubmitDownloadedFile"])
     pm = PythonModule.objects.create(
         health_check_schedule=None,
         update_schedule=None,
@@ -14,28 +14,30 @@ def migrate(apps, schema_editor):
         base_path="api_app.pivots_manager.pivots",
     )
     param1 = Parameter.objects.create(
-        name="field_to_compare",
-        type="str",
-        description="Dotted path to the field",
-        is_secret=False,
-        required=True,
-        python_module=pm,
-    )
-    PluginConfig.objects.filter(pivot_config=pivot_to_update).delete()
-    pivot_to_update.python_module = pm
-    PluginConfig.objects.create(
-        parameter=param1,
-        value="stored_base64",
-        for_organization=False,
-        updated_at="2024-11-07T10:35:46.217160Z",
-        analyzer_config=None,
-        connector_config=None,
-        visualizer_config=None,
-        ingestor_config=None,
-        pivot_config=pivot_to_update,
-    )
-    pivot_to_update.full_clean()
-    pivot_to_update.save()
+          name="field_to_compare",
+          type="str",
+          description="Dotted path to the field",
+          is_secret=False,
+          required=True,
+          python_module=pm,
+     )
+    for pivot_to_update in pivots_to_update:
+
+      PluginConfig.objects.filter(pivot_config=pivot_to_update).delete()
+      pivot_to_update.python_module = pm
+      PluginConfig.objects.create(
+          parameter=param1,
+          value="stored_base64",
+          for_organization=False,
+          updated_at="2024-11-07T10:35:46.217160Z",
+          analyzer_config=None,
+          connector_config=None,
+          visualizer_config=None,
+          ingestor_config=None,
+          pivot_config=pivot_to_update,
+      )
+      pivot_to_update.full_clean()
+      pivot_to_update.save()
 
 
 class Migration(migrations.Migration):

@@ -23,7 +23,6 @@ class BaseDataModelAdminView(admin.ModelAdmin):
 @admin.register(DomainDataModel)
 class DomainDataModelAdminView(BaseDataModelAdminView):
     list_display = BaseDataModelAdminView.list_display + (
-        "ietf_report",
         "rank",
     )
 

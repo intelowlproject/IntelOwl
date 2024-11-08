@@ -117,10 +117,11 @@ class BaseDataModel(models.Model):
 
 
 class DomainDataModel(BaseDataModel):
-    ietf_report = models.ForeignKey(
-        IETFReport, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name="domains"
+    ietf_report = models.ManyToManyField(
+        IETFReport, related_name="domains"
     )  # pdns
     rank = models.IntegerField(null=True, blank=True, default=None)  # Tranco
+    resolutions = pg_fields.ArrayField(LowercaseCharField(max_length=100), default=list)
 
     @classmethod
     def get_serializer(cls) -> Type[ModelSerializer]:

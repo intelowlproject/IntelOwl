@@ -1,9 +1,12 @@
 import json
-from typing import Dict
+from typing import Dict, Type
 
+from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
 from django.utils.timezone import now
+from rest_framework.serializers import ModelSerializer
 
 from api_app.data_model_manager.enums import (
     DataModelEvaluations,
@@ -12,6 +15,8 @@ from api_app.data_model_manager.enums import (
 )
 from api_app.data_model_manager.fields import LowercaseCharField
 from certego_saas.apps.user.models import User
+
+from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 
 
 class IETFReport(models.Model):
@@ -49,11 +54,7 @@ class Signature(models.Model):
 
 
 class BaseDataModel(models.Model):
-    analyzer_report = models.OneToOneField(
-        "analyzers_manager.AnalyzerReport",
-        on_delete=models.CASCADE,
-        related_name="data_model",
-    )
+    objects = BaseDataModelQuerySet.as_manager()
     evaluation = LowercaseCharField(
         max_length=100, null=True, blank=True, default=None
     )  # classification/verdict/found/score/malscore
@@ -95,7 +96,10 @@ class BaseDataModel(models.Model):
     )  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
     TAGS = DataModelTags
+
     EVALUATIONS = DataModelEvaluations
+    class Meta:
+        abstract = True
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -107,17 +111,26 @@ class BaseDataModel(models.Model):
     def owner(self) -> User:
         return self.analyzer_report.user
 
+    @classmethod
+    def get_serializer(cls) -> Type[ModelSerializer]:
+        raise NotImplementedError()
+
 
 class DomainDataModel(BaseDataModel):
     ietf_report = models.ForeignKey(
-        IETFReport, on_delete=models.CASCADE, null=True, blank=True, default=None
+        IETFReport, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name="domains"
     )  # pdns
     rank = models.IntegerField(null=True, blank=True, default=None)  # Tranco
 
+    @classmethod
+    def get_serializer(cls) -> Type[ModelSerializer]:
+        from api_app.data_model_manager.serializers import DomainDataModelSerializer
+
+        return DomainDataModelSerializer
 
 class IPDataModel(BaseDataModel):
     ietf_report = models.ForeignKey(
-        IETFReport, on_delete=models.CASCADE, null=True, blank=True, default=None
+        IETFReport, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name="ips"
     )  # pdns
     asn = models.IntegerField(
         null=True, blank=True, default=None
@@ -143,9 +156,15 @@ class IPDataModel(BaseDataModel):
     # noise = models.BooleanField(null=True)  # GreyNoise
     # riot = models.BooleanField(null=True)  # GreyNoise
 
+    @classmethod
+    def get_serializer(cls) -> Type[ModelSerializer]:
+        from api_app.data_model_manager.serializers import IPDataModelSerializer
+
+        return IPDataModelSerializer
+
 
 class FileDataModel(BaseDataModel):
-    signatures = models.ManyToManyField(Signature)  # ClamAvFileAnalyzer,
+    signatures = models.ManyToManyField(Signature, related_name="files")  # ClamAvFileAnalyzer,
     # MalwareBazaarFileAnalyzer (signatures/yara_rules), Yara (report.list_el.match)
     # Yaraify (report.data.tasks.static_result)
     comments = pg_fields.ArrayField(
@@ -165,3 +184,9 @@ class FileDataModel(BaseDataModel):
     # pdfid_reports = models.JSONField(null=True)  # PdfInfo
     # imphash = LowercaseCharField(max_length=100, null=True)  # PeInfo
     # type = LowercaseCharField(max_length=100, null=True)  # PeInfo
+
+    @classmethod
+    def get_serializer(cls) -> Type[ModelSerializer]:
+        from api_app.data_model_manager.serializers import FileDataModelSerializer
+
+        return FileDataModelSerializer

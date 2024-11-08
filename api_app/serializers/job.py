@@ -539,6 +539,8 @@ class JobSerializer(_AbstractJobViewSerializer):
     investigation = rfs.SerializerMethodField(read_only=True, default=None)
     permissions = rfs.SerializerMethodField()
 
+    analyzers_data_model = rfs.SerializerMethodField(read_only=True)
+
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
@@ -566,7 +568,11 @@ class JobSerializer(_AbstractJobViewSerializer):
             )
         return super().get_fields()
 
+    def get_analyzers_data_model(self, instance: Job):
+        return instance.analyzerreports.get_data_models(instance).serialize()
 
+
+    
 class RestJobSerializer(JobSerializer):
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
         request = self.context.get("request", None)

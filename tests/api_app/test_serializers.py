@@ -192,6 +192,7 @@ class RestJobSerializerTestCase(CustomTestCase):
         self.assertIn("analyzer_reports", js.data)
         self.assertIn("connector_reports", js.data)
         self.assertIn("visualizer_reports", js.data)
+        self.assertIn("analyzers_data_model", js.data)
         job.delete()
 
 

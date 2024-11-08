@@ -8,9 +8,9 @@ from api_app.data_model_manager.models import (
 )
 
 
-@admin.register(BaseDataModel)
 class BaseDataModelAdminView(admin.ModelAdmin):
     list_display = (
+        "pk",
         "evaluation",
         "external_references",
         "related_threats",

@@ -1597,8 +1597,7 @@ def plugin_report_queries(request):
     if not settings.ELASTICSEARCH_DSL_ENABLED:
         raise NotImplementedException()
 
-    # if not request.user.has_membership():
-    #     raise PermissionDenied()
+    # TODO: check permissions
 
     # 1 validate request
     logger.debug(f"{request.query_params=}")
@@ -1641,11 +1640,16 @@ def plugin_report_queries(request):
         filter_list.append(QElastic("term", report=elastic_request_params.report))
 
     # 3 return data
-    logger.debug(f"{filter_list=}")
-    hits = Search(index="plugin-report-*").query(QElastic("bool", filter=filter_list))
-    serialize_response = ElasticResponseSerializer(data=hits)
+    hits = (
+        Search(index="plugin-report-*")
+        .query(QElastic("bool", filter=filter_list))
+        .execute()
+    )
+    logger.debug(f"filters: {filter_list}, hits: {len(hits)}")
+    serialize_response = ElasticResponseSerializer(
+        data=[h.to_dict() for h in hits], many=True
+    )
     serialize_response.is_valid(raise_exception=True)
     response_data = serialize_response.validated_data
-
     result = {"data": response_data}
     return Response(result)

@@ -12,6 +12,13 @@ from api_app.pivots_manager.models import PivotConfig
 logger = logging.getLogger(__name__)
 
 
+supported_plugin_name_list = [
+    AnalyzerConfig.plugin_name,
+    ConnectorConfig.plugin_name,
+    PivotConfig.plugin_name,
+]
+
+
 @dataclass
 class ElasticRequest:
     plugin_name: str = ""
@@ -27,11 +34,7 @@ class ElasticRequest:
 
 class ElasticRequestSerializer(serializers.Serializer):
     plugin_name = serializers.ChoiceField(
-        choices=[
-            AnalyzerConfig.plugin_name,
-            ConnectorConfig.plugin_name,
-            PivotConfig.plugin_name,
-        ],
+        choices=supported_plugin_name_list,
         required=False,
     )
     name = serializers.CharField(required=False)
@@ -50,18 +53,20 @@ class ElasticRequestSerializer(serializers.Serializer):
         return ElasticRequest(**validated_data)
 
 
-class ElasticResponseSerializer(serializers.Serializer):
-    job_id = serializers.IntegerField()
-    plugin_name = serializers.ChoiceField(
-        choices=[
-            AnalyzerConfig.plugin_name,
-            ConnectorConfig.plugin_name,
-            PivotConfig.plugin_name,
-        ],
-    )
+class ElasticJobSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+
+class ElasticConfigSerializer(serializers.Serializer):
     name = serializers.CharField()
+    plugin_name = serializers.ChoiceField(choices=supported_plugin_name_list)
+
+
+class ElasticResponseSerializer(serializers.Serializer):
+    job = ElasticJobSerializer()
+    config = ElasticConfigSerializer()
     status = serializers.ChoiceField(choices=ReportStatus.final_statuses())
     start_time = serializers.DateTimeField()
     end_time = serializers.DateTimeField()
-    errors = serializers.BooleanField()
-    report = serializers.CharField()
+    errors = serializers.ListField(child=serializers.CharField())
+    report = serializers.JSONField()

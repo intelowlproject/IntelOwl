@@ -27,21 +27,6 @@ class SendElasticTestCase(CustomTestCase):
         self.job = Job.objects.create(
             observable_name="dns.google.com", tlp="AMBER", user=User.objects.first()
         )
-        AnalyzerReport.objects.create(  # valid for initial, not for last 5 minutes
-            config=AnalyzerConfig.objects.get(
-                python_module=PythonModule.objects.get(
-                    base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
-                    module="dns.dns_malicious_detectors.cloudflare_malicious_detector.CloudFlareMaliciousDetector",
-                )
-            ),
-            job=self.job,
-            start_time=datetime.datetime(2024, 10, 29, 4, 49, tzinfo=datetime.UTC),
-            end_time=datetime.datetime(2024, 10, 29, 4, 59, tzinfo=datetime.UTC),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={"observable": "dns.google.com", "malicious": False},
-            task_id=uuid(),
-            parameters={},
-        )
         AnalyzerReport.objects.create(  # valid
             config=AnalyzerConfig.objects.get(
                 python_module=PythonModule.objects.get(
@@ -124,7 +109,7 @@ class SendElasticTestCase(CustomTestCase):
             },
             parameters={},
         )
-        IngestorReport.objects.create(
+        IngestorReport.objects.create(  # not want to index
             config=IngestorConfig.objects.get(
                 python_module=PythonModule.objects.get(
                     base_path=PythonModuleBasePaths.Ingestor.value,
@@ -154,7 +139,7 @@ class SendElasticTestCase(CustomTestCase):
             report={"job_id": [1], "created": True, "motivation": None},
             parameters={},
         )
-        VisualizerReport.objects.create(
+        VisualizerReport.objects.create(  # not want to index
             config=VisualizerConfig.objects.get(
                 python_module=PythonModule.objects.get(
                     base_path=PythonModuleBasePaths.Visualizer.value,
@@ -186,8 +171,11 @@ class SendElasticTestCase(CustomTestCase):
         VisualizerReport.objects.all().delete()
         LastElasticReportUpdate.objects.all().delete()
 
-    @override_settings(ELASTIC_HOST="https://elasticsearch:9200")
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
     def test_initial(self, *args, **kwargs):
+        self.assertEqual(LastElasticReportUpdate.objects.count(), 0)
+
         with patch(
             "intel_owl.tasks.bulk",
             return_value=MockResponseNoOp(json_data={}, status_code=200),
@@ -198,25 +186,6 @@ class SendElasticTestCase(CustomTestCase):
             self.assertEqual(
                 mocked_bulk_param,
                 [
-                    {
-                        "_op_type": "index",
-                        "_index": "plugin-report-analyzer-report-2024-10-29",
-                        "_source": {
-                            "config": {"name": "CloudFlare_Malicious_Detector"},
-                            "job": {"id": self.job.id},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 4, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 4, 59, tzinfo=datetime.timezone.utc
-                            ),
-                            "status": "SUCCESS",
-                            "report": {
-                                "malicious": False,
-                                "observable": "dns.google.com",
-                            },
-                        },
-                    },
                     {
                         "_op_type": "index",
                         "_index": "plugin-report-analyzer-report-2024-10-29",
@@ -272,22 +241,6 @@ class SendElasticTestCase(CustomTestCase):
                     },
                     {
                         "_op_type": "index",
-                        "_index": "plugin-report-ingestor-report-2024-10-29",
-                        "_source": {
-                            "config": {"name": "MalwareBazaar"},
-                            "job": {"id": self.job.id},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
-                            "status": "SUCCESS",
-                            "report": {},
-                        },
-                    },
-                    {
-                        "_op_type": "index",
                         "_index": "plugin-report-pivot-report-2024-10-29",
                         "_source": {
                             "config": {"name": "AbuseIpToSubmission"},
@@ -306,30 +259,6 @@ class SendElasticTestCase(CustomTestCase):
                             },
                         },
                     },
-                    {
-                        "_op_type": "index",
-                        "_index": "plugin-report-visualizer-report-2024-10-29",
-                        "_source": {
-                            "config": {"name": "DNS"},
-                            "job": {"id": self.job.id},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
-                            "status": "SUCCESS",
-                            "report": {
-                                "elements": {
-                                    "type": "horizontal_list",
-                                    "values": [],
-                                    "alignment": "around",
-                                },
-                                "level_size": "3",
-                                "level_position": 1,
-                            },
-                        },
-                    },
                 ],
             )
 
@@ -338,7 +267,8 @@ class SendElasticTestCase(CustomTestCase):
             datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC),
         )
 
-    @override_settings(ELASTIC_HOST="https://elasticsearch:9200")
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
     def test_update(self, *args, **kwargs):
         LastElasticReportUpdate.objects.create(
             last_update_datetime=_now - datetime.timedelta(minutes=5)
@@ -407,22 +337,6 @@ class SendElasticTestCase(CustomTestCase):
                         },
                     },
                     {
-                        "_index": "plugin-report-ingestor-report-2024-10-29",
-                        "_op_type": "index",
-                        "_source": {
-                            "config": {"name": "MalwareBazaar"},
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
-                            "job": {"id": self.job.id},
-                            "report": {},
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "status": "SUCCESS",
-                        },
-                    },
-                    {
                         "_index": "plugin-report-pivot-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
@@ -435,30 +349,6 @@ class SendElasticTestCase(CustomTestCase):
                                 "created": True,
                                 "job_id": [1],
                                 "motivation": None,
-                            },
-                            "start_time": datetime.datetime(
-                                2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc
-                            ),
-                            "status": "SUCCESS",
-                        },
-                    },
-                    {
-                        "_index": "plugin-report-visualizer-report-2024-10-29",
-                        "_op_type": "index",
-                        "_source": {
-                            "config": {"name": "DNS"},
-                            "end_time": datetime.datetime(
-                                2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
-                            ),
-                            "job": {"id": self.job.id},
-                            "report": {
-                                "elements": {
-                                    "alignment": "around",
-                                    "type": "horizontal_list",
-                                    "values": [],
-                                },
-                                "level_position": 1,
-                                "level_size": "3",
                             },
                             "start_time": datetime.datetime(
                                 2024, 10, 29, 10, 49, tzinfo=datetime.timezone.utc

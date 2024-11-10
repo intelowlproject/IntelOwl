@@ -130,7 +130,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0063_singleton_and_elastic_report"),
-        ("analyzers_manager", "0127_analyzer_config_dshield"),
+        ("analyzers_manager", "0129_analyzer_config_phishing_extractor"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

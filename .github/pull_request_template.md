@@ -18,8 +18,8 @@ Please delete options that are not relevant.
 - [ ] The pull request is for the branch `develop`
 - [ ] A new plugin (analyzer, connector, visualizer, playbook, pivot or ingestor) was added or changed, in which case:
     - [ ] I strictly followed the documentation ["How to create a Plugin"](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-add-a-new-plugin)
-    - [ ] [Usage](https://github.com/intelowlproject/docs/blob/main/docs/IntelOwl/usage.md) file was updated.
-    - [ ] [Advanced-Usage](https://github.com/intelowlproject/docs/blob/main/docs/IntelOwl/advanced_usage.md) was updated (in case the plugin provides additional optional configuration).
+    - [ ] [Usage](https://github.com/intelowlproject/docs/blob/main/docs/IntelOwl/usage.md) file was updated. A link to the PR to the [docs](https://github.com/intelowlproject/docs) repo has been added as a comment here.
+    - [ ] [Advanced-Usage](https://github.com/intelowlproject/docs/blob/main/docs/IntelOwl/advanced_usage.md) was updated (in case the plugin provides additional optional configuration). A link to the PR to the [docs](https://github.com/intelowlproject/docs) repo has been added as a comment here.
     - [ ] I have dumped the configuration from Django Admin using the `dumpplugin` command and added it in the project as a data migration. (["How to share a plugin with the community"](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-share-your-plugin-with-the-community))
     - [ ] If a File analyzer was added and it supports a mimetype which is not already supported, you added a sample of that type inside the archive `test_files.zip` and you added the default tests for that mimetype in [test_classes.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/api_app/analyzers_manager/test_classes.py).
     - [ ] If you created a new analyzer and it is free (does not require any API key), please add it in the `FREE_TO_USE_ANALYZERS` playbook by following [this guide](https://intelowlproject.github.io/docs/IntelOwl/contribute/#how-to-modify-a-plugin).

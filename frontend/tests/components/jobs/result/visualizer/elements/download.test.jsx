@@ -28,9 +28,7 @@ describe("DownalodVisualizer component", () => {
     const idElement = container.querySelector("#test-id");
     expect(idElement).toBeInTheDocument();
     // chec text (inner span)
-    const innerPartComponent = screen.getByText(
-      "test-required.txt",
-    );
+    const innerPartComponent = screen.getByText("test-required.txt");
     expect(innerPartComponent).toBeInTheDocument();
     // check no link
     expect(innerPartComponent.closest("div").style).not.toHaveProperty(
@@ -53,18 +51,18 @@ describe("DownalodVisualizer component", () => {
 
   test("all params", async () => {
     const { container } = render(
-        <DownloadVisualizer
-            size="col-2"
-            alignment="end"
-            value="test-all.txt"
-            mimetype="plain/text"
-            payload="test all params"
-            id="test-id"
-            copyText="test-all.txt"
-            description="this is a test file"
-            addMetadataInDescription
-            isChild
-        />,
+      <DownloadVisualizer
+        size="col-2"
+        alignment="end"
+        value="test-all.txt"
+        mimetype="plain/text"
+        payload="test all params"
+        id="test-id"
+        copyText="test-all.txt"
+        description="this is a test file"
+        addMetadataInDescription
+        isChild
+      />,
     );
 
     // check id
@@ -90,19 +88,19 @@ describe("DownalodVisualizer component", () => {
     // it's a special case because change the style, but also the interactions
 
     const { container } = render(
-        <DownloadVisualizer
-            size="col-2"
-            alignment="end"
-            value="test-disabled.txt"
-            mimetype="plain/text"
-            payload="test all params"
-            id="test-id"
-            copyText="test-disabled.txt"
-            description="this is a test file"
-            addMetadataInDescription
-            isChild
-            disable
-        />,
+      <DownloadVisualizer
+        size="col-2"
+        alignment="end"
+        value="test-disabled.txt"
+        mimetype="plain/text"
+        payload="test all params"
+        id="test-id"
+        copyText="test-disabled.txt"
+        description="this is a test file"
+        addMetadataInDescription
+        isChild
+        disable
+      />,
     );
 
     // check id

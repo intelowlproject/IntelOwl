@@ -12,7 +12,12 @@ describe("visualizer data validation", () => {
         values: [
           {},
           { type: "base" },
-          { type: "download", value: "test.txt", payload: "hello, world", mimetype: "text/plain" },
+          {
+            type: "download",
+            value: "test.txt",
+            payload: "hello, world",
+            mimetype: "text/plain",
+          },
           { type: "bool", disable: true },
           { type: "title", title: { type: "base" }, value: { type: "base" } },
           { type: "horizontal_list", value: [] },
@@ -69,7 +74,7 @@ describe("visualizer data validation", () => {
             type: "download",
             value: "test.txt",
             payload: "hello, world",
-            mimetype: "text/plain"
+            mimetype: "text/plain",
           },
           {
             activeColor: "danger",
@@ -662,8 +667,8 @@ describe("visualizer data validation", () => {
             copy_text: {},
             description: {},
             add_metadata_in_description: {},
-            link: {}
-          }
+            link: {},
+          },
         ],
       },
     });
@@ -773,7 +778,7 @@ describe("visualizer data validation", () => {
             sortById: "invalid",
             sortByDesc: true,
             columns: [],
-            data: []
+            data: [],
           },
           {
             alignment: "around",

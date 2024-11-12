@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from logging import getLogger
-from typing import Optional
+from typing import Optional, Union
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
@@ -121,7 +121,7 @@ class MimeTypes(models.TextChoices):
         return mimetype
 
     @classmethod
-    def calculate(cls, file_pointer, file_name) -> str:
+    def calculate(cls, buffer: Union[bytes, str], file_name: str) -> str:
         from magic import from_buffer as magic_from_buffer
 
         mimetype = None
@@ -129,8 +129,9 @@ class MimeTypes(models.TextChoices):
             mimetype = cls._calculate_from_filename(file_name)
 
         if mimetype is None:
-            buffer = file_pointer.read()
-            mimetype = magic_from_buffer(buffer, mime=True)
+            mimetype = magic_from_buffer(
+                buffer.encode() if isinstance(buffer, str) else buffer, mime=True
+            )
             logger.debug(f"mimetype is {mimetype}")
             try:
                 mimetype = cls(mimetype)

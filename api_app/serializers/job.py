@@ -749,7 +749,9 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         if "file_name" not in attrs:
             attrs["file_name"] = attrs["file"].name
-        attrs["file_mimetype"] = MimeTypes.calculate(attrs["file"], attrs["file_name"])
+        attrs["file_mimetype"] = MimeTypes.calculate(
+            attrs["file"].read(), attrs["file_name"]
+        )
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)

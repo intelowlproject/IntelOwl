@@ -14,18 +14,37 @@ import { getIcon } from "./icons";
 
 import { HorizontalListVisualizer } from "./elements/horizontalList";
 import { TableVisualizer } from "./elements/table";
+import { DownloadVisualizer } from "./elements/download";
 
 /**
  * Convert the validated data into a VisualizerElement.
  * This is a recursive function: It's called by the component to convert the inner components.
  *
  * @param {object} element data used to generate the component
- * @param {bool} isChild flag used in Title and VList to create a smaller children components.
+ * @param {boolean} isChild flag used in Title and VList to create a smaller children components.
  * @returns {Object} component to visualize
  */
 function convertToElement(element, idElement, isChild = false) {
   let visualizerElement;
   switch (element.type) {
+    case VisualizerComponentType.DOWNLOAD: {
+      visualizerElement = (
+        <DownloadVisualizer
+          key={idElement}
+          id={idElement}
+          size={element.size}
+          disable={element.disable}
+          value={element.value}
+          mimetype={element.mimetype}
+          payload={element.payload}
+          copyText={element.copyText}
+          description={element.description}
+          addMetadataInDescription={element.addMetadataInDescription}
+          link={element.link}
+        />
+      );
+      break;
+    }
     case VisualizerComponentType.BOOL: {
       visualizerElement = (
         <BooleanVisualizer

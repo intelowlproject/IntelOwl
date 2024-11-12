@@ -18,7 +18,9 @@ services:
       - uwsgi
 
   chrome-webdriver:
-    image: selenium/node-chrome:latest
+    # tagging convention for chrome webdriver
+    # https://github.com/SeleniumHQ/docker-selenium/wiki/Tagging-Convention
+    image: selenium/node-chrome:130.0.6723.91-chromedriver-130.0.6723.91-grid-4.26.0-20241101
     shm_size: 2gb # https://github.com/SeleniumHQ/docker-selenium?tab=readme-ov-file#--shm-size2g
     depends_on:
       - selenium-hub
@@ -29,7 +31,7 @@ services:
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
 
   selenium-hub:
-    image: selenium/hub:latest
+    image: selenium/hub:4.26.0
     container_name: selenium-hub
     environment:
       - SE_ENABLE_TRACING=false

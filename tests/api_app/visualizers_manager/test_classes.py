@@ -190,12 +190,12 @@ class VisualizableBoolTestCase(CustomTestCase):
             "value": "test",
             "link": "",
             "color": "danger",
+            "icon": "",
             "italic": False,
             "size": "auto",
             "disable": False,
             "copy_text": "test",
             "description": "",
-            "add_metadata_in_description": False,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 

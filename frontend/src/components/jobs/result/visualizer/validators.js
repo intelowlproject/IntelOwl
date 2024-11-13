@@ -1,3 +1,4 @@
+import { FileMimeTypes } from "../../../../constants/jobConst";
 import { VisualizerComponentType } from "./elements/const";
 
 function parseLevelSize(value) {
@@ -49,16 +50,7 @@ function parseElementWidth(value) {
 }
 
 function parseComponentType(value) {
-  if (
-    [
-      VisualizerComponentType.BASE,
-      VisualizerComponentType.TITLE,
-      VisualizerComponentType.BOOL,
-      VisualizerComponentType.VLIST,
-      VisualizerComponentType.HLIST,
-      VisualizerComponentType.TABLE,
-    ].includes(value)
-  ) {
+  if (Object.values(VisualizerComponentType).includes(value)) {
     return value;
   }
   // default type
@@ -101,8 +93,18 @@ function parseString(value) {
   return String(stringValue);
 }
 
+function parseMimetype(value) {
+  if (Object.values(FileMimeTypes).includes(value)) {
+    return value;
+  }
+  return FileMimeTypes.OCTET;
+}
+
 // parse list of Elements
 function parseElementList(rawElementList) {
+  if (!Array.isArray(rawElementList)) {
+    return [];
+  }
   return rawElementList?.map((additionalElementrawData) =>
     parseElementFields(additionalElementrawData),
   );
@@ -142,6 +144,20 @@ function parseElementFields(rawElement) {
 
   // validation for the elements
   switch (validatedFields.type) {
+    case VisualizerComponentType.DOWNLOAD: {
+      validatedFields.value = parseString(rawElement.value);
+      validatedFields.mimetype = parseMimetype(rawElement.mimetype);
+      validatedFields.payload = parseString(rawElement.payload);
+      validatedFields.copyText = parseString(
+        rawElement.copy_text || rawElement.value,
+      );
+      validatedFields.description = parseString(rawElement.description);
+      validatedFields.addMetadataInDescription = parseBool(
+        rawElement.add_metadata_in_description,
+      );
+      validatedFields.link = parseString(rawElement.link);
+      break;
+    }
     case VisualizerComponentType.BOOL: {
       validatedFields.value = parseString(rawElement.value);
       validatedFields.icon = parseString(rawElement.icon);
@@ -173,9 +189,9 @@ function parseElementFields(rawElement) {
     }
     case VisualizerComponentType.TABLE: {
       validatedFields.data = parseElementListOfDict(rawElement.data || []);
-      validatedFields.columns = rawElement.columns.map((column) =>
-        parseColumnElementList(column),
-      );
+      validatedFields.columns = Array.isArray(rawElement.columns)
+        ? rawElement.columns.map((column) => parseColumnElementList(column))
+        : [];
       validatedFields.pageSize = rawElement.page_size;
       validatedFields.sortById = parseString(rawElement.sort_by_id);
       validatedFields.sortByDesc = parseBool(rawElement.sort_by_desc);

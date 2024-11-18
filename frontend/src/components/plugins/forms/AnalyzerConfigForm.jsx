@@ -5,7 +5,12 @@ import { useFormik, FormikProvider } from "formik";
 import PropTypes from "prop-types";
 import { CustomJsonInput } from "@certego/certego-ui";
 
-import { editConfiguration, createConfiguration } from "../pluginsApi";
+import {
+  editConfiguration,
+  editPluginConfig,
+  createConfiguration,
+  createPluginConfig,
+} from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { ObservableClassifications } from "../../../constants/jobConst";
@@ -87,6 +92,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
     },
     onSubmit: async () => {
       let response;
+      let responsePluginConfig;
       const payloadData = {
         name: formik.values.name,
         description: formik.values.description,
@@ -99,7 +105,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
           "basic_observable_analyzer.BasicObservableAnalyzer";
       }
       // plugin config
-      payloadData.plugin_config = [
+      const pluginConfig = [
         {
           attribute: "http_method",
           value: formik.values.http_method,
@@ -127,6 +133,7 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
         },
       ];
 
+      // configuration
       if (isEditing) {
         const analyzerToEdit =
           formik.initialValues.name !== formik.values.name
@@ -144,7 +151,24 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
         );
       }
 
+      // plugin config
       if (response?.success) {
+        if (isEditing) {
+          responsePluginConfig = await editPluginConfig(
+            PluginsTypes.ANALYZER,
+            formik.values.name,
+            pluginConfig,
+          );
+        } else {
+          responsePluginConfig = await createPluginConfig(
+            PluginsTypes.ANALYZER,
+            formik.values.name,
+            pluginConfig,
+          );
+        }
+      }
+
+      if (response?.success && responsePluginConfig?.success) {
         formik.setSubmitting(false);
         setResponseError(null);
         formik.resetForm();

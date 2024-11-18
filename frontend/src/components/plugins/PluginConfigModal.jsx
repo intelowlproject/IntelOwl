@@ -59,12 +59,16 @@ export function PluginConfigModal({
           <AnalyzerConfigForm
             analyzerConfig={pluginConfig}
             toggle={toggle}
-            isEditing
+            isEditing={isEditing}
           />
         )}
         {/* Create/Edit basic pivot */}
         {pluginType === PluginsTypes.PIVOT && (
-          <PivotConfigForm pivotConfig={pluginConfig} toggle={toggle} />
+          <PivotConfigForm
+            pivotConfig={pluginConfig}
+            toggle={toggle}
+            isEditing={isEditing}
+          />
         )}
       </ModalBody>
     </Modal>

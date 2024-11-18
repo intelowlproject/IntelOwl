@@ -20,7 +20,12 @@ import {
 } from "../../common/form/pluginsMultiSelectDropdownInput";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { PluginsTypes } from "../../../constants/pluginConst";
-import { editConfiguration, createConfiguration } from "../pluginsApi";
+import {
+  editConfiguration,
+  createConfiguration,
+  editPluginConfig,
+  createPluginConfig,
+} from "../pluginsApi";
 
 export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
   console.debug("PivotConfigForm rendered!");
@@ -138,6 +143,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
     },
     onSubmit: async () => {
       let response;
+      let responsePluginConfig;
 
       const payloadData = {
         name: formik.values.name,
@@ -150,15 +156,15 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
           (connector) => connector.value,
         ),
       };
-      if (formik.values.field_to_compare) {
-        payloadData.plugin_config = {
-          type: 5,
-          plugin_name: formik.values.name,
-          attribute: "field_to_compare",
-          value: formik.values.field_to_compare,
-          config_type: 1,
-        };
-      }
+      const pluginConfig = formik.values.field_to_compare
+        ? {
+            type: 5,
+            plugin_name: formik.values.name,
+            attribute: "field_to_compare",
+            value: formik.values.field_to_compare,
+            config_type: 1,
+          }
+        : [];
 
       if (isEditing) {
         const pivotToEdit =
@@ -174,7 +180,24 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
         response = await createConfiguration(PluginsTypes.PIVOT, payloadData);
       }
 
+      // plugin config
       if (response?.success) {
+        if (isEditing) {
+          responsePluginConfig = await editPluginConfig(
+            PluginsTypes.PIVOT,
+            formik.values.name,
+            pluginConfig,
+          );
+        } else {
+          responsePluginConfig = await createPluginConfig(
+            PluginsTypes.PIVOT,
+            formik.values.name,
+            pluginConfig,
+          );
+        }
+      }
+
+      if (response?.success && responsePluginConfig?.success) {
         formik.setSubmitting(false);
         setResponseError(null);
         formik.resetForm();

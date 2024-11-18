@@ -25,14 +25,17 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
     class Meta:
         model = PluginConfig
         fields = (
-            "attribute",
-            "config_type",
-            "type",
-            "plugin_name",
+            "parameter",
             "value",
             "owner",
             "organization",
             "id",
+            "attribute",
+            "analyzer_config",
+            "connector_config",
+            "pivot_config",
+            "visualizer_config",
+            "ingestor_config",
         )
 
     class CustomValueField(rfs.JSONField):
@@ -80,11 +83,49 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
                 return json.dumps(result)
             return result
 
-    type = rfs.ChoiceField(choices=["1", "2", "3", "4", "5"])  # retrocompatibility
-    config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
-    attribute = rfs.CharField()
-    plugin_name = rfs.CharField()
     value = CustomValueField()
+    attribute = rfs.CharField(read_only=True)
+
+    analyzer_config = rfs.SlugRelatedField(
+        queryset=AnalyzerConfig.objects.all(),
+        allow_null=True,
+        required=False,
+        slug_field="name",
+        default=None,
+        write_only=True,
+    )
+    connector_config = rfs.SlugRelatedField(
+        queryset=ConnectorConfig.objects.all(),
+        allow_null=True,
+        required=False,
+        slug_field="name",
+        default=None,
+        write_only=True,
+    )
+    pivot_config = rfs.SlugRelatedField(
+        queryset=PivotConfig.objects.all(),
+        allow_null=True,
+        required=False,
+        slug_field="name",
+        default=None,
+        write_only=True,
+    )
+    visualizer_config = rfs.SlugRelatedField(
+        queryset=VisualizerConfig.objects.all(),
+        allow_null=True,
+        required=False,
+        slug_field="name",
+        default=None,
+        write_only=True,
+    )
+    ingestor_config = rfs.SlugRelatedField(
+        queryset=IngestorConfig.objects.all(),
+        allow_null=True,
+        required=False,
+        slug_field="name",
+        default=None,
+        write_only=True,
+    )
 
     @staticmethod
     def validate_value_type(value: Any, parameter: Parameter):
@@ -101,32 +142,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
             # we are in an update
             return attrs
         _value = attrs["value"]
-        # retro compatibility
-        _type = attrs.pop("type")
-        _config_type = attrs.pop("config_type")
-        _plugin_name = attrs.pop("plugin_name")
-        _attribute = attrs.pop("attribute")
-        if _type == "1":
-            class_ = AnalyzerConfig
-        elif _type == "2":
-            class_ = ConnectorConfig
-        elif _type == "3":
-            class_ = VisualizerConfig
-        elif _type == "4":
-            class_ = IngestorConfig
-        elif _type == "5":
-            class_ = PivotConfig
-        else:
-            raise RuntimeError("Not configured")
-        # we set the pointers allowing retro-compatibility from the frontend
-        config = class_.objects.get(name=_plugin_name)
-        parameter = config.parameters.get(
-            name=_attribute, is_secret=_config_type == "2"
-        )
-        self.validate_value_type(_value, parameter)
-
-        attrs["parameter"] = parameter
-        attrs[class_.snake_case_name] = config
+        self.validate_value_type(_value, attrs["parameter"])
         return super().validate(attrs)
 
     def update(self, instance, validated_data):
@@ -135,6 +151,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
+        result.pop("parameter")
         result["organization"] = (
             instance.organization.name if instance.organization is not None else None
         )

@@ -21,7 +21,6 @@ import {
   PlaybooksEditButton,
   PluginDeletionButton,
   PluginConfigButton,
-  PluginEditButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -171,13 +170,6 @@ export const analyzersTableColumns = [
           pluginConfig={value}
           pluginType_={PluginsTypes.ANALYZER}
         />
-        {value?.python_module ===
-          "basic_observable_analyzer.BasicObservableAnalyzer" && (
-          <PluginEditButton
-            config={value}
-            pluginType_={PluginsTypes.ANALYZER}
-          />
-        )}
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -201,7 +193,7 @@ export const analyzersTableColumns = [
         )}
       </div>
     ),
-    maxWidth: 100,
+    minWidth: 100,
   },
 ];
 
@@ -233,6 +225,10 @@ export const connectorTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
+        <PluginConfigButton
+          pluginConfig={value}
+          pluginType_={PluginsTypes.CONNECTOR}
+        />
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -281,6 +277,10 @@ export const pivotTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
+        <PluginConfigButton
+          pluginConfig={value}
+          pluginType_={PluginsTypes.PIVOT}
+        />
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -295,7 +295,6 @@ export const pivotTableColumns = [
           pluginName={value.name}
           pluginType_={PluginsTypes.PIVOT}
         />
-        <PluginEditButton config={value} pluginType_={PluginsTypes.PIVOT} />
         <PluginDeletionButton
           pluginName={value.name}
           pluginType_={PluginsTypes.PIVOT}
@@ -444,6 +443,10 @@ export const visualizerTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
+        <PluginConfigButton
+          pluginConfig={value}
+          pluginType_={PluginsTypes.VISUALIZER}
+        />
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -497,6 +500,10 @@ export const ingestorTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
+        <PluginConfigButton
+          pluginConfig={value}
+          pluginType_={PluginsTypes.INGESTOR}
+        />
         <PluginHealthCheckButton
           pluginName={value.name}
           pluginType_={PluginsTypes.INGESTOR}

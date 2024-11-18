@@ -19,291 +19,6 @@ from .. import CustomViewSetTestCase, ViewSetTestCaseMixin
 User = get_user_model()
 
 
-class PluginConfigViewSetTestCase(CustomViewSetTestCase):
-    URL = "/api/plugin-config"
-    custom_config_uri = reverse("plugin-config-list")
-
-    def setUp(self):
-        super().setUp()
-        PluginConfig.objects.all().delete()
-
-    def test_get(self):
-        org = Organization.create("test_org", self.user)
-        Membership.objects.create(
-            user=self.admin, organization=org, is_owner=False, is_admin=True
-        )
-        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
-        # logged out
-        self.client.logout()
-        response = self.client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 401, response.json())
-
-        param = Parameter.objects.create(
-            is_secret=True,
-            name="mynewparameter",
-            python_module=ac.python_module,
-            required=True,
-            type="str",
-        )
-        pc = PluginConfig(
-            value="supersecret",
-            for_organization=True,
-            owner=self.user,
-            parameter=param,
-            analyzer_config=ac,
-        )
-        pc.full_clean()
-        pc.save()
-        self.assertEqual(pc.owner, org.owner)
-
-        # if the user is owner of an org, he should get the org secret
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        first_item = content[0]
-        self.assertEqual(first_item["value"], "supersecret")
-
-        # if the user is admin of an org, he should get the org secret
-        self.client.force_authenticate(user=self.admin)
-        response = self.client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        first_item = content[0]
-        self.assertEqual(first_item["value"], "supersecret")
-
-        # second personal item
-        secret_owner = PluginConfig(
-            value="supersecret_user_only",
-            for_organization=False,
-            owner=self.user,
-            parameter=param,
-            analyzer_config=ac,
-        )
-        secret_owner.save()
-
-        # user can see own personal secret
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        second_item = content[1]
-        self.assertEqual(second_item["value"], "supersecret_user_only")
-
-        # other users cannot see user's personal items
-        self.client.force_authenticate(user=self.admin)
-        response = self.client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        self.assertEqual(1, len(content))
-
-        # if a standard user who does not belong to any org tries to get a secret,
-        # they should not find anything
-        self.standard_user = User.objects.create_user(
-            username="standard_user",
-            email="standard_user@intelowl.com",
-            password="test",
-        )
-        self.standard_user.save()
-        self.standard_user_client = APIClient()
-        self.standard_user_client.force_authenticate(user=self.standard_user)
-        response = self.standard_user_client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        self.assertFalse(content)
-
-        # if a standard user tries to get the secret of his org,
-        # he should have a "redacted" value
-        Membership(
-            user=self.standard_user, organization=org, is_owner=False, is_admin=False
-        ).save()
-        response = self.standard_user_client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        first_item = content[0]
-        self.assertEqual(first_item["value"], "redacted")
-        secret_owner.refresh_from_db()
-        self.assertEqual(secret_owner.value, "supersecret_user_only")
-
-        # third superuser secret
-        secret_owner = PluginConfig(
-            value="supersecret_low_privilege",
-            for_organization=False,
-            owner=self.standard_user,
-            parameter=param,
-            analyzer_config=ac,
-        )
-        secret_owner.save()
-        response = self.standard_user_client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        second_item = content[1]
-        self.assertEqual(second_item["value"], "supersecret_low_privilege")
-        ac = AnalyzerConfig.objects.get(name="Auth0")
-        # if there are 2 secrets for different services, the user should get them both
-        param2 = Parameter.objects.create(
-            is_secret=True,
-            name="mysecondsupernewsecret",
-            python_module=ac.python_module,
-            required=True,
-        )
-        secret_owner = PluginConfig(
-            value="supersecret_low_privilege_third",
-            for_organization=False,
-            owner=self.standard_user,
-            parameter=param2,
-            analyzer_config=ac,
-        )
-        secret_owner.save()
-        response = self.standard_user_client.get(self.URL, {}, format="json")
-        self.assertEqual(response.status_code, 200)
-        content = response.json()
-        third_item = content[2]
-        self.assertEqual(third_item["value"], "supersecret_low_privilege_third")
-        param2.delete()
-        param.delete()
-        PluginConfig.objects.filter(value__startswith="supersecret").delete()
-        org.delete()
-
-    def test_list(self):
-        ac = AnalyzerConfig.objects.first()
-        param = Parameter.objects.create(
-            python_module=ac.python_module,
-            name="test",
-            is_secret=True,
-            required=True,
-            type="str",
-        )
-        org0 = Organization.objects.create(name="testorg0")
-        org1 = Organization.objects.create(name="testorg1")
-        another_owner = User.objects.create_user(
-            username="another_owner",
-            email="another_owner@intelowl.com",
-            password="test",
-        )
-        another_owner.save()
-        m0 = Membership.objects.create(
-            organization=org0, user=self.superuser, is_owner=True
-        )
-        m1 = Membership.objects.create(
-            organization=org0, user=self.admin, is_owner=False, is_admin=True
-        )
-        m2 = Membership.objects.create(
-            organization=org1, user=self.user, is_owner=False, is_admin=False
-        )
-        m3 = Membership.objects.create(
-            organization=org1, user=another_owner, is_owner=True
-        )
-        pc0 = PluginConfig.objects.create(
-            parameter=param,
-            analyzer_config=ac,
-            value="value",
-            owner=self.superuser,
-            for_organization=True,
-        )
-        pc1 = PluginConfig.objects.create(
-            parameter=param,
-            analyzer_config=ac,
-            value="value",
-            owner=another_owner,
-            for_organization=True,
-        )
-        # logged out
-        self.client.logout()
-        response = self.client.get(f"{self.custom_config_uri}")
-        self.assertEqual(response.status_code, 401)
-
-        # the owner can see the config of own org
-        self.client.force_authenticate(user=self.superuser)
-        response = self.client.get(f"{self.custom_config_uri}")
-        self.assertEqual(response.status_code, 200)
-        result = response.json()
-        # the owner cannot see configs of other orgs (pc1)
-        self.assertEqual(1, len(result))
-        needle = None
-        for obj in result:
-            if obj["id"] == pc0.pk:
-                needle = obj
-        self.assertIsNotNone(needle)
-        self.assertIn("type", needle)
-        self.assertEqual(needle["type"], "1")
-        self.assertIn("config_type", needle)
-        self.assertEqual(needle["config_type"], "2")
-        self.assertIn("plugin_name", needle)
-        self.assertEqual(needle["plugin_name"], ac.name)
-        self.assertIn("organization", needle)
-        self.assertEqual(needle["organization"], "testorg0")
-        self.assertIn("value", needle)
-        self.assertEqual(needle["value"], "value")
-        self.assertIn("attribute", needle)
-        self.assertEqual(needle["attribute"], "test")
-
-        # an admin can see the config of own org
-        self.client.force_authenticate(user=self.admin)
-        response = self.client.get(f"{self.custom_config_uri}")
-        self.assertEqual(response.status_code, 200)
-        result = response.json()
-        # an admin cannot see configs of other orgs (pc1)
-        self.assertEqual(1, len(result))
-        needle = None
-        for obj in result:
-            if obj["id"] == pc0.pk:
-                needle = obj
-        self.assertIsNotNone(needle)
-        self.assertIn("type", needle)
-        self.assertEqual(needle["type"], "1")
-        self.assertIn("config_type", needle)
-        self.assertEqual(needle["config_type"], "2")
-        self.assertIn("plugin_name", needle)
-        self.assertEqual(needle["plugin_name"], ac.name)
-        self.assertIn("organization", needle)
-        self.assertEqual(needle["organization"], "testorg0")
-        self.assertIn("value", needle)
-        self.assertEqual(needle["value"], "value")
-        self.assertIn("attribute", needle)
-        self.assertEqual(needle["attribute"], "test")
-
-        # a user in the org can see the config with redacted data
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f"{self.custom_config_uri}")
-        self.assertEqual(response.status_code, 200)
-        result = response.json()
-        # a user cannot see configs of other orgs (pc0)
-        self.assertEqual(1, len(result))
-        needle = None
-        for obj in result:
-            if obj["id"] == pc1.pk:
-                needle = obj
-        self.assertIsNotNone(needle)
-        self.assertIn("type", needle)
-        self.assertEqual(needle["type"], "1")
-        self.assertIn("config_type", needle)
-        self.assertEqual(needle["config_type"], "2")
-        self.assertIn("plugin_name", needle)
-        self.assertEqual(needle["plugin_name"], ac.name)
-        self.assertIn("organization", needle)
-        self.assertEqual(needle["organization"], "testorg1")
-        self.assertIn("value", needle)
-        self.assertEqual(needle["value"], "redacted")
-        self.assertIn("attribute", needle)
-        self.assertEqual(needle["attribute"], "test")
-
-        # a user outside the org can not see the config
-        self.client.force_authenticate(user=self.guest)
-        response = self.client.get(f"{self.custom_config_uri}")
-        self.assertEqual(response.status_code, 200)
-        result = response.json()
-        self.assertEqual(0, len(result))
-        m0.delete()
-        m1.delete()
-        m2.delete()
-        m3.delete()
-        another_owner.delete()
-        org0.delete()
-        org1.delete()
-        param.delete()
-
-
 class CommentViewSetTestCase(CustomViewSetTestCase):
     comment_url = reverse("comments-list")
 
@@ -824,3 +539,640 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
 
         m.delete()
         org.delete()
+
+
+class PluginConfigViewSetTestCase(CustomViewSetTestCase):
+
+    def setUp(self):
+        super().setUp()
+        PluginConfig.objects.all().delete()
+
+    def test_plugin_config(self):
+        org = Organization.create("test_org", self.user)
+        Membership.objects.create(
+            user=self.admin, organization=org, is_owner=False, is_admin=True
+        )
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        # uri = f"/api/analyzer/{ac.name}/plugin_config"
+        uri = f"/api/plugin-config/{ac.name}/analyzer"
+
+        # logged out
+        self.client.logout()
+        response = self.client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 401)
+
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig(
+            value="supersecret",
+            for_organization=True,
+            owner=self.user,
+            parameter=param,
+            analyzer_config=ac,
+        )
+        pc.full_clean()
+        pc.save()
+        self.assertEqual(pc.owner, org.owner)
+
+        # if the user is owner of an org, he should get the org secret
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        org_config = content["organization_config"]
+        user_config = content["user_config"]
+
+        for config in [*org_config, *user_config]:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "supersecret")
+
+        # if the user is admin of an org, he should get the org secret
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        org_config = content["organization_config"]
+        user_config = content["user_config"]
+
+        for config in [*org_config, *user_config]:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "supersecret")
+
+        # second personal item
+        secret_owner = PluginConfig(
+            value="supersecret_user_only",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+            analyzer_config=ac,
+        )
+        secret_owner.save()
+
+        # user can see own personal secret
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        org_config = content["organization_config"]
+        user_config = content["user_config"]
+
+        for config in org_config:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "supersecret")
+        for config in user_config:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "supersecret_user_only")
+
+        # other users cannot see user's personal items
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        org_config = content["organization_config"]
+        user_config = content["user_config"]
+
+        for config in org_config:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "supersecret")
+        for config in user_config:
+            if config["attribute"] == "mynewparameter":
+                self.assertNotEqual(config["value"], "supersecret_user_only")
+                self.assertEqual(config["value"], "supersecret")
+
+        # if a standard user who does not belong to any org tries to get a secret,
+        # they should not find anything
+        self.standard_user = User.objects.create_user(
+            username="standard_user",
+            email="standard_user@intelowl.com",
+            password="test",
+        )
+        self.standard_user.save()
+        self.standard_user_client = APIClient()
+        self.standard_user_client.force_authenticate(user=self.standard_user)
+        response = self.standard_user_client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        org_config = content["organization_config"]
+        user_config = content["user_config"]
+        self.assertEqual(org_config, [])
+
+        for config in user_config:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], None)
+
+        # if a standard user tries to get the secret of his org,
+        # he should have a "redacted" value
+        Membership(
+            user=self.standard_user, organization=org, is_owner=False, is_admin=False
+        ).save()
+        response = self.standard_user_client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        org_config = content["organization_config"]
+        user_config = content["user_config"]
+
+        for config in [*org_config, *user_config]:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "redacted")
+
+        secret_owner.refresh_from_db()
+        self.assertEqual(secret_owner.value, "supersecret_user_only")
+
+        # third superuser secret
+        secret_owner = PluginConfig(
+            value="supersecret_low_privilege",
+            for_organization=False,
+            owner=self.standard_user,
+            parameter=param,
+            analyzer_config=ac,
+        )
+        secret_owner.save()
+        response = self.standard_user_client.get(uri, {}, format="json")
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        org_config = content["organization_config"]
+        user_config = content["user_config"]
+
+        for config in org_config:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "redacted")
+        for config in user_config:
+            if config["attribute"] == "mynewparameter":
+                self.assertEqual(config["value"], "supersecret_low_privilege")
+
+        param.delete()
+        PluginConfig.objects.filter(value__startswith="supersecret").delete()
+        org.delete()
+
+    def test_plugin_config_list(self):
+        ac = AnalyzerConfig.objects.first()
+        uri = f"/api/plugin-config/{ac.name}/analyzer"
+        param = Parameter.objects.create(
+            python_module=ac.python_module,
+            name="test",
+            is_secret=True,
+            required=True,
+            type="str",
+        )
+        org0 = Organization.objects.create(name="testorg0")
+        org1 = Organization.objects.create(name="testorg1")
+        another_owner = User.objects.create_user(
+            username="another_owner",
+            email="another_owner@intelowl.com",
+            password="test",
+        )
+        another_owner.save()
+        m0 = Membership.objects.create(
+            organization=org0, user=self.superuser, is_owner=True
+        )
+        m1 = Membership.objects.create(
+            organization=org0, user=self.admin, is_owner=False, is_admin=True
+        )
+        m2 = Membership.objects.create(
+            organization=org1, user=self.user, is_owner=False, is_admin=False
+        )
+        m3 = Membership.objects.create(
+            organization=org1, user=another_owner, is_owner=True
+        )
+        pc0 = PluginConfig.objects.create(
+            parameter=param,
+            analyzer_config=ac,
+            value="value",
+            owner=self.superuser,
+            for_organization=True,
+        )
+        pc1 = PluginConfig.objects.create(
+            parameter=param,
+            analyzer_config=ac,
+            value="value",
+            owner=another_owner,
+            for_organization=True,
+        )
+        # logged out
+        self.client.logout()
+        response = self.client.get(uri)
+        self.assertEqual(response.status_code, 401)
+
+        # the owner can see the config of own org
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.get(uri)
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        org_config = result["organization_config"]
+        needle = None
+        for obj in org_config:
+            if obj["attribute"] == pc0.attribute:
+                needle = obj
+            # the owner cannot see configs of other orgs (pc1)
+            if "organization" in obj.keys():
+                self.assertEqual(obj["organization"], "testorg0")
+        self.assertIsNotNone(needle)
+        self.assertIn("type", needle)
+        self.assertEqual(needle["type"], param.type)
+        self.assertIn("organization", needle)
+        self.assertEqual(needle["organization"], "testorg0")
+        self.assertIn("value", needle)
+        self.assertEqual(needle["value"], "value")
+        self.assertIn("attribute", needle)
+        self.assertEqual(needle["attribute"], "test")
+        self.assertIn("required", needle)
+        self.assertEqual(needle["required"], param.required)
+        self.assertIn("is_secret", needle)
+        self.assertEqual(needle["is_secret"], param.is_secret)
+
+        # an admin can see the config of own org
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(uri)
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        org_config = result["organization_config"]
+        needle = None
+        for obj in org_config:
+            if obj["attribute"] == pc0.attribute:
+                needle = obj
+            # an admin cannot see configs of other orgs (pc1)
+            if "organization" in obj.keys():
+                self.assertEqual(obj["organization"], "testorg0")
+        self.assertIsNotNone(needle)
+        self.assertIn("type", needle)
+        self.assertEqual(needle["type"], param.type)
+        self.assertIn("organization", needle)
+        self.assertEqual(needle["organization"], "testorg0")
+        self.assertIn("value", needle)
+        self.assertEqual(needle["value"], "value")
+        self.assertIn("attribute", needle)
+        self.assertEqual(needle["attribute"], "test")
+        self.assertIn("required", needle)
+        self.assertEqual(needle["required"], param.required)
+        self.assertIn("is_secret", needle)
+        self.assertEqual(needle["is_secret"], param.is_secret)
+
+        # a user in the org can see the config with redacted data
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(uri)
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        org_config = result["organization_config"]
+        needle = None
+        for obj in org_config:
+            if obj["attribute"] == pc1.attribute:
+                needle = obj
+            # a user cannot see configs of other orgs (pc0)
+            if "organization" in obj.keys():
+                self.assertEqual(obj["organization"], "testorg1")
+        self.assertIsNotNone(needle)
+        self.assertIn("type", needle)
+        self.assertEqual(needle["type"], param.type)
+        self.assertIn("organization", needle)
+        self.assertEqual(needle["organization"], "testorg1")
+        self.assertIn("value", needle)
+        self.assertEqual(needle["value"], "redacted")
+        self.assertIn("attribute", needle)
+        self.assertEqual(needle["attribute"], "test")
+        self.assertIn("required", needle)
+        self.assertEqual(needle["required"], param.required)
+        self.assertIn("is_secret", needle)
+        self.assertEqual(needle["is_secret"], param.is_secret)
+
+        # a user outside the org can not see the config
+        self.client.force_authenticate(user=self.guest)
+        response = self.client.get(uri)
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        org_config = result["organization_config"]
+        self.assertEqual(org_config, [])
+        m0.delete()
+        m1.delete()
+        m2.delete()
+        m3.delete()
+        another_owner.delete()
+        org0.delete()
+        org1.delete()
+        param.delete()
+
+    def test_update(self):
+        org = Organization.create("test_org", self.superuser)
+        Membership.objects.create(
+            user=self.admin, organization=org, is_owner=False, is_admin=True
+        )
+        Membership.objects.create(
+            user=self.user, organization=org, is_owner=False, is_admin=False
+        )
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        # uri = f"/api/analyzer/{ac.name}/plugin_config"
+        uri = f"/api/plugin-config/{ac.name}/analyzer"
+
+        # logged out
+        self.client.logout()
+        response = self.client.patch(uri, {}, format="json")
+        self.assertEqual(response.status_code, 401)
+
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig(
+            value="supersecret",
+            for_organization=True,
+            owner=self.superuser,
+            parameter=param,
+            analyzer_config=ac,
+        )
+        pc.full_clean()
+        pc.save()
+        self.assertEqual(pc.owner, org.owner)
+
+        # owner can update org secret
+        self.client.force_authenticate(user=self.superuser)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_org_supersecret",
+                "organization": "test_org",
+            }
+        ]
+        response = self.client.patch(uri, payload, format="json")
+        self.assertEqual(response.status_code, 200)
+        pc1 = PluginConfig.objects.get(id=pc.pk)
+        self.assertEqual(pc1.value, "new_org_supersecret")
+
+        # admin can update org secret
+        self.client.force_authenticate(user=self.admin)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_org_supersecret_admin",
+                "organization": "test_org",
+            }
+        ]
+        response = self.client.patch(uri, payload, format="json")
+        self.assertEqual(response.status_code, 200)
+        pc1 = PluginConfig.objects.get(id=pc.pk)
+        self.assertEqual(pc1.value, "new_org_supersecret_admin")
+
+        # user can not update org secret
+        self.client.force_authenticate(user=self.user)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_org_supersecret_user",
+                "organization": "test_org",
+            }
+        ]
+        response = self.client.patch(uri, payload, format="json")
+        self.assertEqual(response.status_code, 403)
+
+        # second personal item
+        secret_owner = PluginConfig(
+            value="supersecret_user_only",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+            analyzer_config=ac,
+        )
+        secret_owner.save()
+
+        # user can update own personal secret
+        self.client.force_authenticate(user=self.user)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_supersecret_user_only",
+            }
+        ]
+
+        response = self.client.patch(uri, payload, format="json")
+        self.assertEqual(response.status_code, 200)
+        pc_user = PluginConfig.objects.get(id=secret_owner.pk)
+        self.assertEqual(pc_user.value, "new_supersecret_user_only")
+
+        # other users cannot update user's personal items
+        self.client.force_authenticate(user=self.admin)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_supersecret_admin_only",
+            }
+        ]
+        response = self.client.patch(uri, payload, format="json")
+        self.assertEqual(response.status_code, 403)
+        pc_user = PluginConfig.objects.get(id=secret_owner.pk)
+        self.assertEqual(pc_user.value, "new_supersecret_user_only")
+        self.assertNotEqual(pc_user.value, "new_supersecret_admin_only")
+
+        secret_owner.delete()
+        pc.delete()
+
+        param.delete()
+        PluginConfig.objects.filter(value__startswith="supersecret").delete()
+        org.delete()
+
+    def test_create(self):
+        org = Organization.create("test_org", self.superuser)
+        Membership.objects.create(
+            user=self.admin, organization=org, is_owner=False, is_admin=True
+        )
+        Membership.objects.create(
+            user=self.user, organization=org, is_owner=False, is_admin=False
+        )
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        uri = f"/api/plugin-config/{ac.name}/analyzer"
+
+        # logged out
+        self.client.logout()
+        response = self.client.patch(uri, {}, format="json")
+        self.assertEqual(response.status_code, 401)
+
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+
+        # owner can create org secret
+        self.client.force_authenticate(user=self.superuser)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_org_supersecret",
+                "organization": "test_org",
+            }
+        ]
+        response = self.client.post(uri, payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        content = response.json()
+        self.assertEqual(content[0]["value"], "new_org_supersecret")
+        self.assertEqual(content[0]["owner"], self.superuser.username)
+        pc = PluginConfig.objects.get(id=content[0]["id"])
+        self.assertTrue(pc.for_organization)
+        pc.delete()
+
+        # admin can create org secret
+        self.client.force_authenticate(user=self.admin)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_org_supersecret_admin",
+                "organization": "test_org",
+            }
+        ]
+        response = self.client.post(uri, payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        content = response.json()
+        self.assertEqual(content[0]["value"], "new_org_supersecret_admin")
+        self.assertEqual(content[0]["owner"], self.admin.username)
+        pc = PluginConfig.objects.get(id=content[0]["id"])
+        self.assertTrue(pc.for_organization)
+        pc.delete()
+
+        # user can not create org secret
+        self.client.force_authenticate(user=self.user)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_org_supersecret_user",
+                "organization": "test_org",
+            }
+        ]
+        response = self.client.post(uri, payload, format="json")
+        self.assertEqual(response.status_code, 403)
+
+        # user can create own personal secret
+        self.client.force_authenticate(user=self.user)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_supersecret_user_only",
+            }
+        ]
+        response = self.client.post(uri, payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        content = response.json()
+        self.assertEqual(content[0]["value"], "new_supersecret_user_only")
+        self.assertEqual(content[0]["owner"], self.user.username)
+        pc = PluginConfig.objects.get(id=content[0]["id"])
+        self.assertFalse(pc.for_organization)
+        pc.delete()
+
+        pc = PluginConfig(
+            value="default_secret",
+            for_organization=False,
+            owner=None,
+            parameter=param,
+            analyzer_config=ac,
+        )
+        pc.full_clean()
+        pc.save()
+        self.assertEqual(pc.owner, None)
+        self.assertFalse(pc.for_organization)
+
+        self.client.force_authenticate(user=self.user)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_user_secret",
+            }
+        ]
+
+        response = self.client.post(uri, payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        content = response.json()
+        self.assertEqual(content[0]["value"], "new_user_secret")
+        self.assertEqual(content[0]["owner"], self.user.username)
+        pc1 = PluginConfig.objects.get(id=content[0]["id"])
+        self.assertFalse(pc1.for_organization)
+        self.assertNotEqual(pc1.id, pc.id)
+
+        pc.delete()
+        param.delete()
+        PluginConfig.objects.filter(value__startswith="supersecret").delete()
+        org.delete()
+
+    def test_delete(self):
+        org = Organization.create("test_org", self.superuser)
+        Membership.objects.create(
+            user=self.admin, organization=org, is_owner=False, is_admin=True
+        )
+        Membership.objects.create(
+            user=self.user, organization=org, is_owner=False, is_admin=False
+        )
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        uri = "/api/plugin-config/1"
+
+        # logged out
+        self.client.logout()
+        response = self.client.delete(uri, {}, format="json")
+        self.assertEqual(response.status_code, 401)
+
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig(
+            value="supersecret",
+            for_organization=True,
+            owner=self.superuser,
+            parameter=param,
+            analyzer_config=ac,
+            id=1,
+        )
+        pc.full_clean()
+        pc.save()
+        self.assertEqual(pc.owner, org.owner)
+
+        # user can not delete org secret
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(uri, {}, format="json")
+        self.assertEqual(response.status_code, 403)
+
+        # owner can delete org secret
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.delete(uri, format="json")
+        self.assertEqual(response.status_code, 204)
+
+        pc = PluginConfig(
+            value="supersecret",
+            for_organization=True,
+            owner=self.superuser,
+            parameter=param,
+            analyzer_config=ac,
+            id=1,
+        )
+        pc.full_clean()
+        pc.save()
+        self.assertEqual(pc.owner, org.owner)
+
+        # admin can delete org secret
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.delete(uri, {}, format="json")
+        self.assertEqual(response.status_code, 204)
+
+        pc = PluginConfig(
+            value="supersecret",
+            for_organization=False,
+            owner=self.user,
+            parameter=param,
+            analyzer_config=ac,
+            id=1,
+        )
+        pc.full_clean()
+        pc.save()
+        self.assertEqual(pc.owner, self.user)
+
+        # user can delete own personal secret
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(uri, {}, format="json")
+        self.assertEqual(response.status_code, 204)

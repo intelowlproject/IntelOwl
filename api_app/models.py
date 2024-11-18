@@ -1025,18 +1025,6 @@ class PluginConfig(OwnershipAbstractModel):
         """Returns the name of the plugin associated with this configuration."""
         return self.config.name
 
-    @property
-    def type(self):
-        """Returns the type of the plugin associated with this configuration."""
-        # TODO retrocompatibility
-        return self.config.plugin_type
-
-    @property
-    def config_type(self):
-        """Returns the type of the configuration (1 or 2)."""
-        # TODO retrocompatibility
-        return "2" if self.is_secret() else "1"
-
 
 class OrganizationPluginConfiguration(models.Model):
     """

@@ -21,7 +21,6 @@ const CommentResult = React.lazy(
 const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
-const UserConfig = React.lazy(() => import("./user/config/UserConfig"));
 const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
 const InvestigationResult = React.lazy(
   () => import("./investigations/result/InvestigationResult"),
@@ -107,15 +106,6 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <Organization />
-      </Suspense>
-    ),
-  },
-  /* CustomConfig */
-  {
-    path: "/me/config/*",
-    element: (
-      <Suspense fallback={<FallBackLoading />}>
-        <UserConfig />
       </Suspense>
     ),
   },

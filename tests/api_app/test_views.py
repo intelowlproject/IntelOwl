@@ -553,7 +553,6 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             user=self.admin, organization=org, is_owner=False, is_admin=True
         )
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
-        # uri = f"/api/analyzer/{ac.name}/plugin_config"
         uri = f"/api/plugin-config/{ac.name}/analyzer"
 
         # logged out
@@ -864,7 +863,6 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             user=self.user, organization=org, is_owner=False, is_admin=False
         )
         ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
-        # uri = f"/api/analyzer/{ac.name}/plugin_config"
         uri = f"/api/plugin-config/{ac.name}/analyzer"
 
         # logged out

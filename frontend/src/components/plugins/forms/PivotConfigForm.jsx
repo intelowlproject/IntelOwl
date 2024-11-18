@@ -158,13 +158,10 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
       };
       const pluginConfig = formik.values.field_to_compare
         ? {
-            type: 5,
-            plugin_name: formik.values.name,
             attribute: "field_to_compare",
             value: formik.values.field_to_compare,
-            config_type: 1,
           }
-        : [];
+        : {};
 
       if (isEditing) {
         const pivotToEdit =

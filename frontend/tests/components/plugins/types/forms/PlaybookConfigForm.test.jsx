@@ -184,8 +184,8 @@ describe("PlaybookConfigForm test", () => {
         <PlaybookConfigForm
           playbookConfig={playbookConfig}
           toggle={jest.fn()}
-          isOpen
           pluginsLoading={false}
+          isEditing
         />
       </BrowserRouter>,
     );
@@ -301,7 +301,7 @@ describe("PlaybookConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PlaybookConfigForm toggle={jest.fn()} isOpen pluginsLoading={false} />
+        <PlaybookConfigForm toggle={jest.fn()} pluginsLoading={false} />
       </BrowserRouter>,
     );
 

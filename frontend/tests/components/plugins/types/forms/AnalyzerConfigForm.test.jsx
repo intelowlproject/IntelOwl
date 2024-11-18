@@ -200,51 +200,34 @@ describe("AnalyzerConfigForm test", () => {
         maximum_tlp: "RED",
         observable_supported: ["ip"],
         type: "observable",
-        plugin_config: [
+      });
+      expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/plugin-config/myNewAnalyzer/analyzer`, [
           {
             attribute: "http_method",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: "get",
           },
           {
             attribute: "url",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: "http://www.google.com",
           },
           {
             attribute: "headers",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: '{"Accept":"application/json"}',
           },
           {
             attribute: "api_key_name",
-            config_type: 2,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: '""',
           },
           {
             attribute: "certificate",
-            config_type: 2,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: '""',
           },
           {
             attribute: "params",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: "{}",
           },
         ],
-      });
+      );
     });
   });
 
@@ -258,6 +241,7 @@ describe("AnalyzerConfigForm test", () => {
           analyzerConfig={analyzerConfig}
           toggle={jest.fn()}
           isOpen
+          isEditing
         />
       </BrowserRouter>,
     );
@@ -335,51 +319,36 @@ describe("AnalyzerConfigForm test", () => {
           description: "myNewAnalyzer - description",
           maximum_tlp: "AMBER",
           observable_supported: ["domain"],
-          plugin_config: [
+        },
+      );
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/plugin-config/myNewAnalyzer/analyzer`,
+        [
             {
               attribute: "http_method",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
               value: "get",
             },
             {
               attribute: "url",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
               value: "https://www.service.com/",
             },
             {
               attribute: "headers",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
               value: '{"Accept":"application/json"}',
             },
             {
               attribute: "api_key_name",
-              config_type: 2,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
               value: '""',
             },
             {
               attribute: "certificate",
-              config_type: 2,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
               value: '""',
             },
             {
               attribute: "params",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
               value: "{}",
             },
           ],
-        },
       );
     });
   });

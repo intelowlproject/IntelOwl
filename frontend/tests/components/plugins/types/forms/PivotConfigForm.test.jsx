@@ -229,16 +229,15 @@ describe("PivotConfigForm test", () => {
         name: "myNewPivot",
         python_module: "any_compare.AnyCompare",
         playbooks_choice: ["TEST_PLAYBOOK_URL"],
-        plugin_config: {
-          type: 5,
-          plugin_name: "myNewPivot",
-          attribute: "field_to_compare",
-          value: "test.value",
-          config_type: 1,
-        },
         related_analyzer_configs: ["TEST_ANALYZER"],
         related_connector_configs: [],
       });
+      expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/plugin-config/myNewPivot/pivot`,
+          {
+            attribute: "field_to_compare",
+            value: "test.value",
+          }
+      );
     });
   });
 
@@ -248,7 +247,7 @@ describe("PivotConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PivotConfigForm pivotConfig={pivotConfig} toggle={jest.fn()} isOpen />
+        <PivotConfigForm pivotConfig={pivotConfig} toggle={jest.fn()} isOpen isEditing/>
       </BrowserRouter>,
     );
 

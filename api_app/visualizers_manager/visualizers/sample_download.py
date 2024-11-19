@@ -24,36 +24,36 @@ logger = getLogger(__name__)
 
 class SampleDownload(Visualizer):
 
-    @visualizable_error_handler_with_params("VirusTotal")
-    def _vt_button(self):
+    @visualizable_error_handler_with_params("Download")
+    def _download_button(self):
+        # first attempt is download with VT
         try:
             vt_report = self.analyzer_reports().get(
                 config__python_module=VirusTotalv3SampleDownload.python_module
             )
         except AnalyzerReport.DoesNotExist:
-            payload = ""
+            pass
         else:
             payload = vt_report.report["data"]
-        disable = not payload
-        return VisualizableDownload(
-            value="VirusTotal",
-            payload=payload,
-            disable=disable,
-        )
+            disable = not payload
+            return VisualizableDownload(
+                value="VirusTotal Download",
+                payload=payload,
+                disable=disable,
+            )
 
-    @visualizable_error_handler_with_params("URI")
-    def _download_uri(self):
+        # second attempt is download with VT
         try:
             uri_report = self.analyzer_reports().get(
                 config__python_module=DownloadFileFromUri.python_module
             )
         except AnalyzerReport.DoesNotExist:
-            base64_file_list = []
+            raise Exception("no VirusTotal nor uri analyzer used")
         else:
             base64_file_list = uri_report.report["stored_base64"]
         disable_element = not base64_file_list
         return VisualizableVerticalList(
-            name=VisualizableBase(value="URI", disable=disable_element),
+            name=VisualizableBase(value="URI's Downloads", disable=disable_element),
             value=[
                 VisualizableDownload(
                     value=f"Sample-{index + 1}",
@@ -73,8 +73,7 @@ class SampleDownload(Visualizer):
                 size=self.LevelSize.S_3,
                 horizontal_list=self.HList(
                     value=[
-                        self._vt_button(),
-                        self._download_uri(),
+                        self._download_button(),
                     ]
                 ),
             )

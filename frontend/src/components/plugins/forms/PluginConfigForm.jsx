@@ -51,7 +51,7 @@ function CustomInput({ formik, config, configType }) {
       return (
         <>
           <Input
-            id={`pluginConfig_${config.attribute}`}
+            id={`pluginConfig_${configType}-${config.attribute}`}
             type="number"
             name={config.attribute}
             value={formik.values[config.attribute] || ""}
@@ -71,7 +71,7 @@ function CustomInput({ formik, config, configType }) {
     case ParameterTypes.FLOAT:
       return (
         <Input
-          id={`pluginConfig_${config.attribute}`}
+          id={`pluginConfig_${configType}-${config.attribute}`}
           type="number"
           step="0.1"
           name={config.attribute}
@@ -89,7 +89,7 @@ function CustomInput({ formik, config, configType }) {
     case ParameterTypes.STR:
       return (
         <Input
-          id={`pluginConfig_${config.attribute}`}
+          id={`pluginConfig_${configType}-${config.attribute}`}
           type="text"
           name={config.attribute}
           value={
@@ -111,7 +111,7 @@ function CustomInput({ formik, config, configType }) {
       return (
         <div style={{ maxHeight: "150px" }}>
           <CustomJsonInput
-            id="analyzer_header"
+            id={`pluginConfig_${configType}-${config.attribute}`}
             placeholder={formik.values[config.attribute]}
             onChange={(value) => {
               formik.setFieldValue(config.attribute, value.jsObject, false);
@@ -133,10 +133,10 @@ function CustomInput({ formik, config, configType }) {
         <FormGroup
           check
           inline
-          key={`pluginConfig___${config.attribute}-${value}`}
+          key={`pluginConfig_${configType}-${config.attribute}-${value}`}
         >
           <Input
-            id={`pluginConfig___${config.attribute}-${value}`}
+            id={`pluginConfig_${configType}-${config.attribute}-${value}`}
             type="radio"
             name={config.attribute}
             value={value}
@@ -145,7 +145,10 @@ function CustomInput({ formik, config, configType }) {
             onChange={formik.handleChange}
             disabled={disabledInputField}
           />
-          <Label check for={`pluginConfig___${config.attribute}-${value}`}>
+          <Label
+            check
+            for={`pluginConfig_${configType}-${config.attribute}-${value}`}
+          >
             {value}
           </Label>
         </FormGroup>
@@ -155,18 +158,24 @@ function CustomInput({ formik, config, configType }) {
         <FieldArray
           name={`${config.attribute}`}
           render={(arrayHelpers) => (
-            <FormGroup row>
+            <FormGroup
+              row
+              id={`pluginConfig_${configType}-${config.attribute}`}
+            >
               <Col sm={10}>
                 <div style={{ maxHeight: "27vh", overflowY: "scroll" }}>
                   {formik.values[config.attribute] &&
                   formik.values[config.attribute].length > 0
                     ? formik.values[config.attribute].map((value, index) => (
-                        <div className="py-2 d-flex" key={`value.${index + 0}`}>
+                        <div
+                          className="py-2 d-flex"
+                          key={`${configType}__value-${index + 0}`}
+                        >
                           <Col sm={11} className="ps-1 pe-3">
                             <Input
                               type="text"
-                              id={`value.${index}`}
-                              name={`value.${index}`}
+                              id={`${configType}__value-${index}`}
+                              name={`${configType}__value-${index}`}
                               className={
                                 disabledInputField
                                   ? "disabled bg-darker border-0 input-secondary"
@@ -188,6 +197,7 @@ function CustomInput({ formik, config, configType }) {
                           </Col>
                           <Button
                             color="primary"
+                            id={`${configType}__value-${index}-deletebtn`}
                             className="mx-auto rounded-1 text-larger col-sm-1"
                             onClick={() => arrayHelpers.remove(index)}
                             disabled={disabledInputField}
@@ -234,7 +244,6 @@ export function PluginConfigForm({
   refetch,
 }) {
   console.debug("PluginConfigForm rendered!");
-  console.debug(configs);
 
   const {
     organization: { name: orgName },
@@ -270,25 +279,22 @@ export function PluginConfigForm({
       const configToUpdate = [];
 
       configs.forEach((config) => {
-        if (
-          formik.values[config.attribute] !== initialValues[config.attribute]
-        ) {
+        const formValueJson = JSON.stringify(formik.values[config.attribute]);
+        const initialValuesJson = JSON.stringify(
+          initialValues[config.attribute],
+        );
+        if (formValueJson !== initialValuesJson) {
           const obj = {
             attribute: config.attribute,
-            value: JSON.stringify(formik.values[config.attribute]),
+            value: formValueJson,
           };
           // org config
-          if (
-            config.organization &&
-            configType === PluginConfigTypes.ORG_CONFIG
-          ) {
-            obj.organization = config.organization;
-          } else if (
-            config.organization === null &&
-            config.default &&
-            configType === PluginConfigTypes.ORG_CONFIG
-          ) {
-            obj.organization = orgName;
+          if (configType === PluginConfigTypes.ORG_CONFIG) {
+            if (config.organization) {
+              obj.organization = config.organization;
+            } else if (config.organization === null && config.default) {
+              obj.organization = orgName;
+            }
           }
           // determinate which config should be created and which should be updated
           if (config.exist && !config.default) {
@@ -301,7 +307,6 @@ export function PluginConfigForm({
 
       let responseUpdated = null;
       let responseCreated = null;
-
       if (configToUpdate.length > 0) {
         responseUpdated = await editPluginConfig(
           pluginType,
@@ -347,19 +352,19 @@ export function PluginConfigForm({
                     className={`me-2 mb-0 ${
                       config?.required ? "required" : ""
                     }`}
-                    for={`pluginConfig_${config.plugin_name}-${config.attribute}`}
+                    for={`pluginConfig_${configType}-${config.attribute}`}
                   >
                     {config.attribute}
                   </Label>
                   {config.is_secret && (
                     <>
                       <MdInfoOutline
-                        id={`pluginConfig_${config.plugin_name}-${config.attribute}-secretinfoicon`}
+                        id={`pluginConfig_${configType}-${config.attribute}-secretinfoicon`}
                         fontSize="20"
                       />
                       <UncontrolledTooltip
                         trigger="hover"
-                        target={`pluginConfig_${config.plugin_name}-${config.attribute}-secretinfoicon`}
+                        target={`pluginConfig_${configType}-${config.attribute}-secretinfoicon`}
                         placement="right"
                         fade={false}
                         innerClassName="p-2 text-start text-nowrap md-fit-content"
@@ -381,7 +386,7 @@ export function PluginConfigForm({
                 </Col>
                 <Col md={1}>
                   <IconButton
-                    id={`pluginConfig_${config.plugin_name}-${config.attribute}-deletebtn`}
+                    id={`pluginConfig_${configType}-${config.attribute}-deletebtn`}
                     Icon={MdDelete}
                     size="sm"
                     color="info"
@@ -391,6 +396,7 @@ export function PluginConfigForm({
                     titlePlacement="top"
                     disabled={
                       config.default ||
+                      !config.exist ||
                       (config.organization !== null &&
                         configType === PluginConfigTypes.USER_CONFIG)
                     }

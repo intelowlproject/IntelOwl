@@ -1053,10 +1053,6 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
         serializer_class (class): The serializer class used for `PluginConfig` objects.
         pagination_class (class): Specifies that pagination is not applied.
         queryset (QuerySet): The queryset for `PluginConfig` objects, initially set to all objects.
-
-    Methods:
-        get_queryset(): Returns the queryset for `PluginConfig` objects, excluding default values
-                        (where the owner is `NULL`) and ordering the remaining objects by ID.
     """
 
     serializer_class = PluginConfigSerializer

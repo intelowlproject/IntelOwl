@@ -53,6 +53,56 @@ export const mockedUseOrganizationStoreNoOrg = {
   isUserAdmin: () => true,
 };
 
+export const mockedUseOrganizationStoreUser = {
+  loading: false,
+  error: null,
+  isUserOwner: false,
+  isInOrganization: true,
+  organization: {
+    owner: {
+      full_name: "user owner",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_owner",
+      is_admin: true,
+    },
+    name: "org_test",
+    establishedAt: "2023-10-18T14:34:38.263483Z",
+  },
+  membersCount: 3,
+  members: [
+    {
+      full_name: "user owner",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_owner",
+      is_admin: true,
+    },
+    {
+      full_name: "user admin",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_admin",
+      is_admin: true,
+    },
+    {
+      full_name: "user user",
+      joined: "2023-10-19T14:34:38.263483Z",
+      username: "user_user",
+      is_admin: false,
+    },
+  ],
+  pendingInvitations: [],
+  pluginsState: {},
+  fetchAll: () => {},
+  fetchOnlyBasicInfo: () => {},
+  refetchMembers: () => {},
+  refetchInvs: () => {},
+  isUserAdmin: (username) => {
+    if (["user_owner", "user_admin"].includes(username)) {
+      return true;
+    }
+    return false;
+  },
+};
+
 export const mockedUseOrganizationStoreOwner = {
   loading: false,
   error: null,

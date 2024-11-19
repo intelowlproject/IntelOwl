@@ -50,6 +50,7 @@ export function PluginConfigContainer({ pluginName, pluginType }) {
             }
             style={{ border: "1px solid #001d24" }}
             onClick={() => setActiveTab(PluginConfigTypes.USER_CONFIG)}
+            id={`userconfig__${pluginName}`}
           >
             User config
           </NavLink>
@@ -64,6 +65,7 @@ export function PluginConfigContainer({ pluginName, pluginType }) {
               }
               style={{ border: "1px solid #001d24" }}
               onClick={() => setActiveTab(PluginConfigTypes.ORG_CONFIG)}
+              id={`orgconfig__${pluginName}`}
             >
               Org config
             </NavLink>

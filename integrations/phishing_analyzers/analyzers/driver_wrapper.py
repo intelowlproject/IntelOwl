@@ -65,7 +65,9 @@ class DriverWrapper:
         sw_options: {} = {
             "auto_config": False,  # Ensure this is set to False
             "enable_har": True,
-            "addr": "phishing_analyzers",  # where selenium-wire proxy will run
+            # https://github.com/wkeeling/selenium-wire/issues/220#issuecomment-794308386
+            # config to have local seleniumwire proxy compatible with another proxy
+            "addr": "0.0.0.0",  # where selenium-wire proxy will run
             "port": 7007,
         }
         if self.proxy:

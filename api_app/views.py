@@ -1597,8 +1597,6 @@ def plugin_report_queries(request):
     if not settings.ELASTICSEARCH_DSL_ENABLED:
         raise NotImplementedException()
 
-    # TODO: check permissions
-
     # 1 validate request
     logger.debug(f"{request.query_params=}")
     elastic_request_serializer = ElasticRequestSerializer(data=request.query_params)
@@ -1606,8 +1604,15 @@ def plugin_report_queries(request):
     elastic_request_params: ElasticRequest = elastic_request_serializer.save()
     logger.debug(f"{elastic_request_params.__dict__=}")
 
-    # 2 generate elasticsearch queries
-    filter_list = []
+    # 2 generate elasticsearch queries, default filter: object owner or in org
+    permission_filter = QElastic("term", user__username=request.user.username)
+    if request.user.has_membership():
+        permission_filter |= QElastic(
+            "term", membership__organization__name=request.user.username
+        )
+    filter_list = [permission_filter]
+
+    # additional filters based on request params
     if elastic_request_params.plugin_name:
         filter_list.append(
             QElastic("term", plugin_name=elastic_request_params.plugin_name)

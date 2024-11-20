@@ -8,6 +8,30 @@
     },
     "mappings": {
         "properties": {
+            "user": {
+                "properties": {
+                    "username": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "membership": {
+                "properties": {
+                    "is_owner": {
+                        "type": "boolean"
+                    },
+                    "is_admin": {
+                        "type": "boolean"
+                    },
+                    "organization": {
+                        "properties": {
+                            "name": {
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
             "config": {
                 "properties": {
                     "name": {

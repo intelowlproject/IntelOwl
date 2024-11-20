@@ -232,11 +232,12 @@ describe("PivotConfigForm test", () => {
         related_analyzer_configs: ["TEST_ANALYZER"],
         related_connector_configs: [],
       });
-      expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/plugin-config/myNewPivot/pivot`,
-          {
-            attribute: "field_to_compare",
-            value: "test.value",
-          }
+      expect(axios.post).toHaveBeenCalledWith(
+        `${API_BASE_URI}/plugin-config/myNewPivot/pivot`,
+        {
+          attribute: "field_to_compare",
+          value: "test.value",
+        },
       );
     });
   });
@@ -247,7 +248,12 @@ describe("PivotConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PivotConfigForm pivotConfig={pivotConfig} toggle={jest.fn()} isOpen isEditing/>
+        <PivotConfigForm
+          pivotConfig={pivotConfig}
+          toggle={jest.fn()}
+          isOpen
+          isEditing
+        />
       </BrowserRouter>,
     );
 

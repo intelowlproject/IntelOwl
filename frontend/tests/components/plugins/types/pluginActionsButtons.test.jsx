@@ -383,15 +383,15 @@ describe("Plugin Config test", () => {
     // default - configured: true
     {
       pluginConfig: {
-          "id": 167,
-          "python_module": "ailtyposquatting.AilTypoSquatting",
-          "name": "AILTypoSquatting",
-          "verification": {
-            "configured": true,
-            "details": "Ready to use!",
-            "missing_secrets": []
-          }
-          // other configs are not necessary
+        id: 167,
+        python_module: "ailtyposquatting.AilTypoSquatting",
+        name: "AILTypoSquatting",
+        verification: {
+          configured: true,
+          details: "Ready to use!",
+          missing_secrets: [],
+        },
+        // other configs are not necessary
       },
       buttonClassname: "btn-success",
       tooltipText: "Plugin config",
@@ -399,56 +399,60 @@ describe("Plugin Config test", () => {
     // default - configured: false
     {
       pluginConfig: {
-          "id": 3,
-          "python_module": "abuseipdb.AbuseIPDB",
-          "name": "AbuseIPDB",
-          "verification": {
-            "configured": false,
-            "details": "api_key_name secret not set; (3 of 4 satisfied)",
-            "missing_secrets": [
-              "api_key_name"
-            ]
-          }
-          // other configs are not necessary
+        id: 3,
+        python_module: "abuseipdb.AbuseIPDB",
+        name: "AbuseIPDB",
+        verification: {
+          configured: false,
+          details: "api_key_name secret not set; (3 of 4 satisfied)",
+          missing_secrets: ["api_key_name"],
+        },
+        // other configs are not necessary
       },
       buttonClassname: "btn-warning",
-      tooltipText: "Plugin config: api_key_name secret not set; (3 of 4 satisfied)",
+      tooltipText:
+        "Plugin config: api_key_name secret not set; (3 of 4 satisfied)",
     },
     // basic analyzer
     {
       pluginConfig: {
-          "id": 192,
-          "python_module": "basic_observable_analyzer.BasicObservableAnalyzer",
-          "name": "AAA_mnemonic_test",
-          "verification": {
-            "configured": true,
-            "details": "Ready to use!",
-            "missing_secrets": []
-          },
-          // other configs are not necessary
+        id: 192,
+        python_module: "basic_observable_analyzer.BasicObservableAnalyzer",
+        name: "AAA_mnemonic_test",
+        verification: {
+          configured: true,
+          details: "Ready to use!",
+          missing_secrets: [],
+        },
+        // other configs are not necessary
       },
       buttonClassname: "btn-success",
       tooltipText: "Edit analyzer config",
     },
-  ])("Plugin Config - (%o)", async ({ pluginConfig, buttonClassname, tooltipText }) => {
-    const userAction = userEvent.setup();
+  ])(
+    "Plugin Config - (%o)",
+    async ({ pluginConfig, buttonClassname, tooltipText }) => {
+      const userAction = userEvent.setup();
 
-    const { container } = render(
-      <BrowserRouter>
-        <PluginConfigButton pluginConfig={pluginConfig} pluginType_="analyzer" />
-      </BrowserRouter>,
-    );
+      const { container } = render(
+        <BrowserRouter>
+          <PluginConfigButton
+            pluginConfig={pluginConfig}
+            pluginType_="analyzer"
+          />
+        </BrowserRouter>,
+      );
 
-    const configIcon = container.querySelector(
-      `#plugin-config-btn__${pluginConfig.name}`,
-    );
-    expect(configIcon).toBeInTheDocument();
-    expect(configIcon.className).toContain(buttonClassname);
+      const configIcon = container.querySelector(
+        `#plugin-config-btn__${pluginConfig.name}`,
+      );
+      expect(configIcon).toBeInTheDocument();
+      expect(configIcon.className).toContain(buttonClassname);
 
-    await userAction.hover(configIcon);
-    await waitFor(() => {
-      expect(screen.getByText(tooltipText)).toBeInTheDocument();
-    });
-
-  });
+      await userAction.hover(configIcon);
+      await waitFor(() => {
+        expect(screen.getByText(tooltipText)).toBeInTheDocument();
+      });
+    },
+  );
 });

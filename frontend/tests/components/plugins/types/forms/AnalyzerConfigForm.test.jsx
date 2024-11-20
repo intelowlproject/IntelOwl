@@ -201,7 +201,9 @@ describe("AnalyzerConfigForm test", () => {
         observable_supported: ["ip"],
         type: "observable",
       });
-      expect(axios.post).toHaveBeenCalledWith(`${API_BASE_URI}/plugin-config/myNewAnalyzer/analyzer`, [
+      expect(axios.post).toHaveBeenCalledWith(
+        `${API_BASE_URI}/plugin-config/myNewAnalyzer/analyzer`,
+        [
           {
             attribute: "http_method",
             value: "get",
@@ -324,31 +326,31 @@ describe("AnalyzerConfigForm test", () => {
       expect(axios.patch).toHaveBeenCalledWith(
         `${API_BASE_URI}/plugin-config/myNewAnalyzer/analyzer`,
         [
-            {
-              attribute: "http_method",
-              value: "get",
-            },
-            {
-              attribute: "url",
-              value: "https://www.service.com/",
-            },
-            {
-              attribute: "headers",
-              value: '{"Accept":"application/json"}',
-            },
-            {
-              attribute: "api_key_name",
-              value: '""',
-            },
-            {
-              attribute: "certificate",
-              value: '""',
-            },
-            {
-              attribute: "params",
-              value: "{}",
-            },
-          ],
+          {
+            attribute: "http_method",
+            value: "get",
+          },
+          {
+            attribute: "url",
+            value: "https://www.service.com/",
+          },
+          {
+            attribute: "headers",
+            value: '{"Accept":"application/json"}',
+          },
+          {
+            attribute: "api_key_name",
+            value: '""',
+          },
+          {
+            attribute: "certificate",
+            value: '""',
+          },
+          {
+            attribute: "params",
+            value: "{}",
+          },
+        ],
       );
     });
   });

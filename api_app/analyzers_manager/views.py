@@ -5,7 +5,7 @@ import logging
 from rest_framework import mixins
 
 from ..permissions import isPluginActionsPermission
-from ..views import PythonConfigViewSet, PythonReportActionViewSet
+from ..views import PluginConfigViewSet, PythonConfigViewSet, PythonReportActionViewSet
 from .filters import AnalyzerConfigFilter
 from .models import AnalyzerConfig, AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
@@ -41,3 +41,7 @@ class AnalyzerActionViewSet(PythonReportActionViewSet):
     @property
     def report_model(cls):
         return AnalyzerReport
+
+
+class AnalyzerPluginConfigViewSet(PluginConfigViewSet):
+    queryset = AnalyzerConfig.objects.all()

@@ -7,7 +7,11 @@ from api_app.pivots_manager.permissions import (
     PivotOwnerPermission,
 )
 from api_app.pivots_manager.serializers import PivotConfigSerializer, PivotMapSerializer
-from api_app.views import PythonConfigViewSet, PythonReportActionViewSet
+from api_app.views import (
+    PluginConfigViewSet,
+    PythonConfigViewSet,
+    PythonReportActionViewSet,
+)
 
 
 class PivotConfigViewSet(
@@ -55,3 +59,7 @@ class PivotMapViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PivotMapSerializer
     lookup_field = "pk"
     queryset = PivotMap.objects.all()
+
+
+class PivotPluginConfigViewSet(PluginConfigViewSet):
+    queryset = PivotConfig.objects.all()

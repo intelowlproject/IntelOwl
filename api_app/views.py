@@ -21,11 +21,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import ScanMode
-from api_app.connectors_manager.models import ConnectorConfig
-from api_app.ingestors_manager.models import IngestorConfig
-from api_app.visualizers_manager.models import VisualizerConfig
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
@@ -1035,197 +1031,6 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
 
 
 @add_docs(
-    description="""
-    REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
-    Requires authentication. Allows access to only authorized CustomConfigs.
-    """
-)
-class PluginConfigViewSet(ModelWithOwnershipViewSet):
-    """
-    A viewset for managing `PluginConfig` objects with ownership-based access control.
-
-    This viewset extends `ModelWithOwnershipViewSet` to handle `PluginConfig` objects,
-    allowing users to list, retrieve, and delete configurations while ensuring that only
-    authorized configurations are accessible. It customizes the queryset to exclude default
-    values and orders the configurations by ID.
-
-    Attributes:
-        serializer_class (class): The serializer class used for `PluginConfig` objects.
-        pagination_class (class): Specifies that pagination is not applied.
-        queryset (QuerySet): The queryset for `PluginConfig` objects, initially set to all objects.
-    """
-
-    serializer_class = PluginConfigSerializer
-    pagination_class = None
-    queryset = PluginConfig.objects.all()
-
-    def _get_plugin_configs(self, request, obj):
-        try:
-            plugin_configs: PluginConfig = PluginConfig.objects.filter(
-                **{obj.snake_case_name: obj.pk}
-            )
-        except PluginConfig.DoesNotExist:
-            raise ValidationError({"detail": "Requested plugin config does not exist."})
-        else:
-            pc = PluginConfigSerializer(
-                plugin_configs, context={"request": request}, many=True
-            )
-            pp = ParameterSerializer(obj.parameters, many=True)
-            org_config = []
-            user_config = []
-
-            for attribute, param_obj in pp.data.items():
-                param_obj["attribute"] = attribute
-                param_obj["exist"] = False
-                param_obj["default"] = False
-                # override default config (if any)
-                for config in [config for config in pc.data if config["owner"] is None]:
-                    if config["attribute"] == attribute:
-                        param_obj.update(config)
-                        param_obj["exist"] = True
-                        param_obj["default"] = True
-                # override default config with org config (if any)
-                if request.user.has_membership():
-                    org = request.user.membership.organization.name
-                    for config in [
-                        config for config in pc.data if config["organization"] == org
-                    ]:
-                        if config["attribute"] == attribute:
-                            param_obj.update(config)
-                            param_obj["exist"] = True
-                            param_obj["default"] = False
-                    org_config.append(copy.deepcopy(param_obj))
-                # override default config with user config (if any)
-                for config in [
-                    config
-                    for config in pc.data
-                    if config["owner"] == request.user.username
-                    and config["organization"] is None
-                ]:
-                    if config["attribute"] == attribute:
-                        param_obj.update(config)
-                        param_obj["exist"] = True
-                        param_obj["default"] = False
-                user_config.append(copy.deepcopy(param_obj))
-
-            result = {"organization_config": org_config, "user_config": user_config}
-            return Response(result, status=status.HTTP_200_OK)
-
-    def _update_config(self, request, obj):
-        for config in request.data:
-            organization = config.get("organization", False)
-            # only owner and admin can update org config
-            if (
-                request.user.has_membership()
-                and organization
-                and not request.user.membership.is_admin
-            ):
-                raise PermissionDenied()
-
-            parameter = obj.parameters.get(name=config["attribute"])
-            config["parameter"] = parameter.pk
-            config["owner"] = request.user
-            config[obj.snake_case_name] = obj.name
-            try:
-                if organization:
-                    instance = PluginConfig.objects.get(
-                        parameter=parameter,
-                        for_organization=True,
-                        **{obj.snake_case_name: obj.pk},
-                    )
-                else:
-                    instance = PluginConfig.objects.get(
-                        owner=config["owner"],
-                        parameter=parameter,
-                        for_organization=False,
-                        **{obj.snake_case_name: obj.pk},
-                    )
-            except PluginConfig.DoesNotExist:
-                raise PermissionDenied()
-            else:
-                serializer = PluginConfigSerializer(instance, data=config, partial=True)
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-        return Response(status=status.HTTP_200_OK)
-
-    def _create_config(self, request, obj):
-        for config in request.data:
-            organization = config.get("organization", False)
-            # only owner and admin can create org config
-            if (
-                request.user.has_membership()
-                and organization
-                and not request.user.membership.is_admin
-            ):
-                raise PermissionDenied()
-
-            config[obj.snake_case_name] = obj.name
-            parameter = obj.parameters.get(name=config["attribute"])
-            config["parameter"] = parameter.pk
-            config["owner"] = request.user
-
-        plugin_config_serializer = PluginConfigSerializer(
-            data=request.data, context={"request": request}, many=True
-        )
-        plugin_config_serializer.is_valid(raise_exception=True)
-        plugin_config_serializer.save()
-        return Response(plugin_config_serializer.data, status=status.HTTP_201_CREATED)
-
-    def _plugin_action(self, request, obj):
-        if request.method == "GET":
-            return self._get_plugin_configs(request, obj)
-        if request.method == "PATCH":
-            return self._update_config(request, obj)
-        if request.method == "POST":
-            return self._create_config(request, obj)
-
-    @action(
-        methods=["get", "patch", "post"],
-        detail=True,
-    )
-    def analyzer(self, request, pk=None):
-        logger.info(f"get plugin config from user {request.user}, plugin: {pk}")
-        obj: AnalyzerConfig = AnalyzerConfig.objects.get(name=pk)
-        return self._plugin_action(request, obj)
-
-    @action(
-        methods=["get", "patch", "post"],
-        detail=True,
-    )
-    def connector(self, request, pk=None):
-        logger.info(f"get plugin config from user {request.user}, plugin: {pk}")
-        obj: ConnectorConfig = ConnectorConfig.objects.get(name=pk)
-        return self._plugin_action(request, obj)
-
-    @action(
-        methods=["get", "patch", "post"],
-        detail=True,
-    )
-    def pivot(self, request, pk=None):
-        logger.info(f"get plugin config from user {request.user}, plugin: {pk}")
-        obj: PivotConfig = PivotConfig.objects.get(name=pk)
-        return self._plugin_action(request, obj)
-
-    @action(
-        methods=["get", "patch", "post"],
-        detail=True,
-    )
-    def ingestor(self, request, pk=None):
-        logger.info(f"get plugin config from user {request.user}, plugin: {pk}")
-        obj: IngestorConfig = IngestorConfig.objects.get(name=pk)
-        return self._plugin_action(request, obj)
-
-    @action(
-        methods=["get", "patch", "post"],
-        detail=True,
-    )
-    def visualizer(self, request, pk=None):
-        logger.info(f"get plugin config from user {request.user}, plugin: {pk}")
-        obj: VisualizerConfig = VisualizerConfig.objects.get(name=pk)
-        return self._plugin_action(request, obj)
-
-
-@add_docs(
     description="""This endpoint allows organization owners
     and members to view plugin state.""",
     responses={
@@ -1715,3 +1520,167 @@ class PythonConfigViewSet(AbstractConfigViewSet):
                     {"detail": "This Plugin has no Update implemented"}
                 )
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)
+
+
+@add_docs(
+    description="""
+    REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
+    Requires authentication. Allows access to only authorized CustomConfigs.
+    """
+)
+class PluginConfigViewSet(ModelWithOwnershipViewSet):
+    """
+    A viewset for managing `PluginConfig` objects with ownership-based access control.
+
+    This viewset extends `ModelWithOwnershipViewSet` to handle `PluginConfig` objects,
+    allowing users to list, retrieve, and delete configurations while ensuring that only
+    authorized configurations are accessible.
+
+    Attributes:
+        serializer_class (class): The serializer class used for `PluginConfig` objects.
+        pagination_class (class): Specifies that pagination is not applied.
+        queryset (QuerySet): The queryset for `PluginConfig` objects, initially set to all objects.
+    """
+
+    serializer_class = PluginConfigSerializer
+    pagination_class = None
+    queryset = PluginConfig.objects.all()
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action in ["retrieve"]:
+            permissions.append((IsObjectAdminPermission | IsObjectOwnerPermission)())
+        return permissions
+
+    def get_object(self, name: str = None):
+        if name is None:
+            return super().get_object()
+        queryset = self.get_queryset()
+        obj = queryset.get(name=name)
+        return obj
+
+    @action(
+        methods=["get"],
+        detail=False,
+    )
+    def plugin_config(self, request, name=None):
+        logger.info(f"get plugin_config from user {request.user}, name {name}")
+        obj: PythonConfig = self.get_object(name)
+        try:
+            plugin_configs: PluginConfig = PluginConfig.objects.filter(
+                **{obj.snake_case_name: obj.pk}
+            )
+        except PluginConfig.DoesNotExist:
+            raise ValidationError({"detail": "Requested plugin config does not exist."})
+        else:
+            pc = PluginConfigSerializer(
+                plugin_configs, context={"request": request}, many=True
+            )
+            pp = ParameterSerializer(obj.parameters, many=True)
+            org_config = []
+            user_config = []
+
+            for attribute, param_obj in pp.data.items():
+                param_obj["attribute"] = attribute
+                param_obj["exist"] = False
+                param_obj["default"] = False
+                # override default config (if any)
+                for config in [config for config in pc.data if config["owner"] is None]:
+                    if config["attribute"] == attribute:
+                        param_obj.update(config)
+                        param_obj["exist"] = True
+                        param_obj["default"] = True
+                # override default config with org config (if any)
+                if request.user.has_membership():
+                    org = request.user.membership.organization.name
+                    for config in [
+                        config for config in pc.data if config["organization"] == org
+                    ]:
+                        if config["attribute"] == attribute:
+                            param_obj.update(config)
+                            param_obj["exist"] = True
+                            param_obj["default"] = False
+                    org_config.append(copy.deepcopy(param_obj))
+                # override default config with user config (if any)
+                for config in [
+                    config
+                    for config in pc.data
+                    if config["owner"] == request.user.username
+                    and config["organization"] is None
+                ]:
+                    if config["attribute"] == attribute:
+                        param_obj.update(config)
+                        param_obj["exist"] = True
+                        param_obj["default"] = False
+                user_config.append(copy.deepcopy(param_obj))
+
+            result = {"organization_config": org_config, "user_config": user_config}
+            return Response(result, status=status.HTTP_200_OK)
+
+    @plugin_config.mapping.patch
+    def update(self, request, name=None):
+        logger.info(f"patch plugin_config from user {request.user}, name {name}")
+        obj: PythonConfig = self.get_object(name)
+
+        for config in request.data:
+            organization = config.get("organization", False)
+            # only owner and admin can update org config
+            if (
+                request.user.has_membership()
+                and organization
+                and not request.user.membership.is_admin
+            ):
+                raise PermissionDenied()
+
+            parameter = obj.parameters.get(name=config["attribute"])
+            config["parameter"] = parameter.pk
+            config["owner"] = request.user
+            config[obj.snake_case_name] = obj.name
+            try:
+                if organization:
+                    instance = PluginConfig.objects.get(
+                        parameter=parameter,
+                        for_organization=True,
+                        **{obj.snake_case_name: obj.pk},
+                    )
+                else:
+                    instance = PluginConfig.objects.get(
+                        owner=config["owner"],
+                        parameter=parameter,
+                        for_organization=False,
+                        **{obj.snake_case_name: obj.pk},
+                    )
+            except PluginConfig.DoesNotExist:
+                raise PermissionDenied()
+            else:
+                serializer = PluginConfigSerializer(instance, data=config, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+        return Response(status=status.HTTP_200_OK)
+
+    @plugin_config.mapping.post
+    def create(self, request, name=None):
+        logger.info(f"post plugin_config from user {request.user}, name {name}")
+        obj: PythonConfig = self.get_object(name)
+
+        for config in request.data:
+            organization = config.get("organization", False)
+            # only owner and admin can create org config
+            if (
+                request.user.has_membership()
+                and organization
+                and not request.user.membership.is_admin
+            ):
+                raise PermissionDenied()
+
+            config[obj.snake_case_name] = obj.name
+            parameter = obj.parameters.get(name=config["attribute"])
+            config["parameter"] = parameter.pk
+            config["owner"] = request.user
+
+        plugin_config_serializer = PluginConfigSerializer(
+            data=request.data, context={"request": request}, many=True
+        )
+        plugin_config_serializer.is_valid(raise_exception=True)
+        plugin_config_serializer.save()
+        return Response(plugin_config_serializer.data, status=status.HTTP_201_CREATED)

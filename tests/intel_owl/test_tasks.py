@@ -11,6 +11,8 @@ from api_app.ingestors_manager.models import IngestorConfig, IngestorReport
 from api_app.models import Job, LastElasticReportUpdate, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotReport
 from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
+from certego_saas.apps.organization.membership import Membership
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
 from intel_owl.tasks import send_plugin_report_to_elastic
 from tests import CustomTestCase
@@ -24,8 +26,17 @@ _now = datetime.datetime(2024, 10, 29, 11, tzinfo=datetime.UTC)
 class SendElasticTestCase(CustomTestCase):
 
     def setUp(self):
+        self.user, _ = User.objects.get_or_create(
+            username="test_elastic_user", email="elastic@intelowl.com", password="test"
+        )
+        self.organization, _ = Organization.objects.get_or_create(
+            name="test_elastic_org"
+        )
+        self.membership, _ = Membership.objects.get_or_create(
+            user=self.user, organization=self.organization, is_owner=True
+        )
         self.job = Job.objects.create(
-            observable_name="dns.google.com", tlp="AMBER", user=User.objects.first()
+            observable_name="dns.google.com", tlp="AMBER", user=self.user
         )
         AnalyzerReport.objects.create(  # valid
             config=AnalyzerConfig.objects.get(
@@ -170,6 +181,9 @@ class SendElasticTestCase(CustomTestCase):
         PivotReport.objects.all().delete()
         VisualizerReport.objects.all().delete()
         LastElasticReportUpdate.objects.all().delete()
+        self.user.delete()
+        self.organization.delete()
+        self.membership.delete()
 
     @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @override_settings(ELASTICSEARCH_DSL_HOST="https://elasticsearch:9200")
@@ -190,6 +204,12 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_source": {
+                            "user": {"username": "test_elastic_user"},
+                            "membership": {
+                                "is_admin": False,
+                                "is_owner": True,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "DNS0_EU_Malicious_Detector",
                                 "plugin_name": "Analyzer",
@@ -210,6 +230,12 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_source": {
+                            "user": {"username": "test_elastic_user"},
+                            "membership": {
+                                "is_admin": False,
+                                "is_owner": True,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "Quad9_Malicious_Detector",
                                 "plugin_name": "Analyzer",
@@ -230,6 +256,12 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-connector-report-2024-10-29",
                         "_source": {
+                            "user": {"username": "test_elastic_user"},
+                            "membership": {
+                                "is_admin": False,
+                                "is_owner": True,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "AbuseSubmitter",
                                 "plugin_name": "Connector",
@@ -255,6 +287,14 @@ class SendElasticTestCase(CustomTestCase):
                         "_op_type": "index",
                         "_index": "plugin-report-pivot-report-2024-10-29",
                         "_source": {
+                            "user": {
+                                "username": "test_elastic_user",
+                            },
+                            "membership": {
+                                "is_owner": True,
+                                "is_admin": False,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "AbuseIpToSubmission",
                                 "plugin_name": "Pivot",
@@ -303,6 +343,12 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
+                            "user": {"username": "test_elastic_user"},
+                            "membership": {
+                                "is_admin": False,
+                                "is_owner": True,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "DNS0_EU_Malicious_Detector",
                                 "plugin_name": "Analyzer",
@@ -323,6 +369,12 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-analyzer-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
+                            "user": {"username": "test_elastic_user"},
+                            "membership": {
+                                "is_admin": False,
+                                "is_owner": True,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "Quad9_Malicious_Detector",
                                 "plugin_name": "Analyzer",
@@ -343,6 +395,12 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-connector-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
+                            "user": {"username": "test_elastic_user"},
+                            "membership": {
+                                "is_admin": False,
+                                "is_owner": True,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "AbuseSubmitter",
                                 "plugin_name": "Connector",
@@ -368,6 +426,12 @@ class SendElasticTestCase(CustomTestCase):
                         "_index": "plugin-report-pivot-report-2024-10-29",
                         "_op_type": "index",
                         "_source": {
+                            "user": {"username": "test_elastic_user"},
+                            "membership": {
+                                "is_admin": False,
+                                "is_owner": True,
+                                "organization": {"name": "test_elastic_org"},
+                            },
                             "config": {
                                 "name": "AbuseIpToSubmission",
                                 "plugin_name": "Pivot",

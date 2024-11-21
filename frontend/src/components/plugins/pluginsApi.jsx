@@ -33,7 +33,7 @@ export async function createPluginConfig(type, pluginName, data) {
   let success = false;
   try {
     const response = await axios.post(
-      `${API_BASE_URI}/plugin-config/${pluginName}/${type}`,
+      `${API_BASE_URI}/${type}/${pluginName}/plugin_config`,
       data,
     );
     success = response.status === 201;
@@ -81,7 +81,7 @@ export async function editPluginConfig(type, pluginName, data) {
   let success = false;
   try {
     const response = await axios.patch(
-      `${API_BASE_URI}/plugin-config/${pluginName}/${type}`,
+      `${API_BASE_URI}/${type}/${pluginName}/plugin_config`,
       data,
     );
     success = response.status === 200;

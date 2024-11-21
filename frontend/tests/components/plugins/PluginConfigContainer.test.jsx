@@ -303,7 +303,7 @@ describe("test PluginConfigContainer component", () => {
 
     await waitFor(() => {
       expect(axios.patch).toHaveBeenCalledWith(
-        `${API_BASE_URI}/plugin-config/AbuseIPDB/analyzer`,
+        `${API_BASE_URI}/analyzer/AbuseIPDB/plugin_config`,
         [
           {
             attribute: "bool_input",
@@ -312,7 +312,7 @@ describe("test PluginConfigContainer component", () => {
         ],
       );
       expect(axios.post).toHaveBeenCalledWith(
-        `${API_BASE_URI}/plugin-config/AbuseIPDB/analyzer`,
+        `${API_BASE_URI}/analyzer/AbuseIPDB/plugin_config`,
         [
           {
             attribute: "str_input",
@@ -443,7 +443,7 @@ describe("test PluginConfigContainer component", () => {
 
       waitFor(() => {
         expect(axios.patch).toHaveBeenCalledWith(
-          `${API_BASE_URI}/plugin-config/AbuseIPDB/analyzer`,
+          `${API_BASE_URI}/analyzer/AbuseIPDB/plugin_config`,
           [
             {
               attribute: "bool_input",
@@ -453,7 +453,7 @@ describe("test PluginConfigContainer component", () => {
           ],
         );
         expect(axios.post).toHaveBeenCalledWith(
-          `${API_BASE_URI}/plugin-config/AbuseIPDB/analyzer`,
+          `${API_BASE_URI}/analyzer/AbuseIPDB/plugin_config`,
           [
             {
               attribute: "str_input",

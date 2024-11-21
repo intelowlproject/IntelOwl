@@ -1551,8 +1551,10 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
         if self.action in ["retrieve"]:
             # code quality checker marks this as error, but it works correctly
             permissions.append(
-                (IsObjectAdminPermission | IsObjectOwnerPermission)()
-            )  # skipcq: PYL-E1102
+                (  # skipcq: PYL-E1102
+                    IsObjectAdminPermission | IsObjectOwnerPermission
+                )()
+            )
         return permissions
 
     def get_object(self, name: str = None):

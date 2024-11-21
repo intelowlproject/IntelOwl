@@ -176,7 +176,6 @@ class PhishingFormCompiler(FileAnalyzer):
         logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
         return requests.post(
             url=dest_url,
-            params=params,
             data=params,
             proxies=(
                 {"http": self.proxy_address, "https": self.proxy_address}

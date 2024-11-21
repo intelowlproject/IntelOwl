@@ -2,7 +2,7 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import Connectors from "../../../../src/components/plugins/types/Connectors";
+import Connectors from "../../../../src/components/plugins/tables/Connectors";
 
 import {
   mockedUseOrganizationStoreNoOrg,

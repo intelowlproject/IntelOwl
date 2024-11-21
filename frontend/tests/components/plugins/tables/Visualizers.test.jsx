@@ -2,25 +2,17 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import Ingestors from "../../../../src/components/plugins/types/Ingestors";
+import Visualizers from "../../../../src/components/plugins/tables/Visualizers";
 
-import { mockedUsePluginConfigurationStore } from "../../../mock";
+import {
+  mockedUseOrganizationStoreNoOrg,
+  mockedUsePluginConfigurationStore,
+} from "../../../mock";
 
 jest.mock("axios");
 jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
-    state({
-      loading: false,
-      error: null,
-      isUserOwner: false,
-      isInOrganization: false,
-      organization: {},
-      membersCount: undefined,
-      members: [],
-      pendingInvitations: [],
-      pluginsState: {},
-      fetchAll: () => {},
-    }),
+    state(mockedUseOrganizationStoreNoOrg),
   ),
 }));
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
@@ -28,15 +20,16 @@ jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
     state(mockedUsePluginConfigurationStore),
   ),
 }));
-describe("test Ingestors component", () => {
+
+describe("test Visualizers component", () => {
   test("Table columns", async () => {
     render(
       <BrowserRouter>
-        <Ingestors />
+        <Visualizers />
       </BrowserRouter>,
     );
 
-    const title = screen.getByRole("heading", { name: "Ingestors 0 total" });
+    const title = screen.getByRole("heading", { name: "Visualizers 0 total" });
     expect(title).toBeInTheDocument();
     // table
     const tableComponent = screen.getByRole("table");
@@ -51,13 +44,13 @@ describe("test Ingestors component", () => {
       name: "Description",
     });
     expect(descriptionColumnHeader).toBeInTheDocument();
-    const playbookExecutedColumnHeader = screen.getByRole("columnheader", {
-      name: "Playbook to execute All",
+    const playbookConnectedToColumnHeader = screen.getByRole("columnheader", {
+      name: "Playbook connected to All",
     });
-    expect(playbookExecutedColumnHeader).toBeInTheDocument();
-    const scheduleColumnHeader = screen.getByRole("columnheader", {
-      name: "Schedule",
+    expect(playbookConnectedToColumnHeader).toBeInTheDocument();
+    const actionColumnHeader = screen.getByRole("columnheader", {
+      name: "Actions",
     });
-    expect(scheduleColumnHeader).toBeInTheDocument();
+    expect(actionColumnHeader).toBeInTheDocument();
   });
 });

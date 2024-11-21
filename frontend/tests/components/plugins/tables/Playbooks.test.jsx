@@ -2,12 +2,11 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import Analyzers from "../../../../src/components/plugins/types/Analyzers";
+import Playbooks from "../../../../src/components/plugins/tables/Playbooks";
 
 import {
   mockedUseAuthStore,
   mockedUseOrganizationStoreNoOrg,
-  mockedUseTagsStore,
   mockedUsePluginConfigurationStore,
 } from "../../../mock";
 
@@ -20,24 +19,21 @@ jest.mock("../../../../src/stores/useOrganizationStore", () => ({
     state(mockedUseOrganizationStoreNoOrg),
   ),
 }));
-jest.mock("../../../../src/stores/useTagsStore", () => ({
-  useTagsStore: jest.fn((state) => state(mockedUseTagsStore)),
-}));
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
     state(mockedUsePluginConfigurationStore),
   ),
 }));
 
-describe("test Analyzers component", () => {
+describe("test Playbooks component", () => {
   test("Table columns", async () => {
     render(
       <BrowserRouter>
-        <Analyzers />
+        <Playbooks />
       </BrowserRouter>,
     );
 
-    const title = screen.getByRole("heading", { name: "Analyzers 1 total" });
+    const title = screen.getByRole("heading", { name: "Playbooks 6 total" });
     expect(title).toBeInTheDocument();
     // table
     const tableComponent = screen.getByRole("table");
@@ -53,17 +49,25 @@ describe("test Analyzers component", () => {
     });
     expect(descriptionColumnHeader).toBeInTheDocument();
     const typeColumnHeader = screen.getByRole("columnheader", {
-      name: "Type All",
-    });
-    expect(typeColumnHeader).toBeInTheDocument();
-    const supportedTypesColumnHeader = screen.getByRole("columnheader", {
       name: "Supported types All",
     });
-    expect(supportedTypesColumnHeader).toBeInTheDocument();
-    const tlpColumnHeader = screen.getByRole("columnheader", {
-      name: "Maximum TLP All",
+    expect(typeColumnHeader).toBeInTheDocument();
+    const analyzersExecutedColumnHeader = screen.getByRole("columnheader", {
+      name: "Analyzers All",
     });
-    expect(tlpColumnHeader).toBeInTheDocument();
+    expect(analyzersExecutedColumnHeader).toBeInTheDocument();
+    const connectorsExecutedColumnHeader = screen.getByRole("columnheader", {
+      name: "Connectors All",
+    });
+    expect(connectorsExecutedColumnHeader).toBeInTheDocument();
+    const pivotsExecutedColumnHeader = screen.getByRole("columnheader", {
+      name: "Pivots All",
+    });
+    expect(pivotsExecutedColumnHeader).toBeInTheDocument();
+    const visualizersExecutedColumnHeader = screen.getByRole("columnheader", {
+      name: "Visualizers All",
+    });
+    expect(visualizersExecutedColumnHeader).toBeInTheDocument();
     const actionColumnHeader = screen.getByRole("columnheader", {
       name: "Actions",
     });

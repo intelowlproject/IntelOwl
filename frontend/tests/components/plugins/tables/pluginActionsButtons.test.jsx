@@ -13,7 +13,7 @@ import {
   PluginPullButton,
   PlaybooksEditButton,
   PluginConfigButton,
-} from "../../../../src/components/plugins/types/pluginActionsButtons";
+} from "../../../../src/components/plugins/tables/pluginActionsButtons";
 import { mockedUseOrganizationStoreOwner } from "../../../mock";
 
 jest.mock("axios");

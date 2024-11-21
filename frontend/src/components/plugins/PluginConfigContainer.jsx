@@ -32,13 +32,13 @@ export function PluginConfigContainer({ pluginName, pluginType }) {
     refetchPluginConfig,
   ] = useAxios(
     {
-      url: `${API_BASE_URI}/plugin-config/${pluginName}/${pluginType}`,
+      url: `${API_BASE_URI}/${pluginType}/${pluginName}/plugin_config`,
     },
     { useCache: false },
   );
 
   return (
-    <>
+    <div id="plugin-config-container">
       {/* plugin config */}
       <Nav tabs className="mt-4">
         <NavItem>
@@ -102,7 +102,7 @@ export function PluginConfigContainer({ pluginName, pluginType }) {
           </TabContent>
         )}
       />
-    </>
+    </div>
   );
 }
 

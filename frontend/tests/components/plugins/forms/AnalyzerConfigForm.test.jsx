@@ -4,11 +4,11 @@ import axios from "axios";
 import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { API_BASE_URI } from "../../../../../src/constants/apiURLs";
-import { AnalyzerConfigForm } from "../../../../../src/components/plugins/forms/AnalyzerConfigForm";
-import { mockedUsePluginConfigurationStore } from "../../../../mock";
+import { API_BASE_URI } from "../../../../src/constants/apiURLs";
+import { AnalyzerConfigForm } from "../../../../src/components/plugins/forms/AnalyzerConfigForm";
+import { mockedUsePluginConfigurationStore } from "../../../mock";
 
-jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
     state(mockedUsePluginConfigurationStore),
   ),
@@ -202,7 +202,7 @@ describe("AnalyzerConfigForm test", () => {
         type: "observable",
       });
       expect(axios.post).toHaveBeenCalledWith(
-        `${API_BASE_URI}/plugin-config/myNewAnalyzer/analyzer`,
+        `${API_BASE_URI}/analyzer/myNewAnalyzer/plugin_config`,
         [
           {
             attribute: "http_method",
@@ -324,7 +324,7 @@ describe("AnalyzerConfigForm test", () => {
         },
       );
       expect(axios.patch).toHaveBeenCalledWith(
-        `${API_BASE_URI}/plugin-config/myNewAnalyzer/analyzer`,
+        `${API_BASE_URI}/analyzer/myNewAnalyzer/plugin_config`,
         [
           {
             attribute: "http_method",

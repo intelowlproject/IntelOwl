@@ -13,12 +13,12 @@ import { useGuideContext } from "../../contexts/GuideContext";
 import { PluginsTypes } from "../../constants/pluginConst";
 import { PluginConfigModal } from "./PluginConfigModal";
 
-const Analyzers = React.lazy(() => import("./types/Analyzers"));
-const Connectors = React.lazy(() => import("./types/Connectors"));
-const Pivots = React.lazy(() => import("./types/Pivots"));
-const Visualizers = React.lazy(() => import("./types/Visualizers"));
-const Ingestors = React.lazy(() => import("./types/Ingestors"));
-const Playbooks = React.lazy(() => import("./types/Playbooks"));
+const Analyzers = React.lazy(() => import("./tables/Analyzers"));
+const Connectors = React.lazy(() => import("./tables/Connectors"));
+const Pivots = React.lazy(() => import("./tables/Pivots"));
+const Visualizers = React.lazy(() => import("./tables/Visualizers"));
+const Ingestors = React.lazy(() => import("./tables/Ingestors"));
+const Playbooks = React.lazy(() => import("./tables/Playbooks"));
 
 const routes = [
   {

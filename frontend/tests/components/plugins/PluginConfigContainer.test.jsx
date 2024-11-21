@@ -323,7 +323,7 @@ describe("test PluginConfigContainer component", () => {
     });
   });
 
-  test("plugins config modal - org owner", async () => {
+  test("plugins config form - org owner", async () => {
     const user = userEvent.setup();
     useOrganizationStore.mockImplementation(
       jest.fn((state) => state(mockedUseOrganizationStoreOwner)),
@@ -466,7 +466,7 @@ describe("test PluginConfigContainer component", () => {
     });
   });
 
-  test("plugins config modal - org user", async () => {
+  test("plugins config form - org user", async () => {
     const user = userEvent.setup();
     useOrganizationStore.mockImplementation(
       jest.fn((state) => state(mockedUseOrganizationStoreUser)),
@@ -587,7 +587,7 @@ describe("test PluginConfigContainer component", () => {
     });
   });
 
-  test("plugins config modal - delete config", async () => {
+  test("plugins config form - delete config", async () => {
     const user = userEvent.setup();
     useOrganizationStore.mockImplementation(
       jest.fn((state) => state(mockedUseOrganizationStoreNoOrg)),

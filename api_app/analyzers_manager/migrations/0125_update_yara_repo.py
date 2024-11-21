@@ -10,10 +10,10 @@ def migrate(apps, schema_editor):
         base_path="api_app.analyzers_manager.file_analyzers",
     )
     param = pm.parameters.get(name="repositories")
-    pc = PluginConfig.objects.get(parameter=param)
-    pc.value.append("https://yaraify-api.abuse.ch/download/yaraify-rules.zip")
-    pc.value.remove("https://yaraify-api.abuse.ch/yarahub/yaraify-rules.zip")
-    pc.save()
+    for pc in PluginConfig.objects.filter(parameter=param):
+        pc.value.append("https://yaraify-api.abuse.ch/download/yaraify-rules.zip")
+        pc.value.remove("https://yaraify-api.abuse.ch/yarahub/yaraify-rules.zip")
+        pc.save()
 
 
 def reverse_migrate(apps, schema_editor):
@@ -25,10 +25,10 @@ def reverse_migrate(apps, schema_editor):
         base_path="api_app.analyzers_manager.file_analyzers",
     )
     param = pm.parameters.get(name="repositories")
-    pc = PluginConfig.objects.get(parameter=param)
-    pc.value.remove("https://yaraify-api.abuse.ch/download/yaraify-rules.zip")
-    pc.value.append("https://yaraify-api.abuse.ch/yarahub/yaraify-rules.zip")
-    pc.save()
+    for pc in PluginConfig.objects.filter(parameter=param):
+        pc.value.remove("https://yaraify-api.abuse.ch/download/yaraify-rules.zip")
+        pc.value.append("https://yaraify-api.abuse.ch/yarahub/yaraify-rules.zip")
+        pc.save()
 
 
 class Migration(migrations.Migration):

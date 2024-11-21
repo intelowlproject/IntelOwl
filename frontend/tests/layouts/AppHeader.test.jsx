@@ -124,7 +124,6 @@ describe("test AppHeader component", () => {
 
     const socialButton = screen.getByText("Social");
     expect(socialButton).toBeInTheDocument();
-
   });
 
   test("auth header - no org", async () => {

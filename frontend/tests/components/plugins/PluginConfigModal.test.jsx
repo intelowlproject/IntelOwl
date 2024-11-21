@@ -3,15 +3,7 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { PluginConfigModal } from "../../../src/components/plugins/PluginConfigModal";
-import { mockedPlugins } from "../../mock";
-
-/*
-    default: edit generic plugin config
-    case A: create basic analyzer
-    case B: edit basic analyzer
-    case D: create basic pivot
-    case E: edit basic pivot
-*/
+import { mockedPlugins, mockedPlaybooks } from "../../mock";
 
 // mock PluginConfigContainer component
 jest.mock("../../../src/components/plugins/PluginConfigContainer", () => ({
@@ -24,6 +16,10 @@ jest.mock("../../../src/components/plugins/forms/AnalyzerConfigForm", () => ({
 // mock PivotConfigForm component
 jest.mock("../../../src/components/plugins/forms/PivotConfigForm", () => ({
   PivotConfigForm: jest.fn(() => <div id="pivot-config-form" />),
+}));
+// mock PlaybookConfigForm component
+jest.mock("../../../src/components/plugins/forms/PlaybookConfigForm", () => ({
+  PlaybookConfigForm: jest.fn(() => <div id="playbook-config-form" />),
 }));
 
 describe("test PluginConfigModal component", () => {
@@ -135,5 +131,47 @@ describe("test PluginConfigModal component", () => {
     // expect PivotConfigForm is called
     const PivotConfigForm = document.querySelector("#pivot-config-form");
     expect(PivotConfigForm).toBeInTheDocument();
+  });
+
+  test("plugins config modal - case F: create playbook", () => {
+    render(
+      <BrowserRouter>
+        <PluginConfigModal
+          pluginConfig={{}}
+          pluginType="playbook"
+          toggle={() => jest.fn()}
+          isOpen
+        />
+      </BrowserRouter>,
+    );
+    // modal
+    const pluginConfigModal = document.querySelector("#plugin-config-modal");
+    expect(pluginConfigModal).toBeInTheDocument();
+    // modal title
+    expect(screen.getByText("Create a new playbook")).toBeInTheDocument();
+    // expect PlaybookConfigForm is called
+    const PlaybookConfigForm = document.querySelector("#playbook-config-form");
+    expect(PlaybookConfigForm).toBeInTheDocument();
+  });
+
+  test("plugins config modal - case G: edit playbook", () => {
+    render(
+      <BrowserRouter>
+        <PluginConfigModal
+          pluginConfig={mockedPlaybooks.TEST_PLAYBOOK_DOMAIN}
+          pluginType="playbook"
+          toggle={() => jest.fn()}
+          isOpen
+        />
+      </BrowserRouter>,
+    );
+    // modal
+    const pluginConfigModal = document.querySelector("#plugin-config-modal");
+    expect(pluginConfigModal).toBeInTheDocument();
+    // modal title
+    expect(screen.getByText("Edit playbook config")).toBeInTheDocument();
+    // expect PlaybookConfigForm is called
+    const PlaybookConfigForm = document.querySelector("#playbook-config-form");
+    expect(PlaybookConfigForm).toBeInTheDocument();
   });
 });

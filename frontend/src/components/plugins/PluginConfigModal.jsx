@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { PluginsTypes } from "../../constants/pluginConst";
 import { AnalyzerConfigForm } from "./forms/AnalyzerConfigForm";
 import { PivotConfigForm } from "./forms/PivotConfigForm";
+import { PlaybookConfigForm } from "./forms/PlaybookConfigForm";
 import { PluginConfigContainer } from "./PluginConfigContainer";
 
 export function PluginConfigModal({
@@ -24,6 +25,8 @@ export function PluginConfigModal({
   let title = "Plugin config";
   if (isBasicAnalyzer) {
     title = "Edit analyzer config";
+  } else if (pluginType === PluginsTypes.PLAYBOOK) {
+    title = "Edit playbook config";
   }
 
   return (
@@ -70,6 +73,14 @@ export function PluginConfigModal({
             isEditing={isEditing}
           />
         )}
+        {/* Create/Edit playbook */}
+        {pluginType === PluginsTypes.PLAYBOOK && (
+          <PlaybookConfigForm
+            playbookConfig={pluginConfig}
+            toggle={toggle}
+            isEditing={isEditing}
+          />
+        )}
       </ModalBody>
     </Modal>
   );
@@ -77,8 +88,13 @@ export function PluginConfigModal({
 
 PluginConfigModal.propTypes = {
   pluginConfig: PropTypes.object,
-  pluginType: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
-    .isRequired,
+  pluginType: PropTypes.oneOf([
+    "analyzer",
+    "connector",
+    "ingestor",
+    "pivot",
+    "playbook",
+  ]).isRequired,
   toggle: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
 };

@@ -41,14 +41,13 @@ const stateSelector = (state) => [
   state.visualizers,
   state.pivots,
   state.retrievePlaybooksConfiguration,
+  state.analyzersLoading,
+  state.connectorsLoading,
+  state.visualizersLoading,
+  state.pivotsLoading,
 ];
 
-export function PlaybookConfigForm({
-  playbookConfig,
-  toggle,
-  pluginsLoading,
-  isEditing,
-}) {
+export function PlaybookConfigForm({ playbookConfig, toggle, isEditing }) {
   console.debug("PlaybookConfigForm rendered!");
 
   // states
@@ -64,7 +63,17 @@ export function PlaybookConfigForm({
     visualizers,
     pivots,
     retrievePlaybooksConfiguration,
+    analyzersLoading,
+    connectorsLoading,
+    visualizersLoading,
+    pivotsLoading,
   ] = usePluginConfigurationStore(stateSelector);
+
+  const pluginsLoading =
+    analyzersLoading ||
+    connectorsLoading ||
+    visualizersLoading ||
+    pivotsLoading;
 
   const formik = useFormik({
     initialValues: {
@@ -402,10 +411,8 @@ PlaybookConfigForm.propTypes = {
   playbookConfig: PropTypes.object,
   toggle: PropTypes.func.isRequired,
   isEditing: PropTypes.bool.isRequired,
-  pluginsLoading: PropTypes.bool,
 };
 
 PlaybookConfigForm.defaultProps = {
   playbookConfig: {},
-  pluginsLoading: false,
 };

@@ -12,7 +12,6 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.models import PythonConfig
 
 logger = logging.getLogger(__name__)
-fake = Faker()
 
 
 def xpath_query_on_page(page, xpath_selector: str) -> []:
@@ -33,30 +32,6 @@ class PhishingFormCompiler(FileAnalyzer):
     cvv_matching: list = []
     expiration_date_matching: list = []
 
-    # mapping between name attribute of text <input>
-    # and their corresponding fake values
-    _name_text_input_mapping: {tuple: str} = {
-        tuple(name_matching): fake.user_name(),
-        tuple(cc_matching): fake.credit_card_number(),
-        tuple(pin_matching): str(fake.random.randint(10000, 100000)),
-        tuple(cvv_matching): fake.credit_card_security_code(),
-        tuple(expiration_date_matching): fake.credit_card_expire(
-            start=date.today(),
-            end=date.today() + timedelta(days=fake.random.randint(1, 1000)),
-            date_format="%m/%y",
-        ),
-    }
-
-    FAKE_EMAIL_INPUT: str = fake.email()
-    FAKE_PASSWORD_INPUT: str = fake.password(
-        length=16,
-        special_chars=True,
-        digits=True,
-        upper_case=True,
-        lower_case=True,
-    )
-    FAKE_TEL_INPUT: str = fake.phone_number()
-
     def __init__(
         self,
         config: PythonConfig,
@@ -67,6 +42,10 @@ class PhishingFormCompiler(FileAnalyzer):
         self.html_source_code: str = ""
         self.parsed_page = None
         self.args: [] = []
+        self._name_text_input_mapping: {} = None
+        self.FAKE_EMAIL_INPUT = None
+        self.FAKE_PASSWORD_INPUT = None
+        self.FAKE_TEL_INPUT = None
 
     def config(self, runtime_configuration: Dict):
         super().config(runtime_configuration)
@@ -85,6 +64,37 @@ class PhishingFormCompiler(FileAnalyzer):
             logger.info(
                 f"Job #{self.job_id}: Target site from parent job not found! Proceeding with only source code."
             )
+
+        # generate fake values for each mapping
+        fake = Faker()
+        # mapping between name attribute of text <input>
+        # and their corresponding fake values
+        self._name_text_input_mapping: {tuple: str} = {
+            tuple(self.name_matching): fake.user_name(),
+            tuple(self.cc_matching): fake.credit_card_number(),
+            tuple(self.pin_matching): str(fake.random.randint(10000, 100000)),
+            tuple(self.cvv_matching): fake.credit_card_security_code(),
+            tuple(self.expiration_date_matching): fake.credit_card_expire(
+                start=date.today(),
+                end=date.today() + timedelta(days=fake.random.randint(1, 1000)),
+                date_format="%m/%y",
+            ),
+        }
+        logger.info(
+            f"Generated name text input mapping {self._name_text_input_mapping}"
+        )
+        self.FAKE_EMAIL_INPUT: str = fake.email()
+        logger.info(f"Generated fake email input {self.FAKE_EMAIL_INPUT}")
+        self.FAKE_PASSWORD_INPUT: str = fake.password(
+            length=16,
+            special_chars=True,
+            digits=True,
+            upper_case=True,
+            lower_case=True,
+        )
+        logger.info(f"Generated fake password input {self.FAKE_PASSWORD_INPUT}")
+        self.FAKE_TEL_INPUT: str = fake.phone_number()
+        logger.info(f"Generated fake tel input {self.FAKE_TEL_INPUT}")
 
         # extract and decode source code from file
         self.html_source_code = self.read_file_bytes()

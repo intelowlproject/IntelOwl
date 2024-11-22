@@ -38,17 +38,10 @@ def migrate(apps, schema_editor):
 
 
 def reverse_migrate(apps, schema_editor):
-    PythonModule = apps.get_model("api_app", "PythonModule")
-
-    vt_sample_analyzer_python_module = PythonModule.objects.get(
-        module="vt.vt3_sample_download.VirusTotalv3SampleDownload"
-    )
-    print(f"{vt_sample_analyzer_python_module.connectorconfigs.all()=}")
-    vt_sample_analyzer_python_module.delete()
-    vt_sample_visualizer_python_module = PythonModule.objects.get(
-        module="sample_download.SampleDownload"
-    )
-    vt_sample_visualizer_python_module.delete()
+    # cannot undo:
+    # depending on migration order, some field could miss and the reverse fail
+    # for this reason the reversion didn't delete nothing
+    pass
 
 
 class Migration(migrations.Migration):

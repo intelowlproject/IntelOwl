@@ -35,4 +35,4 @@ class Migration(migrations.Migration):
         ("analyzers_manager", "0131_analyzer_config_vt_sample_download"),
     ]
 
-    # operations = [migrations.RunPython(migrate, reverse_migrate)]
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

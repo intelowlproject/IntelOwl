@@ -12,11 +12,11 @@ def migrate(apps, schema_editor):
         description="Download a sample",
         python_module=PythonModule.objects.get(module="sample_download.SampleDownload"),
     )
-    visualizer_download_sample.playbooks.set(
-        PlaybookConfig.objects.filter(
+    visualizer_download_sample.playbooks.add(
+        *PlaybookConfig.objects.filter(
             analyzers=AnalyzerConfig.objects.get(name="DownloadFileFromUri")
-        )
-        + PlaybookConfig.objects.filter(
+        ),
+        *PlaybookConfig.objects.filter(
             analyzers=AnalyzerConfig.objects.get(name="VirusTotalv3SampleDownload")
         )
     )
@@ -35,4 +35,4 @@ class Migration(migrations.Migration):
         ("playbooks_manager", "0056_download_sample_vt"),
     ]
 
-    # operations = [migrations.RunPython(migrate, reverse_migrate)]
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

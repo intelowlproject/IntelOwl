@@ -14,7 +14,7 @@ def migrate(apps, schema_editor):
     )
 
     # visualizer python module
-    vt_sample_visualizer_python_module, _ = PythonModule.objects.get_or_create(
+    PythonModule.objects.get_or_create(
         module="sample_download.SampleDownload",
         base_path=PythonModuleBasePaths.Visualizer.value,
     )

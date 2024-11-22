@@ -31,4 +31,4 @@ class Migration(migrations.Migration):
         ("api_app", "0064_vt_sample_download"),
     ]
 
-    # operations = [migrations.RunPython(migrate, reverse_migrate)]
+    operations = [migrations.RunPython(migrate, reverse_migrate)]

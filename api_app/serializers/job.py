@@ -478,6 +478,7 @@ class JobTreeSerializer(ModelSerializer):
             "playbook",
             "status",
             "received_request_time",
+            "is_sample",
         ]
 
     playbook = rfs.SlugRelatedField(
@@ -748,7 +749,9 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         if "file_name" not in attrs:
             attrs["file_name"] = attrs["file"].name
-        attrs["file_mimetype"] = MimeTypes.calculate(attrs["file"], attrs["file_name"])
+        attrs["file_mimetype"] = MimeTypes.calculate(
+            attrs["file"].read(), attrs["file_name"]
+        )
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)
@@ -772,7 +775,7 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
             pk__in=[config.pk for config in analyzers_to_execute]
         )
-        if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP1.value]:
+        if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP2.value]:
             EXCEL_OFFICE_FILES = r"\.[xl]\w{0,3}$"
             DOC_OFFICE_FILES = r"\.[doc]\w{0,3}$"
             if re.search(DOC_OFFICE_FILES, file_name):

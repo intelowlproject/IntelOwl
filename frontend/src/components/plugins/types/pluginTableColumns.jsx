@@ -21,8 +21,10 @@ import {
 import {
   OrganizationPluginStateToggle,
   PluginHealthCheckButton,
-  PlaybooksDeletionButton,
   PluginPullButton,
+  PlaybooksEditButton,
+  PluginDeletionButton,
+  PluginEditButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -190,7 +192,14 @@ export const analyzersTableColumns = [
     accessor: (analyzerConfig) => analyzerConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
-      <div className="d-flex justify-content-center mx-2">
+      <div className="d-flex justify-content-center flex-wrap mx-2">
+        {value?.python_module ===
+          "basic_observable_analyzer.BasicObservableAnalyzer" && (
+          <PluginEditButton
+            config={value}
+            pluginType_={PluginsTypes.ANALYZER}
+          />
+        )}
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={value?.orgPluginDisabled}
@@ -205,6 +214,13 @@ export const analyzersTableColumns = [
           pluginName={value.name}
           pluginType_={PluginsTypes.ANALYZER}
         />
+        {value?.python_module ===
+          "basic_observable_analyzer.BasicObservableAnalyzer" && (
+          <PluginDeletionButton
+            pluginName={value.name}
+            pluginType_={PluginsTypes.ANALYZER}
+          />
+        )}
       </div>
     ),
     maxWidth: 100,
@@ -331,11 +347,17 @@ export const pivotTableColumns = [
           pluginName={value.name}
           pluginType_={PluginsTypes.PIVOT}
         />
+        <PluginEditButton config={value} pluginType_={PluginsTypes.PIVOT} />
+        <PluginDeletionButton
+          pluginName={value.name}
+          pluginType_={PluginsTypes.PIVOT}
+        />
       </div>
     ),
     maxWidth: 125,
   },
 ];
+
 // Playbooks columns: these columns are shown for the playbooks
 export const playbookTableColumns = [
   ...pluginTableColumns,
@@ -425,8 +447,14 @@ export const playbookTableColumns = [
           type={PluginsTypes.PLAYBOOK}
           pluginOwner={value?.owner}
         />
-        {value.is_deletable && (
-          <PlaybooksDeletionButton playbookName={value?.name} />
+        {value.is_editable && (
+          <>
+            <PlaybooksEditButton playbookConfig={value} />
+            <PluginDeletionButton
+              pluginName={value?.name}
+              pluginType_={PluginsTypes.PLAYBOOK}
+            />
+          </>
         )}
       </div>
     ),
@@ -524,7 +552,7 @@ export const ingestorTableColumns = [
   {
     Header: "Playbook to execute",
     id: "playbook",
-    accessor: "playbook_to_execute",
+    accessor: "playbooks_choice",
     Cell: ({ value }) => (
       <TableCell isCopyToClipboard isTruncate value={value} />
     ),

@@ -58,6 +58,11 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
     def before_run(self):
         self._config: IngestorConfig
         self._config.validate_playbooks(self._user)
+        logger.info(f"STARTED ingestor: {self.__repr__()}")
+
+    def after_run(self):
+        super().after_run()
+        logger.info(f"FINISHED ingestor: {self.__repr__()}")
 
     def get_playbook_to_execute(self):
         self._config: IngestorConfig

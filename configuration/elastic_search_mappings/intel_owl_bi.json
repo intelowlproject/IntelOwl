@@ -39,8 +39,10 @@
       },
       "class_instance": {
         "type": "keyword"
+      },
+      "job_id": {
+        "type": "long"
       }
-
     }
   }
 }

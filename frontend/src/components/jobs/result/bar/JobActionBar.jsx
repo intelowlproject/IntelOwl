@@ -8,9 +8,7 @@ import { ContentSection, IconButton, addToast } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
-import { downloadJobSample, deleteJob } from "../jobApi";
-import { createJob } from "../../../scan/scanApi";
-import { ScanModesNumeric } from "../../../../constants/advancedSettingsConst";
+import { downloadJobSample, deleteJob, rescanJob } from "../jobApi";
 import { JobResultSections } from "../../../../constants/miscConst";
 import {
   DeleteIcon,
@@ -18,6 +16,7 @@ import {
   retryJobIcon,
   downloadReportIcon,
 } from "../../../common/icon/icons";
+import { fileDownload } from "../../../../utils/files";
 
 export function JobActionsBar({ job }) {
   // routers
@@ -29,16 +28,6 @@ export function JobActionsBar({ job }) {
     if (!success) return;
     addToast("Redirecting...", null, "secondary");
     setTimeout(() => navigate(-1), 250);
-  };
-
-  const fileDownload = (blob, filename) => {
-    // create URL blob and a hidden <a> tag to serve file for download
-    const fileLink = document.createElement("a");
-    fileLink.href = window.URL.createObjectURL(blob);
-    fileLink.rel = "noopener,noreferrer";
-    fileLink.download = `${filename}`;
-    // triggers the click event
-    fileLink.click();
   };
 
   const onDownloadSampleBtnClick = async () => {
@@ -53,33 +42,11 @@ export function JobActionsBar({ job }) {
   };
 
   const handleRetry = async () => {
-    if (job.is_sample) {
-      addToast(
-        "Rescan File!",
-        "It's not possible to repeat a sample analysis",
-        "warning",
-        false,
-        2000,
-      );
-    } else {
-      addToast("Retrying the same job...", null, "spinner", false, 2000);
-      const response = await createJob(
-        [job.observable_name],
-        job.observable_classification,
-        job.playbook_requested,
-        job.analyzers_requested,
-        job.connectors_requested,
-        job.runtime_configuration,
-        job.tags.map((optTag) => optTag.label),
-        job.tlp,
-        ScanModesNumeric.FORCE_NEW_ANALYSIS,
-        0,
-      );
+    addToast("Retrying the same job...", null, "spinner", false, 2000);
+    const newJobId = await rescanJob(job.id);
+    if (newJobId) {
       setTimeout(
-        () =>
-          navigate(
-            `/jobs/${response.jobIds[0]}/${JobResultSections.VISUALIZER}/`,
-          ),
+        () => navigate(`/jobs/${newJobId}/${JobResultSections.VISUALIZER}/`),
         1000,
       );
     }

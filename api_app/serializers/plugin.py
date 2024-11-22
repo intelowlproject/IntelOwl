@@ -12,6 +12,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.models import Parameter, PluginConfig, PythonConfig, PythonModule
+from api_app.pivots_manager.models import PivotConfig
 from api_app.serializers import ModelWithOwnershipSerializer
 from api_app.serializers.celery import CrontabScheduleSerializer
 from api_app.visualizers_manager.models import VisualizerConfig
@@ -79,7 +80,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
                 return json.dumps(result)
             return result
 
-    type = rfs.ChoiceField(choices=["1", "2", "3", "4"])  # retrocompatibility
+    type = rfs.ChoiceField(choices=["1", "2", "3", "4", "5"])  # retrocompatibility
     config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
@@ -113,6 +114,8 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
             class_ = VisualizerConfig
         elif _type == "4":
             class_ = IngestorConfig
+        elif _type == "5":
+            class_ = PivotConfig
         else:
             raise RuntimeError("Not configured")
         # we set the pointers allowing retro-compatibility from the frontend
@@ -265,20 +268,16 @@ class AbstractConfigSerializer(rfs.ModelSerializer): ...
 
 
 class PythonConfigSerializer(AbstractConfigSerializer):
-    parameters = ParameterSerializer(write_only=True, many=True)
+    parameters = ParameterSerializer(write_only=True, many=True, required=False)
 
     class Meta:
         exclude = [
-            "python_module",
             "routing_key",
             "soft_time_limit",
             "health_check_status",
             "health_check_task",
         ]
         list_serializer_class = PythonConfigListSerializer
-
-    def to_internal_value(self, data):
-        raise NotImplementedError()
 
     def to_representation(self, instance: PythonConfig):
         result = super().to_representation(instance)

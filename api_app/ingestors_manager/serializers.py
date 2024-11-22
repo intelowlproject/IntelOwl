@@ -39,7 +39,7 @@ class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
 
     class Meta:
         model = IngestorConfig
-        exclude = []
+        exclude = PythonConfigSerializerForMigration.Meta.exclude
 
     def to_internal_value(self, data):
         raise NotImplementedError()
@@ -67,7 +67,24 @@ class IngestorReportBISerializer(AbstractReportBISerializer):
 
     class Meta:
         model = IngestorReport
-        fields = AbstractReportBISerializer.Meta.fields
+        fields = (
+            [
+                "application",
+                "environment",
+                "timestamp",
+            ]
+            + [
+                "username",
+                "class_instance",
+                "process_time",
+                "status",
+                "end_time",
+            ]
+            + [
+                "name",
+                "parameters",
+            ]
+        )
         list_serializer_class = AbstractReportBISerializer.Meta.list_serializer_class
 
     @classmethod

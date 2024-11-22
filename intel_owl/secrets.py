@@ -34,28 +34,31 @@ def aws_get_secret(secret_name):
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
     except ClientError as e:
-        if e.response["Error"]["Code"] == "DecryptionFailureException":
-            # Secrets Manager can't decrypt the protected secret text..
-            # ... using the provided KMS key.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise RetrieveSecretException(e)
-        if e.response["Error"]["Code"] == "InternalServiceErrorException":
-            # An error occurred on the server side.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise RetrieveSecretException(e)
-        if e.response["Error"]["Code"] == "InvalidParameterException":
-            # You provided an invalid value for a parameter.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise RetrieveSecretException(e)
-        if e.response["Error"]["Code"] == "InvalidRequestException":
-            # You provided a parameter value that is not valid for the..
-            # ... current state of the resource.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise RetrieveSecretException(e)
-        if e.response["Error"]["Code"] == "ResourceNotFoundException":
-            # We can't find the resource that you asked for.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise RetrieveSecretException(e)
+        match e.response["Error"]["Code"]:
+            case "DecryptionFailureException" | "DecryptionFailure":
+                # Secrets Manager can't decrypt the protected secret text..
+                # ... using the provided KMS key.
+                # Deal with the exception here, and/or rethrow at your discretion.
+                raise RetrieveSecretException(e)
+            case "InternalServiceErrorException" | "InternalServiceError":
+                # An error occurred on the server side.
+                # Deal with the exception here, and/or rethrow at your discretion.
+                raise RetrieveSecretException(e)
+            case "InvalidParameterException":
+                # You provided an invalid value for a parameter.
+                # Deal with the exception here, and/or rethrow at your discretion.
+                raise RetrieveSecretException(e)
+            case "InvalidRequestException":
+                # You provided a parameter value that is not valid for the..
+                # ... current state of the resource.
+                # Deal with the exception here, and/or rethrow at your discretion.
+                raise RetrieveSecretException(e)
+            case "ResourceNotFoundException":
+                # We can't find the resource that you asked for.
+                # Deal with the exception here, and/or rethrow at your discretion.
+                raise RetrieveSecretException(e)
+            case _:
+                raise RetrieveSecretException(e)
     else:
         # Decrypts secret using the associated KMS CMK.
         # Depending on whether the secret is a string or binary,..
@@ -75,7 +78,7 @@ def get_secret(secret_name, default=""):
     """
     secret = os.environ.get(secret_name, default)
     aws_secrets_enabled = os.environ.get("AWS_SECRETS", False) == "True"
-    if not secret and aws_secrets_enabled:
+    if not secret and aws_secrets_enabled and not secret_name == "AWS_REGION":
         try:
             secret = aws_get_secret(secret_name)
         except RetrieveSecretException as e:
@@ -86,5 +89,8 @@ def get_secret(secret_name, default=""):
             logging.error(
                 f"Error: {e}. Secret: {secret_name}"
             )  # lgtm [py/clear-text-logging-sensitive-data]
-
+        except Exception as e:
+            logging.exception(
+                f"Error: {e}. Secret: {secret_name}"
+            )  # lgtm [py/clear-text-logging-sensitive-data]
     return secret

@@ -81,3 +81,40 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         pcs = PivotConfigSerializer(pc)
         result = pcs.data
         self.assertCountEqual(result["related_configs"], [ac.name])
+
+    def test_create_without_plugin_config(self):
+        pcs = PivotConfigSerializer(
+            data={
+                "name": "test",
+                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
+                "python_module": "self_analyzable.SelfAnalyzable",
+                "playbooks_choice": [PlaybookConfig.objects.first()],
+            },
+            context={"request": MockUpRequest(self.user)},
+        )
+        pcs.is_valid(raise_exception=True)
+        pc = pcs.save()
+        pc.delete()
+
+    def test_create_with_plugin_config(self):
+        pcs = PivotConfigSerializer(
+            data={
+                "name": "pivot_test",
+                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
+                "python_module": "any_compare.AnyCompare",
+                "playbooks_choice": [PlaybookConfig.objects.first()],
+                "plugin_config": [
+                    {
+                        "type": "5",
+                        "plugin_name": "pivot_test",
+                        "attribute": "field_to_compare",
+                        "value": "my_field",
+                        "config_type": "1",
+                    }
+                ],
+            },
+            context={"request": MockUpRequest(self.user)},
+        )
+        pcs.is_valid(raise_exception=True)
+        pc = pcs.save()
+        pc.delete()

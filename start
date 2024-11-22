@@ -46,7 +46,7 @@ print_help () {
   echo "    --custom                    Uses custom.override.yml to leverage your"
   echo "                                customized configuration."
   echo "    --debug-build               See more verbose output from the build."
-  echo "    --elastic                   This spins up Elasticsearch and Kibana on your"
+  echo "    --elastic                   This spins up Elasticsearch on your"
   echo "                                machine (might need >=16GB of RAM)."
   echo "    --https                     This leverage the https.override.yml file that"
   echo "                                can be used to host IntelOwl with HTTPS and your"
@@ -99,7 +99,7 @@ check_parameters "$@" && shift 2
 load_env "docker/.env"
 current_version=${REACT_APP_INTELOWL_VERSION/"v"/""}
 
-docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga")
+docker_analyzers=("pcap_analyzers" "tor_analyzers" "malware_tools_analyzers" "cyberchef" "phoneinfoga" "phishing_analyzers")
 
 
 for value in "${docker_analyzers[@]}"; do
@@ -163,6 +163,10 @@ while [[ $# -gt 0 ]]; do
     analyzers["phoneinfoga"]=true
     shift 1
     ;;
+  --phishing_analyzers)
+    analyzers["phishing_analyzers"]=true
+    shift 1
+    ;;
   --multi_queue)
     params["multi_queue"]=true
     shift 1
@@ -201,6 +205,7 @@ while [[ $# -gt 0 ]]; do
   ;;
   --elastic)
     params["elastic"]=true
+    ./create_elastic_certs
     shift 1
   ;;
   --pycti-version)

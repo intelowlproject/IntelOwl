@@ -2,6 +2,19 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.2.0)
+#### TODO: DRAFT CHANGELOG
+
+### New releases schedule
+From this release onwards, we are adopting a new schedule for future releases containing new features: expect a new release on every April and October (like Ubuntu :P).
+
+In this way we aim to provide constant support for the users and expected deadlines to get the new features from our project into the official releases.
+
+Please remember that you can always use the most recent features available in the development branch at anytime!  See [this section](https://intelowlproject.github.io/docs/IntelOwl/installation#get-the-experimental-features-in-the-develop-branch) for additional details.
+
+Obviously, as always, important bugs and fixes will be handled differently with dedicated patch releases.
+
+
 ## [v6.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.1.0)
 This release merges all the developments performed by our Google Summer of Code contributors for this year. The program has just ended. You can read the related blogs for more info about:
 - [Nilay Gupta](https://x.com/guptanilay1): [New analyzers for IntelOwl](https://intelowlproject.github.io/blogs/gsoc24_new_analyzers_for_intelowl)

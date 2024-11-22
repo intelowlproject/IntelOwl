@@ -1419,6 +1419,24 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
+    def get_value(self, field: str) -> Any:
+        content = self.report
+
+        for key in field.split("."):
+            try:
+                content = content[key]
+            except TypeError:
+                if isinstance(content, list) and len(content) > 0:
+                    content = content[int(key)]
+                else:
+                    raise RuntimeError(f"Not found {field}")
+
+        if isinstance(content, (int, dict)):
+            raise ValueError(f"You can't use a {type(content)} as pivot")
+        if not content:
+            raise ValueError("Empty value")
+        return content
+
 
 class PythonConfig(AbstractConfig):
     """
@@ -1787,3 +1805,29 @@ class PythonConfig(AbstractConfig):
             )[0]
             self.health_check_task = periodic_task
             self.save()
+
+
+class SingletonModel(models.Model):
+    """Singleton base class.
+    Singleton is a desing pattern that allow only one istance of a class.
+    """
+
+    class Meta:
+        abstract = True
+        constraints = [
+            models.CheckConstraint(
+                check=Q(pk=1),
+                name="singleton",
+                violation_error_message="This class is a singleton: only one object is allowed",
+            ),
+        ]
+
+    def save(self, *args, **kwargs):
+        # check required to delete the singleton instance and create a new one
+        if type(self).objects.count() == 0:
+            self.pk = 1
+        super().save(*args, **kwargs)
+
+
+class LastElasticReportUpdate(SingletonModel):
+    last_update_datetime = models.DateTimeField()

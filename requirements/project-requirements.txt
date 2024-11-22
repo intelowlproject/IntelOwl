@@ -1,5 +1,5 @@
 # django libs
-Django==4.2.15
+Django==4.2.16
 psycopg2-binary==2.9.6
 django-auth-ldap==4.8.0
 django-radius==1.5.0
@@ -7,8 +7,8 @@ django-filter==24.3
 django-storages==1.14
 django-celery-beat==2.7.0
 django-celery-results==2.5.0
-django-ses == 4.1.0
-django-iam-dbauth==0.2.0
+django-ses == 4.2.0
+django-iam-dbauth==0.2.1
 django-prettyjson==0.4.1
 django-silk==5.2.0
 django-elasticsearch-dsl==8.0
@@ -31,7 +31,7 @@ dataclasses==0.6
 flower==2.0.0
 uWSGI==2.0.22
 uwsgitop==0.12
-whitenoise==6.7.0
+whitenoise==6.8.1
 daphne==4.1.0
 channels==4.1.0
 channels-redis==4.2.0
@@ -43,13 +43,13 @@ checkdmarc==5.5.0
 dnspython==2.6.1
 dnstwist[full]==20240812
 google>=3.0.0
-google-cloud-webrisk==1.14.0
+google-cloud-webrisk==1.15.0
 intezer-sdk==1.21
 lief==0.15.1
 maxminddb==2.6.0
 geoip2==4.8.0
 mwdblib==4.5.0
-git+https://github.com/decalage2/oletools.git@ccf99d1a8f85e552f5cc130fbaa504cfe5725a92
+oletools==0.60.2
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
@@ -60,14 +60,14 @@ pyelftools==0.31
 PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
-pymisp==2.4.196
+pymisp==2.5.0
 pyOneNote==0.0.2
 pypdns==2.2.1
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==24.8.1
+quark-engine==24.10.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.5.0
@@ -81,9 +81,12 @@ permhash==0.1.4
 ail_typo_squatting==2.7.4
 iocextract==1.16.1
 ioc-finder==7.0.0
-polyswarm-api==3.9.0
+polyswarm-api==3.10.0
 knock-subdomains==7.0.1
 dotnetfile==0.2.4
+docxpy==0.8.5
+pylnk3==0.4.2
+androguard==3.4.0a1 # version >=4.x of androguard raises a dependency conflict with quark-engine==24.10.1
 
 # this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8
@@ -93,5 +96,8 @@ defusedxml==0.7.1
 # required by MalwareBazaar Ingestor -> https://bazaar.abuse.ch/api/#download (read the warning)
 pyzipper==0.3.6
 
-#others
+# others
 dateparser==1.2.0
+# phishing form compiler module
+lxml==5.3.0
+Faker==30.8.0

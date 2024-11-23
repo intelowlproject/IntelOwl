@@ -25,8 +25,8 @@ class UrlDNA(ObservableAnalyzer):
         "Mozilla/5.0 (Windows NT 10.0;Win64;x64) AppleWebKit/537.36 "
         "(KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36"
     )
-    width = 1920
-    height = 1080
+    viewport_width = 1920
+    viewport_height = 1080
     waiting_time = 5
     private_scan = False
     scanned_from = "DEFAULT"
@@ -62,8 +62,8 @@ class UrlDNA(ObservableAnalyzer):
             "submitted_url": submitted_url,
             "device": self.device,
             "user_agent": self.user_agent,
-            "width": self.width,
-            "height": self.height,
+            "width": self.viewport_width,
+            "height": self.viewport_height,
             "scanned_from": self.scanned_from,
             "waiting_time": self.waiting_time,
             "private_scan": self.private_scan,

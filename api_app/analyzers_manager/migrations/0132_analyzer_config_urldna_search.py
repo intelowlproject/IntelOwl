@@ -241,7 +241,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0063_singleton_and_elastic_report"),
-        ("analyzers_manager", "0130_analyzer_config_nvd_cve"),
+        ("analyzers_manager", "0131_analyzer_config_urldna_new_scan"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

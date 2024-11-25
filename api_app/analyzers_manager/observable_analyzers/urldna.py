@@ -38,7 +38,7 @@ class UrlDNA(ObservableAnalyzer):
     def run(self):
         headers = {
             "Content-Type": "application/json",
-            "User-Agent": "IntelOwl/v1.x",
+            "User-Agent": "IntelOwl",
             "Authorization": self._api_key_name,
         }
 

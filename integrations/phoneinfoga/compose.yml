@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
     phoneinfoga:
       container_name: intelowl_phoneinfoga

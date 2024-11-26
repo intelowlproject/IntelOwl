@@ -211,10 +211,12 @@ describe("PivotConfigForm test", () => {
       });
       expect(axios.post).toHaveBeenCalledWith(
         `${API_BASE_URI}/pivot/myNewPivot/plugin_config`,
-        [{
-          attribute: "field_to_compare",
-          value: "test.value",
-        }],
+        [
+          {
+            attribute: "field_to_compare",
+            value: "test.value",
+          },
+        ],
       );
     });
   });

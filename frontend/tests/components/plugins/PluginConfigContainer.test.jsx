@@ -21,7 +21,11 @@ describe("test PluginConfigContainer component", () => {
 
     render(
       <BrowserRouter>
-        <PluginConfigContainer pluginName="AbuseIPDB" pluginType="analyzer" toggle={()=>jest.fn()}/>
+        <PluginConfigContainer
+          pluginName="AbuseIPDB"
+          pluginType="analyzer"
+          toggle={() => jest.fn()}
+        />
       </BrowserRouter>,
     );
 
@@ -45,7 +49,11 @@ describe("test PluginConfigContainer component", () => {
 
     render(
       <BrowserRouter>
-        <PluginConfigContainer pluginName="AbuseIPDB" pluginType="analyzer" toggle={()=>jest.fn()}/>
+        <PluginConfigContainer
+          pluginName="AbuseIPDB"
+          pluginType="analyzer"
+          toggle={() => jest.fn()}
+        />
       </BrowserRouter>,
     );
 

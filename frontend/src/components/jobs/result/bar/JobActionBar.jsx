@@ -16,6 +16,7 @@ import {
   retryJobIcon,
   downloadReportIcon,
 } from "../../../common/icon/icons";
+import { fileDownload } from "../../../../utils/files";
 
 export function JobActionsBar({ job }) {
   // routers
@@ -27,16 +28,6 @@ export function JobActionsBar({ job }) {
     if (!success) return;
     addToast("Redirecting...", null, "secondary");
     setTimeout(() => navigate(-1), 250);
-  };
-
-  const fileDownload = (blob, filename) => {
-    // create URL blob and a hidden <a> tag to serve file for download
-    const fileLink = document.createElement("a");
-    fileLink.href = window.URL.createObjectURL(blob);
-    fileLink.rel = "noopener,noreferrer";
-    fileLink.download = `${filename}`;
-    // triggers the click event
-    fileLink.click();
   };
 
   const onDownloadSampleBtnClick = async () => {

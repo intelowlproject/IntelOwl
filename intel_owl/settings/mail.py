@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from ._util import get_secret
-from .aws import AWS_REGION
+from .a_secrets import AWS_REGION
 from .commons import STAGE_CI, STAGE_LOCAL
 
 DEFAULT_FROM_EMAIL = get_secret("DEFAULT_FROM_EMAIL")

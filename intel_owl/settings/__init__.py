@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "treebeard",
 ]
 
+from .a_secrets import *  # lgtm [py/polluting-import]
 from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]

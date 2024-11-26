@@ -1576,7 +1576,7 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                 **{obj.snake_case_name: obj.pk}
             )
         except PluginConfig.DoesNotExist:
-            raise ValidationError({"detail": "Requested plugin config does not exist."})
+            raise NotFound("Requested plugin config does not exist.")
         else:
             pc = PluginConfigSerializer(
                 plugin_configs, context={"request": request}, many=True

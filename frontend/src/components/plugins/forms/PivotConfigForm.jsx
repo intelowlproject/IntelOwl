@@ -143,7 +143,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
     },
     onSubmit: async () => {
       let response;
-      let responsePluginConfig;
+      let responsePluginConfig = { success: true, error: null };
 
       const payloadData = {
         name: formik.values.name,
@@ -156,12 +156,6 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
           (connector) => connector.value,
         ),
       };
-      const pluginConfig = formik.values.field_to_compare
-        ? {
-            attribute: "field_to_compare",
-            value: formik.values.field_to_compare,
-          }
-        : {};
 
       if (isEditing) {
         const pivotToEdit =
@@ -178,7 +172,13 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
       }
 
       // plugin config
-      if (response?.success) {
+      if (response?.success && formik.values.field_to_compare) {
+        const pluginConfig = [
+          {
+            attribute: "field_to_compare",
+            value: formik.values.field_to_compare,
+          },
+        ];
         if (isEditing) {
           responsePluginConfig = await editPluginConfig(
             PluginsTypes.PIVOT,

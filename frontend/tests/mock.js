@@ -405,5 +405,6 @@ export const mockedUsePluginConfigurationStore = {
   retrieveVisualizersConfiguration: () => {},
   retrieveIngestorsConfiguration: () => {},
   retrievePlaybooksConfiguration: () => {},
+  retrievePivotsConfiguration: () => {},
   checkPluginHealth: () => {},
 };

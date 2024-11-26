@@ -54,6 +54,7 @@ export function PluginConfigModal({
             <PluginConfigContainer
               pluginName={pluginConfig.name}
               pluginType={pluginType}
+              toggle={toggle}
             />
           )}
         {/* Create/Edit basic analyzer */}

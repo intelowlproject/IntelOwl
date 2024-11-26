@@ -10,7 +10,7 @@ import { API_BASE_URI } from "../../constants/apiURLs";
 import { PluginConfigTypes } from "../../constants/pluginConst";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
-export function PluginConfigContainer({ pluginName, pluginType }) {
+export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
   console.debug("PluginConfigContainer rendered!");
 
   const { isInOrganization } = useOrganizationStore(
@@ -88,6 +88,7 @@ export function PluginConfigContainer({ pluginName, pluginType }) {
                 configType={PluginConfigTypes.USER_CONFIG}
                 configs={configs.user_config}
                 refetch={refetchPluginConfig}
+                toggle={toggle}
               />
             </TabPane>
             <TabPane tabId={PluginConfigTypes.ORG_CONFIG}>
@@ -97,6 +98,7 @@ export function PluginConfigContainer({ pluginName, pluginType }) {
                 configType={PluginConfigTypes.ORG_CONFIG}
                 configs={configs.organization_config}
                 refetch={refetchPluginConfig}
+                toggle={toggle}
               />
             </TabPane>
           </TabContent>
@@ -110,4 +112,5 @@ PluginConfigContainer.propTypes = {
   pluginName: PropTypes.string.isRequired,
   pluginType: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
     .isRequired,
+  toggle: PropTypes.func.isRequired,
 };

@@ -25,9 +25,11 @@ import {
 import {
   PluginConfigTypes,
   ParameterTypes,
+  PluginsTypes,
 } from "../../../constants/pluginConst";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { useAuthStore } from "../../../stores/useAuthStore";
+import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 function CustomInput({ formik, config, configType }) {
   const [user] = useAuthStore((state) => [state.user]);
@@ -236,14 +238,35 @@ CustomInput.propTypes = {
   configType: PropTypes.string.isRequired,
 };
 
+function calculateStateSelector(pluginType) {
+  switch (pluginType) {
+    case PluginsTypes.ANALYZER:
+      return (state) => [state.retrieveAnalyzersConfiguration];
+    case PluginsTypes.CONNECTOR:
+      return (state) => [state.retrieveConnectorsConfiguration];
+    case PluginsTypes.VISUALIZER:
+      return (state) => [state.retrieveVisualizersConfiguration];
+    case PluginsTypes.PIVOT:
+      return (state) => [state.retrievePivotsConfiguration];
+    default:
+      return [];
+  }
+}
+
 export function PluginConfigForm({
   pluginName,
   pluginType,
   configType,
   configs,
   refetch,
+  toggle,
 }) {
   console.debug("PluginConfigForm rendered!");
+
+  // API/ store
+  const [retrievePlugins] = usePluginConfigurationStore(
+    calculateStateSelector(pluginType),
+  );
 
   const {
     organization: { name: orgName },
@@ -286,13 +309,16 @@ export function PluginConfigForm({
         if (formValueJson !== initialValuesJson) {
           const obj = {
             attribute: config.attribute,
-            value: formValueJson,
+            value:
+              config.type === ParameterTypes.BOOL
+                ? formik.values[config.attribute]
+                : formValueJson,
           };
           // org config
           if (configType === PluginConfigTypes.ORG_CONFIG) {
             if (config.organization) {
               obj.organization = config.organization;
-            } else if (config.organization === null && config.default) {
+            } else {
               obj.organization = orgName;
             }
           }
@@ -305,15 +331,8 @@ export function PluginConfigForm({
         }
       });
 
-      let responseUpdated = null;
-      let responseCreated = null;
-      if (configToUpdate.length > 0) {
-        responseUpdated = await editPluginConfig(
-          pluginType,
-          pluginName,
-          configToUpdate,
-        );
-      }
+      let responseCreated = { success: true, error: null };
+      let responseUpdated = { success: true, error: null };
       if (configToCreate.length > 0) {
         responseCreated = await createPluginConfig(
           pluginType,
@@ -321,10 +340,19 @@ export function PluginConfigForm({
           configToCreate,
         );
       }
+      if (configToUpdate.length > 0) {
+        responseUpdated = await editPluginConfig(
+          pluginType,
+          pluginName,
+          configToUpdate,
+        );
+      }
 
-      if (responseUpdated?.success && responseCreated?.success) {
+      if (responseUpdated.success && responseCreated.success) {
         formik.setSubmitting(false);
-        refetch();
+        formik.resetForm();
+        toggle(false);
+        retrievePlugins();
       }
       return null;
     },
@@ -441,6 +469,7 @@ PluginConfigForm.propTypes = {
   configType: PropTypes.oneOf(Object.values(PluginConfigTypes)).isRequired,
   configs: PropTypes.arrayOf(Object),
   refetch: PropTypes.func.isRequired,
+  toggle: PropTypes.func.isRequired,
 };
 
 PluginConfigForm.defaultProps = {

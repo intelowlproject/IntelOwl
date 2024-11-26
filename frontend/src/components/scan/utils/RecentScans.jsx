@@ -56,14 +56,19 @@ function RecentScansCard({
           </small>
           <small>
             Finished:{" "}
-            <small>
-              <DateHoverable
-                className="text-accent"
-                ago
-                value={finished}
-                format="hh:mm:ss a MMM do, yyyy"
-              />
-            </small>
+            {finished === null ? (
+              // in some cases (ex. pending and running status) the finished field is null, so we use a placeholder
+              <small className="text-gray">processing job</small>
+            ) : (
+              <small>
+                <DateHoverable
+                  className="text-accent"
+                  ago
+                  value={finished}
+                  format="hh:mm:ss a MMM do, yyyy"
+                />
+              </small>
+            )}
           </small>
         </div>
         <div className="d-flex flex-column col-4">

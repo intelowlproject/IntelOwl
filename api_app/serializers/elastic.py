@@ -19,7 +19,7 @@ supported_plugin_name_list = [
 ]
 
 
-@dataclass
+@dataclass(frozen=True)
 class ElasticRequest:
     plugin_name: str = ""
     name: str = ""

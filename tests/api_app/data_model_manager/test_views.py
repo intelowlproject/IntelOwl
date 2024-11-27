@@ -44,7 +44,9 @@ class DomainDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.model_class.objects.create(analyzer_report=create_report(cls.user))
+        report = create_report(cls.user)
+        report.data_model = cls.model_class.objects.create()
+        report.save()
 
     @classmethod
     @property
@@ -56,6 +58,7 @@ class DomainDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase
 
     def test_get_superuser(self):
         plugin = self.get_object()
+        self.assertIsNotNone(plugin)
         self.client.force_authenticate(self.superuser)
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 403, response.json())
@@ -75,7 +78,9 @@ class IPDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.model_class.objects.create(analyzer_report=create_report(cls.user))
+        report = create_report(cls.user)
+        report.data_model = cls.model_class.objects.create()
+        report.save()
 
     def test_get_superuser(self):
         plugin = self.get_object()
@@ -98,7 +103,9 @@ class FileDataModelViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.model_class.objects.create(analyzer_report=create_report(cls.user))
+        report = create_report(cls.user)
+        report.data_model = cls.model_class.objects.create()
+        report.save()
 
     def test_get_superuser(self):
         plugin = self.get_object()

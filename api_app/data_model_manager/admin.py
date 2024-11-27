@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 from api_app.data_model_manager.models import (
-    BaseDataModel,
     DomainDataModel,
     FileDataModel,
     IPDataModel,
@@ -22,15 +21,17 @@ class BaseDataModelAdminView(admin.ModelAdmin):
 
 @admin.register(DomainDataModel)
 class DomainDataModelAdminView(BaseDataModelAdminView):
-    list_display = BaseDataModelAdminView.list_display + (
-        "rank",
-    )
+    list_display = BaseDataModelAdminView.list_display + ("rank",)
+
+    @admin.display(description="IETF Reports")
+    def get_ietf_report(self, instance: DomainDataModel):
+        return list(map(str, instance.ietf_report.all()))
 
 
 @admin.register(IPDataModel)
 class IPDataModelAdminView(BaseDataModelAdminView):
     list_display = BaseDataModelAdminView.list_display + (
-        "ietf_report",
+        "get_ietf_report",
         "asn",
         "asn_rank",
         "certificates",
@@ -39,6 +40,10 @@ class IPDataModelAdminView(BaseDataModelAdminView):
         "registered_country_code",
         "isp",
     )
+
+    @admin.display(description="IETF Reports")
+    def get_ietf_report(self, instance: IPDataModel):
+        return list(map(str, instance.ietf_report.all()))
 
 
 @admin.register(FileDataModel)

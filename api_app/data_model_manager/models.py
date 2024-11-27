@@ -14,9 +14,8 @@ from api_app.data_model_manager.enums import (
     SignatureProviderChoices,
 )
 from api_app.data_model_manager.fields import LowercaseCharField
-from certego_saas.apps.user.models import User
-
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
+from certego_saas.apps.user.models import User
 
 
 class IETFReport(models.Model):
@@ -95,11 +94,22 @@ class BaseDataModel(models.Model):
         default=dict
     )  # field for additional information related to a specific analyzer
     date = models.DateTimeField(default=now)
+    analyzers_report = GenericRelation(
+        to="analyzers_manager.AnalyzerReport",
+        object_id_field="data_model_object_id",
+        content_type_field="data_model_content_type",
+    )
+
     TAGS = DataModelTags
 
     EVALUATIONS = DataModelEvaluations
+
     class Meta:
         abstract = True
+
+    @classmethod
+    def get_content_type(cls) -> ContentType:
+        return ContentType.objects.get_for_model(model=cls)
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -109,7 +119,7 @@ class BaseDataModel(models.Model):
 
     @property
     def owner(self) -> User:
-        return self.analyzer_report.user
+        return self.analyzers_report.first().user
 
     @classmethod
     def get_serializer(cls) -> Type[ModelSerializer]:
@@ -117,9 +127,7 @@ class BaseDataModel(models.Model):
 
 
 class DomainDataModel(BaseDataModel):
-    ietf_report = models.ManyToManyField(
-        IETFReport, related_name="domains"
-    )  # pdns
+    ietf_report = models.ManyToManyField(IETFReport, related_name="domains")  # pdns
     rank = models.IntegerField(null=True, blank=True, default=None)  # Tranco
     resolutions = pg_fields.ArrayField(LowercaseCharField(max_length=100), default=list)
 
@@ -129,10 +137,9 @@ class DomainDataModel(BaseDataModel):
 
         return DomainDataModelSerializer
 
+
 class IPDataModel(BaseDataModel):
-    ietf_report = models.ForeignKey(
-        IETFReport, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name="ips"
-    )  # pdns
+    ietf_report = models.ManyToManyField(IETFReport, related_name="ips")  # pdns
     asn = models.IntegerField(
         null=True, blank=True, default=None
     )  # BGPRanking, MaxMind
@@ -165,7 +172,9 @@ class IPDataModel(BaseDataModel):
 
 
 class FileDataModel(BaseDataModel):
-    signatures = models.ManyToManyField(Signature, related_name="files")  # ClamAvFileAnalyzer,
+    signatures = models.ManyToManyField(
+        Signature, related_name="files"
+    )  # ClamAvFileAnalyzer,
     # MalwareBazaarFileAnalyzer (signatures/yara_rules), Yara (report.list_el.match)
     # Yaraify (report.data.tasks.static_result)
     comments = pg_fields.ArrayField(

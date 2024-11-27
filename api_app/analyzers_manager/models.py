@@ -4,7 +4,7 @@ import json
 from logging import getLogger
 from typing import Dict, Optional, Type
 
-from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -43,7 +43,7 @@ class AnalyzerReport(AbstractReport):
             "app_label": "data_model_manager",
         },
         null=True,
-        editable=False
+        editable=False,
     )
     data_model_object_id = models.IntegerField(null=True, editable=False)
     data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
@@ -52,29 +52,32 @@ class AnalyzerReport(AbstractReport):
         unique_together = [("config", "job")]
         indexes = AbstractReport.Meta.indexes
 
-
     def clean(self):
         if self.data_model_content_type:
-            if ContentType.objects.get_for_model(model=self.data_model_class) != self.data_model_content_type:
+            if (
+                ContentType.objects.get_for_model(model=self.data_model_class)
+                != self.data_model_content_type
+            ):
                 raise ValidationError("Wrong data model for this report")
 
     @classmethod
     def get_data_model_class(cls, job) -> Type[BaseDataModel]:
-        if job.is_sample:
+        if job.is_sample or job.observable_classification == ObservableTypes.HASH.value:
             return FileDataModel
         if job.observable_classification == ObservableTypes.IP.value:
             return IPDataModel
-        if job.observable_classification == ObservableTypes.DOMAIN.value:
+        if (
+            job.observable_classification == ObservableTypes.DOMAIN.value
+            or job.observable_classification == ObservableTypes.URL.value
+        ):
             return DomainDataModel
         raise NotImplementedError(
             f"Unable to find data model for {job.observable_classification}"
         )
 
-
     @property
     def data_model_class(self) -> Type[BaseDataModel]:
         return self.get_data_model_class(self.job)
-
 
     def _validation_before_data_model(self) -> bool:
         if not self.status == self.STATUSES.SUCCESS.value:
@@ -137,9 +140,7 @@ class AnalyzerReport(AbstractReport):
         if not self._validation_before_data_model():
             return None
         dictionary = self._create_data_model_dictionary()
-        data_model = self.data_model_class.objects.create(
-            **dictionary
-        )
+        data_model = self.data_model_class.objects.create(**dictionary)
         self.data_model = data_model
         self.save()
         return data_model

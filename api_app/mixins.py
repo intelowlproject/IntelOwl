@@ -10,6 +10,7 @@ from django.core.cache import cache
 from rest_framework.response import Response
 
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import ObservableClassification
 from certego_saas.ext.pagination import CustomPageNumberPagination
@@ -83,6 +84,7 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
     # If you want to query a specific subpath of the base endpoint, i.e: `analyses`
     url_sub_path: str
     _api_key_name: str
+    ObservableTypes = ObservableTypes
 
     @property
     def headers(self) -> dict:

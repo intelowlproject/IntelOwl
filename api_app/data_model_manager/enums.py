@@ -21,4 +21,3 @@ class DataModelEvaluations(Choices):
     CLEAN = "clean"
     SUSPICIOUS = "suspicious"
     MALICIOUS = "malicious"
-    INFO = "info"

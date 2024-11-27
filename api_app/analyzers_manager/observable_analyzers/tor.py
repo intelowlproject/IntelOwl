@@ -64,17 +64,6 @@ class Tor(classes.ObservableAnalyzer):
 
         return False
 
-    def _do_create_data_model(self):
-        return super()._do_create_data_model() and self.report.report.get(
-            "found", False
-        )
-
-    def _update_data_model(self, data_model):
-        super()._update_data_model(data_model)
-        found = self.report.report.get("found", False)
-        if found:
-            data_model.evaluation = self.report.data_model_class.EVALUATIONS.INFO.value
-
     @classmethod
     def _monkeypatch(cls):
         patches = [

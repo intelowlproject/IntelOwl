@@ -7,7 +7,7 @@ from kombu import uuid
 
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.choices import PythonModuleBasePaths
-from api_app.data_model_manager.models import IPDataModel, DomainDataModel
+from api_app.data_model_manager.models import DomainDataModel, IPDataModel
 from api_app.models import Job, PythonModule
 from tests import CustomTestCase
 
@@ -66,7 +66,6 @@ class AnalyzerReportTestCase(CustomTestCase):
         ar.delete()
         job.delete()
         domain_data_model.delete()
-
 
     def test_create_data_model(self):
         job = Job.objects.create(

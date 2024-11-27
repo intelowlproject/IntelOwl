@@ -443,15 +443,16 @@ class YaraScan(FileAnalyzer):
         from api_app.data_model_manager.models import Signature
 
         signatures = []
-        for signature in self.report.report:
-            url = signature.pop("rule_url", None)
-            sign = Signature.objects.create(
-                provider=Signature.PROVIDERS.YARA.value,
-                signature=signature,
-                url=url,
-                score=1,
-            )
-            signatures.append(sign)
+        for yara_signatures in self.report.report.values():
+            for yara_signature in yara_signatures:
+                url = yara_signature.pop("rule_url", None)
+                sign = Signature.objects.create(
+                    provider=Signature.PROVIDERS.YARA.value,
+                    signature=yara_signature,
+                    url=url,
+                    score=1,
+                )
+                signatures.append(sign)
 
         return {"signatures": signatures}
 
@@ -459,11 +460,11 @@ class YaraScan(FileAnalyzer):
         from api_app.data_model_manager.models import FileDataModel
 
         super()._update_data_model(data_model)
-        if data_model:
-            data_model: FileDataModel
-            signatures = data_model.signatures.count()
-            if signatures > 20:
-                data_model.evaluation = data_model.EVALUATIONS.MALICIOUS.value
-            elif signatures > 10:
-                data_model.evaluation = data_model.EVALUATIONS.SUSPICIOUS.value
-            data_model.save()
+        data_model: FileDataModel
+        signatures = data_model.signatures.count()
+
+        if signatures:
+            self.MALICIOUS_EVALUATION = 20
+            self.SUSPICIOUS_EVALUATION = 10
+
+            data_model.evaluation = self.threat_to_evaluation(signatures)

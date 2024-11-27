@@ -35,7 +35,27 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
+    MALICIOUS_EVALUATION = 75
+    SUSPICIOUS_EVALUATION = 35
+    FALSE_POSITIVE = -50
+
+    def threat_to_evaluation(self, threat_level):
+        # MAGIC NUMBERS HERE!!!
+        # I know, it should be 25-50-75-100. We raised it a bit because too many false positives were generated
+        self.report: AnalyzerReport
+        if threat_level >= self.MALICIOUS_EVALUATION:
+            evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+        elif threat_level >= self.SUSPICIOUS_EVALUATION:
+            evaluation = self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
+        elif threat_level <= self.FALSE_POSITIVE:
+            evaluation = self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
+        else:
+            evaluation = self.report.data_model_class.EVALUATIONS.CLEAN.value
+        return evaluation
+
     def _do_create_data_model(self) -> bool:
+        if self.report.job.observable_classification == ObservableTypes.GENERIC:
+            return False
         return True
 
     def _create_data_model_mtm(self):
@@ -45,7 +65,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         mtm = self._create_data_model_mtm()
         for field_name, value in mtm.items():
             field = getattr(data_model, field_name)
-            field.set(value)
+            field.add(*value)
 
     def create_data_model(self):
         self.report: AnalyzerReport

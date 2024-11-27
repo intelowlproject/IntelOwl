@@ -1,4 +1,5 @@
 from rest_flex_fields import FlexFieldsModelSerializer
+from rest_framework.relations import SlugRelatedField
 
 from api_app.data_model_manager.models import (
     DomainDataModel,
@@ -22,7 +23,8 @@ class SignatureSerializer(FlexFieldsModelSerializer):
 
 
 class DomainDataModelSerializer(FlexFieldsModelSerializer):
-    ietf_report = IETFReportSerializer()
+    ietf_report = IETFReportSerializer(many=True)
+    analyzers_report = SlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = DomainDataModel
@@ -30,7 +32,8 @@ class DomainDataModelSerializer(FlexFieldsModelSerializer):
 
 
 class IPDataModelSerializer(FlexFieldsModelSerializer):
-    ietf_report = IETFReportSerializer()
+    ietf_report = IETFReportSerializer(many=True)
+    analyzers_report = SlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = IPDataModel
@@ -39,6 +42,7 @@ class IPDataModelSerializer(FlexFieldsModelSerializer):
 
 class FileDataModelSerializer(FlexFieldsModelSerializer):
     signatures = SignatureSerializer(many=True)
+    analyzers_report = SlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = FileDataModel

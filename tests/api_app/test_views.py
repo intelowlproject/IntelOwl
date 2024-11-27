@@ -2,14 +2,19 @@
 # See the file 'LICENSE' for copying permission.
 import abc
 import datetime
+from unittest.mock import MagicMock, patch
+from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.utils.timezone import now
+from elasticsearch_dsl.query import Bool, Range, Term
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import ReportStatus
 from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -824,3 +829,238 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
 
         m.delete()
         org.delete()
+
+
+class ElasticTestCase(CustomViewSetTestCase):
+    uri = reverse("plugin_report_queries")
+
+    class ElasticObject:
+
+        def __init__(self, response):
+            self.response = response
+
+        def to_dict(self):
+            return self.response
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.org_user, _ = User.objects.get_or_create(
+            is_superuser=False, username="elastic_test_user"
+        )
+        cls.org = Organization.objects.create(name="test_elastic_org")
+        cls.membership = Membership.objects.create(
+            user=cls.org_user, organization=cls.org, is_owner=True
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls.membership.delete()
+        cls.org.delete()
+        cls.org_user.delete()
+
+    def test_not_authenticated(self):
+        self.client.logout()
+        response = self.client.get(self.uri)
+        self.assertEqual(response.status_code, 401)
+
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @patch(
+        "api_app.views.Search.execute",
+        MagicMock(
+            return_value=(
+                [
+                    ElasticObject(
+                        {
+                            "user": {"username": "elastic_test_user"},
+                            "membership": {
+                                "is_owner": True,
+                                "is_admin": False,
+                                "organization": {"name": "test_elastic_org"},
+                            },
+                            "job": {"id": 1},
+                            "config": {
+                                "name": "Quad9_DNS",
+                                "plugin_name": "analyzer",
+                            },
+                            "status": "SUCCESS",
+                            "start_time": "2024-11-27T09:56:59.555203Z",
+                            "end_time": "2024-11-27T09:57:03.805453Z",
+                            "errors": [],
+                            "report": {
+                                "observable": "google.com",
+                                "resolutions": [
+                                    {
+                                        "TTL": 268,
+                                        "data": "216.58.205.46",
+                                        "name": "google.com.",
+                                        "type": 1,
+                                        "Expires": "Wed, 27 Nov 2024 10:01:31 UTC",
+                                    },
+                                ],
+                            },
+                        }
+                    ),
+                    ElasticObject(
+                        {
+                            "user": {"username": "another_user"},
+                            "membership": {
+                                "is_owner": False,
+                                "is_admin": False,
+                                "organization": {"name": "test_elastic_org"},
+                            },
+                            "job": {"id": 2},
+                            "config": {
+                                "name": "Classic_DNS",
+                                "plugin_name": "analyzer",
+                            },
+                            "status": "SUCCESS",
+                            "start_time": "2024-11-26T09:56:59.555203Z",
+                            "end_time": "2024-11-26T09:57:03.805453Z",
+                            "errors": [],
+                            "report": {
+                                "observable": "google.com",
+                                "resolutions": [
+                                    {
+                                        "TTL": 268,
+                                        "data": "216.58.205.46",
+                                        "name": "google.com.",
+                                        "type": 1,
+                                        "Expires": "Wed, 26 Nov 2024 10:01:31 UTC",
+                                    },
+                                ],
+                            },
+                        }
+                    ),
+                ]
+            )
+        ),
+    )
+    def test_client_request(self):
+        self.client.force_authenticate(self.org_user)
+        response = self.client.get(
+            self.uri,
+            data={
+                "report": "216.58.205.46",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "data": [
+                    {
+                        "job": {"id": 1},
+                        "config": {
+                            "name": "Quad9_DNS",
+                            "plugin_name": "analyzer",
+                        },
+                        "status": "SUCCESS",
+                        "start_time": "2024-11-27T09:56:59.555203Z",
+                        "end_time": "2024-11-27T09:57:03.805453Z",
+                        "errors": [],
+                        "report": {
+                            "observable": "google.com",
+                            "resolutions": [
+                                {
+                                    "TTL": 268,
+                                    "data": "216.58.205.46",
+                                    "name": "google.com.",
+                                    "type": 1,
+                                    "Expires": "Wed, 27 Nov 2024 10:01:31 UTC",
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "job": {"id": 2},
+                        "config": {
+                            "name": "Classic_DNS",
+                            "plugin_name": "analyzer",
+                        },
+                        "status": "SUCCESS",
+                        "start_time": "2024-11-26T09:56:59.555203Z",
+                        "end_time": "2024-11-26T09:57:03.805453Z",
+                        "errors": [],
+                        "report": {
+                            "observable": "google.com",
+                            "resolutions": [
+                                {
+                                    "TTL": 268,
+                                    "data": "216.58.205.46",
+                                    "name": "google.com.",
+                                    "type": 1,
+                                    "Expires": "Wed, 26 Nov 2024 10:01:31 UTC",
+                                },
+                            ],
+                        },
+                    },
+                ]
+            },
+        )
+
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @patch("api_app.views.Search")
+    def test_elastic_request(self, mocked_search):
+        self.client.force_authenticate(self.org_user)
+        response = self.client.get(
+            self.uri,
+            data={
+                "plugin_name": "analyzer",
+                "name": "classic_dns",
+                "status": "SUCCESS",
+                "errors": False,
+                "start_start_time": datetime.datetime(2024, 11, 27),
+                "end_start_time": datetime.datetime(2024, 11, 28),
+                "start_end_time": datetime.datetime(2024, 11, 27),
+                "end_end_time": datetime.datetime(2024, 11, 28),
+                "report": "8.8.8.8",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            mocked_search.return_value.query.call_args_list[0][0][0],
+            Bool(
+                filter=[
+                    Bool(
+                        should=[
+                            Term(user__username="elastic_test_user"),
+                            Term(membership__organization__name="elastic_test_user"),
+                        ]
+                    ),
+                    Term(plugin_name="analyzer"),
+                    Term(name="classic_dns"),
+                    Term(status=ReportStatus.SUCCESS),
+                    Range(
+                        start_time={
+                            "gte": datetime.datetime(
+                                2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Range(
+                        start_time={
+                            "lte": datetime.datetime(
+                                2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Range(
+                        end_time={
+                            "gte": datetime.datetime(
+                                2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Range(
+                        end_time={
+                            "lte": datetime.datetime(
+                                2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Term(report="8.8.8.8"),
+                ]
+            ),
+        )

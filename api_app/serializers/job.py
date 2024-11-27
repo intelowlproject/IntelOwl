@@ -572,7 +572,6 @@ class JobSerializer(_AbstractJobViewSerializer):
         return instance.analyzerreports.get_data_models(instance).serialize()
 
 
-    
 class RestJobSerializer(JobSerializer):
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
         request = self.context.get("request", None)

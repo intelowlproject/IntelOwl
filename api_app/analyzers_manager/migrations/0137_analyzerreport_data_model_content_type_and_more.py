@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
         ("contenttypes", "0002_remove_content_type_name"),
         (
             "analyzers_manager",
-            "0134_alter_analyzerconfig_mapping_data_model_and_more",
+            "0136_alter_analyzerconfig_mapping_data_model_and_more",
         ),
     ]
 

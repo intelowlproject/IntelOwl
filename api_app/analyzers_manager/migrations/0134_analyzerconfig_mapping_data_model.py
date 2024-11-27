@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("analyzers_manager", "0131_analyzer_config_vt_sample_download"),
+        ("analyzers_manager", "0133_analyzer_config_urldna_search"),
     ]
 
     operations = [

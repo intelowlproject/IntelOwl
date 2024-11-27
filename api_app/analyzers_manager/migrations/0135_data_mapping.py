@@ -48,7 +48,7 @@ def migrate_abuse_ipdb(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("analyzers_manager", "0132_analyzerconfig_mapping_data_model"),
+        ("analyzers_manager", "0134_analyzerconfig_mapping_data_model"),
     ]
 
     operations = [

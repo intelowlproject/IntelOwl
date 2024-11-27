@@ -8,7 +8,7 @@ import api_app.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("analyzers_manager", "0133_data_mapping"),
+        ("analyzers_manager", "0135_data_mapping"),
     ]
 
     operations = [

@@ -1567,17 +1567,17 @@ class PythonConfigViewSet(AbstractConfigViewSet):
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)
 
 
-# @add_docs(
-#     description="""This endpoint allows organization owners""",
-#     responses={
-#         200: inline_serializer(
-#             name="PluginStateViewerResponseSerializer",
-#             fields={
-#                 "data": rfs.JSONField(),
-#             },
-#         ),
-#     },
-# )
+@add_docs(
+    description="""This endpoint allows users to search analyzer, connector and pivot reports. ELASTIC REQUIRED""",
+    responses={
+        200: inline_serializer(
+            name="ElasticResponseSerializer",
+            fields={
+                "data": rfs.JSONField(),
+            },
+        ),
+    },
+)
 @api_view(["GET"])
 def plugin_report_queries(request):
     """

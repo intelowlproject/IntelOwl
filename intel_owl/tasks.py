@@ -459,7 +459,7 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                         ),
                         "config": {
                             "name": report.config.name,
-                            "plugin_name": report.config.plugin_name,
+                            "plugin_name": report.config.plugin_name.lower(),
                         },
                         "job": {"id": report.job.id},
                         "start_time": report.start_time,

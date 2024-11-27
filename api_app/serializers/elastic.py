@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 supported_plugin_name_list = [
-    AnalyzerConfig.plugin_name,
-    ConnectorConfig.plugin_name,
-    PivotConfig.plugin_name,
+    AnalyzerConfig.plugin_name.lower(),
+    ConnectorConfig.plugin_name.lower(),
+    PivotConfig.plugin_name.lower(),
 ]
 
 

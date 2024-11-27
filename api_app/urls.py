@@ -41,7 +41,7 @@ urlpatterns = [
         analyze_multiple_observables,
         name="analyze_multiple_observables",
     ),
-    path("plugin_report_queries", plugin_report_queries),
+    path("plugin_report_queries", plugin_report_queries, name="plugin_report_queries"),
     # router viewsets
     path("", include(router.urls)),
     # Plugins

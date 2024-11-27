@@ -212,7 +212,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "DNS0_EU_Malicious_Detector",
-                                "plugin_name": "Analyzer",
+                                "plugin_name": "analyzer",
                             },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
@@ -238,7 +238,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "Quad9_Malicious_Detector",
-                                "plugin_name": "Analyzer",
+                                "plugin_name": "analyzer",
                             },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
@@ -264,7 +264,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "AbuseSubmitter",
-                                "plugin_name": "Connector",
+                                "plugin_name": "connector",
                             },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
@@ -297,7 +297,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "AbuseIpToSubmission",
-                                "plugin_name": "Pivot",
+                                "plugin_name": "pivot",
                             },
                             "job": {"id": self.job.id},
                             "start_time": datetime.datetime(
@@ -351,7 +351,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "DNS0_EU_Malicious_Detector",
-                                "plugin_name": "Analyzer",
+                                "plugin_name": "analyzer",
                             },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
@@ -377,7 +377,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "Quad9_Malicious_Detector",
-                                "plugin_name": "Analyzer",
+                                "plugin_name": "analyzer",
                             },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
@@ -403,7 +403,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "AbuseSubmitter",
-                                "plugin_name": "Connector",
+                                "plugin_name": "connector",
                             },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc
@@ -434,7 +434,7 @@ class SendElasticTestCase(CustomTestCase):
                             },
                             "config": {
                                 "name": "AbuseIpToSubmission",
-                                "plugin_name": "Pivot",
+                                "plugin_name": "pivot",
                             },
                             "end_time": datetime.datetime(
                                 2024, 10, 29, 10, 59, tzinfo=datetime.timezone.utc

@@ -23,7 +23,7 @@ jest.mock("../../../src/components/plugins/forms/PlaybookConfigForm", () => ({
 }));
 
 describe("test PluginConfigModal component", () => {
-  test("plugins config modal - default plugin config", () => {
+  test("plugins config modal - case A: default plugin config", () => {
     render(
       <BrowserRouter>
         <PluginConfigModal
@@ -46,7 +46,7 @@ describe("test PluginConfigModal component", () => {
     expect(pluginConfigContainer).toBeInTheDocument();
   });
 
-  test("plugins config modal - case A: create basic analyzer", () => {
+  test("plugins config modal - case B: create basic analyzer", () => {
     render(
       <BrowserRouter>
         <PluginConfigModal
@@ -67,7 +67,7 @@ describe("test PluginConfigModal component", () => {
     expect(AnalyzerConfigForm).toBeInTheDocument();
   });
 
-  test("plugins config modal - case B: edit basic analyzer", () => {
+  test("plugins config modal - case C: edit basic analyzer", () => {
     const basicAnalyzer = mockedPlugins.ANALYZER;
     basicAnalyzer.python_module =
       "basic_observable_analyzer.BasicObservableAnalyzer";
@@ -127,7 +127,7 @@ describe("test PluginConfigModal component", () => {
     const pluginConfigModal = document.querySelector("#plugin-config-modal");
     expect(pluginConfigModal).toBeInTheDocument();
     // modal title
-    expect(screen.getByText("Plugin config")).toBeInTheDocument();
+    expect(screen.getByText("Edit pivot config")).toBeInTheDocument();
     // expect PivotConfigForm is called
     const PivotConfigForm = document.querySelector("#pivot-config-form");
     expect(PivotConfigForm).toBeInTheDocument();

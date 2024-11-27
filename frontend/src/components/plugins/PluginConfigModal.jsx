@@ -23,10 +23,44 @@ export function PluginConfigModal({
       "basic_observable_analyzer.BasicObservableAnalyzer";
 
   let title = "Plugin config";
-  if (isBasicAnalyzer) {
+  // case A: DEFAULT plugin config
+  let component = (
+    <PluginConfigContainer
+      pluginName={pluginConfig.name}
+      pluginType={pluginType}
+      toggle={toggle}
+    />
+  );
+  if (isBasicAnalyzer || (pluginType === PluginsTypes.ANALYZER && !isEditing)) {
     title = "Edit analyzer config";
+    // case B-C: create/edit basic analyzer
+    component = (
+      <AnalyzerConfigForm
+        analyzerConfig={pluginConfig}
+        toggle={toggle}
+        isEditing={isEditing}
+      />
+    );
+  } else if (pluginType === PluginsTypes.PIVOT) {
+    title = "Edit pivot config";
+    // case D-E: create/edit basic pivot
+    component = (
+      <PivotConfigForm
+        pivotConfig={pluginConfig}
+        toggle={toggle}
+        isEditing={isEditing}
+      />
+    );
   } else if (pluginType === PluginsTypes.PLAYBOOK) {
     title = "Edit playbook config";
+    // case F-G: create/edit playbook
+    component = (
+      <PlaybookConfigForm
+        playbookConfig={pluginConfig}
+        toggle={toggle}
+        isEditing={isEditing}
+      />
+    );
   }
 
   return (
@@ -47,55 +81,14 @@ export function PluginConfigModal({
           {isEditing ? title : `Create a new ${pluginType}`}
         </small>
       </ModalHeader>
-      <ModalBody className="m-2">
-        {/* Edit plugin config - DEFAULT */}
-        {isEditing &&
-          !(isBasicAnalyzer || pluginType === PluginsTypes.PIVOT) && (
-            <PluginConfigContainer
-              pluginName={pluginConfig.name}
-              pluginType={pluginType}
-              toggle={toggle}
-            />
-          )}
-        {/* Create/Edit basic analyzer */}
-        {(isBasicAnalyzer ||
-          (pluginType === PluginsTypes.ANALYZER && !isEditing)) && (
-          <AnalyzerConfigForm
-            analyzerConfig={pluginConfig}
-            toggle={toggle}
-            isEditing={isEditing}
-          />
-        )}
-        {/* Create/Edit basic pivot */}
-        {pluginType === PluginsTypes.PIVOT && (
-          <PivotConfigForm
-            pivotConfig={pluginConfig}
-            toggle={toggle}
-            isEditing={isEditing}
-          />
-        )}
-        {/* Create/Edit playbook */}
-        {pluginType === PluginsTypes.PLAYBOOK && (
-          <PlaybookConfigForm
-            playbookConfig={pluginConfig}
-            toggle={toggle}
-            isEditing={isEditing}
-          />
-        )}
-      </ModalBody>
+      <ModalBody className="m-2">{component}</ModalBody>
     </Modal>
   );
 }
 
 PluginConfigModal.propTypes = {
   pluginConfig: PropTypes.object,
-  pluginType: PropTypes.oneOf([
-    "analyzer",
-    "connector",
-    "ingestor",
-    "pivot",
-    "playbook",
-  ]).isRequired,
+  pluginType: PropTypes.oneOf(Object.values(PluginsTypes)).isRequired,
   toggle: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
 };

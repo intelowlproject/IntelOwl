@@ -12,7 +12,6 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
-import { PlaybookConfigForm } from "../forms/PlaybookConfigForm";
 import { deleteConfiguration } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { PluginConfigModal } from "../PluginConfigModal";
@@ -303,7 +302,7 @@ export function PlaybooksEditButton({ playbookConfig }) {
     pivotsLoading;
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`playbook-edit-btn__${playbookConfig?.name}`}
         color="info"
@@ -321,11 +320,11 @@ export function PlaybooksEditButton({ playbookConfig }) {
         titlePlacement="top"
       />
       {showModal && (
-        <PlaybookConfigForm
-          playbookConfig={playbookConfig}
+        <PluginConfigModal
+          pluginConfig={playbookConfig}
+          pluginType={PluginsTypes.PLAYBOOK}
           toggle={setShowModal}
           isOpen={showModal}
-          pluginsLoading={pluginsLoading}
         />
       )}
     </div>

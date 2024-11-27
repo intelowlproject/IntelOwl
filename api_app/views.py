@@ -1590,21 +1590,26 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                 param_obj["exist"] = False
                 param_obj["default"] = False
                 # override default config (if any)
-                for config in [config for config in pc.data if config["owner"] is None]:
-                    if config["attribute"] == attribute:
-                        param_obj.update(config)
-                        param_obj["exist"] = True
-                        param_obj["default"] = True
+                for config in [
+                    config
+                    for config in pc.data
+                    if config["owner"] is None and config["attribute"] == attribute
+                ]:
+                    param_obj.update(config)
+                    param_obj["exist"] = True
+                    param_obj["default"] = True
                 # override default config with org config (if any)
                 if request.user.has_membership():
                     org = request.user.membership.organization.name
                     for config in [
-                        config for config in pc.data if config["organization"] == org
+                        config
+                        for config in pc.data
+                        if config["organization"] == org
+                        and config["attribute"] == attribute
                     ]:
-                        if config["attribute"] == attribute:
-                            param_obj.update(config)
-                            param_obj["exist"] = True
-                            param_obj["default"] = False
+                        param_obj.update(config)
+                        param_obj["exist"] = True
+                        param_obj["default"] = False
                     org_config.append(copy.deepcopy(param_obj))
                 # override default config with user config (if any)
                 for config in [
@@ -1612,11 +1617,11 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                     for config in pc.data
                     if config["owner"] == request.user.username
                     and config["organization"] is None
+                    and config["attribute"] == attribute
                 ]:
-                    if config["attribute"] == attribute:
-                        param_obj.update(config)
-                        param_obj["exist"] = True
-                        param_obj["default"] = False
+                    param_obj.update(config)
+                    param_obj["exist"] = True
+                    param_obj["default"] = False
                 user_config.append(copy.deepcopy(param_obj))
 
             result = {"organization_config": org_config, "user_config": user_config}

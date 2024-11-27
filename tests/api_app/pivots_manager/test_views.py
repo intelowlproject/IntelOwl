@@ -157,13 +157,15 @@ class PivotConfigViewSetTestCase(
                 .first()
                 .module,
                 "playbooks_choice": [PlaybookConfig.objects.first().name],
-                "plugin_config": {
-                    "type": "5",
-                    "plugin_name": "TestCreate",
-                    "attribute": "field_to_test",
-                    "value": "my.field",
-                    "config_type": "1",
-                },
+                "plugin_config": [
+                    {
+                        "type": "5",
+                        "plugin_name": "TestCreate",
+                        "attribute": "field_to_test",
+                        "value": "my.field",
+                        "config_type": "1",
+                    }
+                ],
             },
             format="json",
         )

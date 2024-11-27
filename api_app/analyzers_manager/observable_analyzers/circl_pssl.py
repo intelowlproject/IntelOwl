@@ -56,22 +56,6 @@ class CIRCL_PSSL(classes.ObservableAnalyzer):
     def _get_health_check_url(self, user: User = None) -> typing.Optional[str]:
         return self.url
 
-    def _do_create_data_model(self):
-        return super()._do_create_data_model() and self.report.report.get(
-            "certificates", []
-        )
-
-    def _update_data_model(self, data_model):
-        from api_app.analyzers_manager.models import AnalyzerReport
-
-        super()._update_data_model(data_model)
-        entries = self.report.report.get("certificates", [])
-        if len(entries) > 50:
-            self.report: AnalyzerReport
-            data_model.evaluation = (
-                self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
-            )
-
     @classmethod
     def _monkeypatch(cls):
         patches = [

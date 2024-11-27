@@ -89,24 +89,6 @@ class BGPRanking(classes.ObservableAnalyzer):
 
         return final_response
 
-    def _do_create_data_model(self):
-        return (
-            super()._do_create_data_model()
-            and self.report.report.get("asn_rank", 0)
-            and self.report.report.get("asn_position", None)
-        )
-
-    def _update_data_model(self, data_model):
-        from api_app.analyzers_manager.models import AnalyzerReport
-
-        super()._update_data_model(data_model)
-        rank = self.report.report.get("asn_rank", 0)
-        if rank and rank >= 0.01:
-            self.report: AnalyzerReport
-            data_model.evaluation = (
-                self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
-            )
-
     @classmethod
     def _monkeypatch(cls):
         patches = [

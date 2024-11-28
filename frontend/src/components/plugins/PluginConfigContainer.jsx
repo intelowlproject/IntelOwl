@@ -92,6 +92,10 @@ export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
               />
             </TabPane>
             <TabPane tabId={PluginConfigTypes.ORG_CONFIG}>
+              <small className="text-muted">
+                Note: Only org admins can modify the configuration, other users
+                can only view it.
+              </small>
               <PluginConfigForm
                 pluginName={pluginName}
                 pluginType={pluginType}

@@ -31,23 +31,7 @@ import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
-function CustomInput({ formik, config, configType }) {
-  const [user] = useAuthStore((state) => [state.user]);
-  const { isUserOwner, isUserAdmin } = useOrganizationStore(
-    React.useCallback(
-      (state) => ({
-        isUserOwner: state.isUserOwner,
-        isUserAdmin: state.isUserAdmin,
-      }),
-      [],
-    ),
-  );
-
-  // Only owner and admins can update org config
-  const disabledInputField =
-    configType === PluginConfigTypes.ORG_CONFIG &&
-    !(isUserOwner || isUserAdmin(user));
-
+function CustomInput({ formik, config, configType, disabledInputField }) {
   switch (config.type) {
     case ParameterTypes.INT:
       return (
@@ -236,6 +220,7 @@ CustomInput.propTypes = {
   formik: PropTypes.object.isRequired,
   config: PropTypes.object.isRequired,
   configType: PropTypes.string.isRequired,
+  disabledInputField: PropTypes.bool.isRequired,
 };
 
 function calculateStateSelector(pluginType) {
@@ -268,16 +253,26 @@ export function PluginConfigForm({
     calculateStateSelector(pluginType),
   );
 
+  const [user] = useAuthStore((state) => [state.user]);
   const {
+    isUserOwner,
+    isUserAdmin,
     organization: { name: orgName },
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
+        isUserOwner: state.isUserOwner,
+        isUserAdmin: state.isUserAdmin,
         organization: state.organization,
       }),
       [],
     ),
   );
+
+  // Only owner and admins can create/update/delete org config
+  const disabledOrgActions =
+    configType === PluginConfigTypes.ORG_CONFIG &&
+    !(isUserOwner || isUserAdmin(user));
 
   const initialValues = {};
   configs.forEach((config) => {
@@ -410,6 +405,7 @@ export function PluginConfigForm({
                     formik={formik}
                     config={config}
                     configType={configType}
+                    disabledInputField={disabledOrgActions}
                   />
                 </Col>
                 <Col md={1}>
@@ -425,6 +421,7 @@ export function PluginConfigForm({
                     disabled={
                       config.default ||
                       !config.exist ||
+                      disabledOrgActions ||
                       (config.organization !== null &&
                         configType === PluginConfigTypes.USER_CONFIG)
                     }
@@ -452,7 +449,10 @@ export function PluginConfigForm({
             size="lg"
             outline
             className="mx-2 mt-2"
-            disabled={!formik.isValid || formik.isSubmitting}
+            /* dirty return True if values are different then default
+              we cannot run the validation on mount or we get an infinite loop.
+            */
+            disabled={!formik.isValid || formik.isSubmitting || !formik.dirty}
           >
             Save
           </Button>

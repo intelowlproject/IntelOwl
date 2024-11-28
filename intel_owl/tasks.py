@@ -445,12 +445,28 @@ def send_plugin_report_to_elastic(max_timeout: int = 60, max_objects: int = 1000
                         f"{now().date()}"
                     ),
                     "_source": {
-                        "config": {"name": report.config.name},
+                        "user": {"username": report.user.username},
+                        "membership": (
+                            {
+                                "is_owner": report.user.membership.is_owner,
+                                "is_admin": report.user.membership.is_admin,
+                                "organization": {
+                                    "name": report.user.membership.organization.name,
+                                },
+                            }
+                            if report.user.has_membership()
+                            else {}
+                        ),
+                        "config": {
+                            "name": report.config.name,
+                            "plugin_name": report.config.plugin_name.lower(),
+                        },
                         "job": {"id": report.job.id},
                         "start_time": report.start_time,
                         "end_time": report.end_time,
                         "status": report.status,
                         "report": report.report,
+                        "errors": report.errors,
                     },
                 }
                 for report in report_list

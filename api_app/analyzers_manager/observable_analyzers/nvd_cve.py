@@ -1,7 +1,6 @@
 import re
 
 import requests
-from django.conf import settings
 
 from api_app.analyzers_manager.classes import AnalyzerRunException, ObservableAnalyzer
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
@@ -23,7 +22,7 @@ class NVDDetails(ObservableAnalyzer):
 
         try:
             # Validate if CVE format is correct E.g CVE-2014-1234 or cve-2022-1234567
-            if not settings.STAGE_CI and not re.match(
+            if not re.match(
                 self.cve_pattern, self.observable_name, flags=re.IGNORECASE
             ):
                 raise ValueError(f"Invalid CVE format: {self.observable_name}")

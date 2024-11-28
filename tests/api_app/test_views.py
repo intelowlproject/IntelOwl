@@ -374,8 +374,6 @@ class JobViewSetTests(CustomViewSetTestCase):
         "jobs-aggregate-observable-classification"
     )
     agg_file_mimetype_uri = reverse("jobs-aggregate-file-mimetype")
-    agg_observable_name_uri = reverse("jobs-aggregate-observable-name")
-    agg_file_name_uri = reverse("jobs-aggregate-md5")
 
     def setUp(self):
         super().setUp()
@@ -572,32 +570,6 @@ class JobViewSetTests(CustomViewSetTestCase):
             self.assertIn(
                 field,
                 content["aggregation"][0],
-                msg=msg,
-            )
-
-    def test_agg_observable_name_200(self):
-        resp = self.client.get(self.agg_observable_name_uri)
-        content = resp.json()
-        msg = (resp, content)
-
-        self.assertEqual(resp.status_code, 200, msg)
-        for field in content["values"]:
-            self.assertIn(
-                field,
-                content["aggregation"],
-                msg=msg,
-            )
-
-    def test_agg_file_name_200(self):
-        resp = self.client.get(self.agg_file_name_uri)
-        content = resp.json()
-        msg = (resp, content)
-
-        self.assertEqual(resp.status_code, 200, msg)
-        for field in content["values"]:
-            self.assertIn(
-                field,
-                content["aggregation"],
                 msg=msg,
             )
 

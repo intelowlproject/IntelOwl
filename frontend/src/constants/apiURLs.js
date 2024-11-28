@@ -23,8 +23,6 @@ export const JOB_AGG_STATUS_URI = `${JOB_BASE_URI}/aggregate/status`;
 export const JOB_AGG_TYPE_URI = `${JOB_BASE_URI}/aggregate/type`;
 export const JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_BASE_URI}/aggregate/observable_classification`;
 export const JOB_AGG_FILE_MIMETYPE_URI = `${JOB_BASE_URI}/aggregate/file_mimetype`;
-export const JOB_AGG_OBS_NAME_URI = `${JOB_BASE_URI}/aggregate/observable_name`;
-export const JOB_AGG_FILE_MD5_URI = `${JOB_BASE_URI}/aggregate/md5`;
 
 export const JOB_RECENT_SCANS = `${JOB_BASE_URI}/recent_scans`;
 export const JOB_RECENT_SCANS_USER = `${JOB_BASE_URI}/recent_scans_user`;

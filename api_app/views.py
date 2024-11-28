@@ -763,41 +763,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             "file_mimetype", users=self.get_org_members(request)
         )
 
-    @action(
-        url_path="aggregate/observable_name",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_observable_name(self, request):
-        """
-        Aggregate jobs by observable name.
-
-        Returns:
-        - Aggregated count of jobs for each observable name.
-        """
-        return self.__aggregation_response_dynamic(
-            "observable_name", False, users=self.get_org_members(request)
-        )
-
-    @action(
-        url_path="aggregate/md5",
-        detail=False,
-        methods=["GET"],
-    )
-    @cache_action_response(timeout=60 * 5)
-    def aggregate_md5(self, request):
-        """
-        Aggregate jobs by MD5 hash.
-
-        Returns:
-        - Aggregated count of jobs for each MD5 hash.
-        """
-        # this is for file
-        return self.__aggregation_response_dynamic(
-            "md5", False, users=self.get_org_members(request)
-        )
-
     @staticmethod
     def get_org_members(request):
         """

@@ -12,22 +12,11 @@ import {
   JobTypeBarChart,
   JobObsClassificationBarChart,
   JobFileMimetypeBarChart,
-  JobObsNamePieChart,
-  JobFileHashPieChart,
 } from "./utils/charts";
 
 import { useGuideContext } from "../../contexts/GuideContext";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
-const charts1 = [
-  ["JobStatusBarChart", "Job: Status", JobStatusBarChart],
-  [
-    "JobObsNamePieChart",
-    "Job: Frequent IPs, Hash & Domains",
-    JobObsNamePieChart,
-  ],
-  ["JobFileHashPieChart", "Job: Frequent Files", JobFileHashPieChart],
-];
 const charts2 = [
   ["JobTypeBarChart", "Job: Type", JobTypeBarChart],
   [
@@ -39,7 +28,6 @@ const charts2 = [
 ];
 
 export default function Dashboard() {
-  // const isSelectedUI = JobResultSections.VISUALIZER;
   const { guideState, setGuideState } = useGuideContext();
 
   const [orgState, setOrgState] = useState(() => false);
@@ -116,24 +104,22 @@ export default function Dashboard() {
       </div>
 
       <Row className="d-flex flex-wrap flex-lg-nowrap">
-        {charts1.map(([id, header, Component], index) => (
-          <Col key={id} md={12} lg={index === 0 ? 6 : 3}>
-            <SmallInfoCard
-              id={id}
-              header={header}
-              body={
-                <div className="pt-2">
-                  <Component
-                    sendOrgState={{
-                      key: orgState,
-                    }}
-                  />
-                </div>
-              }
-              style={{ minHeight: 360 }}
-            />
-          </Col>
-        ))}
+        <Col key="JobStatusBarChart" md={12}>
+          <SmallInfoCard
+            id="JobStatusBarChart"
+            header="Job: Status"
+            body={
+              <div className="pt-2">
+                <JobStatusBarChart
+                  sendOrgState={{
+                    key: orgState,
+                  }}
+                />
+              </div>
+            }
+            style={{ minHeight: 360 }}
+          />
+        </Col>
       </Row>
       <Row className="d-flex flex-wrap flex-lg-nowrap mt-4">
         {charts2.map(([id, header, Component]) => (

@@ -1,32 +1,26 @@
 import React from "react";
 import { Bar } from "recharts";
 
-import {
-  getRandomColorsArray,
-  AnyChartWidget,
-  PieChartWidget,
-} from "@certego/certego-ui";
+import { getRandomColorsArray, AnyChartWidget } from "@certego/certego-ui";
 
 import {
-  JobStatusColors,
   JobTypeColors,
   ObservableClassificationColors,
 } from "../../../constants/colorConst";
+
+import { JobStatuses } from "../../../constants/jobConst";
 
 import {
   JOB_AGG_STATUS_URI,
   JOB_AGG_TYPE_URI,
   JOB_AGG_OBS_CLASSIFICATION_URI,
   JOB_AGG_FILE_MIMETYPE_URI,
-  JOB_AGG_OBS_NAME_URI,
-  JOB_AGG_FILE_MD5_URI,
 } from "../../../constants/apiURLs";
 
 // constants
 const colors = getRandomColorsArray(10, true);
 
 // bar charts
-
 export const JobStatusBarChart = React.memo((props) => {
   console.debug("JobStatusBarChart rendered!");
   /* eslint-disable */
@@ -35,17 +29,25 @@ export const JobStatusBarChart = React.memo((props) => {
   const getValue = parameter.key;
   ORG_JOB_AGG_STATUS_URI = `${JOB_AGG_STATUS_URI}?org=${getValue}`;
 
+  const mappingStatusColor = Object.freeze({
+    [JobStatuses.PENDING]: "#ffffff",
+    [JobStatuses.REPORTED_WITH_FAILS]: "#ffa31a",
+    [JobStatuses.REPORTED_WITHOUT_FAILS]: "#009933",
+    [JobStatuses.FAILED]: "#cc0000",
+  });
+  console.debug(mappingStatusColor);
+
   const chartProps = React.useMemo(
     () => ({
       url: ORG_JOB_AGG_STATUS_URI,
       accessorFnAggregation: (jobStatusesPerDay) => jobStatusesPerDay,
       componentsFn: () =>
-        Object.entries(JobStatusColors).map(([jobStatus, jobColor]) => (
+        Object.entries(mappingStatusColor).map(([jobStatus, jobColor]) => (
           <Bar
             stackId="jobstatus"
             key={jobStatus}
             dataKey={jobStatus}
-            fill={`var(--${jobColor})`}
+            fill={jobColor}
           />
         )),
     }),
@@ -144,58 +146,4 @@ export const JobFileMimetypeBarChart = React.memo((props) => {
   );
 
   return <AnyChartWidget {...chartProps} />;
-});
-
-// pie charts
-
-export const JobObsNamePieChart = React.memo((props) => {
-  console.debug("JobObsNamePieChart rendered!");
-  /* eslint-disable */
-  var ORG_JOB_AGG_OBS_NAME_URI = JOB_AGG_OBS_NAME_URI;
-  const parameter = props.sendOrgState;
-  const getValue = parameter.key;
-  ORG_JOB_AGG_OBS_NAME_URI = `${JOB_AGG_OBS_NAME_URI}?org=${getValue}`;
-
-  const chartProps = React.useMemo(
-    () => ({
-      url: ORG_JOB_AGG_OBS_NAME_URI,
-      modifierFn: (respData) =>
-        Object.entries(respData?.aggregation).map(
-          ([observableName, analyzedTimes], index) => ({
-            name: observableName.toLowerCase(),
-            value: analyzedTimes,
-            fill: colors[index],
-          }),
-        ),
-    }),
-    [ORG_JOB_AGG_OBS_NAME_URI],
-  );
-
-  return <PieChartWidget {...chartProps} />;
-});
-
-export const JobFileHashPieChart = React.memo((props) => {
-  console.debug("JobFileHashPieChart rendered!");
-  /* eslint-disable */
-  var ORG_JOB_AGG_FILE_MD5_URI = JOB_AGG_FILE_MD5_URI;
-  const parameter = props.sendOrgState;
-  const getValue = parameter.key;
-  ORG_JOB_AGG_FILE_MD5_URI = `${JOB_AGG_FILE_MD5_URI}?org=${getValue}`;
-
-  const chartProps = React.useMemo(
-    () => ({
-      url: ORG_JOB_AGG_FILE_MD5_URI,
-      modifierFn: (respData) =>
-        Object.entries(respData?.aggregation).map(
-          ([fileMd5, analyzedTimes], index) => ({
-            name: fileMd5.toLowerCase(),
-            value: analyzedTimes,
-            fill: colors[index],
-          }),
-        ),
-    }),
-    [ORG_JOB_AGG_FILE_MD5_URI],
-  );
-
-  return <PieChartWidget {...chartProps} />;
 });

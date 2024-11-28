@@ -8,15 +8,37 @@
     },
     "mappings": {
         "properties": {
-            "config": {
+            "user": {
                 "properties": {
-                    "name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
+                    "username": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "membership": {
+                "properties": {
+                    "is_owner": {
+                        "type": "boolean"
+                    },
+                    "is_admin": {
+                        "type": "boolean"
+                    },
+                    "organization": {
+                        "properties": {
+                            "name": {
                                 "type": "keyword"
                             }
                         }
+                    }
+                }
+            },
+            "config": {
+                "properties": {
+                    "name": {
+                        "type": "keyword"
+                    },
+                    "plugin_name": {
+                        "type": "keyword"
                     }
                 }
             },
@@ -34,13 +56,10 @@
                 "type": "date"
             },
             "status": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                }
+                "type": "keyword"
+            },
+            "errors": {
+                "type": "text"
             },
             "report": {
                 "type": "flattened"

@@ -6,6 +6,7 @@ import logging
 import uuid
 from abc import ABCMeta, abstractmethod
 
+from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
@@ -13,6 +14,8 @@ from django.utils.timezone import now
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
+from elasticsearch_dsl import Q as QElastic
+from elasticsearch_dsl import Search
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
@@ -22,6 +25,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api_app.choices import ScanMode
+from api_app.exceptions import NotImplementedException
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
@@ -52,6 +56,11 @@ from .models import (
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
+from .serializers.elastic import (
+    ElasticRequest,
+    ElasticRequestSerializer,
+    ElasticResponseSerializer,
+)
 from .serializers.job import (
     CommentSerializer,
     FileJobSerializer,
@@ -1694,3 +1703,100 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
         plugin_config_serializer.is_valid(raise_exception=True)
         plugin_config_serializer.save()
         return Response(plugin_config_serializer.data, status=status.HTTP_201_CREATED)
+
+
+description = (
+    """This endpoint allows users to search analyzer, connector and pivot reports. ELASTIC REQUIRED""",
+)
+responses = (
+    {
+        200: inline_serializer(
+            name="ElasticResponseSerializer",
+            fields={
+                "data": rfs.JSONField(),
+            },
+        ),
+    },
+)
+
+
+@api_view(["GET"])
+def plugin_report_queries(request):
+    """
+    View enabled only with elastic. Allow to perform queries in the Plugin reports.
+
+    Args:
+        request (HttpRequest): The request object containing the HTTP GET request.
+
+    Returns:
+        Response: A JSON response with the state of each plugin configuration,
+                  indicating whether it is disabled or not.
+
+    Raises:
+        NotImplementedException: Elastic is not configured
+        PermissionDenied: If the requesting user does not belong to any organization.
+    """
+    if not settings.ELASTICSEARCH_DSL_ENABLED:
+        raise NotImplementedException()
+
+    # 1 validate request
+    logger.debug(f"{request.query_params=}")
+    elastic_request_serializer = ElasticRequestSerializer(data=request.query_params)
+    elastic_request_serializer.is_valid(raise_exception=True)
+    elastic_request_params: ElasticRequest = elastic_request_serializer.save()
+    logger.debug(f"{elastic_request_params.__dict__=}")
+
+    # 2 generate elasticsearch queries, default filter: object owner or in org
+    permission_filter = QElastic("term", user__username=request.user.username)
+    if request.user.has_membership():
+        permission_filter |= QElastic(
+            "term", membership__organization__name=request.user.username
+        )
+    filter_list = [permission_filter]
+
+    # additional filters based on request params
+    if elastic_request_params.plugin_name:
+        filter_list.append(
+            QElastic("term", plugin_name=elastic_request_params.plugin_name)
+        )
+    if elastic_request_params.name:
+        filter_list.append(QElastic("term", name=elastic_request_params.name))
+    if elastic_request_params.status:
+        filter_list.append(QElastic("term", status=elastic_request_params.status))
+    if elastic_request_params.errors:
+        filter_list.append(QElastic("exists", field="errors"))
+    if elastic_request_params.start_start_time:
+        filter_list.append(
+            QElastic(
+                "range", start_time={"gte": elastic_request_params.start_start_time}
+            )
+        )
+    if elastic_request_params.end_start_time:
+        filter_list.append(
+            QElastic("range", start_time={"lte": elastic_request_params.end_start_time})
+        )
+    if elastic_request_params.start_end_time:
+        filter_list.append(
+            QElastic("range", end_time={"gte": elastic_request_params.start_end_time})
+        )
+    if elastic_request_params.end_end_time:
+        filter_list.append(
+            QElastic("range", end_time={"lte": elastic_request_params.end_end_time})
+        )
+    if elastic_request_params.report:
+        filter_list.append(QElastic("term", report=elastic_request_params.report))
+
+    # 3 return data
+    hits = (
+        Search(index="plugin-report-*")
+        .query(QElastic("bool", filter=filter_list))
+        .execute()
+    )
+    logger.debug(f"filters: {filter_list}, hits: {len(hits)}")
+    serialize_response = ElasticResponseSerializer(
+        data=[h.to_dict() for h in hits], many=True
+    )
+    serialize_response.is_valid(raise_exception=True)
+    response_data = serialize_response.validated_data
+    result = {"data": response_data}
+    return Response(result)

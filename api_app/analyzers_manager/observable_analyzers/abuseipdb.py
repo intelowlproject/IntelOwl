@@ -97,9 +97,10 @@ class AbuseIPDB(ObservableAnalyzer):
 
     def _update_data_model(self, data_model) -> None:
         super()._update_data_model(data_model)
-        if self.report.report.get("totalReports", 0):
+        report_data = self.report.report.get("data", {})
+        if report_data.get("totalReports", 0):
             self.report: AnalyzerReport
-            if self.report.report["isWhitelisted"]:
+            if report_data["isWhitelisted"]:
                 evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
             else:
                 evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value

@@ -19,10 +19,11 @@ export const PLAYBOOKS_CONFIG_URI = `${API_BASE_URI}/playbook`;
 export const PLAYBOOKS_ANALYZE_MULTIPLE_FILES_URI = `${PLAYBOOKS_CONFIG_URI}/analyze_multiple_files`;
 export const PLAYBOOKS_ANALYZE_MULTIPLE_OBSERVABLE_URI = `${PLAYBOOKS_CONFIG_URI}/analyze_multiple_observables`;
 
-export const JOB_AGG_STATUS_URI = `${JOB_BASE_URI}/aggregate/status`;
-export const JOB_AGG_TYPE_URI = `${JOB_BASE_URI}/aggregate/type`;
-export const JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_BASE_URI}/aggregate/observable_classification`;
-export const JOB_AGG_FILE_MIMETYPE_URI = `${JOB_BASE_URI}/aggregate/file_mimetype`;
+const AGGREGATE_PATH = "/aggregate";
+export const JOB_AGG_STATUS_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/status`;
+export const JOB_AGG_TYPE_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/type`;
+export const JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/observable_classification`;
+export const JOB_AGG_FILE_MIMETYPE_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/file_mimetype`;
 
 export const JOB_RECENT_SCANS = `${JOB_BASE_URI}/recent_scans`;
 export const JOB_RECENT_SCANS_USER = `${JOB_BASE_URI}/recent_scans_user`;
@@ -45,6 +46,5 @@ export const AUTH_BASE_URI = `${API_BASE_URI}/auth`;
 export const APIACCESS_BASE_URI = `${AUTH_BASE_URI}/apiaccess`;
 
 // WEBSOCKETS
-export const WEBSOCKET_BASE_URI = "ws";
-
+const WEBSOCKET_BASE_URI = "ws";
 export const WEBSOCKET_JOBS_URI = `${WEBSOCKET_BASE_URI}/jobs`;

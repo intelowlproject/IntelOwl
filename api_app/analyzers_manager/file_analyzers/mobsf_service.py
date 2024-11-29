@@ -12,6 +12,9 @@ class MobSF_Service(FileAnalyzer):
     mobsf_host: str
     _mobsf_api_key: str
 
+    def update(self) -> bool:
+        pass
+
     def static_analysis(self, scan_hash, headers):
 
         scan_url = self.mobsf_host + "/api/v1/scan"

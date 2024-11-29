@@ -12,7 +12,7 @@ import {
   JobTypeBarChart,
   JobObsClassificationBarChart,
   JobFileMimetypeBarChart,
-} from "./utils/charts";
+} from "./charts";
 
 import { useGuideContext } from "../../contexts/GuideContext";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
@@ -110,11 +110,7 @@ export default function Dashboard() {
             header="Job: Status"
             body={
               <div className="pt-2">
-                <JobStatusBarChart
-                  sendOrgState={{
-                    key: orgState,
-                  }}
-                />
+                <JobStatusBarChart orgName={orgState} />
               </div>
             }
             style={{ minHeight: 360 }}
@@ -129,11 +125,7 @@ export default function Dashboard() {
               header={header}
               body={
                 <div className="pt-2">
-                  <Component
-                    sendOrgState={{
-                      key: orgState,
-                    }}
-                  />
+                  <Component orgName={orgState} />
                 </div>
               }
               style={{ minHeight: 360 }}

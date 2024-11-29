@@ -433,7 +433,9 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "is_sample": False,
                 "observable_name": "gigatest.com",
                 "observable_classification": "domain",
-                "finished_analysis_time": now() - datetime.timedelta(days=2),
+                "finished_analysis_time": datetime.datetime(
+                    2024, 11, 28, tzinfo=datetime.timezone.utc
+                ),
             }
         )
         j2 = Job.objects.create(
@@ -442,7 +444,9 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "is_sample": False,
                 "observable_name": "gigatest.com",
                 "observable_classification": "domain",
-                "finished_analysis_time": now() - datetime.timedelta(hours=2),
+                "finished_analysis_time": datetime.datetime(
+                    2024, 11, 28, tzinfo=datetime.timezone.utc
+                ),
             }
         )
         response = self.client.post(
@@ -526,12 +530,18 @@ class JobViewSetTests(CustomViewSetTestCase):
         msg = (resp, content)
 
         self.assertEqual(resp.status_code, 200, msg)
-        for field in ["date", *Job.Status.values]:
-            self.assertIn(
-                field,
-                content[0],
-                msg=msg,
-            )
+        self.assertEqual(
+            content,
+            [
+                {
+                    "date": "2024-11-28T00:00:00Z",
+                    "pending": 2,
+                    "failed": 0,
+                    "reported_with_fails": 0,
+                    "reported_without_fails": 0,
+                }
+            ],
+        )
 
     def test_agg_type_200(self):
         resp = self.client.get(self.agg_type_uri)

@@ -6,16 +6,16 @@ import { getRandomColorsArray, AnyChartWidget } from "@certego/certego-ui";
 import {
   JobTypeColors,
   ObservableClassificationColors,
-} from "../../../constants/colorConst";
+} from "../../constants/colorConst";
 
-import { JobStatuses } from "../../../constants/jobConst";
+import { JobStatuses } from "../../constants/jobConst";
 
 import {
   JOB_AGG_STATUS_URI,
   JOB_AGG_TYPE_URI,
   JOB_AGG_OBS_CLASSIFICATION_URI,
   JOB_AGG_FILE_MIMETYPE_URI,
-} from "../../../constants/apiURLs";
+} from "../../constants/apiURLs";
 
 // constants
 const colors = getRandomColorsArray(10, true);
@@ -23,11 +23,7 @@ const colors = getRandomColorsArray(10, true);
 // bar charts
 export const JobStatusBarChart = React.memo((props) => {
   console.debug("JobStatusBarChart rendered!");
-  /* eslint-disable */
-  var ORG_JOB_AGG_STATUS_URI = JOB_AGG_STATUS_URI;
-  const parameter = props.sendOrgState;
-  const getValue = parameter.key;
-  ORG_JOB_AGG_STATUS_URI = `${JOB_AGG_STATUS_URI}?org=${getValue}`;
+  const ORG_JOB_AGG_STATUS_URI = `${JOB_AGG_STATUS_URI}?org=${props.orgName}`;
 
   const mappingStatusColor = Object.freeze({
     [JobStatuses.PENDING]: "#ffffff",
@@ -35,7 +31,6 @@ export const JobStatusBarChart = React.memo((props) => {
     [JobStatuses.REPORTED_WITHOUT_FAILS]: "#009933",
     [JobStatuses.FAILED]: "#cc0000",
   });
-  console.debug(mappingStatusColor);
 
   const chartProps = React.useMemo(
     () => ({
@@ -51,7 +46,7 @@ export const JobStatusBarChart = React.memo((props) => {
           />
         )),
     }),
-    [ORG_JOB_AGG_STATUS_URI],
+    [ORG_JOB_AGG_STATUS_URI, mappingStatusColor],
   );
 
   return <AnyChartWidget {...chartProps} />;
@@ -59,11 +54,7 @@ export const JobStatusBarChart = React.memo((props) => {
 
 export const JobTypeBarChart = React.memo((props) => {
   console.debug("JobTypeBarChart rendered!");
-  /* eslint-disable */
-  var ORG_JOB_AGG_TYPE_URI = JOB_AGG_TYPE_URI;
-  const parameter = props.sendOrgState;
-  const getValue = parameter.key;
-  ORG_JOB_AGG_TYPE_URI = `${JOB_AGG_TYPE_URI}?org=${getValue}`;
+  const ORG_JOB_AGG_TYPE_URI = `${JOB_AGG_TYPE_URI}?org=${props.orgName}`;
 
   const chartProps = React.useMemo(
     () => ({
@@ -87,11 +78,7 @@ export const JobTypeBarChart = React.memo((props) => {
 
 export const JobObsClassificationBarChart = React.memo((props) => {
   console.debug("JobObsClassificationBarChart rendered!");
-  /* eslint-disable */
-  var ORG_JOB_AGG_OBS_CLASSIFICATION_URI = JOB_AGG_OBS_CLASSIFICATION_URI;
-  const parameter = props.sendOrgState;
-  const getValue = parameter.key;
-  ORG_JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_AGG_OBS_CLASSIFICATION_URI}?org=${getValue}`;
+  const ORG_JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_AGG_OBS_CLASSIFICATION_URI}?org=${props.orgName}`;
 
   const chartProps = React.useMemo(
     () => ({
@@ -118,11 +105,7 @@ export const JobObsClassificationBarChart = React.memo((props) => {
 
 export const JobFileMimetypeBarChart = React.memo((props) => {
   console.debug("JobFileMimetypeBarChart rendered!");
-  /* eslint-disable */
-  var ORG_JOB_AGG_FILE_MIMETYPE_URI = JOB_AGG_FILE_MIMETYPE_URI;
-  const parameter = props.sendOrgState;
-  const getValue = parameter.key;
-  ORG_JOB_AGG_FILE_MIMETYPE_URI = `${JOB_AGG_FILE_MIMETYPE_URI}?org=${getValue}`;
+  const ORG_JOB_AGG_FILE_MIMETYPE_URI = `${JOB_AGG_FILE_MIMETYPE_URI}?org=${props.orgName}`;
 
   const chartProps = React.useMemo(
     () => ({

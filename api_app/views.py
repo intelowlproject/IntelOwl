@@ -425,8 +425,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     - **aggregate_type**: Aggregate jobs by type (file or observable) over a specified time range.
     - **aggregate_observable_classification**: Aggregate jobs by observable classification over a specified time range.
     - **aggregate_file_mimetype**: Aggregate jobs by file MIME type over a specified time range.
-    - **aggregate_observable_name**: Aggregate jobs by observable name over a specified time range.
-    - **aggregate_md5**: Aggregate jobs by MD5 hash over a specified time range.
 
     Permissions:
     - **IsAuthenticated**: Requires authentication for all actions.
@@ -697,6 +695,13 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
             for key in Job.Status.values
+            if key
+            in [
+                Job.Status.PENDING,
+                Job.Status.FAILED,
+                Job.Status.REPORTED_WITH_FAILS,
+                Job.Status.REPORTED_WITHOUT_FAILS,
+            ]
         }
         return self.__aggregation_response_static(
             annotations, users=self.get_org_members(request)

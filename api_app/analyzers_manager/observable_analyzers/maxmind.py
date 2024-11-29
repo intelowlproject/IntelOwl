@@ -248,7 +248,7 @@ class Maxmind(classes.ObservableAnalyzer):
                 "forcepoint",
             ]:
                 data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
+                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
                 )
             elif org in ["stark industries"]:
                 data_model.evaluation = (

@@ -53,7 +53,7 @@ class Crowdsec(ObservableAnalyzer):
             label = classification.get("label", "")
             if label in ["Legit scanner", "Known Security Company", "Known CERT"]:
                 data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
+                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
                 )
             elif label in ["Likely Botnet", "CrowdSec Community Blocklist"]:
                 data_model.additional_info = {"classifications": classifications}
@@ -83,7 +83,7 @@ class Crowdsec(ObservableAnalyzer):
         )
         if (
             data_model.evaluation
-            != self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
+            != self.report.data_model_class.EVALUATIONS.TRUSTED.value
         ):
             if highest_total_score <= 1:
                 data_model.evaluation = (

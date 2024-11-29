@@ -17,7 +17,7 @@ class DataModelTags(Choices):
 
 
 class DataModelEvaluations(Choices):
-    FALSE_POSITIVE = "false_positive"
+    TRUSTED = "trusted"
     CLEAN = "clean"
     SUSPICIOUS = "suspicious"
     MALICIOUS = "malicious"

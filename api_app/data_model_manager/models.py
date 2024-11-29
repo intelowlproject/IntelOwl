@@ -55,7 +55,11 @@ class Signature(models.Model):
 class BaseDataModel(models.Model):
     objects = BaseDataModelQuerySet.as_manager()
     evaluation = LowercaseCharField(
-        max_length=100, null=True, blank=True, default=None
+        max_length=100,
+        null=True,
+        blank=True,
+        default=None,
+        choices=DataModelEvaluations.choices,
     )  # classification/verdict/found/score/malscore
     # HybridAnalysisObservable (verdict), BasicMaliciousDetector (malicious),
     # GoogleSafeBrowsing (malicious), Crowdsec (classifications),

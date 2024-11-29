@@ -100,9 +100,7 @@ class AbuseIPDB(ObservableAnalyzer):
         if self.report.report.get("totalReports", 0):
             self.report: AnalyzerReport
             if self.report.report["isWhitelisted"]:
-                evaluation = (
-                    self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
-                )
+                evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
             else:
                 evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
             data_model.evaluation = evaluation

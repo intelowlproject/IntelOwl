@@ -105,7 +105,7 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
                     )
             elif classification == "benign":
                 data_model.evaluation = (
-                    self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
+                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
                 )
             else:
                 logger.error(

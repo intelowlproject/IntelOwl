@@ -48,7 +48,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         elif threat_level >= self.SUSPICIOUS_EVALUATION:
             evaluation = self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
         elif threat_level <= self.FALSE_POSITIVE:
-            evaluation = self.report.data_model_class.EVALUATIONS.FALSE_POSITIVE.value
+            evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
         else:
             evaluation = self.report.data_model_class.EVALUATIONS.CLEAN.value
         return evaluation

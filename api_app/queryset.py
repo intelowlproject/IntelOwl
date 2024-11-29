@@ -697,6 +697,7 @@ class AbstractReportQuerySet(SendToBiQuerySet):
             pk__in=self.values("config_id")
         )
 
+
 class ModelWithOwnershipQuerySet:
     """
     Custom queryset for managing models with ownership, providing methods for filtering based on ownership.

@@ -17,7 +17,7 @@ class InvetigationTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
-            status=Job.Status.REPORTED_WITH_FAILS,
+            status=Job.STATUSES.REPORTED_WITH_FAILS,
         )
         an: Investigation = Investigation.objects.create(name="Test", owner=self.user)
         an.jobs.add(job)
@@ -28,7 +28,7 @@ class InvetigationTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             user=self.user,
-            status=Job.Status.PENDING,
+            status=Job.STATUSES.PENDING,
         )
         an.refresh_from_db()
         an.set_correct_status()

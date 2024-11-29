@@ -69,6 +69,49 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
 
         return response
 
+    def _do_create_data_model(self):
+        return super()._do_create_data_model() and (
+            self.report.report.get("riot", False)
+            or self.report.report.get("noise", False)
+        )
+
+    def _update_data_model(self, data_model):
+        from api_app.analyzers_manager.models import AnalyzerReport
+
+        super()._update_data_model(data_model)
+        classification = self.report.report.get("classification", None)
+        riot = self.report.report.get("riot", None)
+        noise = self.report.report.get("noise", None)
+        if classification:
+            classification = classification.lower()
+            self.report: AnalyzerReport
+            if (
+                classification
+                == self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+            ):
+                if not noise:
+                    logger.error("malicious IP is not a noise!?! How is this possible")
+                data_model.evaluation = (
+                    self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+                )
+            elif classification == "unknown":
+                if riot:
+                    data_model.evaluation = (
+                        self.report.data_model_class.EVALUATIONS.CLEAN.value
+                    )
+                elif noise:
+                    data_model.evaluation = (
+                        self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+                    )
+            elif classification == "benign":
+                data_model.evaluation = (
+                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
+                )
+            else:
+                logger.error(
+                    f"there should not be other types of classification. Classification found: {classification}"
+                )
+
     @classmethod
     def _monkeypatch(cls):
         patches = [

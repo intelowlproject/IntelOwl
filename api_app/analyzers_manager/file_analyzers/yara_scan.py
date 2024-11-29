@@ -438,3 +438,33 @@ class YaraScan(FileAnalyzer):
         logger.info("Finished updating yara rules")
         set_permissions(settings.YARA_RULES_PATH)
         return True
+
+    def _create_data_model_mtm(self):
+        from api_app.data_model_manager.models import Signature
+
+        signatures = []
+        for yara_signatures in self.report.report.values():
+            for yara_signature in yara_signatures:
+                url = yara_signature.pop("rule_url", None)
+                sign = Signature.objects.create(
+                    provider=Signature.PROVIDERS.YARA.value,
+                    signature=yara_signature,
+                    url=url,
+                    score=1,
+                )
+                signatures.append(sign)
+
+        return {"signatures": signatures}
+
+    def _update_data_model(self, data_model):
+        from api_app.data_model_manager.models import FileDataModel
+
+        super()._update_data_model(data_model)
+        data_model: FileDataModel
+        signatures = data_model.signatures.count()
+
+        if signatures:
+            self.MALICIOUS_EVALUATION = 20
+            self.SUSPICIOUS_EVALUATION = 10
+
+            data_model.evaluation = self.threat_to_evaluation(signatures)

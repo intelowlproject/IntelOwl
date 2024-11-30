@@ -238,7 +238,7 @@ class AnalyzerActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTestC
         config = AnalyzerConfig.objects.get(name="HaveIBeenPwned")
         _job = Job.objects.create(
             user=user,
-            status=Job.Status.RUNNING,
+            status=Job.STATUSES.RUNNING,
             observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
         )

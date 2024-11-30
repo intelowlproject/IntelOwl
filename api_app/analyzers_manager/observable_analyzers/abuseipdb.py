@@ -4,6 +4,7 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.models import AnalyzerReport
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -93,3 +94,14 @@ class AbuseIPDB(ObservableAnalyzer):
             )
         ]
         return super()._monkeypatch(patches=patches)
+
+    def _update_data_model(self, data_model) -> None:
+        super()._update_data_model(data_model)
+        report_data = self.report.report.get("data", {})
+        if report_data.get("totalReports", 0):
+            self.report: AnalyzerReport
+            if report_data["isWhitelisted"]:
+                evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
+            else:
+                evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+            data_model.evaluation = evaluation

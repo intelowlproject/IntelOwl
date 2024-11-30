@@ -144,7 +144,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0064_vt_sample_download"),
-        ("analyzers_manager", "0133_analyzer_config_urldna_search"),
+        ("analyzers_manager", "0138_alter_analyzerreport_data_model_content_type"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

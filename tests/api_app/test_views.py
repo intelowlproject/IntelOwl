@@ -392,7 +392,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                     "observable_name": "1.2.3.4",
                     "observable_classification": "ip",
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
-                    "tlp": "AMBER",
+                    "tlp": Job.TLP.CLEAR.value,
                 }
             )
             self.job2, _ = Job.objects.get_or_create(
@@ -403,7 +403,7 @@ class JobViewSetTests(CustomViewSetTestCase):
                     "file_name": "test.file",
                     "file_mimetype": "application/vnd.microsoft.portable-executable",
                     "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
-                    "tlp": "GREEN",
+                    "tlp": Job.TLP.GREEN.value,
                 }
             )
 
@@ -630,9 +630,9 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(
             resp.json(),
             {
-                "values": ["AMBER", "GREEN"],
+                "values": ["CLEAR", "GREEN"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "AMBER": 1, "GREEN": 1}
+                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1}
                 ],
             },
         )

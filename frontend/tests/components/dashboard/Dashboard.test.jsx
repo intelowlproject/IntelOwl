@@ -5,10 +5,7 @@ import Dashboard from "../../../src/components/dashboard/Dashboard";
 
 describe("test Dashboard component", () => {
   test("Dashboard page", async () => {
-
-    render(
-      <Dashboard />
-    );
+    render(<Dashboard />);
 
     // header
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
@@ -19,7 +16,9 @@ describe("test Dashboard component", () => {
     // charts
     expect(screen.getByText("Job: Status")).toBeInTheDocument();
     expect(screen.getByText("Job: Type")).toBeInTheDocument();
-    expect(screen.getByText("Job: Observable Classification")).toBeInTheDocument();
+    expect(
+      screen.getByText("Job: Observable Classification"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Job: File Mimetype")).toBeInTheDocument();
     expect(screen.getByText("Job: Top 5 Playbooks")).toBeInTheDocument();
     expect(screen.getByText("Job: Top 5 Users")).toBeInTheDocument();

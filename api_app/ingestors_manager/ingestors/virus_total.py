@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable
 from unittest.mock import patch
 
 from django.utils import timezone
@@ -20,6 +20,12 @@ class VirusTotal(Ingestor, VirusTotalv3BaseMixin):
     extract_IOCs: bool
     # VT API key
     _api_key_name: str
+
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
+        # An Ingestor does not have a corresponding job so we set the value to False,
+        # the aim of the ingestors usually is to download data not to upload.
+        self.force_active_scan = False
 
     @classmethod
     def update(cls) -> bool:

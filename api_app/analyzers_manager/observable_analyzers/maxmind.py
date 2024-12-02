@@ -228,3 +228,29 @@ class Maxmind(classes.ObservableAnalyzer):
         # completely skip because does not work without connection.
         patches = [if_mock_connections(patch.object(cls, "run", return_value={}))]
         return super()._monkeypatch(patches=patches)
+
+    def _update_data_model(self, data_model) -> None:
+        from api_app.analyzers_manager.models import AnalyzerReport
+
+        super()._update_data_model(data_model)
+        org = self.report.report.get("autonomous_system_organization", None)
+        if org:
+            org = org.lower()
+            self.report: AnalyzerReport
+            if org in ["fastly", "cloudflare", "akamai"]:
+                data_model.evaluation = (
+                    self.report.data_model_class.EVALUATIONS.CLEAN.value
+                )
+            elif org in [
+                "zscaler",
+                "palo alto networks",
+                "microdata service srl",
+                "forcepoint",
+            ]:
+                data_model.evaluation = (
+                    self.report.data_model_class.EVALUATIONS.TRUSTED.value
+                )
+            elif org in ["stark industries"]:
+                data_model.evaluation = (
+                    self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
+                )

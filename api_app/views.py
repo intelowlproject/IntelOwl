@@ -551,7 +551,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - No content (204) if the job is successfully retried.
         """
         job = self.get_object()
-        if job.status not in Job.Status.final_statuses():
+        if job.status not in Job.STATUSES.final_statuses():
             raise ValidationError({"detail": "Job is running"})
         job.retry()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -607,7 +607,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         job = self.get_object()
 
         # check if job running
-        if job.status in Job.Status.final_statuses():
+        if job.status in Job.STATUSES.final_statuses():
             raise ValidationError({"detail": "Job is not running"})
         # close celery tasks and mark reports as killed
         job.kill_if_ongoing()
@@ -701,7 +701,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         """
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
-            for key in Job.Status.values
+            for key in Job.STATUSES.values
         }
         return self.__aggregation_response_static(
             annotations, users=self.get_org_members(request)
@@ -1178,7 +1178,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
-        report.status = AbstractReport.Status.KILLED
+        report.status = AbstractReport.STATUSES.KILLED
         report.save(update_fields=["status"])
         # clean up job
 
@@ -1255,8 +1255,8 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # get report object or raise 404
         report = self.get_object(job_id, report_id)
         if report.status not in [
-            AbstractReport.Status.RUNNING,
-            AbstractReport.Status.PENDING,
+            AbstractReport.STATUSES.RUNNING,
+            AbstractReport.STATUSES.PENDING,
         ]:
             raise ValidationError({"detail": "Plugin is not running or pending"})
 
@@ -1291,8 +1291,8 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # get report object or raise 404
         report = self.get_object(job_id, report_id)
         if report.status not in [
-            AbstractReport.Status.FAILED,
-            AbstractReport.Status.KILLED,
+            AbstractReport.STATUSES.FAILED,
+            AbstractReport.STATUSES.KILLED,
         ]:
             raise ValidationError(
                 {"detail": "Plugin status should be failed or killed"}

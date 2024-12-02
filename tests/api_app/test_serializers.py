@@ -201,6 +201,7 @@ class RestJobSerializerTestCase(CustomTestCase):
         self.assertIn("analyzer_reports", js.data)
         self.assertIn("connector_reports", js.data)
         self.assertIn("visualizer_reports", js.data)
+        self.assertIn("analyzers_data_model", js.data)
         job.delete()
 
 
@@ -221,7 +222,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             observable_classification="domain",
             user=self.user,
             md5="72cf478e87b031233091d8c00a38ce00",
-            status=Job.Status.REPORTED_WITHOUT_FAILS,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             received_request_time=now() - datetime.timedelta(hours=3),
         )
         j1.analyzers_requested.add(a1)

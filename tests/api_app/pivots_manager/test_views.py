@@ -22,6 +22,8 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         return self.model_class.objects.order_by("?").first().pk
 
     def test_get(self):
+        self.client.force_authenticate(self.superuser)
+
         plugin = self.model_class.objects.order_by("?").first().pk
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 403, response.json())
@@ -30,20 +32,20 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 401, response.json())
 
-        self.client.force_authenticate(self.superuser)
+        self.client.force_authenticate(self.user)
         response = self.client.get(f"{self.URL}/{plugin}")
         self.assertEqual(response.status_code, 200, response.json())
 
     def setUp(self):
         super().setUp()
         self.j1 = Job.objects.create(
-            user=self.superuser,
+            user=self.user,
             observable_name="test.com",
             observable_classification="domain",
             status="reported_without_fails",
         )
         self.j2 = Job.objects.create(
-            user=self.superuser,
+            user=self.user,
             observable_name="test2.com",
             observable_classification="domain",
             status="reported_without_fails",
@@ -65,6 +67,12 @@ class PivotMapViewSetTestCase(ViewSetTestCaseMixin, CustomViewSetTestCase):
         self.j2.delete()
         self.pc.delete()
         PivotMap.objects.all().delete()
+
+    def test_get_superuser(self):
+        plugin = self.get_object()
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 403, response.json())
 
 
 class PivotConfigViewSetTestCase(

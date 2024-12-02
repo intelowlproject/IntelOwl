@@ -1,7 +1,8 @@
 services:
   uwsgi:
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     volumes:
       - ../certs:/opt/deploy/intel_owl/certs
 

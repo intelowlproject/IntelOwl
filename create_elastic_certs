@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# create dir only in case they missing
+mkdir -p ./certs
+
 if [ ! -f ./certs/elastic_ca/ca.crt ] && [ ! -f ./certs/elastic_ca/ca.key ] && [ ! -f ./certs/elastic_instance/instance.crt ] && [ ! -f ./certs/elastic_instance/instance.key ]; then
     # start container
     docker pull docker.elastic.co/elasticsearch/elasticsearch:8.15.0 &&

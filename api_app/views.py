@@ -776,7 +776,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         detail=False,
         methods=["GET"],
     )
-    # @cache_action_response(timeout=60 * 5)
+    @cache_action_response(timeout=60 * 5)
     def aggregate_top_playbook(self, request):
         """
         Aggregate playbooks by usage.

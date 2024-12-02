@@ -41,21 +41,21 @@ describe("test dashboard's charts", () => {
       {
         data: [
           {
-            date: "2024-11-28T14:00:00Z",
+            date: "2024-11-28T22:00:00Z",
             pending: 0,
             reported_without_fails: 8,
             reported_with_fails: 0,
             failed: 0,
           },
           {
-            date: "2024-11-29T10:00:00Z",
+            date: "2024-11-29T22:00:00Z",
             pending: 0,
             reported_without_fails: 0,
             reported_with_fails: 1,
             failed: 1,
           },
           {
-            date: "2024-11-29T09:00:00Z",
+            date: "2024-11-29T23:00:00Z",
             pending: 0,
             reported_without_fails: 1,
             reported_with_fails: 2,
@@ -72,17 +72,17 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T14:00:00Z").getHours()}:00`,
+        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T10:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T09:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("pending")).toBeInTheDocument();
@@ -111,17 +111,17 @@ describe("test dashboard's charts", () => {
       {
         data: [
           {
-            date: "2024-11-28T14:00:00Z",
+            date: "2024-11-28T22:00:00Z",
             file: 0,
             observable: 8,
           },
           {
-            date: "2024-11-29T10:00:00Z",
+            date: "2024-11-29T22:00:00Z",
             file: 2,
             observable: 0,
           },
           {
-            date: "2024-11-29T09:00:00Z",
+            date: "2024-11-29T23:00:00Z",
             file: 0,
             observable: 3,
           },
@@ -136,17 +136,17 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T14:00:00Z").getHours()}:00`,
+        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T10:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T09:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("file")).toBeInTheDocument();
@@ -173,7 +173,7 @@ describe("test dashboard's charts", () => {
       {
         data: [
           {
-            date: "2024-11-28T14:00:00Z",
+            date: "2024-11-28T22:00:00Z",
             ip: 0,
             url: 0,
             domain: 1,
@@ -181,7 +181,7 @@ describe("test dashboard's charts", () => {
             generic: 0,
           },
           {
-            date: "2024-11-29T10:00:00Z",
+            date: "2024-11-29T22:00:00Z",
             ip: 0,
             url: 0,
             domain: 0,
@@ -189,7 +189,7 @@ describe("test dashboard's charts", () => {
             generic: 0,
           },
           {
-            date: "2024-11-29T09:00:00Z",
+            date: "2024-11-29T23:00:00Z",
             ip: 0,
             url: 0,
             domain: 3,
@@ -207,17 +207,17 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T14:00:00Z").getHours()}:00`,
+        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T10:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T09:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("ip")).toBeInTheDocument();
@@ -249,17 +249,17 @@ describe("test dashboard's charts", () => {
           values: ["application/json", "text/plain"],
           aggregation: [
             {
-              date: "2024-11-28T14:00:00Z",
+              date: "2024-11-28T22:00:00Z",
               "application/json": 0,
               "text/plain": 0,
             },
             {
-              date: "2024-11-29T10:00:00Z",
+              date: "2024-11-29T22:00:00Z",
               "application/json": 1,
               "text/plain": 1,
             },
             {
-              date: "2024-11-29T09:00:00Z",
+              date: "2024-11-29T23:00:00Z",
               "application/json": 0,
               "text/plain": 0,
             },
@@ -275,17 +275,17 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T14:00:00Z").getHours()}:00`,
+        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T10:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T09:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("application/json")).toBeInTheDocument();
@@ -314,19 +314,19 @@ describe("test dashboard's charts", () => {
           values: ["Dns", "FREE_TO_USE_ANALYZERS", "Passive_DNS"],
           aggregation: [
             {
-              date: "2024-11-28T14:00:00Z",
+              date: "2024-11-28T22:00:00Z",
               Dns: 5,
               FREE_TO_USE_ANALYZERS: 1,
               Passive_DNS: 3,
             },
             {
-              date: "2024-11-29T10:00:00Z",
+              date: "2024-11-29T22:00:00Z",
               Dns: 1,
               FREE_TO_USE_ANALYZERS: 0,
               Passive_DNS: 0,
             },
             {
-              date: "2024-11-29T09:00:00Z",
+              date: "2024-11-29T23:00:00Z",
               Dns: 1,
               FREE_TO_USE_ANALYZERS: 0,
               Passive_DNS: 0,
@@ -343,17 +343,17 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T14:00:00Z").getHours()}:00`,
+        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T10:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T09:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("Dns")).toBeInTheDocument();
@@ -383,19 +383,19 @@ describe("test dashboard's charts", () => {
           values: ["user_a", "user_b", "user_c"],
           aggregation: [
             {
-              date: "2024-11-28T14:00:00Z",
+              date: "2024-11-28T22:00:00Z",
               user_a: 5,
               user_b: 1,
               user_c: 3,
             },
             {
-              date: "2024-11-29T10:00:00Z",
+              date: "2024-11-29T22:00:00Z",
               user_a: 1,
               user_b: 0,
               user_c: 0,
             },
             {
-              date: "2024-11-29T09:00:00Z",
+              date: "2024-11-29T23:00:00Z",
               user_a: 1,
               user_b: 0,
               user_c: 0,
@@ -412,17 +412,17 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T14:00:00Z").getHours()}:00`,
+        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T10:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T09:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("user_a")).toBeInTheDocument();
@@ -452,19 +452,19 @@ describe("test dashboard's charts", () => {
           values: ["AMBER", "CLEAR", "RED"],
           aggregation: [
             {
-              date: "2024-11-28T14:00:00Z",
+              date: "2024-11-28T22:00:00Z",
               AMBER: 5,
               CLEAR: 1,
               RED: 3,
             },
             {
-              date: "2024-11-29T10:00:00Z",
+              date: "2024-11-29T22:00:00Z",
               AMBER: 1,
               CLEAR: 0,
               RED: 0,
             },
             {
-              date: "2024-11-29T09:00:00Z",
+              date: "2024-11-29T23:00:00Z",
               AMBER: 1,
               CLEAR: 0,
               RED: 0,
@@ -481,17 +481,17 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T14:00:00Z").getHours()}:00`,
+        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T10:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T09:00:00Z").getHours()}:00`,
+        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("AMBER")).toBeInTheDocument();

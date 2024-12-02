@@ -19,6 +19,9 @@ database_location = f"{settings.MEDIA_ROOT}/{db_name}"
 
 
 class Tor(classes.ObservableAnalyzer):
+    def _do_create_data_model(self) -> bool:
+        return super()._do_create_data_model() and self.report.report["found"]
+
     def run(self):
         result = {"found": False}
         if not os.path.isfile(database_location) and not self.update():

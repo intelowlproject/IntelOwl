@@ -48,7 +48,7 @@ class SendElasticTestCase(CustomTestCase):
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
-            status=AnalyzerReport.Status.FAILED,
+            status=AnalyzerReport.STATUSES.FAILED,
             errors=["error1", "error2"],
             task_id=uuid(),
             parameters={},
@@ -63,7 +63,7 @@ class SendElasticTestCase(CustomTestCase):
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
-            status=AnalyzerReport.Status.KILLED,
+            status=AnalyzerReport.STATUSES.KILLED,
             task_id=uuid(),
             parameters={},
         )
@@ -81,7 +81,7 @@ class SendElasticTestCase(CustomTestCase):
             end_time=datetime.datetime(
                 2024, 9, 29, 10, 58, 59, tzinfo=datetime.timezone.utc
             ),
-            status=AnalyzerReport.Status.SUCCESS,
+            status=AnalyzerReport.STATUSES.SUCCESS,
             report={"observable": "dns.google.com", "malicious": False},
             task_id=uuid(),
             parameters={},
@@ -94,7 +94,7 @@ class SendElasticTestCase(CustomTestCase):
                 )
             ),
             job=self.job,
-            status=AnalyzerReport.Status.RUNNING,
+            status=AnalyzerReport.STATUSES.RUNNING,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
             task_id=uuid(),
@@ -110,7 +110,7 @@ class SendElasticTestCase(CustomTestCase):
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
-            status=ConnectorReport.Status.SUCCESS,
+            status=ConnectorReport.STATUSES.SUCCESS,
             task_id=uuid(),
             report={
                 "subject": "Subject",
@@ -130,7 +130,7 @@ class SendElasticTestCase(CustomTestCase):
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
-            status=IngestorReport.Status.SUCCESS,
+            status=IngestorReport.STATUSES.SUCCESS,
             task_id=uuid(),
             report={},
             parameters={},
@@ -145,7 +145,7 @@ class SendElasticTestCase(CustomTestCase):
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
-            status=PivotReport.Status.SUCCESS,
+            status=PivotReport.STATUSES.SUCCESS,
             task_id=uuid(),
             report={"job_id": [1], "created": True, "motivation": None},
             parameters={},
@@ -160,7 +160,7 @@ class SendElasticTestCase(CustomTestCase):
             job=self.job,
             start_time=datetime.datetime(2024, 10, 29, 10, 49, tzinfo=datetime.UTC),
             end_time=datetime.datetime(2024, 10, 29, 10, 59, tzinfo=datetime.UTC),
-            status=VisualizerReport.Status.SUCCESS,
+            status=VisualizerReport.STATUSES.SUCCESS,
             task_id=uuid(),
             report={
                 "level_position": 1,

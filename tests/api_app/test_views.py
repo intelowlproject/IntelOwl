@@ -506,8 +506,12 @@ class JobViewSetTests(CustomViewSetTestCase):
     # @action endpoints
 
     def test_kill(self):
-        job = Job.objects.create(status=Job.Status.RUNNING, user=self.superuser)
-        self.assertEqual(job.status, Job.Status.RUNNING)
+        job = Job.objects.create(
+            status=Job.STATUSES.RUNNING,
+            user=self.superuser,
+            observable_classification="ip",
+        )
+        self.assertEqual(job.status, Job.STATUSES.RUNNING)
         uri = reverse("jobs-kill", args=[job.pk])
         response = self.client.patch(uri)
 
@@ -517,12 +521,14 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 204)
         job.refresh_from_db()
 
-        self.assertEqual(job.status, Job.Status.KILLED)
+        self.assertEqual(job.status, Job.STATUSES.KILLED)
 
     def test_kill_400(self):
         # create a new job whose status is not "running"
         job = Job.objects.create(
-            status=Job.Status.REPORTED_WITHOUT_FAILS, user=self.superuser
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+            user=self.superuser,
+            observable_classification="ip",
         )
         uri = reverse("jobs-kill", args=[job.pk])
         self.client.force_authenticate(user=self.job.user)

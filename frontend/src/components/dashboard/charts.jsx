@@ -6,6 +6,7 @@ import { getRandomColorsArray, AnyChartWidget } from "@certego/certego-ui";
 import {
   JobTypeColors,
   ObservableClassificationColors,
+  TLPColors,
 } from "../../constants/colorConst";
 
 import { JobStatuses } from "../../constants/jobConst";
@@ -15,6 +16,9 @@ import {
   JOB_AGG_TYPE_URI,
   JOB_AGG_OBS_CLASSIFICATION_URI,
   JOB_AGG_FILE_MIMETYPE_URI,
+  JOB_AGG_TOP_PLAYBOOK_URI,
+  JOB_AGG_TOP_USER_URI,
+  JOB_AGG_TOP_TLP_URI,
 } from "../../constants/apiURLs";
 
 // constants
@@ -126,6 +130,87 @@ export const JobFileMimetypeBarChart = React.memo((props) => {
       },
     }),
     [ORG_JOB_AGG_FILE_MIMETYPE_URI],
+  );
+
+  return <AnyChartWidget {...chartProps} />;
+});
+
+export const JobTopPlaybookBarChart = React.memo((props) => {
+  console.debug("JobTopPlaybookBarChart rendered!");
+  const ORG_JOB_AGG_TOP_PLAYBOOK_URI = `${JOB_AGG_TOP_PLAYBOOK_URI}?org=${props.orgName}`;
+
+  const chartProps = React.useMemo(
+    () => ({
+      url: ORG_JOB_AGG_TOP_PLAYBOOK_URI,
+      accessorFnAggregation: (jobPlaybooks) => jobPlaybooks?.aggregation,
+      componentsFn: (playbookUsageAggregatedByPlaybookName) => {
+        const { values } = playbookUsageAggregatedByPlaybookName;
+        if (!values || !values?.length) return null;
+        return values.map((playbookName, index) => (
+          <Bar
+            stackId="jobtopplaybook"
+            key={playbookName}
+            dataKey={playbookName}
+            fill={colors[index]}
+          />
+        ));
+      },
+    }),
+    [ORG_JOB_AGG_TOP_PLAYBOOK_URI],
+  );
+
+  return <AnyChartWidget {...chartProps} />;
+});
+
+export const JobTopUserBarChart = React.memo((props) => {
+  console.debug("JobTopUserBarChart rendered!");
+  const ORG_JOB_AGG_TOP_USER_URI = `${JOB_AGG_TOP_USER_URI}?org=${props.orgName}`;
+
+  const chartProps = React.useMemo(
+    () => ({
+      url: ORG_JOB_AGG_TOP_USER_URI,
+      accessorFnAggregation: (jobUsers) => jobUsers?.aggregation,
+      componentsFn: (JobUsageAggregatedByUsername) => {
+        const { values } = JobUsageAggregatedByUsername;
+        if (!values || !values?.length) return null;
+        return values.map((username, index) => (
+          <Bar
+            stackId="jobtopuser"
+            key={username}
+            dataKey={username}
+            fill={colors[index]}
+          />
+        ));
+      },
+    }),
+    [ORG_JOB_AGG_TOP_USER_URI],
+  );
+
+  return <AnyChartWidget {...chartProps} />;
+});
+
+export const JobTopTLPBarChart = React.memo((props) => {
+  console.debug("JobTopTLPBarChart rendered!");
+  const ORG_JOB_AGG_TOP_TLP_URI = `${JOB_AGG_TOP_TLP_URI}?org=${props.orgName}`;
+
+  const chartProps = React.useMemo(
+    () => ({
+      url: ORG_JOB_AGG_TOP_TLP_URI,
+      accessorFnAggregation: (jobTLPs) => jobTLPs?.aggregation,
+      componentsFn: (JobUsageAggregatedByTLP) => {
+        const { values } = JobUsageAggregatedByTLP;
+        if (!values || !values?.length) return null;
+        return values.map((tlp) => (
+          <Bar
+            stackId="jobtopuser"
+            key={tlp}
+            dataKey={tlp}
+            fill={TLPColors[tlp]}
+          />
+        ));
+      },
+    }),
+    [ORG_JOB_AGG_TOP_TLP_URI],
   );
 
   return <AnyChartWidget {...chartProps} />;

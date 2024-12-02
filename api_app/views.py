@@ -768,6 +768,57 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             "file_mimetype", users=self.get_org_members(request)
         )
 
+    @action(
+        url_path="aggregate/top_playbook",
+        detail=False,
+        methods=["GET"],
+    )
+    # @cache_action_response(timeout=60 * 5)
+    def aggregate_top_playbook(self, request):
+        """
+        Aggregate playbooks by usage.
+
+        Returns:
+        - Aggregated count of playbooks for each one.
+        """
+        return self.__aggregation_response_dynamic(
+            "playbook_to_execute__name", users=self.get_org_members(request)
+        )
+
+    @action(
+        url_path="aggregate/top_user",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_top_user(self, request):
+        """
+        Aggregate Users by usage.
+
+        Returns:
+        - Aggregated count of users for each one.
+        """
+        return self.__aggregation_response_dynamic(
+            "user__username", users=self.get_org_members(request)
+        )
+
+    @action(
+        url_path="aggregate/top_tlp",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_top_tlp(self, request):
+        """
+        Aggregate TLPs by usage.
+
+        Returns:
+        - Aggregated count of TLPs for each one.
+        """
+        return self.__aggregation_response_dynamic(
+            "tlp", users=self.get_org_members(request)
+        )
+
     @staticmethod
     def get_org_members(request):
         """

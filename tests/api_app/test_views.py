@@ -16,6 +16,7 @@ from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import ReportStatus
 from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
+from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -374,26 +375,37 @@ class JobViewSetTests(CustomViewSetTestCase):
         "jobs-aggregate-observable-classification"
     )
     agg_file_mimetype_uri = reverse("jobs-aggregate-file-mimetype")
+    agg_top_playbook = reverse("jobs-aggregate-top-playbook")
+    agg_top_user = reverse("jobs-aggregate-top-user")
+    agg_top_tlp = reverse("jobs-aggregate-top-tlp")
 
     def setUp(self):
         super().setUp()
-        self.job, _ = Job.objects.get_or_create(
-            **{
-                "user": self.superuser,
-                "is_sample": False,
-                "observable_name": "1.2.3.4",
-                "observable_classification": "ip",
-            }
-        )
-        self.job2, _ = Job.objects.get_or_create(
-            **{
-                "user": self.superuser,
-                "is_sample": True,
-                "md5": "test.file",
-                "file_name": "test.file",
-                "file_mimetype": "application/vnd.microsoft.portable-executable",
-            }
-        )
+        with patch(
+            "django.utils.timezone.now",
+            return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
+        ):
+            self.job, _ = Job.objects.get_or_create(
+                **{
+                    "user": self.superuser,
+                    "is_sample": False,
+                    "observable_name": "1.2.3.4",
+                    "observable_classification": "ip",
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": "AMBER",
+                }
+            )
+            self.job2, _ = Job.objects.get_or_create(
+                **{
+                    "user": self.superuser,
+                    "is_sample": True,
+                    "md5": "test.file",
+                    "file_name": "test.file",
+                    "file_mimetype": "application/vnd.microsoft.portable-executable",
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": "GREEN",
+                }
+            )
 
     def test_recent_scan(self):
         j1 = Job.objects.create(
@@ -523,7 +535,6 @@ class JobViewSetTests(CustomViewSetTestCase):
         )
 
     # aggregation endpoints
-
     def test_agg_status_200(self):
         resp = self.client.get(self.agg_status_uri)
         content = resp.json()
@@ -582,6 +593,43 @@ class JobViewSetTests(CustomViewSetTestCase):
                 content["aggregation"][0],
                 msg=msg,
             )
+
+    def test_agg_top_playbook_200(self):
+        resp = self.client.get(self.agg_top_playbook)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "values": ["Dns"],
+                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 2}],
+            },
+        )
+
+    def test_agg_top_user_200(self):
+        resp = self.client.get(self.agg_top_user)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "values": ["superuser@intelowl.org"],
+                "aggregation": [
+                    {"date": "2024-11-28T00:00:00Z", "superuser@intelowl.org": 2}
+                ],
+            },
+        )
+
+    def test_agg_top_tlp_200(self):
+        resp = self.client.get(self.agg_top_tlp)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "values": ["AMBER", "GREEN"],
+                "aggregation": [
+                    {"date": "2024-11-28T00:00:00Z", "AMBER": 1, "GREEN": 1}
+                ],
+            },
+        )
 
 
 class TagViewsetTests(CustomViewSetTestCase):

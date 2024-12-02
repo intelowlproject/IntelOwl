@@ -2,7 +2,7 @@ import React from "react";
 import useAxios from "axios-hooks";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
-import { JobFileMimetypeBarChart, JobObsClassificationBarChart, JobStatusBarChart, JobTypeBarChart } from "../../../src/components/dashboard/charts";
+import { JobFileMimetypeBarChart, JobObsClassificationBarChart, JobStatusBarChart, JobTopPlaybookBarChart, JobTopTLPBarChart, JobTopUserBarChart, JobTypeBarChart } from "../../../src/components/dashboard/charts";
 
 
 jest.mock("axios-hooks");
@@ -63,7 +63,6 @@ describe("test dashboard's charts", () => {
         ]);
 
         render(<JobStatusBarChart orgName="testOrg" />);
-        screen.debug(undefined, Infinity)
 
         // needed to support different timezones (ex: ci and local could be different)
         expect(screen.getByText(`28/11, ${  new Date('2024-11-28T14:00:00Z').getHours()  }:00`)).toBeInTheDocument();
@@ -115,7 +114,6 @@ describe("test dashboard's charts", () => {
         ]);
 
         render(<JobTypeBarChart orgName="testOrg" />);
-        screen.debug(undefined, Infinity)
 
         // needed to support different timezones (ex: ci and local could be different)
         expect(screen.getByText(`28/11, ${  new Date('2024-11-28T14:00:00Z').getHours()  }:00`)).toBeInTheDocument();
@@ -174,7 +172,6 @@ describe("test dashboard's charts", () => {
         ]);
 
         render(<JobObsClassificationBarChart orgName="testOrg" />);
-        screen.debug(undefined, Infinity)
 
         // needed to support different timezones (ex: ci and local could be different)
         expect(screen.getByText(`28/11, ${  new Date('2024-11-28T14:00:00Z').getHours()  }:00`)).toBeInTheDocument();
@@ -233,7 +230,6 @@ describe("test dashboard's charts", () => {
         ]);
 
         render(<JobFileMimetypeBarChart orgName="testOrg" />);
-        screen.debug(undefined, Infinity)
 
         // needed to support different timezones (ex: ci and local could be different)
         expect(screen.getByText(`28/11, ${  new Date('2024-11-28T14:00:00Z').getHours()  }:00`)).toBeInTheDocument();
@@ -256,4 +252,183 @@ describe("test dashboard's charts", () => {
         expect(screen.getByText("No data in the selected range.")).toBeInTheDocument();
     });
 
+    test("test JobTopPlaybookBarChart", async () => {
+
+        useAxios.mockReturnValue([
+            {
+                data: {
+                    values: [
+                        "Dns",
+                        "FREE_TO_USE_ANALYZERS",
+                        "Passive_DNS"
+                    ],
+                    aggregation: [
+                        {
+                            date: "2024-11-28T14:00:00Z",
+                            Dns: 5,
+                            FREE_TO_USE_ANALYZERS: 1,
+                            Passive_DNS: 3
+                        },
+                        {
+                            date: "2024-11-29T10:00:00Z",
+                            Dns: 1,
+                            FREE_TO_USE_ANALYZERS: 0,
+                            Passive_DNS: 0
+                        },
+                        {
+                            date: "2024-11-29T09:00:00Z",
+                            Dns: 1,
+                            FREE_TO_USE_ANALYZERS: 0,
+                            Passive_DNS: 0
+                        }
+                    ]
+                },
+                loading: false,
+                error: null
+            },
+        ]);
+
+        render(<JobTopPlaybookBarChart orgName="testOrg" />);
+
+        // needed to support different timezones (ex: ci and local could be different)
+        expect(screen.getByText(`28/11, ${  new Date('2024-11-28T14:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText(`29/11, ${  new Date('2024-11-29T10:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText(`29/11, ${  new Date('2024-11-29T09:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText("Dns")).toBeInTheDocument();
+        expect(screen.getByText("FREE_TO_USE_ANALYZERS")).toBeInTheDocument();
+        expect(screen.getByText("Passive_DNS")).toBeInTheDocument();
+    });
+
+    test("test JobTopPlaybookBarChart no data", async () => {
+        useAxios.mockReturnValue([
+            {
+                data: [],
+                loading: false,
+                error: null
+            },
+        ]);
+
+        render(<JobTopPlaybookBarChart orgName="testOrg" />);
+        expect(screen.getByText("No data in the selected range.")).toBeInTheDocument();
+    });
+
+    test("test JobTopUserBarChart", async () => {
+
+        useAxios.mockReturnValue([
+            {
+                data: {
+                    values: [
+                        "user_a",
+                        "user_b",
+                        "user_c"
+                    ],
+                    aggregation: [
+                        {
+                            date: "2024-11-28T14:00:00Z",
+                            user_a: 5,
+                            user_b: 1,
+                            user_c: 3
+                        },
+                        {
+                            date: "2024-11-29T10:00:00Z",
+                            user_a: 1,
+                            user_b: 0,
+                            user_c: 0
+                        },
+                        {
+                            date: "2024-11-29T09:00:00Z",
+                            user_a: 1,
+                            user_b: 0,
+                            user_c: 0
+                        }
+                    ]
+                },
+                loading: false,
+                error: null
+            },
+        ]);
+
+        render(<JobTopUserBarChart orgName="testOrg" />);
+
+        // needed to support different timezones (ex: ci and local could be different)
+        expect(screen.getByText(`28/11, ${  new Date('2024-11-28T14:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText(`29/11, ${  new Date('2024-11-29T10:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText(`29/11, ${  new Date('2024-11-29T09:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText("user_a")).toBeInTheDocument();
+        expect(screen.getByText("user_b")).toBeInTheDocument();
+        expect(screen.getByText("user_c")).toBeInTheDocument();
+    });
+
+    test("test JobTopUserBarChart no data", async () => {
+        useAxios.mockReturnValue([
+            {
+                data: [],
+                loading: false,
+                error: null
+            },
+        ]);
+
+        render(<JobTopUserBarChart orgName="testOrg" />);
+        expect(screen.getByText("No data in the selected range.")).toBeInTheDocument();
+    });
+
+    test("test JobTopTLPBarChart", async () => {
+
+        useAxios.mockReturnValue([
+            {
+                data: {
+                    values: [
+                        "AMBER",
+                        "CLEAR",
+                        "RED"
+                    ],
+                    aggregation: [
+                        {
+                            date: "2024-11-28T14:00:00Z",
+                            AMBER: 5,
+                            CLEAR: 1,
+                            RED: 3
+                        },
+                        {
+                            date: "2024-11-29T10:00:00Z",
+                            AMBER: 1,
+                            CLEAR: 0,
+                            RED: 0
+                        },
+                        {
+                            date: "2024-11-29T09:00:00Z",
+                            AMBER: 1,
+                            CLEAR: 0,
+                            RED: 0
+                        }
+                    ]
+                },
+                loading: false,
+                error: null
+            },
+        ]);
+
+        render(<JobTopTLPBarChart orgName="testOrg" />);
+
+        // needed to support different timezones (ex: ci and local could be different)
+        expect(screen.getByText(`28/11, ${  new Date('2024-11-28T14:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText(`29/11, ${  new Date('2024-11-29T10:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText(`29/11, ${  new Date('2024-11-29T09:00:00Z').getHours()  }:00`)).toBeInTheDocument();
+        expect(screen.getByText("AMBER")).toBeInTheDocument();
+        expect(screen.getByText("CLEAR")).toBeInTheDocument();
+        expect(screen.getByText("RED")).toBeInTheDocument();
+    });
+
+    test("test JobTopTLPBarChart no data", async () => {
+        useAxios.mockReturnValue([
+            {
+                data: [],
+                loading: false,
+                error: null
+            },
+        ]);
+
+        render(<JobTopTLPBarChart orgName="testOrg" />);
+        expect(screen.getByText("No data in the selected range.")).toBeInTheDocument();
+    });
 });

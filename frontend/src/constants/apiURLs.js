@@ -24,6 +24,9 @@ export const JOB_AGG_STATUS_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/status`;
 export const JOB_AGG_TYPE_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/type`;
 export const JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/observable_classification`;
 export const JOB_AGG_FILE_MIMETYPE_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/file_mimetype`;
+export const JOB_AGG_TOP_PLAYBOOK_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/top_playbook`;
+export const JOB_AGG_TOP_USER_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/top_user`;
+export const JOB_AGG_TOP_TLP_URI = `${JOB_BASE_URI}${AGGREGATE_PATH}/top_tlp`;
 
 export const JOB_RECENT_SCANS = `${JOB_BASE_URI}/recent_scans`;
 export const JOB_RECENT_SCANS_USER = `${JOB_BASE_URI}/recent_scans_user`;

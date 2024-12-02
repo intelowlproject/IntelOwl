@@ -12,12 +12,15 @@ import {
   JobTypeBarChart,
   JobObsClassificationBarChart,
   JobFileMimetypeBarChart,
+  JobTopPlaybookBarChart,
+  JobTopUserBarChart,
+  JobTopTLPBarChart,
 } from "./charts";
 
 import { useGuideContext } from "../../contexts/GuideContext";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
 
-const charts2 = [
+const typeRow = [
   ["JobTypeBarChart", "Job: Type", JobTypeBarChart],
   [
     "JobObsClassificationBarChart",
@@ -25,6 +28,11 @@ const charts2 = [
     JobObsClassificationBarChart,
   ],
   ["JobFileMimetypeBarChart", "Job: File Mimetype", JobFileMimetypeBarChart],
+];
+const usageRow = [
+  ["JobTopPlaybookBarChart", "Job: Top 5 Playbooks", JobTopPlaybookBarChart],
+  ["JobTopUserBarChart", "Job: Top 5 Users", JobTopUserBarChart],
+  ["JobTopTLPBarChart", "Job: Top 5 TLP", JobTopTLPBarChart],
 ];
 
 export default function Dashboard() {
@@ -118,7 +126,23 @@ export default function Dashboard() {
         </Col>
       </Row>
       <Row className="d-flex flex-wrap flex-lg-nowrap mt-4">
-        {charts2.map(([id, header, Component]) => (
+        {typeRow.map(([id, header, Component]) => (
+          <Col key={id} md={12} lg={4}>
+            <SmallInfoCard
+              id={id}
+              header={header}
+              body={
+                <div className="pt-2">
+                  <Component orgName={orgState} />
+                </div>
+              }
+              style={{ minHeight: 360 }}
+            />
+          </Col>
+        ))}
+      </Row>
+      <Row className="d-flex flex-wrap flex-lg-nowrap mt-4">
+        {usageRow.map(([id, header, Component]) => (
           <Col key={id} md={12} lg={4}>
             <SmallInfoCard
               id={id}

@@ -130,9 +130,9 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     def fail_job(job):
         logger.error(
             f"found stuck analysis, job_id:{job.id}."
-            f"Setting the job to status {Job.Status.FAILED.value}'"
+            f"Setting the job to status {Job.STATUSES.FAILED.value}'"
         )
-        job.status = Job.Status.FAILED.value
+        job.status = Job.STATUSES.FAILED.value
         job.finished_analysis_time = now()
         job.save(update_fields=["status", "finished_analysis_time"])
 
@@ -145,9 +145,9 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     jobs_id_stuck = []
     for running_job in running_jobs:
         jobs_id_stuck.append(running_job.id)
-        if running_job.status == Job.Status.RUNNING.value:
+        if running_job.status == Job.STATUSES.RUNNING.value:
             fail_job(running_job)
-        elif running_job.status == Job.Status.PENDING.value:
+        elif running_job.status == Job.STATUSES.PENDING.value:
             # the job can be pending for 2 cycles of this function
             if running_job.received_request_time < (
                 now() - datetime.timedelta(minutes=(minutes_ago * 2) + 1)
@@ -266,7 +266,7 @@ def job_pipeline(
             + list(job.pivotreports.all())
             + list(job.visualizerreports.all())
         ):
-            report.status = report.Status.FAILED.value
+            report.status = report.STATUSES.FAILED.value
             report.save()
 
 
@@ -304,7 +304,7 @@ def run_plugin(
     except Exception as e:
         logger.exception(e)
         config.reports.filter(job__pk=job_id).update(
-            status=plugin.report_model.Status.FAILED.value
+            status=plugin.report_model.STATUSES.FAILED.value
         )
     job = Job.objects.get(pk=job_id)
     JobConsumer.serialize_and_send_job(job)

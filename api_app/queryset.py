@@ -312,7 +312,7 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         Returns:
             The filtered queryset.
         """
-        return self.filter(status__in=self.model.Status.final_statuses())
+        return self.filter(status__in=self.model.STATUSES.final_statuses())
 
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
@@ -409,10 +409,10 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
             The filtered queryset.
         """
         qs = self.exclude(
-            status__in=[status.value for status in self.model.Status.final_statuses()]
+            status__in=[status.value for status in self.model.STATUSES.final_statuses()]
         )
         if not check_pending:
-            qs = qs.exclude(status=self.model.Status.PENDING.value)
+            qs = qs.exclude(status=self.model.STATUSES.PENDING.value)
         difference = now() - datetime.timedelta(minutes=minutes_ago)
         return qs.filter(received_request_time__lte=difference)
 
@@ -673,7 +673,7 @@ class AbstractReportQuerySet(SendToBiQuerySet):
         Returns:
             AbstractReportQuerySet: The filtered queryset.
         """
-        return self.filter(status__in=self.model.Status.final_statuses())
+        return self.filter(status__in=self.model.STATUSES.final_statuses())
 
     def filter_retryable(self):
         """
@@ -683,7 +683,10 @@ class AbstractReportQuerySet(SendToBiQuerySet):
             AbstractReportQuerySet: The filtered queryset.
         """
         return self.filter(
-            status__in=[self.model.Status.FAILED.value, self.model.Status.PENDING.value]
+            status__in=[
+                self.model.STATUSES.FAILED.value,
+                self.model.STATUSES.PENDING.value,
+            ]
         )
 
     def get_configurations(self) -> AbstractConfigQuerySet:
@@ -696,6 +699,7 @@ class AbstractReportQuerySet(SendToBiQuerySet):
         return self.model.config.field.related_model.objects.filter(
             pk__in=self.values("config_id")
         )
+
 
 class ModelWithOwnershipQuerySet:
     """
@@ -935,7 +939,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
 
             task_id = str(uuid.uuid4())
             config.generate_empty_report(
-                job, task_id, AbstractReport.Status.PENDING.value
+                job, task_id, AbstractReport.STATUSES.PENDING.value
             )
             args = [
                 job.pk,

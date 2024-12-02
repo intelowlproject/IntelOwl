@@ -425,6 +425,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     - **aggregate_type**: Aggregate jobs by type (file or observable) over a specified time range.
     - **aggregate_observable_classification**: Aggregate jobs by observable classification over a specified time range.
     - **aggregate_file_mimetype**: Aggregate jobs by file MIME type over a specified time range.
+    - **aggregate_top_playbook**: Aggregate jobs by playbook over a specified time range and show the most used.
+    - **aggregate_top_user**: Aggregate jobs by user over a specified time range and show the most used.
+    - **aggregate_top_tlp**: Aggregate jobs by TLP over a specified time range and show the most used.
 
     Permissions:
     - **IsAuthenticated**: Requires authentication for all actions.

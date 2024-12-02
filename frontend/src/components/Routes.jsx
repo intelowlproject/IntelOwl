@@ -27,6 +27,8 @@ const InvestigationResult = React.lazy(
   () => import("./investigations/result/InvestigationResult"),
 );
 const History = React.lazy(() => import("./History"));
+const Search = React.lazy(() => import("./search/Search"));
+
 /*
 lazy imports to enable code splitting
 */
@@ -209,6 +211,15 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <ScanForm />
+      </Suspense>
+    ),
+  },
+  /* Search */
+  {
+    path: "/search",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <Search />
       </Suspense>
     ),
   },

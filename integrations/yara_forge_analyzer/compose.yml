@@ -1,0 +1,13 @@
+version: '3'
+services:
+  yara_forge:
+    build: .
+    container_name: intel_owl_yara_forge
+    restart: unless-stopped
+    volumes:
+      - yara_rules:/opt/deploy/yara_rules
+    environment:
+      - YARA_RULES_DIR=/opt/deploy/yara_rules
+
+volumes:
+  yara_rules:

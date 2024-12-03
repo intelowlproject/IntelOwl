@@ -1,0 +1,1 @@
+0 0 * * * /usr/local/bin/python /opt/app/yara_forge_analyzer.py --update-rules >> /var/log/cron.log 2>&1

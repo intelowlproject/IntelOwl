@@ -1,0 +1,21 @@
+version: '3'
+services:
+  yara_forge_test:
+    build: .
+    container_name: intel_owl_yara_forge_test
+    volumes:
+      - yara_rules_test:/opt/deploy/yara_rules
+    environment:
+      - YARA_RULES_DIR=/opt/deploy/yara_rules
+      - TESTING=True
+    ports:
+      - "4000:4000"
+    networks:
+      - intel_owl_test
+
+networks:
+  intel_owl_test:
+    driver: bridge
+
+volumes:
+  yara_rules_test:

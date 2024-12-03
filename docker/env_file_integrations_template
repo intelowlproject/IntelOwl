@@ -4,3 +4,5 @@
 
 # Applies to all integrations, choose from: INFO (recommended), ERROR, DEBUG.
 LOG_LEVEL=INFO
+
+YARA_RULES_DIR=/opt/deploy/yara_rules

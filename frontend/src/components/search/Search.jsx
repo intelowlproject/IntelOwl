@@ -11,6 +11,7 @@ import {
   FormGroup,
   UncontrolledTooltip,
   Button,
+  Spinner,
 } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 import { JSONTree } from "react-json-tree";
@@ -18,11 +19,12 @@ import { Loader, DataTable } from "@certego/certego-ui";
 
 import { PluginsTypes, PluginFinalStatuses } from "../../constants/pluginConst";
 import { searchTableColumns } from "./searchTableColumns";
+import { pluginReportQueries } from "./searchApi";
 
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
 const tableInitialState = {
-  pageSize: 6,
+  pageSize: 10,
   sortBy: [{ id: "end_time", desc: false }],
 };
 
@@ -38,6 +40,8 @@ const tableProps = {
 };
 
 export default function Search() {
+  const [elasticData, setElasticData] = React.useState([]);
+
   // data mock
   const loading = false;
   const error = null;
@@ -88,12 +92,53 @@ export default function Search() {
         ],
       },
     },
+    {
+      job: { id: 3 },
+      config: {
+        name: "Classic_DNS",
+        plugin_name: "analyzer",
+      },
+      status: "KILLED",
+      start_time: "2024-11-26T09:56:59.555203Z",
+      end_time: "2024-11-26T09:57:03.805453Z",
+      errors: [],
+      report: {
+        observable: "google.com",
+        resolutions: [
+          {
+            TTL: 268,
+            data: "216.58.205.46",
+            name: "google.com.",
+            type: 1,
+            Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
+          },
+        ],
+      },
+    },
+    {
+      job: { id: 4 },
+      config: {
+        name: "Classic_DNS",
+        plugin_name: "analyzer",
+      },
+      status: "FAILED",
+      start_time: "2024-11-26T09:56:59.555203Z",
+      end_time: "2024-11-26T09:57:03.805453Z",
+      errors: ["error2"],
+      report: {
+        observable: "google.com",
+        resolutions: [
+          {
+            TTL: 268,
+            data: "216.58.205.46",
+            name: "google.com.",
+            type: 1,
+            Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
+          },
+        ],
+      },
+    },
   ];
-
-  // API
-  // const [{ data, loading, error }, refetch] = useAxios({
-  //     url: ``,
-  // });
 
   const formik = useFormik({
     initialValues: {
@@ -104,7 +149,8 @@ export default function Search() {
       startTimeLte: new Date().toISOString().split("T")[0],
       endTimeGte: new Date().toISOString().split("T")[0],
       endTimeLte: new Date().toISOString().split("T")[0],
-      reportErrors: false,
+      errors: false,
+      report: "",
     },
     validate: (values) => {
       console.debug("validate - values");
@@ -114,13 +160,41 @@ export default function Search() {
       if (Date.parse(values.startTimeLte) < Date.parse(values.startTimeGte)) {
         errors.startTimeLte = "Invalid date";
       }
+      if (Date.parse(values.endTimeGte) < Date.parse(values.startTimeLte)) {
+        errors.endTimeGte = "Invalid date";
+      }
+      if (Date.parse(values.endTimeLte) < Date.parse(values.endTimeGte)) {
+        errors.endTimeLte = "Invalid date";
+      }
 
       console.debug("formik validation errors");
       console.debug(errors);
       return errors;
     },
     onSubmit: async () => {
-      console.debug("SUBMIT");
+      const payloadData = {
+        plugin_name: formik.values.type,
+        name: formik.values.name,
+        status: formik.values.status,
+        errors: formik.values.errors,
+        start_start_time: new Date(formik.values.startTimeGte),
+        start_end_time: new Date(formik.values.startTimeLte),
+        end_start_time: new Date(formik.values.endTimeGte),
+        end_end_time: new Date(formik.values.endTimeLte),
+        report: formik.values.report,
+      };
+      console.debug(payloadData);
+      let response = [];
+      try {
+        response = await pluginReportQueries(payloadData);
+        console.debug(response);
+      } catch (err) {
+        // error will be handled by pluginReportQueries
+      } finally {
+        setElasticData(data);
+        // setElasticData(response);
+        formik.setSubmitting(false);
+      }
     },
   });
   console.debug(formik);
@@ -267,6 +341,9 @@ export default function Search() {
                   value={formik.values.endTimeGte}
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
+                  invalid={
+                    formik.touched.endTimeGte && formik.errors.endTimeGte
+                  }
                 />
               </div>
               <div className="d-flex align-items-center ms-2">
@@ -281,24 +358,23 @@ export default function Search() {
                   value={formik.values.endTimeLte}
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
+                  invalid={
+                    formik.touched.endTimeLte && formik.errors.endTimeLte
+                  }
                 />
               </div>
             </Col>
             <Col sm={2} className="d-flex align-items-center ms-4">
               <FormGroup switch className="mb-0">
-                <Label
-                  check
-                  className="fw-bold ms-2"
-                  for="search__reportErrors"
-                >
+                <Label check className="fw-bold ms-2" for="search__errors">
                   Errors in the report
                 </Label>
                 <Input
-                  id="search__reportErrors"
+                  id="search__errors"
                   type="switch"
-                  name="reportErrors"
-                  checked={formik.values.reportErrors}
-                  value={formik.values.reportErrors}
+                  name="errors"
+                  checked={formik.values.errors}
+                  value={formik.values.errors}
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                 />
@@ -343,9 +419,12 @@ export default function Search() {
                 className="d-flex align-items-center"
                 size="sm"
                 color="primary"
-                // onClick={onClick}
+                type="submit"
+                disabled={
+                  !formik.isValid || formik.isSubmitting || !formik.dirty
+                }
               >
-                Search
+                {formik.isSubmitting && <Spinner size="sm" />}Search
               </Button>
             </Col>
           </Row>
@@ -357,7 +436,7 @@ export default function Search() {
           error={error}
           render={() => (
             <DataTable
-              data={data}
+              data={elasticData}
               config={tableConfig}
               initialState={tableInitialState}
               columns={searchTableColumns}

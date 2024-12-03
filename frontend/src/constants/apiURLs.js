@@ -29,6 +29,8 @@ export const JOB_AGG_FILE_MD5_URI = `${JOB_BASE_URI}/aggregate/md5`;
 export const JOB_RECENT_SCANS = `${JOB_BASE_URI}/recent_scans`;
 export const JOB_RECENT_SCANS_USER = `${JOB_BASE_URI}/recent_scans_user`;
 
+export const PLUGIN_REPORT_QUERIES = `${API_BASE_URI}/plugin_report_queries`;
+
 // user
 export const USERACCESS_URI = `${API_BASE_URI}/me/access`;
 export const PLUGIN_CONFIG_URI = `${API_BASE_URI}/plugin-config`;

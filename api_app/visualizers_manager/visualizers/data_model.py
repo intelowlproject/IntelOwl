@@ -116,20 +116,24 @@ class DataModel(Visualizer):
         related_threats = []
         external_references = []
         malware_families = []
+        tags = []
 
         for datamodel in datamodels:
             related_threats.extend(datamodel[1].related_threats)
             external_references.extend(datamodel[1].external_references)
             if datamodel[1].malware_family:
                 malware_families.append(datamodel[1].malware_family)
+            if datamodel[1].tags:
+                tags.extend(datamodel[1].tags)
 
         related_threats = list(set(related_threats))
         external_references = list(set(external_references))
         malware_families = list(set(malware_families))
-        print(f"malware families {malware_families}")
+        tags = list(set(tags))
 
         base_data_vlists = []
         for name, values_list in [
+            ("Tags", tags),
             ("Related threats", related_threats),
             ("Malware families", malware_families),
             ("External references", external_references),

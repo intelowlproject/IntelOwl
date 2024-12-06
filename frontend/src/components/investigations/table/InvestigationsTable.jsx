@@ -1,9 +1,21 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Container, Row, Col, UncontrolledTooltip } from "reactstrap";
+import {
+  Container,
+  Row,
+  Col,
+  UncontrolledTooltip,
+  Label,
+  Input,
+} from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
 
-import { SyncButton, TableHintIcon, useDataTable } from "@certego/certego-ui";
+import {
+  SyncButton,
+  TableHintIcon,
+  useDataTable,
+  useDebounceInput,
+} from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 
@@ -38,6 +50,12 @@ export default function InvestigationsTable() {
 
   // state
   const [initialLoading, setInitialLoading] = React.useState(true);
+  /* searchNameType is used to show the user typed text (this state changes for each char typed), 
+  searchNameRequest is used in the request to the backend and it's update periodically.
+  In this way we avoid a request for each char. */
+  const [searchNameType, setSearchNameType] = React.useState("");
+  const [searchNameRequest, setSearchNameRequest] = React.useState("");
+  useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
   // API/ Table
   const [data, tableNode, refetch, _, loadingTable] = useDataTable(
@@ -46,6 +64,7 @@ export default function InvestigationsTable() {
       params: {
         start_time__gte: fromDateValue,
         start_time__lte: toDateValue,
+        analyzed_object_name: searchNameRequest,
       },
       initialParams: {
         ordering: "-start_time",
@@ -89,6 +108,18 @@ export default function InvestigationsTable() {
         </Col>
         <Col className="align-self-center">
           <TimePicker />
+          <div className="d-flex float-end mx-2">
+            <div className="d-flex align-items-center">
+              <Label check className="me-2">
+                Name:
+              </Label>
+              <Input
+                id="nameSearch"
+                type="text"
+                onChange={(event) => setSearchNameType(event.target.value)}
+              />
+            </div>
+          </div>
         </Col>
       </Row>
       {/* Actions */}

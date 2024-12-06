@@ -12,23 +12,22 @@ const versionText = VERSION;
 const logoBgImg = `url('${PUBLIC_URL}/logo-negative.png')`;
 const blogPosts = [
   {
-    title: "IntelOwl: Release v4.0.0",
-    subText: "Certego Blog: v4.0.0 Announcement",
-    date: "1st July 2022",
-    link: "https://www.certego.net/en/news/intel-owl-release-v4-0-0/",
+    title: "IntelOwl: Open-source threat intelligence management",
+    subText: "HelpNetSecurity: Interview with Matteo Lodi",
+    date: "14th August 2024",
+    link: "https://www.helpnetsecurity.com/2024/08/14/intelowl-open-source-threat-intelligence-management/",
   },
   {
-    title: "IntelOwl: Release v3.0.0",
-    subText: "Honeynet Blog: v3.0.0 Announcement",
-    date: "13th September 2021",
-    link: "https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/",
+    title: "IntelOwl: Making the life of cyber security analysts easier",
+    subText: "FIRSTCON24 Fukuoka Talk with Matteo Lodi and Simone Berni",
+    date: "10th June 2024",
+    link: "https://www.youtube.com/watch?v=1L5rzvlRjdU",
   },
   {
-    title:
-      "Intel Owl – OSINT tool automates the intel-gathering process using a single API",
-    subText: "Daily Swig: Interview with Matteo Lodi and Eshaan Bansal",
-    date: "18th August 2020",
-    link: "https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api",
+    title: "From Zero to IntelOwl!",
+    subText: "The Honeynet Workshop: Denmark 2024",
+    date: "29th May 2024",
+    link: "https://github.com/intelowlproject/thp_workshop_2024",
   },
   {
     title: "New year, new tool: Intel Owl",

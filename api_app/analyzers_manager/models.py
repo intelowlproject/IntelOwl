@@ -305,6 +305,7 @@ class AnalyzerConfig(PythonConfig):
     mapping_data_model = models.JSONField(
         default=dict,
         help_text="Mapping analyzer_report_key: data_model_key. Keys preceded by the symbol $ will be considered as constants.",
+        blank=True,
     )
 
     @classmethod

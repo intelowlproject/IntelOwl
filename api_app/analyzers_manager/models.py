@@ -90,14 +90,15 @@ class AnalyzerReport(AbstractReport):
         for data_model_key in self.config.mapping_data_model.values():
             if data_model_key not in data_model_keys:
                 self.errors.append(
-                    f"Field {data_model_key} not present in {self.data_model_class.__name__}"
+                    f"Field {data_model_key} not available in {self.data_model_class.__name__}"
                 )
         return True
 
     def _create_data_model_dictionary(self) -> Dict:
+        # todo explain how this method works with an example and a docstring
         result = {}
         data_model_fields = self.data_model_class.get_fields()
-        logger.info(f"Mapping is {json.dumps(self.config.mapping_data_model)}")
+        logger.debug(f"Mapping is {json.dumps(self.config.mapping_data_model)}")
         for report_key, data_model_key in self.config.mapping_data_model.items():
             # this is a constant
             if report_key.startswith("$"):
@@ -106,14 +107,15 @@ class AnalyzerReport(AbstractReport):
             else:
                 try:
                     value = self.get_value(self.report, report_key.split("."))
-                    logger.info(f"Retrieved {value} from key {report_key}")
+                    logger.debug(f"Retrieved {value} from key {report_key}")
                 except Exception:
                     # validation
-                    self.errors.append(f"Field {report_key} not present in report")
+                    self.errors.append(f"Field {report_key} not available in report")
                     continue
-                    # create the related object if necessary
+                    # create the related object if necessary #todo what does it mean - there is this comment then nothing
+
             if isinstance(data_model_fields[data_model_key], ForeignKey):
-                # to create an object we need at least
+                # to create an object we need at least #todo what does it mean - sentence not finished
                 if not isinstance(value, dict):
                     self.errors.append(
                         f"Field {report_key} has type {type(report_key)} while a dictionary is expected"
@@ -143,6 +145,7 @@ class AnalyzerReport(AbstractReport):
         data_model = self.data_model_class.objects.create(**dictionary)
         self.data_model = data_model
         self.save()
+        # todo so for every analysis we do create a new data model element in the db. And how the retention is managed?
         return data_model
 
 

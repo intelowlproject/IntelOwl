@@ -95,7 +95,22 @@ class AnalyzerReport(AbstractReport):
         return True
 
     def _create_data_model_dictionary(self) -> Dict:
-        # todo explain how this method works with an example and a docstring
+        """
+        Returns a dictionary that will be used to create an initial data model for the report.
+
+        It uses the mapping_data_model field of the AnalyzerConfig to map the fields of the report with the fields of the data model.
+
+        For example, if we have
+
+        analyzer_report = {
+            "family": "MalwareFamily"
+        }
+
+        mapping_data_model = {"family": "malware_family"}
+
+        the method returns
+        result = {"malware_family": "MalwareFamily"}.
+        """
         result = {}
         data_model_fields = self.data_model_class.get_fields()
         logger.debug(f"Mapping is {json.dumps(self.config.mapping_data_model)}")
@@ -112,10 +127,10 @@ class AnalyzerReport(AbstractReport):
                     # validation
                     self.errors.append(f"Field {report_key} not available in report")
                     continue
-                    # create the related object if necessary #todo what does it mean - there is this comment then nothing
 
+            # create the related object if necessary
             if isinstance(data_model_fields[data_model_key], ForeignKey):
-                # to create an object we need at least #todo what does it mean - sentence not finished
+                # to create an object we need at least a dictionary
                 if not isinstance(value, dict):
                     self.errors.append(
                         f"Field {report_key} has type {type(report_key)} while a dictionary is expected"
@@ -145,7 +160,6 @@ class AnalyzerReport(AbstractReport):
         data_model = self.data_model_class.objects.create(**dictionary)
         self.data_model = data_model
         self.save()
-        # todo so for every analysis we do create a new data model element in the db. And how the retention is managed?
         return data_model
 
 

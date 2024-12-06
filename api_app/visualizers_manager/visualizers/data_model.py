@@ -2,6 +2,11 @@ from logging import getLogger
 from typing import Dict, List
 
 from api_app.data_model_manager.enums import DataModelEvaluations
+from api_app.data_model_manager.models import (
+    DomainDataModel,
+    FileDataModel,
+    IPDataModel,
+)
 from api_app.visualizers_manager.classes import Visualizer
 
 logger = getLogger(__name__)
@@ -38,16 +43,95 @@ class DataModel(Visualizer):
             start_open=True,
         )
 
+    def get_rank(self, datamodels):
+        rank = Visualizer.Title(
+            title=Visualizer.Base(value="Rank", disable=True),
+            value=Visualizer.Base(
+                value="",
+                disable=True,
+            ),
+            size=Visualizer.Size.S_2,
+            disable=True,
+        )
+        for analyzer_name, datamodel in datamodels:
+            if datamodel.rank:
+                rank = Visualizer.Title(
+                    title=Visualizer.Base(value="Rank", disable=False),
+                    value=Visualizer.Base(
+                        value=datamodel.rank + f"({analyzer_name})",
+                        disable=False,
+                    ),
+                    size=Visualizer.Size.S_2,
+                    disable=False,
+                )
+                break
+        return rank
+
+    def get_resolutions(self, datamodels):
+        resolutions = []
+        for analyzer_name, datamodel in datamodels:
+            resolutions.append(
+                self.VList(
+                    name=self.Base(
+                        value=analyzer_name,
+                        disable=False,
+                    ),
+                    value=datamodel.resolutions,
+                    size=self.Size.S_2,
+                    disable=False,
+                    start_open=True,
+                )
+            )
+
+    def get_domain_data_elements(self, page, datamodels):
+        page.add_level(
+            self.Level(
+                position=3,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=[self.get_rank(datamodels)]),
+            )
+        )
+
+        page.add_level(
+            self.Level(
+                position=4,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=[self.get_resolutions(datamodels)]),
+            )
+        )
+
+    def get_ip_data_elements(self, page, datamodels):
+        page.add_level(
+            self.Level(
+                position=3,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=[]),
+            )
+        )
+
+    def get_file_data_elements(self, page, datamodels):
+        page.add_level(
+            self.Level(
+                position=3,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=[]),
+            )
+        )
+
     def run(self) -> List[Dict]:
         trusted_datamodels = []
         clean_datamodels = []
         suspicious_datamodels = []
         malicious_datamodels = []
         noeval_datamodels = []
+        datamodel_class = None
 
         for analyzer_report in self.analyzer_reports():
             printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-            datamodel_class = analyzer_report.get_data_model_class(analyzer_report.job)
+            if not datamodel_class:
+                datamodel_class = analyzer_report.get_data_model_class(
+                    analyzer_report.job
+                )
             datamodel = datamodel_class.objects.filter(
                 analyzers_report=analyzer_report.pk
             ).first()
@@ -156,5 +240,12 @@ class DataModel(Visualizer):
                 horizontal_list=self.HList(value=base_data_vlists),
             )
         )
+
+        if datamodel_class == DomainDataModel:
+            self.get_domain_data_elements(page, datamodels)
+        elif datamodel_class == IPDataModel:
+            self.get_ip_data_elements(page, datamodels)
+        elif datamodel_class == FileDataModel:
+            self.get_file_data_elements(page, datamodels)
 
         return [page.to_dict()]

@@ -44,29 +44,27 @@ class DataModel(Visualizer):
             start_open=True,
         )
 
-    def get_rank(self, data_models):
-        rank = Visualizer.Title(
-            title=Visualizer.Base(value="Rank", disable=True),
-            value=Visualizer.Base(
-                value="",
-                disable=True,
-            ),
-            size=Visualizer.Size.S_2,
-            disable=True,
-        )
+    def get_field(self, field, data_models):
         for data_model in data_models:
-            if data_model.rank:
-                rank = Visualizer.Title(
-                    title=Visualizer.Base(value="Rank", disable=False),
+            value = getattr(data_model, field, None)
+            if value:
+                return Visualizer.Title(
+                    title=Visualizer.Base(value=field.replace("_", " "), disable=False),
                     value=Visualizer.Base(
-                        value=data_model.rank,
+                        value=value,
                         disable=False,
                     ),
-                    size=Visualizer.Size.S_2,
                     disable=False,
                 )
-                break
-        return rank
+        else:
+            return Visualizer.Title(
+                title=Visualizer.Base(value=field.replace("_", " "), disable=True),
+                value=Visualizer.Base(
+                    value="",
+                    disable=True,
+                ),
+                disable=True,
+            )
 
     def get_resolutions(self, data_models):
         resolutions = []
@@ -78,43 +76,26 @@ class DataModel(Visualizer):
                             value=data_model.analyzers_report.all().first().config.name,
                             disable=False,
                         ),
-                        value=data_model.resolutions,
+                        value=[
+                            self.Base(
+                                value=resolution,
+                                disable=False,
+                            )
+                            for resolution in data_model.resolutions
+                        ],
                         size=self.Size.S_2,
                         disable=False,
                         start_open=True,
                     )
                 )
-
-    def get_asn(self, data_models):
-        asn = Visualizer.Title(
-            title=Visualizer.Base(value="ASN", disable=True),
-            value=Visualizer.Base(
-                value="",
-                disable=True,
-            ),
-            size=Visualizer.Size.S_2,
-            disable=True,
-        )
-        for data_model in data_models:
-            if data_model.asn:
-                asn = Visualizer.Title(
-                    title=Visualizer.Base(value="ASN", disable=False),
-                    value=Visualizer.Base(
-                        value=data_model.asn,
-                        disable=False,
-                    ),
-                    size=Visualizer.Size.S_2,
-                    disable=False,
-                )
-                break
-        return asn
+        return resolutions
 
     def get_domain_data_elements(self, page, data_models):
         page.add_level(
             self.Level(
                 position=3,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[self.get_rank(data_models)]),
+                horizontal_list=self.HList(value=self.get_resolutions(data_models)),
             )
         )
 
@@ -122,7 +103,7 @@ class DataModel(Visualizer):
             self.Level(
                 position=4,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[self.get_resolutions(data_models)]),
+                horizontal_list=self.HList(value=[self.get_field("rank", data_models)]),
             )
         )
 
@@ -131,7 +112,27 @@ class DataModel(Visualizer):
             self.Level(
                 position=3,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[self.get_asn(data_models)]),
+                horizontal_list=self.HList(value=self.get_resolutions(data_models)),
+            )
+        )
+
+        page.add_level(
+            self.Level(
+                position=4,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(
+                    value=[
+                        self.get_field(field, data_models)
+                        for field in [
+                            "asn",
+                            "asn_rank",
+                            "org_name",
+                            "country_code",
+                            "registered_country_code",
+                            "isp",
+                        ]
+                    ]
+                ),
             )
         )
 
@@ -160,15 +161,15 @@ class DataModel(Visualizer):
 
             evaluation = ""
             if data_model.evaluation:
-                evaluation = data_model.evaluation.value
+                evaluation = data_model.evaluation
 
-            if evaluation == DataModelEvaluations.TRUSTED:
+            if evaluation == DataModelEvaluations.TRUSTED.value:
                 trusted_data_models.append(data_model)
-            elif evaluation == DataModelEvaluations.CLEAN:
+            elif evaluation == DataModelEvaluations.CLEAN.value:
                 clean_data_models.append(data_model)
-            elif evaluation == DataModelEvaluations.SUSPICIOUS:
+            elif evaluation == DataModelEvaluations.SUSPICIOUS.value:
                 suspicious_data_models.append(data_model)
-            elif evaluation == DataModelEvaluations.MALICIOUS:
+            elif evaluation == DataModelEvaluations.MALICIOUS.value:
                 malicious_data_models.append(data_model)
             else:
                 noeval_data_models.append(data_model)

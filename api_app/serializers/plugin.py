@@ -137,7 +137,7 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
 
     def create(self, validated_data):
         value = validated_data.pop("value", None)
-        if PluginConfig.objects.filter(**validated_data).count() > 0:
+        if PluginConfig.objects.filter(**validated_data).exists():
             raise ValidationError("Config with this parameters already exists")
         validated_data["value"] = value
         return super().create(validated_data)

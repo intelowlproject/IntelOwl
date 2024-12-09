@@ -83,6 +83,30 @@ class DataModel(Visualizer):
                 )
             )
 
+    def get_asn(self, datamodels):
+        asn = Visualizer.Title(
+            title=Visualizer.Base(value="ASN", disable=True),
+            value=Visualizer.Base(
+                value="",
+                disable=True,
+            ),
+            size=Visualizer.Size.S_2,
+            disable=True,
+        )
+        for analyzer_name, datamodel in datamodels:
+            if datamodel.asn:
+                asn = Visualizer.Title(
+                    title=Visualizer.Base(value="ASN", disable=False),
+                    value=Visualizer.Base(
+                        value=datamodel.asn + f"({analyzer_name})",
+                        disable=False,
+                    ),
+                    size=Visualizer.Size.S_2,
+                    disable=False,
+                )
+                break
+        return asn
+
     def get_domain_data_elements(self, page, datamodels):
         page.add_level(
             self.Level(
@@ -105,7 +129,7 @@ class DataModel(Visualizer):
             self.Level(
                 position=3,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[]),
+                horizontal_list=self.HList(value=[self.get_asn(datamodels)]),
             )
         )
 

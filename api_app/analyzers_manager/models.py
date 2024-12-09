@@ -90,14 +90,30 @@ class AnalyzerReport(AbstractReport):
         for data_model_key in self.config.mapping_data_model.values():
             if data_model_key not in data_model_keys:
                 self.errors.append(
-                    f"Field {data_model_key} not present in {self.data_model_class.__name__}"
+                    f"Field {data_model_key} not available in {self.data_model_class.__name__}"
                 )
         return True
 
     def _create_data_model_dictionary(self) -> Dict:
+        """
+        Returns a dictionary that will be used to create an initial data model for the report.
+
+        It uses the mapping_data_model field of the AnalyzerConfig to map the fields of the report with the fields of the data model.
+
+        For example, if we have
+
+        analyzer_report = {
+            "family": "MalwareFamily"
+        }
+
+        mapping_data_model = {"family": "malware_family"}
+
+        the method returns
+        result = {"malware_family": "MalwareFamily"}.
+        """
         result = {}
         data_model_fields = self.data_model_class.get_fields()
-        logger.info(f"Mapping is {json.dumps(self.config.mapping_data_model)}")
+        logger.debug(f"Mapping is {json.dumps(self.config.mapping_data_model)}")
         for report_key, data_model_key in self.config.mapping_data_model.items():
             # this is a constant
             if report_key.startswith("$"):
@@ -106,14 +122,15 @@ class AnalyzerReport(AbstractReport):
             else:
                 try:
                     value = self.get_value(self.report, report_key.split("."))
-                    logger.info(f"Retrieved {value} from key {report_key}")
+                    logger.debug(f"Retrieved {value} from key {report_key}")
                 except Exception:
                     # validation
-                    self.errors.append(f"Field {report_key} not present in report")
+                    self.errors.append(f"Field {report_key} not available in report")
                     continue
-                    # create the related object if necessary
+
+            # create the related object if necessary
             if isinstance(data_model_fields[data_model_key], ForeignKey):
-                # to create an object we need at least
+                # to create an object we need at least a dictionary
                 if not isinstance(value, dict):
                     self.errors.append(
                         f"Field {report_key} has type {type(report_key)} while a dictionary is expected"

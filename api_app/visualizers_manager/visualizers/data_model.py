@@ -1,6 +1,7 @@
 from logging import getLogger
 from typing import Dict, List
 
+from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.data_model_manager.enums import DataModelEvaluations
 from api_app.data_model_manager.models import (
     DomainDataModel,
@@ -13,8 +14,8 @@ logger = getLogger(__name__)
 
 
 class DataModel(Visualizer):
-    def get_eval_list(self, eval, color, icon, analyzers_datamodels):
-        disable_element = not len(analyzers_datamodels)
+    def get_eval_list(self, eval, color, icon, data_models):
+        disable_element = not len(data_models)
         return self.VList(
             name=self.Base(
                 value=eval,
@@ -24,10 +25,10 @@ class DataModel(Visualizer):
             ),
             value=[
                 self.Base(
-                    value=analyzer_name[0],
+                    value=data_model.analyzers_report.all().first().config.name,
                     disable=False,
                 )
-                for analyzer_name in analyzers_datamodels
+                for data_model in data_models
             ],
             size=self.Size.S_2,
             disable=disable_element,
@@ -43,7 +44,7 @@ class DataModel(Visualizer):
             start_open=True,
         )
 
-    def get_rank(self, datamodels):
+    def get_rank(self, data_models):
         rank = Visualizer.Title(
             title=Visualizer.Base(value="Rank", disable=True),
             value=Visualizer.Base(
@@ -53,12 +54,12 @@ class DataModel(Visualizer):
             size=Visualizer.Size.S_2,
             disable=True,
         )
-        for analyzer_name, datamodel in datamodels:
-            if datamodel.rank:
+        for data_model in data_models:
+            if data_model.rank:
                 rank = Visualizer.Title(
                     title=Visualizer.Base(value="Rank", disable=False),
                     value=Visualizer.Base(
-                        value=datamodel.rank + f"({analyzer_name})",
+                        value=data_model.rank,
                         disable=False,
                     ),
                     size=Visualizer.Size.S_2,
@@ -67,23 +68,24 @@ class DataModel(Visualizer):
                 break
         return rank
 
-    def get_resolutions(self, datamodels):
+    def get_resolutions(self, data_models):
         resolutions = []
-        for analyzer_name, datamodel in datamodels:
-            resolutions.append(
-                self.VList(
-                    name=self.Base(
-                        value=analyzer_name,
+        for data_model in data_models:
+            if data_model.resolutions:
+                resolutions.append(
+                    self.VList(
+                        name=self.Base(
+                            value=data_model.analyzers_report.all().first().config.name,
+                            disable=False,
+                        ),
+                        value=data_model.resolutions,
+                        size=self.Size.S_2,
                         disable=False,
-                    ),
-                    value=datamodel.resolutions,
-                    size=self.Size.S_2,
-                    disable=False,
-                    start_open=True,
+                        start_open=True,
+                    )
                 )
-            )
 
-    def get_asn(self, datamodels):
+    def get_asn(self, data_models):
         asn = Visualizer.Title(
             title=Visualizer.Base(value="ASN", disable=True),
             value=Visualizer.Base(
@@ -93,12 +95,12 @@ class DataModel(Visualizer):
             size=Visualizer.Size.S_2,
             disable=True,
         )
-        for analyzer_name, datamodel in datamodels:
-            if datamodel.asn:
+        for data_model in data_models:
+            if data_model.asn:
                 asn = Visualizer.Title(
                     title=Visualizer.Base(value="ASN", disable=False),
                     value=Visualizer.Base(
-                        value=datamodel.asn + f"({analyzer_name})",
+                        value=data_model.asn,
                         disable=False,
                     ),
                     size=Visualizer.Size.S_2,
@@ -107,12 +109,12 @@ class DataModel(Visualizer):
                 break
         return asn
 
-    def get_domain_data_elements(self, page, datamodels):
+    def get_domain_data_elements(self, page, data_models):
         page.add_level(
             self.Level(
                 position=3,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[self.get_rank(datamodels)]),
+                horizontal_list=self.HList(value=[self.get_rank(data_models)]),
             )
         )
 
@@ -120,20 +122,20 @@ class DataModel(Visualizer):
             self.Level(
                 position=4,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[self.get_resolutions(datamodels)]),
+                horizontal_list=self.HList(value=[self.get_resolutions(data_models)]),
             )
         )
 
-    def get_ip_data_elements(self, page, datamodels):
+    def get_ip_data_elements(self, page, data_models):
         page.add_level(
             self.Level(
                 position=3,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[self.get_asn(datamodels)]),
+                horizontal_list=self.HList(value=[self.get_asn(data_models)]),
             )
         )
 
-    def get_file_data_elements(self, page, datamodels):
+    def get_file_data_elements(self, page, data_models):
         page.add_level(
             self.Level(
                 position=3,
@@ -143,96 +145,83 @@ class DataModel(Visualizer):
         )
 
     def run(self) -> List[Dict]:
-        trusted_datamodels = []
-        clean_datamodels = []
-        suspicious_datamodels = []
-        malicious_datamodels = []
-        noeval_datamodels = []
-        datamodel_class = None
+        trusted_data_models = []
+        clean_data_models = []
+        suspicious_data_models = []
+        malicious_data_models = []
+        noeval_data_models = []
+        data_models = self.data_models()
 
-        for analyzer_report in self.analyzer_reports():
-            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
-            if not datamodel_class:
-                datamodel_class = analyzer_report.get_data_model_class(
-                    analyzer_report.job
-                )
-            datamodel = datamodel_class.objects.filter(
-                analyzers_report=analyzer_report.pk
-            ).first()
-            if datamodel:
-                logger.debug(f"{printable_analyzer_name}, {datamodel}")
+        for data_model in data_models:
+            printable_analyzer_name = (
+                data_model.analyzers_report.all().first().config.name.replace("_", " ")
+            )
+            logger.debug(f"{printable_analyzer_name}, {data_model}")
 
-                evaluation = ""
-                if datamodel.evaluation:
-                    evaluation = datamodel.evaluation.value
+            evaluation = ""
+            if data_model.evaluation:
+                evaluation = data_model.evaluation.value
 
-                if evaluation == DataModelEvaluations.TRUSTED:
-                    trusted_datamodels.append((printable_analyzer_name, datamodel))
-                elif evaluation == DataModelEvaluations.CLEAN:
-                    clean_datamodels.append((printable_analyzer_name, datamodel))
-                elif evaluation == DataModelEvaluations.SUSPICIOUS:
-                    suspicious_datamodels.append((printable_analyzer_name, datamodel))
-                elif evaluation == DataModelEvaluations.MALICIOUS:
-                    malicious_datamodels.append((printable_analyzer_name, datamodel))
-                else:
-                    noeval_datamodels.append((printable_analyzer_name, datamodel))
+            if evaluation == DataModelEvaluations.TRUSTED:
+                trusted_data_models.append(data_model)
+            elif evaluation == DataModelEvaluations.CLEAN:
+                clean_data_models.append(data_model)
+            elif evaluation == DataModelEvaluations.SUSPICIOUS:
+                suspicious_data_models.append(data_model)
+            elif evaluation == DataModelEvaluations.MALICIOUS:
+                malicious_data_models.append(data_model)
+            else:
+                noeval_data_models.append(data_model)
 
         evals_vlists = []
-        for evaluation, color, icon, eval_datamodels in [
+        for evaluation, color, icon, eval_data_models in [
             (
                 "no evaluation",
                 Visualizer.Color.SECONDARY,
                 Visualizer.Icon.INFO,
-                noeval_datamodels,
+                noeval_data_models,
             ),
             (
                 DataModelEvaluations.CLEAN.value,
                 Visualizer.Color.SUCCESS,
                 Visualizer.Icon.LIKE,
-                clean_datamodels,
+                clean_data_models,
             ),
             (
                 DataModelEvaluations.TRUSTED.value,
                 Visualizer.Color.SUCCESS,
                 Visualizer.Icon.LIKE,
-                trusted_datamodels,
+                trusted_data_models,
             ),
             (
                 DataModelEvaluations.SUSPICIOUS.value,
                 Visualizer.Color.WARNING,
                 Visualizer.Icon.WARNING,
-                suspicious_datamodels,
+                suspicious_data_models,
             ),
             (
                 DataModelEvaluations.MALICIOUS.value,
                 Visualizer.Color.DANGER,
                 Visualizer.Icon.MALWARE,
-                malicious_datamodels,
+                malicious_data_models,
             ),
         ]:
             evals_vlists.append(
-                self.get_eval_list(evaluation, color, icon, eval_datamodels)
+                self.get_eval_list(evaluation, color, icon, eval_data_models)
             )
 
-        datamodels = (
-            noeval_datamodels
-            + trusted_datamodels
-            + clean_datamodels
-            + suspicious_datamodels
-            + malicious_datamodels
-        )
         related_threats = []
         external_references = []
         malware_families = []
         tags = []
 
-        for datamodel in datamodels:
-            related_threats.extend(datamodel[1].related_threats)
-            external_references.extend(datamodel[1].external_references)
-            if datamodel[1].malware_family:
-                malware_families.append(datamodel[1].malware_family)
-            if datamodel[1].tags:
-                tags.extend(datamodel[1].tags)
+        for data_model in data_models:
+            related_threats.extend(data_model.related_threats)
+            external_references.extend(data_model.external_references)
+            if data_model.malware_family:
+                malware_families.append(data_model.malware_family)
+            if data_model.tags:
+                tags.extend(data_model.tags)
 
         related_threats = list(set(related_threats))
         external_references = list(set(external_references))
@@ -265,11 +254,12 @@ class DataModel(Visualizer):
             )
         )
 
-        if datamodel_class == DomainDataModel:
-            self.get_domain_data_elements(page, datamodels)
-        elif datamodel_class == IPDataModel:
-            self.get_ip_data_elements(page, datamodels)
-        elif datamodel_class == FileDataModel:
-            self.get_file_data_elements(page, datamodels)
+        data_model_class = AnalyzerReport.get_data_model_class(self._job)
+        if data_model_class == DomainDataModel:
+            self.get_domain_data_elements(page, data_models)
+        elif data_model_class == IPDataModel:
+            self.get_ip_data_elements(page, data_models)
+        elif data_model_class == FileDataModel:
+            self.get_file_data_elements(page, data_models)
 
         return [page.to_dict()]

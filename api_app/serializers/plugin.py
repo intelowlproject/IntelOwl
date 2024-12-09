@@ -21,22 +21,12 @@ from certego_saas.apps.user.models import User
 logger = logging.getLogger(__name__)
 
 
-class PluginConfigSerializer(ModelWithOwnershipSerializer):
+class PluginConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer):
     class Meta:
         model = PluginConfig
-        fields = (
-            "parameter",
-            "value",
-            "owner",
-            "organization",
-            "id",
-            "attribute",
-            "analyzer_config",
-            "connector_config",
-            "pivot_config",
-            "visualizer_config",
-            "ingestor_config",
-        )
+        fields = rfs.ALL_FIELDS
+        list_serializer_class = rfs.ListSerializer
+        validators = []
 
     class CustomValueField(rfs.JSONField):
         @staticmethod
@@ -145,13 +135,19 @@ class PluginConfigSerializer(ModelWithOwnershipSerializer):
         self.validate_value_type(_value, attrs["parameter"])
         return super().validate(attrs)
 
+    def create(self, validated_data):
+        value = validated_data.pop("value", None)
+        if len(PluginConfig.objects.filter(**validated_data)) > 0:
+            raise ValidationError("Config with this parameters already exists")
+        validated_data["value"] = value
+        return super().create(validated_data)
+
     def update(self, instance, validated_data):
         self.validate_value_type(validated_data["value"], instance.parameter)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance: PluginConfig):
         result = super().to_representation(instance)
-        result.pop("parameter")
         result["organization"] = (
             instance.organization.name if instance.organization is not None else None
         )
@@ -174,7 +170,7 @@ class ParameterSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Parameter
-        fields = ["name", "type", "description", "required", "value", "is_secret"]
+        fields = ["id", "name", "type", "description", "required", "value", "is_secret"]
         list_serializer_class = ParamListSerializer
 
     @staticmethod

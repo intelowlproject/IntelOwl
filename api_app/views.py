@@ -1026,7 +1026,7 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
             list: A list of permission instances.
         """
         permissions = super().get_permissions()
-        if self.action in ["destroy", "update"]:
+        if self.action in ["destroy", "update", "retrieve"]:
             if self.request.method == "PUT":
                 raise PermissionDenied()
             # code quality checker marks this as error, but it works correctly
@@ -1555,31 +1555,13 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     pagination_class = None
     queryset = PluginConfig.objects.all()
 
-    def get_permissions(self):
-        permissions = super().get_permissions()
-        if self.action in ["retrieve"]:
-            # code quality checker marks this as error, but it works correctly
-            permissions.append(
-                (  # skipcq: PYL-E1102
-                    IsObjectAdminPermission | IsObjectOwnerPermission
-                )()
-            )
-        return permissions
-
-    def get_object(self, name: str = None):
-        if name is None:
-            return super().get_object()
-        queryset = self.get_queryset()
-        obj = queryset.get(name=name)
-        return obj
-
     @action(
         methods=["get"],
         detail=False,
     )
     def plugin_config(self, request, name=None):
         logger.info(f"get plugin_config from user {request.user}, name {name}")
-        obj: PythonConfig = self.get_object(name)
+        obj: PythonConfig = self.get_queryset().get(name=name)
         try:
             plugin_configs: PluginConfig = PluginConfig.objects.filter(
                 **{obj.snake_case_name: obj.pk}
@@ -1596,8 +1578,8 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
 
             for attribute, param_obj in pp.data.items():
                 param_obj["attribute"] = attribute
+                param_obj["parameter"] = param_obj.pop("id")
                 param_obj["exist"] = False
-                param_obj["default"] = False
                 # override default config (if any)
                 for config in [
                     config
@@ -1606,7 +1588,6 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                 ]:
                     param_obj.update(config)
                     param_obj["exist"] = True
-                    param_obj["default"] = True
                 # override default config with org config (if any)
                 if request.user.has_membership():
                     org = request.user.membership.organization.name
@@ -1618,7 +1599,6 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                     ]:
                         param_obj.update(config)
                         param_obj["exist"] = True
-                        param_obj["default"] = False
                     org_config.append(copy.deepcopy(param_obj))
                 # override default config with user config (if any)
                 for config in [
@@ -1630,7 +1610,6 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
                 ]:
                     param_obj.update(config)
                     param_obj["exist"] = True
-                    param_obj["default"] = False
                 user_config.append(copy.deepcopy(param_obj))
 
             result = {"organization_config": org_config, "user_config": user_config}
@@ -1639,40 +1618,14 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     @plugin_config.mapping.patch
     def update(self, request, name=None):
         logger.info(f"patch plugin_config from user {request.user}, name {name}")
-        obj: PythonConfig = self.get_object(name)
-
-        for config in request.data:
-            organization = config.get("organization", False)
-            # only owner and admin can update org config
-            if (
-                request.user.has_membership()
-                and organization
-                and not request.user.membership.is_admin
-            ):
-                raise PermissionDenied()
-
-            parameter = obj.parameters.get(name=config["attribute"])
-            config["parameter"] = parameter.pk
-            config["owner"] = request.user
-            config[obj.snake_case_name] = obj.name
+        for data in request.data:
             try:
-                if organization:
-                    instance = PluginConfig.objects.get(
-                        parameter=parameter,
-                        for_organization=True,
-                        **{obj.snake_case_name: obj.pk},
-                    )
-                else:
-                    instance = PluginConfig.objects.get(
-                        owner=config["owner"],
-                        parameter=parameter,
-                        for_organization=False,
-                        **{obj.snake_case_name: obj.pk},
-                    )
+                instance = PluginConfig.objects.get(id=data["id"])
             except PluginConfig.DoesNotExist:
                 raise PermissionDenied()
             else:
-                serializer = PluginConfigSerializer(instance, data=config, partial=True)
+                self.check_object_permissions(self.request, instance)
+                serializer = PluginConfigSerializer(instance, data=data, partial=True)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
         return Response(status=status.HTTP_200_OK)
@@ -1680,29 +1633,12 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     @plugin_config.mapping.post
     def create(self, request, name=None):
         logger.info(f"post plugin_config from user {request.user}, name {name}")
-        obj: PythonConfig = self.get_object(name)
-
-        for config in request.data:
-            organization = config.get("organization", False)
-            # only owner and admin can create org config
-            if (
-                request.user.has_membership()
-                and organization
-                and not request.user.membership.is_admin
-            ):
-                raise PermissionDenied()
-
-            config[obj.snake_case_name] = obj.name
-            parameter = obj.parameters.get(name=config["attribute"])
-            config["parameter"] = parameter.pk
-            config["owner"] = request.user
-
-        plugin_config_serializer = PluginConfigSerializer(
+        serializer = self.get_serializer(
             data=request.data, context={"request": request}, many=True
         )
-        plugin_config_serializer.is_valid(raise_exception=True)
-        plugin_config_serializer.save()
-        return Response(plugin_config_serializer.data, status=status.HTTP_201_CREATED)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 description = (

@@ -888,6 +888,13 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             required=True,
             type="str",
         )
+        param2 = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter2",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
         pc = PluginConfig(
             value="supersecret",
             for_organization=True,
@@ -895,18 +902,33 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             parameter=param,
             analyzer_config=ac,
         )
+        pc2 = PluginConfig(
+            value="supersecret2",
+            for_organization=True,
+            owner=self.superuser,
+            parameter=param2,
+            analyzer_config=ac,
+        )
         pc.full_clean()
         pc.save()
         self.assertEqual(pc.owner, org.owner)
+        pc2.full_clean()
+        pc2.save()
+        self.assertEqual(pc2.owner, org.owner)
 
         # owner can update org secret
         self.client.force_authenticate(user=self.superuser)
         payload = [
             {
+                "id": pc.pk,
                 "attribute": "mynewparameter",
                 "value": "new_org_supersecret",
-                "organization": "test_org",
-            }
+            },
+            {
+                "id": pc2.pk,
+                "attribute": "mynewparameter2",
+                "value": "new_org_supersecret2",
+            },
         ]
         response = self.client.patch(uri, payload, format="json")
         self.assertEqual(response.status_code, 200)
@@ -917,9 +939,9 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.client.force_authenticate(user=self.admin)
         payload = [
             {
+                "id": pc.pk,
                 "attribute": "mynewparameter",
                 "value": "new_org_supersecret_admin",
-                "organization": "test_org",
             }
         ]
         response = self.client.patch(uri, payload, format="json")
@@ -931,9 +953,9 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.client.force_authenticate(user=self.user)
         payload = [
             {
+                "id": pc.pk,
                 "attribute": "mynewparameter",
                 "value": "new_org_supersecret_user",
-                "organization": "test_org",
             }
         ]
         response = self.client.patch(uri, payload, format="json")
@@ -953,6 +975,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.client.force_authenticate(user=self.user)
         payload = [
             {
+                "id": secret_owner.pk,
                 "attribute": "mynewparameter",
                 "value": "new_supersecret_user_only",
             }
@@ -964,18 +987,19 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(pc_user.value, "new_supersecret_user_only")
 
         # other users cannot update user's personal items
-        self.client.force_authenticate(user=self.admin)
+        self.client.force_authenticate(user=self.guest)
         payload = [
             {
+                "id": secret_owner.pk,
                 "attribute": "mynewparameter",
-                "value": "new_supersecret_admin_only",
+                "value": "new_supersecret",
             }
         ]
         response = self.client.patch(uri, payload, format="json")
         self.assertEqual(response.status_code, 403)
         pc_user = PluginConfig.objects.get(id=secret_owner.pk)
         self.assertEqual(pc_user.value, "new_supersecret_user_only")
-        self.assertNotEqual(pc_user.value, "new_supersecret_admin_only")
+        self.assertNotEqual(pc_user.value, "new_supersecret")
 
         secret_owner.delete()
         pc.delete()
@@ -1007,6 +1031,13 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             required=True,
             type="str",
         )
+        param2 = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter2",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
 
         # owner can create org secret
         self.client.force_authenticate(user=self.superuser)
@@ -1015,7 +1046,16 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
                 "attribute": "mynewparameter",
                 "value": "new_org_supersecret",
                 "organization": "test_org",
-            }
+                "parameter": param.pk,
+                "analyzer_config": "AbuseIPDB",
+            },
+            {
+                "attribute": "mynewparameter2",
+                "value": "new_org_supersecret2",
+                "organization": "test_org",
+                "parameter": param2.pk,
+                "analyzer_config": "AbuseIPDB",
+            },
         ]
         response = self.client.post(uri, payload, format="json")
         self.assertEqual(response.status_code, 201)
@@ -1023,8 +1063,11 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(content[0]["value"], "new_org_supersecret")
         self.assertEqual(content[0]["owner"], self.superuser.username)
         pc = PluginConfig.objects.get(id=content[0]["id"])
+        pc2 = PluginConfig.objects.get(id=content[1]["id"])
         self.assertTrue(pc.for_organization)
+        self.assertTrue(pc2.for_organization)
         pc.delete()
+        pc2.delete()
 
         # admin can create org secret
         self.client.force_authenticate(user=self.admin)
@@ -1033,6 +1076,8 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
                 "attribute": "mynewparameter",
                 "value": "new_org_supersecret_admin",
                 "organization": "test_org",
+                "parameter": param.pk,
+                "analyzer_config": "AbuseIPDB",
             }
         ]
         response = self.client.post(uri, payload, format="json")
@@ -1042,7 +1087,26 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(content[0]["owner"], self.admin.username)
         pc = PluginConfig.objects.get(id=content[0]["id"])
         self.assertTrue(pc.for_organization)
+
+        # admin can create own personal secret for same param
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_supersecret_admin",
+                "parameter": param.pk,
+                "analyzer_config": "AbuseIPDB",
+                "for_organization": False,
+            }
+        ]
+        response = self.client.post(uri, payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        content = response.json()
+        self.assertEqual(content[0]["value"], "new_supersecret_admin")
+        self.assertEqual(content[0]["owner"], self.admin.username)
+        pc1 = PluginConfig.objects.get(id=content[0]["id"])
+        self.assertFalse(pc1.for_organization)
         pc.delete()
+        pc1.delete()
 
         # user can not create org secret
         self.client.force_authenticate(user=self.user)
@@ -1051,10 +1115,12 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
                 "attribute": "mynewparameter",
                 "value": "new_org_supersecret_user",
                 "organization": "test_org",
+                "parameter": param.pk,
+                "analyzer_config": "AbuseIPDB",
             }
         ]
         response = self.client.post(uri, payload, format="json")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
         # user can create own personal secret
         self.client.force_authenticate(user=self.user)
@@ -1062,6 +1128,9 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
             {
                 "attribute": "mynewparameter",
                 "value": "new_supersecret_user_only",
+                "parameter": param.pk,
+                "analyzer_config": "AbuseIPDB",
+                "for_organization": False,
             }
         ]
         response = self.client.post(uri, payload, format="json")
@@ -1071,6 +1140,20 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(content[0]["owner"], self.user.username)
         pc = PluginConfig.objects.get(id=content[0]["id"])
         self.assertFalse(pc.for_organization)
+
+        # user can not create a second config for the same parameter
+        self.client.force_authenticate(user=self.user)
+        payload = [
+            {
+                "attribute": "mynewparameter",
+                "value": "new_supersecret_user_only_copy",
+                "parameter": param.pk,
+                "analyzer_config": "AbuseIPDB",
+                "for_organization": False,
+            }
+        ]
+        response = self.client.post(uri, payload, format="json")
+        self.assertEqual(response.status_code, 400)
         pc.delete()
 
         pc = PluginConfig(
@@ -1085,11 +1168,15 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(pc.owner, None)
         self.assertFalse(pc.for_organization)
 
+        # user create own personal secret (override dafult config)
         self.client.force_authenticate(user=self.user)
         payload = [
             {
                 "attribute": "mynewparameter",
                 "value": "new_user_secret",
+                "parameter": param.pk,
+                "analyzer_config": "AbuseIPDB",
+                "for_organization": False,
             }
         ]
 
@@ -1185,6 +1272,40 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.delete(uri, {}, format="json")
         self.assertEqual(response.status_code, 204)
+
+    def test_get_403(self):
+        different_user = User.objects.create_user(
+            username="standard2_user",
+            email="standard_user@intelowl.com",
+            password="test",
+        )
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
+        pc = PluginConfig.objects.create(
+            value="https://intelowl.com",
+            owner=different_user,
+            parameter=param,
+            analyzer_config=ac,
+            for_organization=False,
+        )
+        self.client.force_authenticate(different_user)
+        response = self.client.get(
+            reverse("plugin-config-detail", kwargs={"pk": pc.pk})
+        )
+        self.assertEqual(200, response.status_code)
+        self.client.force_authenticate(self.user)
+        response = self.client.get(
+            reverse("plugin-config-detail", kwargs={"pk": pc.pk})
+        )
+        self.assertEqual(403, response.status_code)
+        pc.delete()
+        different_user.delete()
 
 
 class ElasticTestCase(CustomViewSetTestCase):

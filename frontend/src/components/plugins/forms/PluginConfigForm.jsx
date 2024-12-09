@@ -272,7 +272,7 @@ export function PluginConfigForm({
   // Only owner and admins can create/update/delete org config
   const disabledOrgActions =
     configType === PluginConfigTypes.ORG_CONFIG &&
-    !(isUserOwner || isUserAdmin(user));
+    !(isUserOwner || isUserAdmin(user.username));
 
   const initialValues = {};
   configs.forEach((config) => {
@@ -309,19 +309,29 @@ export function PluginConfigForm({
                 ? formik.values[config.attribute]
                 : formValueJson,
           };
-          // org config
-          if (configType === PluginConfigTypes.ORG_CONFIG) {
-            if (config.organization) {
-              obj.organization = config.organization;
-            } else {
-              obj.organization = orgName;
-            }
-          }
+
           // determinate which config should be created and which should be updated
-          if (config.exist && !config.default) {
-            configToUpdate.push(obj);
-          } else {
+          // CREATE
+          if (
+            !config.exist || // no config
+            (config.exist && config.owner === null) || // defualt config
+            (configType === PluginConfigTypes.USER_CONFIG &&
+              config.exist &&
+              config.for_organization) // org override
+          ) {
+            if (configType === PluginConfigTypes.ORG_CONFIG) {
+              obj.organization = config.organization || orgName;
+            } else {
+              obj.for_organization = false;
+            }
+            const pluginSlugName = `${pluginType}_config`;
+            obj[pluginSlugName] = pluginName;
+            obj.parameter = config.parameter;
             configToCreate.push(obj);
+          } else {
+            // UPDATE
+            obj.id = config.id;
+            configToUpdate.push(obj);
           }
         }
       });
@@ -419,8 +429,8 @@ export function PluginConfigForm({
                     title="Delete plugin config"
                     titlePlacement="top"
                     disabled={
-                      config.default ||
                       !config.exist ||
+                      config.owner === null ||
                       disabledOrgActions ||
                       (config.organization !== null &&
                         configType === PluginConfigTypes.USER_CONFIG)

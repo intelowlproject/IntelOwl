@@ -39,10 +39,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: false,
           attribute: "int_input",
           exist: true,
-          default: true,
           id: 10,
           owner: null,
           organization: null,
+          parameter: 10,
         },
         // bool - user config
         {
@@ -53,10 +53,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: false,
           attribute: "bool_input",
           exist: true,
-          default: false,
           id: 11,
           owner: "user",
           organization: null,
+          parameter: 11,
         },
         // str - secret required - no config
         {
@@ -67,7 +67,7 @@ describe("test PluginConfigForm component", () => {
           is_secret: true,
           attribute: "str_input",
           exist: false,
-          default: false,
+          parameter: 12,
         },
         // float - default config
         {
@@ -78,9 +78,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: false,
           attribute: "float_input",
           exist: true,
-          default: true,
           owner: null,
           organization: null,
+          id: 13,
+          parameter: 13,
         },
         // list - default config
         {
@@ -91,9 +92,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: true,
           attribute: "list_input",
           exist: true,
-          default: true,
           owner: null,
           organization: null,
+          id: 14,
+          parameter: 14,
         },
         // dict - no config
         {
@@ -104,7 +106,7 @@ describe("test PluginConfigForm component", () => {
           is_secret: true,
           attribute: "dict_input",
           exist: false,
-          default: false,
+          parameter: 15,
         },
       ],
       organization_config: [
@@ -117,10 +119,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: false,
           attribute: "int_input",
           exist: true,
-          default: true,
           id: 10,
           owner: null,
           organization: null,
+          parameter: 10,
         },
         // bool - default config
         {
@@ -131,10 +133,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: false,
           attribute: "bool_input",
           exist: true,
-          default: true,
           id: 11,
           owner: null,
           organization: null,
+          parameter: 11,
         },
         // str - secret required - no config
         {
@@ -145,7 +147,7 @@ describe("test PluginConfigForm component", () => {
           is_secret: true,
           attribute: "str_input",
           exist: false,
-          default: false,
+          parameter: 12,
         },
         // float - default config
         {
@@ -156,9 +158,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: false,
           attribute: "float_input",
           exist: true,
-          default: true,
           owner: null,
           organization: null,
+          id: 13,
+          parameter: 13,
         },
         // list - default config
         {
@@ -169,9 +172,10 @@ describe("test PluginConfigForm component", () => {
           is_secret: true,
           attribute: "list_input",
           exist: true,
-          default: true,
           owner: null,
           organization: null,
+          id: 14,
+          parameter: 14,
         },
         // dict - no config
         {
@@ -182,7 +186,7 @@ describe("test PluginConfigForm component", () => {
           is_secret: true,
           attribute: "dict_input",
           exist: false,
-          default: false,
+          parameter: 15,
         },
       ],
     };
@@ -393,7 +397,7 @@ describe("test PluginConfigForm component", () => {
     expect(saveButtonOrg).toBeInTheDocument();
   });
 
-  test("plugins config form - org user", async () => {
+  test("plugins config form - field (org user)", async () => {
     useOrganizationStore.mockImplementation(
       jest.fn((state) => state(mockedUseOrganizationStoreUser)),
     );
@@ -508,7 +512,7 @@ describe("test PluginConfigForm component", () => {
     );
 
     // edit user_config to have only default value
-    configs.user_config[1].default = true; // bool input
+    configs.user_config[1].owner = null; // bool input
 
     const { container } = render(
       <BrowserRouter>
@@ -606,22 +610,37 @@ describe("test PluginConfigForm component", () => {
           {
             attribute: "int_input",
             value: "200",
+            analyzer_config: "AbuseIPDB",
+            parameter: 10,
+            for_organization: false,
           },
           {
             attribute: "bool_input",
             value: "true",
+            analyzer_config: "AbuseIPDB",
+            parameter: 11,
+            for_organization: false,
           },
           {
             attribute: "str_input",
             value: '"myNewSecret"',
+            analyzer_config: "AbuseIPDB",
+            parameter: 12,
+            for_organization: false,
           },
           {
             attribute: "float_input",
             value: "12.4",
+            analyzer_config: "AbuseIPDB",
+            parameter: 13,
+            for_organization: false,
           },
           {
             attribute: "list_input",
             value: '["list value 1","list value 2","newListElement"]',
+            analyzer_config: "AbuseIPDB",
+            parameter: 14,
+            for_organization: false,
           },
         ],
       );
@@ -635,12 +654,14 @@ describe("test PluginConfigForm component", () => {
     );
 
     // edit user_config to have existing and not default values
-    configs.user_config[0].default = false; // int input
-    configs.user_config[1].default = false; // bool input
+    configs.user_config[0].owner = "user"; // int input
+    configs.user_config[1].owner = "user"; // bool input
     configs.user_config[2].value = "mysecret"; // str input
     configs.user_config[2].exist = true;
-    configs.user_config[3].default = false; // float input
-    configs.user_config[4].default = false; // list input
+    configs.user_config[2].owner = "user";
+    configs.user_config[2].id = 12;
+    configs.user_config[3].owner = "user"; // float input
+    configs.user_config[4].owner = "user"; // list input
     configs.user_config[5].value = '{"param1": "A"}'; // dict input
     configs.user_config[5].exist = true;
 
@@ -741,22 +762,27 @@ describe("test PluginConfigForm component", () => {
           {
             attribute: "int_input",
             value: "200",
+            id: 10,
           },
           {
             attribute: "bool_input",
             value: "true",
+            id: 11,
           },
           {
             attribute: "str_input",
             value: '"myNewSecret"',
+            id: 12,
           },
           {
             attribute: "float_input",
             value: "12.4",
+            id: 13,
           },
           {
             attribute: "list_input",
             value: '["list value 1","list value 2","newListElement"]',
+            id: 14,
           },
         ],
       );
@@ -923,26 +949,36 @@ describe("test PluginConfigForm component", () => {
             attribute: "int_input",
             value: "200",
             organization: mockedUseOrganizationStoreOwner.organization.name,
+            analyzer_config: "AbuseIPDB",
+            parameter: 10,
           },
           {
             attribute: "bool_input",
             value: "false",
             organization: mockedUseOrganizationStoreOwner.organization.name,
+            analyzer_config: "AbuseIPDB",
+            parameter: 11,
           },
           {
             attribute: "str_input",
             value: '"myNewSecret"',
             organization: mockedUseOrganizationStoreOwner.organization.name,
+            analyzer_config: "AbuseIPDB",
+            parameter: 12,
           },
           {
             attribute: "float_input",
             value: "12.4",
             organization: mockedUseOrganizationStoreOwner.organization.name,
+            analyzer_config: "AbuseIPDB",
+            parameter: 13,
           },
           {
             attribute: "list_input",
             value: '["list value 1","list value 2","newListElement"]',
             organization: mockedUseOrganizationStoreOwner.organization.name,
+            analyzer_config: "AbuseIPDB",
+            parameter: 14,
           },
         ],
       );

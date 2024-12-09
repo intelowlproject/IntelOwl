@@ -1026,7 +1026,7 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
             list: A list of permission instances.
         """
         permissions = super().get_permissions()
-        if self.action in ["destroy", "update", "retrieve"]:
+        if self.action in ["destroy", "update"]:
             if self.request.method == "PUT":
                 raise PermissionDenied()
             # code quality checker marks this as error, but it works correctly
@@ -1554,6 +1554,17 @@ class PluginConfigViewSet(ModelWithOwnershipViewSet):
     serializer_class = PluginConfigSerializer
     pagination_class = None
     queryset = PluginConfig.objects.all()
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action in ["retrieve"]:
+            # code quality checker marks this as error, but it works correctly
+            permissions.append(
+                (  # skipcq: PYL-E1102
+                    IsObjectAdminPermission | IsObjectOwnerPermission
+                )()
+            )
+        return permissions
 
     @action(
         methods=["get"],

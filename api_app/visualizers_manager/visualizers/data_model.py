@@ -132,6 +132,38 @@ class DataModel(Visualizer):
             sort_by_desc=True,
         )
 
+    def get_signatures(self, data_models):
+        columns = [
+            self.TableColumn(name="provider"),
+            self.TableColumn(name="url"),
+            self.TableColumn(name="score"),
+            self.TableColumn(name="analyzer"),
+        ]
+
+        data = []
+        for data_model in data_models:
+            signatures = data_model.signatures.all()
+            for signature in signatures:
+                data.append(
+                    {
+                        "provider": self.Base(value=signature.provider),
+                        "url": self.Base(value=signature.url),
+                        "score": self.Base(value=signature.score),
+                        "analyzer": self.Base(
+                            value=data_model.analyzers_report.all().first().config.name
+                        ),
+                    }
+                )
+
+        return self.Table(
+            columns=columns,
+            data=data,
+            size=Visualizer.Size.S_ALL,
+            page_size=10,
+            sort_by_id="provider",
+            sort_by_desc=True,
+        )
+
     def get_domain_data_elements(self, page, data_models):
         page.add_level(
             self.Level(
@@ -199,7 +231,7 @@ class DataModel(Visualizer):
             self.Level(
                 position=3,
                 size=self.LevelSize.S_3,
-                horizontal_list=self.HList(value=[]),
+                horizontal_list=self.HList(value=[self.get_signatures(data_models)]),
             )
         )
 

@@ -117,22 +117,22 @@ describe("AnalyzerConfigForm test", () => {
 
   test("create analyzer config", async () => {
     const userAction = userEvent.setup();
-    axios.post.mockImplementation(() => Promise.resolve(
-      { 
-        status: 201, 
+    axios.post.mockImplementation(() =>
+      Promise.resolve({
+        status: 201,
         data: {
           name: "myNewAnalyzer",
           parameters: {
-            headers: {id:455},
-            http_method: {id:455},
-            url: {id:455},
-            api_key_name: {id:455},
-            certificate: {id:455},
-            params: {id:455},
-          }
-        }
-      }
-    ));
+            headers: { id: 455 },
+            http_method: { id: 455 },
+            url: { id: 455 },
+            api_key_name: { id: 455 },
+            certificate: { id: 455 },
+            params: { id: 455 },
+          },
+        },
+      }),
+    );
 
     render(
       <BrowserRouter>
@@ -224,42 +224,42 @@ describe("AnalyzerConfigForm test", () => {
             value: "get",
             parameter: 455,
             for_organization: false,
-            analyzer_config:"myNewAnalyzer",
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "url",
             value: "http://www.google.com",
             parameter: 455,
             for_organization: false,
-            analyzer_config:"myNewAnalyzer",
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "headers",
             value: '{"Accept":"application/json"}',
             parameter: 455,
             for_organization: false,
-            analyzer_config:"myNewAnalyzer",
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "api_key_name",
             value: '""',
             parameter: 455,
             for_organization: false,
-            analyzer_config:"myNewAnalyzer",
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "certificate",
             value: '""',
             parameter: 455,
             for_organization: false,
-            analyzer_config:"myNewAnalyzer",
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "params",
             value: "{}",
             parameter: 455,
             for_organization: false,
-            analyzer_config:"myNewAnalyzer",
+            analyzer_config: "myNewAnalyzer",
           },
         ],
       );
@@ -268,20 +268,22 @@ describe("AnalyzerConfigForm test", () => {
 
   test("edit analyzer config", async () => {
     const userAction = userEvent.setup();
-    axios.patch.mockImplementation(() => Promise.resolve(
-      { status: 200,
+    axios.patch.mockImplementation(() =>
+      Promise.resolve({
+        status: 200,
         data: {
           name: "myNewAnalyzer",
           parameters: {
-            headers: {id:455},
-            http_method: {id:455},
-            url: {id:455},
-            api_key_name: {id:455},
-            certificate: {id:455},
-            params: {id:455},
-          }
-        }
-      }));
+            headers: { id: 455 },
+            http_method: { id: 455 },
+            url: { id: 455 },
+            api_key_name: { id: 455 },
+            certificate: { id: 455 },
+            params: { id: 455 },
+          },
+        },
+      }),
+    );
 
     render(
       <BrowserRouter>

@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.utils.timezone import now
-from elasticsearch_dsl.query import Bool, Range, Term
+from elasticsearch_dsl.query import Bool, Exists, Range, Term
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
@@ -901,6 +901,64 @@ class ElasticTestCase(CustomViewSetTestCase):
         response = self.client.get(self.uri)
         self.assertEqual(response.status_code, 401)
 
+    def test_validatior_errors(self):
+        # invalid plugin type
+        response_invalid_plugin_type = self.client.get(
+            self.uri, data={"plugin_name": "not valid"}
+        )
+        self.assertEqual(response_invalid_plugin_type.status_code, 400)
+        self.assertEqual(
+            response_invalid_plugin_type.json(),
+            {"errors": {"plugin_name": ['"not valid" is not a valid choice.']}},
+        )
+        # invalid status
+        response_invalid_status = self.client.get(
+            self.uri, data={"status": "not valid"}
+        )
+        self.assertEqual(response_invalid_status.status_code, 400)
+        self.assertEqual(
+            response_invalid_status.json(),
+            {"errors": {"status": ['"not valid" is not a valid choice.']}},
+        )
+        # start time
+        response_invalid_start_time = self.client.get(
+            self.uri,
+            data={
+                "start_start_time": datetime.datetime(2024, 12, 10, 11, 58, 46, 900001),
+                "end_start_time": datetime.datetime(2024, 12, 10, 11, 58, 46, 900000),
+            },
+        )
+        self.assertEqual(response_invalid_start_time.status_code, 400)
+        self.assertEqual(
+            response_invalid_start_time.json(),
+            {
+                "errors": {
+                    "non_field_errors": [
+                        "start date must be equal or lower than end date"
+                    ]
+                }
+            },
+        )
+        # end time
+        response_invalid_end_time = self.client.get(
+            self.uri,
+            data={
+                "start_end_time": datetime.datetime(2024, 12, 10, 11, 58, 46, 900001),
+                "end_end_time": datetime.datetime(2024, 12, 10, 11, 58, 46, 900000),
+            },
+        )
+        self.assertEqual(response_invalid_end_time.status_code, 400)
+        self.assertEqual(
+            response_invalid_end_time.json(),
+            {
+                "errors": {
+                    "non_field_errors": [
+                        "start date must be equal or lower than end date"
+                    ]
+                }
+            },
+        )
+
     @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @patch(
         "api_app.views.Search.execute",
@@ -1065,9 +1123,10 @@ class ElasticTestCase(CustomViewSetTestCase):
                             Term(membership__organization__name="elastic_test_user"),
                         ]
                     ),
-                    Term(plugin_name="analyzer"),
-                    Term(name="classic_dns"),
+                    Term(config__plugin_name="analyzer"),
+                    Term(config__name="classic_dns"),
                     Term(status=ReportStatus.SUCCESS),
+                    Bool(must_not=[Exists(field="errors")]),
                     Range(
                         start_time={
                             "gte": datetime.datetime(

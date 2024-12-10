@@ -1639,14 +1639,18 @@ def plugin_report_queries(request):
     # additional filters based on request params
     if elastic_request_params.plugin_name:
         filter_list.append(
-            QElastic("term", plugin_name=elastic_request_params.plugin_name)
+            QElastic("term", config__plugin_name=elastic_request_params.plugin_name)
         )
     if elastic_request_params.name:
-        filter_list.append(QElastic("term", name=elastic_request_params.name))
+        filter_list.append(QElastic("term", config__name=elastic_request_params.name))
     if elastic_request_params.status:
         filter_list.append(QElastic("term", status=elastic_request_params.status))
-    if elastic_request_params.errors:
+    if elastic_request_params.errors is True:
         filter_list.append(QElastic("exists", field="errors"))
+    elif elastic_request_params.errors is False:
+        filter_list.append(
+            QElastic("bool", must_not=[QElastic("exists", field="errors")])
+        )
     if elastic_request_params.start_start_time:
         filter_list.append(
             QElastic(

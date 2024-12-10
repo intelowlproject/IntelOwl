@@ -90,6 +90,45 @@ class DataModel(Visualizer):
                 )
         return resolutions
 
+    def get_pdns(self, data_models):
+        columns = [
+            self.TableColumn(name="rrname"),
+            self.TableColumn(name="rrtype"),
+            self.TableColumn(name="rdata"),
+            self.TableColumn(name="time_first"),
+            self.TableColumn(name="time_last"),
+            self.TableColumn(name="analyzer"),
+        ]
+
+        data = []
+        for data_model in data_models:
+            ietf_reports = data_model.ietf_report.all()
+            for report in ietf_reports:
+                data.append(
+                    {
+                        "rrname": self.Base(value=report.rrname),
+                        "rrtype": self.Base(value=report.rrtype),
+                        "rdata": self.VList(
+                            value=[self.Base(value=rdata) for rdata in report.rdata]
+                        ),
+                        "time_first": self.Base(
+                            value=report.time_first.strftime("%Y-%m-%d %H:%M:%S")
+                        ),
+                        "time_last": self.Base(
+                            value=report.time_last.strftime("%Y-%m-%d %H:%M:%S")
+                        ),
+                    }
+                )
+
+        return self.Table(
+            columns=columns,
+            data=data,
+            size=Visualizer.Size.S_ALL,
+            page_size=10,
+            sort_by_id="last_view",
+            sort_by_desc=True,
+        )
+
     def get_domain_data_elements(self, page, data_models):
         page.add_level(
             self.Level(
@@ -104,6 +143,14 @@ class DataModel(Visualizer):
                 position=4,
                 size=self.LevelSize.S_3,
                 horizontal_list=self.HList(value=[self.get_field("rank", data_models)]),
+            )
+        )
+
+        page.add_level(
+            self.Level(
+                position=5,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=[self.get_pdns(data_models)]),
             )
         )
 
@@ -133,6 +180,14 @@ class DataModel(Visualizer):
                         ]
                     ]
                 ),
+            )
+        )
+
+        page.add_level(
+            self.Level(
+                position=5,
+                size=self.LevelSize.S_3,
+                horizontal_list=self.HList(value=[self.get_pdns(data_models)]),
             )
         )
 

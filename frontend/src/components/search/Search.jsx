@@ -8,7 +8,6 @@ import {
   Col,
   Input,
   Label,
-  FormGroup,
   UncontrolledTooltip,
   Button,
   Spinner,
@@ -41,104 +40,103 @@ const tableProps = {
 
 export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
+  const [loadingData, setLoadingData] = React.useState(false);
 
   // data mock
-  const loading = false;
-  const error = null;
-  const data = [
-    {
-      job: { id: 1 },
-      config: {
-        name: "Quad9_DNS",
-        plugin_name: "analyzer",
-      },
-      status: "SUCCESS",
-      start_time: "2024-11-27T09:56:59.555203Z",
-      end_time: "2024-11-27T09:57:03.805453Z",
-      errors: [],
-      report: {
-        observable: "google.com",
-        resolutions: [
-          {
-            TTL: 268,
-            data: "216.58.205.46",
-            name: "google.com.",
-            type: 1,
-            Expires: "Wed, 27 Nov 2024 10:01:31 UTC",
-          },
-        ],
-      },
-    },
-    {
-      job: { id: 2 },
-      config: {
-        name: "Classic_DNS",
-        plugin_name: "analyzer",
-      },
-      status: "SUCCESS",
-      start_time: "2024-11-26T09:56:59.555203Z",
-      end_time: "2024-11-26T09:57:03.805453Z",
-      errors: [],
-      report: {
-        observable: "google.com",
-        resolutions: [
-          {
-            TTL: 268,
-            data: "216.58.205.46",
-            name: "google.com.",
-            type: 1,
-            Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
-          },
-        ],
-      },
-    },
-    {
-      job: { id: 3 },
-      config: {
-        name: "Classic_DNS",
-        plugin_name: "analyzer",
-      },
-      status: "KILLED",
-      start_time: "2024-11-26T09:56:59.555203Z",
-      end_time: "2024-11-26T09:57:03.805453Z",
-      errors: [],
-      report: {
-        observable: "google.com",
-        resolutions: [
-          {
-            TTL: 268,
-            data: "216.58.205.46",
-            name: "google.com.",
-            type: 1,
-            Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
-          },
-        ],
-      },
-    },
-    {
-      job: { id: 4 },
-      config: {
-        name: "Classic_DNS",
-        plugin_name: "analyzer",
-      },
-      status: "FAILED",
-      start_time: "2024-11-26T09:56:59.555203Z",
-      end_time: "2024-11-26T09:57:03.805453Z",
-      errors: ["error2"],
-      report: {
-        observable: "google.com",
-        resolutions: [
-          {
-            TTL: 268,
-            data: "216.58.205.46",
-            name: "google.com.",
-            type: 1,
-            Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
-          },
-        ],
-      },
-    },
-  ];
+  // const data = [
+  //   {
+  //     job: { id: 1 },
+  //     config: {
+  //       name: "Quad9_DNS",
+  //       plugin_name: "analyzer",
+  //     },
+  //     status: "SUCCESS",
+  //     start_time: "2024-11-27T09:56:59.555203Z",
+  //     end_time: "2024-11-27T09:57:03.805453Z",
+  //     errors: [],
+  //     report: {
+  //       observable: "google.com",
+  //       resolutions: [
+  //         {
+  //           TTL: 268,
+  //           data: "216.58.205.46",
+  //           name: "google.com.",
+  //           type: 1,
+  //           Expires: "Wed, 27 Nov 2024 10:01:31 UTC",
+  //         },
+  //       ],
+  //     },
+  //   },
+  //   {
+  //     job: { id: 2 },
+  //     config: {
+  //       name: "Classic_DNS",
+  //       plugin_name: "analyzer",
+  //     },
+  //     status: "SUCCESS",
+  //     start_time: "2024-11-26T09:56:59.555203Z",
+  //     end_time: "2024-11-26T09:57:03.805453Z",
+  //     errors: [],
+  //     report: {
+  //       observable: "google.com",
+  //       resolutions: [
+  //         {
+  //           TTL: 268,
+  //           data: "216.58.205.46",
+  //           name: "google.com.",
+  //           type: 1,
+  //           Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
+  //         },
+  //       ],
+  //     },
+  //   },
+  //   {
+  //     job: { id: 3 },
+  //     config: {
+  //       name: "Classic_DNS",
+  //       plugin_name: "analyzer",
+  //     },
+  //     status: "KILLED",
+  //     start_time: "2024-11-26T09:56:59.555203Z",
+  //     end_time: "2024-11-26T09:57:03.805453Z",
+  //     errors: [],
+  //     report: {
+  //       observable: "google.com",
+  //       resolutions: [
+  //         {
+  //           TTL: 268,
+  //           data: "216.58.205.46",
+  //           name: "google.com.",
+  //           type: 1,
+  //           Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
+  //         },
+  //       ],
+  //     },
+  //   },
+  //   {
+  //     job: { id: 4 },
+  //     config: {
+  //       name: "Classic_DNS",
+  //       plugin_name: "analyzer",
+  //     },
+  //     status: "FAILED",
+  //     start_time: "2024-11-26T09:56:59.555203Z",
+  //     end_time: "2024-11-26T09:57:03.805453Z",
+  //     errors: ["error2"],
+  //     report: {
+  //       observable: "google.com",
+  //       resolutions: [
+  //         {
+  //           TTL: 268,
+  //           data: "216.58.205.46",
+  //           name: "google.com.",
+  //           type: 1,
+  //           Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
+  //         },
+  //       ],
+  //     },
+  //   },
+  // ];
 
   const formik = useFormik({
     initialValues: {
@@ -149,7 +147,7 @@ export default function Search() {
       startTimeLte: new Date().toISOString().split("T")[0],
       endTimeGte: new Date().toISOString().split("T")[0],
       endTimeLte: new Date().toISOString().split("T")[0],
-      errors: false,
+      errors: null,
       report: "",
     },
     validate: (values) => {
@@ -172,27 +170,33 @@ export default function Search() {
       return errors;
     },
     onSubmit: async () => {
-      const payloadData = {
-        plugin_name: formik.values.type,
-        name: formik.values.name,
-        status: formik.values.status,
-        errors: formik.values.errors,
-        start_start_time: new Date(formik.values.startTimeGte),
-        start_end_time: new Date(formik.values.startTimeLte),
-        end_start_time: new Date(formik.values.endTimeGte),
-        end_end_time: new Date(formik.values.endTimeLte),
-        report: formik.values.report,
-      };
-      console.debug(payloadData);
+      const queryParams = {};
+      Object.entries(formik.values).forEach(([key, value]) => {
+        if (formik.initialValues[key] !== value)
+          if (key === "type") queryParams.plugin_name = value;
+          else if (
+            key.includes([
+              "start_start_time",
+              "start_end_time",
+              "end_start_time",
+              "end_end_time",
+            ])
+          )
+            queryParams[key] = new Date(value);
+          else queryParams[key] = value;
+      });
+      console.debug(queryParams);
+
       let response = [];
       try {
-        response = await pluginReportQueries(payloadData);
+        setLoadingData(true);
+        response = await pluginReportQueries(queryParams);
         console.debug(response);
       } catch (err) {
         // error will be handled by pluginReportQueries
       } finally {
-        setElasticData(data);
-        // setElasticData(response);
+        setLoadingData(false);
+        setElasticData(response.data.data);
         formik.setSubmitting(false);
       }
     },
@@ -364,21 +368,29 @@ export default function Search() {
                 />
               </div>
             </Col>
-            <Col sm={2} className="d-flex align-items-center ms-4">
-              <FormGroup switch className="mb-0">
-                <Label check className="fw-bold ms-2" for="search__errors">
-                  Errors in the report
-                </Label>
-                <Input
-                  id="search__errors"
-                  type="switch"
-                  name="errors"
-                  checked={formik.values.errors}
-                  value={formik.values.errors}
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                />
-              </FormGroup>
+            <Col sm={3} className="d-flex align-items-center ms-4">
+              <Label className="col-4 fw-bold mb-0" for="search__errors">
+                Errors:
+              </Label>
+              <Input
+                id="search__errors"
+                type="select"
+                name="errors"
+                value={formik.values.errors}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                className="bg-darker border-dark"
+              >
+                <option value="">Select...</option>
+                {["true", "false"].sort().map((value) => (
+                  <option
+                    key={`search__errors-select-option-${value}`}
+                    value={value}
+                  >
+                    {value.toUpperCase()}
+                  </option>
+                ))}
+              </Input>
             </Col>
           </Row>
           <Row id="search-input-fields-third-row" className="mt-3">
@@ -432,8 +444,7 @@ export default function Search() {
       </FormikProvider>
       <Row className="mt-4">
         <Loader
-          loading={loading}
-          error={error}
+          loading={loadingData}
           render={() => (
             <DataTable
               data={elasticData}

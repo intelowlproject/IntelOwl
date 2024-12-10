@@ -4,6 +4,7 @@ from rest_framework import serializers as rfs
 
 from ..models import PythonModule
 from ..serializers.plugin import (
+    ParameterSerializer,
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
@@ -34,6 +35,12 @@ class AnalyzerConfigSerializer(PythonConfigSerializer):
         model = AnalyzerConfig
         exclude = PythonConfigSerializer.Meta.exclude
         list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        parameters = ParameterSerializer(instance.parameters, many=True)
+        result["parameters"] = parameters.data
+        return result
 
 
 class AnalyzerConfigSerializerForMigration(PythonConfigSerializerForMigration):

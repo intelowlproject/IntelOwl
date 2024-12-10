@@ -16,6 +16,7 @@ export async function createConfiguration(type, data) {
         "success",
       );
     }
+    return { success, data: response.data };
   } catch (error) {
     addToast(
       `Failed creation of ${type} with name ${data.name}`,
@@ -26,7 +27,6 @@ export async function createConfiguration(type, data) {
     );
     return { success, error: prettifyErrors(error) };
   }
-  return { success };
 }
 
 export async function createPluginConfig(type, pluginName, data) {
@@ -64,6 +64,7 @@ export async function editConfiguration(type, pluginName, data) {
     if (success) {
       addToast(`${data.name} configuration saved`, null, "success");
     }
+    return { success, data: response.data };
   } catch (error) {
     addToast(
       `Failed to edited ${type} with name ${data.name}`,
@@ -74,7 +75,6 @@ export async function editConfiguration(type, pluginName, data) {
     );
     return { success, error: prettifyErrors(error) };
   }
-  return { success };
 }
 
 export async function editPluginConfig(type, pluginName, data) {

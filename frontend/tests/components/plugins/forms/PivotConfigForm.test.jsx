@@ -129,7 +129,7 @@ describe("PivotConfigForm test", () => {
 
   test("create pivot config - AnyCompare", async () => {
     const userAction = userEvent.setup();
-    axios.post.mockImplementation(() => Promise.resolve({ status: 201 }));
+    axios.post.mockImplementation(() => Promise.resolve({ status: 201, data: {parameters: {field_to_compare: {id:455}}} }));
 
     render(
       <BrowserRouter>
@@ -215,6 +215,9 @@ describe("PivotConfigForm test", () => {
           {
             attribute: "field_to_compare",
             value: "test.value",
+            for_organization: false,
+            pivot_config: "myNewPivot",
+            parameter: 455,
           },
         ],
       );

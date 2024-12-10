@@ -104,34 +104,6 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
         payloadData.python_module =
           "basic_observable_analyzer.BasicObservableAnalyzer";
       }
-      // plugin config
-      const pluginConfig = [
-        {
-          attribute: "http_method",
-          value: formik.values.http_method,
-        },
-        {
-          attribute: "url",
-          value: formik.values.url,
-        },
-        {
-          attribute: "headers",
-          value:
-            headersJsonInput?.json || JSON.stringify(formik.values.headers),
-        },
-        {
-          attribute: "api_key_name",
-          value: JSON.stringify(formik.values.api_key_name),
-        },
-        {
-          attribute: "certificate",
-          value: JSON.stringify(formik.values.certificate),
-        },
-        {
-          attribute: "params",
-          value: paramsJsonInput?.json || JSON.stringify({}),
-        },
-      ];
 
       // configuration
       if (isEditing) {
@@ -152,6 +124,39 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
       }
 
       // plugin config
+      const pluginConfig = [
+        {
+          attribute: "http_method",
+          value: formik.values.http_method,
+          parameter: response.data.parameters.http_method.id,
+        },
+        {
+          attribute: "url",
+          value: formik.values.url,
+          parameter: response.data.parameters.url.id,
+        },
+        {
+          attribute: "headers",
+          value:
+            headersJsonInput?.json || JSON.stringify(formik.values.headers),
+          parameter: response.data.parameters.headers.id,
+        },
+        {
+          attribute: "api_key_name",
+          value: JSON.stringify(formik.values.api_key_name),
+          parameter: response.data.parameters.api_key_name.id,
+        },
+        {
+          attribute: "certificate",
+          value: JSON.stringify(formik.values.certificate),
+          parameter: response.data.parameters.certificate.id,
+        },
+        {
+          attribute: "params",
+          value: paramsJsonInput?.json || JSON.stringify({}),
+          parameter: response.data.parameters.params.id,
+        },
+      ];
       if (response?.success) {
         if (isEditing) {
           responsePluginConfig = await editPluginConfig(
@@ -160,6 +165,12 @@ export function AnalyzerConfigForm({ analyzerConfig, toggle, isEditing }) {
             pluginConfig,
           );
         } else {
+          pluginConfig.forEach((config) =>
+            Object.assign(config, {
+              analyzer_config: response.data.name,
+              for_organization: false,
+            }),
+          );
           responsePluginConfig = await createPluginConfig(
             PluginsTypes.ANALYZER,
             formik.values.name,

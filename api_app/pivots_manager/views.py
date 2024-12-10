@@ -1,6 +1,8 @@
 from rest_framework import mixins, viewsets
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 
+from api_app.models import PluginConfig
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.pivots_manager.permissions import (
     PivotActionsPermission,
@@ -63,3 +65,17 @@ class PivotMapViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PivotPluginConfigViewSet(PluginConfigViewSet):
     queryset = PivotConfig.objects.all()
+
+    def update(self, request, name=None):
+        obj: PivotConfig = self.get_queryset().get(name=name)
+        for data in request.data:
+            try:
+                plugin_config: PluginConfig = PluginConfig.objects.get(
+                    parameter=data["parameter"],
+                    owner=request.user,
+                    pivot_config=obj.pk,
+                )
+                data["id"] = plugin_config.pk
+            except PluginConfig.DoesNotExist:
+                raise NotFound("Requested plugin config does not exist.")
+        return super().update(request, name)

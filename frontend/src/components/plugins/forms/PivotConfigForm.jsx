@@ -173,23 +173,24 @@ export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
 
       // plugin config
       if (response?.success && formik.values.field_to_compare) {
-        const pluginConfig = [
-          {
-            attribute: "field_to_compare",
-            value: formik.values.field_to_compare,
-          },
-        ];
+        const pluginConfig = {
+          attribute: "field_to_compare",
+          value: formik.values.field_to_compare,
+          parameter: response.data.parameters.field_to_compare.id,
+        };
         if (isEditing) {
           responsePluginConfig = await editPluginConfig(
             PluginsTypes.PIVOT,
             formik.values.name,
-            pluginConfig,
+            [pluginConfig],
           );
         } else {
+          pluginConfig.pivot_config = formik.values.name;
+          pluginConfig.for_organization = false;
           responsePluginConfig = await createPluginConfig(
             PluginsTypes.PIVOT,
             formik.values.name,
-            pluginConfig,
+            [pluginConfig],
           );
         }
       }

@@ -7,6 +7,7 @@ from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.plugin import (
+    ParameterSerializer,
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
@@ -94,6 +95,12 @@ class PivotConfigSerializer(PythonConfigSerializer):
                 {"detail": "No Analyzers and Connectors attached to pivot"}
             )
         return attrs
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        parameters = ParameterSerializer(instance.parameters, many=True)
+        result["parameters"] = parameters.data
+        return result
 
 
 class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):

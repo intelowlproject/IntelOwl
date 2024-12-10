@@ -117,6 +117,9 @@ class DataModel(Visualizer):
                         "time_last": self.Base(
                             value=report.time_last.strftime("%Y-%m-%d %H:%M:%S")
                         ),
+                        "analyzer": self.Base(
+                            value=data_model.analyzers_report.all().first().config.name
+                        ),
                     }
                 )
 

@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { useFormik, Form, FormikProvider, ErrorMessage } from "formik";
-// import useAxios from "axios-hooks";
+import { useFormik, Form, FormikProvider } from "formik";
 import {
   Container,
   Row,
@@ -42,112 +41,20 @@ export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
 
-  // data mock
-  // const data = [
-  //   {
-  //     job: { id: 1 },
-  //     config: {
-  //       name: "Quad9_DNS",
-  //       plugin_name: "analyzer",
-  //     },
-  //     status: "SUCCESS",
-  //     start_time: "2024-11-27T09:56:59.555203Z",
-  //     end_time: "2024-11-27T09:57:03.805453Z",
-  //     errors: [],
-  //     report: {
-  //       observable: "google.com",
-  //       resolutions: [
-  //         {
-  //           TTL: 268,
-  //           data: "216.58.205.46",
-  //           name: "google.com.",
-  //           type: 1,
-  //           Expires: "Wed, 27 Nov 2024 10:01:31 UTC",
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     job: { id: 2 },
-  //     config: {
-  //       name: "Classic_DNS",
-  //       plugin_name: "analyzer",
-  //     },
-  //     status: "SUCCESS",
-  //     start_time: "2024-11-26T09:56:59.555203Z",
-  //     end_time: "2024-11-26T09:57:03.805453Z",
-  //     errors: [],
-  //     report: {
-  //       observable: "google.com",
-  //       resolutions: [
-  //         {
-  //           TTL: 268,
-  //           data: "216.58.205.46",
-  //           name: "google.com.",
-  //           type: 1,
-  //           Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     job: { id: 3 },
-  //     config: {
-  //       name: "Classic_DNS",
-  //       plugin_name: "analyzer",
-  //     },
-  //     status: "KILLED",
-  //     start_time: "2024-11-26T09:56:59.555203Z",
-  //     end_time: "2024-11-26T09:57:03.805453Z",
-  //     errors: [],
-  //     report: {
-  //       observable: "google.com",
-  //       resolutions: [
-  //         {
-  //           TTL: 268,
-  //           data: "216.58.205.46",
-  //           name: "google.com.",
-  //           type: 1,
-  //           Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     job: { id: 4 },
-  //     config: {
-  //       name: "Classic_DNS",
-  //       plugin_name: "analyzer",
-  //     },
-  //     status: "FAILED",
-  //     start_time: "2024-11-26T09:56:59.555203Z",
-  //     end_time: "2024-11-26T09:57:03.805453Z",
-  //     errors: ["error2"],
-  //     report: {
-  //       observable: "google.com",
-  //       resolutions: [
-  //         {
-  //           TTL: 268,
-  //           data: "216.58.205.46",
-  //           name: "google.com.",
-  //           type: 1,
-  //           Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
-  //         },
-  //       ],
-  //     },
-  //   },
-  // ];
+  // default: 30days
+  const defaultStartDate = new Date();
+  defaultStartDate.setDate(defaultStartDate.getDate() - 30);
 
   const formik = useFormik({
     initialValues: {
       type: "",
       name: "",
       status: "",
-      startTimeGte: new Date().toISOString().split("T")[0],
-      startTimeLte: new Date().toISOString().split("T")[0],
-      endTimeGte: new Date().toISOString().split("T")[0],
-      endTimeLte: new Date().toISOString().split("T")[0],
-      errors: null,
+      fromStartTime: defaultStartDate.toISOString().split("T")[0],
+      toStartTime: new Date().toISOString().split("T")[0],
+      fromEndTime: defaultStartDate.toISOString().split("T")[0],
+      toEndTime: new Date().toISOString().split("T")[0],
+      errors: "all",
       report: "",
     },
     validate: (values) => {
@@ -155,22 +62,23 @@ export default function Search() {
       console.debug(values);
       const errors = {};
 
-      if (Date.parse(values.startTimeLte) < Date.parse(values.startTimeGte)) {
-        errors.startTimeLte = "Invalid date";
+      if (Date.parse(values.toStartTime) < Date.parse(values.fromStartTime)) {
+        errors.startTime = "Start date must be equal or lower than end date";
       }
-      if (Date.parse(values.endTimeGte) < Date.parse(values.startTimeLte)) {
-        errors.endTimeGte = "Invalid date";
+      if (Date.parse(values.toEndTime) < Date.parse(values.fromEndTime)) {
+        errors.endTime = "Start date must be equal or lower than end date";
       }
-      if (Date.parse(values.endTimeLte) < Date.parse(values.endTimeGte)) {
-        errors.endTimeLte = "Invalid date";
-      }
-
       console.debug("formik validation errors");
       console.debug(errors);
       return errors;
     },
     onSubmit: async () => {
-      const queryParams = {};
+      const queryParams = {
+        // start_start_time: new Date(formik.values.fromStartTime),
+        // end_start_time: new Date(formik.values.toStartTime),
+        // start_end_time: new Date(formik.values.fromEndTime),
+        // end_end_time: new Date(formik.values.toEndTime),
+      };
       Object.entries(formik.values).forEach(([key, value]) => {
         if (formik.initialValues[key] !== value)
           if (key === "type") queryParams.plugin_name = value;
@@ -288,84 +196,84 @@ export default function Search() {
           <Row id="search-input-fields-second-row" className="mt-3">
             <Col sm={4} className="d-flex align-items-center">
               <Label className="col-3 fw-bold mb-0">Start time:</Label>
-              <div className="d-flex align-items-center">
-                <Label className="me-2 mb-0" for="search__startTimeGte">
-                  from:
-                </Label>
-                <Input
-                  id="search__startTimeGte"
-                  type="date"
-                  name="startTimeGte"
-                  autoComplete="off"
-                  value={formik.values.startTimeGte}
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  invalid={
-                    formik.touched.startTimeGte && formik.errors.startTimeGte
-                  }
-                />
-              </div>
-              <div className="d-flex align-items-center ms-2">
-                <Label className="me-2 mb-0" for="search__startTimeLte">
-                  to:
-                </Label>
-                <div className="d-flex flex-column align-item-start">
-                  <Input
-                    id="search__startTimeLte"
-                    type="date"
-                    name="startTimeLte"
-                    autoComplete="off"
-                    value={formik.values.startTimeLte}
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    invalid={
-                      formik.touched.startTimeLte && formik.errors.startTimeLte
-                    }
-                  />
-                  <ErrorMessage
-                    name="startTimeLte"
-                    render={(msg) => (
-                      <small className="text-danger">{msg}</small>
-                    )}
-                  />
+              <div className="d-flex flex-column align-item-start">
+                <div className="d-flex">
+                  <div className="d-flex align-items-center">
+                    <Label className="me-2 mb-0" for="search__fromStartTime">
+                      from:
+                    </Label>
+                    <Input
+                      id="search__fromStartTime"
+                      type="date"
+                      name="fromStartTime"
+                      autoComplete="off"
+                      value={formik.values.fromStartTime}
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                      invalid={formik.errors.startTime}
+                    />
+                  </div>
+                  <div className="d-flex align-items-center ms-2">
+                    <Label className="me-2 mb-0" for="search__toStartTime">
+                      to:
+                    </Label>
+                    <Input
+                      id="search__toStartTime"
+                      type="date"
+                      name="toStartTime"
+                      autoComplete="off"
+                      value={formik.values.toStartTime}
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                      invalid={formik.errors.startTime}
+                    />
+                  </div>
                 </div>
+                {formik.errors.startTime && (
+                  <small className="text-danger">
+                    {formik.errors.startTime}
+                  </small>
+                )}
               </div>
             </Col>
             <Col sm={4} className="d-flex align-items-center ms-4">
               <Label className="col-3 fw-bold mb-0">End time:</Label>
-              <div className="d-flex align-items-center">
-                <Label className="me-2 mb-0" for="search__endTimeGte">
-                  from:
-                </Label>
-                <Input
-                  id="search__endTimeGte"
-                  type="date"
-                  name="endTimeGte"
-                  autoComplete="off"
-                  value={formik.values.endTimeGte}
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  invalid={
-                    formik.touched.endTimeGte && formik.errors.endTimeGte
-                  }
-                />
-              </div>
-              <div className="d-flex align-items-center ms-2">
-                <Label className="me-2 mb-0" for="search__endTimeLte">
-                  to:
-                </Label>
-                <Input
-                  id="search__endTimeLte"
-                  type="date"
-                  name="endTimeLte"
-                  autoComplete="off"
-                  value={formik.values.endTimeLte}
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  invalid={
-                    formik.touched.endTimeLte && formik.errors.endTimeLte
-                  }
-                />
+              <div className="d-flex flex-column align-item-start">
+                <div className="d-flex">
+                  <div className="d-flex align-items-center">
+                    <Label className="me-2 mb-0" for="search__fromEndTime">
+                      from:
+                    </Label>
+                    <Input
+                      id="search__fromEndTime"
+                      type="date"
+                      name="fromEndTime"
+                      autoComplete="off"
+                      value={formik.values.fromEndTime}
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                      invalid={formik.errors.endTime}
+                    />
+                  </div>
+                  <div className="d-flex align-items-center ms-2">
+                    <Label className="me-2 mb-0" for="search__toEndTime">
+                      to:
+                    </Label>
+                    <Input
+                      id="search__toEndTime"
+                      type="date"
+                      name="toEndTime"
+                      autoComplete="off"
+                      value={formik.values.toEndTime}
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                      invalid={formik.errors.endTime}
+                    />
+                  </div>
+                </div>
+                {formik.errors.endTime && (
+                  <small className="text-danger">{formik.errors.endTime}</small>
+                )}
               </div>
             </Col>
             <Col sm={3} className="d-flex align-items-center ms-4">
@@ -382,30 +290,36 @@ export default function Search() {
                 className="bg-darker border-dark"
               >
                 <option value="">Select...</option>
-                {["true", "false"].sort().map((value) => (
-                  <option
-                    key={`search__errors-select-option-${value}`}
-                    value={value}
-                  >
-                    {value.toUpperCase()}
-                  </option>
-                ))}
+                {[
+                  { value: "all", label: "All reports" },
+                  { value: true, label: "Reports with errors" },
+                  { value: false, label: "Reports without errors" },
+                ]
+                  .sort()
+                  .map((option) => (
+                    <option
+                      key={`search__errors-select-option-${option.value}`}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
               </Input>
             </Col>
           </Row>
           <Row id="search-input-fields-third-row" className="mt-3">
             <Col sm={11} className="d-flex align-items-center">
-              <Label className="col-1 fw-bold mb-0" for="search__text-search">
+              <Label className="col-1 fw-bold mb-0" for="search__report">
                 Text search:
                 <MdInfoOutline
-                  id="search__text-search-infoicon"
+                  id="search__report-infoicon"
                   fontSize="20"
                   className="ms-2"
                 />
                 <UncontrolledTooltip
                   trigger="hover"
                   delay={{ show: 0, hide: 500 }}
-                  target="search__text-search-infoicon"
+                  target="search__report-infoicon"
                   placement="right"
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
@@ -414,12 +328,14 @@ export default function Search() {
                 </UncontrolledTooltip>
               </Label>
               <Input
-                id="search__text-search"
+                id="search__report"
                 type="text"
-                name="test-search"
-                value=""
-                onChange={() => null}
+                name="report"
+                value={formik.values.report}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 className="bg-darker border-dark ms-2"
+                invalid={formik.touched.report && formik.errors.report}
               />
             </Col>
             <Col

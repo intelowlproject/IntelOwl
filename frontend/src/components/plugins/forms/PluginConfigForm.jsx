@@ -233,6 +233,8 @@ function calculateStateSelector(pluginType) {
       return (state) => [state.retrieveVisualizersConfiguration];
     case PluginsTypes.PIVOT:
       return (state) => [state.retrievePivotsConfiguration];
+    case PluginsTypes.INGESTOR:
+      return (state) => [state.retrieveIngestorsConfiguration];
     default:
       return [];
   }

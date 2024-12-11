@@ -139,7 +139,6 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
   const { isInOrganization, isUserAdmin } = useOrganizationStore(
     React.useCallback(
       (state) => ({
-        fetchAll: state.fetchAll,
         isInOrganization: state.isInOrganization,
         isUserAdmin: state.isUserAdmin,
       }),
@@ -342,7 +341,6 @@ export function PluginConfigButton({ pluginConfig, pluginType_ }) {
   const { isInOrganization, isUserAdmin } = useOrganizationStore(
     React.useCallback(
       (state) => ({
-        fetchAll: state.fetchAll,
         isInOrganization: state.isInOrganization,
         isUserAdmin: state.isUserAdmin,
       }),

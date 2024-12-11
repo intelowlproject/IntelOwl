@@ -9,12 +9,16 @@ from api_app.data_model_manager.models import (
     IPDataModel,
 )
 from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.decorators import (
+    visualizable_error_handler_with_params,
+)
 from api_app.visualizers_manager.enums import VisualizableTableColumnSize
 
 logger = getLogger(__name__)
 
 
 class DataModel(Visualizer):
+    @visualizable_error_handler_with_params("get_eval_list")
     def get_eval_list(self, eval, color, icon, data_models):
         disable_element = not len(data_models)
         return self.VList(
@@ -36,6 +40,7 @@ class DataModel(Visualizer):
             start_open=True,
         )
 
+    @visualizable_error_handler_with_params("get_base_data_list")
     def get_base_data_list(self, name, values_list):
         disable_element = not len(values_list)
         return self.VList(
@@ -45,6 +50,7 @@ class DataModel(Visualizer):
             start_open=True,
         )
 
+    @visualizable_error_handler_with_params("get_field")
     def get_field(self, field, data_models):
         for data_model in data_models:
             value = getattr(data_model, field, None)
@@ -67,6 +73,7 @@ class DataModel(Visualizer):
                 disable=True,
             )
 
+    @visualizable_error_handler_with_params("get_resolutions")
     def get_resolutions(self, data_models):
         resolutions = []
         for data_model in data_models:
@@ -91,6 +98,7 @@ class DataModel(Visualizer):
                 )
         return resolutions
 
+    @visualizable_error_handler_with_params("get_pdns")
     def get_pdns(self, data_models):
         columns = [
             self.TableColumn(
@@ -157,6 +165,7 @@ class DataModel(Visualizer):
             sort_by_desc=True,
         )
 
+    @visualizable_error_handler_with_params("get_signatures")
     def get_signatures(self, data_models):
         columns = [
             self.TableColumn(

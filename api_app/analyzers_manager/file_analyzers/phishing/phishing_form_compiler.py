@@ -139,7 +139,12 @@ class PhishingFormCompiler(FileAnalyzer):
         result: {} = {}
         # setting default to page itself if action is not specified
         if not (form_action := form.get("action", None)):
+            logger.info(
+                f"'action' attribute not found in form. Defaulting to {self.target_site=}"
+            )
             form_action = self.target_site
+        logger.info(f"Extracted action to post data to: {form_action}")
+
         for element in form.findall(".//input"):
             input_type: str = element.get("type", None)
             input_name: str = element.get("name", None)
@@ -186,11 +191,19 @@ class PhishingFormCompiler(FileAnalyzer):
 
     @staticmethod
     def handle_3xx_response(response: Response) -> [str]:
+        result: [] = []
         # extract all redirection history
-        return [history.request.url for history in response.history]
+        for history in response.history:
+            logger.info(
+                f"Extracting 3xx {response.status_code} HTTP response with url {history.request.url}"
+            )
+            result.append(history.request.url)
 
     @staticmethod
     def handle_2xx_response(response: Response) -> str:
+        logger.info(
+            f"Extracting 2xx {response.status_code} response with url {response.request.url}"
+        )
         return response.request.url
 
     def is_js_used_in_page(self) -> bool:

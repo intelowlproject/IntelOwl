@@ -211,7 +211,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=3,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_4,
                 horizontal_list=self.HList(value=self.get_resolutions(data_models)),
             )
         )
@@ -219,7 +219,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=4,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_4,
                 horizontal_list=self.HList(value=[self.get_field("rank", data_models)]),
             )
         )
@@ -227,7 +227,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=5,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_5,
                 horizontal_list=self.HList(value=[self.get_pdns(data_models)]),
             )
         )
@@ -236,7 +236,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=3,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_4,
                 horizontal_list=self.HList(value=self.get_resolutions(data_models)),
             )
         )
@@ -244,7 +244,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=4,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_4,
                 horizontal_list=self.HList(
                     value=[
                         self.get_field(field, data_models)
@@ -264,7 +264,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=5,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_5,
                 horizontal_list=self.HList(value=[self.get_pdns(data_models)]),
             )
         )
@@ -273,7 +273,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=3,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_5,
                 horizontal_list=self.HList(value=[self.get_signatures(data_models)]),
             )
         )
@@ -375,7 +375,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=1,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_4,
                 horizontal_list=self.HList(value=evals_vlists),
             )
         )
@@ -383,7 +383,7 @@ class DataModel(Visualizer):
         page.add_level(
             self.Level(
                 position=2,
-                size=self.LevelSize.S_3,
+                size=self.LevelSize.S_4,
                 horizontal_list=self.HList(value=base_data_vlists),
             )
         )

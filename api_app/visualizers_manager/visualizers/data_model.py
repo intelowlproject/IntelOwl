@@ -205,7 +205,6 @@ class DataModel(Visualizer):
             size=Visualizer.Size.S_ALL,
             page_size=10,
             sort_by_id="provider",
-            sort_by_desc=True,
         )
 
     def get_domain_data_elements(self, page, data_models):

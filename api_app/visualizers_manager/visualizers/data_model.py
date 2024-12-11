@@ -93,12 +93,20 @@ class DataModel(Visualizer):
 
     def get_pdns(self, data_models):
         columns = [
-            self.TableColumn(name="rrname"),
-            self.TableColumn(name="rrtype"),
-            self.TableColumn(name="rdata"),
-            self.TableColumn(name="time_first"),
-            self.TableColumn(name="time_last"),
-            self.TableColumn(name="analyzer"),
+            self.TableColumn(
+                name="rrname", max_width=VisualizableTableColumnSize.S_300
+            ),
+            self.TableColumn(name="rrtype", max_width=VisualizableTableColumnSize.S_50),
+            self.TableColumn(name="rdata", max_width=VisualizableTableColumnSize.S_300),
+            self.TableColumn(
+                name="time_first", max_width=VisualizableTableColumnSize.S_100
+            ),
+            self.TableColumn(
+                name="time_last", max_width=VisualizableTableColumnSize.S_100
+            ),
+            self.TableColumn(
+                name="analyzer", max_width=VisualizableTableColumnSize.S_200
+            ),
         ]
 
         data = []
@@ -107,19 +115,35 @@ class DataModel(Visualizer):
             for report in ietf_reports:
                 data.append(
                     {
-                        "rrname": self.Base(value=report.rrname),
-                        "rrtype": self.Base(value=report.rrtype),
+                        "rrname": self.Base(
+                            value=report.rrname,
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
+                        ),
+                        "rrtype": self.Base(
+                            value=report.rrtype,
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
+                        ),
                         "rdata": self.VList(
-                            value=[self.Base(value=rdata) for rdata in report.rdata]
+                            value=[self.Base(value=rdata) for rdata in report.rdata],
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
                         ),
                         "time_first": self.Base(
-                            value=report.time_first.strftime("%Y-%m-%d %H:%M:%S")
+                            value=report.time_first.strftime("%Y-%m-%d %H:%M:%S"),
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
                         ),
                         "time_last": self.Base(
-                            value=report.time_last.strftime("%Y-%m-%d %H:%M:%S")
+                            value=report.time_last.strftime("%Y-%m-%d %H:%M:%S"),
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
                         ),
                         "analyzer": self.Base(
-                            value=data_model.analyzers_report.all().first().config.name
+                            value=data_model.analyzers_report.all().first().config.name,
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
                         ),
                     }
                 )

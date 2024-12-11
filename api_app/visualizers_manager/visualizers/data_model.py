@@ -9,6 +9,7 @@ from api_app.data_model_manager.models import (
     IPDataModel,
 )
 from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.enums import VisualizableTableColumnSize
 
 logger = getLogger(__name__)
 
@@ -134,10 +135,14 @@ class DataModel(Visualizer):
 
     def get_signatures(self, data_models):
         columns = [
-            self.TableColumn(name="provider"),
-            self.TableColumn(name="url"),
-            self.TableColumn(name="score"),
-            self.TableColumn(name="analyzer"),
+            self.TableColumn(
+                name="provider", max_width=VisualizableTableColumnSize.S_100
+            ),
+            self.TableColumn(name="url", max_width=VisualizableTableColumnSize.S_300),
+            self.TableColumn(name="score", max_width=VisualizableTableColumnSize.S_50),
+            self.TableColumn(
+                name="analyzer", max_width=VisualizableTableColumnSize.S_100
+            ),
         ]
 
         data = []
@@ -146,11 +151,26 @@ class DataModel(Visualizer):
             for signature in signatures:
                 data.append(
                     {
-                        "provider": self.Base(value=signature.provider),
-                        "url": self.Base(value=signature.url),
-                        "score": self.Base(value=signature.score),
+                        "provider": self.Base(
+                            value=signature.provider,
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
+                        ),
+                        "url": self.Base(
+                            value=signature.url,
+                            link=signature.url,
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
+                        ),
+                        "score": self.Base(
+                            value=signature.score,
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
+                        ),
                         "analyzer": self.Base(
-                            value=data_model.analyzers_report.all().first().config.name
+                            value=data_model.analyzers_report.all().first().config.name,
+                            color=self.Color.TRANSPARENT,
+                            disable=False,
                         ),
                     }
                 )

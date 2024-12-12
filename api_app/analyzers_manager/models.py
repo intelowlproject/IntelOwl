@@ -50,7 +50,9 @@ class AnalyzerReport(AbstractReport):
 
     class Meta:
         unique_together = [("config", "job")]
-        indexes = AbstractReport.Meta.indexes
+        indexes = AbstractReport.Meta.indexes + [
+            models.Index(fields=["data_model_content_type", "data_model_object_id"])
+        ]
 
     def clean(self):
         if self.data_model_content_type:

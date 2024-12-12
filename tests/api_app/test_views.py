@@ -365,6 +365,15 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
 
 
+@patch(
+    "api_app.views.parse_humanized_range",
+    MagicMock(
+        return_value=(
+            datetime.datetime(2024, 11, 27, 12, tzinfo=datetime.timezone.utc),
+            "day",
+        )
+    ),
+)
 class JobViewSetTests(CustomViewSetTestCase):
     jobs_list_uri = reverse("jobs-list")
     jobs_recent_scans_uri = reverse("jobs-recent-scans")

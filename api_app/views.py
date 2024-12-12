@@ -900,6 +900,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             and the aggregated data.
         """
         delta, basis = self.__parse_range(self.request)
+        logger.debug(f"{delta=}, {basis=}, {users=}")
         filter_kwargs = {"received_request_time__gte": delta}
         if users:
             filter_kwargs["user__in"] = users

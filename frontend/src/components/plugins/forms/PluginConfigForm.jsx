@@ -28,7 +28,6 @@ import {
   PluginsTypes,
 } from "../../../constants/pluginConst";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
-import { useAuthStore } from "../../../stores/useAuthStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 
 function CustomInput({ formik, config, configType, disabledInputField }) {
@@ -245,6 +244,7 @@ export function PluginConfigForm({
   pluginType,
   configType,
   configs,
+  isUserOwnerOrAdmin,
   refetch,
   toggle,
 }) {
@@ -255,16 +255,11 @@ export function PluginConfigForm({
     calculateStateSelector(pluginType),
   );
 
-  const [user] = useAuthStore((state) => [state.user]);
   const {
-    isUserOwner,
-    isUserAdmin,
     organization: { name: orgName },
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
-        isUserOwner: state.isUserOwner,
-        isUserAdmin: state.isUserAdmin,
         organization: state.organization,
       }),
       [],
@@ -273,8 +268,7 @@ export function PluginConfigForm({
 
   // Only owner and admins can create/update/delete org config
   const disabledOrgActions =
-    configType === PluginConfigTypes.ORG_CONFIG &&
-    !(isUserOwner || isUserAdmin(user.username));
+    configType === PluginConfigTypes.ORG_CONFIG && !isUserOwnerOrAdmin;
 
   const initialValues = {};
   configs.forEach((config) => {
@@ -480,6 +474,7 @@ PluginConfigForm.propTypes = {
     .isRequired,
   configType: PropTypes.oneOf(Object.values(PluginConfigTypes)).isRequired,
   configs: PropTypes.arrayOf(Object),
+  isUserOwnerOrAdmin: PropTypes.bool.isRequired,
   refetch: PropTypes.func.isRequired,
   toggle: PropTypes.func.isRequired,
 };

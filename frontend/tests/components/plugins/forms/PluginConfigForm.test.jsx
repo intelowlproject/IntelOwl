@@ -203,6 +203,7 @@ describe("test PluginConfigForm component", () => {
           pluginType="analyzer"
           configType={PluginConfigTypes.USER_CONFIG}
           configs={configs.user_config}
+          isUserOwnerOrAdmin={false}
           refetch={() => jest.fn()}
           toggle={() => jest.fn()}
         />
@@ -306,6 +307,7 @@ describe("test PluginConfigForm component", () => {
           pluginType="analyzer"
           configType={PluginConfigTypes.ORG_CONFIG}
           configs={configs.organization_config}
+          isUserOwnerOrAdmin
           refetch={() => jest.fn()}
           toggle={() => jest.fn()}
         />
@@ -409,6 +411,7 @@ describe("test PluginConfigForm component", () => {
           pluginType="analyzer"
           configType={PluginConfigTypes.ORG_CONFIG}
           configs={configs.organization_config}
+          isUserOwnerOrAdmin={false}
           refetch={() => jest.fn()}
           toggle={() => jest.fn()}
         />
@@ -521,6 +524,7 @@ describe("test PluginConfigForm component", () => {
           pluginType="analyzer"
           configType={PluginConfigTypes.USER_CONFIG}
           configs={configs.user_config}
+          isUserOwnerOrAdmin={false}
           refetch={() => jest.fn()}
           toggle={() => jest.fn()}
         />
@@ -859,6 +863,7 @@ describe("test PluginConfigForm component", () => {
           pluginType="analyzer"
           configType={PluginConfigTypes.ORG_CONFIG}
           configs={configs.organization_config}
+          isUserOwnerOrAdmin
           refetch={() => jest.fn()}
           toggle={() => jest.fn()}
         />

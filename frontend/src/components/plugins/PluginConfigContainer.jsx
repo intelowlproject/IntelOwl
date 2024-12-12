@@ -9,13 +9,17 @@ import { PluginConfigForm } from "./forms/PluginConfigForm";
 import { API_BASE_URI } from "../../constants/apiURLs";
 import { PluginConfigTypes } from "../../constants/pluginConst";
 import { useOrganizationStore } from "../../stores/useOrganizationStore";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
   console.debug("PluginConfigContainer rendered!");
 
-  const { isInOrganization } = useOrganizationStore(
+  const [user] = useAuthStore((state) => [state.user]);
+  const { isUserOwner, isUserAdmin, isInOrganization } = useOrganizationStore(
     React.useCallback(
       (state) => ({
+        isUserOwner: state.isUserOwner,
+        isUserAdmin: state.isUserAdmin,
         isInOrganization: state.isInOrganization,
       }),
       [],
@@ -36,6 +40,8 @@ export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
     },
     { useCache: false },
   );
+
+  const isUserOwnerOrAdmin = isUserOwner || isUserAdmin(user.username);
 
   return (
     <div id="plugin-config-container">
@@ -87,20 +93,26 @@ export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
                 pluginType={pluginType}
                 configType={PluginConfigTypes.USER_CONFIG}
                 configs={configs.user_config}
+                isUserOwnerOrAdmin={isUserOwnerOrAdmin}
                 refetch={refetchPluginConfig}
                 toggle={toggle}
               />
             </TabPane>
             <TabPane tabId={PluginConfigTypes.ORG_CONFIG}>
               <small className="text-muted">
-                Note: Only org admins can modify the configuration, other users
-                can only view it.
+                Note: Only org admins can modify the configuration,
+                {isUserOwnerOrAdmin ? (
+                  <span> other users can only view it</span>
+                ) : (
+                  <span className="text-accent"> you can only view it.</span>
+                )}
               </small>
               <PluginConfigForm
                 pluginName={pluginName}
                 pluginType={pluginType}
                 configType={PluginConfigTypes.ORG_CONFIG}
                 configs={configs.organization_config}
+                isUserOwnerOrAdmin={isUserOwnerOrAdmin}
                 refetch={refetchPluginConfig}
                 toggle={toggle}
               />

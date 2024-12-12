@@ -55,7 +55,7 @@ export default function Search() {
       toStartTime: new Date().toISOString().split("T")[0],
       fromEndTime: defaultStartDate.toISOString().split("T")[0],
       toEndTime: new Date().toISOString().split("T")[0],
-      errors: "all",
+      errors: "",
       report: "",
     },
     validate: (values) => {
@@ -75,26 +75,24 @@ export default function Search() {
     },
     onSubmit: async () => {
       const queryParams = {
-        // start_start_time: new Date(formik.values.fromStartTime),
-        // end_start_time: new Date(formik.values.toStartTime),
-        // start_end_time: new Date(formik.values.fromEndTime),
-        // end_end_time: new Date(formik.values.toEndTime),
+        start_start_time: new Date(formik.values.fromStartTime),
+        end_start_time: new Date(formik.values.toStartTime),
+        start_end_time: new Date(formik.values.fromEndTime),
+        end_end_time: new Date(formik.values.toEndTime),
       };
       Object.entries(formik.values).forEach(([key, value]) => {
         if (formik.initialValues[key] !== value)
           if (key === "type") queryParams.plugin_name = value;
-          else if (
-            key.includes([
-              "start_start_time",
-              "start_end_time",
-              "end_start_time",
-              "end_end_time",
-            ])
-          )
-            queryParams[key] = new Date(value);
+          else if (key === "fromStartTime")
+            queryParams.start_start_time = new Date(value);
+          else if (key === "toStartTime")
+            queryParams.end_start_time = new Date(value);
+          else if (key === "fromEndTime")
+            queryParams.start_end_time = new Date(value);
+          else if (key === "toEndTime")
+            queryParams.end_end_time = new Date(value);
           else queryParams[key] = value;
       });
-      console.debug(queryParams);
 
       let response = [];
       try {
@@ -311,8 +309,8 @@ export default function Search() {
                 onChange={formik.handleChange}
                 className="bg-darker border-dark"
               >
+                <option value="">Select...</option>
                 {[
-                  { value: "all", label: "All reports" },
                   { value: true, label: "Reports with errors" },
                   { value: false, label: "Reports without errors" },
                 ]

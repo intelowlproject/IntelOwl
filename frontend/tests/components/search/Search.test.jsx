@@ -194,9 +194,18 @@ describe("test Search component", () => {
     expect(searchButton.className).not.toContain("disabled");
     await user.click(searchButton);
 
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - 30);
+
     await waitFor(() => {
         expect(axios.get).toHaveBeenCalledWith(`${PLUGIN_REPORT_QUERIES}`, {
-          params: {name: "Classic_DNS"}
+          params: {
+            name: "Classic_DNS",
+            end_end_time: new Date(new Date().toISOString().split("T")[0]),
+            end_start_time: new Date(new Date().toISOString().split("T")[0]),
+            start_end_time: new Date(fromDate.toISOString().split("T")[0]),
+            start_start_time: new Date(fromDate.toISOString().split("T")[0]),
+          }
         });
         expect(screen.getByText("#2")).toBeInTheDocument();
         const startTimeCell = screen.getAllByRole("cell")[2];

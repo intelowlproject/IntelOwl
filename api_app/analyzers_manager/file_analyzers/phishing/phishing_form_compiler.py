@@ -196,7 +196,7 @@ class PhishingFormCompiler(FileAnalyzer):
         params = self.compile_form_field(form)
         dest_url = self._extract_action_attribute(form)
         logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
-        return requests.post(
+        response = requests.post(
             url=dest_url,
             data=params,
             proxies=(
@@ -205,6 +205,8 @@ class PhishingFormCompiler(FileAnalyzer):
                 else None
             ),
         )
+        logger.info(f"Request headers: {response.request.headers}")
+        return response
 
     @staticmethod
     def handle_3xx_response(response: Response) -> [str]:
@@ -232,6 +234,7 @@ class PhishingFormCompiler(FileAnalyzer):
     def analyze_responses(self, responses: [Response]) -> {}:
         result: [] = []
         for response in responses:
+            logger.info(f"Response headers for {response.url}: {response.headers}")
             try:
                 # handle 4xx and 5xx
                 response.raise_for_status()

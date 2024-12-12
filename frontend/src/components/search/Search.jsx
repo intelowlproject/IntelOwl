@@ -11,6 +11,7 @@ import {
   Button,
   Spinner,
 } from "reactstrap";
+import { Link } from "react-router-dom";
 import { MdInfoOutline } from "react-icons/md";
 import { JSONTree } from "react-json-tree";
 import { Loader, DataTable } from "@certego/certego-ui";
@@ -99,7 +100,6 @@ export default function Search() {
       try {
         setLoadingData(true);
         response = await pluginReportQueries(queryParams);
-        console.debug(response);
       } catch (err) {
         // error will be handled by pluginReportQueries
       } finally {
@@ -109,7 +109,6 @@ export default function Search() {
       }
     },
   });
-  console.debug(formik);
 
   return (
     <Container fluid>
@@ -120,6 +119,28 @@ export default function Search() {
               <h1 id="reportSearch"> Search&nbsp;</h1>
               <span className="ms-4" style={{ marginBottom: "0.5rem" }}>
                 Advanced search in plugin reports of the performed analysis.
+                <MdInfoOutline
+                  id="search__elastic-infoicon"
+                  fontSize="20"
+                  className="ms-2"
+                />
+                <UncontrolledTooltip
+                  trigger="hover"
+                  delay={{ show: 0, hide: 200 }}
+                  target="search__elastic-infoicon"
+                  placement="right"
+                  fade={false}
+                  innerClassName="p-2 text-start text-nowrap md-fit-content"
+                >
+                  This section only works if Elasticsearch has been configured
+                  correctly. For more info check the{" "}
+                  <Link
+                    to="https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#elasticsearch"
+                    target="_blank"
+                  >
+                    official doc.
+                  </Link>
+                </UncontrolledTooltip>
               </span>
             </Col>
           </Row>
@@ -162,6 +183,7 @@ export default function Search() {
                 id="search__name"
                 type="text"
                 name="name"
+                placeholder="Enter a plugin name"
                 value={formik.values.name}
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
@@ -197,7 +219,7 @@ export default function Search() {
             <Col sm={4} className="d-flex align-items-center">
               <Label className="col-3 fw-bold mb-0">Start time:</Label>
               <div className="d-flex flex-column align-item-start">
-                <div className="d-flex">
+                <div className="d-flex flex-wrap">
                   <div className="d-flex align-items-center">
                     <Label className="me-2 mb-0" for="search__fromStartTime">
                       from:
@@ -239,7 +261,7 @@ export default function Search() {
             <Col sm={4} className="d-flex align-items-center ms-4">
               <Label className="col-3 fw-bold mb-0">End time:</Label>
               <div className="d-flex flex-column align-item-start">
-                <div className="d-flex">
+                <div className="d-flex flex-wrap">
                   <div className="d-flex align-items-center">
                     <Label className="me-2 mb-0" for="search__fromEndTime">
                       from:
@@ -289,7 +311,6 @@ export default function Search() {
                 onChange={formik.handleChange}
                 className="bg-darker border-dark"
               >
-                <option value="">Select...</option>
                 {[
                   { value: "all", label: "All reports" },
                   { value: true, label: "Reports with errors" },
@@ -318,13 +339,14 @@ export default function Search() {
                 />
                 <UncontrolledTooltip
                   trigger="hover"
-                  delay={{ show: 0, hide: 500 }}
+                  delay={{ show: 0, hide: 200 }}
                   target="search__report-infoicon"
                   placement="right"
                   fade={false}
                   innerClassName="p-2 text-start text-nowrap md-fit-content"
                 >
-                  Elastic docs:
+                  Text field to search within the “report“ and therefore in the
+                  data extracted from the plugins.
                 </UncontrolledTooltip>
               </Label>
               <Input

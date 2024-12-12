@@ -17,17 +17,19 @@ describe("test Search component", () => {
       </BrowserRouter>,
     );
 
-    const searchTitle = screen.getByRole("heading", {name: /Search/i});
+    const searchTitle = screen.getByRole("heading", { name: /Search/i });
     expect(searchTitle).toBeInTheDocument();
-    const searchDescription = screen.getByText("Advanced search in plugin reports of the performed analysis.");
+    const searchDescription = screen.getByText(
+      "Advanced search in plugin reports of the performed analysis.",
+    );
     expect(searchDescription).toBeInTheDocument();
 
     // first row
-    const typeField = screen.getByRole("combobox", {name: /Type:/i});
+    const typeField = screen.getByRole("combobox", { name: /Type:/i });
     expect(typeField).toBeInTheDocument();
-    const nameField = screen.getByRole("textbox", {name: /Name:/i});
+    const nameField = screen.getByRole("textbox", { name: /Name:/i });
     expect(nameField).toBeInTheDocument();
-    const statusField = screen.getByRole("combobox", {name: /Status:/i});
+    const statusField = screen.getByRole("combobox", { name: /Status:/i });
     expect(statusField).toBeInTheDocument();
     // second row
     const startTimeField = screen.getByText("Start time:");
@@ -42,97 +44,99 @@ describe("test Search component", () => {
     expect(fromEndTimeInput).toBeInTheDocument();
     const toEndTimeInput = screen.getAllByText("to:")[1];
     expect(toEndTimeInput).toBeInTheDocument();
-    const errorsField = screen.getByRole("combobox", {name: /Errors:/i});
+    const errorsField = screen.getByRole("combobox", { name: /Errors:/i });
     expect(errorsField).toBeInTheDocument();
     // third row
-    const fullTextField = screen.getByRole("textbox", {name: /Text search:/i});
+    const fullTextField = screen.getByRole("textbox", {
+      name: /Text search:/i,
+    });
     expect(fullTextField).toBeInTheDocument();
-    const searchButton = screen.getByRole("button", {name: /Search/i});
+    const searchButton = screen.getByRole("button", { name: /Search/i });
     expect(searchButton).toBeInTheDocument();
     expect(searchButton.className).toContain("disabled");
 
     // column headers
+    expect(screen.getByRole("columnheader", { name: "" })).toBeInTheDocument();
     expect(
-        screen.getByRole("columnheader", { name: "" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Job ID" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Start time" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "End time" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Type" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Name" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Status" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Errors" }),
-      ).toBeInTheDocument();
+      screen.getByRole("columnheader", { name: "Job ID" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Start time" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "End time" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Type" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Name" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Status" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Errors" }),
+    ).toBeInTheDocument();
 
-    // no data 
-    expect(
-        screen.getByRole("cell", { name: "No Data" }),
-      ).toBeInTheDocument();
+    // no data
+    expect(screen.getByRole("cell", { name: "No Data" })).toBeInTheDocument();
   });
 
   test("Search page - search plugin name", async () => {
     const user = userEvent.setup();
-    axios.get.mockImplementation(() => Promise.resolve({ 
-        status: 200, 
+    axios.get.mockImplementation(() =>
+      Promise.resolve({
+        status: 200,
         data: {
-            data: [
-                {
-                    job: {id: 2},
-                    config: {
-                        name: "Classic_DNS",
-                        plugin_name: "analyzer",
-                    },
-                    status: "SUCCESS",
-                    start_time: "2024-11-26T09:56:59.555203Z",
-                    end_time: "2024-11-26T09:57:03.805453Z",
-                    errors: [],
-                    report: {
-                        observable: "google.com",
-                        resolutions: [
-                            {
-                                TTL: 268,
-                                data: "216.58.205.46",
-                                name: "google.com.",
-                                type: 1,
-                                Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
-                            },
-                        ],
-                    },
-                },
-            ] 
-        }
-    }));
-    
+          data: [
+            {
+              job: { id: 2 },
+              config: {
+                name: "Classic_DNS",
+                plugin_name: "analyzer",
+              },
+              status: "SUCCESS",
+              start_time: "2024-11-26T09:56:59.555203Z",
+              end_time: "2024-11-26T09:57:03.805453Z",
+              errors: [],
+              report: {
+                observable: "google.com",
+                resolutions: [
+                  {
+                    TTL: 268,
+                    data: "216.58.205.46",
+                    name: "google.com.",
+                    type: 1,
+                    Expires: "Wed, 26 Nov 2024 10:01:31 UTC",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }),
+    );
+
     render(
       <BrowserRouter>
         <Search />
       </BrowserRouter>,
     );
 
-    const searchTitle = screen.getByRole("heading", {name: /Search/i});
+    const searchTitle = screen.getByRole("heading", { name: /Search/i });
     expect(searchTitle).toBeInTheDocument();
-    const searchDescription = screen.getByText("Advanced search in plugin reports of the performed analysis.");
+    const searchDescription = screen.getByText(
+      "Advanced search in plugin reports of the performed analysis.",
+    );
     expect(searchDescription).toBeInTheDocument();
 
     // first row
-    const typeField = screen.getByRole("combobox", {name: /Type:/i});
+    const typeField = screen.getByRole("combobox", { name: /Type:/i });
     expect(typeField).toBeInTheDocument();
-    const nameField = screen.getByRole("textbox", {name: /Name:/i});
+    const nameField = screen.getByRole("textbox", { name: /Name:/i });
     expect(nameField).toBeInTheDocument();
-    const statusField = screen.getByRole("combobox", {name: /Status:/i});
+    const statusField = screen.getByRole("combobox", { name: /Status:/i });
     expect(statusField).toBeInTheDocument();
     // second row
     const startTimeField = screen.getByText("Start time:");
@@ -147,47 +151,44 @@ describe("test Search component", () => {
     expect(fromEndTimeInput).toBeInTheDocument();
     const toEndTimeInput = screen.getAllByText("to:")[1];
     expect(toEndTimeInput).toBeInTheDocument();
-    const errorsField = screen.getByRole("combobox", {name: /Errors:/i});
+    const errorsField = screen.getByRole("combobox", { name: /Errors:/i });
     expect(errorsField).toBeInTheDocument();
     // third row
-    const fullTextField = screen.getByRole("textbox", {name: /Text search:/i});
+    const fullTextField = screen.getByRole("textbox", {
+      name: /Text search:/i,
+    });
     expect(fullTextField).toBeInTheDocument();
-    const searchButton = screen.getByRole("button", {name: /Search/i});
+    const searchButton = screen.getByRole("button", { name: /Search/i });
     expect(searchButton).toBeInTheDocument();
     expect(searchButton.className).toContain("disabled");
 
-
     // column headers
+    expect(screen.getByRole("columnheader", { name: "" })).toBeInTheDocument();
     expect(
-        screen.getByRole("columnheader", { name: "" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Job ID" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Start time" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "End time" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Type" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Name" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Status" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: "Errors" }),
-      ).toBeInTheDocument();
-
-    // no data 
-    expect(
-        screen.getByRole("cell", { name: "No Data" }),
+      screen.getByRole("columnheader", { name: "Job ID" }),
     ).toBeInTheDocument();
-    
+    expect(
+      screen.getByRole("columnheader", { name: "Start time" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "End time" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Type" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Name" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Status" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Errors" }),
+    ).toBeInTheDocument();
+
+    // no data
+    expect(screen.getByRole("cell", { name: "No Data" })).toBeInTheDocument();
+
     // select plugin name
     await user.type(nameField, "Classic_DNS");
 
@@ -198,26 +199,26 @@ describe("test Search component", () => {
     fromDate.setDate(fromDate.getDate() - 30);
 
     await waitFor(() => {
-        expect(axios.get).toHaveBeenCalledWith(`${PLUGIN_REPORT_QUERIES}`, {
-          params: {
-            name: "Classic_DNS",
-            end_end_time: new Date(new Date().toISOString().split("T")[0]),
-            end_start_time: new Date(new Date().toISOString().split("T")[0]),
-            start_end_time: new Date(fromDate.toISOString().split("T")[0]),
-            start_start_time: new Date(fromDate.toISOString().split("T")[0]),
-          }
-        });
-        expect(screen.getByText("#2")).toBeInTheDocument();
-        const startTimeCell = screen.getAllByRole("cell")[2];
-        expect(startTimeCell).toBeInTheDocument();
-        expect(startTimeCell.textContent).toBe("10:56:59 AM Nov 26th, 2024");
-        const endTimeCell = screen.getAllByRole("cell")[3];
-        expect(endTimeCell).toBeInTheDocument();
-        expect(endTimeCell.textContent).toBe("10:57:03 AM Nov 26th, 2024");
-        expect(screen.getByText("analyzer")).toBeInTheDocument();
-        expect(screen.getByText("Classic_DNS")).toBeInTheDocument();
-        expect(screen.getAllByText("SUCCESS")[1]).toBeInTheDocument();
-        expect(screen.getByText("0 errors")).toBeInTheDocument();
+      expect(axios.get).toHaveBeenCalledWith(`${PLUGIN_REPORT_QUERIES}`, {
+        params: {
+          name: "Classic_DNS",
+          end_end_time: new Date(new Date().toISOString().split("T")[0]),
+          end_start_time: new Date(new Date().toISOString().split("T")[0]),
+          start_end_time: new Date(fromDate.toISOString().split("T")[0]),
+          start_start_time: new Date(fromDate.toISOString().split("T")[0]),
+        },
+      });
+      expect(screen.getByText("#2")).toBeInTheDocument();
+      const startTimeCell = screen.getAllByRole("cell")[2];
+      expect(startTimeCell).toBeInTheDocument();
+      expect(startTimeCell.textContent).toBe("10:56:59 AM Nov 26th, 2024");
+      const endTimeCell = screen.getAllByRole("cell")[3];
+      expect(endTimeCell).toBeInTheDocument();
+      expect(endTimeCell.textContent).toBe("10:57:03 AM Nov 26th, 2024");
+      expect(screen.getByText("analyzer")).toBeInTheDocument();
+      expect(screen.getByText("Classic_DNS")).toBeInTheDocument();
+      expect(screen.getAllByText("SUCCESS")[1]).toBeInTheDocument();
+      expect(screen.getByText("0 errors")).toBeInTheDocument();
     });
   });
 });

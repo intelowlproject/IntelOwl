@@ -406,3 +406,8 @@ class DataModel(Visualizer):
             self.get_file_data_elements(page, data_models)
 
         return [page.to_dict()]
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = []
+        return super()._monkeypatch(patches=patches)

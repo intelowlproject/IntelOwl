@@ -4,6 +4,9 @@ import os
 from typing import Iterator
 
 from selenium.common import WebDriverException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 from seleniumwire.request import Request
 from seleniumwire.webdriver import ChromeOptions, Remote
 
@@ -40,7 +43,8 @@ def driver_exception_handler(func):
                 f"Error while performing {func.__name__}"
                 f"{' for url=' + url if func.__name__ == 'navigate' else ''}: {e}"
             )
-            self.restart(motivation=func.__name__)
+            # default is 5
+            self.restart(motivation=func.__name__, timeout_wait_page=5)
             func(self, *args, **kwargs)
 
     return handle_exception
@@ -90,7 +94,7 @@ class DriverWrapper:
         )
         return driver
 
-    def restart(self, motivation: str = ""):
+    def restart(self, motivation: str = "", timeout_wait_page: int = 0):
         logger.info(f"Restarting driver: {motivation=}")
         self._driver.quit()
         self._driver = self._init_driver(
@@ -98,10 +102,10 @@ class DriverWrapper:
         )
         if self.last_url:
             logger.info(f"Navigating to {self.last_url} after driver has restarted")
-            self.navigate(self.last_url)
+            self.navigate(self.last_url, timeout_wait_page=timeout_wait_page)
 
     @driver_exception_handler
-    def navigate(self, url: str = ""):
+    def navigate(self, url: str = "", timeout_wait_page: int = 0):
         if not url:
             logger.error("Empty URL! Something's wrong!")
             return
@@ -109,6 +113,13 @@ class DriverWrapper:
         self.last_url = url
         logger.info(f"Navigating to {url=}")
         self._driver.get(url)
+        # dinamically wait for page to load its content with a fallback
+        # of `timeout_wait_page` seconds.
+        # waiting to see if any visible input tag appears
+        if timeout_wait_page:
+            WebDriverWait(self._driver, timeout=timeout_wait_page).until(
+                EC.visibility_of_any_elements_located((By.TAG_NAME, "input"))
+            )
 
     @driver_exception_handler
     def get_page_source(self) -> str:

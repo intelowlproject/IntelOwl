@@ -338,6 +338,9 @@ class Job(MP_Node):
             models.Index(
                 fields=["sent_to_bi", "-received_request_time"], name="JobBISearch"
             ),
+            # SELECT COUNT(*) AS "__count" FROM "api_app_job"
+            # WHERE ("api_app_job"."depth" >= ? AND "api_app_job"."path"::text LIKE ? AND NOT ("api_app_job"."id" = ?))
+            models.Index(fields=["depth", "path", "id"], name="MPNodeSearch"),
         ]
 
     # constants

@@ -136,7 +136,7 @@ class PhishingFormCompiler(FileAnalyzer):
             if input_name in names:
                 return fake_value
 
-    def _extract_action_attribute(self, form) -> str:
+    def extract_action_attribute(self, form) -> str:
         if not (form_action := form.get("action", None)):
             logger.info(
                 f"'action' attribute not found in form. Defaulting to {self.target_site=}"
@@ -194,7 +194,7 @@ class PhishingFormCompiler(FileAnalyzer):
 
     def perform_request_to_form(self, form) -> Response:
         params = self.compile_form_field(form)
-        dest_url = self._extract_action_attribute(form)
+        dest_url = self.extract_action_attribute(form)
         logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
         response = requests.post(
             url=dest_url,

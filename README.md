@@ -37,9 +37,11 @@ It provides:
   - *analyzers* that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
   - *connectors* that can be run to export data to external platforms (like MISP or OpenCTI)
   - *pivots* that are designed to trigger the execution of a chain of analysis and connect them to each other
-  - *visualizers* that are designed to create custom visualizations of analyzers results
-  - *ingestors* that allows to automatically ingest stream of observables or files to IntelOwl itself
+  - *visualizers* that are designed to create custom visualizations of analyzers results in the GUI
+  - *ingestors* that allow to automatically ingest stream of observables or files to IntelOwl itself
   - *playbooks* that are meant to make analysis easily repeatable
+  - *data models* to map the different data extracted from analyzers to a single common schema
+- A starting point for analysts' **Investigations**: users can register their findings, correlate the information found, and collaborate...all in a single place
 
 
 ### Documentation

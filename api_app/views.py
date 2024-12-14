@@ -425,8 +425,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     - **aggregate_type**: Aggregate jobs by type (file or observable) over a specified time range.
     - **aggregate_observable_classification**: Aggregate jobs by observable classification over a specified time range.
     - **aggregate_file_mimetype**: Aggregate jobs by file MIME type over a specified time range.
-    - **aggregate_observable_name**: Aggregate jobs by observable name over a specified time range.
-    - **aggregate_md5**: Aggregate jobs by MD5 hash over a specified time range.
+    - **aggregate_top_playbook**: Aggregate jobs by playbook over a specified time range and show the most used.
+    - **aggregate_top_user**: Aggregate jobs by user over a specified time range and show the most used.
+    - **aggregate_top_tlp**: Aggregate jobs by TLP over a specified time range and show the most used.
 
     Permissions:
     - **IsAuthenticated**: Requires authentication for all actions.
@@ -697,6 +698,13 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
             for key in Job.STATUSES.values
+            if key
+            in [
+                Job.STATUSES.PENDING,
+                Job.STATUSES.FAILED,
+                Job.STATUSES.REPORTED_WITH_FAILS,
+                Job.STATUSES.REPORTED_WITHOUT_FAILS,
+            ]
         }
         return self.__aggregation_response_static(
             annotations, users=self.get_org_members(request)
@@ -764,38 +772,54 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         )
 
     @action(
-        url_path="aggregate/observable_name",
+        url_path="aggregate/top_playbook",
         detail=False,
         methods=["GET"],
     )
     @cache_action_response(timeout=60 * 5)
-    def aggregate_observable_name(self, request):
+    def aggregate_top_playbook(self, request):
         """
-        Aggregate jobs by observable name.
+        Aggregate playbooks by usage.
 
         Returns:
-        - Aggregated count of jobs for each observable name.
+        - Aggregated count of playbooks for each one.
         """
         return self.__aggregation_response_dynamic(
-            "observable_name", False, users=self.get_org_members(request)
+            "playbook_to_execute__name", users=self.get_org_members(request)
         )
 
     @action(
-        url_path="aggregate/md5",
+        url_path="aggregate/top_user",
         detail=False,
         methods=["GET"],
     )
     @cache_action_response(timeout=60 * 5)
-    def aggregate_md5(self, request):
+    def aggregate_top_user(self, request):
         """
-        Aggregate jobs by MD5 hash.
+        Aggregate Users by usage.
 
         Returns:
-        - Aggregated count of jobs for each MD5 hash.
+        - Aggregated count of users for each one.
         """
-        # this is for file
         return self.__aggregation_response_dynamic(
-            "md5", False, users=self.get_org_members(request)
+            "user__username", users=self.get_org_members(request)
+        )
+
+    @action(
+        url_path="aggregate/top_tlp",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_top_tlp(self, request):
+        """
+        Aggregate TLPs by usage.
+
+        Returns:
+        - Aggregated count of TLPs for each one.
+        """
+        return self.__aggregation_response_dynamic(
+            "tlp", users=self.get_org_members(request)
         )
 
     @staticmethod
@@ -876,6 +900,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             and the aggregated data.
         """
         delta, basis = self.__parse_range(self.request)
+        logger.debug(f"{delta=}, {basis=}, {users=}")
         filter_kwargs = {"received_request_time__gte": delta}
         if users:
             filter_kwargs["user__in"] = users

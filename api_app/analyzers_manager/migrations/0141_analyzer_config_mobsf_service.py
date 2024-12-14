@@ -15,22 +15,25 @@ plugin = {
         "base_path": "api_app.analyzers_manager.file_analyzers",
     },
     "name": "MobSF_Service",
-    "description": "[MobSF_Service](https://github.com/MobSF/Mobile-Security-Framework-MobSF) can be used for a variety of use cases such as mobile application security, penetration testing, malware analysis, and privacy analysis.",
+    "description": "[MobSF_service](https://github.com/MobSF/Mobile-Security-Framework-MobSF) can be used for a variety of use cases such as mobile application security, penetration testing, malware analysis, and privacy analysis.",
     "disabled": False,
     "soft_time_limit": 400,
     "routing_key": "default",
     "health_check_status": True,
     "type": "file",
     "docker_based": False,
-    "maximum_tlp": "RED",
+    "maximum_tlp": "AMBER",
     "observable_supported": [],
     "supported_filetypes": [
         "application/vnd.android.package-archive",
+        "application/x-dex",
         "application/zip",
+        "application/java-archive",
     ],
     "run_hash": False,
     "run_hash_type": "",
     "not_supported_filetypes": [],
+    "mapping_data_model": {},
     "model": "analyzers_manager.AnalyzerConfig",
 }
 
@@ -40,10 +43,10 @@ params = [
             "module": "mobsf_service.MobSF_Service",
             "base_path": "api_app.analyzers_manager.file_analyzers",
         },
-        "name": "mobsf_api_key",
+        "name": "mobsf_host",
         "type": "str",
-        "description": "MobSF API Key",
-        "is_secret": True,
+        "description": "IP address where mobsf is hosted",
+        "is_secret": False,
         "required": True,
     },
     {
@@ -51,10 +54,76 @@ params = [
             "module": "mobsf_service.MobSF_Service",
             "base_path": "api_app.analyzers_manager.file_analyzers",
         },
-        "name": "mobsf_host",
+        "name": "identifier",
         "type": "str",
-        "description": "The IP address where your mobsf is hosted.",
+        "description": "Android instance identifier",
         "is_secret": False,
+        "required": True,
+    },
+    {
+        "python_module": {
+            "module": "mobsf_service.MobSF_Service",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "timeout",
+        "type": "int",
+        "description": "Request timeout for each API call. Default value is 30 seconds",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "mobsf_service.MobSF_Service",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "enable_dynamic_analysis",
+        "type": "bool",
+        "description": "Set to true to enable dynamic analyzer",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "mobsf_service.MobSF_Service",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "default_hooks",
+        "type": "str",
+        "description": "Comma seperated values for default Frida scripts",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "mobsf_service.MobSF_Service",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "auxiliary_hooks",
+        "type": "str",
+        "description": "Comma seperated values for auxiliary Frida scripts",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "mobsf_service.MobSF_Service",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "frida_code",
+        "type": "str",
+        "description": "Frida code to load",
+        "is_secret": False,
+        "required": False,
+    },
+    {
+        "python_module": {
+            "module": "mobsf_service.MobSF_Service",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "mobsf_api_key",
+        "type": "str",
+        "description": "MobSF API key",
+        "is_secret": True,
         "required": True,
     },
 ]
@@ -144,7 +213,7 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0064_vt_sample_download"),
-        ("analyzers_manager", "0138_alter_analyzerreport_data_model_content_type"),
+        ("analyzers_manager", "0140_analyzerreport_analyzers_m_data_mo_a1952b_idx"),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

@@ -10,69 +10,99 @@ logger = logging.getLogger(__name__)
 
 class MobSF_Service(FileAnalyzer):
     mobsf_host: str
+    identifier: str
+    timeout: int = 30
+    enable_dynamic_analysis: bool = False
     _mobsf_api_key: str
+    default_hooks: str = "root_bypass"
+    auxiliary_hooks: str = ""
+    frida_code: str = ""
 
     def update(self) -> bool:
         pass
 
     def static_analysis(self, scan_hash, headers):
-
+        logger.info(f"Initiating static analysis with scan hash: {scan_hash}")
         scan_url = self.mobsf_host + "/api/v1/scan"
         data = {"hash": scan_hash}
-        scan_response = requests.post(url=scan_url, data=data, headers=headers)
+        scan_response = requests.post(
+            url=scan_url, data=data, headers=headers, timeout=self.timeout
+        )
         scan_response.raise_for_status()
+        logger.info("Static analysis completed successfully")
 
+        logger.info("Generating JSON Report for static analysis")
         report_url = self.mobsf_host + "/api/v1/report_json"
-        report_response = requests.post(url=report_url, data=data, headers=headers)
+        report_response = requests.post(
+            url=report_url, data=data, headers=headers, timeout=self.timeout
+        )
         report_response.raise_for_status()
         return report_response.json()
 
     def dynamic_analysis(self, scan_hash, headers):
-
+        logger.info(
+            f"Configuring runtime environment with android instance identifier: {self.identifier}"
+        )
         mobsfy_runtime_response = requests.post(
             url=self.mobsf_host + "/api/v1/android/mobsfy",
             headers=headers,
-            data={"identifier": "127.0.0.1:6555"},
+            data={"identifier": self.identifier},
+            timeout=self.timeout,
         )
         mobsfy_runtime_response.raise_for_status()
 
+        logger.info(f"Initiating dynamic analysis for scan hash: {scan_hash}")
         start_dynamic_analysis_response = requests.post(
             url=self.mobsf_host + "/api/v1/dynamic/start_analysis",
             headers=headers,
             data={"hash": scan_hash},
+            timeout=self.timeout,
         )
         start_dynamic_analysis_response.raise_for_status()
+        logger.info("Dynamic analyzer started successfully")
 
+        logger.info("Running tls tests")
         tls_tests_response = requests.post(
             url=self.mobsf_host + "/api/v1/android/tls_tests",
             headers=headers,
             data={"hash": scan_hash},
+            timeout=self.timeout,
         )
         tls_tests_response.raise_for_status()
 
+        logger.info("Starting frida instrumentation with user provided hooks and code")
         start_frida_instrumentation_response = requests.post(
             url=self.mobsf_host + "/api/v1/frida/instrument",
             headers=headers,
             data={
                 "hash": scan_hash,
-                "default_hooks": "api_monitor,ssl_pinning_bypass,root_bypass,debugger_check_bypass",
-                "auxiliary_hooks": "",
-                "frida_code": "",
+                "default_hooks": self.default_hooks,
+                "auxiliary_hooks": self.auxiliary_hooks,
+                "frida_code": self.frida_code,
             },
+            timeout=self.timeout,
         )
         start_frida_instrumentation_response.raise_for_status()
+        logger.info("Frida instrumentation started successfully")
 
+        logger.info("Collecting runtime dependencies")
         get_runtime_dependency_response = requests.post(
             url=self.mobsf_host + "/api/v1/frida/get_dependencies",
             headers=headers,
             data={"hash": scan_hash},
+            timeout=self.timeout,
         )
         get_runtime_dependency_response.raise_for_status()
+        logger.info("Successfully collected runtime dependencies")
 
+        logger.info(
+            f"Stopping dyanmic analyzer and generating JSON report for scan hash: {scan_hash}"
+        )
         stop_dynamic_analysis = requests.post(
             url=self.mobsf_host + "/api/v1/dynamic/stop_analysis",
             headers=headers,
             data={"hash": scan_hash},
+            timeout=self.timeout,
         )
         stop_dynamic_analysis.raise_for_status()
 
@@ -80,27 +110,35 @@ class MobSF_Service(FileAnalyzer):
             url=self.mobsf_host + "/api/v1/dynamic/report_json",
             headers=headers,
             data={"hash": scan_hash},
+            timeout=self.timeout,
         )
         dynamic_analysis_report.raise_for_status()
+        logger.info("JSON report for dynamic analysis generated successfully")
 
         return dynamic_analysis_report.json()
 
     def run(self):
         headers = {"X-Mobsf-Api-Key": self._mobsf_api_key}
         binary = self.read_file_bytes()
+        logger.info("File bytes read successfully. Initiating upload request")
 
         upload_url = self.mobsf_host + "/api/v1/upload"
         upload_response = requests.post(
             url=upload_url,
             files={"file": (self.filename, binary, "application/octet-stream")},
             headers=headers,
+            timeout=self.timeout,
         )
         upload_response.raise_for_status()
         scan_hash = upload_response.json()["hash"]
+        logger.info(f"File upload successful with scan hash: {scan_hash}")
 
         static_analysis_json = self.static_analysis(scan_hash, headers)
-        dynamic_analysis_json = self.dynamic_analysis(scan_hash, headers)
-
+        dynamic_analysis_json = (
+            self.dynamic_analysis(scan_hash, headers)
+            if self.enable_dynamic_analysis
+            else {}
+        )
         results = {
             "static_analysis_results": static_analysis_json,
             "dynamic_analysis_results": dynamic_analysis_json,

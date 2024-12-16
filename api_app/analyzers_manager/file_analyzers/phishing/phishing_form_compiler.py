@@ -231,8 +231,9 @@ class PhishingFormCompiler(FileAnalyzer):
             logger.info(f"Job #{self.job_id}: Found script tag: {js_tag}")
         return bool(js_tag)
 
-    def analyze_responses(self, responses: [Response]) -> {}:
-        result: [] = []
+    def analyze_responses(self, responses: [Response]) -> ([], []):
+        success_result: [] = []
+        redirect_result: [] = []
         for response in responses:
             logger.info(f"Response headers for {response.url}: {response.headers}")
             try:
@@ -244,12 +245,12 @@ class PhishingFormCompiler(FileAnalyzer):
                 self.report.errors.append(message)
             else:
                 if response.history:
-                    result.extend(self.handle_3xx_response(response))
+                    redirect_result.extend(self.handle_3xx_response(response))
 
-                result.append(self.handle_2xx_response(response))
+                success_result.append(self.handle_2xx_response(response))
         self.report.save()
 
-        return result
+        return success_result, redirect_result
 
     def run(self) -> dict:
         result: {} = {}
@@ -272,7 +273,9 @@ class PhishingFormCompiler(FileAnalyzer):
         for form in forms:
             responses.append(self.perform_request_to_form(form))
 
-        result.setdefault("extracted_urls", self.analyze_responses(responses))
+        success_result, redirect_result = self.analyze_responses(responses)
+        result.setdefault("extracted_urls", success_result)
+        result.setdefault("redirection_urls", redirect_result)
         result.setdefault("has_javascript", self.is_js_used_in_page())
         return result
 

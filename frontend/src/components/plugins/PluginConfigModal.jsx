@@ -1,6 +1,8 @@
 import React from "react";
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Modal, ModalHeader, ModalBody, UncontrolledTooltip } from "reactstrap";
 import PropTypes from "prop-types";
+import { MdInfoOutline } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 import { PluginsTypes } from "../../constants/pluginConst";
 import { AnalyzerConfigForm } from "./forms/AnalyzerConfigForm";
@@ -22,7 +24,35 @@ export function PluginConfigModal({
     pluginConfig.python_module ===
       "basic_observable_analyzer.BasicObservableAnalyzer";
 
-  let title = "Plugin config";
+  let title = (
+    <div>
+      Plugin config
+      <MdInfoOutline
+        id="pluginConfig_infoicon"
+        fontSize="16"
+        className="ms-2"
+      />
+      <UncontrolledTooltip
+        trigger="hover"
+        target="pluginConfig_infoicon"
+        placement="right"
+        fade={false}
+        autohide={false}
+        innerClassName="p-2 text-start text-nowrap md-fit-content"
+      >
+        Each plugin could have one or more parameters available to be configured
+        to customize the plugin behavior.
+        <br />
+        For more info check the{" "}
+        <Link
+          to="https://intelowlproject.github.io/docs/IntelOwl/usage/#parameters"
+          target="_blank"
+        >
+          official doc.
+        </Link>
+      </UncontrolledTooltip>
+    </div>
+  );
   // case A: DEFAULT plugin config
   let component = (
     <PluginConfigContainer

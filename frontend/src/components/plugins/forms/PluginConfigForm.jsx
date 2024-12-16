@@ -8,10 +8,11 @@ import {
   Col,
   FormFeedback,
   Button,
-  UncontrolledTooltip,
 } from "reactstrap";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
-import { MdDelete, MdInfoOutline } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
+import { FaUserSecret } from "react-icons/fa";
+
 import PropTypes from "prop-types";
 import { useFormik, FormikProvider, FieldArray } from "formik";
 
@@ -376,7 +377,7 @@ export function PluginConfigForm({
           configs.map((config) => (
             <FormGroup>
               <Row>
-                <Col md={2}>
+                <Col md={2} className="d-flex align-items-center">
                   <Label
                     className={`me-2 mb-0 ${
                       config?.required ? "required" : ""
@@ -385,26 +386,7 @@ export function PluginConfigForm({
                   >
                     {config.attribute}
                   </Label>
-                  {config.is_secret && (
-                    <>
-                      <MdInfoOutline
-                        id={`pluginConfig_${configType}-${config.attribute}-secretinfoicon`}
-                        fontSize="20"
-                      />
-                      <UncontrolledTooltip
-                        trigger="hover"
-                        target={`pluginConfig_${configType}-${config.attribute}-secretinfoicon`}
-                        placement="right"
-                        fade={false}
-                        innerClassName="p-2 text-start text-nowrap md-fit-content"
-                      >
-                        If an admin of your organization has set a secret you
-                        will not be able to see its value but you will see the
-                        placeholder *********. You can change the value by
-                        setting your personal secret.
-                      </UncontrolledTooltip>
-                    </>
-                  )}
+                  {config.is_secret && <FaUserSecret />}
                 </Col>
                 <Col>
                   <CustomInput
@@ -422,7 +404,7 @@ export function PluginConfigForm({
                     color="info"
                     className="text-white me-2"
                     onClick={() => onDelete(config.id)}
-                    title="Delete plugin config"
+                    title="Delete custom config - If a default exists it will be restored"
                     titlePlacement="top"
                     disabled={
                       !config.exist ||
@@ -445,7 +427,7 @@ export function PluginConfigForm({
             </FormGroup>
           ))
         ) : (
-          <div>No config available</div>
+          <div className="text-muted fst-italic">No parameters available</div>
         )}
         <FormGroup className="d-flex justify-content-end align-items-center mt-3">
           <Button

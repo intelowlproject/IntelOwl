@@ -2,6 +2,7 @@ import React from "react";
 import { Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import PropTypes from "prop-types";
 import useAxios from "axios-hooks";
+import { FaUserSecret } from "react-icons/fa";
 
 import { Loader } from "@certego/certego-ui";
 
@@ -41,12 +42,36 @@ export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
     { useCache: false },
   );
 
+  [configs?.user_config, configs?.organization_config].forEach((config) => {
+    config?.sort((itemA, itemB) => {
+      // sort by required
+      if (!itemA.required && itemB.required) {
+        return 1;
+      }
+      if (itemA.required && !itemB.required) {
+        return -1;
+      }
+      // sort by attribute name (not required fields)
+      if (!itemA.required && !itemB.required) {
+        const attributeA = itemA.attribute.toUpperCase(); // ignore upper and lowercase
+        const attributeB = itemB.attribute.toUpperCase(); // ignore upper and lowercase
+        if (attributeA < attributeB) {
+          return -1;
+        }
+        if (attributeA > attributeB) {
+          return 1;
+        }
+      }
+      return 0;
+    });
+  });
+
   const isUserOwnerOrAdmin = isUserOwner || isUserAdmin(user.username);
 
   return (
     <div id="plugin-config-container">
       {/* plugin config */}
-      <Nav tabs className="mt-4">
+      <Nav tabs className="mt-2">
         <NavItem>
           <NavLink
             className={
@@ -85,8 +110,23 @@ export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
           <TabContent activeTab={activeTab} className="p-2 mt-2">
             <TabPane tabId={PluginConfigTypes.USER_CONFIG}>
               <small className="text-muted">
-                Note: Your plugin configuration overrides your
-                organization&apos;s configuration (if any).
+                Note: User configuration overrides the organization&apos;s
+                configuration (if any).
+              </small>
+              <small className="d-flex align-items-center mt-2">
+                <span className="text-danger ms-3 me-2">*</span>
+                <strong className="text-muted">Required field</strong>
+              </small>
+              <small className="d-flex align-items-center">
+                <FaUserSecret className="mx-2" />
+                <span className="text-muted">
+                  <strong>Secret field:&nbsp;</strong>
+                  <span className="text-muted flex-wrap">
+                    Only org admins can view the org&apos;s secrets. Other users
+                    will see the placeholder ********* and will be able to
+                    change its value by setting their user secret.
+                  </span>
+                </span>
               </small>
               <PluginConfigForm
                 pluginName={pluginName}
@@ -106,6 +146,21 @@ export function PluginConfigContainer({ pluginName, pluginType, toggle }) {
                 ) : (
                   <span className="text-accent"> you can only view it.</span>
                 )}
+              </small>
+              <small className="d-flex align-items-center mt-2">
+                <span className="text-danger ms-3 me-2">*</span>
+                <strong className="text-muted">Required field</strong>
+              </small>
+              <small className="d-flex align-items-center">
+                <FaUserSecret className="mx-2" />
+                <span className="text-muted">
+                  <strong>Secret field:&nbsp;</strong>
+                  <span className="text-muted flex-wrap">
+                    Only org admins can view the org&apos;s secrets. Other users
+                    will see the placeholder ********* and will be able to
+                    change its value by setting their user secret.
+                  </span>
+                </span>
               </small>
               <PluginConfigForm
                 pluginName={pluginName}

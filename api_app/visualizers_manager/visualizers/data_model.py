@@ -18,12 +18,16 @@ logger = getLogger(__name__)
 
 
 class DataModel(Visualizer):
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     @visualizable_error_handler_with_params("get_eval_list")
-    def get_eval_list(self, eval, color, icon, data_models):
-        disable_element = not len(data_models)
+    def get_eval_list(self, evaluation, color, icon, data_models):
+        disable_element = not bool(data_models)
         return self.VList(
             name=self.Base(
-                value=eval,
+                value=evaluation,
                 color=color if not disable_element else Visualizer.Color.TRANSPARENT,
                 icon=icon,
                 disable=False,
@@ -42,7 +46,7 @@ class DataModel(Visualizer):
 
     @visualizable_error_handler_with_params("get_base_data_list")
     def get_base_data_list(self, name, values_list):
-        disable_element = not len(values_list)
+        disable_element = not bool(values_list)
         return self.VList(
             name=self.Base(value=name, disable=False),
             value=values_list,
@@ -63,15 +67,15 @@ class DataModel(Visualizer):
                     ),
                     disable=False,
                 )
-        else:
-            return Visualizer.Title(
-                title=Visualizer.Base(value=field.replace("_", " "), disable=True),
-                value=Visualizer.Base(
-                    value="",
-                    disable=True,
-                ),
+
+        return Visualizer.Title(
+            title=Visualizer.Base(value=field.replace("_", " "), disable=True),
+            value=Visualizer.Base(
+                value="",
                 disable=True,
-            )
+            ),
+            disable=True,
+        )
 
     @visualizable_error_handler_with_params("get_resolutions")
     def get_resolutions(self, data_models):
@@ -134,8 +138,14 @@ class DataModel(Visualizer):
                             disable=False,
                         ),
                         "rdata": self.VList(
-                            value=[self.Base(value=rdata) for rdata in report.rdata],
-                            color=self.Color.TRANSPARENT,
+                            value=[
+                                self.Base(
+                                    value=rdata,
+                                    color=self.Color.TRANSPARENT,
+                                    disable=False,
+                                )
+                                for rdata in report.rdata
+                            ],
                             disable=False,
                         ),
                         "time_first": self.Base(
@@ -196,7 +206,7 @@ class DataModel(Visualizer):
                             ),
                             link=signature.url,
                             color=self.Color.TRANSPARENT,
-                            disable=False if signature.url else True,
+                            disable=not signature.url,
                         ),
                         "score": self.Base(
                             value=signature.score,

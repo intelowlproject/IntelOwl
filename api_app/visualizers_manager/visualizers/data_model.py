@@ -192,7 +192,6 @@ class DataModel(Visualizer):
         for data_model in data_models:
             signatures = data_model.signatures.all()
             for signature in signatures:
-                print(signature.url)
                 data.append(
                     {
                         "provider": self.Base(

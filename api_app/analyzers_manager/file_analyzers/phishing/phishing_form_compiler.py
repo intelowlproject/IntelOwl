@@ -217,6 +217,7 @@ class PhishingFormCompiler(FileAnalyzer):
                 f"Extracting 3xx {response.status_code} HTTP response with url {history.request.url}"
             )
             result.append(history.request.url)
+        return result
 
     @staticmethod
     def handle_2xx_response(response: Response) -> str:

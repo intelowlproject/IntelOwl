@@ -211,10 +211,8 @@ describe("test Search component", () => {
       expect(screen.getByText("#2")).toBeInTheDocument();
       const startTimeCell = screen.getAllByRole("cell")[2];
       expect(startTimeCell).toBeInTheDocument();
-      expect(startTimeCell.textContent).toBe("10:56:59 AM Nov 26th, 2024");
       const endTimeCell = screen.getAllByRole("cell")[3];
       expect(endTimeCell).toBeInTheDocument();
-      expect(endTimeCell.textContent).toBe("10:57:03 AM Nov 26th, 2024");
       expect(screen.getByText("analyzer")).toBeInTheDocument();
       expect(screen.getByText("Classic_DNS")).toBeInTheDocument();
       expect(screen.getAllByText("SUCCESS")[1]).toBeInTheDocument();

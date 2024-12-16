@@ -25,7 +25,7 @@ class Compare(Pivot):
         except (RuntimeError, ValueError) as e:
             return False, str(e)
         if not self._value:
-            return False, f"Can't create a new job, value {self._value} is not valid"
+            return False, f"Can't create new job, value {self._value} is not valid"
         return super().should_run()
 
     def get_value_to_pivot_to(self) -> Any:

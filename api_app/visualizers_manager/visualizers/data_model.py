@@ -182,6 +182,7 @@ class DataModel(Visualizer):
         for data_model in data_models:
             signatures = data_model.signatures.all()
             for signature in signatures:
+                print(signature.url)
                 data.append(
                     {
                         "provider": self.Base(
@@ -190,10 +191,12 @@ class DataModel(Visualizer):
                             disable=False,
                         ),
                         "url": self.Base(
-                            value=signature.url,
+                            value=(
+                                signature.url if signature.url else "No url available"
+                            ),
                             link=signature.url,
                             color=self.Color.TRANSPARENT,
-                            disable=False,
+                            disable=False if signature.url else True,
                         ),
                         "score": self.Base(
                             value=signature.score,

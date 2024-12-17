@@ -148,7 +148,7 @@ class IPDataModel(BaseDataModel):
         null=True, blank=True, default=None
     )  # BGPRanking, MaxMind
     asn_rank = models.DecimalField(
-        null=True, blank=True, default=None, decimal_places=2, max_digits=3
+        null=True, blank=True, default=None, decimal_places=20, max_digits=21
     )  # BGPRanking
     certificates = models.JSONField(null=True, blank=True, default=None)  # CIRCL_PSSL
     org_name = LowercaseCharField(

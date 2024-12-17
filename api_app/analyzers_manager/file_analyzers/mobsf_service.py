@@ -29,9 +29,10 @@ class MobSF_Service(FileAnalyzer):
             url=scan_url, data=data, headers=headers, timeout=self.timeout
         )
         scan_response.raise_for_status()
-        logger.info("Static analysis completed successfully")
+        logger.info(
+            f"Static analysis for scan hash:{scan_hash} completed successfully, now generating JSON Report"
+        )
 
-        logger.info("Generating JSON Report for static analysis")
         report_url = self.mobsf_host + "/api/v1/report_json"
         report_response = requests.post(
             url=report_url, data=data, headers=headers, timeout=self.timeout
@@ -59,9 +60,9 @@ class MobSF_Service(FileAnalyzer):
             timeout=self.timeout,
         )
         start_dynamic_analysis_response.raise_for_status()
-        logger.info("Dynamic analyzer started successfully")
+        logger.info(f"Dynamic analyzer started successfully for scan hash: {scan_hash}")
 
-        logger.info("Running tls tests")
+        logger.info(f"Running tls tests for scan with hash: {scan_hash}")
         tls_tests_response = requests.post(
             url=self.mobsf_host + "/api/v1/android/tls_tests",
             headers=headers,
@@ -70,7 +71,9 @@ class MobSF_Service(FileAnalyzer):
         )
         tls_tests_response.raise_for_status()
 
-        logger.info("Starting frida instrumentation with user provided hooks and code")
+        logger.info(
+            f"Starting frida instrumentation with user provided hooks and code for scan with hash: {scan_hash}"
+        )
         start_frida_instrumentation_response = requests.post(
             url=self.mobsf_host + "/api/v1/frida/instrument",
             headers=headers,
@@ -83,9 +86,10 @@ class MobSF_Service(FileAnalyzer):
             timeout=self.timeout,
         )
         start_frida_instrumentation_response.raise_for_status()
-        logger.info("Frida instrumentation started successfully")
+        logger.info(
+            f"Frida instrumentation started successfully for scan with hash: {scan_hash}. Initiating collection of runtime dependencies"
+        )
 
-        logger.info("Collecting runtime dependencies")
         get_runtime_dependency_response = requests.post(
             url=self.mobsf_host + "/api/v1/frida/get_dependencies",
             headers=headers,
@@ -93,7 +97,9 @@ class MobSF_Service(FileAnalyzer):
             timeout=self.timeout,
         )
         get_runtime_dependency_response.raise_for_status()
-        logger.info("Successfully collected runtime dependencies")
+        logger.info(
+            f"Successfully collected runtime dependencies for scan hash: {scan_hash}"
+        )
 
         logger.info(
             f"Stopping dyanmic analyzer and generating JSON report for scan hash: {scan_hash}"
@@ -113,14 +119,18 @@ class MobSF_Service(FileAnalyzer):
             timeout=self.timeout,
         )
         dynamic_analysis_report.raise_for_status()
-        logger.info("JSON report for dynamic analysis generated successfully")
+        logger.info(
+            f"JSON report for dynamic analysis with scan hash: {scan_hash} generated successfully"
+        )
 
         return dynamic_analysis_report.json()
 
     def run(self):
         headers = {"X-Mobsf-Api-Key": self._mobsf_api_key}
         binary = self.read_file_bytes()
-        logger.info("File bytes read successfully. Initiating upload request")
+        logger.info(
+            f"File bytes for file:{self.filename} read successfully. Initiating upload request"
+        )
 
         upload_url = self.mobsf_host + "/api/v1/upload"
         upload_response = requests.post(
@@ -131,7 +141,9 @@ class MobSF_Service(FileAnalyzer):
         )
         upload_response.raise_for_status()
         scan_hash = upload_response.json()["hash"]
-        logger.info(f"File upload successful with scan hash: {scan_hash}")
+        logger.info(
+            f"File upload for file: {self.filename} is successful and the scan hash is: {scan_hash}"
+        )
 
         static_analysis_json = self.static_analysis(scan_hash, headers)
         dynamic_analysis_json = (

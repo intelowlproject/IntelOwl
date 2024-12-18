@@ -17,7 +17,7 @@ plugin = {
     "name": "MobSF_Service",
     "description": "[MobSF_service](https://github.com/MobSF/Mobile-Security-Framework-MobSF) can be used for a variety of use cases such as mobile application security, penetration testing, malware analysis, and privacy analysis.",
     "disabled": False,
-    "soft_time_limit": 400,
+    "soft_time_limit": 1000,
     "routing_key": "default",
     "health_check_status": True,
     "type": "file",
@@ -38,6 +38,17 @@ plugin = {
 }
 
 params = [
+    {
+        "python_module": {
+            "module": "mobsf_service.MobSF_Service",
+            "base_path": "api_app.analyzers_manager.file_analyzers",
+        },
+        "name": "activity_duration",
+        "type": "int",
+        "description": "Time duration for mobsf to collect sufficient info in dynamic analysis before generating report. Default value is 60 seconds.",
+        "is_secret": False,
+        "required": False,
+    },
     {
         "python_module": {
             "module": "mobsf_service.MobSF_Service",
@@ -212,7 +223,7 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("api_app", "0064_vt_sample_download"),
+        ("api_app", "0065_job_mpnodesearch"),
         ("analyzers_manager", "0140_analyzerreport_analyzers_m_data_mo_a1952b_idx"),
     ]
 

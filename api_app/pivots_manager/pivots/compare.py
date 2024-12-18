@@ -17,8 +17,8 @@ class Compare(Pivot):
                 f"Unable to run pivot {self._config.name} "
                 "because attached to more than one configuration",
             )
-        result = super().should_run()
-        if result[0]:
+        should_run, motivation = super().should_run()
+        if should_run:
             report = self.related_reports.first()
             try:
                 self._value = report.get_value(
@@ -28,7 +28,7 @@ class Compare(Pivot):
                 return False, str(e)
             if not self._value:
                 return False, f"Can't create new job, value {self._value} is not valid"
-        return result
+        return should_run, motivation
 
     def get_value_to_pivot_to(self) -> Any:
         return self._value

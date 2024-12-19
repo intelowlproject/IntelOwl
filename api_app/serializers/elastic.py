@@ -48,7 +48,8 @@ class ElasticRequestSerializer(serializers.Serializer):
     end_end_time = serializers.DateTimeField(required=False)
     report = serializers.CharField(required=False)
 
-    def create(self, validated_data) -> ElasticRequest:
+    @staticmethod
+    def create(validated_data) -> ElasticRequest:
         logger.debug(f"{validated_data=}")
         return ElasticRequest(**validated_data)
 

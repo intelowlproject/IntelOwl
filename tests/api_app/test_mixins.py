@@ -71,6 +71,7 @@ class VirusTotalv3Base(VirusTotalv3BaseMixin):
     def update(cls) -> bool:
         pass
 
+    @staticmethod
     def run(self) -> dict:
         return {}
 

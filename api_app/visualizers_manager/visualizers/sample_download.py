@@ -24,6 +24,10 @@ logger = getLogger(__name__)
 
 class SampleDownload(Visualizer):
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     @visualizable_error_handler_with_params("Download")
     def _download_button(self):
         # first attempt is download with VT

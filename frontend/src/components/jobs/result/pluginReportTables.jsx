@@ -181,7 +181,7 @@ export function PluginsReportTable({
       }
     });
     // data model
-    reports[index].data_model = [];
+    reports[index].data_model = {};
     if (report.type === PluginsTypes.ANALYZER) {
       analyzersDataModel.forEach((dataModel) => {
         dataModel?.analyzers_report?.forEach((analyzerReportId) => {

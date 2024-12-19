@@ -6,6 +6,7 @@ from django.core.files import File
 from kombu import uuid
 
 from api_app.analyzers_manager.classes import FileAnalyzer, ObservableAnalyzer
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
 from api_app.models import Job, PluginConfig
 from tests import CustomTestCase
@@ -46,6 +47,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "document.rtf",
                 "document.xls",
                 "document.doc",
+                "downloader.lnk",
                 "file.dll",
                 "file.exe",
                 "shellcode.bin",
@@ -54,6 +56,14 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "AndroidManifest.xml",
                 "sample.crx",
                 "manifest.json",
+                "main.out",
+                "java_vuln.java",
+                "kotlin.kt",
+                "objectivec.m",
+                "swift.swift",
+                "android.xml",
+                "test.zip",
+                "sample.dex",
             ],
             [
                 "application/onenote",
@@ -66,6 +76,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "text/rtf",
                 "application/vnd.ms-excel",
                 "application/msword",
+                "application/x-ms-shortcut",
                 "application/vnd.microsoft.portable-executable",
                 "application/vnd.microsoft.portable-executable",
                 "application/octet-stream",
@@ -74,6 +85,14 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/octet-stream",
                 "application/x-chrome-extension",
                 "application/json",
+                "application/x-executable",
+                "text/x-java",
+                "text/x-kotlin",
+                "text/x-objective-c",
+                "text/x-swift",
+                "text/xml",
+                "application/zip",
+                "application/x-dex",
             ],
         ):
             try:
@@ -112,6 +131,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 timeout_seconds = min(timeout_seconds, 30)
                 print(f"\tTesting with config {config.name}")
                 found_one = False
+                skipped = False
                 for mimetype in MimeTypes.values:
                     if (
                         config.supported_filetypes
@@ -125,6 +145,13 @@ class FileAnalyzerTestCase(CustomTestCase):
                         pass
                     else:
                         continue
+                    sub = subclass(
+                        config,
+                    )
+                    if config.docker_based and not sub.health_check():
+                        print(f"skipping {subclass.__name__} cause health check failed")
+                        skipped = True
+                        continue
                     jobs = Job.objects.filter(file_mimetype=mimetype)
                     if jobs.exists():
                         found_one = True
@@ -134,9 +161,6 @@ class FileAnalyzerTestCase(CustomTestCase):
                             "\t\t"
                             f"Testing {job.file_name} with mimetype {mimetype}"
                             f" for {timeout_seconds} seconds"
-                        )
-                        sub = subclass(
-                            config,
                         )
                         signal.alarm(timeout_seconds)
                         try:
@@ -149,7 +173,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                             )
                         finally:
                             signal.alarm(0)
-                if not found_one:
+                if not found_one and not skipped:
                     self.fail(
                         f"No valid job found for analyzer {subclass.__name__}"
                         f" with configuration {config.name}"
@@ -208,6 +232,12 @@ class ObservableAnalyzerTestCase(CustomTestCase):
             observable_name="test@intelowl.com",
             observable_classification="generic",
             status="reported_without_fails",
+        ),
+        Job.objects.create(
+            user=self.superuser,
+            observable_name="CVE-2024-51181",
+            observable_classification="generic",
+            status="reported_without_fails",
         )
 
     def test_subclasses(self):
@@ -232,9 +262,20 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                         f"Testing datatype {observable_supported}"
                         f" for {timeout_seconds} seconds"
                     )
-                    job = Job.objects.get(
-                        observable_classification=observable_supported
-                    )
+                    if observable_supported == ObservableTypes.GENERIC.value:
+                        # generic should handle different use cases
+                        job = Job.objects.get(
+                            observable_classification=ObservableTypes.GENERIC.value,
+                            observable_name=(
+                                "CVE-2024-51181"
+                                if config.name == "NVD_CVE"
+                                else "test@intelowl.com"
+                            ),
+                        )
+                    else:
+                        job = Job.objects.get(
+                            observable_classification=observable_supported
+                        )
                     job.analyzers_to_execute.set([config])
                     sub = subclass(
                         config,

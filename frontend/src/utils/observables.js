@@ -28,14 +28,18 @@ export function sanitizeObservable(observable) {
       .replaceAll("[", "")
       .replaceAll("]", "")
       .trim()
-      .replace(/\W*$/, "")
+      .replace(/(?!\\(|\\))\W*$/, "")
       /* ignore + at the start of the string to support phone number:
     this could lead to a match problem in the loading observable feature */
-      .replace(/^(?!\+)\W/, "")
+      .replace(/^(?!\+|\\(|\\))\W/, "")
   );
 }
 
 export function observableValidators(stringToValidate) {
+  const defaultValue = {
+    classification: ObservableClassifications.GENERIC,
+    observable: stringToValidate,
+  };
   const sanitizedString = sanitizeObservable(stringToValidate);
 
   let stringClassification = "";
@@ -44,8 +48,6 @@ export function observableValidators(stringToValidate) {
       const validType = typeValidationFunction(sanitizedString);
       if (validType) {
         stringClassification = typeName;
-        if (stringClassification === "phone") stringClassification = null;
-        if (stringClassification === "date") stringClassification = null;
       }
     },
   );
@@ -59,9 +61,9 @@ export function observableValidators(stringToValidate) {
         .concat(Object.values(InvalidTLD))
         .includes(stringEnd)
     )
-      return null;
+      return defaultValue;
     // remove domain if stringEnd is a number
-    if (!Number.isNaN(parseInt(stringEnd, 10))) return null;
+    if (!Number.isNaN(parseInt(stringEnd, 10))) return defaultValue;
   }
 
   // hash
@@ -73,20 +75,22 @@ export function observableValidators(stringToValidate) {
       sha512: 128,
     };
     if (!Object.values(hashTypesLength).includes(sanitizedString.length))
-      return null;
+      return defaultValue;
   }
 
+  if (["phone", "date"].includes(stringClassification))
+    return {
+      classification: ObservableClassifications.GENERIC,
+      observable: sanitizedString,
+    };
   if (stringClassification)
     return {
       classification: stringClassification,
       observable: sanitizedString,
     };
-  return null;
+  return defaultValue;
 }
 
 export function getObservableClassification(observable) {
-  let classification = ObservableClassifications.GENERIC;
-  const validationValue = observableValidators(observable);
-  if (validationValue !== null) classification = validationValue.classification;
-  return classification;
+  return observableValidators(observable).classification;
 }

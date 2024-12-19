@@ -81,6 +81,22 @@ describe("ScanForm adavanced use", () => {
     expect(screen.getByText("TEST_PLAYBOOK_DOMAIN")).toBeInTheDocument();
   });
 
+  test("test scan page with sample in the GET parameters", async () => {
+    render(
+      <MemoryRouter initialEntries={["/scan?isSample=true"]}>
+        <Routes>
+          <Route path="/scan" element={<ScanForm />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    // check file radio button is selected and input file rendered
+    const fileSelectorRadioButton = screen.getAllByRole("radio")[1];
+    expect(fileSelectorRadioButton).toBeInTheDocument();
+    expect(fileSelectorRadioButton.checked).toBe(true);
+    expect(screen.getByText("File(s)")).toBeInTheDocument();
+  });
+
   test("test scan page with an investigation in the GET parameters", async () => {
     const user = userEvent.setup();
     render(

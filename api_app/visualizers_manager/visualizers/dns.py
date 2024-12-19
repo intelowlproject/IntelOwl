@@ -67,10 +67,12 @@ class DNS(Visualizer):
             name=self.Base(value=f"{printable_analyzer_name}", disable=disable_element),
             value=[
                 self.Base(
-                    value=dns_resolution["data"]
-                    if self._job.observable_classification
-                    == ObservableClassification.DOMAIN
-                    else dns_resolution,
+                    value=(
+                        dns_resolution["data"]
+                        if self._job.observable_classification
+                        == ObservableClassification.DOMAIN
+                        else dns_resolution
+                    ),
                     disable=False,
                 )
                 for dns_resolution in analyzer_report.report["resolutions"]
@@ -132,13 +134,13 @@ class DNS(Visualizer):
                 AnalyzerReport.objects.get(
                     config=AnalyzerConfig.objects.get(python_module=python_module),
                     job=Job.objects.first(),
-                    status=AnalyzerReport.Status.SUCCESS,
+                    status=AnalyzerReport.STATUSES.SUCCESS,
                 )
             except AnalyzerReport.DoesNotExist:
                 report = AnalyzerReport(
                     config=AnalyzerConfig.objects.get(python_module=python_module),
                     job=Job.objects.first(),
-                    status=AnalyzerReport.Status.SUCCESS,
+                    status=AnalyzerReport.STATUSES.SUCCESS,
                     report={
                         "observable": "dns.google.com",
                         "resolutions": [
@@ -173,7 +175,7 @@ class DNS(Visualizer):
                 report = AnalyzerReport(
                     config=AnalyzerConfig.objects.get(python_module=python_module),
                     job=Job.objects.first(),
-                    status=AnalyzerReport.Status.SUCCESS,
+                    status=AnalyzerReport.STATUSES.SUCCESS,
                     report={"observable": "dns.google.com", "malicious": False},
                     task_id=uuid(),
                     parameters={},

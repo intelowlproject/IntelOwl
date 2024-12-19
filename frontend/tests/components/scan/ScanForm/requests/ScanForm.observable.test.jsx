@@ -39,7 +39,7 @@ jest.mock("../../../../../src/components/scan/utils/RecentScans", () =>
   jest.fn((props) => <div {...props} />),
 );
 
-describe("test ScanForm component with domains", () => {
+describe("test ScanForm component", () => {
   test.each([
     {
       type: "domain",

@@ -467,7 +467,7 @@ class JobTestCase(CustomTestCase):
             observable_classification="domain",
             user=self.user,
             md5="72cf478e87b031233091d8c00a38ce00",
-            status=Job.Status.REPORTED_WITHOUT_FAILS,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(
             name="test",
@@ -475,8 +475,8 @@ class JobTestCase(CustomTestCase):
                 base_path="api_app.pivots_manager.pivots",
                 module="self_analyzable.SelfAnalyzable",
             ),
-            playbook_to_execute=PlaybookConfig.objects.first(),
         )
+        pc.playbooks_choice.add(PlaybookConfig.objects.first())
 
         j1.analyzers_to_execute.set([ac, ac2])
         pc.related_analyzer_configs.set([ac, ac2])

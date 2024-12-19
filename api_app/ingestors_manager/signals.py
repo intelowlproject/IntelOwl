@@ -9,6 +9,7 @@ from django_celery_beat.models import PeriodicTask
 
 from api_app.ingestors_manager.models import IngestorConfig
 from api_app.signals import migrate_finished
+from authentication.models import UserProfile
 from certego_saas.apps.user.models import User
 from intel_owl.celery import get_queue_name
 
@@ -19,16 +20,27 @@ logger = logging.getLogger(__name__)
 def pre_save_ingestor_config(sender, instance: IngestorConfig, *args, **kwargs):
     from intel_owl.tasks import execute_ingestor
 
-    user = User.objects.get_or_create(username=f"{instance.name.title()}Ingestor")[0]
+    user = User.objects.get_or_create(
+        username__iexact=f"{instance.name}Ingestor",
+        defaults={
+            "username": f"{instance.name}Ingestor",
+        },
+    )[0]
+
+    # in case the user has been created
+    if not hasattr(user, "profile"):
+        user.profile = UserProfile()
+
     user.profile.task_priority = 7
     user.profile.is_robot = True
     user.profile.save()
     instance.user = user
 
     periodic_task = PeriodicTask.objects.update_or_create(
-        name=f"{instance.name.title()}Ingestor",
+        name__iexact=f"{instance.name}Ingestor",
         task=f"{execute_ingestor.__module__}.{execute_ingestor.__name__}",
         defaults={
+            "name": f"{instance.name}Ingestor",
             "crontab": instance.schedule,
             "queue": instance.queue,
             "kwargs": json.dumps({"config_name": instance.name}),

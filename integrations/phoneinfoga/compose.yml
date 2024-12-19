@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
     phoneinfoga:
-      container_name: phoneinfoga
+      container_name: intelowl_phoneinfoga
       restart: unless-stopped
       image: sundowndev/phoneinfoga:v2.11.0
       command:

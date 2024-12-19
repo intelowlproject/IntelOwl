@@ -3,14 +3,11 @@ import PropTypes from "prop-types";
 import { FormGroup, Label, Input, Button, Spinner } from "reactstrap";
 import { Form, Formik } from "formik";
 
-import ReCAPTCHAInput from "./ReCAPTCHAInput";
-import { RECAPTCHA_SITEKEY } from "../../../constants/environment";
-import { RecaptchaValidator, EmailValidator } from "./validator";
+import { EmailValidator } from "./validator";
 
 // constants
 const initialValues = {
   email: "",
-  recaptcha: "noKey",
 };
 
 // methods
@@ -20,11 +17,6 @@ const onValidate = (values) => {
   const emailErrors = EmailValidator(values.email);
   if (emailErrors.email) {
     errors.email = emailErrors.email;
-  }
-  // recaptcha
-  const recaptchaErrors = RecaptchaValidator(values.recaptcha);
-  if (recaptchaErrors.recaptcha) {
-    errors.recaptcha = recaptchaErrors.recaptcha;
   }
   return errors;
 };
@@ -70,15 +62,6 @@ export default function EmailForm({ onFormSubmit, apiCallback, ...restProps }) {
               invalid={formik.errors.email && formik.touched.email}
             />
             {formik.touched.email && <small>{formik.errors.email}</small>}
-          </FormGroup>
-          {/* reCAPTCHA */}
-          <FormGroup row>
-            {RECAPTCHA_SITEKEY && (
-              <ReCAPTCHAInput
-                id="RegisterForm__recaptcha"
-                className="m-3 mx-auto"
-              />
-            )}
           </FormGroup>
           {/* Submit */}
           <FormGroup className="">

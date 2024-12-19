@@ -1,0 +1,5 @@
+Flask-Shell2HTTP-fork==1.9.2
+gunicorn==23.0.0
+selenium==4.25.0
+selenium-wire==5.1.0
+blinker==1.7.0 # selenium-wire depends on this library version <1.8

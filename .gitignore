@@ -8,6 +8,7 @@ test_files
 docker/env_file_app
 docker/env_file_postgres
 docker/env_file_integrations
+docker/env_file_elasticsearch
 docker/custom.override.yml
 venv/
 intel_owl_test_env/
@@ -16,6 +17,8 @@ compose-elk.yml
 .python_history
 .viminfo
 
+# certs
+certs/
 
 # docs
 docs_env/
@@ -45,3 +48,6 @@ coverage.xml
 *.cover
 .hypothesis/
 /.env
+
+# post run dev
+integrations/malware_tools_analyzers/clamav/sigs

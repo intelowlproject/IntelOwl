@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Tuple, Type, Union
 
 from django.db.models import QuerySet
 
+from api_app.analyzers_manager.models import MimeTypes
 from api_app.choices import PythonModuleBasePaths
 from api_app.classes import Plugin
 from api_app.models import AbstractReport
@@ -16,6 +17,7 @@ from api_app.visualizers_manager.enums import (
     VisualizableIcon,
     VisualizableLevelSize,
     VisualizableSize,
+    VisualizableTableColumnSize,
 )
 from api_app.visualizers_manager.exceptions import (
     VisualizerConfigurationException,
@@ -140,6 +142,50 @@ class VisualizableTitle(VisualizableObject):
         return "title"
 
 
+class VisualizableDownload(VisualizableObject):
+
+    def __init__(
+        self,
+        value: str,
+        payload: str,
+        alignment: VisualizableAlignment = VisualizableAlignment.CENTER,
+        size: VisualizableSize = VisualizableSize.S_AUTO,
+        disable: bool = False,
+        copy_text: str = "",
+        description: str = "",
+        add_metadata_in_description: bool = True,
+        link: str = "",
+    ):
+        # assignments
+        super().__init__(size, alignment, disable)
+        self.value = value
+        self.payload = payload
+        self.copy_text = copy_text
+        self.description = description
+        self.add_metadata_in_description = add_metadata_in_description
+        self.link = link
+        # logic
+        self.mimetype = MimeTypes.calculate(
+            self.payload, self.value
+        )  # needed as field from the frontend
+
+    @property
+    def type(self) -> str:
+        return "download"
+
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + [
+            "value",
+            "mimetype",
+            "payload",
+            "copy_text",
+            "description",
+            "add_metadata_in_description",
+            "link",
+        ]
+
+
 class VisualizableBool(VisualizableBase):
     def __init__(
         self,
@@ -208,7 +254,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
                     f"value {v} should be a VisualizableObject and not a string"
                 )
         if fill_empty and not value:
-            value = [VisualizableBase(value="no data available", disable=False)]
+            value = [VisualizableBase(value="no data available", disable=True)]
         if not name:
             start_open = True
         self.value = value
@@ -261,23 +307,58 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         return "vertical_list"
 
 
+class VisualizableTableColumn:
+    def __init__(
+        self,
+        name: str,
+        max_width: VisualizableTableColumnSize = VisualizableTableColumnSize.S_300,
+        description: str = "",
+        disable_filters: bool = False,
+        disable_sort_by: bool = False,
+    ):
+        self.name = name
+        self.description = description
+        self.disable_filters = disable_filters
+        self.disable_sort_by = disable_sort_by
+        self.max_width = max_width
+
+    @property
+    def attributes(self) -> List[str]:
+        return [
+            "name",
+            "description",
+            "disable_filters",
+            "disable_sort_by",
+            "max_width",
+        ]
+
+    def to_dict(self) -> Dict:
+        if not self:
+            return {}
+        result = {attr: getattr(self, attr) for attr in self.attributes}
+        for key, value in result.items():
+            if isinstance(value, Enum):
+                result[key] = value.value
+        return result
+
+
 class VisualizableTable(VisualizableObject):
     def __init__(
         self,
-        columns: List[str],
+        columns: List[VisualizableTableColumn],
         data: List[Dict[str, VisualizableObject]],
         size: VisualizableSize = VisualizableSize.S_AUTO,
         alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
         page_size: int = 5,
-        disable_filters: bool = False,
-        disable_sort_by: bool = False,
+        sort_by_id: str = "",
+        sort_by_desc: bool = False,
     ):
         super().__init__(size=size, alignment=alignment, disable=False)
         self.data = data
         self.columns = columns
         self.page_size = page_size
-        self.disable_filters = disable_filters
-        self.disable_sort_by = disable_sort_by
+        self.sort_by_id = sort_by_id
+        self.sort_by_desc = sort_by_desc
 
     @property
     def attributes(self) -> List[str]:
@@ -285,8 +366,8 @@ class VisualizableTable(VisualizableObject):
             "data",
             "columns",
             "page_size",
-            "disable_filters",
-            "disable_sort_by",
+            "sort_by_id",
+            "sort_by_desc",
         ]
 
     @property
@@ -296,6 +377,7 @@ class VisualizableTable(VisualizableObject):
     def to_dict(self) -> Dict:
         result = super().to_dict()
         data: List[Dict[str, VisualizableObject]] = result.pop("data", [])
+        columns: List[VisualizableTableColumn] = result.pop("columns", [])
         if any(x for x in data):
             new_data = []
             for element in data:
@@ -309,6 +391,12 @@ class VisualizableTable(VisualizableObject):
             result["data"] = new_data
         else:
             result["data"] = []
+        if any(x for x in columns):
+            result["columns"] = [
+                column.to_dict() for column in columns if column is not None
+            ]
+        else:
+            result["columns"] = []
         result.pop("disable")
         return result
 
@@ -383,6 +471,8 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
     Table = VisualizableTable
+
+    TableColumn = VisualizableTableColumn
 
     LevelSize = VisualizableLevelSize
     Page = VisualizablePage

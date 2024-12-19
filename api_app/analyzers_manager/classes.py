@@ -35,23 +35,77 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
+    MALICIOUS_EVALUATION = 75
+    SUSPICIOUS_EVALUATION = 35
+    FALSE_POSITIVE = -50
+
+    def threat_to_evaluation(self, threat_level):
+        # MAGIC NUMBERS HERE!!!
+        # I know, it should be 25-50-75-100. We raised it a bit because too many false positives were generated
+        self.report: AnalyzerReport
+        if threat_level >= self.MALICIOUS_EVALUATION:
+            evaluation = self.report.data_model_class.EVALUATIONS.MALICIOUS.value
+        elif threat_level >= self.SUSPICIOUS_EVALUATION:
+            evaluation = self.report.data_model_class.EVALUATIONS.SUSPICIOUS.value
+        elif threat_level <= self.FALSE_POSITIVE:
+            evaluation = self.report.data_model_class.EVALUATIONS.TRUSTED.value
+        else:
+            evaluation = self.report.data_model_class.EVALUATIONS.CLEAN.value
+        return evaluation
+
+    def _do_create_data_model(self) -> bool:
+        if self.report.job.observable_classification == ObservableTypes.GENERIC:
+            return False
+        if (
+            not self._config.mapping_data_model
+            and self.__class__._create_data_model_mtm
+            == BaseAnalyzerMixin._create_data_model_mtm
+            and self.__class__._update_data_model
+            == BaseAnalyzerMixin._update_data_model
+        ):
+            return False
+        return True
+
+    def _create_data_model_mtm(self):
+        return {}
+
+    def _update_data_model(self, data_model) -> None:
+        mtm = self._create_data_model_mtm()
+        for field_name, value in mtm.items():
+            field = getattr(data_model, field_name)
+            field.add(*value)
+
+    def create_data_model(self):
+        self.report: AnalyzerReport
+        if self._do_create_data_model():
+            data_model = self.report.create_data_model()
+            if data_model:
+                self._update_data_model(data_model)
+                data_model.save()
+            return data_model
+        return None
+
     @classmethod
     @property
     def config_exception(cls):
+        """Returns the AnalyzerConfigurationException class."""
         return AnalyzerConfigurationException
 
     @property
     def analyzer_name(self) -> str:
+        """Returns the name of the analyzer."""
         return self._config.name
 
     @classmethod
     @property
     def report_model(cls):
+        """Returns the AnalyzerReport model."""
         return AnalyzerReport
 
     @classmethod
     @property
     def config_model(cls):
+        """Returns the AnalyzerConfig model."""
         return AnalyzerConfig
 
     def get_exceptions_to_catch(self):
@@ -98,7 +152,20 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return result
 
     def after_run_success(self, content):
+        """
+        Handles actions after a successful run.
+
+        Args:
+            content (any): The content to process after a successful run.
+        """
         super().after_run_success(self._validate_result(content, max_recursion=15))
+        try:
+            self.create_data_model()
+        except Exception as e:
+            logger.exception(e)
+            self._job.errors.append(
+                f"Data model creation failed for {self._config.name}"
+            )
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -194,6 +261,11 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     @property
     def filepath(self) -> str:
+        """Returns the file path, retrieving the file from storage if necessary.
+
+        Returns:
+            str: The file path.
+        """
         if not self.__filepath:
             self.__filepath = self._job.file.storage.retrieve(
                 file=self._job.file, analyzer=self.analyzer_name
@@ -311,7 +383,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             return self.__polling(req_key, chance, re_poll_try=re_poll_try + 1)
         else:
             status = json_data.get("status", None)
-            if status and status == self._job.Status.RUNNING.value:
+            if status and status == self._job.STATUSES.RUNNING.value:
                 logger.info(
                     f"Poll number #{chance + 1}, "
                     f"status: 'running' <-- {self.__repr__()}"

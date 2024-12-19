@@ -69,6 +69,7 @@ else:
         "priority_steps": list(range(10)),
         "sep": ":",
         "queue_order_strategy": "priority",
+        "task_default_priority": 7,
     }
 
 task_queues = [
@@ -129,6 +130,14 @@ app.conf.beat_schedule = {
     "send_elastic_bi": {
         "task": "send_bi_to_elastic",
         "schedule": crontab(minute=12),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
+    "send_plugin_report_to_elastic": {
+        "task": "send_plugin_report_to_elastic",
+        "schedule": crontab(minute="*/5"),
         "options": {
             "queue": get_queue_name(settings.DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),

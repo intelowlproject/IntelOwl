@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
 
-from certego_saas.apps.user.serializers import UserSerializer
+from authentication.serializers import UserProfileSerializer
 
 from ..playbooks_manager.models import PlaybookConfig
 from ..serializers.celery import CrontabScheduleSerializer, PeriodicTaskSerializer
@@ -16,8 +16,8 @@ from .models import IngestorConfig, IngestorReport
 
 class IngestorConfigSerializer(PythonConfigSerializer):
     schedule = CrontabScheduleSerializer(read_only=True)
-    playbook_to_execute = rfs.SlugRelatedField(
-        queryset=PlaybookConfig.objects.all(), slug_field="name", many=False
+    playbooks_choice = rfs.SlugRelatedField(
+        queryset=PlaybookConfig.objects.all(), slug_field="name", many=True
     )
 
     class Meta:
@@ -32,11 +32,14 @@ class IngestorConfigSerializer(PythonConfigSerializer):
 class IngestorConfigSerializerForMigration(PythonConfigSerializerForMigration):
     schedule = CrontabScheduleSerializer(read_only=True)
     periodic_task = PeriodicTaskSerializer(read_only=True)
-    user = UserSerializer(read_only=True, omit=["full_name"])
+    user = UserProfileSerializer(read_only=True)
+    playbooks_choice = rfs.SlugRelatedField(
+        read_only=True, slug_field="name", many=True
+    )
 
     class Meta:
         model = IngestorConfig
-        exclude = []
+        exclude = PythonConfigSerializerForMigration.Meta.exclude
 
     def to_internal_value(self, data):
         raise NotImplementedError()
@@ -60,10 +63,28 @@ class IngestorReportSerializer(AbstractReportSerializer):
 
 class IngestorReportBISerializer(AbstractReportBISerializer):
     name = rfs.SerializerMethodField()
+    username = rfs.CharField(source="config.user.username")
 
     class Meta:
         model = IngestorReport
-        fields = AbstractReportBISerializer.Meta.fields
+        fields = (
+            [
+                "application",
+                "environment",
+                "timestamp",
+            ]
+            + [
+                "username",
+                "class_instance",
+                "process_time",
+                "status",
+                "end_time",
+            ]
+            + [
+                "name",
+                "parameters",
+            ]
+        )
         list_serializer_class = AbstractReportBISerializer.Meta.list_serializer_class
 
     @classmethod

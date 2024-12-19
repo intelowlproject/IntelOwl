@@ -1,0 +1,39 @@
+# All additional integrations should be added following this format only.
+
+services:
+  phishing_analyzers:
+    image: intelowlproject/intelowl_phishing_analyzers:${REACT_APP_INTELOWL_VERSION}
+    container_name: intelowl_phishing_analyzers
+    restart: unless-stopped
+    expose:
+      - "4005"
+      - "7007"  # selenium-wire proxy
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi
+
+  chrome-webdriver:
+    # tagging convention for chrome webdriver
+    # https://github.com/SeleniumHQ/docker-selenium/wiki/Tagging-Convention
+    image: selenium/node-chrome:130.0.6723.91-chromedriver-130.0.6723.91-grid-4.26.0-20241101
+    shm_size: 2gb # https://github.com/SeleniumHQ/docker-selenium?tab=readme-ov-file#--shm-size2g
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_ENABLE_TRACING=false
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  selenium-hub:
+    image: selenium/hub:4.26.0
+    container_name: selenium-hub
+    environment:
+      - SE_ENABLE_TRACING=false
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"

@@ -11,12 +11,14 @@ from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
+    VisualizableDownload,
     VisualizableHorizontalList,
     VisualizableLevel,
     VisualizableLevelSize,
     VisualizableObject,
     VisualizablePage,
     VisualizableTable,
+    VisualizableTableColumn,
     VisualizableTitle,
     VisualizableVerticalList,
     Visualizer,
@@ -24,7 +26,11 @@ from api_app.visualizers_manager.classes import (
 from api_app.visualizers_manager.decorators import (
     visualizable_error_handler_with_params,
 )
-from api_app.visualizers_manager.enums import VisualizableColor, VisualizableSize
+from api_app.visualizers_manager.enums import (
+    VisualizableColor,
+    VisualizableSize,
+    VisualizableTableColumnSize,
+)
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 
@@ -104,6 +110,74 @@ class VisualizableBaseTestCase(CustomTestCase):
             "icon": "",
             "copy_text": "",
             "description": "",
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+
+class VisualizableDownloadTestCase(CustomTestCase):
+    def test_to_dict(self):
+        vo = VisualizableDownload(
+            value="hello.txt",
+            payload="hello, world",
+            link="https://test.com",
+            disable=True,
+            description="description-test",
+        )
+        expected_result = {
+            "alignment": "center",
+            "disable": True,
+            "type": "download",
+            "value": "hello.txt",
+            "size": "auto",
+            "link": "https://test.com",
+            "copy_text": "",
+            "payload": "hello, world",
+            "mimetype": "text/plain",
+            "description": "description-test",
+            "add_metadata_in_description": True,
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+    def test_empty(self):
+        vo = VisualizableDownload(
+            value="",
+            payload="",
+            disable=False,
+        )
+        expected_result = {
+            "alignment": "center",
+            "disable": False,
+            "type": "download",
+            "value": "",
+            "size": "auto",
+            "link": "",
+            "copy_text": "",
+            "payload": "",
+            "mimetype": "application/x-empty",
+            "description": "",
+            "add_metadata_in_description": True,
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+    def test_disable(self):
+        vo = VisualizableDownload(
+            value="",
+            payload="hello, world",
+            size=VisualizableSize.S_3,
+            disable=True,
+        )
+        expected_result = {
+            "alignment": "center",
+            "disable": True,
+            "type": "download",
+            "value": "",
+            "size": "3",
+            "link": "",
+            "payload": "hello, world",
+            "copy_text": "",
+            "description": "",
+            "mimetype": "text/plain",
+            "add_metadata_in_description": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -201,7 +275,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
                     "alignment": "center",
                     "bold": False,
                     "color": "",
-                    "disable": False,
+                    "disable": True,
                     "icon": "",
                     "italic": False,
                     "link": "",
@@ -241,15 +315,33 @@ class VisualizableTableTestCase(CustomTestCase):
                 )
             }
         ]
-        columns = ["column_name"]
-        vvl = VisualizableTable(columns=columns, data=data)
+        columns = [
+            VisualizableTableColumn(
+                name="column_name",
+                description="test description",
+                max_width=VisualizableTableColumnSize.S_300,
+                disable_filters=True,
+                disable_sort_by=True,
+            ),
+        ]
+        vvl = VisualizableTable(
+            columns=columns, data=data, sort_by_desc=True, sort_by_id="column_name"
+        )
         expected_result = {
             "size": "auto",
             "alignment": "around",
-            "columns": ["column_name"],
+            "columns": [
+                {
+                    "name": "column_name",
+                    "max_width": 300,
+                    "description": "test description",
+                    "disable_filters": True,
+                    "disable_sort_by": True,
+                }
+            ],
             "page_size": 5,
-            "disable_filters": False,
-            "disable_sort_by": False,
+            "sort_by_id": "column_name",
+            "sort_by_desc": True,
             "type": "table",
             "data": [
                 {
@@ -273,17 +365,30 @@ class VisualizableTableTestCase(CustomTestCase):
         self.assertEqual(vvl.to_dict(), expected_result)
 
     def test_to_dict_data_null(self):
-        columns = ["column_name"]
+        columns = [
+            VisualizableTableColumn(
+                name="column_name",
+                description="test description",
+            ),
+        ]
         vvl = VisualizableTable(columns=columns, data=[])
         expected_result = {
             "size": "auto",
             "alignment": "around",
-            "columns": ["column_name"],
+            "columns": [
+                {
+                    "name": "column_name",
+                    "max_width": 300,
+                    "description": "test description",
+                    "disable_filters": False,
+                    "disable_sort_by": False,
+                }
+            ],
             "page_size": 5,
-            "disable_filters": False,
-            "disable_sort_by": False,
             "type": "table",
             "data": [],
+            "sort_by_id": "",
+            "sort_by_desc": False,
         }
         self.assertCountEqual(vvl.to_dict(), expected_result)
 
@@ -517,3 +622,24 @@ class ErrorHandlerTestCase(CustomTestCase):
                 "type": "title",
             },
         )
+
+
+class VisualizableTableColumnTestCase(CustomTestCase):
+    def test_to_dict(self):
+        co = VisualizableTableColumn(
+            name="id",
+            description="test description",
+            max_width=VisualizableTableColumnSize.S_300,
+            disable_filters=True,
+            disable_sort_by=True,
+        )
+        result = co.to_dict()
+
+        expected_result = {
+            "name": "id",
+            "description": "test description",
+            "max_width": 300,
+            "disable_filters": True,
+            "disable_sort_by": True,
+        }
+        self.assertEqual(expected_result, result)

@@ -1,4 +1,4 @@
-<img src="docs/static/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
+<img src="static/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)](https://github.com/intelowlproject/IntelOwl/releases)
 [![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
@@ -37,22 +37,24 @@ It provides:
   - *analyzers* that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
   - *connectors* that can be run to export data to external platforms (like MISP or OpenCTI)
   - *pivots* that are designed to trigger the execution of a chain of analysis and connect them to each other
-  - *visualizers* that are designed to create custom visualizations of analyzers results
-  - *ingestors* that allows to automatically ingest stream of observables or files to IntelOwl itself
+  - *visualizers* that are designed to create custom visualizations of analyzers results in the GUI
+  - *ingestors* that allow to automatically ingest stream of observables or files to IntelOwl itself
   - *playbooks* that are meant to make analysis easily repeatable
+  - *data models* to map the different data extracted from analyzers to a single common schema
+- A starting point for analysts' **Investigations**: users can register their findings, correlate the information found, and collaborate...all in a single place
 
 
-### Documentation [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
+### Documentation
 We try hard to keep our documentation well written, easy to understand and always updated.
-All info about installation, usage, configuration and contribution can be found [here](https://intelowl.readthedocs.io/)
+All info about installation, usage, configuration and contribution can be found [here](https://intelowlproject.github.io/docs/)
 
 ### Publications and Media
 
-To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowl.readthedocs.io/en/latest/Introduction.html#publications-and-media)
+To know more about the project and its growth over time, you may be interested in reading [the official blog posts and/or videos about the project by clicking on this link](https://intelowlproject.github.io/docs/IntelOwl/introduction/#publications-and-media)
 
 ### Available services or analyzers
 
-You can see the full list of all available analyzers in the [documentation](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers).
+You can see the full list of all available analyzers in the [documentation](https://intelowlproject.github.io/docs/IntelOwl/usage/#analyzers).
 
 | Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | -------------------------------------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -73,7 +75,7 @@ Because of this, we joined [Open Collective](https://opencollective.com/intelowl
 
 #### Certego
 
-<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="docs/static/Certego.png" alt="Certego Logo"/></a>
+<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="static/Certego.png" alt="Certego Logo"/></a>
 
 [Certego](https://certego.net/?utm_source=intelowl) is a MDR (Managed Detection and Response) and Threat Intelligence Provider based in Italy.
 
@@ -81,14 +83,14 @@ IntelOwl was born out of Certego's Threat intelligence R&D division and is const
 
 #### The Honeynet Project
 
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=125 height=125 src="docs/static/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=125 height=125 src="static/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
 [The Honeynet Project](https://www.honeynet.org) is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
 
 Thanks to Honeynet, we are hosting a public demo of the application [here](https://intelowl.honeynet.org). If you are interested, please contact a member of Honeynet to get access to the public service.
 
 #### Google Summer of Code
-<a href="https://summerofcode.withgoogle.com/"> <img style="border: 0.2px solid black" width=150 height=89 src="docs/static/gsoc_logo.png" alt="GSoC logo"> </a>
+<a href="https://summerofcode.withgoogle.com/"> <img style="border: 0.2px solid black" width=150 height=89 src="static/gsoc_logo.png" alt="GSoC logo"> </a>
 
 Since its birth this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC)!
 
@@ -99,7 +101,7 @@ If you are interested in participating in the next Google Summer of Code, check 
 
 #### ThreatHunter.ai
 
-<a href="https://threathunter.ai?utm_source=intelowl"> <img style="border: 0.2px solid black" width=194 height=80 src="docs/static/threathunter_logo.png" alt="ThreatHunter.ai logo"> </a>
+<a href="https://threathunter.ai?utm_source=intelowl"> <img style="border: 0.2px solid black" width=194 height=80 src="static/threathunter_logo.png" alt="ThreatHunter.ai logo"> </a>
 
 [ThreatHunter.ai®](https://threathunter.ai?utm_source=intelowl), is a 100% Service-Disabled Veteran-Owned Small Business started in 2007 under the name Milton Security Group. ThreatHunter.ai is the global leader in Dynamic Threat Hunting. Operating a true 24x7x365 Security Operation Center with AI/ML-enhanced human Threat Hunters, ThreatHunter.ai has changed the industry in how threats are found, and mitigated in real time. For over 15 years, our teams of Threat Hunters have stopped hundreds of thousands of threats and assisted organizations in defending against threat actors around the clock.
 
@@ -114,16 +116,12 @@ In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.do
 In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://www.digitalocean.com/open-source?utm_medium=opensource&utm_source=IntelOwl).
 
 
-### Other collaborations
- * [LimaCharlie](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner)
- * [Tines](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl)
-
-
 ## About the author and maintainers
 
 Feel free to contact the main developers at any time on Twitter:
 
-- [Matteo Lodi](https://twitter.com/matte_lodi): Author and principal maintainer
+- [Matteo Lodi](https://twitter.com/matte_lodi): Author, Advisor and Administrator
+- [Daniele Rosetti](https://github.com/drosetti): Administrator and Frontend Maintainer
 - [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
-- [Daniele Rosetti](https://github.com/drosetti): Frontend Maintainer
+- [Federico Gibertoni](https://x.com/fgibertoni1): Maintainer and Community Assistant
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor

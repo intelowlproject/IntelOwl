@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   uwsgi:
     build:
@@ -7,7 +5,7 @@ services:
       dockerfile: docker/Dockerfile
       args:
         REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
-        WATCHMAN: true
+        WATCHMAN: "true"
         PYCTI_VERSION: ${PYCTI_VERSION:-5.10.0}
     image: intelowlproject/intelowl:test
     volumes:
@@ -16,7 +14,6 @@ services:
       - DEBUG=True
       - DJANGO_TEST_SERVER=True
       - DJANGO_WATCHMAN_TIMEOUT=60
-      - WATCHMAN=True
 
   daphne:
     image: intelowlproject/intelowl:test
@@ -37,9 +34,6 @@ services:
       - ../:/opt/deploy/intel_owl
     environment:
       - DEBUG=True
-      - DJANGO_TEST_SERVER=True
-      - DJANGO_WATCHMAN_TIMEOUT=60
-      - WATCHMAN=True
 
   celery_worker_default:
     image: intelowlproject/intelowl:test
@@ -47,6 +41,3 @@ services:
       - ../:/opt/deploy/intel_owl
     environment:
       - DEBUG=True
-      - DJANGO_TEST_SERVER=True
-      - DJANGO_WATCHMAN_TIMEOUT=60
-      - WATCHMAN=True

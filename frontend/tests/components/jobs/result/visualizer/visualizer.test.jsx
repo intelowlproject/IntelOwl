@@ -164,7 +164,15 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                     type: "table",
                     size: "auto",
                     alignment: "start",
-                    columns: ["column_name"],
+                    columns: [
+                      {
+                        name: "column_name",
+                        max_width: 300,
+                        description: "test description",
+                        disable_filters: true,
+                        disable_sort_by: true,
+                      },
+                    ],
                     data: [
                       {
                         column_name: {
@@ -184,8 +192,21 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                       },
                     ],
                     page_size: 5,
-                    disable_filters: true,
-                    disable_sort_by: true,
+                    sort_by_id: "",
+                    sort_by_desc: false,
+                  },
+                  {
+                    type: "download",
+                    size: "auto",
+                    alignment: "around",
+                    disable: true,
+                    value: "test.txt",
+                    payload: "hello, world",
+                    copy_text: "base component",
+                    description: "test file",
+                    mimetype: "plain/text",
+                    add_metadata_in_description: true,
+                    link: "",
                   },
                 ],
                 alignment: "around",
@@ -229,5 +250,6 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
     // check base and bool are still present in the document
     expect(screen.getByText("base component")).toBeInTheDocument();
     expect(screen.getByText("bool component")).toBeInTheDocument();
+    expect(screen.getByText("test.txt")).toBeInTheDocument();
   });
 });

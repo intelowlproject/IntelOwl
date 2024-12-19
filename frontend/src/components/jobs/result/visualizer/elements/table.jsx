@@ -1,9 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { UncontrolledTooltip } from "reactstrap";
 import { DataTable, DefaultColumnFilter } from "@certego/certego-ui";
 
 import { VerticalListVisualizer } from "./verticalList";
 import { HorizontalListVisualizer } from "./horizontalList";
+import { markdownToHtml } from "../../../../common/markdownToHtml";
 
 function getAccessor(element) {
   if ([VerticalListVisualizer, HorizontalListVisualizer].includes(element.type))
@@ -12,44 +14,58 @@ function getAccessor(element) {
   return element.props.value;
 }
 
-export function TableVisualizer({
-  id,
-  size,
-  columns,
-  data,
-  pageSize,
-  disableFilters,
-  disableSortBy,
-}) {
+export function TableVisualizer({ id, size, columns, data, pageSize, sortBy }) {
   const tableColumns = [];
 
   columns.forEach((column) => {
-    const columnHeader = column.replaceAll("_", " ");
+    const columnHeader = column.name.replaceAll("_", " ");
+    const columnElement = (
+      <>
+        <span id={`${column.name}-header`}>{columnHeader}</span>
+        {column.description && (
+          <UncontrolledTooltip
+            target={`${column.name}-header`}
+            placement="top"
+            fade={false}
+            style={{
+              paddingTop: "1rem",
+              paddingLeft: "1rem",
+              paddingRight: "1rem",
+            }}
+          >
+            {markdownToHtml(column.description)}
+          </UncontrolledTooltip>
+        )}
+      </>
+    );
+
     tableColumns.push({
-      Header: columnHeader,
-      id: column,
-      accessor: (row) => getAccessor(row[column]),
+      Header: columnElement,
+      id: column.name,
+      accessor: (row) => getAccessor(row[column.name]),
       Cell: ({
         cell: {
           row: { original },
         },
-      }) => original[column],
-      disableFilters,
-      disableSortBy,
+      }) => original[column.name],
+      disableFilters: column.disableFilters,
+      disableSortBy: column.disableSortBy,
       Filter: DefaultColumnFilter,
+      maxWidth: column.maxWidth,
     });
   });
 
   const tableConfig = {};
   const tableInitialState = {
     pageSize,
+    sortBy,
   };
 
   return (
     <div
       id={id}
       className={size}
-      style={{ maxHeight: "60vh", overflowY: "scroll" }}
+      style={{ maxHeight: "80vh", overflowY: "scroll" }}
     >
       <DataTable
         id={id}
@@ -65,15 +81,13 @@ export function TableVisualizer({
 TableVisualizer.propTypes = {
   id: PropTypes.string.isRequired,
   size: PropTypes.string.isRequired,
-  columns: PropTypes.arrayOf(PropTypes.string).isRequired,
+  columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   data: PropTypes.array.isRequired,
   pageSize: PropTypes.number,
-  disableFilters: PropTypes.bool,
-  disableSortBy: PropTypes.bool,
+  sortBy: PropTypes.array,
 };
 
 TableVisualizer.defaultProps = {
   pageSize: 5,
-  disableFilters: false,
-  disableSortBy: false,
+  sortBy: [],
 };

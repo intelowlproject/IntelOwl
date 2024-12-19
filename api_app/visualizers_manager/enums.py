@@ -123,3 +123,17 @@ class VisualizableAlignment(enum.Enum):
 
     def __bool__(self):
         return True
+
+
+class VisualizableTableColumnSize(enum.Enum):
+    """Column size for VisualizebleTable elements"""
+
+    S_50 = 50
+    S_100 = 100
+    S_150 = 150
+    S_200 = 200
+    S_250 = 250
+    S_300 = 300
+
+    def __str__(self):
+        return self.value

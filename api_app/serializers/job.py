@@ -568,7 +568,8 @@ class JobSerializer(_AbstractJobViewSerializer):
             )
         return super().get_fields()
 
-    def get_analyzers_data_model(self, instance: Job):
+    @staticmethod
+    def get_analyzers_data_model(instance: Job):
         return instance.analyzerreports.get_data_models(instance).serialize()
 
 

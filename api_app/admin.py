@@ -271,11 +271,14 @@ class LogEntryAdmin(admin.ModelAdmin):
     list_filter = ["user", "action_flag", "action_time", "content_type"]
     search_fields = ["user__username", "object_repr", "change_message"]
 
-    def has_delete_permission(self, request, obj=None):
+    @staticmethod
+    def has_delete_permission(request, obj=None):
         return False
 
-    def has_add_permission(self, request):
+    @staticmethod
+    def has_add_permission(request):
         return False
 
-    def has_change_permission(self, request, obj=None):
+    @staticmethod
+    def has_change_permission(request, obj=None):
         return False

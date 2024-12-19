@@ -9,6 +9,7 @@ from api_app.visualizers_manager.classes import Visualizer
 from api_app.visualizers_manager.decorators import (
     visualizable_error_handler_with_params,
 )
+from api_app.visualizers_manager.enums import VisualizableIcon
 
 logger = getLogger(__name__)
 
@@ -64,6 +65,41 @@ class StaticSampleAnalyzers(Visualizer):
             name=self.Base(value="Mraptor", disable=disable_signatures),
             value=self.Base(
                 value="found" if mraptor_match else "", disable=disable_signatures
+            ),
+            disable=disable_signatures,
+        )
+
+    @visualizable_error_handler_with_params("XLMMacroDeobfuscator")
+    def _xlm_macro_deobfuscator(self, analyzer_report):
+        report = analyzer_report.report
+        found_urls = []
+        error = ""
+        outputs = report.get("output", "")
+        if outputs:
+            self.decrypt = True
+            for output in outputs:
+                for elem in output.split("\n"):
+                    elem = elem.strip().replace("'", "").replace('"', "")
+                    if elem.startswith("http"):
+                        found_urls.append(elem)
+        elif report.get("error", ""):
+            error = report["error"]
+
+        disable_signatures = not found_urls
+
+        return self.VList(
+            name=self.Base(
+                value="XLM Macro Deobfuscator",
+                disable=disable_signatures,
+                icon=VisualizableIcon.WARNING if error else None,
+            ),
+            value=(
+                [error]
+                if error
+                else [
+                    self.Base(value=value, disable=disable_signatures)
+                    for value in found_urls
+                ]
             ),
             disable=disable_signatures,
         )
@@ -185,7 +221,12 @@ class StaticSampleAnalyzers(Visualizer):
         doc_info = self.analyzer_reports().get(config__name="Doc_Info")
 
         h2 = self.HList(
-            value=[self._mraptor(doc_info), self._cves(doc_info), self._pdf_info()]
+            value=[
+                self._mraptor(doc_info),
+                self._xlm_macro_deobfuscator(),
+                self._cves(doc_info),
+                self._pdf_info(),
+            ]
         )
         page2.add_level(
             self.Level(position=1, size=self.LevelSize.S_3, horizontal_list=h2)

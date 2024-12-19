@@ -29,7 +29,7 @@ services:
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       # to allow multiple session to run
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
-      - SE_NODE_MAX_SESSIONS=8
+      - SE_NODE_MAX_SESSIONS=4
       # clean session for long running containers
       # https://github.com/SeleniumHQ/docker-selenium/blob/trunk/README.md#automatic-browser-leftovers-cleanup
       - SE_ENABLE_BROWSER_LEFTOVERS_CLEANUP=true
@@ -41,7 +41,7 @@ services:
     container_name: selenium-hub
     environment:
       - SE_ENABLE_TRACING=false
-    ports:
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
+    expose:
+      - "4442"
+      - "4443"
+      - "4444"

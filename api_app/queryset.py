@@ -15,7 +15,7 @@ from django.core.paginator import Paginator
 from treebeard.mp_tree import MP_NodeQuerySet
 
 if TYPE_CHECKING:
-    from api_app.models import PythonConfig
+    from api_app.models import PythonConfig, AbstractConfig
     from api_app.serializers import AbstractBIInterface
 
 import logging
@@ -74,7 +74,7 @@ class SendToBiQuerySet(models.QuerySet):
         ) as f:
             body = json.load(f)
             body["index_patterns"] = [f"{settings.ELASTICSEARCH_BI_INDEX}-*"]
-            settings.ELASTICSEARCH_CLIENT.indices.put_template(
+            settings.ELASTICSEARCH_BI_CLIENT.indices.put_template(
                 name=settings.ELASTICSEARCH_BI_INDEX, body=body
             )
             logger.info(
@@ -105,7 +105,7 @@ class SendToBiQuerySet(models.QuerySet):
             serializer = self._get_bi_serializer_class()(instance=objects, many=True)
             objects_serialized = serializer.data
             _, errors = bulk(
-                settings.ELASTICSEARCH_CLIENT,
+                settings.ELASTICSEARCH_BI_CLIENT,
                 objects_serialized,
                 request_timeout=max_timeout,
             )
@@ -312,7 +312,7 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         Returns:
             The filtered queryset.
         """
-        return self.filter(status__in=self.model.Status.final_statuses())
+        return self.filter(status__in=self.model.STATUSES.final_statuses())
 
     def visible_for_user(self, user: User) -> "JobQuerySet":
         """
@@ -409,10 +409,10 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
             The filtered queryset.
         """
         qs = self.exclude(
-            status__in=[status.value for status in self.model.Status.final_statuses()]
+            status__in=[status.value for status in self.model.STATUSES.final_statuses()]
         )
         if not check_pending:
-            qs = qs.exclude(status=self.model.Status.PENDING.value)
+            qs = qs.exclude(status=self.model.STATUSES.PENDING.value)
         difference = now() - datetime.timedelta(minutes=minutes_ago)
         return qs.filter(received_request_time__lte=difference)
 
@@ -673,7 +673,7 @@ class AbstractReportQuerySet(SendToBiQuerySet):
         Returns:
             AbstractReportQuerySet: The filtered queryset.
         """
-        return self.filter(status__in=self.model.Status.final_statuses())
+        return self.filter(status__in=self.model.STATUSES.final_statuses())
 
     def filter_retryable(self):
         """
@@ -683,7 +683,10 @@ class AbstractReportQuerySet(SendToBiQuerySet):
             AbstractReportQuerySet: The filtered queryset.
         """
         return self.filter(
-            status__in=[self.model.Status.FAILED.value, self.model.Status.PENDING.value]
+            status__in=[
+                self.model.STATUSES.FAILED.value,
+                self.model.STATUSES.PENDING.value,
+            ]
         )
 
     def get_configurations(self) -> AbstractConfigQuerySet:
@@ -693,7 +696,9 @@ class AbstractReportQuerySet(SendToBiQuerySet):
         Returns:
             AbstractConfigQuerySet: The queryset of configurations.
         """
-        return self.model.config.objects.filter(pk__in=self.values("config__pk"))
+        return self.model.config.field.related_model.objects.filter(
+            pk__in=self.values("config_id")
+        )
 
 
 class ModelWithOwnershipQuerySet:
@@ -934,7 +939,7 @@ class PythonConfigQuerySet(AbstractConfigQuerySet):
 
             task_id = str(uuid.uuid4())
             config.generate_empty_report(
-                job, task_id, AbstractReport.Status.PENDING.value
+                job, task_id, AbstractReport.STATUSES.PENDING.value
             )
             args = [
                 job.pk,

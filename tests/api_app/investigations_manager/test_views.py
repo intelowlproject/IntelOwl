@@ -152,3 +152,9 @@ class InvestigationViewSetTestCase(CustomViewSetTestCase, ViewSetTestCaseMixin):
 
         job.delete()
         job2.delete()
+
+    def test_get_superuser(self):
+        plugin = self.get_object()
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.URL}/{plugin}")
+        self.assertEqual(response.status_code, 403, response.json())

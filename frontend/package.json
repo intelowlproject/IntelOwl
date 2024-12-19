@@ -64,6 +64,7 @@
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.14",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.57.1",

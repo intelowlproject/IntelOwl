@@ -467,7 +467,7 @@ class JobTestCase(CustomTestCase):
             observable_classification="domain",
             user=self.user,
             md5="72cf478e87b031233091d8c00a38ce00",
-            status=Job.Status.REPORTED_WITHOUT_FAILS,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
         )
         pc = PivotConfig.objects.create(
             name="test",

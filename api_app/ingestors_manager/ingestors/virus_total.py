@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable
 from unittest.mock import patch
 
 from django.utils import timezone
@@ -21,6 +21,12 @@ class VirusTotal(Ingestor, VirusTotalv3BaseMixin):
     # VT API key
     _api_key_name: str
 
+    def config(self, runtime_configuration: Dict):
+        super().config(runtime_configuration)
+        # An Ingestor does not have a corresponding job so we set the value to False,
+        # the aim of the ingestors usually is to download data not to upload.
+        self.force_active_scan = False
+
     @classmethod
     def update(cls) -> bool:
         pass
@@ -30,7 +36,9 @@ class VirusTotal(Ingestor, VirusTotalv3BaseMixin):
             delta_hours = timezone.datetime.now() - timezone.timedelta(hours=self.hours)
             self.query = f"fs:{delta_hours.strftime('%Y-%m-%d%H:%M:%S')}+ " + self.query
         data = self._vt_intelligence_search(self.query, 300, "").get("data", {})
-        logger.info(f"Retrieved {len(data)} items from the query")
+        logger.info(
+            f"VT ingestor: Retrieved {len(data)} items from the query {self.query}"
+        )
         samples_hashes = [d["id"] for d in data]
         for sample_hash in samples_hashes:
             if self.extract_IOCs:

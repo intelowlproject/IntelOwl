@@ -55,6 +55,7 @@ DEFAULT_SLACK_CHANNEL=
 # Elastic Search Configuration
 ELASTICSEARCH_DSL_ENABLED=False
 ELASTICSEARCH_DSL_HOST=
+ELASTICSEARCH_DSL_PASSWORD=
 # consult to: https://django-elasticsearch-dsl.readthedocs.io/en/latest/settings.html
 ELASTICSEARCH_DSL_NO_OF_SHARDS=1
 ELASTICSEARCH_DSL_NO_OF_REPLICAS=0

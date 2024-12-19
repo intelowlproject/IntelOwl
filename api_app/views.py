@@ -5,6 +5,7 @@ import logging
 import uuid
 from abc import ABCMeta, abstractmethod
 
+from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse
@@ -12,6 +13,8 @@ from django.utils.timezone import now
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
+from elasticsearch_dsl import Q as QElastic
+from elasticsearch_dsl import Search
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
@@ -21,6 +24,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api_app.choices import ScanMode
+from api_app.exceptions import NotImplementedException
 from api_app.websocket import JobConsumer
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission as IsObjectUserOrSameOrgPermission,
@@ -51,6 +55,11 @@ from .models import (
 )
 from .permissions import IsObjectAdminPermission, IsObjectOwnerPermission
 from .pivots_manager.models import PivotConfig
+from .serializers.elastic import (
+    ElasticRequest,
+    ElasticRequestSerializer,
+    ElasticResponseSerializer,
+)
 from .serializers.job import (
     CommentSerializer,
     FileJobSerializer,
@@ -416,8 +425,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     - **aggregate_type**: Aggregate jobs by type (file or observable) over a specified time range.
     - **aggregate_observable_classification**: Aggregate jobs by observable classification over a specified time range.
     - **aggregate_file_mimetype**: Aggregate jobs by file MIME type over a specified time range.
-    - **aggregate_observable_name**: Aggregate jobs by observable name over a specified time range.
-    - **aggregate_md5**: Aggregate jobs by MD5 hash over a specified time range.
+    - **aggregate_top_playbook**: Aggregate jobs by playbook over a specified time range and show the most used.
+    - **aggregate_top_user**: Aggregate jobs by user over a specified time range and show the most used.
+    - **aggregate_top_tlp**: Aggregate jobs by TLP over a specified time range and show the most used.
 
     Permissions:
     - **IsAuthenticated**: Requires authentication for all actions.
@@ -537,7 +547,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - No content (204) if the job is successfully retried.
         """
         job = self.get_object()
-        if job.status not in Job.Status.final_statuses():
+        if job.status not in Job.STATUSES.final_statuses():
             raise ValidationError({"detail": "Job is running"})
         job.retry()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -593,7 +603,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         job = self.get_object()
 
         # check if job running
-        if job.status in Job.Status.final_statuses():
+        if job.status in Job.STATUSES.final_statuses():
             raise ValidationError({"detail": "Job is not running"})
         # close celery tasks and mark reports as killed
         job.kill_if_ongoing()
@@ -687,7 +697,14 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         """
         annotations = {
             key.lower(): Count("status", filter=Q(status=key))
-            for key in Job.Status.values
+            for key in Job.STATUSES.values
+            if key
+            in [
+                Job.STATUSES.PENDING,
+                Job.STATUSES.FAILED,
+                Job.STATUSES.REPORTED_WITH_FAILS,
+                Job.STATUSES.REPORTED_WITHOUT_FAILS,
+            ]
         }
         return self.__aggregation_response_static(
             annotations, users=self.get_org_members(request)
@@ -755,38 +772,54 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         )
 
     @action(
-        url_path="aggregate/observable_name",
+        url_path="aggregate/top_playbook",
         detail=False,
         methods=["GET"],
     )
     @cache_action_response(timeout=60 * 5)
-    def aggregate_observable_name(self, request):
+    def aggregate_top_playbook(self, request):
         """
-        Aggregate jobs by observable name.
+        Aggregate playbooks by usage.
 
         Returns:
-        - Aggregated count of jobs for each observable name.
+        - Aggregated count of playbooks for each one.
         """
         return self.__aggregation_response_dynamic(
-            "observable_name", False, users=self.get_org_members(request)
+            "playbook_to_execute__name", users=self.get_org_members(request)
         )
 
     @action(
-        url_path="aggregate/md5",
+        url_path="aggregate/top_user",
         detail=False,
         methods=["GET"],
     )
     @cache_action_response(timeout=60 * 5)
-    def aggregate_md5(self, request):
+    def aggregate_top_user(self, request):
         """
-        Aggregate jobs by MD5 hash.
+        Aggregate Users by usage.
 
         Returns:
-        - Aggregated count of jobs for each MD5 hash.
+        - Aggregated count of users for each one.
         """
-        # this is for file
         return self.__aggregation_response_dynamic(
-            "md5", False, users=self.get_org_members(request)
+            "user__username", users=self.get_org_members(request)
+        )
+
+    @action(
+        url_path="aggregate/top_tlp",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_top_tlp(self, request):
+        """
+        Aggregate TLPs by usage.
+
+        Returns:
+        - Aggregated count of TLPs for each one.
+        """
+        return self.__aggregation_response_dynamic(
+            "tlp", users=self.get_org_members(request)
         )
 
     @staticmethod
@@ -867,6 +900,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             and the aggregated data.
         """
         delta, basis = self.__parse_range(self.request)
+        logger.debug(f"{delta=}, {basis=}, {users=}")
         filter_kwargs = {"received_request_time__gte": delta}
         if users:
             filter_kwargs["user__in"] = users
@@ -1205,7 +1239,7 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
-        report.status = AbstractReport.Status.KILLED
+        report.status = AbstractReport.STATUSES.KILLED
         report.save(update_fields=["status"])
         # clean up job
 
@@ -1282,8 +1316,8 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # get report object or raise 404
         report = self.get_object(job_id, report_id)
         if report.status not in [
-            AbstractReport.Status.RUNNING,
-            AbstractReport.Status.PENDING,
+            AbstractReport.STATUSES.RUNNING,
+            AbstractReport.STATUSES.PENDING,
         ]:
             raise ValidationError({"detail": "Plugin is not running or pending"})
 
@@ -1318,8 +1352,8 @@ class PythonReportActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         # get report object or raise 404
         report = self.get_object(job_id, report_id)
         if report.status not in [
-            AbstractReport.Status.FAILED,
-            AbstractReport.Status.KILLED,
+            AbstractReport.STATUSES.FAILED,
+            AbstractReport.STATUSES.KILLED,
         ]:
             raise ValidationError(
                 {"detail": "Plugin status should be failed or killed"}
@@ -1556,3 +1590,96 @@ class PythonConfigViewSet(AbstractConfigViewSet):
                     {"detail": "This Plugin has no Update implemented"}
                 )
             return Response(data={"status": update_status}, status=status.HTTP_200_OK)
+
+
+@add_docs(
+    description="""This endpoint allows users to search analyzer, connector and pivot reports. ELASTIC REQUIRED""",
+    responses={
+        200: inline_serializer(
+            name="ElasticResponseSerializer",
+            fields={
+                "data": rfs.JSONField(),
+            },
+        ),
+    },
+)
+@api_view(["GET"])
+def plugin_report_queries(request):
+    """
+    View enabled only with elastic. Allow to perform queries in the Plugin reports.
+
+    Args:
+        request (HttpRequest): The request object containing the HTTP GET request.
+
+    Returns:
+        Response: A JSON response with the state of each plugin configuration,
+                  indicating whether it is disabled or not.
+
+    Raises:
+        NotImplementedException: Elastic is not configured
+        PermissionDenied: If the requesting user does not belong to any organization.
+    """
+    if not settings.ELASTICSEARCH_DSL_ENABLED:
+        raise NotImplementedException()
+
+    # 1 validate request
+    logger.debug(f"{request.query_params=}")
+    elastic_request_serializer = ElasticRequestSerializer(data=request.query_params)
+    elastic_request_serializer.is_valid(raise_exception=True)
+    elastic_request_params: ElasticRequest = elastic_request_serializer.save()
+    logger.debug(f"{elastic_request_params.__dict__=}")
+
+    # 2 generate elasticsearch queries, default filter: object owner or in org
+    permission_filter = QElastic("term", user__username=request.user.username)
+    if request.user.has_membership():
+        permission_filter |= QElastic(
+            "term", membership__organization__name=request.user.username
+        )
+    filter_list = [permission_filter]
+
+    # additional filters based on request params
+    if elastic_request_params.plugin_name:
+        filter_list.append(
+            QElastic("term", plugin_name=elastic_request_params.plugin_name)
+        )
+    if elastic_request_params.name:
+        filter_list.append(QElastic("term", name=elastic_request_params.name))
+    if elastic_request_params.status:
+        filter_list.append(QElastic("term", status=elastic_request_params.status))
+    if elastic_request_params.errors:
+        filter_list.append(QElastic("exists", field="errors"))
+    if elastic_request_params.start_start_time:
+        filter_list.append(
+            QElastic(
+                "range", start_time={"gte": elastic_request_params.start_start_time}
+            )
+        )
+    if elastic_request_params.end_start_time:
+        filter_list.append(
+            QElastic("range", start_time={"lte": elastic_request_params.end_start_time})
+        )
+    if elastic_request_params.start_end_time:
+        filter_list.append(
+            QElastic("range", end_time={"gte": elastic_request_params.start_end_time})
+        )
+    if elastic_request_params.end_end_time:
+        filter_list.append(
+            QElastic("range", end_time={"lte": elastic_request_params.end_end_time})
+        )
+    if elastic_request_params.report:
+        filter_list.append(QElastic("term", report=elastic_request_params.report))
+
+    # 3 return data
+    hits = (
+        Search(index="plugin-report-*")
+        .query(QElastic("bool", filter=filter_list))
+        .execute()
+    )
+    logger.debug(f"filters: {filter_list}, hits: {len(hits)}")
+    serialize_response = ElasticResponseSerializer(
+        data=[h.to_dict() for h in hits], many=True
+    )
+    serialize_response.is_valid(raise_exception=True)
+    response_data = serialize_response.validated_data
+    result = {"data": response_data}
+    return Response(result)

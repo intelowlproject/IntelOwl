@@ -1,13 +1,17 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from .models import Job
 
+logger = logging.getLogger(__name__)
 
-@registry.register_document
+
+@registry.register_document  # TODO: maybe we can replace this with the signal and remove django elasticsearch dsl
 class JobDocument(Document):
     # Object/List fields
     analyzers_to_execute = fields.NestedField(
@@ -19,7 +23,11 @@ class JobDocument(Document):
     visualizers_to_execute = fields.NestedField(
         properties={"name": fields.KeywordField()}
     )
-    playbook_to_execute = fields.KeywordField()
+    playbook_to_execute = fields.ObjectField(
+        properties={
+            "name": fields.KeywordField(),
+        },
+    )
 
     # Normal fields
     errors = fields.TextField()

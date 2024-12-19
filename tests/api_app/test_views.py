@@ -2,15 +2,21 @@
 # See the file 'LICENSE' for copying permission.
 import abc
 import datetime
+from unittest.mock import MagicMock, patch
+from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.utils.timezone import now
+from elasticsearch_dsl.query import Bool, Range, Term
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.choices import ReportStatus
 from api_app.models import Comment, Job, Parameter, PluginConfig, Tag
+from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -359,6 +365,15 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 200)
 
 
+@patch(
+    "api_app.views.parse_humanized_range",
+    MagicMock(
+        return_value=(
+            datetime.datetime(2024, 11, 27, 12, tzinfo=datetime.timezone.utc),
+            "day",
+        )
+    ),
+)
 class JobViewSetTests(CustomViewSetTestCase):
     jobs_list_uri = reverse("jobs-list")
     jobs_recent_scans_uri = reverse("jobs-recent-scans")
@@ -369,28 +384,37 @@ class JobViewSetTests(CustomViewSetTestCase):
         "jobs-aggregate-observable-classification"
     )
     agg_file_mimetype_uri = reverse("jobs-aggregate-file-mimetype")
-    agg_observable_name_uri = reverse("jobs-aggregate-observable-name")
-    agg_file_name_uri = reverse("jobs-aggregate-md5")
+    agg_top_playbook = reverse("jobs-aggregate-top-playbook")
+    agg_top_user = reverse("jobs-aggregate-top-user")
+    agg_top_tlp = reverse("jobs-aggregate-top-tlp")
 
     def setUp(self):
         super().setUp()
-        self.job, _ = Job.objects.get_or_create(
-            **{
-                "user": self.superuser,
-                "is_sample": False,
-                "observable_name": "1.2.3.4",
-                "observable_classification": "ip",
-            }
-        )
-        self.job2, _ = Job.objects.get_or_create(
-            **{
-                "user": self.superuser,
-                "is_sample": True,
-                "md5": "test.file",
-                "file_name": "test.file",
-                "file_mimetype": "application/vnd.microsoft.portable-executable",
-            }
-        )
+        with patch(
+            "django.utils.timezone.now",
+            return_value=datetime.datetime(2024, 11, 28, tzinfo=datetime.timezone.utc),
+        ):
+            self.job, _ = Job.objects.get_or_create(
+                **{
+                    "user": self.superuser,
+                    "is_sample": False,
+                    "observable_name": "1.2.3.4",
+                    "observable_classification": "ip",
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": Job.TLP.CLEAR.value,
+                }
+            )
+            self.job2, _ = Job.objects.get_or_create(
+                **{
+                    "user": self.superuser,
+                    "is_sample": True,
+                    "md5": "test.file",
+                    "file_name": "test.file",
+                    "file_mimetype": "application/vnd.microsoft.portable-executable",
+                    "playbook_to_execute": PlaybookConfig.objects.get(name="Dns"),
+                    "tlp": Job.TLP.GREEN.value,
+                }
+            )
 
     def test_recent_scan(self):
         j1 = Job.objects.create(
@@ -430,7 +454,9 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "is_sample": False,
                 "observable_name": "gigatest.com",
                 "observable_classification": "domain",
-                "finished_analysis_time": now() - datetime.timedelta(days=2),
+                "finished_analysis_time": datetime.datetime(
+                    2024, 11, 28, tzinfo=datetime.timezone.utc
+                ),
             }
         )
         j2 = Job.objects.create(
@@ -439,7 +465,9 @@ class JobViewSetTests(CustomViewSetTestCase):
                 "is_sample": False,
                 "observable_name": "gigatest.com",
                 "observable_classification": "domain",
-                "finished_analysis_time": now() - datetime.timedelta(hours=2),
+                "finished_analysis_time": datetime.datetime(
+                    2024, 11, 28, tzinfo=datetime.timezone.utc
+                ),
             }
         )
         response = self.client.post(
@@ -487,8 +515,12 @@ class JobViewSetTests(CustomViewSetTestCase):
     # @action endpoints
 
     def test_kill(self):
-        job = Job.objects.create(status=Job.Status.RUNNING, user=self.superuser)
-        self.assertEqual(job.status, Job.Status.RUNNING)
+        job = Job.objects.create(
+            status=Job.STATUSES.RUNNING,
+            user=self.superuser,
+            observable_classification="ip",
+        )
+        self.assertEqual(job.status, Job.STATUSES.RUNNING)
         uri = reverse("jobs-kill", args=[job.pk])
         response = self.client.patch(uri)
 
@@ -498,12 +530,14 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(response.status_code, 204)
         job.refresh_from_db()
 
-        self.assertEqual(job.status, Job.Status.KILLED)
+        self.assertEqual(job.status, Job.STATUSES.KILLED)
 
     def test_kill_400(self):
         # create a new job whose status is not "running"
         job = Job.objects.create(
-            status=Job.Status.REPORTED_WITHOUT_FAILS, user=self.superuser
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
+            user=self.superuser,
+            observable_classification="ip",
         )
         uri = reverse("jobs-kill", args=[job.pk])
         self.client.force_authenticate(user=self.job.user)
@@ -516,19 +550,24 @@ class JobViewSetTests(CustomViewSetTestCase):
         )
 
     # aggregation endpoints
-
     def test_agg_status_200(self):
         resp = self.client.get(self.agg_status_uri)
         content = resp.json()
         msg = (resp, content)
 
         self.assertEqual(resp.status_code, 200, msg)
-        for field in ["date", *Job.Status.values]:
-            self.assertIn(
-                field,
-                content[0],
-                msg=msg,
-            )
+        self.assertEqual(
+            content,
+            [
+                {
+                    "date": "2024-11-28T00:00:00Z",
+                    "pending": 2,
+                    "failed": 0,
+                    "reported_with_fails": 0,
+                    "reported_without_fails": 0,
+                }
+            ],
+        )
 
     def test_agg_type_200(self):
         resp = self.client.get(self.agg_type_uri)
@@ -570,31 +609,42 @@ class JobViewSetTests(CustomViewSetTestCase):
                 msg=msg,
             )
 
-    def test_agg_observable_name_200(self):
-        resp = self.client.get(self.agg_observable_name_uri)
-        content = resp.json()
-        msg = (resp, content)
+    def test_agg_top_playbook_200(self):
+        resp = self.client.get(self.agg_top_playbook)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "values": ["Dns"],
+                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 2}],
+            },
+        )
 
-        self.assertEqual(resp.status_code, 200, msg)
-        for field in content["values"]:
-            self.assertIn(
-                field,
-                content["aggregation"],
-                msg=msg,
-            )
+    def test_agg_top_user_200(self):
+        resp = self.client.get(self.agg_top_user)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "values": ["superuser@intelowl.org"],
+                "aggregation": [
+                    {"date": "2024-11-28T00:00:00Z", "superuser@intelowl.org": 2}
+                ],
+            },
+        )
 
-    def test_agg_file_name_200(self):
-        resp = self.client.get(self.agg_file_name_uri)
-        content = resp.json()
-        msg = (resp, content)
-
-        self.assertEqual(resp.status_code, 200, msg)
-        for field in content["values"]:
-            self.assertIn(
-                field,
-                content["aggregation"],
-                msg=msg,
-            )
+    def test_agg_top_tlp_200(self):
+        resp = self.client.get(self.agg_top_tlp)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "values": ["CLEAR", "GREEN"],
+                "aggregation": [
+                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1}
+                ],
+            },
+        )
 
 
 class TagViewsetTests(CustomViewSetTestCase):
@@ -824,3 +874,238 @@ class AbstractConfigViewSetTestCaseMixin(ViewSetTestCaseMixin, metaclass=abc.ABC
 
         m.delete()
         org.delete()
+
+
+class ElasticTestCase(CustomViewSetTestCase):
+    uri = reverse("plugin_report_queries")
+
+    class ElasticObject:
+
+        def __init__(self, response):
+            self.response = response
+
+        def to_dict(self):
+            return self.response
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.org_user, _ = User.objects.get_or_create(
+            is_superuser=False, username="elastic_test_user"
+        )
+        cls.org = Organization.objects.create(name="test_elastic_org")
+        cls.membership = Membership.objects.create(
+            user=cls.org_user, organization=cls.org, is_owner=True
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls.membership.delete()
+        cls.org.delete()
+        cls.org_user.delete()
+
+    def test_not_authenticated(self):
+        self.client.logout()
+        response = self.client.get(self.uri)
+        self.assertEqual(response.status_code, 401)
+
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @patch(
+        "api_app.views.Search.execute",
+        MagicMock(
+            return_value=(
+                [
+                    ElasticObject(
+                        {
+                            "user": {"username": "elastic_test_user"},
+                            "membership": {
+                                "is_owner": True,
+                                "is_admin": False,
+                                "organization": {"name": "test_elastic_org"},
+                            },
+                            "job": {"id": 1},
+                            "config": {
+                                "name": "Quad9_DNS",
+                                "plugin_name": "analyzer",
+                            },
+                            "status": "SUCCESS",
+                            "start_time": "2024-11-27T09:56:59.555203Z",
+                            "end_time": "2024-11-27T09:57:03.805453Z",
+                            "errors": [],
+                            "report": {
+                                "observable": "google.com",
+                                "resolutions": [
+                                    {
+                                        "TTL": 268,
+                                        "data": "216.58.205.46",
+                                        "name": "google.com.",
+                                        "type": 1,
+                                        "Expires": "Wed, 27 Nov 2024 10:01:31 UTC",
+                                    },
+                                ],
+                            },
+                        }
+                    ),
+                    ElasticObject(
+                        {
+                            "user": {"username": "another_user"},
+                            "membership": {
+                                "is_owner": False,
+                                "is_admin": False,
+                                "organization": {"name": "test_elastic_org"},
+                            },
+                            "job": {"id": 2},
+                            "config": {
+                                "name": "Classic_DNS",
+                                "plugin_name": "analyzer",
+                            },
+                            "status": "SUCCESS",
+                            "start_time": "2024-11-26T09:56:59.555203Z",
+                            "end_time": "2024-11-26T09:57:03.805453Z",
+                            "errors": [],
+                            "report": {
+                                "observable": "google.com",
+                                "resolutions": [
+                                    {
+                                        "TTL": 268,
+                                        "data": "216.58.205.46",
+                                        "name": "google.com.",
+                                        "type": 1,
+                                        "Expires": "Wed, 26 Nov 2024 10:01:31 UTC",
+                                    },
+                                ],
+                            },
+                        }
+                    ),
+                ]
+            )
+        ),
+    )
+    def test_client_request(self):
+        self.client.force_authenticate(self.org_user)
+        response = self.client.get(
+            self.uri,
+            data={
+                "report": "216.58.205.46",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "data": [
+                    {
+                        "job": {"id": 1},
+                        "config": {
+                            "name": "Quad9_DNS",
+                            "plugin_name": "analyzer",
+                        },
+                        "status": "SUCCESS",
+                        "start_time": "2024-11-27T09:56:59.555203Z",
+                        "end_time": "2024-11-27T09:57:03.805453Z",
+                        "errors": [],
+                        "report": {
+                            "observable": "google.com",
+                            "resolutions": [
+                                {
+                                    "TTL": 268,
+                                    "data": "216.58.205.46",
+                                    "name": "google.com.",
+                                    "type": 1,
+                                    "Expires": "Wed, 27 Nov 2024 10:01:31 UTC",
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        "job": {"id": 2},
+                        "config": {
+                            "name": "Classic_DNS",
+                            "plugin_name": "analyzer",
+                        },
+                        "status": "SUCCESS",
+                        "start_time": "2024-11-26T09:56:59.555203Z",
+                        "end_time": "2024-11-26T09:57:03.805453Z",
+                        "errors": [],
+                        "report": {
+                            "observable": "google.com",
+                            "resolutions": [
+                                {
+                                    "TTL": 268,
+                                    "data": "216.58.205.46",
+                                    "name": "google.com.",
+                                    "type": 1,
+                                    "Expires": "Wed, 26 Nov 2024 10:01:31 UTC",
+                                },
+                            ],
+                        },
+                    },
+                ]
+            },
+        )
+
+    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
+    @patch("api_app.views.Search")
+    def test_elastic_request(self, mocked_search):
+        self.client.force_authenticate(self.org_user)
+        response = self.client.get(
+            self.uri,
+            data={
+                "plugin_name": "analyzer",
+                "name": "classic_dns",
+                "status": "SUCCESS",
+                "errors": False,
+                "start_start_time": datetime.datetime(2024, 11, 27),
+                "end_start_time": datetime.datetime(2024, 11, 28),
+                "start_end_time": datetime.datetime(2024, 11, 27),
+                "end_end_time": datetime.datetime(2024, 11, 28),
+                "report": "8.8.8.8",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            mocked_search.return_value.query.call_args_list[0][0][0],
+            Bool(
+                filter=[
+                    Bool(
+                        should=[
+                            Term(user__username="elastic_test_user"),
+                            Term(membership__organization__name="elastic_test_user"),
+                        ]
+                    ),
+                    Term(plugin_name="analyzer"),
+                    Term(name="classic_dns"),
+                    Term(status=ReportStatus.SUCCESS),
+                    Range(
+                        start_time={
+                            "gte": datetime.datetime(
+                                2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Range(
+                        start_time={
+                            "lte": datetime.datetime(
+                                2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Range(
+                        end_time={
+                            "gte": datetime.datetime(
+                                2024, 11, 27, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Range(
+                        end_time={
+                            "lte": datetime.datetime(
+                                2024, 11, 28, 0, 0, tzinfo=ZoneInfo(key="UTC")
+                            )
+                        }
+                    ),
+                    Term(report="8.8.8.8"),
+                ]
+            ),
+        )

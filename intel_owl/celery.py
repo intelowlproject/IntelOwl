@@ -135,6 +135,14 @@ app.conf.beat_schedule = {
             "MessageGroupId": str(uuid.uuid4()),
         },
     },
+    "send_plugin_report_to_elastic": {
+        "task": "send_plugin_report_to_elastic",
+        "schedule": crontab(minute="*/5"),
+        "options": {
+            "queue": get_queue_name(settings.DEFAULT_QUEUE),
+            "MessageGroupId": str(uuid.uuid4()),
+        },
+    },
     "remove_old_jobs": {
         "task": "intel_owl.tasks.remove_old_jobs",
         "schedule": crontab(minute=10, hour=2),

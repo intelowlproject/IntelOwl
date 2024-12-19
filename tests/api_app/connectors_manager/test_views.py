@@ -67,7 +67,7 @@ class ConnectorActionViewSetTests(CustomViewSetTestCase, PluginActionViewsetTest
     def init_report(self, status: str, user) -> ConnectorReport:
         _job = Job.objects.create(
             user=user,
-            status=Job.Status.REPORTED_WITHOUT_FAILS,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
         )

@@ -42,7 +42,7 @@ class IETFReport(models.Model):
 
 class Signature(models.Model):
     provider = LowercaseCharField(max_length=100)
-    url = models.URLField(default=None, null=True, blank=True)
+    url = models.URLField(default="", blank=True)
     score = models.PositiveIntegerField(default=0)
     signature = models.JSONField()
 

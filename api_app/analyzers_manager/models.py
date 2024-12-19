@@ -44,8 +44,9 @@ class AnalyzerReport(AbstractReport):
         },
         null=True,
         editable=False,
+        blank=True,
     )
-    data_model_object_id = models.IntegerField(null=True, editable=False)
+    data_model_object_id = models.IntegerField(null=True, editable=False, blank=True)
     data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
 
     class Meta:

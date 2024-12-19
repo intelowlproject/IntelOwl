@@ -4,7 +4,7 @@
 - [ ] I have already checked if all Dependabot issues have been solved before creating this PR.
 - [ ] Update `CHANGELOG.md` for the new version. Tag another maintainer to review the Changelog and wait for their feedback.
 - [ ] Change version number `docker/.env`
-- [ ] Verify CI Tests
+- [ ] Verify CI Tests. Solve all the issues (Dependencies, Django Doctor, CodeFactor, DeepSource, etc)
 - [ ] Create release for the branch `develop`. Remember to prepend a `v` to the version number.
       Write the following statement there (change the version number):
 

@@ -12,7 +12,7 @@ class NVDDetails(ObservableAnalyzer):
     cve_pattern = r"^CVE-\d{4}-\d{4,7}$"
 
     @classmethod
-    def update(self) -> bool:
+    def update(cls) -> bool:
         pass
 
     def run(self):

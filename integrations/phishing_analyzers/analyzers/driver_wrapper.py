@@ -41,7 +41,7 @@ def driver_exception_handler(func):
         try:
             return func(self, *args, **kwargs)
         except WebDriverException as e:
-            logger.error(
+            logger.exception(
                 f"Error while performing {func.__name__}"
                 f"{' for url=' + url if func.__name__ == 'navigate' else ''}: {e}"
             )
@@ -58,14 +58,18 @@ class DriverWrapper:
         proxy_address: str = "",
         window_width: int = 1920,
         window_height: int = 1080,
+        user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.3",
     ):
         self.proxy: str = proxy_address
         self.window_width: int = window_width
         self.window_height: int = window_height
+        self.user_agent: str = user_agent
         self.last_url: str = ""
         self.base_port = 17000
         self.port_pool_size = 100
-        self._driver: Remote = self._init_driver(self.window_width, self.window_height)
+        self._driver: Remote = self._init_driver(
+            self.window_width, self.window_height, self.user_agent
+        )
 
     def _pick_free_port_from_pool(
         self, sw_options: {}, options: ChromeOptions
@@ -97,7 +101,9 @@ class DriverWrapper:
             "Failed to retrieve a free port for MitM proxy! Try restarting the job"
         )
 
-    def _init_driver(self, window_width: int, window_height: int) -> Remote:
+    def _init_driver(
+        self, window_width: int, window_height: int, user_agent: str
+    ) -> Remote:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chrome driver...")
         sw_options: {} = {
@@ -119,6 +125,7 @@ class DriverWrapper:
         options.add_argument("--headless=new")
         options.add_argument("--ignore-certificate-errors")
         options.add_argument(f"--window-size={window_width},{window_height}")
+        options.add_argument(f"--user-agent={user_agent}")
 
         return self._pick_free_port_from_pool(sw_options, options)
 
@@ -126,7 +133,9 @@ class DriverWrapper:
         logger.info(f"{self._driver.session_id}: Restarting driver: {motivation=}")
         self._driver.quit()
         self._driver = self._init_driver(
-            window_width=self.window_width, window_height=self.window_height
+            window_width=self.window_width,
+            window_height=self.window_height,
+            user_agent=self.user_agent,
         )
         if self.last_url:
             logger.info(

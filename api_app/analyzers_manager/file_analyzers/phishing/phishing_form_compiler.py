@@ -4,8 +4,8 @@ from typing import Dict
 from urllib.parse import urlparse
 
 import requests
-from faker import Faker
-from lxml.etree import HTMLParser
+from faker import Faker  # skipcq: BAN-B410
+from lxml.etree import HTMLParser  # skipcq: BAN-B410
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
 

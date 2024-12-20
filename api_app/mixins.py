@@ -104,11 +104,25 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
         self, uri: str, method: str, ignore_404: bool = False, **kwargs
     ) -> Dict:
         error = None
+        response = None
         try:
             url = self.url + uri
+            logger.debug(f"kwargs: {kwargs}")
             if method == "GET":
-                response = requests.get(url, headers=self.headers, **kwargs)
+                if kwargs:
+                    logger.debug(
+                        f"about to send get request to url {url} with headers {self.headers} and kwargs: {kwargs}"
+                    )
+                    response = requests.get(url, headers=self.headers, **kwargs)
+                else:
+                    logger.debug(
+                        f"about to send get request to url {url} with headers {self.headers} and no kwargs"
+                    )
+                    response = requests.get(url, headers=self.headers)
             elif method == "POST":
+                logger.debug(
+                    f"about to send post request to url {url} with headers {self.headers} and kwargs: {kwargs}"
+                )
                 response = requests.post(url, headers=self.headers, **kwargs)
             else:
                 raise NotImplementedError()
@@ -121,6 +135,9 @@ class VirusTotalv3BaseMixin(metaclass=abc.ABCMeta):
             # .. it happens when a requested object is not found and that's normal
             if not ignore_404 or not response.status_code == 404:
                 response.raise_for_status()
+        except requests.exceptions.JSONDecodeError as e:
+            error_message = f"Raised JSONDecodeError: {e}. Error data: {response.text if response is not None else None}"
+            raise AnalyzerRunException(error_message)
         except Exception as e:
             error_message = f"Raised Error: {e}. Error data: {error}"
             raise AnalyzerRunException(error_message)
@@ -444,7 +461,8 @@ class VirusTotalv3AnalyzerMixin(
         )
         for chance in range(max_tries):
             time.sleep(poll_distance)
-            result, _ = self._perform_get_request(uri, files=files)
+            result, _ = self._perform_get_request(uri)
+            logger.debug(f"result: {result}")
             analysis_status = (
                 result.get("data", {}).get("attributes", {}).get("status", "")
             )

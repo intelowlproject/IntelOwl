@@ -1,7 +1,7 @@
 from typing import Type
 
 from api_app.analyzers_manager.models import AnalyzerConfig
-from api_app.models import Job, Parameter, PluginConfig, PythonModule
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap
 from api_app.playbooks_manager.models import PlaybookConfig
 from certego_saas.apps.organization.membership import Membership
@@ -134,56 +134,6 @@ class PivotConfigViewSetTestCase(
         except PivotConfig.DoesNotExist as e:
             self.fail(e)
         else:
-            pc.delete()
-
-        # with plugin config
-        p = Parameter.objects.create(
-            name="field_to_test",
-            python_module=PythonModule.objects.filter(
-                base_path="api_app.pivots_manager.pivots"
-            ).first(),
-            is_secret=False,
-            required=False,
-            type="str",
-        )
-        response = self.client.post(
-            self.URL,
-            data={
-                "name": "TestCreate",
-                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
-                "python_module": PythonModule.objects.filter(
-                    base_path="api_app.pivots_manager.pivots"
-                )
-                .first()
-                .module,
-                "playbooks_choice": [PlaybookConfig.objects.first().name],
-                "plugin_config": [
-                    {
-                        "type": "5",
-                        "plugin_name": "TestCreate",
-                        "attribute": "field_to_test",
-                        "value": "my.field",
-                        "config_type": "1",
-                    }
-                ],
-            },
-            format="json",
-        )
-        self.assertEqual(response.status_code, 201, response.json())
-        try:
-            pc = PivotConfig.objects.get(name="TestCreate")
-        except PivotConfig.DoesNotExist as e:
-            self.fail(e)
-        try:
-            plugin = PluginConfig.objects.get(pivot_config=pc.id)
-        except PluginConfig.DoesNotExist as e:
-            self.fail(e)
-        else:
-            self.assertEqual(plugin.value, "my.field")
-            self.assertEqual(plugin.parameter, p)
-
-            p.delete()
-            plugin.delete()
             pc.delete()
 
     def test_update(self):

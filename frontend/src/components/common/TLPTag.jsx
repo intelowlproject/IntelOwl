@@ -16,10 +16,9 @@ export function TLPTag(props) {
       id={badgeId}
       color={null}
       style={{
-        backgroundColor: color,
-        color: "black",
-        borderRadius: 0,
+        borderRadius: 5,
         userSelect: "none",
+        border: `1px solid ${color}`,
       }}
       {...rest}
     >

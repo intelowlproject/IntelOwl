@@ -95,18 +95,22 @@ class PluginConfigSerializerTestCase(CustomTestCase):
 
     def test_create(self):
         org = Organization.objects.create(name="test_org")
-
         m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
 
         payload = {
-            "create": True,
-            "edit": True,
-            "type": "1",
-            "plugin_name": "DNS0_EU",
-            "attribute": "query_type",
-            "value": "AA",
+            "attribute": param.name,
+            "value": "new_value",
             "organization": "test_org",
-            "config_type": "1",
+            "parameter": param.pk,
+            "analyzer_config": ac.name,
         }
         serializer = PluginConfigSerializer(
             data=payload,
@@ -130,16 +134,21 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         m3 = Membership.objects.create(
             user=self.user, organization=org, is_owner=False, is_admin=False
         )
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
 
         payload = {
-            "create": True,
-            "edit": False,
-            "type": "1",
-            "plugin_name": "DNS0_EU",
-            "attribute": "query_type",
-            "value": "AA",
+            "attribute": param.name,
+            "value": "new value",
             "organization": "test_org",
-            "config_type": "1",
+            "parameter": param.pk,
+            "analyzer_config": ac.name,
         }
         serializer = PluginConfigSerializer(
             data=payload,

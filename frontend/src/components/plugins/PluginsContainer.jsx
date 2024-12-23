@@ -10,17 +10,15 @@ import { Button, Col } from "reactstrap";
 
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { useGuideContext } from "../../contexts/GuideContext";
-import { PlaybookConfigForm } from "./forms/PlaybookConfigForm";
-import { PivotConfigForm } from "./forms/PivotConfigForm";
-import { AnalyzerConfigForm } from "./forms/AnalyzerConfigForm";
 import { PluginsTypes } from "../../constants/pluginConst";
+import { PluginConfigModal } from "./PluginConfigModal";
 
-const Analyzers = React.lazy(() => import("./types/Analyzers"));
-const Connectors = React.lazy(() => import("./types/Connectors"));
-const Pivots = React.lazy(() => import("./types/Pivots"));
-const Visualizers = React.lazy(() => import("./types/Visualizers"));
-const Ingestors = React.lazy(() => import("./types/Ingestors"));
-const Playbooks = React.lazy(() => import("./types/Playbooks"));
+const Analyzers = React.lazy(() => import("./tables/Analyzers"));
+const Connectors = React.lazy(() => import("./tables/Connectors"));
+const Pivots = React.lazy(() => import("./tables/Pivots"));
+const Visualizers = React.lazy(() => import("./tables/Visualizers"));
+const Ingestors = React.lazy(() => import("./tables/Ingestors"));
+const Playbooks = React.lazy(() => import("./tables/Playbooks"));
 
 const routes = [
   {
@@ -118,19 +116,14 @@ const routes = [
 export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
   const location = useLocation();
-  const pluginsPage = location?.pathname.split("/")[2];
+  const pluginsPage = location?.pathname?.split("/")[2]?.slice(0, -1);
   const enableCreateButton = [
-    `${PluginsTypes.ANALYZER}s`,
-    `${PluginsTypes.PIVOT}s`,
-    `${PluginsTypes.PLAYBOOK}s`,
+    PluginsTypes.ANALYZER,
+    PluginsTypes.PIVOT,
+    PluginsTypes.PLAYBOOK,
   ].includes(pluginsPage);
 
-  const [showModalCreatePlaybook, setShowModalCreatePlaybook] =
-    React.useState(false);
-  const [showModalCreatePivot, setShowModalCreatePivot] = React.useState(false);
-  const [showModalCreateAnalyzer, setShowModalCreateAnalyzer] =
-    React.useState(false);
-
+  const [showModalCreate, setShowModalCreate] = React.useState(false);
   const { guideState, setGuideState } = useGuideContext();
 
   React.useEffect(() => {
@@ -142,22 +135,6 @@ export default function PluginsContainer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onClick = async () => {
-    // open modal for create playbook
-    if (pluginsPage === `${PluginsTypes.PLAYBOOK}s`) {
-      setShowModalCreatePlaybook(true);
-    }
-    // open modal for create pivot
-    if (pluginsPage === `${PluginsTypes.PIVOT}s`) {
-      setShowModalCreatePivot(true);
-    }
-    // open modal for create analyzer
-    if (pluginsPage === `${PluginsTypes.ANALYZER}s`) {
-      setShowModalCreateAnalyzer(true);
-    }
-    return null;
-  };
-
   const createButton = (
     <Col className="d-flex justify-content-end">
       {enableCreateButton && (
@@ -166,28 +143,17 @@ export default function PluginsContainer() {
           className="d-flex align-items-center"
           size="sm"
           color="darker"
-          onClick={onClick}
+          onClick={() => setShowModalCreate(true)}
         >
           <BsFillPlusCircleFill />
           &nbsp;Create {pluginsPage}
         </Button>
       )}
-      {showModalCreatePlaybook && (
-        <PlaybookConfigForm
-          toggle={setShowModalCreatePlaybook}
-          isOpen={showModalCreatePlaybook}
-        />
-      )}
-      {showModalCreatePivot && (
-        <PivotConfigForm
-          toggle={setShowModalCreatePivot}
-          isOpen={showModalCreatePivot}
-        />
-      )}
-      {showModalCreateAnalyzer && (
-        <AnalyzerConfigForm
-          toggle={setShowModalCreateAnalyzer}
-          isOpen={showModalCreateAnalyzer}
+      {showModalCreate && (
+        <PluginConfigModal
+          pluginType={pluginsPage}
+          toggle={setShowModalCreate}
+          isOpen={showModalCreate}
         />
       )}
     </Col>

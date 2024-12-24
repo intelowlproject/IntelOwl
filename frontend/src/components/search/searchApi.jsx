@@ -4,7 +4,7 @@ import { addToast } from "@certego/certego-ui";
 import { PLUGIN_REPORT_QUERIES } from "../../constants/apiURLs";
 import { prettifyErrors } from "../../utils/api";
 
-export async function pluginReportQueries(body, pageSize) {
+export async function pluginReportQueries(body, pageSize, pageLimit) {
   let resultList = [];
   const params = body;
   // default request: page=1
@@ -18,7 +18,8 @@ export async function pluginReportQueries(body, pageSize) {
       const additionalRequests = [];
       for (
         let addtionalPageIndex = 2;
-        addtionalPageIndex <= resp.data.total_pages;
+        // in case there are too many data don't download all of them
+        addtionalPageIndex <= Math.min(resp.data.total_pages, pageLimit);
         addtionalPageIndex += 1
       ) {
         params.page = addtionalPageIndex;

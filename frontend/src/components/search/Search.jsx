@@ -100,6 +100,7 @@ export default function Search() {
         response = await pluginReportQueries(
           queryParams,
           tableInitialState.pageSize,
+          20,
         );
       } catch (err) {
         // error will be handled by pluginReportQueries

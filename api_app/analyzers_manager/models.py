@@ -44,21 +44,24 @@ class AnalyzerReport(AbstractReport):
         },
         null=True,
         editable=False,
+        blank=True,
     )
-    data_model_object_id = models.IntegerField(null=True, editable=False)
+    data_model_object_id = models.IntegerField(null=True, editable=False, blank=True)
     data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
 
     class Meta:
         unique_together = [("config", "job")]
-        indexes = AbstractReport.Meta.indexes
+        indexes = AbstractReport.Meta.indexes + [
+            models.Index(fields=["data_model_content_type", "data_model_object_id"])
+        ]
 
     def clean(self):
-        if self.data_model_content_type:
-            if (
-                ContentType.objects.get_for_model(model=self.data_model_class)
-                != self.data_model_content_type
-            ):
-                raise ValidationError("Wrong data model for this report")
+        if (
+            self.data_model_content_type
+            and ContentType.objects.get_for_model(model=self.data_model_class)
+            != self.data_model_content_type
+        ):
+            raise ValidationError("Wrong data model for this report")
 
     @classmethod
     def get_data_model_class(cls, job) -> Type[BaseDataModel]:
@@ -66,10 +69,10 @@ class AnalyzerReport(AbstractReport):
             return FileDataModel
         if job.observable_classification == ObservableTypes.IP.value:
             return IPDataModel
-        if (
-            job.observable_classification == ObservableTypes.DOMAIN.value
-            or job.observable_classification == ObservableTypes.URL.value
-        ):
+        if job.observable_classification in [
+            ObservableTypes.DOMAIN.value,
+            ObservableTypes.URL.value,
+        ]:
             return DomainDataModel
         raise NotImplementedError(
             f"Unable to find data model for {job.observable_classification}"

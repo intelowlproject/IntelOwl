@@ -4,11 +4,11 @@ import axios from "axios";
 import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { API_BASE_URI } from "../../../../../src/constants/apiURLs";
-import { AnalyzerConfigForm } from "../../../../../src/components/plugins/forms/AnalyzerConfigForm";
-import { mockedUsePluginConfigurationStore } from "../../../../mock";
+import { API_BASE_URI } from "../../../../src/constants/apiURLs";
+import { AnalyzerConfigForm } from "../../../../src/components/plugins/forms/AnalyzerConfigForm";
+import { mockedUsePluginConfigurationStore } from "../../../mock";
 
-jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
     state(mockedUsePluginConfigurationStore),
   ),
@@ -117,7 +117,22 @@ describe("AnalyzerConfigForm test", () => {
 
   test("create analyzer config", async () => {
     const userAction = userEvent.setup();
-    axios.post.mockImplementation(() => Promise.resolve({ status: 201 }));
+    axios.post.mockImplementation(() =>
+      Promise.resolve({
+        status: 201,
+        data: {
+          name: "myNewAnalyzer",
+          parameters: {
+            headers: { id: 455 },
+            http_method: { id: 455 },
+            url: { id: 455 },
+            api_key_name: { id: 455 },
+            certificate: { id: 455 },
+            params: { id: 455 },
+          },
+        },
+      }),
+    );
 
     render(
       <BrowserRouter>
@@ -200,57 +215,75 @@ describe("AnalyzerConfigForm test", () => {
         maximum_tlp: "RED",
         observable_supported: ["ip"],
         type: "observable",
-        plugin_config: [
+      });
+      expect(axios.post).toHaveBeenCalledWith(
+        `${API_BASE_URI}/analyzer/myNewAnalyzer/plugin_config`,
+        [
           {
             attribute: "http_method",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: "get",
+            parameter: 455,
+            for_organization: false,
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "url",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: "http://www.google.com",
+            parameter: 455,
+            for_organization: false,
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "headers",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: '{"Accept":"application/json"}',
+            parameter: 455,
+            for_organization: false,
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "api_key_name",
-            config_type: 2,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: '""',
+            parameter: 455,
+            for_organization: false,
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "certificate",
-            config_type: 2,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: '""',
+            parameter: 455,
+            for_organization: false,
+            analyzer_config: "myNewAnalyzer",
           },
           {
             attribute: "params",
-            config_type: 1,
-            plugin_name: "myNewAnalyzer",
-            type: 1,
             value: "{}",
+            parameter: 455,
+            for_organization: false,
+            analyzer_config: "myNewAnalyzer",
           },
         ],
-      });
+      );
     });
   });
 
   test("edit analyzer config", async () => {
     const userAction = userEvent.setup();
-    axios.patch.mockImplementation(() => Promise.resolve({ status: 200 }));
+    axios.patch.mockImplementation(() =>
+      Promise.resolve({
+        status: 200,
+        data: {
+          name: "myNewAnalyzer",
+          parameters: {
+            headers: { id: 455 },
+            http_method: { id: 455 },
+            url: { id: 455 },
+            api_key_name: { id: 455 },
+            certificate: { id: 455 },
+            params: { id: 455 },
+          },
+        },
+      }),
+    );
 
     render(
       <BrowserRouter>
@@ -258,6 +291,7 @@ describe("AnalyzerConfigForm test", () => {
           analyzerConfig={analyzerConfig}
           toggle={jest.fn()}
           isOpen
+          isEditing
         />
       </BrowserRouter>,
     );
@@ -335,51 +369,42 @@ describe("AnalyzerConfigForm test", () => {
           description: "myNewAnalyzer - description",
           maximum_tlp: "AMBER",
           observable_supported: ["domain"],
-          plugin_config: [
-            {
-              attribute: "http_method",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
-              value: "get",
-            },
-            {
-              attribute: "url",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
-              value: "https://www.service.com/",
-            },
-            {
-              attribute: "headers",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
-              value: '{"Accept":"application/json"}',
-            },
-            {
-              attribute: "api_key_name",
-              config_type: 2,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
-              value: '""',
-            },
-            {
-              attribute: "certificate",
-              config_type: 2,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
-              value: '""',
-            },
-            {
-              attribute: "params",
-              config_type: 1,
-              plugin_name: "myNewAnalyzer",
-              type: 1,
-              value: "{}",
-            },
-          ],
         },
+      );
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/analyzer/myNewAnalyzer/plugin_config`,
+        [
+          {
+            attribute: "http_method",
+            value: "get",
+            parameter: 455,
+          },
+          {
+            attribute: "url",
+            value: "https://www.service.com/",
+            parameter: 455,
+          },
+          {
+            attribute: "headers",
+            value: '{"Accept":"application/json"}',
+            parameter: 455,
+          },
+          {
+            attribute: "api_key_name",
+            value: '""',
+            parameter: 455,
+          },
+          {
+            attribute: "certificate",
+            value: '""',
+            parameter: 455,
+          },
+          {
+            attribute: "params",
+            value: "{}",
+            parameter: 455,
+          },
+        ],
       );
     });
   });

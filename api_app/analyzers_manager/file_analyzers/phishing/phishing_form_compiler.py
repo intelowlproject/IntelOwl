@@ -1,10 +1,11 @@
 import logging
 from datetime import date, timedelta
 from typing import Dict
+from urllib.parse import urlparse
 
 import requests
-from faker import Faker
-from lxml.etree import HTMLParser
+from faker import Faker  # skipcq: BAN-B410
+from lxml.etree import HTMLParser  # skipcq: BAN-B410
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
 
@@ -135,11 +136,31 @@ class PhishingFormCompiler(FileAnalyzer):
             if input_name in names:
                 return fake_value
 
-    def compile_form_field(self, form) -> (dict, str):
-        result: {} = {}
-        # setting default to page itself if action is not specified
+    def extract_action_attribute(self, form) -> str:
         if not (form_action := form.get("action", None)):
+            logger.info(
+                f"'action' attribute not found in form. Defaulting to {self.target_site=}"
+            )
             form_action = self.target_site
+
+        # if relative url extracted, clean it from '/' and concatenate everything
+        # if action was not extracted in previous step the if should not pass as it is a url
+        if not urlparse(form_action).netloc:
+            logger.info(f"Found relative url in {form_action=}")
+            base_site = self.target_site
+            if base_site.endswith("/"):
+                base_site = base_site[:-1]
+            if form_action.startswith("/"):
+                form_action = form_action.replace("/", "", 1)
+
+            form_action = base_site + "/" + form_action
+
+        logger.info(f"Extracted action to post data to: {form_action}")
+        return form_action
+
+    def compile_form_field(self, form) -> dict:
+        result: {} = {}
+
         for element in form.findall(".//input"):
             input_type: str = element.get("type", None)
             input_name: str = element.get("name", None)
@@ -169,12 +190,13 @@ class PhishingFormCompiler(FileAnalyzer):
                 f"Job #{self.job_id}: Sending value {value_to_set} for {input_name=}"
             )
             result.setdefault(input_name, value_to_set)
-        return result, form_action
+        return result
 
     def perform_request_to_form(self, form) -> Response:
-        params, dest_url = self.compile_form_field(form)
+        params = self.compile_form_field(form)
+        dest_url = self.extract_action_attribute(form)
         logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
-        return requests.post(
+        response = requests.post(
             url=dest_url,
             data=params,
             proxies=(
@@ -183,14 +205,25 @@ class PhishingFormCompiler(FileAnalyzer):
                 else None
             ),
         )
+        logger.info(f"Request headers: {response.request.headers}")
+        return response
 
     @staticmethod
     def handle_3xx_response(response: Response) -> [str]:
+        result: [] = []
         # extract all redirection history
-        return [history.request.url for history in response.history]
+        for history in response.history:
+            logger.info(
+                f"Extracting 3xx {response.status_code} HTTP response with url {history.request.url}"
+            )
+            result.append(history.request.url)
+        return result
 
     @staticmethod
     def handle_2xx_response(response: Response) -> str:
+        logger.info(
+            f"Extracting 2xx {response.status_code} response with url {response.request.url}"
+        )
         return response.request.url
 
     def is_js_used_in_page(self) -> bool:
@@ -199,9 +232,11 @@ class PhishingFormCompiler(FileAnalyzer):
             logger.info(f"Job #{self.job_id}: Found script tag: {js_tag}")
         return bool(js_tag)
 
-    def analyze_responses(self, responses: [Response]) -> {}:
-        result: [] = []
+    def analyze_responses(self, responses: [Response]) -> ([], []):
+        success_result: [] = []
+        redirect_result: [] = []
         for response in responses:
+            logger.info(f"Response headers for {response.url}: {response.headers}")
             try:
                 # handle 4xx and 5xx
                 response.raise_for_status()
@@ -211,12 +246,12 @@ class PhishingFormCompiler(FileAnalyzer):
                 self.report.errors.append(message)
             else:
                 if response.history:
-                    result.extend(self.handle_3xx_response(response))
+                    redirect_result.extend(self.handle_3xx_response(response))
 
-                result.append(self.handle_2xx_response(response))
+                success_result.append(self.handle_2xx_response(response))
         self.report.save()
 
-        return result
+        return success_result, redirect_result
 
     def run(self) -> dict:
         result: {} = {}
@@ -239,7 +274,9 @@ class PhishingFormCompiler(FileAnalyzer):
         for form in forms:
             responses.append(self.perform_request_to_form(form))
 
-        result.setdefault("extracted_urls", self.analyze_responses(responses))
+        success_result, redirect_result = self.analyze_responses(responses)
+        result.setdefault("extracted_urls", success_result)
+        result.setdefault("redirection_urls", redirect_result)
         result.setdefault("has_javascript", self.is_js_used_in_page())
         return result
 

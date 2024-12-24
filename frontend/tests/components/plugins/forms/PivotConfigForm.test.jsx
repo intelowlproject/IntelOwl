@@ -4,11 +4,14 @@ import axios from "axios";
 import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { API_BASE_URI } from "../../../../../src/constants/apiURLs";
-import { PivotConfigForm } from "../../../../../src/components/plugins/forms/PivotConfigForm";
-import { mockedUsePluginConfigurationStore } from "../../../../mock";
+import { API_BASE_URI } from "../../../../src/constants/apiURLs";
+import { PivotConfigForm } from "../../../../src/components/plugins/forms/PivotConfigForm";
+import {
+  mockedUsePluginConfigurationStore,
+  mockedPlugins,
+} from "../../../mock";
 
-jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
     state(mockedUsePluginConfigurationStore),
   ),
@@ -17,32 +20,6 @@ jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("axios");
 
 describe("PivotConfigForm test", () => {
-  const pivotConfig = {
-    id: 13,
-    name: "test",
-    description: "pivot: test",
-    python_module: "self_analyzable.SelfAnalyzable",
-    playbooks_choice: ["DNS"],
-    disabled: false,
-    soft_time_limit: 60,
-    routing_key: "default",
-    health_check_status: true,
-    delay: "00:00:00",
-    health_check_task: null,
-    config: {
-      queue: "default",
-      soft_time_limit: 60,
-    },
-    related_analyzer_configs: ["TEST_ANALYZER"],
-    secrets: {},
-    params: {},
-    verification: {
-      configured: true,
-      details: "Ready to use!",
-      missing_secrets: [],
-    },
-  };
-
   test("form fields", async () => {
     render(
       <BrowserRouter>
@@ -152,7 +129,12 @@ describe("PivotConfigForm test", () => {
 
   test("create pivot config - AnyCompare", async () => {
     const userAction = userEvent.setup();
-    axios.post.mockImplementation(() => Promise.resolve({ status: 201 }));
+    axios.post.mockImplementation(() =>
+      Promise.resolve({
+        status: 201,
+        data: { parameters: { field_to_compare: { id: 455 } } },
+      }),
+    );
 
     render(
       <BrowserRouter>
@@ -229,16 +211,21 @@ describe("PivotConfigForm test", () => {
         name: "myNewPivot",
         python_module: "any_compare.AnyCompare",
         playbooks_choice: ["TEST_PLAYBOOK_URL"],
-        plugin_config: {
-          type: 5,
-          plugin_name: "myNewPivot",
-          attribute: "field_to_compare",
-          value: "test.value",
-          config_type: 1,
-        },
         related_analyzer_configs: ["TEST_ANALYZER"],
         related_connector_configs: [],
       });
+      expect(axios.post).toHaveBeenCalledWith(
+        `${API_BASE_URI}/pivot/myNewPivot/plugin_config`,
+        [
+          {
+            attribute: "field_to_compare",
+            value: "test.value",
+            for_organization: false,
+            pivot_config: "myNewPivot",
+            parameter: 455,
+          },
+        ],
+      );
     });
   });
 
@@ -248,14 +235,19 @@ describe("PivotConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PivotConfigForm pivotConfig={pivotConfig} toggle={jest.fn()} isOpen />
+        <PivotConfigForm
+          pivotConfig={mockedPlugins.PIVOT}
+          toggle={jest.fn()}
+          isOpen
+          isEditing
+        />
       </BrowserRouter>,
     );
 
     // form fields
     const nameInputField = screen.getByLabelText("Name:");
     expect(nameInputField).toBeInTheDocument();
-    expect(nameInputField).toHaveValue("test");
+    expect(nameInputField).toHaveValue("TEST_PIVOT");
 
     const descriptionInputField = screen.getByLabelText("Description:");
     expect(descriptionInputField).toBeInTheDocument();
@@ -284,13 +276,16 @@ describe("PivotConfigForm test", () => {
     await userAction.click(saveButton);
 
     await waitFor(() => {
-      expect(axios.patch).toHaveBeenCalledWith(`${API_BASE_URI}/pivot/test`, {
-        name: "myNewPivot",
-        python_module: "self_analyzable.SelfAnalyzable",
-        playbooks_choice: ["DNS"],
-        related_analyzer_configs: ["TEST_ANALYZER"],
-        related_connector_configs: [],
-      });
+      expect(axios.patch).toHaveBeenCalledWith(
+        `${API_BASE_URI}/pivot/TEST_PIVOT`,
+        {
+          name: "myNewPivot",
+          python_module: "self_analyzable.SelfAnalyzable",
+          playbooks_choice: ["DNS"],
+          related_analyzer_configs: ["TEST_ANALYZER"],
+          related_connector_configs: [],
+        },
+      );
     });
   });
 });

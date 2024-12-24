@@ -3,7 +3,22 @@
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
 ## [v6.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.2.0)
-#### TODO: DRAFT CHANGELOG
+
+Happy new year! :sparkler: And Happy Birthday IntelOwl! :tada: 
+
+We are celebrating the 5th IntelOwl Birthday! :sunglasses: WOW! Such a Milestone!
+
+And we reached almost 4k stars! :star: Thank you for your support!
+
+This release brings a lot of improvements in the GUI regarding the management of Plugins Configuration, Creation, Customization and so on.
+You now have:
+* a complete new interface to manage Plugins' parameters and secrets. See [docs](https://intelowlproject.github.io/docs/IntelOwl/usage/#parameters)
+* a new "Search" section for advanced searches which leverages the optional (and renewed) [ElasticSearch](https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#elasticsearch) integration
+* you can now create simple custom Analyzers, Pivots and Playbooks directly from the "Plugins" section without having to use the Django Admin or Python code.
+
+A new [Ingestor](https://intelowlproject.github.io/docs/IntelOwl/usage/#ingestors) (Virustotal) and new [Analyzers](https://intelowlproject.github.io/docs/IntelOwl/usage/#analyzers-list) has been added from community contributors.
+
+Furthermore, a new [Phishing Framework](https://intelowlproject.github.io/docs/IntelOwl/advanced_usage/#phishing-analyzers) for complex URL analysis has been added as a new optional integration.
 
 ### New releases schedule
 From this release onwards, we are adopting a new schedule for future releases containing new features: expect a new release on every April and October (like Ubuntu :P).
@@ -14,6 +29,11 @@ Please remember that you can always use the most recent features available in th
 
 Obviously, as always, important bugs and fixes will be handled differently with dedicated patch releases.
 
+### Maintainers turnover
+I, Matteo Lodi, author of IntelOwl, am happy to announce the addition of Federico Gibertoni in the list of the official maintainers and Daniele Rosetti as co-administrator of the project.
+
+This change is critical because I am moving through a new job and I'll have less time than before to handle the project directly.
+I would like to personally thank Federico and Daniele for their commitment to the project and for taking up these duties.
 
 ## [v6.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.1.0)
 This release merges all the developments performed by our Google Summer of Code contributors for this year. The program has just ended. You can read the related blogs for more info about:

@@ -8,6 +8,7 @@ from rest_framework import routers
 from api_app.visualizers_manager.views import (
     VisualizerActionViewSet,
     VisualizerConfigViewSet,
+    VisualizerPluginConfigViewSet,
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
@@ -17,6 +18,11 @@ router.register(
     basename="visualizerreport",
 )
 router.register(r"visualizer", VisualizerConfigViewSet, basename="visualizer")
+router.register(
+    r"visualizer/(?P<name>\w+)",
+    VisualizerPluginConfigViewSet,
+    basename="plugin-config-visualizer",
+)
 
 urlpatterns = [
     # Viewsets

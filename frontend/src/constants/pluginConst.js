@@ -42,3 +42,17 @@ export const AllPluginSupportedTypes = Object.freeze({
   GENERIC: "generic",
   FILE: "file",
 });
+
+export const PluginConfigTypes = Object.freeze({
+  USER_CONFIG: "userConfig",
+  ORG_CONFIG: "orgConfig",
+});
+
+export const ParameterTypes = Object.freeze({
+  INT: "int",
+  FLOAT: "float",
+  STR: "str",
+  BOOL: "bool",
+  LIST: "list",
+  DICT: "dict",
+});

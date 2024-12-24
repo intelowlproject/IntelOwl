@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import copy
 import datetime
 import logging
 import uuid
@@ -71,7 +72,11 @@ from .serializers.job import (
     RestJobSerializer,
     TagSerializer,
 )
-from .serializers.plugin import PluginConfigSerializer, PythonConfigSerializer
+from .serializers.plugin import (
+    ParameterSerializer,
+    PluginConfigSerializer,
+    PythonConfigSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1060,47 +1065,6 @@ class ModelWithOwnershipViewSet(viewsets.ModelViewSet):
 
 
 @add_docs(
-    description="""
-    REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
-    Requires authentication. Allows access to only authorized CustomConfigs.
-    """
-)
-class PluginConfigViewSet(ModelWithOwnershipViewSet):
-    """
-    A viewset for managing `PluginConfig` objects with ownership-based access control.
-
-    This viewset extends `ModelWithOwnershipViewSet` to handle `PluginConfig` objects,
-    allowing users to list, retrieve, and delete configurations while ensuring that only
-    authorized configurations are accessible. It customizes the queryset to exclude default
-    values and orders the configurations by ID.
-
-    Attributes:
-        serializer_class (class): The serializer class used for `PluginConfig` objects.
-        pagination_class (class): Specifies that pagination is not applied.
-        queryset (QuerySet): The queryset for `PluginConfig` objects, initially set to all objects.
-
-    Methods:
-        get_queryset(): Returns the queryset for `PluginConfig` objects, excluding default values
-                        (where the owner is `NULL`) and ordering the remaining objects by ID.
-    """
-
-    serializer_class = PluginConfigSerializer
-    pagination_class = None
-    queryset = PluginConfig.objects.all()
-
-    def get_queryset(self):
-        """
-        Retrieves the queryset for `PluginConfig` objects, excluding those with default values
-        (where the owner is `NULL`) and ordering the remaining objects by ID.
-
-        Returns:
-            QuerySet: The filtered and ordered queryset of `PluginConfig` objects.
-        """
-        # the .exclude is to remove the default values
-        return super().get_queryset().exclude(owner__isnull=True).order_by("id")
-
-
-@add_docs(
     description="""This endpoint allows organization owners
     and members to view plugin state.""",
     responses={
@@ -1593,8 +1557,131 @@ class PythonConfigViewSet(AbstractConfigViewSet):
 
 
 @add_docs(
-    description="""This endpoint allows users to search analyzer, connector and pivot reports. ELASTIC REQUIRED""",
-    responses={
+    description="""
+    REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
+    Requires authentication. Allows access to only authorized CustomConfigs.
+    """
+)
+class PluginConfigViewSet(ModelWithOwnershipViewSet):
+    """
+    A viewset for managing `PluginConfig` objects with ownership-based access control.
+
+    This viewset extends `ModelWithOwnershipViewSet` to handle `PluginConfig` objects,
+    allowing users to list, retrieve, and delete configurations while ensuring that only
+    authorized configurations are accessible.
+
+    Attributes:
+        serializer_class (class): The serializer class used for `PluginConfig` objects.
+        pagination_class (class): Specifies that pagination is not applied.
+        queryset (QuerySet): The queryset for `PluginConfig` objects, initially set to all objects.
+    """
+
+    serializer_class = PluginConfigSerializer
+    pagination_class = None
+    queryset = PluginConfig.objects.all()
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action in ["retrieve"]:
+            # code quality checker marks this as error, but it works correctly
+            permissions.append(
+                (  # skipcq: PYL-E1102
+                    IsObjectAdminPermission | IsObjectOwnerPermission
+                )()
+            )
+        return permissions
+
+    @action(
+        methods=["get"],
+        detail=False,
+    )
+    def plugin_config(self, request, name=None):
+        logger.info(f"get plugin_config from user {request.user}, name {name}")
+        obj: PythonConfig = self.get_queryset().get(name=name)
+        try:
+            plugin_configs: PluginConfig = PluginConfig.objects.filter(
+                **{obj.snake_case_name: obj.pk}
+            )
+        except PluginConfig.DoesNotExist:
+            raise NotFound("Requested plugin config does not exist.")
+        else:
+            pc = PluginConfigSerializer(
+                plugin_configs, context={"request": request}, many=True
+            )
+            pp = ParameterSerializer(obj.parameters, many=True)
+            org_config = []
+            user_config = []
+
+            for attribute, param_obj in pp.data.items():
+                param_obj["attribute"] = attribute
+                param_obj["parameter"] = param_obj.pop("id")
+                param_obj["exist"] = False
+                # override default config (if any)
+                for config in [
+                    config
+                    for config in pc.data
+                    if config["owner"] is None and config["attribute"] == attribute
+                ]:
+                    param_obj.update(config)
+                    param_obj["exist"] = True
+                # override default config with org config (if any)
+                if request.user.has_membership():
+                    org = request.user.membership.organization.name
+                    for config in [
+                        config
+                        for config in pc.data
+                        if config["organization"] == org
+                        and config["attribute"] == attribute
+                    ]:
+                        param_obj.update(config)
+                        param_obj["exist"] = True
+                    org_config.append(copy.deepcopy(param_obj))
+                # override default config with user config (if any)
+                for config in [
+                    config
+                    for config in pc.data
+                    if config["owner"] == request.user.username
+                    and config["organization"] is None
+                    and config["attribute"] == attribute
+                ]:
+                    param_obj.update(config)
+                    param_obj["exist"] = True
+                user_config.append(copy.deepcopy(param_obj))
+
+            result = {"organization_config": org_config, "user_config": user_config}
+            return Response(result, status=status.HTTP_200_OK)
+
+    @plugin_config.mapping.patch
+    def update(self, request, name=None):
+        logger.info(f"patch plugin_config from user {request.user}, name {name}")
+        for data in request.data:
+            try:
+                instance = PluginConfig.objects.get(id=data["id"])
+            except PluginConfig.DoesNotExist:
+                raise PermissionDenied()
+            else:
+                self.check_object_permissions(self.request, instance)
+                serializer = PluginConfigSerializer(instance, data=data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+        return Response(status=status.HTTP_200_OK)
+
+    @plugin_config.mapping.post
+    def create(self, request, name=None):
+        logger.info(f"post plugin_config from user {request.user}, name {name}")
+        serializer = self.get_serializer(
+            data=request.data, context={"request": request}, many=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+description = (
+    """This endpoint allows users to search analyzer, connector and pivot reports. ELASTIC REQUIRED""",
+)
+responses = (
+    {
         200: inline_serializer(
             name="ElasticResponseSerializer",
             fields={
@@ -1603,6 +1690,8 @@ class PythonConfigViewSet(AbstractConfigViewSet):
         ),
     },
 )
+
+
 @api_view(["GET"])
 def plugin_report_queries(request):
     """

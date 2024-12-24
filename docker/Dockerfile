@@ -1,6 +1,6 @@
 # Stage 1: Frontend
 # Remove this part if it is conflicting with the frontend you are currently testing
-FROM node:lts-alpine3.18 AS frontend-build
+FROM node:lts-alpine3.21 AS frontend-build
 
 WORKDIR /
 # copy react source code

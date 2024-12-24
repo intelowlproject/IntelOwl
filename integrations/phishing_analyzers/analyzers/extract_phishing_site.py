@@ -57,7 +57,7 @@ def analyze_target(
         window_width=window_width,
         window_height=window_height,
     )
-    driver_wrapper.navigate(url=target_url)
+    driver_wrapper.navigate(url=target_url, timeout_wait_page=5)
 
     result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
     logger.debug(f"JSON dump of driver {result=}")

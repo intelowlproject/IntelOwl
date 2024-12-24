@@ -116,18 +116,15 @@ export default function Search() {
       <FormikProvider value={formik}>
         <Form onSubmit={formik.handleSubmit}>
           <Row className="mb-2">
-            <Col className="d-flex align-items-end">
-              <h1 id="reportSearch"> Search&nbsp;</h1>
-              <small className="text-gray" style={{ marginBottom: "0.5rem" }}>
-                {elasticData?.length} total
-              </small>
-              <span className="ms-4" style={{ marginBottom: "0.5rem" }}>
-                Advanced search in plugin reports of the performed analysis.
-                <MdInfoOutline
-                  id="search__elastic-infoicon"
-                  fontSize="20"
-                  className="ms-2"
-                />
+            <Col className="d-flex align-items-center">
+              <h1 id="reportSearch">
+                Search&nbsp;
+                <small className="text-gray" style={{ marginBottom: "0.5rem" }}>
+                  {elasticData?.length} total
+                </small>
+              </h1>
+              <div className="ms-2">
+                <MdInfoOutline id="search__elastic-infoicon" fontSize="20" />
                 <UncontrolledTooltip
                   trigger="hover"
                   delay={{ show: 0, hide: 200 }}
@@ -145,8 +142,11 @@ export default function Search() {
                     official doc.
                   </Link>
                 </UncontrolledTooltip>
-              </span>
+              </div>
             </Col>
+            <span style={{ marginBottom: "0.5rem" }}>
+              Advanced search in plugin reports of the performed analysis.
+            </span>
           </Row>
           <Row id="search-input-fields-first-row d-flex flex-wrap">
             <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">

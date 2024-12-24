@@ -1797,9 +1797,7 @@ class ElasticSearchView(GenericAPIView):
             .extra(size=10000)  # max allowed size
             .execute()
         )
-        logger.info(
-            f"filters: {filter_list}, total hits: {elastic_response.hits.total.value}"
-        )
+        logger.info(f"filters: {filter_list}, total hits: {len(elastic_response)}")
         serialize_response = ElasticResponseSerializer(
             data=self.paginate_queryset(
                 queryset=[hit.to_dict() for hit in elastic_response]

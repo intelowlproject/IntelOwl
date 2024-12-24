@@ -41,7 +41,11 @@ urlpatterns = [
         analyze_multiple_observables,
         name="analyze_multiple_observables",
     ),
-    path("plugin_report_queries", ElasticSearchView.as_view()),
+    path(
+        "plugin_report_queries",
+        ElasticSearchView.as_view(),
+        name="plugin-report-queries",
+    ),
     # router viewsets
     path("", include(router.urls)),
     # Plugins

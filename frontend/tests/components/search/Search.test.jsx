@@ -89,7 +89,9 @@ describe("test Search component", () => {
       Promise.resolve({
         status: 200,
         data: {
-          data: [
+          count: 1,
+          total_pages: 1,
+          results: [
             {
               job: { id: 2 },
               config: {

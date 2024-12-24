@@ -1348,7 +1348,7 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
 
 
 class ElasticTestCase(CustomViewSetTestCase):
-    uri = reverse("plugin_report_queries")
+    uri = reverse("plugin-report-queries")
 
     class ElasticObject:
 
@@ -1523,7 +1523,9 @@ class ElasticTestCase(CustomViewSetTestCase):
         self.assertEqual(
             response.json(),
             {
-                "data": [
+                "count": 2,
+                "total_pages": 1,
+                "results": [
                     {
                         "job": {"id": 1},
                         "config": {
@@ -1570,7 +1572,7 @@ class ElasticTestCase(CustomViewSetTestCase):
                             ],
                         },
                     },
-                ]
+                ],
             },
         )
 

@@ -19,6 +19,8 @@ describe("test Search component", () => {
 
     const searchTitle = screen.getByRole("heading", { name: /Search/i });
     expect(searchTitle).toBeInTheDocument();
+    const hitsText = screen.getByText("0 total");
+    expect(hitsText).toBeInTheDocument();
     const searchDescription = screen.getByText(
       "Advanced search in plugin reports of the performed analysis.",
     );
@@ -128,6 +130,8 @@ describe("test Search component", () => {
 
     const searchTitle = screen.getByRole("heading", { name: /Search/i });
     expect(searchTitle).toBeInTheDocument();
+    const hitsText = screen.getByText("0 total");
+    expect(hitsText).toBeInTheDocument();
     const searchDescription = screen.getByText(
       "Advanced search in plugin reports of the performed analysis.",
     );
@@ -204,12 +208,15 @@ describe("test Search component", () => {
       expect(axios.get).toHaveBeenCalledWith(`${PLUGIN_REPORT_QUERIES}`, {
         params: {
           name: "Classic_DNS",
-          end_end_time: new Date(new Date().toISOString().slice(0,16)),
-          end_start_time: new Date(new Date().toISOString().slice(0,16)),
-          start_end_time: new Date(fromDate.toISOString().slice(0,16)),
-          start_start_time: new Date(fromDate.toISOString().slice(0,16)),
+          end_end_time: new Date(new Date().toISOString().slice(0, 16)),
+          end_start_time: new Date(new Date().toISOString().slice(0, 16)),
+          start_end_time: new Date(fromDate.toISOString().slice(0, 16)),
+          start_start_time: new Date(fromDate.toISOString().slice(0, 16)),
+          page: 1,
+          page_size: 10,
         },
       });
+      expect(screen.getByText("1 total")).toBeInTheDocument();
       expect(screen.getByText("#2")).toBeInTheDocument();
       const startTimeCell = screen.getAllByRole("cell")[2];
       expect(startTimeCell).toBeInTheDocument();

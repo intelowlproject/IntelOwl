@@ -97,12 +97,15 @@ export default function Search() {
       let response = [];
       try {
         setLoadingData(true);
-        response = await pluginReportQueries(queryParams);
+        response = await pluginReportQueries(
+          queryParams,
+          tableInitialState.pageSize,
+        );
       } catch (err) {
         // error will be handled by pluginReportQueries
       } finally {
         setLoadingData(false);
-        setElasticData(response.data.results);
+        setElasticData(response);
         formik.setSubmitting(false);
       }
     },
@@ -115,6 +118,9 @@ export default function Search() {
           <Row className="mb-2">
             <Col className="d-flex align-items-end">
               <h1 id="reportSearch"> Search&nbsp;</h1>
+              <small className="text-gray" style={{ marginBottom: "0.5rem" }}>
+                {elasticData?.length} total
+              </small>
               <span className="ms-4" style={{ marginBottom: "0.5rem" }}>
                 Advanced search in plugin reports of the performed analysis.
                 <MdInfoOutline

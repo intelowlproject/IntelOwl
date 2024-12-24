@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Button, Collapse } from "reactstrap";
 import { ArrowToggleIcon, CopyToClipboardButton } from "@certego/certego-ui";
 
-export function ErrorsCollapse({ errors }) {
+export function TableCellCollapse({ values, label }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
   return (
@@ -11,21 +11,23 @@ export function ErrorsCollapse({ errors }) {
       <Button
         className="bg-transparent border-0"
         onClick={() => setIsOpen(!isOpen)}
-        id="ReportErrorsDropDown"
+        id="table-cell-collapse"
       >
-        <small>{errors.length} errors </small>
+        <small>
+          {values?.length} {label}{" "}
+        </small>
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
-      <Collapse isOpen={isOpen} id="ReportErrorsDropDown">
+      <Collapse isOpen={isOpen} id="table-cell-collapse">
         <ul className="d-flex flex-column align-items-start p-3">
-          {errors?.sort().map((error) => (
-            <li className="pb-2" key={error}>
+          {values?.sort().map((value) => (
+            <li className="pb-2" key={value}>
               <CopyToClipboardButton
                 showOnHover
-                text={error}
+                text={value}
                 className="d-block text-break"
               >
-                {error}
+                {value}
               </CopyToClipboardButton>
             </li>
           ))}
@@ -35,6 +37,7 @@ export function ErrorsCollapse({ errors }) {
   );
 }
 
-ErrorsCollapse.propTypes = {
-  errors: PropTypes.array.isRequired,
+TableCellCollapse.propTypes = {
+  values: PropTypes.array.isRequired,
+  label: PropTypes.string.isRequired,
 };

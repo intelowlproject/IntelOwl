@@ -6,7 +6,7 @@ import { DateHoverable } from "@certego/certego-ui";
 
 import { JobResultSections } from "../../constants/miscConst";
 import { StatusTag } from "../common/StatusTag";
-import { ErrorsCollapse } from "./utils";
+import { TableCellCollapse } from "../common/TableCellCollapse";
 
 export const searchTableColumns = [
   {
@@ -76,7 +76,7 @@ export const searchTableColumns = [
     Header: "Errors",
     id: "errors",
     accessor: "errors",
-    Cell: ({ value }) => <ErrorsCollapse errors={value} />,
+    Cell: ({ value }) => <TableCellCollapse values={value} label="errors" />,
     disableSortBy: true,
     maxWidth: 90,
   },

@@ -75,10 +75,10 @@ class Crowdsec(ObservableAnalyzer):
                 )
 
         highest_total_score = max(
-            [
+            (
                 values["total"]
                 for key, values in self.report.report.get("scores", {}).items()
-            ],
+            ),
             default=0,
         )
         if (
@@ -91,10 +91,8 @@ class Crowdsec(ObservableAnalyzer):
                 )
             elif 1 < highest_total_score <= 3:
                 highest_trust_score = max(
-                    [
-                        values["trust"]
-                        for key, values in self.report.report.get("scores", {}).items()
-                    ]
+                    values["trust"]
+                    for key, values in self.report.report.get("scores", {}).items()
                 )
                 if highest_trust_score >= 4:
                     data_model.evaluation = (

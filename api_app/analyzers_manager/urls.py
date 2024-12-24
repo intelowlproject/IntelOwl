@@ -4,7 +4,11 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import AnalyzerActionViewSet, AnalyzerConfigViewSet
+from .views import (
+    AnalyzerActionViewSet,
+    AnalyzerConfigViewSet,
+    AnalyzerPluginConfigViewSet,
+)
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
@@ -14,6 +18,11 @@ router.register(
     basename="analyzerreport",
 )
 router.register(r"analyzer", AnalyzerConfigViewSet, basename="analyzer")
+router.register(
+    r"analyzer/(?P<name>\w+)",
+    AnalyzerPluginConfigViewSet,
+    basename="plugin-config-analyzer",
+)
 
 
 urlpatterns = [

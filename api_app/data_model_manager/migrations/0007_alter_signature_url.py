@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "data_model_manager",
-            "0005_alter_domaindatamodel_external_references_and_more",
+            "0006_alter_ipdatamodel_asn_rank",
         ),
     ]
 

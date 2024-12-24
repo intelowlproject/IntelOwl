@@ -4,6 +4,7 @@ import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
 import { MdDelete, MdFileDownload, MdEdit } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
+import { AiFillSetting } from "react-icons/ai";
 
 import { IconButton } from "@certego/certego-ui";
 
@@ -11,11 +12,9 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { SpinnerIcon } from "../../common/icon/icons";
-import { PlaybookConfigForm } from "../forms/PlaybookConfigForm";
-import { PivotConfigForm } from "../forms/PivotConfigForm";
-import { deletePluginConfig } from "../pluginsApi";
+import { deleteConfiguration } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
-import { AnalyzerConfigForm } from "../forms/AnalyzerConfigForm";
+import { PluginConfigModal } from "../PluginConfigModal";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -140,7 +139,6 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
   const { isInOrganization, isUserAdmin } = useOrganizationStore(
     React.useCallback(
       (state) => ({
-        fetchAll: state.fetchAll,
         isInOrganization: state.isInOrganization,
         isUserAdmin: state.isUserAdmin,
       }),
@@ -165,7 +163,7 @@ export function PluginDeletionButton({ pluginName, pluginType_ }) {
 
   const onClick = async () => {
     try {
-      await deletePluginConfig(pluginType_, pluginName);
+      await deleteConfiguration(pluginType_, pluginName);
       if (pluginType_ === PluginsTypes.PLAYBOOK)
         retrievePlaybooksConfiguration();
       if (pluginType_ === PluginsTypes.PIVOT) retrievePivotsConfiguration();
@@ -303,7 +301,7 @@ export function PlaybooksEditButton({ playbookConfig }) {
     pivotsLoading;
 
   return (
-    <div className="d-flex flex-column align-items-center px-2">
+    <div className="d-flex flex-column align-items-center p-1">
       <IconButton
         id={`playbook-edit-btn__${playbookConfig?.name}`}
         color="info"
@@ -321,11 +319,11 @@ export function PlaybooksEditButton({ playbookConfig }) {
         titlePlacement="top"
       />
       {showModal && (
-        <PlaybookConfigForm
-          playbookConfig={playbookConfig}
+        <PluginConfigModal
+          pluginConfig={playbookConfig}
+          pluginType={PluginsTypes.PLAYBOOK}
           toggle={setShowModal}
           isOpen={showModal}
-          pluginsLoading={pluginsLoading}
         />
       )}
     </div>
@@ -336,14 +334,13 @@ PlaybooksEditButton.propTypes = {
   playbookConfig: PropTypes.object.isRequired,
 };
 
-export function PluginEditButton({ config, pluginType_ }) {
+export function PluginConfigButton({ pluginConfig, pluginType_ }) {
   const [showModal, setShowModal] = React.useState(false);
 
   const user = useAuthStore(React.useCallback((state) => state.user, []));
   const { isInOrganization, isUserAdmin } = useOrganizationStore(
     React.useCallback(
       (state) => ({
-        fetchAll: state.fetchAll,
         isInOrganization: state.isInOrganization,
         isUserAdmin: state.isUserAdmin,
       }),
@@ -351,7 +348,16 @@ export function PluginEditButton({ config, pluginType_ }) {
     ),
   );
 
-  // disabled icon if the user is not an admin of the org or a superuser
+  const isBasicAnalyzer =
+    pluginType_ === PluginsTypes.ANALYZER &&
+    pluginConfig.python_module ===
+      "basic_observable_analyzer.BasicObservableAnalyzer";
+  let title = "Plugin config";
+  if (isBasicAnalyzer) {
+    title = "Edit analyzer config";
+  }
+
+  // disabled icon if the user is not an admin of the org or a superuser (only for basic analyzer)
   const disabled =
     (isInOrganization && !isUserAdmin(user.username)) ||
     (!isInOrganization && !user.is_staff);
@@ -359,25 +365,25 @@ export function PluginEditButton({ config, pluginType_ }) {
   return (
     <div className="d-flex flex-column align-items-center p-1">
       <IconButton
-        id={`plugin-edit-btn__${config?.name}`}
-        color="info"
+        id={`plugin-config-btn__${pluginConfig?.name}`}
+        color={pluginConfig.verification.configured ? "success" : "warning"}
         size="sm"
-        Icon={MdEdit}
-        title="Edit config"
+        Icon={isBasicAnalyzer ? MdEdit : AiFillSetting}
+        disabled={
+          (isBasicAnalyzer || pluginType_ === PluginsTypes.PIVOT) && disabled
+        }
+        title={
+          pluginConfig.verification.configured
+            ? title
+            : `Plugin config: ${pluginConfig.verification.details}`
+        }
         onClick={() => setShowModal(true)}
-        disabled={disabled}
         titlePlacement="top"
       />
-      {showModal && pluginType_ === PluginsTypes.PIVOT && (
-        <PivotConfigForm
-          pivotConfig={config}
-          toggle={setShowModal}
-          isOpen={showModal}
-        />
-      )}
-      {showModal && pluginType_ === PluginsTypes.ANALYZER && (
-        <AnalyzerConfigForm
-          analyzerConfig={config}
+      {showModal && (
+        <PluginConfigModal
+          pluginConfig={pluginConfig}
+          pluginType={pluginType_}
           toggle={setShowModal}
           isOpen={showModal}
         />
@@ -386,8 +392,13 @@ export function PluginEditButton({ config, pluginType_ }) {
   );
 }
 
-PluginEditButton.propTypes = {
-  config: PropTypes.object.isRequired,
-  pluginType_: PropTypes.oneOf(["analyzer", "connector", "ingestor", "pivot"])
-    .isRequired,
+PluginConfigButton.propTypes = {
+  pluginConfig: PropTypes.object.isRequired,
+  pluginType_: PropTypes.oneOf([
+    "analyzer",
+    "connector",
+    "ingestor",
+    "pivot",
+    "visualizer",
+  ]).isRequired,
 };

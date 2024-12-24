@@ -4,11 +4,11 @@ import axios from "axios";
 import { screen, render, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { PLAYBOOKS_CONFIG_URI } from "../../../../../src/constants/apiURLs";
-import { PlaybookConfigForm } from "../../../../../src/components/plugins/forms/PlaybookConfigForm";
-import { mockedUsePluginConfigurationStore } from "../../../../mock";
+import { PLAYBOOKS_CONFIG_URI } from "../../../../src/constants/apiURLs";
+import { PlaybookConfigForm } from "../../../../src/components/plugins/forms/PlaybookConfigForm";
+import { mockedUsePluginConfigurationStore } from "../../../mock";
 
-jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
+jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
   usePluginConfigurationStore: jest.fn((state) =>
     state(mockedUsePluginConfigurationStore),
   ),
@@ -17,10 +17,10 @@ jest.mock("../../../../../src/stores/usePluginConfigurationStore", () => ({
 jest.mock("axios");
 // mock runtimeConfigurationParam
 jest.mock(
-  "../../../../../src/components/common/form/runtimeConfigurationInput",
+  "../../../../src/components/common/form/runtimeConfigurationInput",
   () => ({
     ...jest.requireActual(
-      "../../../../../src/components/common/form/runtimeConfigurationInput",
+      "../../../../src/components/common/form/runtimeConfigurationInput",
     ),
     runtimeConfigurationParam: () => {
       const selectedPluginsParams = {
@@ -184,8 +184,8 @@ describe("PlaybookConfigForm test", () => {
         <PlaybookConfigForm
           playbookConfig={playbookConfig}
           toggle={jest.fn()}
-          isOpen
           pluginsLoading={false}
+          isEditing
         />
       </BrowserRouter>,
     );
@@ -301,7 +301,7 @@ describe("PlaybookConfigForm test", () => {
 
     render(
       <BrowserRouter>
-        <PlaybookConfigForm toggle={jest.fn()} isOpen pluginsLoading={false} />
+        <PlaybookConfigForm toggle={jest.fn()} pluginsLoading={false} />
       </BrowserRouter>,
     );
 

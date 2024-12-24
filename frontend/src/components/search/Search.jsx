@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik, Form, FormikProvider } from "formik";
 import {
   Container,
@@ -110,6 +110,12 @@ export default function Search() {
       }
     },
   });
+
+  useEffect(() => {
+    // this hook is required to run a request when the page is visited the first time
+    formik.handleSubmit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container fluid>

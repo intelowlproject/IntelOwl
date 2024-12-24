@@ -34,15 +34,15 @@ describe("test Search component", () => {
     // second row
     const startTimeField = screen.getByText("Start time:");
     expect(startTimeField).toBeInTheDocument();
-    const fromStartTimeInput = screen.getAllByText("from:")[0];
+    const fromStartTimeInput = screen.getAllByText("from")[0];
     expect(fromStartTimeInput).toBeInTheDocument();
-    const toStartTimeInput = screen.getAllByText("to:")[0];
+    const toStartTimeInput = screen.getAllByText("to")[0];
     expect(toStartTimeInput).toBeInTheDocument();
     const endTimeField = screen.getByText("End time:");
     expect(endTimeField).toBeInTheDocument();
-    const fromEndTimeInput = screen.getAllByText("from:")[1];
+    const fromEndTimeInput = screen.getAllByText("from")[1];
     expect(fromEndTimeInput).toBeInTheDocument();
-    const toEndTimeInput = screen.getAllByText("to:")[1];
+    const toEndTimeInput = screen.getAllByText("to")[1];
     expect(toEndTimeInput).toBeInTheDocument();
     const errorsField = screen.getByRole("combobox", { name: /Errors:/i });
     expect(errorsField).toBeInTheDocument();
@@ -141,15 +141,15 @@ describe("test Search component", () => {
     // second row
     const startTimeField = screen.getByText("Start time:");
     expect(startTimeField).toBeInTheDocument();
-    const fromStartTimeInput = screen.getAllByText("from:")[0];
+    const fromStartTimeInput = screen.getAllByText("from")[0];
     expect(fromStartTimeInput).toBeInTheDocument();
-    const toStartTimeInput = screen.getAllByText("to:")[0];
+    const toStartTimeInput = screen.getAllByText("to")[0];
     expect(toStartTimeInput).toBeInTheDocument();
     const endTimeField = screen.getByText("End time:");
     expect(endTimeField).toBeInTheDocument();
-    const fromEndTimeInput = screen.getAllByText("from:")[1];
+    const fromEndTimeInput = screen.getAllByText("from")[1];
     expect(fromEndTimeInput).toBeInTheDocument();
-    const toEndTimeInput = screen.getAllByText("to:")[1];
+    const toEndTimeInput = screen.getAllByText("to")[1];
     expect(toEndTimeInput).toBeInTheDocument();
     const errorsField = screen.getByRole("combobox", { name: /Errors:/i });
     expect(errorsField).toBeInTheDocument();
@@ -202,10 +202,10 @@ describe("test Search component", () => {
       expect(axios.get).toHaveBeenCalledWith(`${PLUGIN_REPORT_QUERIES}`, {
         params: {
           name: "Classic_DNS",
-          end_end_time: new Date(new Date().toISOString().split("T")[0]),
-          end_start_time: new Date(new Date().toISOString().split("T")[0]),
-          start_end_time: new Date(fromDate.toISOString().split("T")[0]),
-          start_start_time: new Date(fromDate.toISOString().split("T")[0]),
+          end_end_time: new Date(new Date().toISOString().slice(0,16)),
+          end_start_time: new Date(new Date().toISOString().slice(0,16)),
+          start_end_time: new Date(fromDate.toISOString().slice(0,16)),
+          start_start_time: new Date(fromDate.toISOString().slice(0,16)),
         },
       });
       expect(screen.getByText("#2")).toBeInTheDocument();

@@ -51,10 +51,10 @@ export default function Search() {
       type: "",
       name: "",
       status: "",
-      fromStartTime: defaultStartDate.toISOString().split("T")[0],
-      toStartTime: new Date().toISOString().split("T")[0],
-      fromEndTime: defaultStartDate.toISOString().split("T")[0],
-      toEndTime: new Date().toISOString().split("T")[0],
+      fromStartTime: defaultStartDate.toISOString().slice(0, 16),
+      toStartTime: new Date().toISOString().slice(0, 16),
+      fromEndTime: defaultStartDate.toISOString().slice(0, 16),
+      toEndTime: new Date().toISOString().slice(0, 16),
       errors: "",
       report: "",
     },
@@ -142,8 +142,8 @@ export default function Search() {
               </span>
             </Col>
           </Row>
-          <Row id="search-input-fields-first-row" className="mt-4">
-            <Col sm={4} className="d-flex align-items-center">
+          <Row id="search-input-fields-first-row d-flex flex-wrap">
+            <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
               <Label className="col-3 fw-bold mb-0" for="search__type">
                 Type:
               </Label>
@@ -173,7 +173,7 @@ export default function Search() {
                   ))}
               </Input>
             </Col>
-            <Col sm={4} className="d-flex align-items-center ms-4">
+            <Col xxl={4} sm={12} className="d-flex align-items-center mt-4">
               <Label className="col-3 fw-bold mb-0" for="search__name">
                 Name:
               </Label>
@@ -188,8 +188,11 @@ export default function Search() {
                 className="col bg-darker border-dark"
               />
             </Col>
-            <Col sm={3} className=" d-flex align-items-center ms-4">
-              <Label className="col-4 fw-bold mb-0" for="search__status">
+            <Col xxl={3} sm={12} className=" d-flex align-items-center mt-4">
+              <Label
+                className="col-xxl-4 col-sm-3 fw-bold mb-0"
+                for="search__status"
+              >
                 Status:
               </Label>
               <Input
@@ -213,39 +216,45 @@ export default function Search() {
               </Input>
             </Col>
           </Row>
-          <Row id="search-input-fields-second-row" className="mt-3">
-            <Col sm={4} className="d-flex align-items-center">
+          <Row id="search-input-fields-second-row">
+            <Col
+              xxl={4}
+              sm={12}
+              className="d-flex align-items-center flex-wrap mt-3"
+            >
               <Label className="col-3 fw-bold mb-0">Start time:</Label>
               <div className="d-flex flex-column align-item-start">
-                <div className="d-flex flex-wrap">
-                  <div className="d-flex align-items-center">
-                    <Label className="me-2 mb-0" for="search__fromStartTime">
-                      from:
+                <div className="d-flex flex-column flex-wrap">
+                  <div className="d-flex align-items-center mb-1">
+                    <Label className="col-3 mb-0" for="search__fromStartTime">
+                      from
                     </Label>
                     <Input
                       id="search__fromStartTime"
-                      type="date"
+                      type="datetime-local"
                       name="fromStartTime"
                       autoComplete="off"
                       value={formik.values.fromStartTime}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
+                      className="col-6"
                     />
                   </div>
-                  <div className="d-flex align-items-center ms-2">
-                    <Label className="me-2 mb-0" for="search__toStartTime">
-                      to:
+                  <div className="d-flex align-items-center">
+                    <Label className="col-3 mb-0" for="search__toStartTime">
+                      to
                     </Label>
                     <Input
                       id="search__toStartTime"
-                      type="date"
+                      type="datetime-local"
                       name="toStartTime"
                       autoComplete="off"
                       value={formik.values.toStartTime}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.startTime}
+                      className="col-6"
                     />
                   </div>
                 </div>
@@ -256,38 +265,44 @@ export default function Search() {
                 )}
               </div>
             </Col>
-            <Col sm={4} className="d-flex align-items-center ms-4">
+            <Col
+              xxl={4}
+              sm={12}
+              className="d-flex align-items-center flex-wrap mt-3"
+            >
               <Label className="col-3 fw-bold mb-0">End time:</Label>
               <div className="d-flex flex-column align-item-start">
-                <div className="d-flex flex-wrap">
-                  <div className="d-flex align-items-center">
-                    <Label className="me-2 mb-0" for="search__fromEndTime">
-                      from:
+                <div className="d-flex flex-column flex-wrap">
+                  <div className="d-flex align-items-center mb-1">
+                    <Label className="col-3 mb-0" for="search__fromEndTime">
+                      from
                     </Label>
                     <Input
                       id="search__fromEndTime"
-                      type="date"
+                      type="datetime-local"
                       name="fromEndTime"
                       autoComplete="off"
                       value={formik.values.fromEndTime}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
+                      className="col-6"
                     />
                   </div>
-                  <div className="d-flex align-items-center ms-2">
-                    <Label className="me-2 mb-0" for="search__toEndTime">
-                      to:
+                  <div className="d-flex align-items-center">
+                    <Label className="col-3 mb-0" for="search__toEndTime">
+                      to
                     </Label>
                     <Input
                       id="search__toEndTime"
-                      type="date"
+                      type="datetime-local"
                       name="toEndTime"
                       autoComplete="off"
                       value={formik.values.toEndTime}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       invalid={formik.errors.endTime}
+                      className="col-6"
                     />
                   </div>
                 </div>
@@ -296,8 +311,11 @@ export default function Search() {
                 )}
               </div>
             </Col>
-            <Col sm={3} className="d-flex align-items-center ms-4">
-              <Label className="col-4 fw-bold mb-0" for="search__errors">
+            <Col xxl={3} sm={12} className="d-flex align-items-center mt-3">
+              <Label
+                className="col-xxl-4 col-sm-3 fw-bold mb-0"
+                for="search__errors"
+              >
                 Errors:
               </Label>
               <Input
@@ -326,9 +344,12 @@ export default function Search() {
               </Input>
             </Col>
           </Row>
-          <Row id="search-input-fields-third-row" className="mt-3">
-            <Col sm={11} className="d-flex align-items-center">
-              <Label className="col-1 fw-bold mb-0" for="search__report">
+          <Row id="search-input-fields-third-row">
+            <Col xxl={11} sm={12} className="d-flex align-items-center mt-3">
+              <Label
+                className="col-xxl-1 col-sm-3 fw-bold mb-0"
+                for="search__report"
+              >
                 Text search:
                 <MdInfoOutline
                   id="search__report-infoicon"
@@ -354,13 +375,14 @@ export default function Search() {
                 value={formik.values.report}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="bg-darker border-dark ms-2"
+                className="bg-darker border-dark"
                 invalid={formik.touched.report && formik.errors.report}
               />
             </Col>
             <Col
-              sm={1}
-              className="d-flex align-items-center justify-content-end"
+              xxl={1}
+              sm={12}
+              className="d-flex align-items-center justify-content-end mt-3"
             >
               <Button
                 id="search-button"

@@ -102,7 +102,7 @@ export default function Search() {
         // error will be handled by pluginReportQueries
       } finally {
         setLoadingData(false);
-        setElasticData(response.data.data);
+        setElasticData(response.data.results);
         formik.setSubmitting(false);
       }
     },

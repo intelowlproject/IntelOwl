@@ -1347,8 +1347,9 @@ class PluginConfigViewSetTestCase(CustomViewSetTestCase):
         different_user.delete()
 
 
+@override_settings(ELASTICSEARCH_DSL_ENABLED=True)
 class ElasticTestCase(CustomViewSetTestCase):
-    uri = reverse("plugin_report_queries")
+    uri = reverse("plugin-report-queries")
 
     class ElasticObject:
 
@@ -1439,7 +1440,6 @@ class ElasticTestCase(CustomViewSetTestCase):
             },
         )
 
-    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @patch(
         "api_app.views.Search.execute",
         MagicMock(
@@ -1523,7 +1523,9 @@ class ElasticTestCase(CustomViewSetTestCase):
         self.assertEqual(
             response.json(),
             {
-                "data": [
+                "count": 2,
+                "total_pages": 1,
+                "results": [
                     {
                         "job": {"id": 1},
                         "config": {
@@ -1570,11 +1572,10 @@ class ElasticTestCase(CustomViewSetTestCase):
                             ],
                         },
                     },
-                ]
+                ],
             },
         )
 
-    @override_settings(ELASTICSEARCH_DSL_ENABLED=True)
     @patch("api_app.views.Search")
     def test_elastic_request(self, mocked_search):
         self.client.force_authenticate(self.org_user)

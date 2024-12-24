@@ -6,6 +6,7 @@ from rest_framework import routers
 
 from .views import (
     CommentViewSet,
+    ElasticSearchView,
     JobViewSet,
     PluginConfigViewSet,
     TagViewSet,
@@ -15,7 +16,6 @@ from .views import (
     analyze_observable,
     ask_analysis_availability,
     ask_multi_analysis_availability,
-    plugin_report_queries,
     plugin_state_viewer,
 )
 
@@ -41,7 +41,11 @@ urlpatterns = [
         analyze_multiple_observables,
         name="analyze_multiple_observables",
     ),
-    path("plugin_report_queries", plugin_report_queries, name="plugin_report_queries"),
+    path(
+        "plugin_report_queries",
+        ElasticSearchView.as_view(),
+        name="plugin-report-queries",
+    ),
     # router viewsets
     path("", include(router.urls)),
     # Plugins

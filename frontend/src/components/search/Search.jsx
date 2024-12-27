@@ -16,6 +16,7 @@ import { MdInfoOutline } from "react-icons/md";
 import { JSONTree } from "react-json-tree";
 import { Loader, DataTable } from "@certego/certego-ui";
 
+import { format } from "date-fns";
 import { PluginsTypes, PluginFinalStatuses } from "../../constants/pluginConst";
 import { searchTableColumns } from "./searchTableColumns";
 import { pluginReportQueries } from "./searchApi";
@@ -42,19 +43,20 @@ export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
 
-  // default: 30days
+  const isoFormatString = "yyyy-MM-dd'T'HH:mm";
   const defaultStartDate = new Date();
-  defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+  defaultStartDate.setDate(defaultStartDate.getDate() - 30); // default: 30 days time range
+  const defaultStartDateStr = format(defaultStartDate, isoFormatString);
 
   const formik = useFormik({
     initialValues: {
       type: "",
       name: "",
       status: "",
-      fromStartTime: defaultStartDate.toISOString().slice(0, 16),
-      toStartTime: new Date().toISOString().slice(0, 16),
-      fromEndTime: defaultStartDate.toISOString().slice(0, 16),
-      toEndTime: new Date().toISOString().slice(0, 16),
+      fromStartTime: defaultStartDateStr,
+      toStartTime: format(new Date(), isoFormatString),
+      fromEndTime: defaultStartDateStr,
+      toEndTime: format(new Date(), isoFormatString),
       errors: "",
       report: "",
     },

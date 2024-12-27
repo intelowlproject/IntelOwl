@@ -2,9 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Collapse } from "reactstrap";
 import { ArrowToggleIcon, CopyToClipboardButton } from "@certego/certego-ui";
-import { PluginsTypes } from "../../../constants/pluginConst";
 
-export function PlaybooksCollapse({ pluginList, pluginType_ }) {
+export function TableCellCollapse({ values, label }) {
   // local state
   const [isOpen, setIsOpen] = React.useState(false);
   return (
@@ -12,23 +11,23 @@ export function PlaybooksCollapse({ pluginList, pluginType_ }) {
       <Button
         className="bg-transparent border-0"
         onClick={() => setIsOpen(!isOpen)}
-        id="PlaybooksCollapse"
+        id="table-cell-collapse"
       >
         <small>
-          {pluginList?.length} {pluginType_}{" "}
+          {values?.length} {label}{" "}
         </small>
         <ArrowToggleIcon isExpanded={isOpen} />
       </Button>
-      <Collapse isOpen={isOpen} id="PlaybooksCollapse">
+      <Collapse isOpen={isOpen} id="table-cell-collapse">
         <ul className="d-flex flex-column align-items-start p-3">
-          {pluginList?.sort().map((pluginName) => (
-            <li className="pb-2" key={pluginName}>
+          {values?.sort().map((value) => (
+            <li className="pb-2" key={value}>
               <CopyToClipboardButton
                 showOnHover
-                text={pluginName}
+                text={value}
                 className="d-block text-break"
               >
-                {pluginName}
+                {value}
               </CopyToClipboardButton>
             </li>
           ))}
@@ -38,7 +37,7 @@ export function PlaybooksCollapse({ pluginList, pluginType_ }) {
   );
 }
 
-PlaybooksCollapse.propTypes = {
-  pluginList: PropTypes.array.isRequired,
-  pluginType_: PropTypes.oneOf(Object.values(PluginsTypes)).isRequired,
+TableCellCollapse.propTypes = {
+  values: PropTypes.array.isRequired,
+  label: PropTypes.string.isRequired,
 };

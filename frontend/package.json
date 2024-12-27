@@ -10,6 +10,7 @@
     "axios-hooks": "^3.1.5",
     "bootstrap": "^5.3.3",
     "classnames": "^2.5.1",
+    "date-fns": "^4.1.0",
     "flag-icons": "^7.2.3",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",

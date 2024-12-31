@@ -71,7 +71,7 @@ class DriverWrapper:
             "enable_har": True,
             # https://github.com/wkeeling/selenium-wire/issues/220#issuecomment-794308386
             # config to have local seleniumwire proxy compatible with another proxy
-            "addr": "0.0.0.0",  # where selenium-wire proxy will run
+            "addr": "0.0.0.0",  # nosec B104 # where selenium-wire proxy will run
             "port": 7007,
         }
         if self.proxy:

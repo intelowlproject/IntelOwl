@@ -88,7 +88,9 @@ describe("test Search component", () => {
 
   test("Search page - search plugin name", async () => {
     // advanceTimers: true needed with user-event
-    jest.useFakeTimers({ advanceTimers: true }).setSystemTime(new Date(2024, 10, 28));
+    jest
+      .useFakeTimers({ advanceTimers: true })
+      .setSystemTime(new Date(2024, 10, 28));
     const user = userEvent.setup();
     axios.get.mockImplementation(() =>
       Promise.resolve({

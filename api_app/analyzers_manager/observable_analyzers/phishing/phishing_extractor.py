@@ -17,6 +17,7 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
     proxy_address: str = ""
     window_width: int
     window_height: int
+    user_agent: str = ""
 
     def __init__(
         self,
@@ -40,6 +41,8 @@ class PhishingExtractor(ObservableAnalyzer, DockerBasedAnalyzer):
             self.args.append(f"--window_width={self.window_width}")
         if self.window_height:
             self.args.append(f"--window_height={self.window_height}")
+        if self.user_agent:
+            self.args.append(f"--user_agent={self.user_agent}")
 
     def run(self):
         req_data: {} = {

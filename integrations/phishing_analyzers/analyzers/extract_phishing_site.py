@@ -51,19 +51,29 @@ def analyze_target(
     proxy_address: str,
     window_width: int = 1920,
     window_height: int = 1080,
+    user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.3",
 ):
-    driver_wrapper = DriverWrapper(
-        proxy_address=proxy_address,
-        window_width=window_width,
-        window_height=window_height,
-    )
-    driver_wrapper.navigate(url=target_url, timeout_wait_page=5)
+    driver_wrapper = None
+    try:
+        driver_wrapper = DriverWrapper(
+            proxy_address=proxy_address,
+            window_width=window_width,
+            window_height=window_height,
+            user_agent=user_agent,
+        )
+        driver_wrapper.navigate(url=target_url, timeout_wait_page=5)
 
-    result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
-    logger.debug(f"JSON dump of driver {result=}")
-    print(result)
-
-    driver_wrapper.quit()
+        result: str = json.dumps(extract_driver_result(driver_wrapper), default=str)
+        logger.debug(f"JSON dump of driver {result=}")
+        print(result)
+    except Exception as e:
+        logger.exception(
+            f"Exception during analysis of target website {target_url}: {e}"
+        )
+    finally:
+        # if anything goes wrong make sure to free the slot
+        if driver_wrapper:
+            driver_wrapper.quit()
 
 
 if __name__ == "__main__":
@@ -72,6 +82,7 @@ if __name__ == "__main__":
     parser.add_argument("--proxy_address", type=str, required=False)
     parser.add_argument("--window_width", type=int, required=False)
     parser.add_argument("--window_height", type=int, required=False)
+    parser.add_argument("--user_agent", type=str, required=False)
     arguments = parser.parse_args()
     logger.info(f"Extracted arguments for {LOG_NAME}: {vars(arguments)}")
 
@@ -80,4 +91,5 @@ if __name__ == "__main__":
         proxy_address=arguments.proxy_address,
         window_width=arguments.window_width,
         window_height=arguments.window_height,
+        user_agent=arguments.user_agent,
     )

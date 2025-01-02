@@ -6,14 +6,11 @@ import { Link } from "react-router-dom";
 
 import {
   Loader,
-  ContentSection,
   DataTable,
   TableHintIcon,
   SyncButton,
-  ButtonSelect,
 } from "@certego/certego-ui";
 
-import { PluginInfoCard } from "./utils";
 import { useOrganizationStore } from "../../../stores/useOrganizationStore";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { PluginsTypes } from "../../../constants/pluginConst";
@@ -24,17 +21,6 @@ const tableInitialState = {
   pageSize: 6,
   sortBy: [{ id: "name", desc: false }],
 };
-function TableBodyComponent({ page }) {
-  return (
-    <ContentSection className="bg-body d-flex flex-wrap">
-      {page.map((row) => (
-        <Col md={6} lg={4} className="mt-2">
-          <PluginInfoCard pluginInfo={row?.original} />
-        </Col>
-      ))}
-    </ContentSection>
-  );
-}
 
 export default function PluginWrapper({
   heading,
@@ -43,9 +29,6 @@ export default function PluginWrapper({
   columns,
   type,
 }) {
-  // local state
-  const [viewType, setViewType] = React.useState("Table");
-
   const { pluginsState: organizationPluginsState } = useOrganizationStore(
     React.useCallback(
       (state) => ({
@@ -93,27 +76,9 @@ export default function PluginWrapper({
         </Col>
       </div>
       {/* Actions */}
-      <div className="bg-dark d-flex-between-center">
-        <div className="ps-3 d-flex">
-          <TableHintIcon />
-          <span className="ps-2 text-muted">
-            Note: Hover over a configured icon to view configuration status and
-            errors if any.
-          </span>
-        </div>
-        <div className="pt-1 pe-3 d-flex align-items-start justify-content-end">
-          <ButtonSelect
-            choices={["Table", "Cards"]}
-            value={viewType}
-            onChange={setViewType}
-            className="bg-tertiary"
-            buttonProps={{
-              size: "sm",
-              className: "text-light",
-            }}
-          />
-          <SyncButton onClick={refetch} className="ms-2" />
-        </div>
+      <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
+        <TableHintIcon />
+        <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
       </div>
       {/* Table/Card View */}
       <div style={{ height: "70vh", overflow: "scroll" }}>
@@ -126,9 +91,6 @@ export default function PluginWrapper({
               config={tableConfig}
               initialState={tableInitialState}
               columns={columns}
-              TableBodyComponent={
-                viewType === "Cards" ? TableBodyComponent : undefined
-              }
             />
           )}
         />
@@ -136,10 +98,6 @@ export default function PluginWrapper({
     </Container>
   );
 }
-
-TableBodyComponent.propTypes = {
-  page: PropTypes.array.isRequired,
-};
 
 PluginWrapper.propTypes = {
   heading: PropTypes.string.isRequired,

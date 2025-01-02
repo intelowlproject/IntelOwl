@@ -5,9 +5,6 @@ import {
   Button,
   Spinner,
   Input,
-  Modal,
-  ModalHeader,
-  ModalBody,
   UncontrolledTooltip,
 } from "reactstrap";
 import { Form, useFormik, FormikProvider } from "formik";
@@ -23,9 +20,14 @@ import {
 } from "../../common/form/pluginsMultiSelectDropdownInput";
 import { usePluginConfigurationStore } from "../../../stores/usePluginConfigurationStore";
 import { PluginsTypes } from "../../../constants/pluginConst";
-import { editPluginConfig, createPluginConfig } from "../pluginsApi";
+import {
+  editConfiguration,
+  createConfiguration,
+  editPluginConfig,
+  createPluginConfig,
+} from "../pluginsApi";
 
-export function PivotConfigForm({ pivotConfig, toggle, isOpen }) {
+export function PivotConfigForm({ pivotConfig, toggle, isEditing }) {
   console.debug("PivotConfigForm rendered!");
 
   // states
@@ -72,8 +74,6 @@ export function PivotConfigForm({ pivotConfig, toggle, isOpen }) {
   const isPythonModuleSelectable = pythonModuleOptions.find(
     (element) => element.value === pivotConfig?.python_module,
   );
-
-  const isEditing = Object.keys(pivotConfig).length > 0;
 
   const formik = useFormik({
     initialValues: {
@@ -143,6 +143,7 @@ export function PivotConfigForm({ pivotConfig, toggle, isOpen }) {
     },
     onSubmit: async () => {
       let response;
+      let responsePluginConfig = { success: true, error: null };
 
       const payloadData = {
         name: formik.values.name,
@@ -155,31 +156,46 @@ export function PivotConfigForm({ pivotConfig, toggle, isOpen }) {
           (connector) => connector.value,
         ),
       };
-      if (formik.values.field_to_compare) {
-        payloadData.plugin_config = {
-          type: 5,
-          plugin_name: formik.values.name,
-          attribute: "field_to_compare",
-          value: formik.values.field_to_compare,
-          config_type: 1,
-        };
-      }
 
       if (isEditing) {
         const pivotToEdit =
           formik.initialValues.name !== formik.values.name
             ? formik.initialValues.name
             : formik.values.name;
-        response = await editPluginConfig(
+        response = await editConfiguration(
           PluginsTypes.PIVOT,
           pivotToEdit,
           payloadData,
         );
       } else {
-        response = await createPluginConfig(PluginsTypes.PIVOT, payloadData);
+        response = await createConfiguration(PluginsTypes.PIVOT, payloadData);
       }
 
-      if (response?.success) {
+      // plugin config
+      if (response?.success && formik.values.field_to_compare) {
+        const pluginConfig = {
+          attribute: "field_to_compare",
+          value: formik.values.field_to_compare,
+          parameter: response.data.parameters.field_to_compare.id,
+        };
+        if (isEditing) {
+          responsePluginConfig = await editPluginConfig(
+            PluginsTypes.PIVOT,
+            formik.values.name,
+            [pluginConfig],
+          );
+        } else {
+          pluginConfig.pivot_config = formik.values.name;
+          pluginConfig.for_organization = false;
+          responsePluginConfig = await createPluginConfig(
+            PluginsTypes.PIVOT,
+            formik.values.name,
+            [pluginConfig],
+          );
+        }
+      }
+
+      if (response?.success && responsePluginConfig?.success) {
         formik.setSubmitting(false);
         setResponseError(null);
         formik.resetForm();
@@ -211,230 +227,200 @@ export function PivotConfigForm({ pivotConfig, toggle, isOpen }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
-  const title = isEditing ? "Edit pivot config" : "Create a new pivot";
-
   return (
-    <Modal
-      id="pivot-config-modal"
-      autoFocus
-      centered
-      zIndex="1050"
-      size="lg"
-      keyboard={false}
-      backdrop="static"
-      labelledBy="Pivot config modal"
-      isOpen={isOpen}
-      style={{ minWidth: "60%" }}
-    >
-      <ModalHeader className="mx-2" toggle={() => toggle(false)}>
-        <small className="text-info">{title}</small>
-      </ModalHeader>
-      <ModalBody className="m-2">
-        <FormikProvider value={formik}>
-          <Form onSubmit={formik.handleSubmit}>
-            {formik.touched.name && formik.errors.name && (
-              <small className="text-danger">Name: {formik.errors.name}</small>
-            )}
-            <FormGroup className="d-flex align-items-center">
-              <Label
-                className="me-2 mb-0"
-                for="pivot-name"
-                style={{ minWidth: "15%" }}
+    <FormikProvider value={formik}>
+      <Form onSubmit={formik.handleSubmit}>
+        {formik.touched.name && formik.errors.name && (
+          <small className="text-danger">Name: {formik.errors.name}</small>
+        )}
+        <FormGroup className="d-flex align-items-center">
+          <Label
+            className="me-2 mb-0"
+            for="pivot-name"
+            style={{ minWidth: "15%" }}
+          >
+            Name:
+          </Label>
+          <Input
+            id="pivot-name"
+            type="text"
+            name="name"
+            value={formik.values.name}
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            valid={!formik.errors.name && formik.touched.name}
+            invalid={formik.touched.name && formik.errors.name}
+            className="bg-darker border-0"
+          />
+        </FormGroup>
+        {formik.touched.description && formik.errors.description && (
+          <small className="text-danger">
+            Description: {formik.errors.description}
+          </small>
+        )}
+        <FormGroup className="d-flex align-items-start">
+          <Label
+            className="me-2 mb-0 d-flex"
+            for="pivot-description"
+            style={{ minWidth: "15%" }}
+          >
+            Description:
+            <div className="ms-2">
+              <MdInfoOutline id="pivot-description-infoicon" fontSize="20" />
+              <UncontrolledTooltip
+                trigger="hover"
+                target="pivot-description-infoicon"
+                placement="right"
+                fade={false}
+                innerClassName="p-2 text-start text-nowrap md-fit-content"
               >
-                Name:
-              </Label>
-              <Input
-                id="pivot-name"
-                type="text"
-                name="name"
-                value={formik.values.name}
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                valid={!formik.errors.name && formik.touched.name}
-                invalid={formik.touched.name && formik.errors.name}
-                className="bg-darker border-0"
-              />
-            </FormGroup>
-            {formik.touched.description && formik.errors.description && (
-              <small className="text-danger">
-                Description: {formik.errors.description}
-              </small>
+                The description is automatically generated based on the
+                configuration.
+              </UncontrolledTooltip>
+            </div>
+          </Label>
+          <Input
+            id="pivot-description"
+            type="textarea"
+            name="description"
+            value={formik.values.description}
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            valid={!formik.errors.description && formik.touched.description}
+            invalid={formik.touched.description && formik.errors.description}
+            className="bg-darker border-0 text-gray"
+            style={{
+              minHeight: "100px",
+              overflowX: "scroll",
+              cursor: "not-allowed",
+            }}
+            disabled
+          />
+        </FormGroup>
+        <div className="bg-tertiary py-2 px-3 rounded">
+          <strong>Note:</strong> Pivots are designed to create a job from
+          another job after certain conditions are triggered. <br />
+          This plugin can only run automatically within a playbook so it is
+          important to select the analyzers or connectors after which the pivot
+          will be executed. <br />
+          Every playbook containing the following combination of
+          analyzers/connectors can have this Pivot attached to.
+        </div>
+        <div className="py-4">
+          {formik.values.analyzers.length !== 0 &&
+            formik.values.connectors.length !== 0 && (
+              <>
+                <br />
+                <small className="text-danger">{formik.errors.analyzers}</small>
+              </>
             )}
-            <FormGroup className="d-flex align-items-start">
-              <Label
-                className="me-2 mb-0 d-flex"
-                for="pivot-description"
-                style={{ minWidth: "15%" }}
-              >
-                Description:
-                <div className="ms-2">
-                  <MdInfoOutline
-                    id="pivot-description-infoicon"
-                    fontSize="20"
-                  />
-                  <UncontrolledTooltip
-                    trigger="hover"
-                    target="pivot-description-infoicon"
-                    placement="right"
-                    fade={false}
-                    innerClassName="p-2 text-start text-nowrap md-fit-content"
-                  >
-                    The description is automatically generated based on the
-                    configuration.
-                  </UncontrolledTooltip>
-                </div>
-              </Label>
-              <Input
-                id="pivot-description"
-                type="textarea"
-                name="description"
-                value={formik.values.description}
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                valid={!formik.errors.description && formik.touched.description}
-                invalid={
-                  formik.touched.description && formik.errors.description
-                }
-                className="bg-darker border-0 text-gray"
-                style={{
-                  minHeight: "100px",
-                  overflowX: "scroll",
-                  cursor: "not-allowed",
-                }}
-                disabled
-              />
-            </FormGroup>
-            <div className="bg-tertiary py-2 px-3 rounded">
-              <strong>Note:</strong> Pivots are designed to create a job from
-              another job after certain conditions are triggered. <br />
-              This plugin can only run automatically within a playbook so it is
-              important to select the analyzers or connectors after which the
-              pivot will be executed. <br />
-              Every playbook containing the following combination of
-              analyzers/connectors can have this Pivot attached to.
-            </div>
-            <div className="py-4">
-              {formik.values.analyzers.length !== 0 &&
-                formik.values.connectors.length !== 0 && (
-                  <>
-                    <br />
-                    <small className="text-danger">
-                      {formik.errors.analyzers}
-                    </small>
-                  </>
-                )}
-              <FormGroup row className="d-flex align-items-center">
-                <Label className="me-2 mb-0" for="pivot-analyzers">
-                  Analyzers:
-                </Label>
-                <AnalyzersMultiSelectDropdownInput formik={formik} />
-              </FormGroup>
-              <FormGroup row className="d-flex align-items-center">
-                <Label className="me-2 mb-0" for="pivot-connectors">
-                  Connectors:
-                </Label>
-                <ConnectorsMultiSelectDropdownInput formik={formik} />
-              </FormGroup>
-            </div>
-            <FormGroup
-              className={`d-flex align-items-center ${
-                isEditing && !isPythonModuleSelectable ? "" : "row"
-              }`}
+          <FormGroup row className="d-flex align-items-center">
+            <Label className="me-2 mb-0" for="pivot-analyzers">
+              Analyzers:
+            </Label>
+            <AnalyzersMultiSelectDropdownInput formik={formik} />
+          </FormGroup>
+          <FormGroup row className="d-flex align-items-center">
+            <Label className="me-2 mb-0" for="pivot-connectors">
+              Connectors:
+            </Label>
+            <ConnectorsMultiSelectDropdownInput formik={formik} />
+          </FormGroup>
+        </div>
+        <FormGroup
+          className={`d-flex align-items-center ${
+            isEditing && !isPythonModuleSelectable ? "" : "row"
+          }`}
+        >
+          <Label
+            className="me-2 mb-0"
+            for="pivot-type"
+            style={{ minWidth: "15%" }}
+          >
+            Type of pivot:
+          </Label>
+          {isEditing && !isPythonModuleSelectable ? (
+            <Input
+              id="pivot-type"
+              type="text"
+              name="python_module"
+              value={formik.values.python_module.value}
+              disabled
+              className="bg-darker border-0 text-gray"
+              style={{ cursor: "not-allowed" }}
+            />
+          ) : (
+            <ReactSelect
+              isClearable={false}
+              options={pythonModuleOptions}
+              styles={selectStyles}
+              value={formik.values.python_module}
+              onChange={(value) =>
+                formik.setFieldValue("python_module", value, false)
+              }
+            />
+          )}
+        </FormGroup>
+        {formik.values.python_module.value === "any_compare.AnyCompare" && (
+          <FormGroup className="d-flex align-items-center">
+            <Label
+              className="me-2 mb-0"
+              for="pivot-field-to-compare"
+              style={{ minWidth: "45%" }}
             >
-              <Label
-                className="me-2 mb-0"
-                for="pivot-type"
-                style={{ minWidth: "15%" }}
-              >
-                Type of pivot:
-              </Label>
-              {isEditing && !isPythonModuleSelectable ? (
-                <Input
-                  id="pivot-type"
-                  type="text"
-                  name="python_module"
-                  value={formik.values.python_module.value}
-                  disabled
-                  className="bg-darker border-0 text-gray"
-                  style={{ cursor: "not-allowed" }}
-                />
-              ) : (
-                <ReactSelect
-                  isClearable={false}
-                  options={pythonModuleOptions}
-                  styles={selectStyles}
-                  value={formik.values.python_module}
-                  onChange={(value) =>
-                    formik.setFieldValue("python_module", value, false)
-                  }
-                />
-              )}
-            </FormGroup>
-            {formik.values.python_module.value === "any_compare.AnyCompare" && (
-              <FormGroup className="d-flex align-items-center">
-                <Label
-                  className="me-2 mb-0"
-                  for="pivot-field-to-compare"
-                  style={{ minWidth: "45%" }}
-                >
-                  Dotted path to the field that will be extracted and then
-                  analyzed:
-                </Label>
-                <Input
-                  id="pivot-field-to-compare"
-                  type="text"
-                  name="field_to_compare"
-                  value={formik.values.field_to_compare}
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  className="bg-darker border-0"
-                />
-              </FormGroup>
-            )}
-            <FormGroup row className="d-flex align-items-center">
-              <Label className="me-2 mb-0" for="pivot-connectors">
-                Playbook to Execute:
-              </Label>
-              <PlaybookMultiSelectDropdownInput
-                formik={formik}
-                onChange={(playbook) => {
-                  formik.setFieldValue("playbook", [playbook], false);
-                }}
-              />
-            </FormGroup>
+              Dotted path to the field that will be extracted and then analyzed:
+            </Label>
+            <Input
+              id="pivot-field-to-compare"
+              type="text"
+              name="field_to_compare"
+              value={formik.values.field_to_compare}
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              className="bg-darker border-0"
+            />
+          </FormGroup>
+        )}
+        <FormGroup row className="d-flex align-items-center">
+          <Label className="me-2 mb-0" for="pivot-connectors">
+            Playbook to Execute:
+          </Label>
+          <PlaybookMultiSelectDropdownInput
+            formik={formik}
+            onChange={(playbook) => {
+              formik.setFieldValue("playbook", [playbook], false);
+            }}
+          />
+        </FormGroup>
 
-            <FormGroup className="d-flex justify-content-end align-items-center mt-3">
-              {responseError && formik.submitCount && (
-                <small className="text-danger">{responseError}</small>
-              )}
-              <Button
-                id="startScan"
-                type="submit"
-                /* dirty return True if values are different then default
+        <FormGroup className="d-flex justify-content-end align-items-center mt-3">
+          {responseError && formik.submitCount && (
+            <small className="text-danger">{responseError}</small>
+          )}
+          <Button
+            id="startScan"
+            type="submit"
+            /* dirty return True if values are different then default
                we cannot run the validation on mount or we get an infinite loop.
               */
-                disabled={
-                  !formik.dirty || !formik.isValid || formik.isSubmitting
-                }
-                color="primary"
-                size="lg"
-                outline
-                className="mx-2 mt-2"
-              >
-                {formik.isSubmitting && <Spinner size="sm" />}Save
-              </Button>
-            </FormGroup>
-          </Form>
-        </FormikProvider>
-      </ModalBody>
-    </Modal>
+            disabled={!formik.dirty || !formik.isValid || formik.isSubmitting}
+            color="primary"
+            size="lg"
+            outline
+            className="mx-2 mt-2"
+          >
+            {formik.isSubmitting && <Spinner size="sm" />}Save
+          </Button>
+        </FormGroup>
+      </Form>
+    </FormikProvider>
   );
 }
 
 PivotConfigForm.propTypes = {
   pivotConfig: PropTypes.object,
   toggle: PropTypes.func.isRequired,
-  isOpen: PropTypes.bool.isRequired,
+  isEditing: PropTypes.bool.isRequired,
 };
 
 PivotConfigForm.defaultProps = {

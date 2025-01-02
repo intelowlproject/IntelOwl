@@ -16,6 +16,10 @@ class AbuseIPDB(ObservableAnalyzer):
     max_reports: int
     verbose: bool
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         headers = {"Key": self._api_key_name, "Accept": "application/json"}
         params_ = {

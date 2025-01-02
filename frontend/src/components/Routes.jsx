@@ -21,12 +21,13 @@ const CommentResult = React.lazy(
 const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
-const UserConfig = React.lazy(() => import("./user/config/UserConfig"));
 const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
 const InvestigationResult = React.lazy(
   () => import("./investigations/result/InvestigationResult"),
 );
 const History = React.lazy(() => import("./History"));
+const Search = React.lazy(() => import("./search/Search"));
+
 /*
 lazy imports to enable code splitting
 */
@@ -107,15 +108,6 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <Organization />
-      </Suspense>
-    ),
-  },
-  /* CustomConfig */
-  {
-    path: "/me/config/*",
-    element: (
-      <Suspense fallback={<FallBackLoading />}>
-        <UserConfig />
       </Suspense>
     ),
   },
@@ -209,6 +201,15 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <ScanForm />
+      </Suspense>
+    ),
+  },
+  /* Search */
+  {
+    path: "/search",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <Search />
       </Suspense>
     ),
   },

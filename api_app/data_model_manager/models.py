@@ -13,7 +13,7 @@ from api_app.data_model_manager.enums import (
     DataModelTags,
     SignatureProviderChoices,
 )
-from api_app.data_model_manager.fields import LowercaseCharField
+from api_app.data_model_manager.fields import LowercaseCharField, SetField
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from certego_saas.apps.user.models import User
 
@@ -42,7 +42,7 @@ class IETFReport(models.Model):
 
 class Signature(models.Model):
     provider = LowercaseCharField(max_length=100)
-    url = models.URLField(default=None, null=True, blank=True)
+    url = models.URLField(default="", blank=True)
     score = models.PositiveIntegerField(default=0)
     signature = models.JSONField()
 
@@ -66,7 +66,7 @@ class BaseDataModel(models.Model):
     # GreyNoise (classification), Cymru (found), Cuckoo (malscore),
     # Intezer (verdict/sub_verdict), Triage (analysis.score),
     # HybridAnalysisFileAnalyzer (classification_tags)
-    external_references = pg_fields.ArrayField(
+    external_references = SetField(
         models.URLField(),
         blank=True,
         default=list,
@@ -78,10 +78,10 @@ class BaseDataModel(models.Model):
     # Yara (report.list_el.url/rule_url), Yaraify (link),
     # HybridAnalysisFileAnalyzer (domains),
     # VirusTotalV3FileAnalyzer (data.relationships.contacted_urls/contacted_domains)
-    related_threats = pg_fields.ArrayField(
+    related_threats = SetField(
         LowercaseCharField(max_length=100), default=list, blank=True
     )  # threats/related_threats, used as a pointer to other IOCs
-    tags = pg_fields.ArrayField(
+    tags = SetField(
         LowercaseCharField(max_length=100), null=True, blank=True, default=None
     )  # used for generic tags like phishing, malware, social_engineering
     # HybridAnalysisFileAnalyzer, MalwareBazaarFileAnalyzer, MwDB,
@@ -133,7 +133,7 @@ class BaseDataModel(models.Model):
 class DomainDataModel(BaseDataModel):
     ietf_report = models.ManyToManyField(IETFReport, related_name="domains")  # pdns
     rank = models.IntegerField(null=True, blank=True, default=None)  # Tranco
-    resolutions = pg_fields.ArrayField(LowercaseCharField(max_length=100), default=list)
+    resolutions = SetField(LowercaseCharField(max_length=100), default=list)
 
     @classmethod
     def get_serializer(cls) -> Type[ModelSerializer]:
@@ -148,7 +148,7 @@ class IPDataModel(BaseDataModel):
         null=True, blank=True, default=None
     )  # BGPRanking, MaxMind
     asn_rank = models.DecimalField(
-        null=True, blank=True, default=None, decimal_places=2, max_digits=3
+        null=True, blank=True, default=None, decimal_places=20, max_digits=21
     )  # BGPRanking
     certificates = models.JSONField(null=True, blank=True, default=None)  # CIRCL_PSSL
     org_name = LowercaseCharField(
@@ -161,7 +161,7 @@ class IPDataModel(BaseDataModel):
         max_length=100, null=True, blank=True, default=None
     )  # MaxMind, AbuseIPDB
     isp = LowercaseCharField(max_length=100, null=True, blank=True, default=None)
-    resolutions = pg_fields.ArrayField(models.URLField(), default=list)
+    resolutions = SetField(models.URLField(), default=list)
     # AbuseIPDB
     # additional_info
     # behavior = LowercaseCharField(max_length=100, null=True)  # Crowdsec
@@ -181,7 +181,7 @@ class FileDataModel(BaseDataModel):
     )  # ClamAvFileAnalyzer,
     # MalwareBazaarFileAnalyzer (signatures/yara_rules), Yara (report.list_el.match)
     # Yaraify (report.data.tasks.static_result)
-    comments = pg_fields.ArrayField(
+    comments = SetField(
         LowercaseCharField(max_length=100), default=list, blank=True
     )  # MalwareBazaarFileAnalyzer,
     # VirusTotalV3FileAnalyzer (data.relationships.comments)

@@ -75,6 +75,7 @@ class Ingestor(Plugin, metaclass=abc.ABCMeta):
 
         super().after_run_success(content)
         self._config: IngestorConfig
+        logger.info(f"creating {len(content)} jobs from ingestor {self.__repr__()}")
         deque(
             self._config.create_jobs(
                 # every job created from an ingestor

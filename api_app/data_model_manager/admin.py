@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from api_app.admin import CustomAdminView
 from api_app.data_model_manager.models import (
     DomainDataModel,
     FileDataModel,
@@ -7,7 +8,7 @@ from api_app.data_model_manager.models import (
 )
 
 
-class BaseDataModelAdminView(admin.ModelAdmin):
+class BaseDataModelAdminView(CustomAdminView):
     list_display = (
         "pk",
         "evaluation",
@@ -21,7 +22,7 @@ class BaseDataModelAdminView(admin.ModelAdmin):
 
 @admin.register(DomainDataModel)
 class DomainDataModelAdminView(BaseDataModelAdminView):
-    list_display = BaseDataModelAdminView.list_display + ("rank",)
+    list_display = BaseDataModelAdminView.list_display + ("rank", "get_ietf_report")
 
     @admin.display(description="IETF Reports")
     def get_ietf_report(self, instance: DomainDataModel):

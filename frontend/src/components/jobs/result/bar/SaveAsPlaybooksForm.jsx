@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 import { addToast, PopupFormButton } from "@certego/certego-ui";
 
 import { PluginsTypes } from "../../../../constants/pluginConst";
-import { createPluginConfig } from "../../../plugins/pluginsApi";
+import { createConfiguration } from "../../../plugins/pluginsApi";
 
 // constants
 const initialValues = {
@@ -53,7 +53,7 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
         scan_check_time: values.scan_check_time,
       };
       try {
-        await createPluginConfig(PluginsTypes.PLAYBOOK, payloadData);
+        await createConfiguration(PluginsTypes.PLAYBOOK, payloadData);
         onFormSubmit();
       } catch (error) {
         addToast(<span>Error!</span>, error.parsedMsg, "warning");

@@ -56,6 +56,14 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     def _do_create_data_model(self) -> bool:
         if self.report.job.observable_classification == ObservableTypes.GENERIC:
             return False
+        if (
+            not self._config.mapping_data_model
+            and self.__class__._create_data_model_mtm
+            == BaseAnalyzerMixin._create_data_model_mtm
+            and self.__class__._update_data_model
+            == BaseAnalyzerMixin._update_data_model
+        ):
+            return False
         return True
 
     def _create_data_model_mtm(self):
@@ -150,11 +158,14 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         Args:
             content (any): The content to process after a successful run.
         """
-        result = super().after_run_success(
-            self._validate_result(content, max_recursion=15)
-        )
-        self.create_data_model()
-        return result
+        super().after_run_success(self._validate_result(content, max_recursion=15))
+        try:
+            self.create_data_model()
+        except Exception as e:
+            logger.exception(e)
+            self._job.errors.append(
+                f"Data model creation failed for {self._config.name}"
+            )
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):

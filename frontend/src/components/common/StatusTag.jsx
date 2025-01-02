@@ -12,7 +12,7 @@ export function StatusTag(props) {
   const divClass = classnames(`bg-${color}`, className);
 
   return (
-    <div className={`p-1 ${divClass}`}>
+    <div className={`p-1 ${divClass}`} style={{ borderRadius: 7 }}>
       <span
         className="text-break text-center status-tag"
         title={status}

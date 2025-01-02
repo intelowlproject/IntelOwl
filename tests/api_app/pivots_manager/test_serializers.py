@@ -81,3 +81,17 @@ class PivotConfigSerializerTestCase(CustomTestCase):
         pcs = PivotConfigSerializer(pc)
         result = pcs.data
         self.assertCountEqual(result["related_configs"], [ac.name])
+
+    def test_create(self):
+        pcs = PivotConfigSerializer(
+            data={
+                "name": "test",
+                "related_analyzer_configs": [AnalyzerConfig.objects.first().name],
+                "python_module": "self_analyzable.SelfAnalyzable",
+                "playbooks_choice": [PlaybookConfig.objects.first()],
+            },
+            context={"request": MockUpRequest(self.user)},
+        )
+        pcs.is_valid(raise_exception=True)
+        pc = pcs.save()
+        pc.delete()

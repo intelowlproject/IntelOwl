@@ -3,8 +3,12 @@
 
 import logging
 
-from api_app.views import PythonConfigViewSet, PythonReportActionViewSet
-from api_app.visualizers_manager.models import VisualizerReport
+from api_app.views import (
+    PluginConfigViewSet,
+    PythonConfigViewSet,
+    PythonReportActionViewSet,
+)
+from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
 logger = logging.getLogger(__name__)
@@ -24,3 +28,7 @@ class VisualizerActionViewSet(PythonReportActionViewSet):
     @property
     def report_model(cls):
         return VisualizerReport
+
+
+class VisualizerPluginConfigViewSet(PluginConfigViewSet):
+    queryset = VisualizerConfig.objects.all()

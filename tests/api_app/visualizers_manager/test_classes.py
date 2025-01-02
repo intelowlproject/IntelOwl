@@ -11,6 +11,7 @@ from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
+    VisualizableDownload,
     VisualizableHorizontalList,
     VisualizableLevel,
     VisualizableLevelSize,
@@ -109,6 +110,74 @@ class VisualizableBaseTestCase(CustomTestCase):
             "icon": "",
             "copy_text": "",
             "description": "",
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+
+class VisualizableDownloadTestCase(CustomTestCase):
+    def test_to_dict(self):
+        vo = VisualizableDownload(
+            value="hello.txt",
+            payload="hello, world",
+            link="https://test.com",
+            disable=True,
+            description="description-test",
+        )
+        expected_result = {
+            "alignment": "center",
+            "disable": True,
+            "type": "download",
+            "value": "hello.txt",
+            "size": "auto",
+            "link": "https://test.com",
+            "copy_text": "",
+            "payload": "hello, world",
+            "mimetype": "text/plain",
+            "description": "description-test",
+            "add_metadata_in_description": True,
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+    def test_empty(self):
+        vo = VisualizableDownload(
+            value="",
+            payload="",
+            disable=False,
+        )
+        expected_result = {
+            "alignment": "center",
+            "disable": False,
+            "type": "download",
+            "value": "",
+            "size": "auto",
+            "link": "",
+            "copy_text": "",
+            "payload": "",
+            "mimetype": "application/x-empty",
+            "description": "",
+            "add_metadata_in_description": True,
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+    def test_disable(self):
+        vo = VisualizableDownload(
+            value="",
+            payload="hello, world",
+            size=VisualizableSize.S_3,
+            disable=True,
+        )
+        expected_result = {
+            "alignment": "center",
+            "disable": True,
+            "type": "download",
+            "value": "",
+            "size": "3",
+            "link": "",
+            "payload": "hello, world",
+            "copy_text": "",
+            "description": "",
+            "mimetype": "text/plain",
+            "add_metadata_in_description": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 

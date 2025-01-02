@@ -2,7 +2,8 @@ import logging
 import os
 import shutil
 
-from blint.analysis import AnalysisRunner
+from blint.config import BlintOptions
+from blint.lib.runners import AnalysisRunner
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -28,7 +29,8 @@ class BlintAnalyzer(FileAnalyzer):
 
         analyzer = AnalysisRunner()
         findings, reviews, fuzzables = analyzer.start(
-            files=[self.filepath], reports_dir=reports_dir
+            blint_options=BlintOptions(reports_dir=reports_dir),
+            exe_files=[self.filepath],
         )
         response = {"findings": findings, "reviews": reviews, "fuzzables": fuzzables}
 

@@ -148,6 +148,7 @@ const tableProps = {
       <JSONTree
         data={{
           report: row.original?.report,
+          data_model: row.original?.data_model,
           errors: row.original?.errors,
           parameters: row.original?.parameters,
         }}
@@ -165,8 +166,10 @@ export function PluginsReportTable({
 }) {
   console.debug("PluginsReportTable rendered");
   const reports = pluginReports;
+  const analyzersDataModel = job?.analyzers_data_model || [];
 
   reports.forEach((report, index) => {
+    // description
     pluginsStored.forEach((plugin) => {
       if (
         (report.type !== PluginsTypes.VISUALIZER &&
@@ -177,6 +180,17 @@ export function PluginsReportTable({
         reports[index].description = plugin.description;
       }
     });
+    // data model
+    reports[index].data_model = {};
+    if (report.type === PluginsTypes.ANALYZER) {
+      analyzersDataModel.forEach((dataModel) => {
+        dataModel?.analyzers_report?.forEach((analyzerReportId) => {
+          if (report.id === analyzerReportId) {
+            reports[index].data_model = dataModel;
+          }
+        });
+      });
+    }
   });
 
   return (

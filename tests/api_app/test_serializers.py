@@ -95,18 +95,22 @@ class PluginConfigSerializerTestCase(CustomTestCase):
 
     def test_create(self):
         org = Organization.objects.create(name="test_org")
-
         m1 = Membership.objects.create(user=self.user, organization=org, is_owner=True)
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
 
         payload = {
-            "create": True,
-            "edit": True,
-            "type": "1",
-            "plugin_name": "DNS0_EU",
-            "attribute": "query_type",
-            "value": "AA",
+            "attribute": param.name,
+            "value": "new_value",
             "organization": "test_org",
-            "config_type": "1",
+            "parameter": param.pk,
+            "analyzer_config": ac.name,
         }
         serializer = PluginConfigSerializer(
             data=payload,
@@ -130,16 +134,21 @@ class PluginConfigSerializerTestCase(CustomTestCase):
         m3 = Membership.objects.create(
             user=self.user, organization=org, is_owner=False, is_admin=False
         )
+        ac = AnalyzerConfig.objects.get(name="AbuseIPDB")
+        param = Parameter.objects.create(
+            is_secret=True,
+            name="mynewparameter",
+            python_module=ac.python_module,
+            required=True,
+            type="str",
+        )
 
         payload = {
-            "create": True,
-            "edit": False,
-            "type": "1",
-            "plugin_name": "DNS0_EU",
-            "attribute": "query_type",
-            "value": "AA",
+            "attribute": param.name,
+            "value": "new value",
             "organization": "test_org",
-            "config_type": "1",
+            "parameter": param.pk,
+            "analyzer_config": ac.name,
         }
         serializer = PluginConfigSerializer(
             data=payload,
@@ -192,6 +201,7 @@ class RestJobSerializerTestCase(CustomTestCase):
         self.assertIn("analyzer_reports", js.data)
         self.assertIn("connector_reports", js.data)
         self.assertIn("visualizer_reports", js.data)
+        self.assertIn("analyzers_data_model", js.data)
         job.delete()
 
 
@@ -212,7 +222,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             observable_classification="domain",
             user=self.user,
             md5="72cf478e87b031233091d8c00a38ce00",
-            status=Job.Status.REPORTED_WITHOUT_FAILS,
+            status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             received_request_time=now() - datetime.timedelta(hours=3),
         )
         j1.analyzers_requested.add(a1)

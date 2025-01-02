@@ -6,6 +6,7 @@ from rest_framework import routers
 
 from .views import (
     CommentViewSet,
+    ElasticSearchView,
     JobViewSet,
     PluginConfigViewSet,
     TagViewSet,
@@ -40,6 +41,11 @@ urlpatterns = [
         analyze_multiple_observables,
         name="analyze_multiple_observables",
     ),
+    path(
+        "plugin_report_queries",
+        ElasticSearchView.as_view(),
+        name="plugin-report-queries",
+    ),
     # router viewsets
     path("", include(router.urls)),
     # Plugins
@@ -50,6 +56,7 @@ urlpatterns = [
     path("", include("api_app.pivots_manager.urls")),
     path("", include("api_app.playbooks_manager.urls")),
     path("", include("api_app.investigations_manager.urls")),
+    path("data_model/", include("api_app.data_model_manager.urls")),
     # auth
     path("auth/", include("authentication.urls")),
     # certego_saas:

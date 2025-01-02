@@ -21,7 +21,7 @@ import {
 } from "react-icons/ri";
 import { FaGithub, FaGoogle, FaLinkedin } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
-import { TbReport } from "react-icons/tb";
+import { TbReport, TbReportSearch } from "react-icons/tb";
 
 // lib
 import { NavLink, AxiosLoadingBar } from "@certego/certego-ui";
@@ -39,37 +39,7 @@ import UserMenu from "./widgets/UserMenu";
 import NotificationPopoverButton from "../components/jobs/notification/NotificationPopoverButton";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useGuideContext } from "../contexts/GuideContext";
-
-const authLinks = (
-  <>
-    <NavItem>
-      <NavLink className="d-flex-start-center" end to="/dashboard">
-        <AiOutlineDashboard />
-        <span className="ms-1" id="dashboard-title">
-          Dashboard
-        </span>
-      </NavLink>
-    </NavItem>
-    <NavItem>
-      <NavLink className="d-flex-start-center" end to="/history">
-        <TbReport />
-        <span className="ms-1">History</span>
-      </NavLink>
-    </NavItem>
-    <NavItem>
-      <NavLink className="d-flex-start-center" to="/plugins">
-        <RiPlugFill />
-        <span className="ms-1">Plugins</span>
-      </NavLink>
-    </NavItem>
-    <NavItem>
-      <NavLink className="d-flex-start-center" end to="/scan">
-        <IoSearch />
-        <span className="ms-1">Scan</span>
-      </NavLink>
-    </NavItem>
-  </>
-);
+import { useOrganizationStore } from "../stores/useOrganizationStore";
 
 const guestLinks = (
   <>
@@ -95,6 +65,46 @@ const guestLinks = (
     </NavItem>
   </>
 );
+
+// eslint-disable-next-line react/prop-types
+function AuthLinks() {
+  return (
+    <>
+      <NavItem>
+        <NavLink className="d-flex-start-center" end to="/dashboard">
+          <AiOutlineDashboard />
+          <span className="ms-1" id="dashboard-title">
+            Dashboard
+          </span>
+        </NavLink>
+      </NavItem>
+      <NavItem>
+        <NavLink className="d-flex-start-center" end to="/history">
+          <TbReport />
+          <span className="ms-1">History</span>
+        </NavLink>
+      </NavItem>
+      <NavItem>
+        <NavLink className="d-flex-start-center" end to="/search">
+          <TbReportSearch />
+          <span className="ms-1">Search</span>
+        </NavLink>
+      </NavItem>
+      <NavItem>
+        <NavLink className="d-flex-start-center" end to="/plugins">
+          <RiPlugFill />
+          <span className="ms-1">Plugins</span>
+        </NavLink>
+      </NavItem>
+      <NavItem>
+        <NavLink className="d-flex-start-center" end to="/scan">
+          <IoSearch />
+          <span className="ms-1">Scan</span>
+        </NavLink>
+      </NavItem>
+    </>
+  );
+}
 
 // eslint-disable-next-line react/prop-types
 function RightLinks({ handleClickStart, isAuthenticated }) {
@@ -224,6 +234,11 @@ function AppHeader() {
     React.useCallback((state) => state.isAuthenticated(), []),
   );
 
+  // organization store
+  const isInOrganization = useOrganizationStore(
+    React.useCallback((state) => state.isInOrganization, []),
+  );
+
   return (
     <header className="sticky-top">
       {/* top loading bar */}
@@ -243,17 +258,23 @@ function AppHeader() {
         <NavbarToggler onClick={() => setIsOpen(!isOpen)} />
         <Collapse navbar isOpen={isOpen}>
           {/* Navbar Left Side */}
-          <Nav navbar>
+          <Nav navbar id="navbar-left-side">
             <NavItem>
               <NavLink className="d-flex-start-center" end to="/">
                 <MdHome />
                 <span className="ms-1">Home</span>
               </NavLink>
             </NavItem>
-            {isAuthenticated && authLinks}
+            {isAuthenticated && (
+              <AuthLinks isInOrganization={isInOrganization} />
+            )}
           </Nav>
           {/* Navbar Right Side */}
-          <Nav navbar className="ms-auto d-flex align-items-center">
+          <Nav
+            navbar
+            className="ms-auto d-flex align-items-center"
+            id="navbar-right-side"
+          >
             <RightLinks
               handleClickStart={handleClickStart}
               isAuthenticated={isAuthenticated}

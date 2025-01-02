@@ -1,6 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from rest_framework import serializers as rfs
+
+from ..models import PythonModule
 from ..serializers.plugin import (
+    ParameterSerializer,
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
@@ -23,10 +27,20 @@ class AnalyzerReportBISerializer(AbstractReportBISerializer):
 
 
 class AnalyzerConfigSerializer(PythonConfigSerializer):
+    python_module = rfs.SlugRelatedField(
+        queryset=PythonModule.objects.all(), slug_field="module"
+    )
+
     class Meta:
         model = AnalyzerConfig
         exclude = PythonConfigSerializer.Meta.exclude
         list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        parameters = ParameterSerializer(instance.parameters, many=True)
+        result["parameters"] = parameters.data
+        return result
 
 
 class AnalyzerConfigSerializerForMigration(PythonConfigSerializerForMigration):

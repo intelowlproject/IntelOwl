@@ -3,9 +3,9 @@ import uuid
 from typing import Type
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
+from rest_framework.exceptions import ValidationError
 
 from api_app.pivots_manager.models import PivotConfig
 from api_app.playbooks_manager.models import PlaybookConfig

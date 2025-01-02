@@ -10,29 +10,6 @@ class Compare(Pivot):
     def update(cls) -> bool:
         pass
 
-    def _get_value(self, field: str) -> Any:
-        report = self.related_reports.filter(
-            status=self.report_model.Status.SUCCESS.value
-        ).first()
-        if not report:
-            raise RuntimeError("No report found")
-        content = report.report
-
-        for key in field.split("."):
-            try:
-                content = content[key]
-            except TypeError:
-                if isinstance(content, list) and len(content) > 0:
-                    content = content[int(key)]
-                else:
-                    raise RuntimeError(f"Not found {field}")
-
-        if isinstance(content, (int, dict)):
-            raise ValueError(f"You can't use a {type(content)} as pivot")
-        if not content:
-            raise ValueError("Empty value")
-        return content
-
     def should_run(self) -> Tuple[bool, Optional[str]]:
         if self.related_reports.count() != 1:
             return (
@@ -40,11 +17,18 @@ class Compare(Pivot):
                 f"Unable to run pivot {self._config.name} "
                 "because attached to more than one configuration",
             )
-        try:
-            self._value = self._get_value(self.field_to_compare)
-        except (RuntimeError, ValueError) as e:
-            return False, str(e)
-        return super().should_run()
+        should_run, motivation = super().should_run()
+        if should_run:
+            report = self.related_reports.first()
+            try:
+                self._value = report.get_value(
+                    report.report, self.field_to_compare.split(".")
+                )
+            except (RuntimeError, ValueError) as e:
+                return False, str(e)
+            if not self._value:
+                return False, f"Can't create new job, value {self._value} is not valid"
+        return should_run, motivation
 
     def get_value_to_pivot_to(self) -> Any:
         return self._value

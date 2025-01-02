@@ -8,7 +8,6 @@
 [![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
 [![Live Instance](https://img.shields.io/badge/live-demo-blue)](https://intelowl.honeynet.org)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![CodeQL](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/codeql-analysis.yml)
@@ -37,9 +36,11 @@ It provides:
   - *analyzers* that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
   - *connectors* that can be run to export data to external platforms (like MISP or OpenCTI)
   - *pivots* that are designed to trigger the execution of a chain of analysis and connect them to each other
-  - *visualizers* that are designed to create custom visualizations of analyzers results
-  - *ingestors* that allows to automatically ingest stream of observables or files to IntelOwl itself
+  - *visualizers* that are designed to create custom visualizations of analyzers results in the GUI
+  - *ingestors* that allow to automatically ingest stream of observables or files to IntelOwl itself
   - *playbooks* that are meant to make analysis easily repeatable
+  - *data models* to map the different data extracted from analyzers to a single common schema
+- A starting point for analysts' **Investigations**: users can register their findings, correlate the information found, and collaborate...all in a single place
 
 
 ### Documentation
@@ -118,10 +119,8 @@ In 2022 IntelOwl joined the official [DigitalOcean Open Source Program](https://
 
 Feel free to contact the main developers at any time on Twitter:
 
-- [Matteo Lodi](https://twitter.com/matte_lodi): Author and principal maintainer
+- [Matteo Lodi](https://twitter.com/matte_lodi): Author, Advisor and Administrator
+- [Daniele Rosetti](https://github.com/drosetti): Administrator and Frontend Maintainer
 - [Simone Berni](https://twitter.com/0ssig3no): Backend Maintainer
-- [Daniele Rosetti](https://github.com/drosetti): Frontend Maintainer
+- [Federico Gibertoni](https://x.com/fgibertoni1): Maintainer and Community Assistant
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Key Contributor
-
-### Consultancy
-IntelOwl's maintainers are available to offer [paid consultancy and mentorship](https://opencollective.com/intelowl-project).

@@ -14,6 +14,7 @@ from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import ModelWithOwnershipSerializer
 from api_app.serializers.job import TagSerializer
 from api_app.serializers.plugin import AbstractConfigSerializerForMigration
+from api_app.visualizers_manager.models import VisualizerConfig
 
 
 class PlaybookConfigSerializerForMigration(AbstractConfigSerializerForMigration):
@@ -31,7 +32,7 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
         model = PlaybookConfig
         fields = rfs.ALL_FIELDS
 
-    type = rfs.ListField(child=rfs.CharField(read_only=True), read_only=True)
+    type = rfs.ListField(child=rfs.CharField(), required=False)
     analyzers = rfs.SlugRelatedField(
         many=True,
         queryset=AnalyzerConfig.objects.all(),
@@ -48,7 +49,12 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
     pivots = rfs.SlugRelatedField(
         many=True, queryset=PivotConfig.objects.all(), required=True, slug_field="name"
     )
-    visualizers = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
+    visualizers = rfs.SlugRelatedField(
+        many=True,
+        queryset=VisualizerConfig.objects.all(),
+        required=False,
+        slug_field="name",
+    )
 
     runtime_configuration = rfs.DictField(required=True)
 
@@ -57,7 +63,7 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
     tags = TagSerializer(required=False, allow_empty=True, many=True, read_only=True)
     tlp = rfs.CharField(read_only=True)
     weight = rfs.IntegerField(read_only=True, required=False, allow_null=True)
-    is_deletable = rfs.SerializerMethodField()
+    is_editable = rfs.SerializerMethodField()
     tags_labels = rfs.ListField(
         child=rfs.CharField(required=True),
         default=list,
@@ -65,10 +71,10 @@ class PlaybookConfigSerializer(ModelWithOwnershipSerializer, rfs.ModelSerializer
         write_only=True,
     )
 
-    def get_is_deletable(self, instance: PlaybookConfig):
+    def get_is_editable(self, instance: PlaybookConfig):
         # if the playbook is not a default one
         if instance.owner:
-            # it is deletable by the owner of the playbook
+            # it is editable/deletable by the owner of the playbook
             # or by an admin of the same organization
             if instance.owner == self.context["request"].user or (
                 self.context["request"].user.membership.is_admin

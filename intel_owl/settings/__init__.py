@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "api_app.pivots_manager",
     "api_app.ingestors_manager",
     "api_app.investigations_manager",
+    "api_app.data_model_manager",
     # auth
     "rest_email_auth",
     # performance debugging
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     "treebeard",
 ]
 
+from .a_secrets import *  # lgtm [py/polluting-import]
 from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]

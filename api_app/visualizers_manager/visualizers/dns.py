@@ -134,13 +134,13 @@ class DNS(Visualizer):
                 AnalyzerReport.objects.get(
                     config=AnalyzerConfig.objects.get(python_module=python_module),
                     job=Job.objects.first(),
-                    status=AnalyzerReport.Status.SUCCESS,
+                    status=AnalyzerReport.STATUSES.SUCCESS,
                 )
             except AnalyzerReport.DoesNotExist:
                 report = AnalyzerReport(
                     config=AnalyzerConfig.objects.get(python_module=python_module),
                     job=Job.objects.first(),
-                    status=AnalyzerReport.Status.SUCCESS,
+                    status=AnalyzerReport.STATUSES.SUCCESS,
                     report={
                         "observable": "dns.google.com",
                         "resolutions": [
@@ -175,7 +175,7 @@ class DNS(Visualizer):
                 report = AnalyzerReport(
                     config=AnalyzerConfig.objects.get(python_module=python_module),
                     job=Job.objects.first(),
-                    status=AnalyzerReport.Status.SUCCESS,
+                    status=AnalyzerReport.STATUSES.SUCCESS,
                     report={"observable": "dns.google.com", "malicious": False},
                     task_id=uuid(),
                     parameters={},

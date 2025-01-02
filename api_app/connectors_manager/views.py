@@ -3,8 +3,8 @@
 
 import logging
 
-from ..views import PythonConfigViewSet, PythonReportActionViewSet
-from .models import ConnectorReport
+from ..views import PluginConfigViewSet, PythonConfigViewSet, PythonReportActionViewSet
+from .models import ConnectorConfig, ConnectorReport
 from .serializers import ConnectorConfigSerializer
 
 logger = logging.getLogger(__name__)
@@ -25,3 +25,7 @@ class ConnectorActionViewSet(PythonReportActionViewSet):
     @property
     def report_model(cls):
         return ConnectorReport
+
+
+class ConnectorPluginConfigViewSet(PluginConfigViewSet):
+    queryset = ConnectorConfig.objects.all()

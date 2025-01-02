@@ -6,7 +6,7 @@ import {
   DropdownItem,
   Badge,
 } from "reactstrap";
-import { BsPeopleFill, BsSliders } from "react-icons/bs";
+import { BsPeopleFill } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
 import { IoMdKey, IoMdSettings } from "react-icons/io";
 import { RiLockPasswordFill } from "react-icons/ri";
@@ -82,10 +82,6 @@ export default function UserMenu(props) {
         {/* Change Password */}
         <DropdownNavLink to="/change-password">
           <RiLockPasswordFill className="me-2" /> Change password
-        </DropdownNavLink>
-        {/* Your plugin configuration */}
-        <DropdownNavLink to="/me/config">
-          <BsSliders className="me-2" /> Your plugin configuration
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">

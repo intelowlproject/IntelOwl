@@ -5,4 +5,5 @@ export const VisualizerComponentType = Object.freeze({
   HLIST: "horizontal_list",
   TITLE: "title",
   TABLE: "table",
+  DOWNLOAD: "download",
 });

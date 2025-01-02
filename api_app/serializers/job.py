@@ -322,9 +322,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         logger.info("Checking previous jobs")
         if not validated_data["scan_check_time"]:
             raise ValidationError({"detail": "Scan check time can't be null"})
-        status_to_exclude = [Job.Status.KILLED, Job.Status.FAILED]
+        status_to_exclude = [Job.STATUSES.KILLED, Job.STATUSES.FAILED]
         if not validated_data.get("playbook_to_execute", None):
-            status_to_exclude.append(Job.Status.REPORTED_WITH_FAILS)
+            status_to_exclude.append(Job.STATUSES.REPORTED_WITH_FAILS)
         qs = (
             self.Meta.model.objects.visible_for_user(self.context["request"].user)
             .filter(
@@ -478,6 +478,7 @@ class JobTreeSerializer(ModelSerializer):
             "playbook",
             "status",
             "received_request_time",
+            "is_sample",
         ]
 
     playbook = rfs.SlugRelatedField(
@@ -538,6 +539,8 @@ class JobSerializer(_AbstractJobViewSerializer):
     investigation = rfs.SerializerMethodField(read_only=True, default=None)
     permissions = rfs.SerializerMethodField()
 
+    analyzers_data_model = rfs.SerializerMethodField(read_only=True)
+
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
@@ -564,6 +567,10 @@ class JobSerializer(_AbstractJobViewSerializer):
                 many=True, read_only=True, source=f"{field}reports"
             )
         return super().get_fields()
+
+    @staticmethod
+    def get_analyzers_data_model(instance: Job):
+        return instance.analyzerreports.get_data_models(instance).serialize()
 
 
 class RestJobSerializer(JobSerializer):
@@ -603,7 +610,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
             # so we don't need to do anything because everything is already connected
             root = parent.get_root()
             if root.investigation:
-                root.investigation.status = root.investigation.Status.RUNNING.value
+                root.investigation.status = root.investigation.STATUSES.RUNNING.value
                 root.investigation.save()
                 return jobs
             # if we have a parent, it means we are pivoting from one job to another
@@ -629,7 +636,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
             # set investigation into running status
             if len(jobs) >= 1 and jobs[0].investigation:
                 investigation = jobs[0].investigation
-                investigation.status = investigation.Status.RUNNING.value
+                investigation.status = investigation.STATUSES.RUNNING.value
                 investigation.save()
                 return jobs
             # if we do not have a parent or an investigation, and we have multiple jobs,
@@ -647,7 +654,7 @@ class MultipleJobSerializer(rfs.ListSerializer):
             else:
                 return jobs
         investigation: Investigation
-        investigation.status = investigation.Status.RUNNING.value
+        investigation.status = investigation.STATUSES.RUNNING.value
         investigation.for_organization = True
         investigation.save()
         return jobs
@@ -748,11 +755,11 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         if "file_name" not in attrs:
             attrs["file_name"] = attrs["file"].name
-        attrs["file_mimetype"] = MimeTypes.calculate(attrs["file"], attrs["file_name"])
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)
         file_buffer = file_obj.read()
+        attrs["file_mimetype"] = MimeTypes.calculate(file_buffer, attrs["file_name"])
         attrs["md5"] = calculate_md5(file_buffer)
         attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
@@ -772,7 +779,7 @@ class FileJobSerializer(_AbstractJobCreateSerializer):
         partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
             pk__in=[config.pk for config in analyzers_to_execute]
         )
-        if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP1.value]:
+        if file_mimetype in [MimeTypes.ZIP1.value, MimeTypes.ZIP2.value]:
             EXCEL_OFFICE_FILES = r"\.[xl]\w{0,3}$"
             DOC_OFFICE_FILES = r"\.[doc]\w{0,3}$"
             if re.search(DOC_OFFICE_FILES, file_name):
@@ -1005,7 +1012,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
         result = super().to_representation(instance)
         result["status"] = self.STATUS_ACCEPTED
         result["already_exists"] = bool(
-            instance.status in instance.Status.final_statuses()
+            instance.status in instance.STATUSES.final_statuses()
         )
         return result
 
@@ -1053,15 +1060,15 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        statuses_to_check = [Job.Status.RUNNING]
+        statuses_to_check = [Job.STATUSES.RUNNING]
 
         if not validated_data["running_only"]:
-            statuses_to_check.append(Job.Status.REPORTED_WITHOUT_FAILS)
+            statuses_to_check.append(Job.STATUSES.REPORTED_WITHOUT_FAILS)
             # since with playbook
             # it is expected behavior
             # for analyzers to often fail
             if validated_data.get("playbooks", []):
-                statuses_to_check.append(Job.Status.REPORTED_WITH_FAILS)
+                statuses_to_check.append(Job.STATUSES.REPORTED_WITH_FAILS)
         # this means that the user is trying to
         # check availability of the case where all
         # analyzers were run but no playbooks were

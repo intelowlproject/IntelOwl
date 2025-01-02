@@ -1,10 +1,13 @@
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 
-from api_app.models import Job
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
+from api_app.models import Job, PythonModule
 from api_app.pivots_manager.models import PivotConfig, PivotMap, PivotReport
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers.plugin import (
+    ParameterSerializer,
     PythonConfigSerializer,
     PythonConfigSerializerForMigration,
 )
@@ -57,14 +60,47 @@ class PivotConfigSerializer(PythonConfigSerializer):
         queryset=PlaybookConfig.objects.all(), slug_field="name", many=True
     )
 
-    name = rfs.CharField(read_only=True)
     description = rfs.CharField(read_only=True)
     related_configs = rfs.SlugRelatedField(read_only=True, many=True, slug_field="name")
+    related_analyzer_configs = rfs.SlugRelatedField(
+        slug_field="name",
+        queryset=AnalyzerConfig.objects.all(),
+        many=True,
+        required=False,
+    )
+    related_connector_configs = rfs.SlugRelatedField(
+        slug_field="name",
+        queryset=ConnectorConfig.objects.all(),
+        many=True,
+        required=False,
+    )
+    python_module = rfs.SlugRelatedField(
+        queryset=PythonModule.objects.all(), slug_field="module"
+    )
 
     class Meta:
         model = PivotConfig
-        exclude = ["related_analyzer_configs", "related_connector_configs"]
+        fields = rfs.ALL_FIELDS
         list_serializer_class = PythonConfigSerializer.Meta.list_serializer_class
+
+    def validate(self, attrs):
+        related_analyzer_configs = attrs.get("related_analyzer_configs", [])
+        related_connector_configs = attrs.get("related_connector_configs", [])
+        if (
+            not self.instance
+            and not related_analyzer_configs
+            and not related_connector_configs
+        ):
+            raise ValidationError(
+                {"detail": "No Analyzers and Connectors attached to pivot"}
+            )
+        return attrs
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        parameters = ParameterSerializer(instance.parameters, many=True)
+        result["parameters"] = parameters.data
+        return result
 
 
 class PivotConfigSerializerForMigration(PythonConfigSerializerForMigration):

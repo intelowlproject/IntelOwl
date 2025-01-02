@@ -19,7 +19,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "dependabot-validation"
+    target-branch: "develop"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
@@ -31,7 +31,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "dependabot-validation"
+    target-branch: "develop"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
@@ -43,7 +43,19 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "dependabot-validation"
+    target-branch: "develop"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "pip"
+    directory: "/integrations/phishing_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
@@ -76,7 +88,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "dependabot-validation"
+    target-branch: "develop"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
@@ -88,7 +100,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "dependabot-validation"
+    target-branch: "develop"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
@@ -100,7 +112,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "dependabot-validation"
+    target-branch: "develop"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
@@ -112,7 +124,19 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "dependabot-validation"
+    target-branch: "develop"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/phishing_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates

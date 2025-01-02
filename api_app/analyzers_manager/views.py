@@ -3,9 +3,12 @@
 import logging
 
 from rest_framework import mixins
+from rest_framework.exceptions import NotFound
+
+from api_app.models import PluginConfig
 
 from ..permissions import isPluginActionsPermission
-from ..views import PythonConfigViewSet, PythonReportActionViewSet
+from ..views import PluginConfigViewSet, PythonConfigViewSet, PythonReportActionViewSet
 from .filters import AnalyzerConfigFilter
 from .models import AnalyzerConfig, AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
@@ -41,3 +44,25 @@ class AnalyzerActionViewSet(PythonReportActionViewSet):
     @property
     def report_model(cls):
         return AnalyzerReport
+
+
+class AnalyzerPluginConfigViewSet(PluginConfigViewSet):
+    queryset = AnalyzerConfig.objects.all()
+
+    def update(self, request, name=None):
+        obj: AnalyzerConfig = self.get_queryset().get(name=name)
+        if (
+            obj.python_module.module
+            == "basic_observable_analyzer.BasicObservableAnalyzer"
+        ):
+            for data in request.data:
+                try:
+                    plugin_config: PluginConfig = PluginConfig.objects.get(
+                        parameter=data["parameter"],
+                        owner=request.user,
+                        analyzer_config=obj.pk,
+                    )
+                    data["id"] = plugin_config.pk
+                except PluginConfig.DoesNotExist:
+                    raise NotFound("Requested plugin config does not exist.")
+        return super().update(request, name)

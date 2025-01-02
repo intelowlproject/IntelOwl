@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 
 from rest_framework import serializers
+from rest_framework.validators import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.choices import ReportStatus
@@ -48,8 +49,26 @@ class ElasticRequestSerializer(serializers.Serializer):
     end_end_time = serializers.DateTimeField(required=False)
     report = serializers.CharField(required=False)
 
-    @staticmethod
-    def create(validated_data) -> ElasticRequest:
+    def validate(self, attrs):
+        result = super().validate(attrs)
+        logger.debug(f"{result=}")
+
+        if (
+            result.get("start_start_time")
+            and result.get("end_start_time")
+            and result["start_start_time"] > result["end_start_time"]
+        ):
+            logger.debug("oi")
+            raise ValidationError("start date must be equal or lower than end date")
+        if (
+            result.get("start_end_time")
+            and result.get("end_end_time")
+            and result["start_end_time"] > result["end_end_time"]
+        ):
+            raise ValidationError("start date must be equal or lower than end date")
+        return result
+
+    def create(self, validated_data) -> ElasticRequest:
         logger.debug(f"{validated_data=}")
         return ElasticRequest(**validated_data)
 

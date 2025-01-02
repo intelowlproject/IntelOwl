@@ -54,7 +54,7 @@ class ApiViewTests(CustomViewSetTestCase):
         ]
 
         self.observable_name = os.environ.get("TEST_IP", "8.8.8.8")
-        self.observable_md5 = hashlib.md5(
+        self.observable_md5 = hashlib.md5(  # nosec
             self.observable_name.encode("utf-8")
         ).hexdigest()
         self.analyze_observable_ip_data = {
@@ -84,7 +84,7 @@ class ApiViewTests(CustomViewSetTestCase):
         uploaded_file = SimpleUploadedFile(
             fname, binary, content_type="multipart/form-data"
         )
-        md5 = hashlib.md5(binary).hexdigest()
+        md5 = hashlib.md5(binary).hexdigest()  # nosec
         return uploaded_file, md5
 
     def test_ask_analysis_availability(self):
@@ -178,7 +178,7 @@ class ApiViewTests(CustomViewSetTestCase):
             "Classic_DNS",
         ]
         observable_name = os.environ.get("TEST_DOMAIN", "google.com")
-        md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()
+        md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()  # nosec
         observable_classification = "domain"
         data = {
             "observable_name": observable_name,

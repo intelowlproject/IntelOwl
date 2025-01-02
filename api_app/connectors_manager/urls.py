@@ -4,7 +4,11 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import ConnectorActionViewSet, ConnectorConfigViewSet
+from .views import (
+    ConnectorActionViewSet,
+    ConnectorConfigViewSet,
+    ConnectorPluginConfigViewSet,
+)
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
@@ -14,6 +18,11 @@ router.register(
     basename="connectorreport",
 )
 router.register(r"connector", ConnectorConfigViewSet, basename="connector")
+router.register(
+    r"connector/(?P<name>\w+)",
+    ConnectorPluginConfigViewSet,
+    basename="plugin-config-connector",
+)
 
 urlpatterns = [
     path(r"", include(router.urls)),

@@ -53,6 +53,50 @@ describe("test plugins report table", () => {
                 runtime_configuration: {},
                 type: "analyzer",
               },
+              {
+                id: 175,
+                name: "TEST_ANALYZER_B",
+                process_time: 0.07,
+                report: {
+                  observable: "dns.google.com",
+                  resolutions: [
+                    {
+                      TTL: 594,
+                      data: "8.8.8.8",
+                      name: "dns.google.com",
+                      type: 1,
+                    },
+                    {
+                      TTL: 594,
+                      data: "8.8.4.4",
+                      name: "dns.google.com",
+                      type: 1,
+                    },
+                  ],
+                },
+                status: "SUCCESS",
+                errors: [],
+                start_time: "2023-05-31T08:19:03.380434Z",
+                end_time: "2023-05-31T08:19:03.455218Z",
+                runtime_configuration: {},
+                type: "analyzer",
+              },
+            ],
+            analyzers_data_model: [
+              {
+                id: 1,
+                ietf_report: [],
+                analyzers_report: [174],
+                evaluation: null,
+                external_references: [],
+                related_threats: [],
+                tags: null,
+                malware_family: null,
+                additional_info: {},
+                date: "2024-12-19T11:20:04.549652Z",
+                rank: null,
+                resolutions: [],
+              },
             ],
             connector_reports: [],
             visualizer_reports: [],
@@ -117,6 +161,34 @@ describe("test plugins report table", () => {
               runtime_configuration: {},
               type: "analyzer",
             },
+            {
+              id: 175,
+              name: "TEST_ANALYZER_B",
+              process_time: 0.07,
+              report: {
+                observable: "dns.google.com",
+                resolutions: [
+                  {
+                    TTL: 594,
+                    data: "8.8.8.8",
+                    name: "dns.google.com",
+                    type: 1,
+                  },
+                  {
+                    TTL: 594,
+                    data: "8.8.4.4",
+                    name: "dns.google.com",
+                    type: 1,
+                  },
+                ],
+              },
+              status: "SUCCESS",
+              errors: [],
+              start_time: "2023-05-31T08:19:03.380434Z",
+              end_time: "2023-05-31T08:19:03.455218Z",
+              runtime_configuration: {},
+              type: "analyzer",
+            },
           ]}
           pluginsStored={mockedUsePluginConfigurationStore.analyzers}
           pluginsStoredLoading={
@@ -144,21 +216,47 @@ describe("test plugins report table", () => {
     ).toBeInTheDocument();
 
     // data
-    const toggleIcon = screen.getByTitle("Toggle Row Expanded");
-    expect(toggleIcon).toBeInTheDocument();
+    const toggleIconFirstRow = screen.getAllByTitle("Toggle Row Expanded")[0];
+    expect(toggleIconFirstRow).toBeInTheDocument();
     expect(screen.getAllByText("SUCCESS")[1]).toBeInTheDocument(); // status
     expect(screen.getByText("TEST_ANALYZER")).toBeInTheDocument(); // name
     const infoIcon = container.querySelector(
       `#pluginReport-infoicon__analyzer_174`,
     );
     expect(infoIcon).toBeInTheDocument();
-    expect(screen.getByText("0.07")).toBeInTheDocument(); // process time
+    expect(screen.getAllByText("0.07")[0]).toBeInTheDocument(); // process time
 
     // user hovers infoIcon
     await user.hover(infoIcon);
     await waitFor(() => {
       // analyzer description
       expect(screen.getByText("Test analyzer")).toBeInTheDocument();
+    });
+
+    // raw data - analyzers without data model
+    await user.click(toggleIconFirstRow);
+    await waitFor(() => {
+      const expandedRow = container.querySelector(`#jobreport-jsoninput-1`);
+      expect(expandedRow).toBeInTheDocument();
+      expect(expandedRow.textContent).toContain("root:{} 4 keys");
+      expect(expandedRow.textContent).toContain("report:{} 2 keys");
+      expect(expandedRow.textContent).toContain("data_model:{} 0 keys");
+      expect(expandedRow.textContent).toContain("errors:[] 0 items");
+      expect(expandedRow.textContent).toContain("parameters:undefined");
+    });
+
+    // raw data - analyzers with data model
+    const toggleIconSecondRow = screen.getAllByTitle("Toggle Row Expanded")[1];
+    expect(toggleIconSecondRow).toBeInTheDocument();
+    await user.click(toggleIconSecondRow);
+    await waitFor(() => {
+      const expandedRow = container.querySelector(`#jobreport-jsoninput-0`);
+      expect(expandedRow).toBeInTheDocument();
+      expect(expandedRow.textContent).toContain("root:{} 4 keys");
+      expect(expandedRow.textContent).toContain("report:{} 2 keys");
+      expect(expandedRow.textContent).toContain("data_model:{} 12 keys");
+      expect(expandedRow.textContent).toContain("errors:[] 0 items");
+      expect(expandedRow.textContent).toContain("parameters:undefined");
     });
   });
 });

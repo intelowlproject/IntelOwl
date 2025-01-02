@@ -14,7 +14,7 @@ This release brings a lot of improvements in the GUI regarding the management of
 You now have:
 * a complete new interface to manage Plugins' parameters and secrets. See [docs](https://intelowlproject.github.io/docs/IntelOwl/usage/#parameters)
 * a new "Search" section for advanced searches which leverages the optional (and renewed) [ElasticSearch](https://intelowlproject.github.io/docs/IntelOwl/advanced_configuration/#elasticsearch) integration
-* you can now create simple custom Analyzers, Pivots and Playbooks directly from the "Plugins" section without having to use the Django Admin or Python code.
+* you can now create simple custom Analyzers, Pivots and Playbooks directly from the "Plugins" section without having to use the Django Admin or Python code. See [docs](https://github.com/intelowlproject/docs/blob/main/docs/IntelOwl/usage.md#creating-analyzers-from-the-gui)
 
 A new [Ingestor](https://intelowlproject.github.io/docs/IntelOwl/usage/#ingestors) (Virustotal) and new [Analyzers](https://intelowlproject.github.io/docs/IntelOwl/usage/#analyzers-list) has been added from community contributors.
 

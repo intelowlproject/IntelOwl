@@ -431,7 +431,9 @@ class VirusTotalv3AnalyzerMixin(
         else:
             logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested scan")
             try:
+                self._job.file.seek(0)
                 binary = self._job.file.read()
+                logger.debug(f"BINARY: {binary}")
             except Exception:
                 raise AnalyzerRunException(
                     "IntelOwl error: couldn't retrieve the binary"

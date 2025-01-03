@@ -7,25 +7,23 @@ import {
   UncontrolledTooltip,
   Label,
   Input,
+  Spinner,
 } from "reactstrap";
 import { MdInfoOutline } from "react-icons/md";
+import axios from "axios";
 
-import {
-  SyncButton,
-  TableHintIcon,
-  useDataTable,
-  useDebounceInput,
-} from "@certego/certego-ui";
+import { useDebounceInput, DataTable } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 
+import { useSearchParams } from "react-router-dom";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
 import { TimePicker } from "../../common/TimePicker";
 import { useTimePickerStore } from "../../../stores/useTimePickerStore";
 
 // constants
-const toPassTableProps = {
+const toPassProps = {
   columns: investigationTableColumns,
   tableEmptyNode: (
     <>
@@ -38,6 +36,8 @@ const toPassTableProps = {
 // component
 export default function InvestigationsTable() {
   console.debug("InvestigationsTable rendered!");
+  const [searchParams] = useSearchParams();
+  const analyzedObjectName = searchParams.get("analyzed_object_name");
 
   // page title
   useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
@@ -49,38 +49,31 @@ export default function InvestigationsTable() {
   ]);
 
   // state
-  const [initialLoading, setInitialLoading] = React.useState(true);
+  const [loading, setILoading] = React.useState(true);
+  const [data, setData] = React.useState({});
   /* searchNameType is used to show the user typed text (this state changes for each char typed), 
   searchNameRequest is used in the request to the backend and it's update periodically.
   In this way we avoid a request for each char. */
-  const [searchNameType, setSearchNameType] = React.useState("");
-  const [searchNameRequest, setSearchNameRequest] = React.useState("");
+  const [searchNameType, setSearchNameType] =
+    React.useState(analyzedObjectName);
+  const [searchNameRequest, setSearchNameRequest] =
+    React.useState(analyzedObjectName);
   useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
-  // API/ Table
-  const [data, tableNode, refetch, _, loadingTable] = useDataTable(
-    {
-      url: INVESTIGATION_BASE_URI,
-      params: {
-        start_time__gte: fromDateValue,
-        start_time__lte: toDateValue,
-        analyzed_object_name: searchNameRequest,
-      },
-      initialParams: {
-        ordering: "-start_time",
-      },
-    },
-    toPassTableProps,
-  );
-
   React.useEffect(() => {
-    if (!loadingTable) setInitialLoading(false);
-  }, [loadingTable]);
-
-  React.useEffect(() => {
-    if (!initialLoading) refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialLoading]);
+    axios
+      .get(INVESTIGATION_BASE_URI, {
+        params: {
+          start_time__gte: fromDateValue,
+          start_time__lte: toDateValue,
+          analyzed_object_name: searchNameRequest,
+        },
+      })
+      .then((response) => {
+        setData(response.data);
+        setILoading(false);
+      });
+  }, [fromDateValue, toDateValue, searchNameRequest]);
 
   return (
     <Container fluid>
@@ -110,27 +103,44 @@ export default function InvestigationsTable() {
           <TimePicker />
           <div className="d-flex float-end mx-2">
             <div className="d-flex align-items-center">
+              <Label check>Name</Label>
+              <div className="ms-1 d-flex">
+                <MdInfoOutline
+                  id="investigationstable-name-info"
+                  fontSize="15"
+                />
+                <UncontrolledTooltip
+                  trigger="hover"
+                  target="investigationstable-name-info"
+                  placement="right"
+                  fade={false}
+                  innerClassName="p-2 text-start text-nowrap md-fit-content"
+                >
+                  Filter investigations showing only the ones that contain at
+                  least one job related to an analyzable with this name.
+                </UncontrolledTooltip>
+              </div>
               <Label check className="me-2">
-                Name:
+                :
               </Label>
               <Input
                 id="nameSearch"
                 type="text"
                 onChange={(event) => setSearchNameType(event.target.value)}
+                value={searchNameType}
               />
             </div>
           </div>
         </Col>
       </Row>
       {/* Actions */}
-      <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
-        <TableHintIcon />
-        <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
-      </div>
-      <div style={{ height: "80vh", overflowY: "scroll" }}>
-        {/* Table */}
-        {tableNode}
-      </div>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <div style={{ height: "80vh", overflowY: "scroll" }}>
+          <DataTable data={data?.results} {...toPassProps} />
+        </div>
+      )}
     </Container>
   );
 }

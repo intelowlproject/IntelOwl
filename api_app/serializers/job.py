@@ -537,6 +537,9 @@ class JobSerializer(_AbstractJobViewSerializer):
     playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     investigation = rfs.SerializerMethodField(read_only=True, default=None)
+    related_investigation_number = rfs.SerializerMethodField(
+        read_only=True, default=None
+    )
     permissions = rfs.SerializerMethodField()
 
     analyzers_data_model = rfs.SerializerMethodField(read_only=True)
@@ -547,8 +550,16 @@ class JobSerializer(_AbstractJobViewSerializer):
 
     def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
         if root_investigation := instance.get_root().investigation:
-            return root_investigation.pk
+            return root_investigation.name
         return instance.investigation
+
+    def get_related_investigation_number(self, instance: Job) -> int:
+        return Investigation.investigation_for_analyzable(
+            Investigation.objects.filter(
+                start_time__gte=now() - datetime.timedelta(days=7),
+            ),
+            instance.analyzed_object_name,
+        ).count()
 
     def get_fields(self):
         # this method override is required for a cyclic import

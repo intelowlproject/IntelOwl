@@ -8,7 +8,7 @@ from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
 from api_app.investigations_manager.choices import InvestigationStatusChoices
 from api_app.investigations_manager.queryset import InvestigationQuerySet
-from api_app.models import ListCachable
+from api_app.models import Job, ListCachable
 from certego_saas.apps.user.models import User
 
 
@@ -83,6 +83,19 @@ class Investigation(OwnershipAbstractModel, ListCachable):
             self.end_time = None
         if save:
             self.save(update_fields=["status", "end_time"])
+
+    @classmethod
+    def investigation_for_analyzable(
+        cls, queryset: models.QuerySet, analyzed_object_name: str
+    ) -> models.QuerySet:
+        related_job_id_list = [
+            job.id
+            for job in Job.objects.filter(
+                models.Q(observable_name__icontains=analyzed_object_name)
+                | models.Q(file_name__icontains=analyzed_object_name)
+            )
+        ]
+        return queryset.filter(jobs__in=related_job_id_list).distinct()
 
     @property
     def tags(self) -> List[str]:

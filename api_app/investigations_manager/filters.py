@@ -1,8 +1,6 @@
 import rest_framework_filters as filters
-from django.db.models import Q
 
 from api_app.investigations_manager.models import Investigation
-from api_app.models import Job
 
 
 class InvestigationFilter(filters.FilterSet):
@@ -18,14 +16,9 @@ class InvestigationFilter(filters.FilterSet):
     def filter_for_analyzed_object_name(
         queryset, value, analyzed_object_name, *args, **kwargs
     ):
-        related_job_id_list = [
-            job.id
-            for job in Job.objects.filter(
-                Q(observable_name__icontains=analyzed_object_name)
-                | Q(file_name__icontains=analyzed_object_name)
-            )
-        ]
-        return queryset.filter(jobs__in=related_job_id_list).distinct()
+        return Investigation.investigation_for_analyzable(
+            queryset, analyzed_object_name
+        )
 
     @staticmethod
     def filter_for_owner(queryset, value, owner, *args, **kwargs):

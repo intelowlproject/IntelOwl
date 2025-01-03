@@ -39,7 +39,26 @@ export function JobInfoCard({ job }) {
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
-          <Col sm={12} md={2} className="d-flex justify-content-start">
+          <Col sm={12} md={3} className="d-flex justify-content-start">
+            <Button
+              className="bg-darker border-1 lh-sm mx-1"
+              href={`/history/investigations/analyzed_object_name?=${
+                job.is_sample ? job.file_name : job.observable_name
+              }`}
+              id="investigationSearchBtn"
+              size="xs"
+              style={{ fontSize: "0.8rem" }}
+            >
+              Similar Investigations: <br /> {job.related_investigation_number}
+            </Button>
+            <UncontrolledTooltip
+              placement="top"
+              target="investigationSearchBtn"
+            >
+              Search other investigations for{" "}
+              {job.is_sample ? job.file_name : job.observable_name} in the last
+              7 days.
+            </UncontrolledTooltip>
             {job.investigation && (
               <>
                 <Button
@@ -51,7 +70,7 @@ export function JobInfoCard({ job }) {
                   size="xs"
                   style={{ fontSize: "0.8rem" }}
                 >
-                  Investigation Overview
+                  Investigation: <br /> {job.investigation}
                 </Button>
                 <UncontrolledTooltip
                   placement="top"
@@ -59,31 +78,13 @@ export function JobInfoCard({ job }) {
                 >
                   This job is part of the investigation #{job.investigation}
                 </UncontrolledTooltip>
-                <Button
-                  className="bg-darker border-1 lh-sm mx-1"
-                  href={`/history/investigations/analyzed_object_name?=${
-                    job.is_sample ? job.file_name : job.observable_name
-                  }`}
-                  id="investigationSearchBtn"
-                  size="xs"
-                  style={{ fontSize: "0.8rem" }}
-                >
-                  Investigation Search
-                </Button>
-                <UncontrolledTooltip
-                  placement="top"
-                  target="investigationSearchBtn"
-                >
-                  Search other investigations for{" "}
-                  {job.is_sample ? job.file_name : job.observable_name}
-                </UncontrolledTooltip>
               </>
             )}
           </Col>
           <Col
             className="d-flex-start-start justify-content-center"
             sm={12}
-            md={8}
+            md={7}
           >
             <h3 className="d-flex-start align-items-center text-truncate">
               <JobInfoIcon job={job} />

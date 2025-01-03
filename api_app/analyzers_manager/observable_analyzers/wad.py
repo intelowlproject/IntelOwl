@@ -7,7 +7,7 @@ from wad.detection import Detector
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -38,18 +38,17 @@ class WAD(classes.ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch.object(
-                    "wad.detection.Detector.detect",
-                    return_value=MockUpResponse(
-                        {
-                            "https://www.google.com/": [
-                                {
-                                    "app": "Google Web Server",
-                                    "ver": "null",
-                                    "type": "Web Servers",
-                                }
-                            ]
-                        }
-                    ),
+                    Detector,
+                    "detect",
+                    return_value={
+                        "https://www.google.com/": [
+                            {
+                                "app": "Google Web Server",
+                                "ver": "null",
+                                "type": "Web Servers",
+                            }
+                        ]
+                    },
                 ),
             )
         ]

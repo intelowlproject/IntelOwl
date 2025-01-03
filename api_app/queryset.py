@@ -15,13 +15,13 @@ from django.core.paginator import Paginator
 from treebeard.mp_tree import MP_NodeQuerySet
 
 if TYPE_CHECKING:
-    from api_app.models import PythonConfig, AbstractConfig
+    from api_app.models import PythonConfig
     from api_app.serializers import AbstractBIInterface
 
 import logging
 
 from celery.canvas import Signature
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models import (
     BooleanField,
     Case,
@@ -280,7 +280,16 @@ class JobQuerySet(MP_NodeQuerySet, CleanOnCreateQuerySet, SendToBiQuerySet):
         """
         if parent:
             return parent.add_child(**kwargs)
-        return self.model.add_root(**kwargs)
+        try:
+            return self.model.add_root(**kwargs)
+        except IntegrityError as e:
+            if "path" in str(e):
+                logger.warning(
+                    f"Found race condition for {kwargs['name']}. Trying again to calculate path."
+                )
+                # we try again a second time, hoping for no race condition
+                return self.model.add_root(**kwargs)
+            raise
 
     def delete(self, *args, **kwargs):
         """

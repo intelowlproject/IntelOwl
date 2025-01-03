@@ -39,11 +39,11 @@ export function JobInfoCard({ job }) {
     <div id="JobInfoCardSection">
       <ContentSection className="mb-0 bg-darker">
         <Row>
-          <Col sm={12} md={1} className="d-flex justify-content-start">
+          <Col sm={12} md={2} className="d-flex justify-content-start">
             {job.investigation && (
               <>
                 <Button
-                  className="bg-darker border-1 lh-sm"
+                  className="bg-darker border-1 lh-sm mx-1"
                   onClick={() =>
                     navigate(`/investigation/${job.investigation}`)
                   }
@@ -59,13 +59,31 @@ export function JobInfoCard({ job }) {
                 >
                   This job is part of the investigation #{job.investigation}
                 </UncontrolledTooltip>
+                <Button
+                  className="bg-darker border-1 lh-sm mx-1"
+                  href={`/history/investigations/analyzed_object_name?=${
+                    job.is_sample ? job.file_name : job.observable_name
+                  }`}
+                  id="investigationSearchBtn"
+                  size="xs"
+                  style={{ fontSize: "0.8rem" }}
+                >
+                  Investigation Search
+                </Button>
+                <UncontrolledTooltip
+                  placement="top"
+                  target="investigationSearchBtn"
+                >
+                  Search other investigations for{" "}
+                  {job.is_sample ? job.file_name : job.observable_name}
+                </UncontrolledTooltip>
               </>
             )}
           </Col>
           <Col
             className="d-flex-start-start justify-content-center"
             sm={12}
-            md={10}
+            md={8}
           >
             <h3 className="d-flex-start align-items-center text-truncate">
               <JobInfoIcon job={job} />
@@ -93,7 +111,7 @@ export function JobInfoCard({ job }) {
                 : job.observable_classification}
             </Badge>
           </Col>
-          <Col sm={12} md={1} className="d-flex justify-content-end">
+          <Col sm={12} md={2} className="d-flex justify-content-end">
             <Button
               className="bg-darker border-0"
               onClick={() => setIsOpenJobInfoCard(!isOpenJobInfoCard)}

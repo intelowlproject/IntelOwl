@@ -35,7 +35,7 @@ whitenoise==6.8.1
 daphne==4.1.0
 channels==4.1.0
 channels-redis==4.2.0
-elasticsearch-dsl==8.15.0
+elasticsearch-dsl==8.17.0
 
 # plugins
 GitPython==3.1.41

@@ -15,7 +15,7 @@ from django.core.paginator import Paginator
 from treebeard.mp_tree import MP_NodeQuerySet
 
 if TYPE_CHECKING:
-    from api_app.models import PythonConfig, AbstractConfig
+    from api_app.models import PythonConfig
     from api_app.serializers import AbstractBIInterface
 
 import logging

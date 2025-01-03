@@ -102,10 +102,13 @@ class InvestigationViewSet(ModelWithOwnershipViewSet, ModelViewSet):
         investigation.refresh_from_db()
         # we are possibly changing the status of the investigation
         investigation.set_correct_status(save=True)
-        return Response(
+        response = Response(
             status=status.HTTP_200_OK,
             data=InvestigationSerializer(instance=investigation).data,
         )
+        if not investigation.jobs.exists():
+            investigation.delete()
+        return response
 
     @action(methods=["GET"], url_name="graph", detail=True)
     def tree(self, request, pk):

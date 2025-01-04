@@ -9,7 +9,6 @@ from urllib.parse import urlparse
 import dns.resolver
 
 from api_app.analyzers_manager import classes
-from tests.mock_utils import if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
 
@@ -34,8 +33,8 @@ class UltraDNSDNSResolver(classes.ObservableAnalyzer):
 
         # Configure UltraDNS servers
         resolver.nameservers = ["64.6.64.6", "64.6.65.6"]
-        resolver.timeout = 5
-        resolver.lifetime = 5
+        resolver.timeout = 10
+        resolver.lifetime = 20
 
         try:
             dns_resolutions = resolver.resolve(observable, self.query_type)
@@ -61,9 +60,5 @@ class UltraDNSDNSResolver(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch("dns.resolver.Resolver.resolve", return_value=["156.154.112.16"]),
-            )
-        ]
+        patches = []
         return super()._monkeypatch(patches=patches)

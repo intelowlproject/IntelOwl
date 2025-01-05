@@ -1,0 +1,150 @@
+import json
+import logging
+import os
+import subprocess
+import traceback
+from typing import Any, Dict, Tuple
+
+from flask import Flask, jsonify, request
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("nuclei-analyzer")
+
+app = Flask(__name__)
+
+
+def run_nuclei_command(url: str) -> Tuple[bool, Dict[str, Any]]:
+    """
+    Returns: (success: bool, result: dict)
+    """
+    try:
+        logger.info(f"Starting Nuclei scan for URL: {url}")
+
+        # Ensure nuclei binary exists
+        nuclei_path = "./nuclei" if os.path.exists("./nuclei") else "nuclei"
+
+        command = [nuclei_path, "-u", url, "-tags", "dns", "-jsonl"]
+        logger.debug(f"Running command: {' '.join(command)}")
+
+        result = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=300,  # 10 minute timeout
+        )
+
+        if result.returncode != 0:
+            error_msg = result.stderr.strip()
+            logger.error(f"Nuclei scan failed: {error_msg}")
+            return False, {
+                "success": False,
+                "error": "Failed to run Nuclei",
+                "details": error_msg,
+            }
+
+        # Process JSON output
+        output_lines = [
+            line.strip() for line in result.stdout.split("\n") if line.strip()
+        ]
+        parsed_results = []
+
+        for line in output_lines:
+            try:
+                parsed_results.append(json.loads(line))
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to parse JSON line: {line}, error: {str(e)}")
+                continue
+
+        logger.info(f"Nuclei scan completed successfully for {url}")
+        return True, {
+            "success": True,
+            "results": parsed_results,
+            "scan_status": "COMPLETED",
+            "statistics": {"total_findings": len(parsed_results)},
+        }
+
+    except subprocess.TimeoutExpired:
+        logger.error("Nuclei scan timed out after 600 seconds")
+        return False, {
+            "success": False,
+            "error": "Scan timed out",
+            "scan_status": "TIMEOUT",
+        }
+    except Exception as e:
+        logger.error(f"Unexpected error during Nuclei scan: {str(e)}")
+        logger.error(traceback.format_exc())
+        return False, {
+            "success": False,
+            "error": "An unexpected error occurred",
+            "details": str(e),
+            "scan_status": "ERROR",
+        }
+
+
+@app.route("/run-nuclei", methods=["POST"])
+def run_nuclei():
+    """
+    Endpoint to run Nuclei analysis.
+
+    Expected payload:
+    {
+        "url": "https://example.com"
+    }
+    """
+    try:
+        logger.info("Received Nuclei scan request")
+
+        # Validate request
+        data = request.get_json()
+        if not data or "url" not in data:
+            logger.error("Invalid request: missing 'data' field")
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Invalid request, 'data' field is required",
+                    }
+                ),
+                400,
+            )
+
+        url = data["url"]
+
+        # Run scan
+        success, result = run_nuclei_command(url)
+
+        if success:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 500
+
+    except Exception as e:
+        logger.error(f"Unexpected API error: {str(e)}")
+        logger.error(traceback.format_exc())
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "An unexpected error occurred",
+                    "details": str(e),
+                }
+            ),
+            500,
+        )
+
+
+if __name__ == "__main__":
+    # Set up file logging if needed
+    file_handler = logging.FileHandler("nuclei_analyzer.log")
+    file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    app.run(host="0.0.0.0", port=5000)

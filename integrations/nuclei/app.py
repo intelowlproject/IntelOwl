@@ -16,7 +16,9 @@ logger = logging.getLogger("nuclei-analyzer")
 app = Flask(__name__)
 
 
-def run_nuclei_command(url: str) -> Tuple[bool, Dict[str, Any]]:
+def run_nuclei_command(
+    url: str, template_dirs: list = None
+) -> Tuple[bool, Dict[str, Any]]:
     """
     Returns: (success: bool, result: dict)
     """
@@ -26,7 +28,12 @@ def run_nuclei_command(url: str) -> Tuple[bool, Dict[str, Any]]:
         # Ensure nuclei binary exists
         nuclei_path = "./nuclei" if os.path.exists("./nuclei") else "nuclei"
 
-        command = [nuclei_path, "-u", url, "-tags", "dns", "-jsonl"]
+        command = [nuclei_path, "-u", url, "-jsonl"]
+
+        if template_dirs:
+            for template_dir in template_dirs:
+                command.extend(["-t", template_dir])
+
         logger.debug(f"Running command: {' '.join(command)}")
 
         result = subprocess.run(
@@ -34,7 +41,7 @@ def run_nuclei_command(url: str) -> Tuple[bool, Dict[str, Any]]:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=300,  # 10 minute timeout
+            timeout=300,  # 5 minute timeout
         )
 
         if result.returncode != 0:
@@ -113,9 +120,22 @@ def run_nuclei():
             )
 
         url = data["url"]
+        template_dirs = data.get("template_dirs", [])
+
+        if not isinstance(template_dirs, list):
+            logger.error("Invalid request: 'template_dirs' must be a list")
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Invalid request, 'template_dirs' must be a list",
+                    }
+                ),
+                400,
+            )
 
         # Run scan
-        success, result = run_nuclei_command(url)
+        success, result = run_nuclei_command(url, template_dirs)
 
         if success:
             return jsonify(result), 200

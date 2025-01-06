@@ -1,0 +1,21 @@
+2025-01-05 14:22:49,248 - nuclei-analyzer - INFO - Received Nuclei scan request
+2025-01-05 14:22:49,248 - nuclei-analyzer - INFO - Starting Nuclei scan for URL: https://amazon.com
+2025-01-05 14:22:50,511 - nuclei-analyzer - ERROR - Nuclei scan failed: __     _
+   ____  __  _______/ /__  (_)
+  / __ \/ / / / ___/ / _ \/ /
+ / / / / /_/ / /__/ /  __/ /
+/_/ /_/\__,_/\___/_/\___/_/   v3.3.7
+
+		projectdiscovery.io
+
+[[31mERR[0m] Could not find template 'caa-fingerprint.yaml': could not find file: open /home/pc/nuclei-templates/caa-fingerprint.yaml: no such file or directory
+[[33mWRN[0m] Found 33 template[s] loaded with deprecated paths, update before v3 for continued support.
+[[34mINF[0m] Current nuclei version: v3.3.7 ([92mlatest[0m)
+[[34mINF[0m] Current nuclei-templates version: v10.1.1 ([92mlatest[0m)
+[[93mWRN[0m] Scan results upload to cloud is disabled.
+[[34mINF[0m] Targets loaded for current scan: 1
+[[34mINF[0m] No results found. Better luck next time!
+[[1;31mFTL[0m] Could not run nuclei: no templates provided for scan
+2025-01-05 14:22:55,664 - nuclei-analyzer - INFO - Received Nuclei scan request
+2025-01-05 14:22:55,664 - nuclei-analyzer - INFO - Starting Nuclei scan for URL: https://amazon.com
+2025-01-05 14:25:01,334 - nuclei-analyzer - INFO - Nuclei scan completed successfully for https://amazon.com

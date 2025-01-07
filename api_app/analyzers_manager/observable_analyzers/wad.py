@@ -31,7 +31,7 @@ class WAD(classes.ObservableAnalyzer):
         if results:
             return results
         else:
-            raise AnalyzerRunException("name or service not known")
+            raise AnalyzerRunException("no results returned for the provided url")
 
     @classmethod
     def _monkeypatch(cls):

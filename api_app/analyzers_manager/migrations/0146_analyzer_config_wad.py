@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
         ("api_app", "0065_job_mpnodesearch"),
         (
             "analyzers_manager",
-            "0143_alter_analyzer_config_phishing_extractor_and_form_compiler",
+            "0145_analyzer_config_ultradns_malicious_detector",
         ),
     ]
 

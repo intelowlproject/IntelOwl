@@ -1,8 +1,10 @@
+import logging
 from datetime import datetime
 from typing import List
 
 from django.conf import settings
 from django.db import models
+from django.db.models import QuerySet
 
 from api_app.choices import TLP
 from api_app.interfaces import OwnershipAbstractModel
@@ -11,8 +13,11 @@ from api_app.investigations_manager.queryset import InvestigationQuerySet
 from api_app.models import ListCachable
 from certego_saas.apps.user.models import User
 
+logger = logging.getLogger(__name__)
+
 
 class Investigation(OwnershipAbstractModel, ListCachable):
+    jobs: QuerySet
     name = models.CharField(max_length=100)
     description = models.TextField(default="", blank=True)
 
@@ -60,13 +65,18 @@ class Investigation(OwnershipAbstractModel, ListCachable):
     def set_correct_status(self, save: bool = True):
         from api_app.models import Job
 
+        logger.info(f"Setting status for investigation {self.pk}")
         # if I have some jobs
         if self.jobs.exists():
             # and at least one is running
             for job in self.jobs.all():
                 job: Job
                 jobs = job.get_tree(job)
-                if jobs.exclude(status__in=Job.STATUSES.final_statuses()).count() > 0:
+                running_jobs = jobs.exclude(status__in=Job.STATUSES.final_statuses())
+                if running_jobs.count() > 0:
+                    logger.info(
+                        f"Jobs {running_jobs.values_list('pk', flat=True)}  are still running for investigation {self.pk}"
+                    )
                     self.status = self.STATUSES.RUNNING.value
                     self.end_time = None
                     break

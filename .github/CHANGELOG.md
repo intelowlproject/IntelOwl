@@ -2,6 +2,9 @@
 
 [**Upgrade Guide**](https://intelowlproject.github.io/docs/IntelOwl/installation/#update-to-the-most-recent-version)
 
+## [v6.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.2.1)
+Minor fixes and dependencies upgrades
+
 ## [v6.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v6.2.0)
 
 Happy new year! :sparkler: And Happy Birthday IntelOwl! :tada: 

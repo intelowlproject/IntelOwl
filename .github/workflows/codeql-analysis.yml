@@ -37,14 +37,14 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4.1.0
+      uses: actions/checkout@v4.2.2
       with:
         # We must fetch at least the immediate parents so that if this is
         # a pull request then we can checkout the head.
         fetch-depth: 2
 
     - name: Set up Python
-      uses: actions/setup-python@v5.1.0
+      uses: actions/setup-python@v5.3.0
       with:
         python-version: '3.11'
 
@@ -65,7 +65,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@v3.28.0
       with:
         languages: python
         # Override the default behavior so that the action doesn't attempt
@@ -93,4 +93,4 @@ jobs:
     #   make release
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@v3.28.0

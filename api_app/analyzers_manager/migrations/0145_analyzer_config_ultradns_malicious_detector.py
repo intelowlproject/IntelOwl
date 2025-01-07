@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
         ("api_app", "0065_job_mpnodesearch"),
         (
             "analyzers_manager",
-            "0142_alter_analyzerreport_data_model_content_type_and_more",
+            "0144_analyzer_config_ultradns_dns",
         ),
     ]
 

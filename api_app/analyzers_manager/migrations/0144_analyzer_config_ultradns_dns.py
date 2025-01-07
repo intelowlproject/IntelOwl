@@ -154,7 +154,10 @@ class Migration(migrations.Migration):
     atomic = False
     dependencies = [
         ("api_app", "0065_job_mpnodesearch"),
-        ("analyzers_manager", "0143_analyzer_config_ultradns_malicious_detector"),
+        (
+            "analyzers_manager",
+            "0143_alter_analyzer_config_phishing_extractor_and_form_compiler",
+        ),
     ]
 
     operations = [migrations.RunPython(migrate, reverse_migrate)]

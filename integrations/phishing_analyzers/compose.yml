@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     expose:
       - "4005"
-      - "7007"  # selenium-wire proxy
+      - "17000-17100"  # selenium-wire proxies pool
     env_file:
       - env_file_integrations
     volumes:
@@ -27,13 +27,21 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      # to allow multiple session to run
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=4
+      # clean session for long running containers
+      # https://github.com/SeleniumHQ/docker-selenium/blob/trunk/README.md#automatic-browser-leftovers-cleanup
+      - SE_ENABLE_BROWSER_LEFTOVERS_CLEANUP=true
+      - SE_BROWSER_LEFTOVERS_INTERVAL_SECS=86400
+      - SE_BROWSER_LEFTOVERS_PROCESSES_SECS=86400
 
   selenium-hub:
     image: selenium/hub:4.26.0
     container_name: selenium-hub
     environment:
       - SE_ENABLE_TRACING=false
-    ports:
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
+    expose:
+      - "4442"
+      - "4443"
+      - "4444"

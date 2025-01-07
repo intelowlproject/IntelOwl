@@ -562,14 +562,13 @@ class Job(MP_Node):
                 "finished_analysis_time",
             ]
         )
-        try:
-            # we update the status of the analysis
-            if root_investigation := self.get_root().investigation:
-                root_investigation.set_correct_status(save=True)
-        except Exception as e:
-            logger.exception(
-                f"investigation status not updated. Job: {self.pk}. Error: {e}"
-            )
+        # we update the status of the analysis
+        if root_investigation := self.get_root().investigation:
+            from api_app.investigations_manager.models import Investigation
+
+            logger.info(f"Updating status of investigation {root_investigation.pk}")
+            root_investigation: Investigation
+            root_investigation.set_correct_status(save=True)
 
     def __get_config_reports(self, config: typing.Type["AbstractConfig"]) -> QuerySet:
         return getattr(self, f"{config.__name__.split('Config')[0].lower()}reports")
@@ -1027,18 +1026,6 @@ class PluginConfig(OwnershipAbstractModel):
     def plugin_name(self):
         """Returns the name of the plugin associated with this configuration."""
         return self.config.name
-
-    @property
-    def type(self):
-        """Returns the type of the plugin associated with this configuration."""
-        # TODO retrocompatibility
-        return self.config.plugin_type
-
-    @property
-    def config_type(self):
-        """Returns the type of the configuration (1 or 2)."""
-        # TODO retrocompatibility
-        return "2" if self.is_secret() else "1"
 
 
 class OrganizationPluginConfiguration(models.Model):

@@ -449,7 +449,7 @@ class YaraScan(FileAnalyzer):
                 sign = Signature.objects.create(
                     provider=Signature.PROVIDERS.YARA.value,
                     signature=yara_signature,
-                    url=url,
+                    url=url if url else "",
                     score=1,
                 )
                 signatures.append(sign)

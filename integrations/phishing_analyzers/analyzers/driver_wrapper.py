@@ -1,6 +1,7 @@
 import functools
 import logging
 import os
+from random import randint
 from typing import Iterator
 
 from selenium.common import WebDriverException
@@ -8,6 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from seleniumwire.request import Request
+from seleniumwire.thirdparty.mitmproxy.exceptions import ServerException
 from seleniumwire.webdriver import ChromeOptions, Remote
 
 LOG_NAME = "driver_wrapper"
@@ -39,7 +41,7 @@ def driver_exception_handler(func):
         try:
             return func(self, *args, **kwargs)
         except WebDriverException as e:
-            logger.error(
+            logger.exception(
                 f"Error while performing {func.__name__}"
                 f"{' for url=' + url if func.__name__ == 'navigate' else ''}: {e}"
             )
@@ -56,14 +58,52 @@ class DriverWrapper:
         proxy_address: str = "",
         window_width: int = 1920,
         window_height: int = 1080,
+        user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.3",
     ):
         self.proxy: str = proxy_address
         self.window_width: int = window_width
         self.window_height: int = window_height
+        self.user_agent: str = user_agent
         self.last_url: str = ""
-        self._driver: Remote = self._init_driver(self.window_width, self.window_height)
+        self.base_port = 17000
+        self.port_pool_size = 100
+        self._driver: Remote = self._init_driver(
+            self.window_width, self.window_height, self.user_agent
+        )
 
-    def _init_driver(self, window_width: int, window_height: int) -> Remote:
+    def _pick_free_port_from_pool(
+        self, sw_options: {}, options: ChromeOptions
+    ) -> Remote:
+        tries: int = 0
+        while tries < self.port_pool_size:
+            picked_port = randint(self.base_port, self.base_port + self.port_pool_size)
+            sw_options.update({"port": picked_port})
+
+            # traffic must go back to host running selenium-wire
+            options.add_argument(
+                f"--proxy-server=http://phishing_analyzers:{picked_port}"
+            )
+            try:
+                driver = Remote(
+                    command_executor="http://selenium-hub:4444/wd/hub",
+                    options=options,
+                    seleniumwire_options=sw_options,
+                )
+            except ServerException:
+                logger.info(
+                    f"Failed to create driver with {picked_port=}. Trying with another one..."
+                )
+                tries += 1
+            else:
+                logger.info(f"Found free port {picked_port}. Creating driver...")
+                return driver
+        raise RuntimeError(
+            "Failed to retrieve a free port for MitM proxy! Try restarting the job"
+        )
+
+    def _init_driver(
+        self, window_width: int, window_height: int, user_agent: str
+    ) -> Remote:
         logger.info(f"Adding proxy with option: {self.proxy}")
         logger.info("Creating Chrome driver...")
         sw_options: {} = {
@@ -72,7 +112,7 @@ class DriverWrapper:
             # https://github.com/wkeeling/selenium-wire/issues/220#issuecomment-794308386
             # config to have local seleniumwire proxy compatible with another proxy
             "addr": "0.0.0.0",  # where selenium-wire proxy will run
-            "port": 7007,
+            "port": 0,
         }
         if self.proxy:
             sw_options["proxy"] = {"http": self.proxy, "https": self.proxy}
@@ -85,23 +125,22 @@ class DriverWrapper:
         options.add_argument("--headless=new")
         options.add_argument("--ignore-certificate-errors")
         options.add_argument(f"--window-size={window_width},{window_height}")
-        # traffic must go back to host running selenium-wire
-        options.add_argument("--proxy-server=http://phishing_analyzers:7007")
-        driver = Remote(
-            command_executor="http://selenium-hub:4444/wd/hub",
-            options=options,
-            seleniumwire_options=sw_options,
-        )
-        return driver
+        options.add_argument(f"--user-agent={user_agent}")
+
+        return self._pick_free_port_from_pool(sw_options, options)
 
     def restart(self, motivation: str = "", timeout_wait_page: int = 0):
-        logger.info(f"Restarting driver: {motivation=}")
+        logger.info(f"{self._driver.session_id}: Restarting driver: {motivation=}")
         self._driver.quit()
         self._driver = self._init_driver(
-            window_width=self.window_width, window_height=self.window_height
+            window_width=self.window_width,
+            window_height=self.window_height,
+            user_agent=self.user_agent,
         )
         if self.last_url:
-            logger.info(f"Navigating to {self.last_url} after driver has restarted")
+            logger.info(
+                f"{self._driver.session_id}: Navigating to {self.last_url} after driver has restarted"
+            )
             self.navigate(self.last_url, timeout_wait_page=timeout_wait_page)
 
     @driver_exception_handler
@@ -111,7 +150,7 @@ class DriverWrapper:
             return
 
         self.last_url = url
-        logger.info(f"Navigating to {url=}")
+        logger.info(f"{self._driver.session_id}: Navigating to {url=}")
         self._driver.get(url)
         # dinamically wait for page to load its content with a fallback
         # of `timeout_wait_page` seconds.
@@ -123,17 +162,21 @@ class DriverWrapper:
 
     @driver_exception_handler
     def get_page_source(self) -> str:
-        logger.info(f"Extracting page source for url {self.last_url}")
+        logger.info(
+            f"{self._driver.session_id}: Extracting page source for url {self.last_url}"
+        )
         return self._driver.page_source
 
     @driver_exception_handler
     def get_current_url(self) -> str:
-        logger.info("Extracting current URL of page")
+        logger.info(f"{self._driver.session_id}: Extracting current URL of page")
         return self._driver.current_url
 
     @driver_exception_handler
     def get_base64_screenshot(self) -> str:
-        logger.info(f"Extracting screenshot of page as base64 for url {self.last_url}")
+        logger.info(
+            f"{self._driver.session_id}: Extracting screenshot of page as base64 for url {self.last_url}"
+        )
         return self._driver.get_screenshot_as_base64()
 
     def iter_requests(self) -> Iterator[Request]:
@@ -142,5 +185,10 @@ class DriverWrapper:
     def get_har(self) -> str:
         return self._driver.har
 
+    def close(self):
+        logger.info(f"{self._driver.session_id}: Closing")
+        self._driver.close()
+
     def quit(self):
+        logger.info(f"{self._driver.session_id}: Quitting")
         self._driver.quit()

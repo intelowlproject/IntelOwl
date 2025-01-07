@@ -4,8 +4,8 @@ from typing import Dict
 from urllib.parse import urlparse
 
 import requests
-from faker import Faker
-from lxml.etree import HTMLParser
+from faker import Faker  # skipcq: BAN-B410
+from lxml.etree import HTMLParser  # skipcq: BAN-B410
 from lxml.html import document_fromstring
 from requests import HTTPError, Response
 
@@ -32,6 +32,7 @@ class PhishingFormCompiler(FileAnalyzer):
     pin_matching: list = []
     cvv_matching: list = []
     expiration_date_matching: list = []
+    user_agent: str = ""
 
     def __init__(
         self,
@@ -196,9 +197,13 @@ class PhishingFormCompiler(FileAnalyzer):
         params = self.compile_form_field(form)
         dest_url = self.extract_action_attribute(form)
         logger.info(f"Job #{self.job_id}: Sending {params=} to submit url {dest_url}")
+        headers = {
+            "User-Agent": self.user_agent,
+        }
         response = requests.post(
             url=dest_url,
             data=params,
+            headers=headers,
             proxies=(
                 {"http": self.proxy_address, "https": self.proxy_address}
                 if self.proxy_address

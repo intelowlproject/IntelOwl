@@ -158,9 +158,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         Args:
             content (any): The content to process after a successful run.
         """
-        result = super().after_run_success(
-            self._validate_result(content, max_recursion=15)
-        )
+        super().after_run_success(self._validate_result(content, max_recursion=15))
         try:
             self.create_data_model()
         except Exception as e:
@@ -168,7 +166,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             self._job.errors.append(
                 f"Data model creation failed for {self._config.name}"
             )
-        return result
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):

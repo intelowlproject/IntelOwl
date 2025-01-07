@@ -6,7 +6,7 @@ from unittest.mock import patch
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.choices import PythonModuleBasePaths
-from api_app.models import Job, Parameter, PluginConfig, PythonModule
+from api_app.models import Job, PythonModule
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomViewSetTestCase, PluginActionViewsetTestCase
@@ -104,54 +104,6 @@ class AnalyzerConfigViewSetTestCase(
         except AnalyzerConfig.DoesNotExist as e:
             self.fail(e)
         else:
-            ac.delete()
-
-        # with plugin config
-        p, _ = Parameter.objects.get_or_create(
-            name="url",
-            python_module=PythonModule.objects.get(
-                base_path=PythonModuleBasePaths.ObservableAnalyzer.value,
-                module="basic_observable_analyzer.BasicObservableAnalyzer",
-            ),
-            is_secret=False,
-            required=True,
-            type="str",
-        )
-        response = self.client.post(
-            self.URL,
-            data={
-                "name": "TestCreate",
-                "description": "test create",
-                "python_module": "basic_observable_analyzer.BasicObservableAnalyzer",
-                "type": "observable",
-                "observable_supported": ["generic"],
-                "plugin_config": [
-                    {
-                        "type": "1",
-                        "plugin_name": "TestCreate",
-                        "attribute": "url",
-                        "value": "https://www.mytesturl.com",
-                        "config_type": "1",
-                    }
-                ],
-            },
-            format="json",
-        )
-        self.assertEqual(response.status_code, 201, response.json())
-        try:
-            ac = AnalyzerConfig.objects.get(name="TestCreate")
-        except AnalyzerConfig.DoesNotExist as e:
-            self.fail(e)
-        try:
-            plugin = PluginConfig.objects.get(analyzer_config=ac.pk)
-        except PluginConfig.DoesNotExist as e:
-            self.fail(e)
-        else:
-            self.assertEqual(plugin.value, "https://www.mytesturl.com")
-            self.assertEqual(plugin.parameter, p)
-
-            p.delete()
-            plugin.delete()
             ac.delete()
 
     def test_update(self):

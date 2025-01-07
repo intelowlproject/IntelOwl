@@ -64,13 +64,13 @@ export function JobInfoCard({ job }) {
                 <Button
                   className="bg-darker border-1 lh-sm mx-1"
                   onClick={() =>
-                    navigate(`/investigation/${job.investigation}`)
+                    navigate(`/investigation/${job.investigation_id}`)
                   }
                   id="investigationOverviewBtn"
                   size="xs"
                   style={{ fontSize: "0.8rem" }}
                 >
-                  Investigation: <br /> {job.investigation}
+                  Investigation: <br /> {job.investigation_name}
                 </Button>
                 <UncontrolledTooltip
                   placement="top"

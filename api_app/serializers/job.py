@@ -536,7 +536,8 @@ class JobSerializer(_AbstractJobViewSerializer):
     )
     playbook_requested = rfs.SlugRelatedField(read_only=True, slug_field="name")
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
-    investigation = rfs.SerializerMethodField(read_only=True, default=None)
+    investigation_id = rfs.SerializerMethodField(read_only=True, default=None)
+    investigation_name = rfs.SerializerMethodField(read_only=True, default=None)
     related_investigation_number = rfs.SerializerMethodField(
         read_only=True, default=None
     )
@@ -548,7 +549,12 @@ class JobSerializer(_AbstractJobViewSerializer):
         # this cast is required or serializer doesn't work with websocket
         return list(obj.pivots_to_execute.all().values_list("name", flat=True))
 
-    def get_investigation(self, instance: Job):  # skipcq: PYL-R0201
+    def get_investigation_id(self, instance: Job):  # skipcq: PYL-R0201
+        if root_investigation := instance.get_root().investigation:
+            return root_investigation.pk
+        return instance.investigation
+
+    def get_investigation_name(self, instance: Job):  # skipcq: PYL-R0201
         if root_investigation := instance.get_root().investigation:
             return root_investigation.name
         return instance.investigation

@@ -37,7 +37,7 @@ const toPassProps = {
 export default function InvestigationsTable() {
   console.debug("InvestigationsTable rendered!");
   const [searchParams] = useSearchParams();
-  const analyzedObjectName = searchParams.get("analyzed_object_name");
+  const analyzedObjectNameParam = searchParams.get("analyzed_object_name");
 
   // page title
   useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
@@ -50,14 +50,16 @@ export default function InvestigationsTable() {
 
   // state
   const [loading, setILoading] = React.useState(true);
-  const [data, setData] = React.useState({});
+  const [data, setData] = React.useState({ results: [], count: 0 });
   /* searchNameType is used to show the user typed text (this state changes for each char typed), 
   searchNameRequest is used in the request to the backend and it's update periodically.
   In this way we avoid a request for each char. */
-  const [searchNameType, setSearchNameType] =
-    React.useState(analyzedObjectName);
-  const [searchNameRequest, setSearchNameRequest] =
-    React.useState(analyzedObjectName);
+  const [searchNameType, setSearchNameType] = React.useState(
+    analyzedObjectNameParam,
+  );
+  const [searchNameRequest, setSearchNameRequest] = React.useState(
+    analyzedObjectNameParam,
+  );
   useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
   React.useEffect(() => {
@@ -82,7 +84,7 @@ export default function InvestigationsTable() {
         <Col className="d-flex align-items-center">
           <h1 id="investigationHistory">
             Investigations History&nbsp;
-            <small className="text-gray">{data?.count} total</small>
+            <small className="text-gray">{data.count} total</small>
           </h1>
           <div className="ms-2">
             <MdInfoOutline id="investigationstable-infoicon" fontSize="20" />
@@ -138,7 +140,7 @@ export default function InvestigationsTable() {
         <Spinner />
       ) : (
         <div style={{ height: "80vh", overflowY: "scroll" }}>
-          <DataTable data={data?.results} {...toPassProps} />
+          <DataTable data={data.results} {...toPassProps} />
         </div>
       )}
     </Container>

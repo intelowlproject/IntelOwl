@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { PluginsTypes, PluginFinalStatuses } from "../../constants/pluginConst";
 import { searchTableColumns } from "./searchTableColumns";
 import { pluginReportQueries } from "./searchApi";
+import { datetimeFormatStr } from "../../constants/miscConst";
 
 // table config
 const tableConfig = { enableExpanded: true, enableFlexLayout: true };
@@ -43,10 +44,9 @@ export default function Search() {
   const [elasticData, setElasticData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
 
-  const isoFormatString = "yyyy-MM-dd'T'HH:mm";
   const defaultStartDate = new Date();
   defaultStartDate.setDate(defaultStartDate.getDate() - 30); // default: 30 days time range
-  const defaultStartDateStr = format(defaultStartDate, isoFormatString);
+  const defaultStartDateStr = format(defaultStartDate, datetimeFormatStr);
 
   const formik = useFormik({
     initialValues: {
@@ -54,9 +54,9 @@ export default function Search() {
       name: "",
       status: "",
       fromStartTime: defaultStartDateStr,
-      toStartTime: format(new Date(), isoFormatString),
+      toStartTime: format(new Date(), datetimeFormatStr),
       fromEndTime: defaultStartDateStr,
-      toEndTime: format(new Date(), isoFormatString),
+      toEndTime: format(new Date(), datetimeFormatStr),
       errors: "",
       report: "",
     },

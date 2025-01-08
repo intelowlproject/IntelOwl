@@ -17,6 +17,7 @@ import { useDebounceInput, DataTable } from "@certego/certego-ui";
 import useTitle from "react-use/lib/useTitle";
 
 import { useSearchParams } from "react-router-dom";
+import { toDate } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
 import { TimePicker } from "../../common/TimePicker";
@@ -38,15 +39,20 @@ export default function InvestigationsTable() {
   console.debug("InvestigationsTable rendered!");
   const [searchParams] = useSearchParams();
   const analyzedObjectNameParam = searchParams.get("analyzed_object_name");
+  const fromDateParam = searchParams.get("from");
+  const toDateParam = searchParams.get("to");
 
   // page title
   useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
 
   // store
-  const [toDateValue, fromDateValue] = useTimePickerStore((state) => [
-    state.toDateValue,
-    state.fromDateValue,
-  ]);
+  const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
+    useTimePickerStore((state) => [
+      state.toDateValue,
+      state.fromDateValue,
+      state.updateToDate,
+      state.updateFromDate,
+    ]);
 
   // state
   const [loading, setILoading] = React.useState(true);
@@ -54,13 +60,23 @@ export default function InvestigationsTable() {
   /* searchNameType is used to show the user typed text (this state changes for each char typed), 
   searchNameRequest is used in the request to the backend and it's update periodically.
   In this way we avoid a request for each char. */
-  const [searchNameType, setSearchNameType] = React.useState(
-    analyzedObjectNameParam,
-  );
-  const [searchNameRequest, setSearchNameRequest] = React.useState(
-    analyzedObjectNameParam,
-  );
+  const [searchNameType, setSearchNameType] = React.useState("");
+  const [searchNameRequest, setSearchNameRequest] = React.useState("");
   useDebounceInput(searchNameType, 1000, setSearchNameRequest);
+
+  React.useEffect(() => {
+    console.debug("DEBUG");
+    if (fromDateParam) updateFromDate(toDate(fromDateParam));
+    if (toDateParam) updateToDate(toDate(toDateParam));
+    if (analyzedObjectNameParam) setSearchNameType(analyzedObjectNameParam);
+    if (analyzedObjectNameParam) setSearchNameRequest(analyzedObjectNameParam);
+  }, [
+    analyzedObjectNameParam,
+    fromDateParam,
+    toDateParam,
+    updateFromDate,
+    updateToDate,
+  ]);
 
   React.useEffect(() => {
     axios
@@ -81,7 +97,7 @@ export default function InvestigationsTable() {
     <Container fluid>
       {/* Basic */}
       <Row className="mb-2">
-        <Col className="d-flex align-items-center">
+        <Col className="d-flex align-items-center" sm={5}>
           <h1 id="investigationHistory">
             Investigations History&nbsp;
             <small className="text-gray">{data.count} total</small>

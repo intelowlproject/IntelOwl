@@ -18,6 +18,7 @@ import {
   CopyToClipboardButton,
   ArrowToggleIcon,
 } from "@certego/certego-ui";
+import { format } from "date-fns";
 import { processTimeMMSS } from "../../../utils/time";
 
 import { JobTag } from "../../common/JobTag";
@@ -27,6 +28,7 @@ import { TLPTag } from "../../common/TLPTag";
 import { JobInfoIcon } from "./JobInfoIcon";
 import { JobIsRunningAlert } from "./JobIsRunningAlert";
 import { JobFinalStatuses } from "../../../constants/jobConst";
+import { datetimeFormatStr } from "../../../constants/miscConst";
 
 export function JobInfoCard({ job }) {
   const navigate = useNavigate();
@@ -42,9 +44,18 @@ export function JobInfoCard({ job }) {
           <Col sm={12} md={3} className="d-flex justify-content-start">
             <Button
               className="bg-darker border-1 lh-sm mx-1"
-              href={`/history/investigations/analyzed_object_name?=${
-                job.is_sample ? job.file_name : job.observable_name
-              }`}
+              onClick={() => {
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - 7);
+                navigate(
+                  `/history/investigations?from=${format(
+                    startDate,
+                    datetimeFormatStr,
+                  )}&analyzed_object_name=${
+                    job.is_sample ? job.file_name : job.observable_name
+                  }`,
+                );
+              }}
               id="investigationSearchBtn"
               size="xs"
               style={{ fontSize: "0.8rem" }}

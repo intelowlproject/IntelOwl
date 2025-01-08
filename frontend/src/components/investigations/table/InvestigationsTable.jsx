@@ -65,7 +65,6 @@ export default function InvestigationsTable() {
   useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
   React.useEffect(() => {
-    console.debug("DEBUG");
     if (fromDateParam) updateFromDate(toDate(fromDateParam));
     if (toDateParam) updateToDate(toDate(toDateParam));
     if (analyzedObjectNameParam) setSearchNameType(analyzedObjectNameParam);

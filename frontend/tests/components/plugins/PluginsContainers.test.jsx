@@ -10,6 +10,7 @@ import {
   mockedUsePluginConfigurationStore,
 } from "../../mock";
 
+jest.mock("reactflow/dist/style.css", () => {});
 jest.mock("axios");
 jest.mock("../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>

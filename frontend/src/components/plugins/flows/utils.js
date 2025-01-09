@@ -20,12 +20,11 @@ function addNode(
   };
 
   if (nodeType === "pivot") {
-    console.debug("pivot", nodeToAdd);
     node.type = "pivotNode";
     node.data = {
       ...node.data,
-      analyzers: nodeToAdd?.related_analyzer_configs.toString(),
-      connectors: nodeToAdd?.related_connector_configs.toString(),
+      analyzers: nodeToAdd?.related_analyzer_configs?.toString(),
+      connectors: nodeToAdd?.related_connector_configs?.toString(),
       type: nodeToAdd?.python_module,
       fieldToCompare: nodeToAdd?.params?.field_to_compare?.value,
     };

@@ -5,7 +5,6 @@ import "reactflow/dist/style.css";
 import { Badge } from "reactstrap";
 
 function CustomPivotNode({ data }) {
-  console.debug("CustomPivotNode", data);
   return (
     <>
       <NodeToolbar position="top" align="start" isVisible offset={3}>

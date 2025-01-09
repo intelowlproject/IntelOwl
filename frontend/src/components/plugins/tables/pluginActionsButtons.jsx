@@ -412,7 +412,7 @@ export function PlaybookFlowsButton({ playbook }) {
   return (
     <div className="d-flex flex-column align-items-center p-1">
       <IconButton
-        id={`table-playbookflowbtn__${playbook.name}`}
+        id={`playbook-flows-btn__${playbook.name}`}
         color="info"
         size="sm"
         Icon={FaDiagramProject}

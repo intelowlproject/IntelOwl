@@ -3,19 +3,19 @@ import React from "react";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import {PlaybookFlows} from "../../../../src/components/plugins/flows/PlaybookFlows";
+import { PlaybookFlows } from "../../../../src/components/plugins/flows/PlaybookFlows";
 import {
-    mockedUsePluginConfigurationStore,
-    mockedPlaybooks,
-  } from "../../../mock";
+  mockedUsePluginConfigurationStore,
+  mockedPlaybooks,
+} from "../../../mock";
 
 jest.mock("reactflow/dist/style.css", () => {});
 
 jest.mock("../../../../src/stores/usePluginConfigurationStore", () => ({
-    usePluginConfigurationStore: jest.fn((state) =>
-      state(mockedUsePluginConfigurationStore),
-    ),
-  }));
+  usePluginConfigurationStore: jest.fn((state) =>
+    state(mockedUsePluginConfigurationStore),
+  ),
+}));
 
 describe("test PlaybookFlows", () => {
   // mock needed for testing flow https://reactflow.dev/learn/advanced-use/testing#using-jest
@@ -66,9 +66,7 @@ describe("test PlaybookFlows", () => {
   test("PlaybookFlows - only root (playbook)", () => {
     const { container } = render(
       <BrowserRouter>
-        <PlaybookFlows
-          playbook={mockedPlaybooks.TEST_PLAYBOOK_FILE}
-        />
+        <PlaybookFlows playbook={mockedPlaybooks.TEST_PLAYBOOK_FILE} />
       </BrowserRouter>,
     );
     // Root node
@@ -83,9 +81,7 @@ describe("test PlaybookFlows", () => {
   test("PlaybookFlows - playbook + pivot + playbook", () => {
     const { container } = render(
       <BrowserRouter>
-        <PlaybookFlows
-          playbook={mockedPlaybooks.TEST_PLAYBOOK_DOMAIN}
-        />
+        <PlaybookFlows playbook={mockedPlaybooks.TEST_PLAYBOOK_DOMAIN} />
       </BrowserRouter>,
     );
     // Root node (playbook)

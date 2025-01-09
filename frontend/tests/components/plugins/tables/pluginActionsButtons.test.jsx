@@ -15,7 +15,10 @@ import {
   PluginConfigButton,
   PlaybookFlowsButton,
 } from "../../../../src/components/plugins/tables/pluginActionsButtons";
-import { mockedUseOrganizationStoreOwner, mockedPlaybooks } from "../../../mock";
+import {
+  mockedUseOrganizationStoreOwner,
+  mockedPlaybooks,
+} from "../../../mock";
 
 jest.mock("axios");
 jest.mock("../../../../src/stores/useOrganizationStore", () => ({
@@ -480,6 +483,5 @@ describe("PlaybookFlowsButton test", () => {
     await waitFor(() => {
       expect(screen.getByText("Possible playbook flows")).toBeInTheDocument();
     });
-
   });
 });

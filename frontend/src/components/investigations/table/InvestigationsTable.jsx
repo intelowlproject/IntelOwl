@@ -25,7 +25,7 @@ import { useTimePickerStore } from "../../../stores/useTimePickerStore";
 import { datetimeFormatStr } from "../../../constants/miscConst";
 
 // constants
-const toPassProps = {
+const toPassTableProps = {
   columns: investigationTableColumns,
   tableEmptyNode: (
     <>
@@ -199,7 +199,7 @@ export default function InvestigationsTable() {
         <Spinner />
       ) : (
         <div style={{ height: "80vh", overflowY: "scroll" }}>
-          <DataTable data={data.results} {...toPassProps} />
+          <DataTable data={data.results} {...toPassTableProps} />
         </div>
       )}
     </Container>

@@ -5,6 +5,7 @@ import { RiHeartPulseLine } from "react-icons/ri";
 import { MdDelete, MdFileDownload, MdEdit } from "react-icons/md";
 import { BsPeopleFill } from "react-icons/bs";
 import { AiFillSetting } from "react-icons/ai";
+import { FaDiagramProject } from "react-icons/fa6";
 
 import { IconButton } from "@certego/certego-ui";
 
@@ -15,6 +16,7 @@ import { SpinnerIcon } from "../../common/icon/icons";
 import { deleteConfiguration } from "../pluginsApi";
 import { PluginsTypes } from "../../../constants/pluginConst";
 import { PluginConfigModal } from "../PluginConfigModal";
+import { PlaybookFlows } from "../flows/PlaybookFlows";
 
 export function PluginHealthCheckButton({ pluginName, pluginType_ }) {
   const { checkPluginHealth } = usePluginConfigurationStore(
@@ -401,4 +403,54 @@ PluginConfigButton.propTypes = {
     "pivot",
     "visualizer",
   ]).isRequired,
+};
+
+export function PlaybookFlowsButton({ playbook }) {
+  // state
+  const [showModal, setShowModal] = React.useState(false);
+
+  return (
+    <div className="d-flex flex-column align-items-center p-1">
+      <IconButton
+        id={`table-playbookflowbtn__${playbook.name}`}
+        color="info"
+        size="sm"
+        Icon={FaDiagramProject}
+        title="View possible playbook execution flows"
+        onClick={() => setShowModal(!showModal)}
+        titlePlacement="top"
+      />
+      {showModal && (
+        <Modal
+          id="playbook-flows-modal"
+          autoFocus
+          centered
+          zIndex="1050"
+          size="lg"
+          keyboard={false}
+          backdrop="static"
+          labelledBy="Playbook flows modal"
+          isOpen={showModal}
+          style={{ minWidth: "90%" }}
+        >
+          <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
+            <small className="text-info">Possible playbook flows</small>
+          </ModalHeader>
+          <ModalBody className="m-2">
+            <div
+              id={`playbookflow-${playbook.id}`}
+              style={{ overflow: "scroll", border: "1px solid #2f515e" }}
+              className="p-2 bg-body"
+            >
+              <PlaybookFlows playbook={playbook} />
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+PlaybookFlowsButton.propTypes = {
+  playbook: PropTypes.object.isRequired,
 };

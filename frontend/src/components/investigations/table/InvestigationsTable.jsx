@@ -16,7 +16,7 @@ import { useDebounceInput, DataTable } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 
-import { replace, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { format, toDate } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
@@ -55,6 +55,9 @@ export default function InvestigationsTable() {
       state.updateToDate,
       state.updateFromDate,
     ]);
+  const [searchFromDateValue, setSearchFromDateValue] =
+    React.useState(fromDateValue);
+  const [searchToDateValue, setSearchToDateValue] = React.useState(toDateValue);
 
   // state
   const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
@@ -65,14 +68,20 @@ export default function InvestigationsTable() {
   In this way we avoid a request for each char. */
   const [searchNameType, setSearchNameType] = React.useState("");
   const [searchNameRequest, setSearchNameRequest] = React.useState("");
+
+  useDebounceInput(fromDateValue, 1000, setSearchFromDateValue);
+  useDebounceInput(toDateValue, 1000, setSearchToDateValue);
   useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
-  console.debug(fromDateValue, toDateValue, searchNameType, searchNameRequest);
-
   React.useEffect(() => {
-    console.debug("1 - update state from url");
-    if (startTimeParam) updateFromDate(toDate(startTimeParam));
-    if (endTimeParam) updateToDate(toDate(endTimeParam));
+    if (startTimeParam) {
+      setSearchFromDateValue(toDate(startTimeParam));
+      updateFromDate(toDate(startTimeParam));
+    }
+    if (endTimeParam) {
+      setSearchToDateValue(toDate(endTimeParam));
+      updateToDate(toDate(endTimeParam));
+    }
     if (analyzedObjectNameParam) setSearchNameType(analyzedObjectNameParam);
     if (analyzedObjectNameParam) setSearchNameRequest(analyzedObjectNameParam);
     setParamInitialization(true);
@@ -88,17 +97,17 @@ export default function InvestigationsTable() {
     // this check is to avoid to send request and compare state and url params before we initialized the state
     if (paramInitialization) {
       if (
-        startTimeParam !== format(fromDateValue, datetimeFormatStr) ||
-        endTimeParam !== format(toDateValue, datetimeFormatStr) ||
+        startTimeParam !== format(searchFromDateValue, datetimeFormatStr) ||
+        endTimeParam !== format(searchToDateValue, datetimeFormatStr) ||
         analyzedObjectNameParam !== searchNameRequest
       ) {
         setSearchParams({
           "start-time": decodeURIComponent(
-            format(fromDateValue, datetimeFormatStr),
+            format(searchFromDateValue, datetimeFormatStr),
           ),
           // eslint-disable-next-line id-length
           "end-time": decodeURIComponent(
-            format(toDateValue, datetimeFormatStr),
+            format(searchToDateValue, datetimeFormatStr),
           ),
           "analyzed-object-name": searchNameRequest,
         });
@@ -106,8 +115,8 @@ export default function InvestigationsTable() {
       axios
         .get(INVESTIGATION_BASE_URI, {
           params: {
-            start_time__gte: fromDateValue,
-            start_time__lte: toDateValue,
+            start_time__gte: searchFromDateValue,
+            start_time__lte: searchToDateValue,
             analyzed_object_name: searchNameRequest,
           },
         })
@@ -117,14 +126,14 @@ export default function InvestigationsTable() {
         });
     }
   }, [
+    setSearchParams,
     paramInitialization,
-    fromDateValue,
-    toDateValue,
+    searchFromDateValue,
+    searchToDateValue,
     searchNameRequest,
     startTimeParam,
     endTimeParam,
     analyzedObjectNameParam,
-    setSearchParams,
   ]);
 
   return (

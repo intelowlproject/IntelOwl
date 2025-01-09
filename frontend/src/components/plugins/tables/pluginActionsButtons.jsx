@@ -436,11 +436,15 @@ export function PlaybookFlowsButton({ playbook }) {
           <ModalHeader className="mx-2" toggle={() => setShowModal(false)}>
             <small className="text-info">Possible playbook flows</small>
           </ModalHeader>
-          <ModalBody className="m-2">
+          <ModalBody className="mx-2">
+            <small>
+              Note: Pivots are plugins designed to run automatically within a
+              playbook after certain conditions are triggered.
+            </small>
             <div
               id={`playbookflow-${playbook.id}`}
               style={{ overflow: "scroll", border: "1px solid #2f515e" }}
-              className="p-2 bg-body"
+              className=" mt-2 p-2 bg-body"
             >
               <PlaybookFlows playbook={playbook} />
             </div>

@@ -16,12 +16,13 @@ import { useDebounceInput, DataTable } from "@certego/certego-ui";
 
 import useTitle from "react-use/lib/useTitle";
 
-import { useSearchParams } from "react-router-dom";
-import { toDate } from "date-fns-tz";
+import { replace, useSearchParams } from "react-router-dom";
+import { format, toDate } from "date-fns-tz";
 import { INVESTIGATION_BASE_URI } from "../../../constants/apiURLs";
 import { investigationTableColumns } from "./investigationTableColumns";
 import { TimePicker } from "../../common/TimePicker";
 import { useTimePickerStore } from "../../../stores/useTimePickerStore";
+import { datetimeFormatStr } from "../../../constants/miscConst";
 
 // constants
 const toPassProps = {
@@ -37,10 +38,11 @@ const toPassProps = {
 // component
 export default function InvestigationsTable() {
   console.debug("InvestigationsTable rendered!");
-  const [searchParams] = useSearchParams();
-  const analyzedObjectNameParam = searchParams.get("analyzed_object_name");
-  const fromDateParam = searchParams.get("from");
-  const toDateParam = searchParams.get("to");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const analyzedObjectNameParam =
+    searchParams.get("analyzed-object-name") || "";
+  const startTimeParam = searchParams.get("start-time");
+  const endTimeParam = searchParams.get("end-time");
 
   // page title
   useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
@@ -55,6 +57,7 @@ export default function InvestigationsTable() {
     ]);
 
   // state
+  const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
   const [loading, setILoading] = React.useState(true);
   const [data, setData] = React.useState({ results: [], count: 0 });
   /* searchNameType is used to show the user typed text (this state changes for each char typed), 
@@ -64,33 +67,65 @@ export default function InvestigationsTable() {
   const [searchNameRequest, setSearchNameRequest] = React.useState("");
   useDebounceInput(searchNameType, 1000, setSearchNameRequest);
 
+  console.debug(fromDateValue, toDateValue, searchNameType, searchNameRequest);
+
   React.useEffect(() => {
-    if (fromDateParam) updateFromDate(toDate(fromDateParam));
-    if (toDateParam) updateToDate(toDate(toDateParam));
+    console.debug("1 - update state from url");
+    if (startTimeParam) updateFromDate(toDate(startTimeParam));
+    if (endTimeParam) updateToDate(toDate(endTimeParam));
     if (analyzedObjectNameParam) setSearchNameType(analyzedObjectNameParam);
     if (analyzedObjectNameParam) setSearchNameRequest(analyzedObjectNameParam);
+    setParamInitialization(true);
   }, [
     analyzedObjectNameParam,
-    fromDateParam,
-    toDateParam,
+    startTimeParam,
+    endTimeParam,
     updateFromDate,
     updateToDate,
   ]);
 
   React.useEffect(() => {
-    axios
-      .get(INVESTIGATION_BASE_URI, {
-        params: {
-          start_time__gte: fromDateValue,
-          start_time__lte: toDateValue,
-          analyzed_object_name: searchNameRequest,
-        },
-      })
-      .then((response) => {
-        setData(response.data);
-        setILoading(false);
-      });
-  }, [fromDateValue, toDateValue, searchNameRequest]);
+    // this check is to avoid to send request and compare state and url params before we initialized the state
+    if (paramInitialization) {
+      if (
+        startTimeParam !== format(fromDateValue, datetimeFormatStr) ||
+        endTimeParam !== format(toDateValue, datetimeFormatStr) ||
+        analyzedObjectNameParam !== searchNameRequest
+      ) {
+        setSearchParams({
+          "start-time": decodeURIComponent(
+            format(fromDateValue, datetimeFormatStr),
+          ),
+          // eslint-disable-next-line id-length
+          "end-time": decodeURIComponent(
+            format(toDateValue, datetimeFormatStr),
+          ),
+          "analyzed-object-name": searchNameRequest,
+        });
+      }
+      axios
+        .get(INVESTIGATION_BASE_URI, {
+          params: {
+            start_time__gte: fromDateValue,
+            start_time__lte: toDateValue,
+            analyzed_object_name: searchNameRequest,
+          },
+        })
+        .then((response) => {
+          setData(response.data);
+          setILoading(false);
+        });
+    }
+  }, [
+    paramInitialization,
+    fromDateValue,
+    toDateValue,
+    searchNameRequest,
+    startTimeParam,
+    endTimeParam,
+    analyzedObjectNameParam,
+    setSearchParams,
+  ]);
 
   return (
     <Container fluid>

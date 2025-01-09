@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import {
   Button,
@@ -31,11 +30,18 @@ import { JobFinalStatuses } from "../../../constants/jobConst";
 import { datetimeFormatStr } from "../../../constants/miscConst";
 
 export function JobInfoCard({ job }) {
-  const navigate = useNavigate();
   // local state
   const [isOpenJobInfoCard, setIsOpenJobInfoCard] = React.useState(false);
   const [isOpenJobWarnings, setIsOpenJobWarnings] = React.useState(false);
   const [isOpenJobErrors, setIsOpenJobErrors] = React.useState(false);
+
+  const endDateRelatedInvestigation = new Date();
+  const startDateRelatedInvestigation = structuredClone(
+    endDateRelatedInvestigation,
+  );
+  startDateRelatedInvestigation.setDate(
+    startDateRelatedInvestigation.getDate() - 7,
+  );
 
   return (
     <div id="JobInfoCardSection">
@@ -44,18 +50,17 @@ export function JobInfoCard({ job }) {
           <Col sm={12} md={3} className="d-flex justify-content-start">
             <Button
               className="bg-darker border-1 lh-sm mx-1"
-              onClick={() => {
-                const startDate = new Date();
-                startDate.setDate(startDate.getDate() - 7);
-                navigate(
-                  `/history/investigations?from=${format(
-                    startDate,
-                    datetimeFormatStr,
-                  )}&analyzed_object_name=${
-                    job.is_sample ? job.file_name : job.observable_name
-                  }`,
-                );
-              }}
+              href={`/history/investigations?start-time=${format(
+                startDateRelatedInvestigation,
+                datetimeFormatStr,
+              )}&end-time=${format(
+                endDateRelatedInvestigation,
+                datetimeFormatStr,
+              )}&analyzed-object-name=${
+                job.is_sample ? job.file_name : job.observable_name
+              }`}
+              target="_blank"
+              rel="noreferrer"
               id="investigationSearchBtn"
               size="xs"
               style={{ fontSize: "0.8rem" }}
@@ -74,9 +79,9 @@ export function JobInfoCard({ job }) {
               <>
                 <Button
                   className="bg-darker border-1 lh-sm mx-1"
-                  onClick={() =>
-                    navigate(`/investigation/${job.investigation_id}`)
-                  }
+                  href={`/investigation/${job.investigation_id}`}
+                  target="_blank"
+                  rel="noreferrer"
                   id="investigationOverviewBtn"
                   size="xs"
                   style={{ fontSize: "0.8rem" }}

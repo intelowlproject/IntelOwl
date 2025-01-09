@@ -38,14 +38,15 @@ const toPassTableProps = {
 // component
 export default function InvestigationsTable() {
   console.debug("InvestigationsTable rendered!");
+
+  // page title
+  useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
+
   const [searchParams, setSearchParams] = useSearchParams();
   const analyzedObjectNameParam =
     searchParams.get("analyzed-object-name") || "";
   const startTimeParam = searchParams.get("start-time");
   const endTimeParam = searchParams.get("end-time");
-
-  // page title
-  useTitle("IntelOwl | Investigation History", { restoreOnUnmount: true });
 
   // store
   const [toDateValue, fromDateValue, updateToDate, updateFromDate] =
@@ -61,7 +62,7 @@ export default function InvestigationsTable() {
 
   // state
   const [paramInitialization, setParamInitialization] = React.useState(false); // used to prevent a request with wrong params
-  const [loading, setILoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(true);
   const [data, setData] = React.useState({ results: [], count: 0 });
   /* searchNameType is used to show the user typed text (this state changes for each char typed), 
   searchNameRequest is used in the request to the backend and it's update periodically.
@@ -122,7 +123,7 @@ export default function InvestigationsTable() {
         })
         .then((response) => {
           setData(response.data);
-          setILoading(false);
+          setLoading(false);
         });
     }
   }, [
@@ -194,7 +195,7 @@ export default function InvestigationsTable() {
           </div>
         </Col>
       </Row>
-      {/* Actions */}
+      {/* Table */}
       {loading ? (
         <Spinner />
       ) : (

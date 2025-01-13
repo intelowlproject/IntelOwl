@@ -250,22 +250,19 @@ describe("test JobOverview (job report)", () => {
             playbook_requested: "TestPlaybook",
             playbook_to_execute: "TestPlaybook",
             investigation: 1,
+            investigation_id: 1,
+            investigation_name: "test investigation",
+            related_investigation_number: 10,
           }}
         />
       </BrowserRouter>,
     );
+    // once we know the JobInfoCard Component is load the check about it is the proper file
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
+    expect(JobInfoCardSection).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
-    const InvestigationOverviewButton = within(JobInfoCardSection).getByRole(
-      "button",
-      {
-        name: "Investigation Overview",
-      },
-    );
-    expect(InvestigationOverviewButton.id).toBe("investigationOverviewBtn");
-    expect(InvestigationOverviewButton).toBeInTheDocument();
   });
 
   test("move from raw to visualizer-Test page", async () => {

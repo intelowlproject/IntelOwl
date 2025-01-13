@@ -84,6 +84,10 @@ describe("test JobInfoCard (job report)", () => {
             },
             received_request_time: "2023-05-31T08:19:03.256003",
             finished_analysis_time: "2023-05-31T08:19:04.484684",
+            investigation: 1,
+            investigation_id: 1,
+            investigation_name: "test investigation",
+            related_investigation_number: 10,
             process_time: 0.23,
             tlp: "AMBER",
             warnings: [],
@@ -160,8 +164,14 @@ describe("test JobInfoCard (job report)", () => {
       </BrowserRouter>,
     );
 
-    // metadata - first line
+    // always visible line
     const JobInfoCardSection = container.querySelector("#JobInfoCardSection");
+    expect(
+      within(JobInfoCardSection).getByText("Similar Investigations: 10"),
+    ).toBeInTheDocument();
+    expect(
+      within(JobInfoCardSection).getByText("Investigation: test investigation"),
+    ).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("dns.google.com"),
     ).toBeInTheDocument();
@@ -169,6 +179,7 @@ describe("test JobInfoCard (job report)", () => {
       "#JobInfoCardDropDown",
     );
     expect(JobInfoCardDropDownButton).toBeInTheDocument();
+    // metadata - first line
     expect(within(JobInfoCardSection).getByText("Status")).toBeInTheDocument();
     expect(
       within(JobInfoCardSection).getByText("REPORTED WITHOUT FAILS"),

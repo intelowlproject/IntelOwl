@@ -1,16 +1,20 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
+import { format } from "date-fns";
 import { TimePicker } from "../../../src/components/common/TimePicker";
+import { datetimeFormatStr } from "../../../src/constants/miscConst";
 
 describe("test TimePicker component", () => {
   test("time picker", async () => {
-    const defaultFromDate = new Date();
-    defaultFromDate.setDate(defaultFromDate.getDate() - 1);
-    const toDateValue = new Date().toISOString().split("T")[0];
-    const fromDateValue = defaultFromDate.toISOString().split("T")[0];
+
+    const toDate = new Date();
+    const fromDate = structuredClone(toDate);
+    fromDate.setDate(fromDate.getDate() - 1);
+    const toDateValue = format(toDate, datetimeFormatStr);
+    const fromDateValue = format(fromDate, datetimeFormatStr);
 
     const user = userEvent.setup();
     const { container } = render(
@@ -33,18 +37,14 @@ describe("test TimePicker component", () => {
     expect(firstDateInput).toHaveValue(fromDateValue);
     expect(secondDateInput).toHaveValue(toDateValue);
 
-    // clear the input by highlighting all the current text and then replacing it with the new value
-    await user.type(firstDateInput, "2024-02-05", {
-      initialSelectionStart: 0,
-      initialSelectionEnd: firstDateInput.value.length,
-    });
-    await user.type(secondDateInput, "2024-05-13", {
-      initialSelectionStart: 0,
-      initialSelectionEnd: secondDateInput.value.length,
-    });
+    /* datetime-local input is editable only with fireEvent, user.type doesn't work:
+    https://github.com/testing-library/user-event/issues/399#issuecomment-656084165 */
+    await fireEvent.change(firstDateInput, { target: { value: '2024-02-05T12:06' } });
+    await fireEvent.change(secondDateInput, { target: { value: '2024-05-13T12:06' } });
+
     await waitFor(() => {
-      expect(firstDateInput).toHaveValue("2024-02-05");
-      expect(secondDateInput).toHaveValue("2024-05-13");
+      expect(firstDateInput).toHaveValue("2024-02-05T12:06");
+      expect(secondDateInput).toHaveValue("2024-05-13T12:06");
     });
   });
 });

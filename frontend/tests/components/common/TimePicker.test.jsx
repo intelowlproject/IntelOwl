@@ -9,7 +9,6 @@ import { datetimeFormatStr } from "../../../src/constants/miscConst";
 
 describe("test TimePicker component", () => {
   test("time picker", async () => {
-
     const toDate = new Date();
     const fromDate = structuredClone(toDate);
     fromDate.setDate(fromDate.getDate() - 1);
@@ -39,8 +38,12 @@ describe("test TimePicker component", () => {
 
     /* datetime-local input is editable only with fireEvent, user.type doesn't work:
     https://github.com/testing-library/user-event/issues/399#issuecomment-656084165 */
-    await fireEvent.change(firstDateInput, { target: { value: '2024-02-05T12:06' } });
-    await fireEvent.change(secondDateInput, { target: { value: '2024-05-13T12:06' } });
+    await fireEvent.change(firstDateInput, {
+      target: { value: "2024-02-05T12:06" },
+    });
+    await fireEvent.change(secondDateInput, {
+      target: { value: "2024-05-13T12:06" },
+    });
 
     await waitFor(() => {
       expect(firstDateInput).toHaveValue("2024-02-05T12:06");

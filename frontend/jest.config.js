@@ -147,7 +147,7 @@ module.exports = {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing: a customization of jsdom to use structuredClone
-  testEnvironment: './FixJSDOMEnvironment.js',
+  testEnvironment: "./FixJSDOMEnvironment.js",
 
   // Options that will be passed to the testEnvironment
   testEnvironmentOptions: {

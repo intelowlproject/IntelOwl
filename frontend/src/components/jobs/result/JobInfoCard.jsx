@@ -98,11 +98,11 @@ export function JobInfoCard({ job }) {
             )}
           </Col>
           <Col
-            className="d-flex-start-start justify-content-center"
+            className="d-flex-start-start justify-content-center align-items-center"
             sm={12}
             md={7}
           >
-            <h3 className="d-flex-start align-items-center text-truncate">
+            <h3 className="d-flex-start text-truncate">
               <JobInfoIcon job={job} />
               {job.is_sample ? (
                 <CopyToClipboardButton
@@ -122,11 +122,13 @@ export function JobInfoCard({ job }) {
                 </CopyToClipboardButton>
               )}
             </h3>
-            <Badge className="ms-1 float-end" color="info">
-              {job.is_sample
-                ? `file: ${job.file_mimetype}`
-                : job.observable_classification}
-            </Badge>
+            <div className="h-100 d-flex align-items-start">
+              <Badge className="ms-1 float-end" color="info">
+                {job.is_sample
+                  ? `file: ${job.file_mimetype}`
+                  : job.observable_classification}
+              </Badge>
+            </div>
           </Col>
           <Col sm={12} md={2} className="d-flex justify-content-end">
             <Button

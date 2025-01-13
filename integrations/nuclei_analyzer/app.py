@@ -7,11 +7,22 @@ from typing import Any, Dict, Tuple
 
 from flask import Flask, jsonify, request
 
+# Set the log path (ensure this is a valid directory)
+log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/nuclei_analyzers")
+os.makedirs(log_path, exist_ok=True)  # Ensure the directory exists
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("nuclei-analyzer")
+
+# Set up file logging
+file_handler = logging.FileHandler(f"{log_path}/nuclei_analyzer.log")
+file_handler.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 app = Flask(__name__)
 
@@ -158,13 +169,5 @@ def run_nuclei():
 
 
 if __name__ == "__main__":
-    # Set up file logging if needed
-    file_handler = logging.FileHandler("nuclei_analyzer.log")
-    file_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
-    app.run(host="0.0.0.0", port=5000)
+    logger.info("Starting the Nuclei Analyzer API")
+    app.run(host="0.0.0.0", port=4008)

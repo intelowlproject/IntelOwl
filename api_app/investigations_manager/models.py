@@ -63,7 +63,6 @@ class Investigation(OwnershipAbstractModel, ListCachable):
         return False
 
     def set_correct_status(self, save: bool = True):
-        from api_app.models import Job
 
         logger.info(f"Setting status for investigation {self.pk}")
         # if I have some jobs

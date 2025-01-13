@@ -52,7 +52,6 @@ class CommentViewSetTestCase(CustomViewSetTestCase):
         super().tearDown()
         self.job.delete()
         self.job2.delete()
-        self.job3.delete()
         self.comment.delete()
 
     def test_list_200(self):
@@ -242,13 +241,13 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(content["related_investigation_number"], 2)
 
     def test_delete(self):
-        self.assertEqual(Job.objects.count(), 2)
+        self.assertEqual(Job.objects.count(), 3)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 403)
         self.client.force_authenticate(user=self.job.user)
         response = self.client.delete(f"{self.jobs_list_uri}/{self.job.id}")
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(Job.objects.count(), 1)
+        self.assertEqual(Job.objects.count(), 2)
 
     # @action endpoints
 
@@ -299,7 +298,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             [
                 {
                     "date": "2024-11-28T00:00:00Z",
-                    "pending": 2,
+                    "pending": 3,
                     "failed": 0,
                     "reported_with_fails": 0,
                     "reported_without_fails": 0,
@@ -354,7 +353,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             resp.json(),
             {
                 "values": ["Dns"],
-                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 2}],
+                "aggregation": [{"date": "2024-11-28T00:00:00Z", "Dns": 3}],
             },
         )
 
@@ -366,7 +365,7 @@ class JobViewSetTests(CustomViewSetTestCase):
             {
                 "values": ["superuser@intelowl.org"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "superuser@intelowl.org": 2}
+                    {"date": "2024-11-28T00:00:00Z", "superuser@intelowl.org": 3}
                 ],
             },
         )
@@ -377,9 +376,9 @@ class JobViewSetTests(CustomViewSetTestCase):
         self.assertEqual(
             resp.json(),
             {
-                "values": ["CLEAR", "GREEN"],
+                "values": ["AMBER", "CLEAR", "GREEN"],
                 "aggregation": [
-                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1}
+                    {"date": "2024-11-28T00:00:00Z", "CLEAR": 1, "GREEN": 1, "AMBER": 1}
                 ],
             },
         )

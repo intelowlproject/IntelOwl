@@ -1,11 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import logging
 
 import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+
+logger = logging.getLogger(__name__)
 
 
 class URLHaus(classes.ObservableAnalyzer):
@@ -23,6 +26,7 @@ class URLHaus(classes.ObservableAnalyzer):
 
         headers = {"Accept": "application/json"}
         if self._service_api_key:
+            logger.debug("Found auth key for urlhaus request")
             headers.setdefault("Auth-Key", self._service_api_key)
         if self.observable_classification in [
             self.ObservableTypes.DOMAIN,

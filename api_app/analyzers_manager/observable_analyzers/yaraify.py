@@ -1,10 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import logging
 
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+
+logger = logging.getLogger(__name__)
 
 
 class YARAify(ObservableAnalyzer):
@@ -27,6 +30,7 @@ class YARAify(ObservableAnalyzer):
 
         headers = {}
         if self._service_api_key:
+            logger.debug("Found auth key for YARAify request")
             headers.setdefault("Auth-Key", self._service_api_key)
 
         response = requests.post(self.url, json=data, headers=headers)

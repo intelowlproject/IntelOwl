@@ -2,11 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+import logging
 
 import requests
 
 from api_app.analyzers_manager import classes
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+
+logger = logging.getLogger(__name__)
 
 
 class ThreatFox(classes.ObservableAnalyzer):
@@ -26,6 +29,7 @@ class ThreatFox(classes.ObservableAnalyzer):
 
         headers = {}
         if self._service_api_key:
+            logger.debug("Found auth key for threatfox request")
             headers.setdefault("Auth-Key", self._service_api_key)
 
         response = requests.post(self.url, data=json.dumps(payload), headers=headers)

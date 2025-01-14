@@ -46,6 +46,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
 
         self.headers = {}
         if self._service_api_key:
+            logger.debug("Found auth key for YARAify file request")
             self.headers.setdefault("Auth-Key", self._service_api_key)
 
     def run(self):

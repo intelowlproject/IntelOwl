@@ -14,6 +14,9 @@ class MB_GOOGLE(MB_GET):
     # API key to access abuse.ch services
     _service_api_key: str
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         results = {}
 

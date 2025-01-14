@@ -16,13 +16,26 @@ class ThreatFox(Ingestor):
     url = "https://threatfox-api.abuse.ch/api/v1/"
     # Days to check. From 1 to 7
     days: int
+    # API key to access abuse.ch services
+    _service_api_key: str
 
     @classmethod
     def update(cls) -> bool:
         pass
 
+    def config(self, runtime_configuration: {}):
+        super().config(runtime_configuration)
+
+        self.headers = {}
+        if self._service_api_key:
+            self.headers.setdefault("Auth-Key", self._service_api_key)
+
     def run(self) -> Iterable[Any]:
-        result = requests.post(self.url, json={"query": "get_iocs", "days": self.days})
+        result = requests.post(
+            self.url,
+            json={"query": "get_iocs", "days": self.days},
+            headers=self.headers,
+        )
         result.raise_for_status()
         content = result.json()
         logger.info(f"ThreatFox data is {content}")

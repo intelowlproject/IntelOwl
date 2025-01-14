@@ -12,6 +12,8 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 class ThreatFox(classes.ObservableAnalyzer):
     url: str = "https://threatfox-api.abuse.ch/api/v1/"
     disable: bool = False  # optional
+    # API key to access abuse.ch services
+    _service_api_key: str
 
     def update(self) -> bool:
         pass
@@ -22,7 +24,11 @@ class ThreatFox(classes.ObservableAnalyzer):
 
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
-        response = requests.post(self.url, data=json.dumps(payload))
+        headers = {}
+        if self._service_api_key:
+            headers.setdefault("Auth-Key", self._service_api_key)
+
+        response = requests.post(self.url, data=json.dumps(payload), headers=headers)
         response.raise_for_status()
 
         result = response.json()

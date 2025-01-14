@@ -16,9 +16,8 @@ RUN apt-get update && \
     mv nuclei /usr/local/bin/ && \
     chmod +x /usr/local/bin/nuclei && \
     rm nuclei_3.3.7_linux_amd64.zip && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    nuclei -update-template-dir /opt/nuclei-api/nuclei-templates -update-templates
+
 
 # Create non-root user
 RUN useradd -ms /bin/bash ${USER}

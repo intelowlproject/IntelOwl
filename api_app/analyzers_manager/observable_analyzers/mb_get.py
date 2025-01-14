@@ -1,10 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import logging
 
 import requests
 
 from api_app.analyzers_manager import classes
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
+
+logger = logging.getLogger(__name__)
 
 
 class MB_GET(classes.ObservableAnalyzer):
@@ -27,6 +30,7 @@ class MB_GET(classes.ObservableAnalyzer):
 
         headers = {}
         if service_api_key:
+            logger.debug("Found auth key for MB request")
             headers.setdefault("Auth-Key", service_api_key)
 
         response = requests.post(cls.url, data=post_data, headers=headers)

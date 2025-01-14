@@ -13,6 +13,8 @@ class YARAify(ObservableAnalyzer):
     query: str
     result_max: int
     _api_key_name: str
+    # API key to access abuse.ch services
+    _service_api_key: str
 
     def run(self):
         data = {"search_term": self.observable_name, "query": self.query}
@@ -23,7 +25,11 @@ class YARAify(ObservableAnalyzer):
         if getattr(self, "_api_key_name", None):
             data["malpedia-token"] = self._api_key_name
 
-        response = requests.post(self.url, json=data)
+        headers = {}
+        if self._service_api_key:
+            headers.setdefault("Auth-Key", self._service_api_key)
+
+        response = requests.post(self.url, json=data, headers=headers)
         response.raise_for_status()
 
         result = response.json()

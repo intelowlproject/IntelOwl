@@ -26,6 +26,8 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
     share_file: bool
     skip_noisy: bool
     skip_known: bool
+    # API key to access abuse.ch services
+    _service_api_key: str
 
     def config(self, runtime_configuration: Dict):
         FileAnalyzer.config(self, runtime_configuration)
@@ -41,6 +43,10 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
             raise AnalyzerConfigurationException(
                 "Unable to send file without having api_key_identifier set"
             )
+
+        self.headers = {}
+        if self._service_api_key:
+            self.headers.setdefault("Auth-Key", self._service_api_key)
 
     def run(self):
         name_to_send = self.filename if self.filename else self.md5
@@ -73,7 +79,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                 "file": (name_to_send, file),
             }
             logger.info(f"yara file scan md5 {self.md5} sending sample for analysis")
-            response = requests.post(self.url, files=files_)
+            response = requests.post(self.url, files=files_, headers=self.headers)
             response.raise_for_status()
             scan_response = response.json()
             scan_query_status = scan_response.get("query_status")
@@ -92,7 +98,9 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                             f"task_id: {task_id}"
                         )
                         data = {"query": "get_results", "task_id": task_id}
-                        response = requests.post(self.url, json=data)
+                        response = requests.post(
+                            self.url, json=data, headers=self.headers
+                        )
                         response.raise_for_status()
                         task_response = response.json()
                         logger.debug(task_response)

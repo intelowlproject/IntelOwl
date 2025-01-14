@@ -11,6 +11,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,8 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
 
     use_recommended_url: bool
     update_on_run: bool = True
+    # API key to access abuse.ch services
+    _service_api_key: str
 
     @classmethod
     @property
@@ -66,6 +69,20 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
         return result
 
     @classmethod
+    def get_service_auth_headers(cls) -> {}:
+        for plugin in PluginConfig.objects.filter(
+            parameter__python_module=cls.python_module,
+            parameter__is_secret=True,
+            parameter__name="service_api_key",
+        ):
+            if plugin.value:
+                logger.debug("Found auth key for feodo tracker update")
+                return {"Auth-Key": plugin.value}
+
+        logger.debug("Not found auth key for feodo tracker update")
+        return {}
+
+    @classmethod
     def update(cls) -> bool:
         """
         Simply update the database
@@ -74,7 +91,7 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
             logger.info(f"starting download of db from {db_url}")
 
             try:
-                r = requests.get(db_url)
+                r = requests.get(db_url, headers=cls.get_service_auth_headers())
                 r.raise_for_status()
             except requests.RequestException:
                 return False

@@ -11,6 +11,8 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 class URLHaus(classes.ObservableAnalyzer):
     url = "https://urlhaus-api.abuse.ch/v1/"
     disable: bool = False  # optional
+    # API key to access abuse.ch services
+    _service_api_key: str
 
     def update(self) -> bool:
         pass
@@ -20,6 +22,8 @@ class URLHaus(classes.ObservableAnalyzer):
             return {"disabled": True}
 
         headers = {"Accept": "application/json"}
+        if self._service_api_key:
+            headers.setdefault("Auth-Key", self._service_api_key)
         if self.observable_classification in [
             self.ObservableTypes.DOMAIN,
             self.ObservableTypes.IP,

@@ -11,13 +11,18 @@ class MB_GOOGLE(MB_GET):
     This is a modified version of MB_GET.
     """
 
+    # API key to access abuse.ch services
+    _service_api_key: str
+
     def run(self):
         results = {}
 
         query = f"{self.observable_name} site:bazaar.abuse.ch"
         for url in googlesearch.search(query, stop=20):
             mb_hash = url.split("/")[-2]
-            res = super().query_mb_api(observable_name=mb_hash)
+            res = super().query_mb_api(
+                observable_name=mb_hash, service_api_key=self._service_api_key
+            )
             results[mb_hash] = res
 
         return results

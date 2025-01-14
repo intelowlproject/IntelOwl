@@ -29,6 +29,9 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
     # API key to access abuse.ch services
     _service_api_key: str
 
+    def update(self) -> bool:
+        pass
+
     def config(self, runtime_configuration: Dict):
         FileAnalyzer.config(self, runtime_configuration)
         self.query = "lookup_hash"

@@ -16,6 +16,9 @@ class MB_GET(classes.ObservableAnalyzer):
     # API key to access abuse.ch services
     _service_api_key: str
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         return self.query_mb_api(
             observable_name=self.observable_name, service_api_key=self._service_api_key

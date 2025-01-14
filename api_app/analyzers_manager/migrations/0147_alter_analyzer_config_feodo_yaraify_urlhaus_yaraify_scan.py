@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
         ("api_app", "0065_job_mpnodesearch"),
         (
             "analyzers_manager",
-            "0145_analyzer_config_ultradns_malicious_detector",
+            "0146_analyzer_config_wad",
         ),
     ]
 

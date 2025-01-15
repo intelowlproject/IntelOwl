@@ -46,9 +46,7 @@ BASE_ANALYZER_FILE_PYTHON_PATH = PosixPath(
     )
 )
 BASE_ENGINE_MODULES_PYTHON_PATH = PosixPath(
-    get_secret(
-        "BASE_ENGINE_MODULES_PYTHON_PATH", "api_app.engines_manager.engines"
-    )
+    get_secret("BASE_ENGINE_MODULES_PYTHON_PATH", "api_app.engines_manager.engines")
 )
 
 REPO_DOWNLOADER_ENABLED = get_secret("REPO_DOWNLOADER_ENABLED", "True") == "True"

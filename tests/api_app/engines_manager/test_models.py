@@ -14,28 +14,20 @@ from tests import CustomTestCase
 class EngineConfigTestCase(CustomTestCase):
 
     def test_create_multiple_config(self):
-        config = EngineConfig.objects.create(
-            modules=["evaluation.EvaluationEngineModule"]
-        )
         with self.assertRaises(Exception):
             with transaction.atomic():
                 EngineConfig.objects.create()
         self.assertEqual(EngineConfig.objects.count(), 1)
-        config.delete()
 
     def test_clean(self):
-        config = EngineConfig.objects.create(
-            modules=["evaluation.EvaluationEngineModule"]
-        )
+        config = EngineConfig.objects.first()
         config.modules.append("test.Test")
         with self.assertRaises(ValidationError):
             config.full_clean()
         config.delete()
 
     def test_run_empty(self):
-        config = EngineConfig.objects.create(
-            modules=["evaluation.EvaluationEngineModule"]
-        )
+        config = EngineConfig.objects.first()
         job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
@@ -51,9 +43,7 @@ class EngineConfigTestCase(CustomTestCase):
         config.delete()
 
     def test_run_value(self):
-        config = EngineConfig.objects.create(
-            modules=["evaluation.EvaluationEngineModule"]
-        )
+        config = EngineConfig.objects.first()
         job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,

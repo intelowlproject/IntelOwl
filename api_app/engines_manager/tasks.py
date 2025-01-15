@@ -6,8 +6,10 @@ from intel_owl.tasks import FailureLoggedTask
 @shared_task(base=FailureLoggedTask, soft_time_limit=300)
 def execute_engine(job_pk:int):
     from api_app.engines_manager.models import EngineConfig
+    from api_app.models import Job
 
-    EngineConfig.objects.first().run(job_pk)
+    job = Job.objects.get(pk=job_pk)
+    EngineConfig.objects.first().run(job)
 
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=300)

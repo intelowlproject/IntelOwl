@@ -694,7 +694,7 @@ class Job(MP_Node):
         return self.user.profile.task_priority
 
     def _get_engine_signature(self) -> Signature:
-        from engines_manager.tasks import execute_engine
+        from api_app.engines_manager.tasks import execute_engine
 
         return execute_engine.signature(
             args=[self.pk],

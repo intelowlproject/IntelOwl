@@ -134,7 +134,10 @@ class BaseDataModel(models.Model):
                 continue
             result_attr = getattr(self, field_name)
             if isinstance(other, dict):
-                other_attr = other[field_name]
+                try:
+                    other_attr = other[field_name]
+                except KeyError:
+                    continue
             else:
                 other_attr = getattr(other, field_name, None)
             if not other_attr:

@@ -453,7 +453,7 @@ class Job(MP_Node):
         },
         null=True,
         editable=False,
-        blank=True
+        blank=True,
     )
     data_model_object_id = models.IntegerField(null=True, editable=False, blank=True)
     data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")

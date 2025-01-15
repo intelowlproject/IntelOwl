@@ -52,6 +52,9 @@ def reverse_migrate(apps, schema_editor):
         "urlhaus.URLHaus",
         "yaraify.YARAify",
         "feodo_tracker.Feodo_Tracker",
+        "threatfox.ThreatFox",
+        "mb_get.MB_GET",
+        "mb_google.MB_GOOGLE",
     ]
     for observable_analyzer in observable_analyzers:
         module = PythonModule.objects.get(

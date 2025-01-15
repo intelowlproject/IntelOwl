@@ -483,7 +483,7 @@ class JobTreeSerializer(ModelSerializer):
             "status",
             "received_request_time",
             "is_sample",
-            "evaluation"
+            "evaluation",
         ]
 
     playbook = rfs.SlugRelatedField(

@@ -15,7 +15,12 @@ from django_celery_beat.models import ClockedSchedule, CrontabSchedule, Periodic
 from solo.models import SingletonModel
 from treebeard.mp_tree import MP_Node
 
-from api_app.data_model_manager.models import DomainDataModel, IPDataModel, FileDataModel, BaseDataModel
+from api_app.data_model_manager.models import (
+    BaseDataModel,
+    DomainDataModel,
+    FileDataModel,
+    IPDataModel,
+)
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from api_app.interfaces import OwnershipAbstractModel
 
@@ -328,9 +333,8 @@ class Job(MP_Node):
 
     class Meta:
         indexes = [
-        models.Index(fields=["data_model_content_type", "data_model_object_id"]),
-
-        models.Index(
+            models.Index(fields=["data_model_content_type", "data_model_object_id"]),
+            models.Index(
                 fields=[
                     "md5",
                     "status",
@@ -452,7 +456,6 @@ class Job(MP_Node):
     )
     data_model_object_id = models.IntegerField(null=True, editable=False)
     data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
-
 
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
@@ -743,7 +746,10 @@ class Job(MP_Node):
         runner()
 
     def get_data_model_class(self) -> Type[BaseDataModel]:
-        if self.is_sample or self.observable_classification == ObservableClassification.HASH.value:
+        if (
+            self.is_sample
+            or self.observable_classification == ObservableClassification.HASH.value
+        ):
             return FileDataModel
         if self.observable_classification == ObservableClassification.IP.value:
             return IPDataModel
@@ -1843,8 +1849,6 @@ class PythonConfig(AbstractConfig):
             )[0]
             self.health_check_task = periodic_task
             self.save()
-
-
 
 
 class LastElasticReportUpdate(SingletonModel):

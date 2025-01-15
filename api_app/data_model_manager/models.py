@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Dict, Type, Union
 
 from django.contrib.contenttypes.fields import GenericRelation
@@ -6,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import ManyToManyField, ForeignKey
+from django.db.models import ForeignKey, ManyToManyField
 from django.forms import JSONField
 from django.utils.timezone import now
 from rest_framework.serializers import ModelSerializer
@@ -19,9 +20,9 @@ from api_app.data_model_manager.enums import (
 from api_app.data_model_manager.fields import LowercaseCharField, SetField
 from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from certego_saas.apps.user.models import User
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 class IETFReport(models.Model):
     rrname = LowercaseCharField(max_length=100)
@@ -121,7 +122,9 @@ class BaseDataModel(models.Model):
     class Meta:
         abstract = True
 
-    def merge(self, other: Union["BaseDataModel", Dict], append:bool=True) -> "BaseDataModel":
+    def merge(
+        self, other: Union["BaseDataModel", Dict], append: bool = True
+    ) -> "BaseDataModel":
         assert self.pk
         if not isinstance(other, (self.__class__, dict)):
             raise TypeError(f"Different class between {self} and {type(other)}")
@@ -145,11 +148,15 @@ class BaseDataModel(models.Model):
                     continue
                 elif isinstance(field, ForeignKey):
                     if isinstance(other_attr, dict):
-                        other_attr = field.related_model.objects.get_or_create(**other_attr)
+                        other_attr = field.related_model.objects.get_or_create(
+                            **other_attr
+                        )
                     elif isinstance(other_attr, models.Model):
                         pass
                     else:
-                        logger.error(f"Field {field_name} has wrong type with value {other_attr}")
+                        logger.error(
+                            f"Field {field_name} has wrong type with value {other_attr}"
+                        )
                         continue
                     result_attr = other_attr
                 else:
@@ -159,7 +166,6 @@ class BaseDataModel(models.Model):
             setattr(self, field_name, result_attr)
         self.save()
         return self
-
 
     @classmethod
     def get_content_type(cls) -> ContentType:

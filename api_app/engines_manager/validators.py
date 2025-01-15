@@ -1,6 +1,4 @@
 from django.conf import settings
-import os
-
 from django.core.exceptions import ValidationError
 from django.utils.module_loading import import_string
 

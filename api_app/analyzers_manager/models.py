@@ -6,10 +6,8 @@ from typing import Dict, Optional, Type, Union
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import ForeignKey
 
 from api_app.analyzers_manager.constants import (
     HashChoices,
@@ -19,12 +17,7 @@ from api_app.analyzers_manager.constants import (
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager.queryset import AnalyzerReportQuerySet
 from api_app.choices import TLP, PythonModuleBasePaths
-from api_app.data_model_manager.models import (
-    BaseDataModel,
-    DomainDataModel,
-    FileDataModel,
-    IPDataModel,
-)
+from api_app.data_model_manager.models import BaseDataModel
 from api_app.fields import ChoiceArrayField
 from api_app.models import AbstractReport, PythonConfig, PythonModule
 
@@ -62,8 +55,6 @@ class AnalyzerReport(AbstractReport):
             != self.data_model_content_type
         ):
             raise ValidationError("Wrong data model for this report")
-
-
 
     @property
     def data_model_class(self) -> Type[BaseDataModel]:

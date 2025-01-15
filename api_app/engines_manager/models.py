@@ -16,19 +16,17 @@ from intel_owl.celery import get_queue_name
 class EngineConfig(SingletonModel):
     modules = ArrayField(
         models.CharField(
-            max_length=255,
-            null=False,
-            blank=False,
-            validators=[validate_engine_module]
+            max_length=255, null=False, blank=False, validators=[validate_engine_module]
         ),
         null=False,
         blank=True,
         default=list,
-        help_text="List of modules used by the engine. Each module has syntax `name_file.name_class`"
+        help_text="List of modules used by the engine. Each module has syntax `name_file.name_class`",
     )
 
     def get_modules_signatures(self, job) -> Generator[Signature, None, None]:
         from api_app.engines_manager.tasks import execute_engine_module
+
         for path in self.modules:
             yield execute_engine_module.signature(
                 args=[job.pk, f"{settings.BASE_ENGINE_MODULES_PYTHON_PATH}.{path}"],
@@ -38,11 +36,12 @@ class EngineConfig(SingletonModel):
                 priority=job.priority,
             )
 
-
     def run(self, job: Job) -> None:
         from api_app.data_model_manager.models import BaseDataModel
 
-        data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(append=True)
+        data_model_result: BaseDataModel = job.get_analyzers_data_models().merge(
+            append=True
+        )
         if job.data_model:
             job.data_model.delete()
         job.data_model = data_model_result
@@ -54,8 +53,4 @@ class EngineConfig(SingletonModel):
             immutable=True,
             MessageGroupId=str(uuid.uuid4()),
             priority=10,
-
         )
-
-
-

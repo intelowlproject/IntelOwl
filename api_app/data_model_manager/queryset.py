@@ -3,13 +3,13 @@ from typing import Dict, List
 
 from django.db.models import QuerySet
 
-
 if typing.TYPE_CHECKING:
     from api_app.data_model_manager.models import BaseDataModel
 
+
 class BaseDataModelQuerySet(QuerySet):
 
-    def merge(self, append:bool=True) -> "BaseDataModel":
+    def merge(self, append: bool = True) -> "BaseDataModel":
         """
         Base method of merge of multiple data models.
         :return: BaseDataModel

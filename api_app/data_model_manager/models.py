@@ -125,7 +125,8 @@ class BaseDataModel(models.Model):
     def merge(
         self, other: Union["BaseDataModel", Dict], append: bool = True
     ) -> "BaseDataModel":
-        assert self.pk
+        if not self.pk:
+            raise ValueError("Unable to merge a model that was not saved.")
         if not isinstance(other, (self.__class__, dict)):
             raise TypeError(f"Different class between {self} and {type(other)}")
         for field_name, field in self.get_fields().items():

@@ -31,7 +31,7 @@ class EngineConfig(SingletonModel):
         from api_app.engines_manager.tasks import execute_engine_module
         for path in self.modules:
             yield execute_engine_module.signature(
-                args=[job, f"{settings.BASE_ENGINE_MODULES_PYTHON_PATH}.{path}"],
+                args=[job.pk, f"{settings.BASE_ENGINE_MODULES_PYTHON_PATH}.{path}"],
                 queue=get_queue_name(settings.DEFAULT_QUEUE),
                 immutable=True,
                 MessageGroupId=str(uuid.uuid4()),

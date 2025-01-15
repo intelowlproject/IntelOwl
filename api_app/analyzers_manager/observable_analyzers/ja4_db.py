@@ -1,11 +1,10 @@
-import json
 import logging
-import os
 
 import requests
-from django.conf import settings
+from django.db import connection
 
 from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.models import JA4Fingerprint
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -27,11 +26,6 @@ class Ja4DB(classes.ObservableAnalyzer):
         pass
 
     url = " https://ja4db.com/api/read/"
-
-    @classmethod
-    def location(cls) -> str:
-        db_name = "ja4_db.json"
-        return f"{settings.MEDIA_ROOT}/{db_name}"
 
     def check_ja4_fingerprint(self, observable: str) -> str:
         message = ""
@@ -62,32 +56,37 @@ class Ja4DB(classes.ObservableAnalyzer):
 
     @classmethod
     def update(cls):
-        logger.info(f"Updating database from {cls.url}")
+        logger.info(f"Updating table from {cls.url}")
         response = requests.get(url=cls.url)
         response.raise_for_status()
         data = response.json()
-        database_location = cls.location()
 
-        with open(database_location, "w", encoding="utf-8") as f:
-            json.dump(data, f)
-        logger.info(f"Database updated at {database_location}")
+        # Reset Table only if no empty
+        if JA4Fingerprint.objects.count() != 0:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "TRUNCATE TABLE analyzers_manager_ja4fingerprint RESTART IDENTITY CASCADE;"
+                )
+
+        instances = [JA4Fingerprint(**item) for item in data]
+        JA4Fingerprint.objects.bulk_create(instances)
+        logger.info("Table updated")
 
     def run(self):
         reason = self.check_ja4_fingerprint(self.observable_name)
-        if not reason:
+        if reason:
             return {"not_supported": reason}
-
-        database_location = self.location()
-        if not os.path.exists(database_location):
-            logger.info(
-                f"Database does not exist in {database_location}, initialising..."
-            )
+        if JA4Fingerprint.objects.count() == 0:
+            logger.info("Table does not exist, initialising...")
             self.update()
-        with open(database_location, "r") as f:
-            db = json.load(f)
-        for application in db:
-            if application["ja4_fingerprint"] == self.observable_name:
-                return application
+
+        application = (
+            JA4Fingerprint.objects.filter(ja4_fingerprint=self.observable_name)
+            .values()
+            .first()
+        )
+        if application:
+            return application
         return {"found": False}
 
     @classmethod

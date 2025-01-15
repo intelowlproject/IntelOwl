@@ -378,3 +378,23 @@ class AnalyzerConfig(PythonConfig):
     @property
     def config_exception(cls):
         return AnalyzerConfigurationException
+
+
+class JA4Fingerprint(models.Model):
+    application = models.CharField(max_length=255, null=True, blank=True)
+    library = models.CharField(max_length=255, null=True, blank=True)
+    device = models.CharField(max_length=255, null=True, blank=True)
+    os = models.CharField(max_length=255, null=True, blank=True)
+    user_agent_string = models.TextField(null=True, blank=True)
+    certificate_authority = models.CharField(max_length=255, null=True, blank=True)
+    observation_count = models.PositiveIntegerField(default=1)
+    verified = models.BooleanField(default=False)
+    notes = models.TextField(null=True, blank=True)
+    ja4_fingerprint = models.CharField(max_length=255, null=True, blank=True)
+    ja4_fingerprint_string = models.TextField(null=True, blank=True)
+    ja4s_fingerprint = models.CharField(max_length=255, null=True, blank=True)
+    ja4h_fingerprint = models.CharField(max_length=255, null=True, blank=True)
+    ja4x_fingerprint = models.CharField(max_length=255, null=True, blank=True)
+    ja4t_fingerprint = models.CharField(max_length=255, null=True, blank=True)
+    ja4ts_fingerprint = models.CharField(max_length=255, null=True, blank=True)
+    ja4tscan_fingerprint = models.CharField(max_length=255, null=True, blank=True)

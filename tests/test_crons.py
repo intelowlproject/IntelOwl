@@ -7,7 +7,7 @@ from django.utils.timezone import now
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
-from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.analyzers_manager.models import AnalyzerConfig, JA4Fingerprint
 from api_app.analyzers_manager.observable_analyzers import (
     feodo_tracker,
     greynoise_labs,
@@ -239,7 +239,7 @@ class CronTests(CustomTestCase):
     )
     def test_ja4_db_updater(self, mock_get=None):
         ja4_db.Ja4DB.update()
-        self.assertTrue(os.path.exists(ja4_db.Ja4DB.location()))
+        self.assertTrue(JA4Fingerprint.objects.count())
 
     def test_quark_updater(self):
         from quark.config import DIR_PATH

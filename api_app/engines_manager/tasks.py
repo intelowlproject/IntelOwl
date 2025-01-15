@@ -3,6 +3,12 @@ from django.utils.module_loading import import_string
 
 from intel_owl.tasks import FailureLoggedTask
 
+@shared_task(base=FailureLoggedTask, soft_time_limit=300)
+def execute_engine(job_pk:int):
+    from api_app.engines_manager.models import EngineConfig
+
+    EngineConfig.objects.first().run(job_pk)
+
 
 @shared_task(base=FailureLoggedTask, soft_time_limit=300)
 def execute_engine_module(job_pk:int, path:str):

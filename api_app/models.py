@@ -693,6 +693,18 @@ class Job(MP_Node):
     def priority(self):
         return self.user.profile.task_priority
 
+    def _get_engine_signature(self) -> Signature:
+        from engines_manager.tasks import execute_engine
+
+        return execute_engine.signature(
+            args=[self.pk],
+            kwargs={},
+            queue=get_queue_name(settings.CONFIG_QUEUE),
+            immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
+            priority=self.priority,
+        )
+
     def _get_pipeline(
         self,
         analyzers: PythonConfigQuerySet,
@@ -715,6 +727,7 @@ class Job(MP_Node):
                 runner |= self._get_signatures(pivots_connectors)
         if visualizers.exists():
             runner |= self._get_signatures(visualizers)
+        runner |= self._get_engine_signature()
         runner |= self._final_status_signature
         return runner
 

@@ -25,12 +25,13 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 to="contenttypes.contenttype",
+                blank=True,
             ),
         ),
         migrations.AddField(
             model_name="job",
             name="data_model_object_id",
-            field=models.IntegerField(editable=False, null=True),
+            field=models.IntegerField(editable=False, null=True, blank=True),
         ),
         migrations.AddIndex(
             model_name="job",

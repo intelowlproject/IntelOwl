@@ -18,7 +18,6 @@ class EngineConfig(SingletonModel):
         models.CharField(
             max_length=255, null=False, blank=False, validators=[validate_engine_module]
         ),
-        null=False,
         blank=True,
         default=list,
         help_text="List of modules used by the engine. Each module has syntax `name_file.name_class`",

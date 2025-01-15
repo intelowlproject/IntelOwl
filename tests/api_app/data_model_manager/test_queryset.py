@@ -1,18 +1,17 @@
 from django.utils.timezone import now
 
-from api_app.data_model_manager.models import IPDataModel, IETFReport
+from api_app.data_model_manager.models import IETFReport, IPDataModel
 from tests import CustomTestCase
 
 
 class BaseDataModelQuerySetTestCase(CustomTestCase):
     def test_merge(self):
         report1 = IETFReport.objects.create(
-            rrname= "test",
-            rrtype = "test2" ,
-            rdata = ["test3"],
-            time_first = now(),
-            time_last = now(),
-
+            rrname="test",
+            rrtype="test2",
+            rdata=["test3"],
+            time_first=now(),
+            time_last=now(),
         )
         report2 = IETFReport.objects.create(
             rrname="test4",
@@ -20,7 +19,6 @@ class BaseDataModelQuerySetTestCase(CustomTestCase):
             rdata=["test6"],
             time_first=now(),
             time_last=now(),
-
         )
         ip = IPDataModel.objects.create(asn=3)
         ip2 = IPDataModel.objects.create(asn=4, resolutions=["2.2.2.2"])
@@ -32,7 +30,9 @@ class BaseDataModelQuerySetTestCase(CustomTestCase):
         self.assertEqual(ip2.asn, result.asn)
         self.assertEqual(ip3.asn_rank, result.asn_rank)
         self.assertCountEqual(ip2.resolutions + ip3.resolutions, result.resolutions)
-        self.assertCountEqual(result.ietf_report.values_list("pk", flat=True), [report1.pk, report2.pk])
+        self.assertCountEqual(
+            result.ietf_report.values_list("pk", flat=True), [report1.pk, report2.pk]
+        )
         report1.delete()
         report2.delete()
         ip.delete()

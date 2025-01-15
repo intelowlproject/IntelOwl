@@ -4,7 +4,7 @@ from django.utils.timezone import now
 from kombu import uuid
 
 from api_app.analyzers_manager.constants import ObservableTypes
-from api_app.analyzers_manager.models import AnalyzerReport, AnalyzerConfig
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.data_model_manager.models import IPDataModel
 from api_app.engines_manager.models import EngineConfig
 from api_app.models import Job
@@ -14,7 +14,9 @@ from tests import CustomTestCase
 class EngineConfigTestCase(CustomTestCase):
 
     def test_create_multiple_config(self):
-        config = EngineConfig.objects.create(modules=["evaluation.EvaluationEngineModule"])
+        config = EngineConfig.objects.create(
+            modules=["evaluation.EvaluationEngineModule"]
+        )
         with self.assertRaises(Exception):
             with transaction.atomic():
                 EngineConfig.objects.create()
@@ -22,14 +24,18 @@ class EngineConfigTestCase(CustomTestCase):
         config.delete()
 
     def test_clean(self):
-        config = EngineConfig.objects.create(modules=["evaluation.EvaluationEngineModule"])
+        config = EngineConfig.objects.create(
+            modules=["evaluation.EvaluationEngineModule"]
+        )
         config.modules.append("test.Test")
         with self.assertRaises(ValidationError):
             config.full_clean()
         config.delete()
 
     def test_run_empty(self):
-        config = EngineConfig.objects.create(modules=["evaluation.EvaluationEngineModule"])
+        config = EngineConfig.objects.create(
+            modules=["evaluation.EvaluationEngineModule"]
+        )
         job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
@@ -45,7 +51,9 @@ class EngineConfigTestCase(CustomTestCase):
         config.delete()
 
     def test_run_value(self):
-        config = EngineConfig.objects.create(modules=["evaluation.EvaluationEngineModule"])
+        config = EngineConfig.objects.create(
+            modules=["evaluation.EvaluationEngineModule"]
+        )
         job = Job.objects.create(
             user=self.user,
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS.value,
@@ -108,9 +116,7 @@ class EngineConfigTestCase(CustomTestCase):
             evaluation=IPDataModel.EVALUATIONS.MALICIOUS.value,
             resolutions=["1.2.3.4"],
         )
-        ip2 = IPDataModel.objects.create(
-            resolutions = ["1.2.3.5"]
-        )
+        ip2 = IPDataModel.objects.create(resolutions=["1.2.3.5"])
         ar.data_model = ip1
         ar.save()
         ar2.data_model = ip2
@@ -119,8 +125,12 @@ class EngineConfigTestCase(CustomTestCase):
         job.refresh_from_db()
         self.assertEqual(2, job.get_analyzers_data_models().count())
         config.run(job)
-        self.assertEqual(job.data_model.evaluation,job.data_model.EVALUATIONS.MALICIOUS.value )
-        self.assertCountEqual(job.data_model.resolutions,ip1.resolutions + ip2.resolutions)
+        self.assertEqual(
+            job.data_model.evaluation, job.data_model.EVALUATIONS.MALICIOUS.value
+        )
+        self.assertCountEqual(
+            job.data_model.resolutions, ip1.resolutions + ip2.resolutions
+        )
         ar.delete()
         ar2.delete()
         job.delete()

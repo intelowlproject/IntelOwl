@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "api_app.ingestors_manager",
     "api_app.investigations_manager",
     "api_app.data_model_manager",
+    "api_app.engines_manager",
     # auth
     "rest_email_auth",
     # performance debugging

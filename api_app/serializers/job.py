@@ -469,6 +469,10 @@ class JobTreeSerializer(ModelSerializer):
         source="pivot_parent.pivot_config.name", allow_null=True, read_only=True
     )
 
+    evaluation = rfs.CharField(
+        source="data_model.evaluation", allow_null=True, read_only=True
+    )
+
     class Meta:
         model = Job
         fields = [
@@ -479,6 +483,7 @@ class JobTreeSerializer(ModelSerializer):
             "status",
             "received_request_time",
             "is_sample",
+            "evaluation"
         ]
 
     playbook = rfs.SlugRelatedField(
@@ -538,7 +543,7 @@ class JobSerializer(_AbstractJobViewSerializer):
     playbook_to_execute = rfs.SlugRelatedField(read_only=True, slug_field="name")
     investigation = rfs.SerializerMethodField(read_only=True, default=None)
     permissions = rfs.SerializerMethodField()
-
+    data_model = rfs.SerializerMethodField()
     analyzers_data_model = rfs.SerializerMethodField(read_only=True)
 
     def get_pivots_to_execute(self, obj: Job):  # skipcq: PYL-R0201
@@ -569,9 +574,12 @@ class JobSerializer(_AbstractJobViewSerializer):
         return super().get_fields()
 
     def get_analyzers_data_model(self, instance: Job):
-        if instance.observable_classification == ObservableTypes.GENERIC:
-            return []
-        return instance.analyzerreports.get_data_models(instance).serialize()
+        return instance.get_analyzers_data_models().serialize()
+
+    def get_data_model(self, instance: Job):
+        if instance.data_model:
+            return instance.data_model.serialize()
+        return {}
 
 
 class RestJobSerializer(JobSerializer):

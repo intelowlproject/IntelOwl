@@ -1,5 +1,6 @@
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework.relations import SlugRelatedField
+from rest_framework.serializers import ModelSerializer
 
 from api_app.data_model_manager.models import (
     DomainDataModel,
@@ -9,17 +10,24 @@ from api_app.data_model_manager.models import (
     Signature,
 )
 
-
 class IETFReportSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = IETFReport
         fields = "__all__"
+
+    def create(self, validated_data):
+        instance, _ = self.Meta.model.objects.get_or_create(**validated_data)
+        return instance
 
 
 class SignatureSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = Signature
         fields = "__all__"
+
+    def create(self, validated_data):
+        instance, _  = self.Meta.model.objects.get_or_create(**validated_data)
+        return instance
 
 
 class DomainDataModelSerializer(FlexFieldsModelSerializer):

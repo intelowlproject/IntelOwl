@@ -63,24 +63,11 @@ class AnalyzerReport(AbstractReport):
         ):
             raise ValidationError("Wrong data model for this report")
 
-    @classmethod
-    def get_data_model_class(cls, job) -> Type[BaseDataModel]:
-        if job.is_sample or job.observable_classification == ObservableTypes.HASH.value:
-            return FileDataModel
-        if job.observable_classification == ObservableTypes.IP.value:
-            return IPDataModel
-        if job.observable_classification in [
-            ObservableTypes.DOMAIN.value,
-            ObservableTypes.URL.value,
-        ]:
-            return DomainDataModel
-        raise NotImplementedError(
-            f"Unable to find data model for {job.observable_classification}"
-        )
+
 
     @property
     def data_model_class(self) -> Type[BaseDataModel]:
-        return self.get_data_model_class(self.job)
+        return self.job.get_data_model_class()
 
     def _validation_before_data_model(self) -> bool:
         if not self.status == self.STATUSES.SUCCESS.value:
@@ -115,7 +102,6 @@ class AnalyzerReport(AbstractReport):
         result = {"malware_family": "MalwareFamily"}.
         """
         result = {}
-        data_model_fields = self.data_model_class.get_fields()
         logger.debug(f"Mapping is {json.dumps(self.config.mapping_data_model)}")
         for report_key, data_model_key in self.config.mapping_data_model.items():
             # this is a constant
@@ -130,40 +116,18 @@ class AnalyzerReport(AbstractReport):
                     # validation
                     self.errors.append(f"Field {report_key} not available in report")
                     continue
-
-            # create the related object if necessary
-            if isinstance(data_model_fields[data_model_key], ForeignKey):
-                # to create an object we need at least a dictionary
-                if not isinstance(value, dict):
-                    self.errors.append(
-                        f"Field {report_key} has type {type(report_key)} while a dictionary is expected"
-                    )
-                    continue
-                value, _ = data_model_fields[
-                    data_model_key
-                ].related_model.objects.get_or_create(**value)
-                result[data_model_key] = value
-            elif isinstance(data_model_fields[data_model_key], ArrayField):
-                if data_model_key not in result:
-                    result[data_model_key] = []
-                if isinstance(value, list):
-                    result[data_model_key].extend(value)
-                elif isinstance(value, dict):
-                    result[data_model_key].extend(list(value.keys()))
-                else:
-                    result[data_model_key].append(value)
-            else:
-                result[data_model_key] = value
+            result[data_model_key] = value
         return result
 
     def create_data_model(self) -> Optional[BaseDataModel]:
         if not self._validation_before_data_model():
             return None
         dictionary = self._create_data_model_dictionary()
-        data_model = self.data_model_class.objects.create(**dictionary)
-        self.data_model = data_model
+
+        self.data_model: BaseDataModel = self.data_model_class.objects.create()
+        self.data_model.merge(dictionary)
         self.save()
-        return data_model
+        return self.data_model
 
 
 class MimeTypes(models.TextChoices):

@@ -61,14 +61,14 @@ class Crowdsec(ObservableAnalyzer):
                     self.report.data_model_class.EVALUATIONS.CLEAN.value
                 )
             elif "Proxy" in label or "VPN" in label:
-                data_model.tags = [DataModelTags.ANONYMIZER]
+                data_model.tags = [DataModelTags.ANONYMIZER.value]
                 data_model.evaluation = (
                     self.report.data_model_class.EVALUATIONS.CLEAN.value
                 )
             elif label in ["TOR exit node"]:
                 data_model.tags = [
-                    DataModelTags.ANONYMIZER,
-                    DataModelTags.TOR_EXIT_NODE,
+                    DataModelTags.ANONYMIZER.value,
+                    DataModelTags.TOR_EXIT_NODE.value,
                 ]
                 data_model.evaluation = (
                     self.report.data_model_class.EVALUATIONS.CLEAN.value

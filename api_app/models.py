@@ -12,8 +12,11 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
 from django_celery_beat.models import ClockedSchedule, CrontabSchedule, PeriodicTask
+from solo.models import SingletonModel
 from treebeard.mp_tree import MP_Node
 
+from api_app.data_model_manager.models import DomainDataModel, IPDataModel, FileDataModel, BaseDataModel
+from api_app.data_model_manager.queryset import BaseDataModelQuerySet
 from api_app.interfaces import OwnershipAbstractModel
 
 if TYPE_CHECKING:
@@ -325,7 +328,9 @@ class Job(MP_Node):
 
     class Meta:
         indexes = [
-            models.Index(
+        models.Index(fields=["data_model_content_type", "data_model_object_id"]),
+
+        models.Index(
                 fields=[
                     "md5",
                     "status",
@@ -436,6 +441,18 @@ class Job(MP_Node):
         null=True, blank=True, default=datetime.timedelta(hours=24)
     )
     sent_to_bi = models.BooleanField(editable=False, default=False)
+    data_model_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to={
+            "app_label": "data_model_manager",
+        },
+        null=True,
+        editable=False,
+    )
+    data_model_object_id = models.IntegerField(null=True, editable=False)
+    data_model = GenericForeignKey("data_model_content_type", "data_model_object_id")
+
 
     def __str__(self):
         return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
@@ -711,6 +728,23 @@ class Job(MP_Node):
             self.visualizers_to_execute.all(),
         )
         runner()
+
+    def get_data_model_class(self) -> Type[BaseDataModel]:
+        if self.is_sample or self.observable_classification == ObservableClassification.HASH.value:
+            return FileDataModel
+        if self.observable_classification == ObservableClassification.IP.value:
+            return IPDataModel
+        if self.observable_classification in [
+            ObservableClassification.DOMAIN.value,
+            ObservableClassification.URL.value,
+        ]:
+            return DomainDataModel
+        raise NotImplementedError(
+            f"Unable to find data model for {self.observable_classification}"
+        )
+
+    def get_analyzers_data_models(self) -> BaseDataModelQuerySet:
+        return self.analyzerreports.get_data_models(self)
 
     def get_config_runtime_configuration(self, config: "AbstractConfig") -> typing.Dict:
         try:
@@ -1798,26 +1832,6 @@ class PythonConfig(AbstractConfig):
             self.save()
 
 
-class SingletonModel(models.Model):
-    """Singleton base class.
-    Singleton is a desing pattern that allow only one istance of a class.
-    """
-
-    class Meta:
-        abstract = True
-        constraints = [
-            models.CheckConstraint(
-                check=Q(pk=1),
-                name="singleton",
-                violation_error_message="This class is a singleton: only one object is allowed",
-            ),
-        ]
-
-    def save(self, *args, **kwargs):
-        # check required to delete the singleton instance and create a new one
-        if type(self).objects.count() == 0:
-            self.pk = 1
-        super().save(*args, **kwargs)
 
 
 class LastElasticReportUpdate(SingletonModel):

@@ -41,7 +41,7 @@ class URLHaus(AbuseCHMixin, ObservableAnalyzer):
         response = requests.post(
             self.url + uri,
             data=post_data,
-            headers=self.get_compiled_authentication_header() | headers,
+            headers=self.authentication_header | headers,
         )
         response.raise_for_status()
 

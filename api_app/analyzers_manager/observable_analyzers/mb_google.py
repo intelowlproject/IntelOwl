@@ -25,7 +25,7 @@ class MB_GOOGLE(MB_GET):
             mb_hash = url.split("/")[-2]
             res = super().query_mb_api(
                 observable_name=mb_hash,
-                headers=self.get_compiled_authentication_header(),
+                headers=self.authentication_header,
             )
             results[mb_hash] = res
 

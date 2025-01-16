@@ -31,7 +31,7 @@ class YARAify(AbuseCHMixin, ObservableAnalyzer):
             data["malpedia-token"] = self._api_key_name
 
         response = requests.post(
-            self.url, json=data, headers=self.get_compiled_authentication_header()
+            self.url, json=data, headers=self.authentication_header
         )
         response.raise_for_status()
 

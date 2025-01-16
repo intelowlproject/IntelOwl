@@ -31,7 +31,7 @@ class ThreatFox(AbuseCHMixin, classes.ObservableAnalyzer):
         response = requests.post(
             self.url,
             data=json.dumps(payload),
-            headers=self.get_compiled_authentication_header(),
+            headers=self.authentication_header,
         )
         response.raise_for_status()
 

@@ -22,14 +22,11 @@ class ThreatFox(AbuseCHMixin, Ingestor):
     def update(cls) -> bool:
         pass
 
-    def config(self, runtime_configuration: {}):
-        super().config(runtime_configuration)
-
     def run(self) -> Iterable[Any]:
         result = requests.post(
             self.url,
             json={"query": "get_iocs", "days": self.days},
-            headers=self.get_compiled_authentication_header(),
+            headers=self.authentication_header,
         )
         result.raise_for_status()
         content = result.json()

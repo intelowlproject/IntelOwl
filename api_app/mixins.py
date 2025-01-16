@@ -676,14 +676,11 @@ class VirusTotalv3AnalyzerMixin(
 class AbuseCHMixin:
     # API key to access abuse.ch services
     _service_api_key: str
-    authentication_header: dict = {}
 
-    def get_compiled_authentication_header(self):
-        if not self.authentication_header:
-            self.authentication_header = {}
-
+    @property
+    def authentication_header(self) -> dict:
         if self._service_api_key:
             logger.debug("Found auth key for abuse.ch request")
-            self.authentication_header.setdefault("Auth-Key", self._service_api_key)
+            return {"Auth-Key": self._service_api_key}
 
-        return self.authentication_header
+        return {}

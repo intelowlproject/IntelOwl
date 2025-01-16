@@ -52,7 +52,9 @@ WORKDIR $PYTHONPATH
 
 RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
     && pip3 install --no-cache-dir pycti==${PYCTI_VERSION} \
-    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
+    && pip3 install --no-cache-dir --compile -r certego-requirements.txt 
+
+RUN pip3 install abuse_whois==0.10.1 
 
 COPY . $PYTHONPATH
 

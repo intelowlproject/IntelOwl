@@ -13,6 +13,7 @@ from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.choices import ObservableClassification
+from api_app.classes import Plugin
 from certego_saas.ext.pagination import CustomPageNumberPagination
 
 logger = logging.getLogger(__name__)
@@ -673,7 +674,7 @@ class VirusTotalv3AnalyzerMixin(
         return result
 
 
-class AbuseCHMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
+class AbuseCHMixin(Plugin, metaclass=abc.ABCMeta):
     # API key to access abuse.ch services
     _service_api_key: str
     authentication_header: dict = {}

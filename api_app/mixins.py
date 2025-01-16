@@ -678,10 +678,12 @@ class AbuseCHMixin:
     _service_api_key: str
     authentication_header: dict = {}
 
-    def get_authentication_header(self):
+    def get_compiled_authentication_header(self):
         if not self.authentication_header:
             self.authentication_header = {}
 
         if self._service_api_key:
             logger.debug("Found auth key for abuse.ch request")
             self.authentication_header.setdefault("Auth-Key", self._service_api_key)
+
+        return self.authentication_header

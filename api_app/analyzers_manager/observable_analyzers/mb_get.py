@@ -21,7 +21,7 @@ class MB_GET(AbuseCHMixin, classes.ObservableAnalyzer):
     def run(self):
         return self.query_mb_api(
             observable_name=self.observable_name,
-            headers=self.get_authentication_header(),
+            headers=self.get_compiled_authentication_header(),
         )
 
     @classmethod

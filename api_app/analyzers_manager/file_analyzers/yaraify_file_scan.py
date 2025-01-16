@@ -13,13 +13,12 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
-from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class YARAifyFileScan(AbuseCHMixin, FileAnalyzer, YARAify):
+class YARAifyFileScan(FileAnalyzer, YARAify):
     _api_key_identifier: str
     clamav_scan: bool
     unpack: bool
@@ -31,7 +30,6 @@ class YARAifyFileScan(AbuseCHMixin, FileAnalyzer, YARAify):
         pass
 
     def config(self, runtime_configuration: dict):
-        AbuseCHMixin.config(self, runtime_configuration)
         FileAnalyzer.config(self, runtime_configuration)
         self.query = "lookup_hash"
         YARAify.config(self, runtime_configuration)

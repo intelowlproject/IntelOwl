@@ -18,6 +18,9 @@ class YARAify(AbuseCHMixin, ObservableAnalyzer):
     result_max: int
     _api_key_name: str
 
+    def update(cls) -> bool:
+        pass
+
     def config(self, runtime_configuration: dict):
         super().config(runtime_configuration)
 

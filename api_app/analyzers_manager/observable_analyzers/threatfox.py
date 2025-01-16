@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 class ThreatFox(AbuseCHMixin, classes.ObservableAnalyzer):
     url: str = "https://threatfox-api.abuse.ch/api/v1/"
     disable: bool = False  # optional
-    # API key to access abuse.ch services
-    _service_api_key: str
 
     def update(self) -> bool:
         pass

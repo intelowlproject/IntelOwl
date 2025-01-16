@@ -35,15 +35,6 @@ class AbstractBIInterface(BISerializer):
         return instance.__class__.__name__.lower()
 
     @staticmethod
-    def get_environment(instance):
-        if settings.STAGE_PRODUCTION:
-            return "prod"
-        elif settings.STAGE_STAGING:
-            return "stag"
-        else:
-            return "test"
-
-    @staticmethod
     def get_index():
         return settings.ELASTICSEARCH_BI_INDEX
 

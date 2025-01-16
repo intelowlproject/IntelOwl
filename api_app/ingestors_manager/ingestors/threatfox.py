@@ -29,7 +29,7 @@ class ThreatFox(AbuseCHMixin, Ingestor):
         result = requests.post(
             self.url,
             json={"query": "get_iocs", "days": self.days},
-            headers=self.authentication_header,
+            headers=self.get_authentication_header(),
         )
         result.raise_for_status()
         content = result.json()

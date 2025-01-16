@@ -18,12 +18,10 @@ class MB_GET(AbuseCHMixin, classes.ObservableAnalyzer):
     def update(self) -> bool:
         pass
 
-    def config(self, runtime_configuration: dict):
-        super().config(runtime_configuration)
-
     def run(self):
         return self.query_mb_api(
-            observable_name=self.observable_name, headers=self.authentication_header
+            observable_name=self.observable_name,
+            headers=self.get_authentication_header(),
         )
 
     @classmethod

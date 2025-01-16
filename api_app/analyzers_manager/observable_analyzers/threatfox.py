@@ -22,9 +22,6 @@ class ThreatFox(AbuseCHMixin, classes.ObservableAnalyzer):
     def update(self) -> bool:
         pass
 
-    def config(self, runtime_configuration: dict):
-        super().config(runtime_configuration)
-
     def run(self):
         if self.disable:
             return {"disabled": True}
@@ -32,7 +29,7 @@ class ThreatFox(AbuseCHMixin, classes.ObservableAnalyzer):
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
         response = requests.post(
-            self.url, data=json.dumps(payload), headers=self.authentication_header
+            self.url, data=json.dumps(payload), headers=self.get_authentication_header()
         )
         response.raise_for_status()
 

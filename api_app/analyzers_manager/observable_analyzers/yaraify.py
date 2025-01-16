@@ -21,9 +21,6 @@ class YARAify(AbuseCHMixin, ObservableAnalyzer):
     def update(self) -> bool:
         pass
 
-    def config(self, runtime_configuration: dict):
-        super().config(runtime_configuration)
-
     def run(self):
         data = {"search_term": self.observable_name, "query": self.query}
 
@@ -34,7 +31,7 @@ class YARAify(AbuseCHMixin, ObservableAnalyzer):
             data["malpedia-token"] = self._api_key_name
 
         response = requests.post(
-            self.url, json=data, headers=self.authentication_header
+            self.url, json=data, headers=self.get_authentication_header()
         )
         response.raise_for_status()
 

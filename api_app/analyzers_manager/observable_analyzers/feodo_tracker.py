@@ -67,9 +67,6 @@ class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
             raise AnalyzerRunException(f"Key error in run: {e}")
         return result
 
-    def config(self, runtime_configuration: dict):
-        super().config(runtime_configuration)
-
     @classmethod
     def get_service_auth_headers(cls) -> {}:
         for plugin in PluginConfig.objects.filter(

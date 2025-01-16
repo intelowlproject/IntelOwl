@@ -15,14 +15,9 @@ logger = logging.getLogger(__name__)
 class URLHaus(AbuseCHMixin, ObservableAnalyzer):
     url = "https://urlhaus-api.abuse.ch/v1/"
     disable: bool = False  # optional
-    # API key to access abuse.ch services
-    _service_api_key: str
 
     def update(self) -> bool:
         pass
-
-    def config(self, runtime_configuration: {}):
-        super().config(runtime_configuration)
 
     def run(self):
         if self.disable:
@@ -44,7 +39,9 @@ class URLHaus(AbuseCHMixin, ObservableAnalyzer):
             )
 
         response = requests.post(
-            self.url + uri, data=post_data, headers=self.authentication_header | headers
+            self.url + uri,
+            data=post_data,
+            headers=self.get_authentication_header() | headers,
         )
         response.raise_for_status()
 

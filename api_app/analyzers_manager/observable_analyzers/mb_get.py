@@ -5,36 +5,36 @@ import logging
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class MB_GET(classes.ObservableAnalyzer):
+class MB_GET(AbuseCHMixin, classes.ObservableAnalyzer):
     url: str = "https://mb-api.abuse.ch/api/v1/"
     sample_url: str = "https://bazaar.abuse.ch/sample/"
-    # API key to access abuse.ch services
-    _service_api_key: str
 
     def update(self) -> bool:
         pass
 
+    def config(self, runtime_configuration: dict):
+        super().config(runtime_configuration)
+
     def run(self):
         return self.query_mb_api(
-            observable_name=self.observable_name, service_api_key=self._service_api_key
+            observable_name=self.observable_name, headers=self.authentication_header
         )
 
     @classmethod
-    def query_mb_api(cls, observable_name: str, service_api_key: str = None) -> dict:
+    def query_mb_api(cls, observable_name: str, headers: dict = None) -> dict:
         """
         This is in a ``classmethod`` so it can be reused in ``MB_GOOGLE``.
         """
         post_data = {"query": "get_info", "hash": observable_name}
 
-        headers = {}
-        if service_api_key:
-            logger.debug("Found auth key for MB request")
-            headers.setdefault("Auth-Key", service_api_key)
+        if headers is None:
+            headers = {}
 
         response = requests.post(cls.url, data=post_data, headers=headers)
         response.raise_for_status()

@@ -671,3 +671,17 @@ class VirusTotalv3AnalyzerMixin(
         result["link"] = f"https://www.virustotal.com/gui/{uri_prefix}/{uri_postfix}"
 
         return result
+
+
+class AbuseCHMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
+    # API key to access abuse.ch services
+    _service_api_key: str
+    authentication_header: dict = {}
+
+    def config(self, runtime_configuration: dict):
+        super().config(runtime_configuration)
+
+        self.authentication_header = {}
+        if self._service_api_key:
+            logger.debug("Found auth key for abuse.ch request")
+            self.authentication_header.setdefault("Auth-Key", self._service_api_key)

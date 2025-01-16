@@ -11,13 +11,14 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.mixins import AbuseCHMixin
 from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class Feodo_Tracker(classes.ObservableAnalyzer):
+class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
     """
     Feodo Tracker offers various blocklists,
     helping network owners to protect their
@@ -26,8 +27,6 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
 
     use_recommended_url: bool
     update_on_run: bool = True
-    # API key to access abuse.ch services
-    _service_api_key: str
 
     @classmethod
     @property
@@ -67,6 +66,9 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
         except KeyError as e:
             raise AnalyzerRunException(f"Key error in run: {e}")
         return result
+
+    def config(self, runtime_configuration: dict):
+        super().config(runtime_configuration)
 
     @classmethod
     def get_service_auth_headers(cls) -> {}:

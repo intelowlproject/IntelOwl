@@ -5,19 +5,21 @@ import logging
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class YARAify(ObservableAnalyzer):
+class YARAify(AbuseCHMixin, ObservableAnalyzer):
     url: str = "https://yaraify-api.abuse.ch/api/v1/"
 
     query: str
     result_max: int
     _api_key_name: str
-    # API key to access abuse.ch services
-    _service_api_key: str
+
+    def config(self, runtime_configuration: dict):
+        super().config(runtime_configuration)
 
     def run(self):
         data = {"search_term": self.observable_name, "query": self.query}
@@ -28,12 +30,9 @@ class YARAify(ObservableAnalyzer):
         if getattr(self, "_api_key_name", None):
             data["malpedia-token"] = self._api_key_name
 
-        headers = {}
-        if self._service_api_key:
-            logger.debug("Found auth key for YARAify request")
-            headers.setdefault("Auth-Key", self._service_api_key)
-
-        response = requests.post(self.url, json=data, headers=headers)
+        response = requests.post(
+            self.url, json=data, headers=self.authentication_header
+        )
         response.raise_for_status()
 
         result = response.json()

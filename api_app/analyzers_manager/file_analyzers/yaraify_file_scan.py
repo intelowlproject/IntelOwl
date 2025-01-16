@@ -4,7 +4,6 @@
 import json
 import logging
 import time
-from typing import Dict
 
 import requests
 
@@ -14,25 +13,25 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerRunException,
 )
 from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class YARAifyFileScan(FileAnalyzer, YARAify):
+class YARAifyFileScan(AbuseCHMixin, FileAnalyzer, YARAify):
     _api_key_identifier: str
     clamav_scan: bool
     unpack: bool
     share_file: bool
     skip_noisy: bool
     skip_known: bool
-    # API key to access abuse.ch services
-    _service_api_key: str
 
     def update(self) -> bool:
         pass
 
-    def config(self, runtime_configuration: Dict):
+    def config(self, runtime_configuration: dict):
+        AbuseCHMixin.config(self, runtime_configuration)
         FileAnalyzer.config(self, runtime_configuration)
         self.query = "lookup_hash"
         YARAify.config(self, runtime_configuration)
@@ -46,11 +45,6 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
             raise AnalyzerConfigurationException(
                 "Unable to send file without having api_key_identifier set"
             )
-
-        self.headers = {}
-        if self._service_api_key:
-            logger.debug("Found auth key for YARAify file request")
-            self.headers.setdefault("Auth-Key", self._service_api_key)
 
     def run(self):
         name_to_send = self.filename if self.filename else self.md5
@@ -83,7 +77,9 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                 "file": (name_to_send, file),
             }
             logger.info(f"yara file scan md5 {self.md5} sending sample for analysis")
-            response = requests.post(self.url, files=files_, headers=self.headers)
+            response = requests.post(
+                self.url, files=files_, headers=self.authentication_header
+            )
             response.raise_for_status()
             scan_response = response.json()
             scan_query_status = scan_response.get("query_status")
@@ -103,7 +99,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                         )
                         data = {"query": "get_results", "task_id": task_id}
                         response = requests.post(
-                            self.url, json=data, headers=self.headers
+                            self.url, json=data, headers=self.authentication_header
                         )
                         response.raise_for_status()
                         task_response = response.json()

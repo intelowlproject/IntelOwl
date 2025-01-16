@@ -7,12 +7,13 @@ import logging
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatFox(classes.ObservableAnalyzer):
+class ThreatFox(AbuseCHMixin, classes.ObservableAnalyzer):
     url: str = "https://threatfox-api.abuse.ch/api/v1/"
     disable: bool = False  # optional
     # API key to access abuse.ch services
@@ -21,18 +22,18 @@ class ThreatFox(classes.ObservableAnalyzer):
     def update(self) -> bool:
         pass
 
+    def config(self, runtime_configuration: dict):
+        super().config(runtime_configuration)
+
     def run(self):
         if self.disable:
             return {"disabled": True}
 
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
-        headers = {}
-        if self._service_api_key:
-            logger.debug("Found auth key for threatfox request")
-            headers.setdefault("Auth-Key", self._service_api_key)
-
-        response = requests.post(self.url, data=json.dumps(payload), headers=headers)
+        response = requests.post(
+            self.url, data=json.dumps(payload), headers=self.authentication_header
+        )
         response.raise_for_status()
 
         result = response.json()

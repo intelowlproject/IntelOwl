@@ -6,18 +6,17 @@ import requests
 
 from api_app.ingestors_manager.classes import Ingestor
 from api_app.ingestors_manager.exceptions import IngestorRunException
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatFox(Ingestor):
+class ThreatFox(AbuseCHMixin, Ingestor):
     # API endpoint
     url = "https://threatfox-api.abuse.ch/api/v1/"
     # Days to check. From 1 to 7
     days: int
-    # API key to access abuse.ch services
-    _service_api_key: str
 
     @classmethod
     def update(cls) -> bool:
@@ -26,16 +25,11 @@ class ThreatFox(Ingestor):
     def config(self, runtime_configuration: {}):
         super().config(runtime_configuration)
 
-        self.headers = {}
-        if self._service_api_key:
-            logger.debug("Found auth key for threatfox request")
-            self.headers.setdefault("Auth-Key", self._service_api_key)
-
     def run(self) -> Iterable[Any]:
         result = requests.post(
             self.url,
             json={"query": "get_iocs", "days": self.days},
-            headers=self.headers,
+            headers=self.authentication_header,
         )
         result.raise_for_status()
         content = result.json()

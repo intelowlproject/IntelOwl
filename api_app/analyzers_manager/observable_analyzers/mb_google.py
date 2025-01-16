@@ -17,6 +17,9 @@ class MB_GOOGLE(MB_GET):
     def update(self) -> bool:
         pass
 
+    def config(self, runtime_configuration: dict):
+        super().config(runtime_configuration)
+
     def run(self):
         results = {}
 
@@ -24,7 +27,7 @@ class MB_GOOGLE(MB_GET):
         for url in googlesearch.search(query, stop=20):
             mb_hash = url.split("/")[-2]
             res = super().query_mb_api(
-                observable_name=mb_hash, service_api_key=self._service_api_key
+                observable_name=mb_hash, headers=self.authentication_header
             )
             results[mb_hash] = res
 

@@ -5,6 +5,7 @@ from random import randint
 from typing import Iterator
 
 from selenium.common import WebDriverException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -152,13 +153,18 @@ class DriverWrapper:
         self.last_url = url
         logger.info(f"{self._driver.session_id}: Navigating to {url=}")
         self._driver.get(url)
-        # dinamically wait for page to load its content with a fallback
-        # of `timeout_wait_page` seconds.
-        # waiting to see if any visible input tag appears
+        # dinamically wait for page to load its content with a fallback of
+        # `timeout_wait_page` seconds. waiting for any visible input tag to appear
         if timeout_wait_page:
-            WebDriverWait(self._driver, timeout=timeout_wait_page).until(
-                EC.visibility_of_any_elements_located((By.TAG_NAME, "input"))
-            )
+            try:
+                WebDriverWait(self._driver, timeout=timeout_wait_page).until(
+                    EC.visibility_of_any_elements_located((By.TAG_NAME, "input"))
+                )
+            except TimeoutException:
+                logger.info(
+                    "Timeout for input tag to appear exceeded! "
+                    "This could mean that the page has no input tag to compile!"
+                )
 
     @driver_exception_handler
     def get_page_source(self) -> str:

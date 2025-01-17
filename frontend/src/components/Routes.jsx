@@ -15,15 +15,18 @@ const ResetPassword = React.lazy(() => import("./auth/ResetPassword"));
 const Organization = React.lazy(() => import("./organization/Organization"));
 const TokenPage = React.lazy(() => import("./user/token/TokenPage"));
 const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
+const PhishingAnalysis = React.lazy(() =>
+  import("./investigations/PhishingAnalysis")
+);
 const CommentResult = React.lazy(
-  () => import("./jobs/result/bar/comment/CommentResult"),
+  () => import("./jobs/result/bar/comment/CommentResult")
 );
 const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
 const ChangePassword = React.lazy(() => import("./auth/ChangePassword"));
 const InvestigationResult = React.lazy(
-  () => import("./investigations/result/InvestigationResult"),
+  () => import("./investigations/result/InvestigationResult")
 );
 const History = React.lazy(() => import("./History"));
 const Search = React.lazy(() => import("./search/Search"));
@@ -210,6 +213,15 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <Search />
+      </Suspense>
+    ),
+  },
+  /* Phishing Analysis */
+  {
+    path: "/visualizer/phishing",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PhishingAnalysis />
       </Suspense>
     ),
   },

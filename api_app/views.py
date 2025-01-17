@@ -5,6 +5,8 @@ import datetime
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
+from django.views import View
+from django.http import HttpResponse
 
 from django.conf import settings
 from django.db.models import Count, Q
@@ -390,6 +392,28 @@ class CommentViewSet(ModelViewSet):
             permissions.append(IsObjectUserOrSameOrgPermission())
 
         return permissions
+class PhishingAnalysisDownloadView(View):
+
+    def get(self, request, *args, **kwargs):
+        # Path where the file will be temporarily stored
+        file_path = "/tmp/phishing_analysis.zip"  # Update as needed for other environments
+
+        # Create a dummy phishing analysis report
+        with zipfile.ZipFile(file_path, 'w') as zf:
+            zf.writestr("phishing_analysis.txt", "Sample Phishing Analysis Report")
+
+        # Serve the generated file as an HTTP response
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type="application/zip")
+            response['Content-Disposition'] = 'attachment; filename="phishing_analysis.zip"'
+
+        # Optional: Cleanup the temporary file after serving
+        try:
+            os.remove(file_path)
+        except OSError:
+            pass  # Handle any cleanup errors silently
+
+        return response
 
     def get_queryset(self):
         """

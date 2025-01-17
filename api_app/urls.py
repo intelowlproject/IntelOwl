@@ -17,6 +17,7 @@ from .views import (
     ask_analysis_availability,
     ask_multi_analysis_availability,
     plugin_state_viewer,
+    PhishingAnalysisDownloadView,
 )
 
 # Routers provide an easy way of automatically determining the URL conf.
@@ -32,6 +33,7 @@ urlpatterns = [
     path("ask_analysis_availability", ask_analysis_availability),
     path("ask_multi_analysis_availability", ask_multi_analysis_availability),
     path("analyze_file", analyze_file),
+    path('phishing-analysis/download/', PhishingAnalysisDownloadView.as_view(), name='phishing_analysis_download'),
     path(
         "analyze_multiple_files", analyze_multiple_files, name="analyze_multiple_files"
     ),

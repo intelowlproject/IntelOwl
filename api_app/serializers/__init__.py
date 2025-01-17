@@ -6,6 +6,7 @@ from rest_framework.fields import Field
 from api_app.interfaces import OwnershipAbstractModel
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.ext.upload.elastic import BISerializer
+from intel_owl.settings._util import get_environment
 
 
 class AbstractBIInterface(BISerializer):
@@ -33,6 +34,10 @@ class AbstractBIInterface(BISerializer):
     @staticmethod
     def get_class_instance(instance):
         return instance.__class__.__name__.lower()
+
+    @staticmethod
+    def get_environment(instance):
+        return get_environment()
 
     @staticmethod
     def get_index():

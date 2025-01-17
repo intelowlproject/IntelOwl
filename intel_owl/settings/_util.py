@@ -13,20 +13,6 @@ logger = logging.getLogger(__name__)
 
 get_secret = os.environ.get
 
-
-# Fallback to current user's UID and GID if 'www-data' is not found
-try:
-    uid = pwd.getpwnam("www-data").pw_uid
-except KeyError:
-    uid = os.getuid()
-    logger.warning("'www-data' user not found. Using current user's UID: %s", uid)
-
-try:
-    gid = grp.getgrnam("www-data").gr_gid
-except KeyError:
-    gid = os.getgid()
-    logger.warning("'www-data' group not found. Using current user's GID: %s", gid)
-
 def set_permissions(directory: Path, force_create: bool = False):
     if not directory.exists():
         # this may happen in case we have added a new directory in the Dockerfile

@@ -15,6 +15,8 @@ get_secret = os.environ.get
 
 uid = pwd.getpwnam("www-data").pw_uid
 gid = grp.getgrnam("www-data").gr_gid
+
+
 def set_permissions(directory: Path, force_create: bool = False):
     if not directory.exists():
         # this may happen in case we have added a new directory in the Dockerfile

@@ -396,7 +396,7 @@ class PhishingAnalysisDownloadView(View):
 
     def get(self, request, *args, **kwargs):
         # Path where the file will be temporarily stored
-        file_path = "/tmp/phishing_analysis.zip"  # Update as needed for other environments
+        file_path = "/tmp/phishing_analysis.zip"  
 
         # Create a dummy phishing analysis report
         with zipfile.ZipFile(file_path, 'w') as zf:

@@ -181,3 +181,35 @@ thead {
 input[type="file"]::file-selector-button {
   background-color: $primary;
 }
+.phishing-analysis-container {
+  text-align: center;
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.phishing-analysis-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.phishing-analysis-container p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}

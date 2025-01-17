@@ -5,7 +5,10 @@ from django.db import migrations
 
 def migrate(apps, schema_editor):
     EngineConfig = apps.get_model("engines_manager", "EngineConfig")
-    EngineConfig.objects.create(modules=["evaluation.EvaluationEngineModule"])
+    if not EngineConfig.objects.exists():
+        EngineConfig.objects.create(
+            modules=["malware_family.MalwareFamilyEngineModule"]
+        )
 
 
 class Migration(migrations.Migration):

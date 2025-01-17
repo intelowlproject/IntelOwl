@@ -67,6 +67,8 @@ class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
             raise AnalyzerRunException(f"Key error in run: {e}")
         return result
 
+    # this is necessary because during the "update()" flow the config()
+    # method is not called and the attributes would not be accessible by "cls"
     @classmethod
     def get_service_auth_headers(cls) -> {}:
         for plugin in PluginConfig.objects.filter(

@@ -15,12 +15,7 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
     def update(cls) -> bool:
         pass
 
-    def _clean_contact_info(self, contact):
-        """Remove null values and replace with REDACTED if appropriate"""
-        if not any(contact.values()):
-            return {"status": "REDACTED FOR PRIVACY"}
-        return {k: v for k, v in contact.items() if v is not None}
-
+    @staticmethod
     def _parse_raw_whois_text(self, raw_text):
         """Extract network information from raw WHOIS text"""
         info = {}
@@ -109,68 +104,62 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
                 ),
             },
             "contacts": {
-                "registrant": self._clean_contact_info(
-                    {
-                        "organization": (
-                            result.records.domain.registrant.organization
-                            if result.records.domain
-                            else None
-                        ),
-                        "email": (
-                            result.records.domain.registrant.email
-                            if result.records.domain
-                            else None
-                        ),
-                        "name": (
-                            result.records.domain.registrant.name
-                            if result.records.domain
-                            else None
-                        ),
-                        "telephone": (
-                            result.records.domain.registrant.telephone
-                            if result.records.domain
-                            else None
-                        ),
-                    }
-                ),
-                "abuse": self._clean_contact_info(
-                    {
-                        "email": (
-                            result.records.domain.abuse.email
-                            if result.records.domain
-                            else None
-                        ),
-                        "telephone": (
-                            result.records.domain.abuse.telephone
-                            if result.records.domain
-                            else None
-                        ),
-                    }
-                ),
-                "technical": self._clean_contact_info(
-                    {
-                        "organization": (
-                            result.records.domain.tech.organization
-                            if result.records.domain
-                            else None
-                        ),
-                        "email": (
-                            result.records.domain.tech.email
-                            if result.records.domain
-                            else None
-                        ),
-                        "name": (
-                            result.records.domain.tech.name
-                            if result.records.domain
-                            else None
-                        ),
-                        "telephone": (
-                            result.records.domain.tech.telephone
-                            if result.records.domain
-                            else None
-                        ),
-                    }
-                ),
+                "registrant": {
+                    "organization": (
+                        result.records.domain.registrant.organization
+                        if result.records.domain
+                        else None
+                    ),
+                    "email": (
+                        result.records.domain.registrant.email
+                        if result.records.domain
+                        else None
+                    ),
+                    "name": (
+                        result.records.domain.registrant.name
+                        if result.records.domain
+                        else None
+                    ),
+                    "telephone": (
+                        result.records.domain.registrant.telephone
+                        if result.records.domain
+                        else None
+                    ),
+                },
+                "abuse": {
+                    "email": (
+                        result.records.domain.abuse.email
+                        if result.records.domain
+                        else None
+                    ),
+                    "telephone": (
+                        result.records.domain.abuse.telephone
+                        if result.records.domain
+                        else None
+                    ),
+                },
+                "technical": {
+                    "organization": (
+                        result.records.domain.tech.organization
+                        if result.records.domain
+                        else None
+                    ),
+                    "email": (
+                        result.records.domain.tech.email
+                        if result.records.domain
+                        else None
+                    ),
+                    "name": (
+                        result.records.domain.tech.name
+                        if result.records.domain
+                        else None
+                    ),
+                    "telephone": (
+                        result.records.domain.tech.telephone
+                        if result.records.domain
+                        else None
+                    ),
+                },
             },
         }
 

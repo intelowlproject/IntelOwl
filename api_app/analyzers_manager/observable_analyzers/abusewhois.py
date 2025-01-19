@@ -15,7 +15,6 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
     def update(cls) -> bool:
         pass
 
-    @staticmethod
     def _parse_raw_whois_text(self, raw_text):
         """Extract network information from raw WHOIS text"""
         info = {}
@@ -73,16 +72,17 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
             },
         }
 
-    def _format_domain_data(self, result):
+    @staticmethod
+    def _format_domain_data(result):
         """Format domain WHOIS data"""
         return {
             "domain": {
                 "name": result.address,
                 "ip_address": result.ip_address,
                 "registrar": {
-                    "provider": result.registrar.provider if result.registrar else None,
-                    "email": result.registrar.address if result.registrar else None,
-                    "type": result.registrar.type if result.registrar else None,
+                    "provider": result.registrar.provider,
+                    "email": result.registrar.address,
+                    "type": result.registrar.type,
                 },
             },
             "domain_info": {
@@ -92,73 +92,25 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
                 "statuses": (
                     result.records.domain.statuses if result.records.domain else []
                 ),
-                "expires_at": (
-                    result.records.domain.expires_at.isoformat()
-                    if result.records.domain and result.records.domain.expires_at
-                    else None
-                ),
-                "updated_at": (
-                    result.records.domain.updated_at.isoformat()
-                    if result.records.domain and result.records.domain.updated_at
-                    else None
-                ),
+                "expires_at": (result.records.domain.expires_at.isoformat()),
+                "updated_at": (result.records.domain.updated_at.isoformat()),
             },
             "contacts": {
                 "registrant": {
-                    "organization": (
-                        result.records.domain.registrant.organization
-                        if result.records.domain
-                        else None
-                    ),
-                    "email": (
-                        result.records.domain.registrant.email
-                        if result.records.domain
-                        else None
-                    ),
-                    "name": (
-                        result.records.domain.registrant.name
-                        if result.records.domain
-                        else None
-                    ),
-                    "telephone": (
-                        result.records.domain.registrant.telephone
-                        if result.records.domain
-                        else None
-                    ),
+                    "organization": (result.records.domain.registrant.organization),
+                    "email": (result.records.domain.registrant.email),
+                    "name": (result.records.domain.registrant.name),
+                    "telephone": (result.records.domain.registrant.telephone),
                 },
                 "abuse": {
-                    "email": (
-                        result.records.domain.abuse.email
-                        if result.records.domain
-                        else None
-                    ),
-                    "telephone": (
-                        result.records.domain.abuse.telephone
-                        if result.records.domain
-                        else None
-                    ),
+                    "email": (result.records.domain.abuse.email),
+                    "telephone": (result.records.domain.abuse.telephone),
                 },
                 "technical": {
-                    "organization": (
-                        result.records.domain.tech.organization
-                        if result.records.domain
-                        else None
-                    ),
-                    "email": (
-                        result.records.domain.tech.email
-                        if result.records.domain
-                        else None
-                    ),
-                    "name": (
-                        result.records.domain.tech.name
-                        if result.records.domain
-                        else None
-                    ),
-                    "telephone": (
-                        result.records.domain.tech.telephone
-                        if result.records.domain
-                        else None
-                    ),
+                    "organization": (result.records.domain.tech.organization),
+                    "email": (result.records.domain.tech.email),
+                    "name": (result.records.domain.tech.name),
+                    "telephone": (result.records.domain.tech.telephone),
                 },
             },
         }
@@ -171,7 +123,7 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
         formatted_data = (
             self._format_ip_data(result)
             if result.records.domain is None
-            else self._format_domain_data(result)
+            else AbuseWHOIS._format_domain_data(result)
         )
 
         # Remove any remaining null values at the top level

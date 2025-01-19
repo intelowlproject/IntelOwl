@@ -123,7 +123,7 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
         formatted_data = (
             self._format_ip_data(result)
             if result.records.domain is None
-            else AbuseWHOIS._format_domain_data(result)
+            else self._format_domain_data(result)
         )
 
         # Remove any remaining null values at the top level

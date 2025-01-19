@@ -15,7 +15,8 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
     def update(cls) -> bool:
         pass
 
-    def _parse_raw_whois_text(self, raw_text):
+    @staticmethod
+    def _parse_raw_whois_text(raw_text):
         """Extract network information from raw WHOIS text"""
         info = {}
         for line in raw_text.split("\n"):
@@ -72,8 +73,7 @@ class AbuseWHOIS(classes.ObservableAnalyzer):
             },
         }
 
-    @staticmethod
-    def _format_domain_data(result):
+    def _format_domain_data(self, result):
         """Format domain WHOIS data"""
         return {
             "domain": {

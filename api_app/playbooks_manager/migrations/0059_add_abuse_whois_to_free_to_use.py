@@ -46,8 +46,8 @@ def reverse_migrate(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("playbooks_manager", "0057_alter_phishing_extractor_add_domain"),
-        ("analyzers_manager", "0145_analyzer_config_ultradns_malicious_detector"),
+        ("playbooks_manager", "0058_add_ultradns_to_free_to_use_and_dns"),
+        ("analyzers_manager", "0147_analyzer_config_abusewhois"),
     ]
 
     operations = [

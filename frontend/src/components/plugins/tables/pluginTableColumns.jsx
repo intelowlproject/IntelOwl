@@ -20,6 +20,7 @@ import {
   PlaybooksEditButton,
   PluginDeletionButton,
   PluginConfigButton,
+  PlaybookFlowsButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -376,6 +377,7 @@ export const playbookTableColumns = [
     disableSortBy: true,
     Cell: ({ value }) => (
       <div className="d-flex justify-content-center mx-2">
+        <PlaybookFlowsButton playbook={value} />
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={

@@ -281,7 +281,7 @@ describe("PivotConfigForm test", () => {
         {
           name: "myNewPivot",
           python_module: "self_analyzable.SelfAnalyzable",
-          playbooks_choice: ["DNS"],
+          playbooks_choice: ["TEST_PLAYBOOK_IP"],
           related_analyzer_configs: ["TEST_ANALYZER"],
           related_connector_configs: [],
         },

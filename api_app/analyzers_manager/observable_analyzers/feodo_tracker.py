@@ -11,12 +11,14 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.mixins import AbuseCHMixin
+from api_app.models import PluginConfig
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-class Feodo_Tracker(classes.ObservableAnalyzer):
+class Feodo_Tracker(AbuseCHMixin, classes.ObservableAnalyzer):
     """
     Feodo Tracker offers various blocklists,
     helping network owners to protect their
@@ -65,6 +67,22 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
             raise AnalyzerRunException(f"Key error in run: {e}")
         return result
 
+    # this is necessary because during the "update()" flow the config()
+    # method is not called and the attributes would not be accessible by "cls"
+    @classmethod
+    def get_service_auth_headers(cls) -> {}:
+        for plugin in PluginConfig.objects.filter(
+            parameter__python_module=cls.python_module,
+            parameter__is_secret=True,
+            parameter__name="service_api_key",
+        ):
+            if plugin.value:
+                logger.debug("Found auth key for feodo tracker update")
+                return {"Auth-Key": plugin.value}
+
+        logger.debug("Not found auth key for feodo tracker update")
+        return {}
+
     @classmethod
     def update(cls) -> bool:
         """
@@ -74,7 +92,7 @@ class Feodo_Tracker(classes.ObservableAnalyzer):
             logger.info(f"starting download of db from {db_url}")
 
             try:
-                r = requests.get(db_url)
+                r = requests.get(db_url, headers=cls.get_service_auth_headers())
                 r.raise_for_status()
             except requests.RequestException:
                 return False

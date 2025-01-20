@@ -6,12 +6,13 @@ import requests
 
 from api_app.ingestors_manager.classes import Ingestor
 from api_app.ingestors_manager.exceptions import IngestorRunException
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatFox(Ingestor):
+class ThreatFox(AbuseCHMixin, Ingestor):
     # API endpoint
     url = "https://threatfox-api.abuse.ch/api/v1/"
     # Days to check. From 1 to 7
@@ -22,7 +23,11 @@ class ThreatFox(Ingestor):
         pass
 
     def run(self) -> Iterable[Any]:
-        result = requests.post(self.url, json={"query": "get_iocs", "days": self.days})
+        result = requests.post(
+            self.url,
+            json={"query": "get_iocs", "days": self.days},
+            headers=self.authentication_header,
+        )
         result.raise_for_status()
         content = result.json()
         logger.info(f"ThreatFox data is {content}")

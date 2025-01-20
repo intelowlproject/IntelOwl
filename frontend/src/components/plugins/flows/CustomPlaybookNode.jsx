@@ -9,15 +9,12 @@ function CustomPlaybookNode({ data }) {
     <>
       {/* Badge */}
       <NodeToolbar position="top" align="start" isVisible offset={3}>
-        <Badge color="#5593ab" style={{ backgroundColor: "#5593ab" }}>
-          Playbook
-        </Badge>
+        <Badge className="bg-secondary">Playbook</Badge>
       </NodeToolbar>
       {/* Info */}
       <NodeToolbar
         position="right"
         style={{
-          background: "#000f12",
           border: "1px solid #6c757d",
           borderRadius: "10px",
         }}
@@ -32,12 +29,10 @@ function CustomPlaybookNode({ data }) {
         </small>
       </NodeToolbar>
       <div
-        className="react-flow__node-input"
+        className="react-flow__node-input border-secondary bg-tertiary text-white"
         id={`playbook-${data.id}`}
         style={{
-          background: "#2f515e",
-          color: "#fff",
-          border: "1px solid #5593ab",
+          border: `1px solid`,
           minWidth: "250px",
         }}
       >

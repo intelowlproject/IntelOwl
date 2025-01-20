@@ -439,7 +439,8 @@ export function PlaybookFlowsButton({ playbook }) {
           <ModalBody className="mx-2">
             <small>
               Note: Pivots are plugins designed to run automatically within a
-              playbook after certain conditions are triggered.
+              playbook after certain conditions are triggered. Some flows of the
+              tree could miss in the analysis due to this reason.
             </small>
             <div
               id={`playbookflow-${playbook.id}`}

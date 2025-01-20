@@ -8,15 +8,12 @@ function CustomPivotNode({ data }) {
   return (
     <>
       <NodeToolbar position="top" align="start" isVisible offset={3}>
-        <Badge color="#b5ba66" style={{ backgroundColor: "#b5ba66" }}>
-          Pivot
-        </Badge>
+        <Badge className="bg-advisory">Pivot</Badge>
       </NodeToolbar>
       {/* Info */}
       <NodeToolbar
         position="right"
         style={{
-          background: "#000f12",
           border: "1px solid #6c757d",
           borderRadius: "10px",
         }}
@@ -25,30 +22,26 @@ function CustomPivotNode({ data }) {
       >
         <small className="d-flex justify-content-between">
           <span className="me-4">Analyzers:</span>
-          <span style={{ color: "#b5ba66" }}>{data?.analyzers || "-"}</span>
+          <span className="text-advisory">{data?.analyzers || "-"}</span>
         </small>
         <small className="d-flex justify-content-between">
           <span className="me-4">Connectors:</span>
-          <span style={{ color: "#b5ba66" }}>{data?.connectors || "-"}</span>
+          <span className="text-advisory">{data?.connectors || "-"}</span>
         </small>
         <small className="d-flex justify-content-between">
           <span className="me-4">Type:</span>
-          <span style={{ color: "#b5ba66" }}>{data?.type}</span>
+          <span className="text-advisory">{data?.type}</span>
         </small>
         <small className="d-flex justify-content-between">
           <span className="me-4"> Field to analyze:</span>
-          <span style={{ color: "#b5ba66" }}>
-            {data?.fieldToCompare || "-"}
-          </span>
+          <span className="text-advisory">{data?.fieldToCompare || "-"}</span>
         </small>
       </NodeToolbar>
       <div
-        className="react-flow__node-input"
+        className="react-flow__node-input border-advisory bg-tertiary text-white"
         id={`pivot-${data.id}`}
         style={{
-          background: "#2f515e",
-          color: "#fff",
-          border: "1px solid #b5ba66",
+          border: "1px solid",
           minWidth: "250px",
         }}
       >

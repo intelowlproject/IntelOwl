@@ -43,8 +43,15 @@ export function PlaybookFlows({ playbook }) {
       setNodes(initialNodes);
       setEdges(initialEdges);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbook, pivotsLoading, playbooksLoading]);
+  }, [
+    playbook,
+    pivotsLoading,
+    playbooksLoading,
+    setNodes,
+    setEdges,
+    pivotStored,
+    playbooksStored,
+  ]);
 
   return (
     <div

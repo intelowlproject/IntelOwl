@@ -75,7 +75,7 @@ describe("test PlaybookFlows", () => {
     expect(rootNode.textContent).toBe("TEST_PLAYBOOK_FILE");
     const playbookBadge = screen.getByText("Playbook");
     expect(playbookBadge).toBeInTheDocument();
-    expect(playbookBadge.className).toContain("badge bg-#5593ab");
+    expect(playbookBadge.className).toContain("badge bg-secondary");
   });
 
   test("PlaybookFlows - playbook + pivot + playbook", () => {
@@ -90,20 +90,20 @@ describe("test PlaybookFlows", () => {
     expect(rootNode.textContent).toBe("TEST_PLAYBOOK_DOMAIN");
     const playbookBadge = screen.getAllByText("Playbook")[0];
     expect(playbookBadge).toBeInTheDocument();
-    expect(playbookBadge.className).toContain("badge bg-#5593ab");
+    expect(playbookBadge.className).toContain("badge bg-secondary");
     // pivot node
     const pivotNode = container.querySelector("#pivot-13");
     expect(pivotNode).toBeInTheDocument();
     expect(pivotNode.textContent).toBe("TEST_PIVOT");
     const pivotBadge = screen.getByText("Pivot");
     expect(pivotBadge).toBeInTheDocument();
-    expect(pivotBadge.className).toContain("badge bg-#b5ba66");
+    expect(pivotBadge.className).toContain("bg-advisory badge");
     // second playbook
     const secondPlaybookNode = container.querySelector("#playbook-1");
     expect(secondPlaybookNode).toBeInTheDocument();
     expect(secondPlaybookNode.textContent).toBe("TEST_PLAYBOOK_IP");
     const secondPlaybookBadge = screen.getAllByText("Playbook")[1];
     expect(secondPlaybookBadge).toBeInTheDocument();
-    expect(secondPlaybookBadge.className).toContain("badge bg-#5593ab");
+    expect(secondPlaybookBadge.className).toContain("badge bg-secondary");
   });
 });

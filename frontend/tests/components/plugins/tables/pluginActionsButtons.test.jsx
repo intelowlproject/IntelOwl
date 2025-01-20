@@ -13,14 +13,22 @@ import {
   PluginPullButton,
   PlaybooksEditButton,
   PluginConfigButton,
+  PlaybookFlowsButton,
 } from "../../../../src/components/plugins/tables/pluginActionsButtons";
-import { mockedUseOrganizationStoreOwner } from "../../../mock";
+import {
+  mockedUseOrganizationStoreOwner,
+  mockedPlaybooks,
+} from "../../../mock";
 
 jest.mock("axios");
 jest.mock("../../../../src/stores/useOrganizationStore", () => ({
   useOrganizationStore: jest.fn((state) =>
     state(mockedUseOrganizationStoreOwner),
   ),
+}));
+// mock flow component
+jest.mock("../../../../src/components/plugins/flows/PlaybookFlows", () => ({
+  PlaybookFlows: jest.fn((props) => <div {...props} />),
 }));
 
 // current user must be equal to org owner
@@ -455,4 +463,25 @@ describe("Plugin Config test", () => {
       });
     },
   );
+});
+
+describe("PlaybookFlowsButton test", () => {
+  test("PlaybookFlowsButton", async () => {
+    const userAction = userEvent.setup();
+    const { container } = render(
+      <BrowserRouter>
+        <PlaybookFlowsButton playbook={mockedPlaybooks.TEST_PLAYBOOK_DOMAIN} />
+      </BrowserRouter>,
+    );
+
+    const playbookFlowsIcon = container.querySelector(
+      "#playbook-flows-btn__TEST_PLAYBOOK_DOMAIN",
+    );
+    expect(playbookFlowsIcon).toBeInTheDocument();
+
+    userAction.click(playbookFlowsIcon);
+    await waitFor(() => {
+      expect(screen.getByText("Possible playbook flows")).toBeInTheDocument();
+    });
+  });
 });

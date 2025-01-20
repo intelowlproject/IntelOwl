@@ -17,6 +17,7 @@ jest.mock("recharts", () => {
   const OriginalModule = jest.requireActual("recharts");
   return {
     ...OriginalModule,
+    // eslint-disable-next-line react/prop-types
     ResponsiveContainer: ({ children }) => (
       <OriginalModule.ResponsiveContainer width={800} height={800}>
         {children}
@@ -72,17 +73,19 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-28T22:00:00Z").getDate()}/${new Date("2024-11-28T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T22:00:00Z").getDate()}/${new Date("2024-11-29T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
+    let hours = new Date("2024-11-29T23:00:00Z").getHours();
+    if (hours === 0) hours = "00";
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("pending")).toBeInTheDocument();
@@ -136,17 +139,19 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-28T22:00:00Z").getDate()}/${new Date("2024-11-28T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T22:00:00Z").getDate()}/${new Date("2024-11-29T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
+    let hours = new Date("2024-11-29T23:00:00Z").getHours();
+    if (hours === 0) hours = "00";
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("file")).toBeInTheDocument();
@@ -207,17 +212,19 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-28T22:00:00Z").getDate()}/${new Date("2024-11-28T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T22:00:00Z").getDate()}/${new Date("2024-11-29T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
+    let hours = new Date("2024-11-29T23:00:00Z").getHours();
+    if (hours === 0) hours = "00";
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("ip")).toBeInTheDocument();
@@ -275,17 +282,19 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-28T22:00:00Z").getDate()}/${new Date("2024-11-28T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T22:00:00Z").getDate()}/${new Date("2024-11-29T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
+    let hours = new Date("2024-11-29T23:00:00Z").getHours();
+    if (hours === 0) hours = "00";
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("application/json")).toBeInTheDocument();
@@ -343,17 +352,19 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-28T22:00:00Z").getDate()}/${new Date("2024-11-28T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T22:00:00Z").getDate()}/${new Date("2024-11-29T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
+    let hours = new Date("2024-11-29T23:00:00Z").getHours();
+    if (hours === 0) hours = "00";
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("Dns")).toBeInTheDocument();
@@ -412,17 +423,19 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-28T22:00:00Z").getDate()}/${new Date("2024-11-28T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T22:00:00Z").getDate()}/${new Date("2024-11-29T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
+    let hours = new Date("2024-11-29T23:00:00Z").getHours();
+    if (hours === 0) hours = "00";
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("user_a")).toBeInTheDocument();
@@ -481,17 +494,19 @@ describe("test dashboard's charts", () => {
     // needed to support different timezones (ex: ci and local could be different)
     expect(
       screen.getByText(
-        `28/11, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-28T22:00:00Z").getDate()}/${new Date("2024-11-28T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-28T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T22:00:00Z").getDate()}/${new Date("2024-11-29T22:00:00Z").getMonth() + 1}, ${new Date("2024-11-29T22:00:00Z").getHours()}:00`,
       ),
     ).toBeInTheDocument();
+    let hours = new Date("2024-11-29T23:00:00Z").getHours();
+    if (hours === 0) hours = "00";
     expect(
       screen.getByText(
-        `29/11, ${new Date("2024-11-29T23:00:00Z").getHours()}:00`,
+        `${new Date("2024-11-29T23:00:00Z").getDate()}/${new Date("2024-11-29T23:00:00Z").getMonth() + 1}, ${hours}:00`,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("AMBER")).toBeInTheDocument();

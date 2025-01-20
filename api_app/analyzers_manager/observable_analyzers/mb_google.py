@@ -11,13 +11,19 @@ class MB_GOOGLE(MB_GET):
     This is a modified version of MB_GET.
     """
 
+    def update(self) -> bool:
+        pass
+
     def run(self):
         results = {}
 
         query = f"{self.observable_name} site:bazaar.abuse.ch"
         for url in googlesearch.search(query, stop=20):
             mb_hash = url.split("/")[-2]
-            res = super().query_mb_api(observable_name=mb_hash)
+            res = super().query_mb_api(
+                observable_name=mb_hash,
+                headers=self.authentication_header,
+            )
             results[mb_hash] = res
 
         return results

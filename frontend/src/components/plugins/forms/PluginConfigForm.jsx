@@ -50,6 +50,7 @@ function CustomInput({ formik, config, configType, disabledInputField }) {
                 : "bg-darker border-0"
             }
             disabled={disabledInputField}
+            autoComplete={config.is_secret ? "off" : "on"}
           />
           <FormFeedback>This field must be a number.</FormFeedback>
         </>
@@ -70,6 +71,7 @@ function CustomInput({ formik, config, configType, disabledInputField }) {
               : "bg-darker border-0"
           }
           disabled={disabledInputField}
+          autoComplete={config.is_secret ? "off" : "on"}
         />
       );
     case ParameterTypes.STR:
@@ -91,6 +93,7 @@ function CustomInput({ formik, config, configType, disabledInputField }) {
               : "bg-darker border-0"
           }
           disabled={disabledInputField}
+          autoComplete={config.is_secret ? "off" : "on"}
         />
       );
     case ParameterTypes.DICT:
@@ -179,6 +182,7 @@ function CustomInput({ formik, config, configType, disabledInputField }) {
                               }}
                               value={value}
                               disabled={disabledInputField}
+                              autoComplete={config.is_secret ? "off" : "on"}
                             />
                           </Col>
                           <Button

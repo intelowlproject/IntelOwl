@@ -9,7 +9,12 @@ function CustomPlaybookNode({ data }) {
     <>
       {/* Badge */}
       <NodeToolbar position="top" align="start" isVisible offset={3}>
-        <Badge className="bg-secondary">Playbook</Badge>
+        <Badge
+          className="bg-secondary"
+          style={{ opacity: data.configured ? "1" : "0.5" }}
+        >
+          Playbook
+        </Badge>
       </NodeToolbar>
       {/* Info */}
       <NodeToolbar
@@ -22,7 +27,9 @@ function CustomPlaybookNode({ data }) {
         className="p-3 px-4 my-2 mx-2 d-flex flex-column bg-body"
       >
         <small
-          className="d-flex justify-content-between"
+          className={`d-flex justify-content-between text-white ${
+            !data.configured && "fst-italic"
+          }`}
           style={{ maxWidth: "25vh" }}
         >
           <span>{data?.description}</span>
@@ -34,6 +41,7 @@ function CustomPlaybookNode({ data }) {
         style={{
           border: `1px solid`,
           minWidth: "250px",
+          opacity: data.configured ? "1" : "0.5",
         }}
       >
         <strong>{data?.label}</strong>

@@ -12,6 +12,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from api_app import models
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
 from api_app.playbooks_manager.models import PlaybookConfig
 
 from .. import CustomViewSetTestCase
@@ -22,8 +23,10 @@ User = get_user_model()
 class ApiViewTests(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
-        self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
-        self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
+        # self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
+        # self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
+        self.uploaded_file, self.file_md5 = None, None
+        self.uploaded_file2, self.file_md52 = None, None
         self.analyze_file_data = {
             "file": self.uploaded_file,
             "analyzers_requested": [
@@ -287,6 +290,49 @@ class ApiViewTests(CustomViewSetTestCase):
             list(job.analyzers_to_execute.all().values_list("name", flat=True)),
             msg=msg,
         )
+
+    def test_observable_no_analyzers_only_connector(self):
+        models.PluginConfig.objects.create(
+            value="test subject",
+            parameter=models.Parameter.objects.get(
+                name="subject",
+                python_module=models.PythonModule.objects.get(
+                    module="email_sender.EmailSender"
+                ),
+            ),
+            connector_config=ConnectorConfig.objects.get(name="EmailSender"),
+        )
+        models.PluginConfig.objects.create(
+            value="test body",
+            parameter=models.Parameter.objects.get(
+                name="body",
+                python_module=models.PythonModule.objects.get(
+                    module="email_sender.EmailSender"
+                ),
+            ),
+            connector_config=ConnectorConfig.objects.get(name="EmailSender"),
+        )
+
+        data = {
+            "observables": [
+                ["ip", "8.8.8.8"],
+            ],
+            "connectors_requested": ["EmailSender"],
+            "tlp": "CLEAR",
+        }
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        content = contents["results"][0]
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
+        self.assertEqual(job.analyzers_requested.count(), 0)
 
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)

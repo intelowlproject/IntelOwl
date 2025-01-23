@@ -66,7 +66,7 @@ function addNode(
         playbookConfig.id = `${child}`;
         playbookConfig.name = child;
         playbookConfig.description =
-          "The playbook is not enabled or configured for this user.";
+          "The playbook is not enabled or configured for this user. So the pivot will always fail as it cannot find the playbook to execute.";
         playbookConfig.pivots = [];
         playbookConfig.configured = false;
       } else {

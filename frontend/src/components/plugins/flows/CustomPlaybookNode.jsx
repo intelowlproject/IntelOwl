@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Handle, Position, NodeToolbar } from "reactflow";
 import "reactflow/dist/style.css";
 import { Badge } from "reactstrap";
+import { IoMdWarning } from "react-icons/io";
 
 function CustomPlaybookNode({ data }) {
   return (
@@ -24,8 +25,9 @@ function CustomPlaybookNode({ data }) {
           borderRadius: "10px",
         }}
         id={`toolbar-pivot-${data.id}`}
-        className="p-3 px-4 my-2 mx-2 d-flex flex-column bg-body"
+        className="p-3 px-4 my-2 mx-2 d-flex bg-body"
       >
+        {!data.configured && <IoMdWarning className="text-warning my-1 me-2" />}
         <small
           className={`d-flex justify-content-between text-white ${
             !data.configured && "fst-italic"

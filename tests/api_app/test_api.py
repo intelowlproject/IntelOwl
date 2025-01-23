@@ -23,10 +23,8 @@ User = get_user_model()
 class ApiViewTests(CustomViewSetTestCase):
     def setUp(self):
         super().setUp()
-        # self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
-        # self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
-        self.uploaded_file, self.file_md5 = None, None
-        self.uploaded_file2, self.file_md52 = None, None
+        self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
+        self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
         self.analyze_file_data = {
             "file": self.uploaded_file,
             "analyzers_requested": [
@@ -333,6 +331,7 @@ class ApiViewTests(CustomViewSetTestCase):
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
         self.assertEqual(job.analyzers_requested.count(), 0)
+        self.assertEqual(job.pivots_to_execute.count(), 0)
 
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)

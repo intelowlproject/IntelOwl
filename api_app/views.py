@@ -324,10 +324,12 @@ def analyze_multiple_observables(request):
     - 200: JSON response with the job details for each initiated analysis.
     """
     logger.info(f"received analyze_multiple_observables from user {request.user}")
+    logger.debug(f"{request.data=}")
     oas = ObservableAnalysisSerializer(
         data=request.data, many=True, context={"request": request}
     )
     oas.is_valid(raise_exception=True)
+    logger.debug(f"{oas.validated_data=}")
     parent_job = oas.validated_data[0].get("parent_job", None)
     jobs = oas.save(send_task=True, parent=parent_job)
     jrs = JobResponseSerializer(jobs, many=True).data

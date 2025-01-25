@@ -14,9 +14,6 @@ class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
         """
         Prepares and executes a Nuclei scan through the Docker-based API.
         """
-        # Prepare request data
-        self.template_dirs = []
-
         req_data = {
             "observable": self.observable_name,  # The URL or observable to scan
             "template_dirs": self.template_dirs or [],
@@ -24,7 +21,4 @@ class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
 
         # Execute the request
         report = self._docker_run(req_data=req_data, req_files=None)
-        print("helllo")
-
-        print(report)
         return report

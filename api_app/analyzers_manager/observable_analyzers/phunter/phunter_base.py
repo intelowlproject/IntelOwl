@@ -8,7 +8,8 @@ class PhunterBase:
     def __init__(self):
         pass
 
-    def phunt(self, phone_number: str) -> dict:
+    @staticmethod
+    def phunt(phone_number: str) -> dict:
 
         # General Information
 
@@ -19,9 +20,7 @@ class PhunterBase:
         valid = phonenumbers.is_valid_number(parsed)
 
         operator = carrier.name_for_number(parsed, "en")
-        if operator != "":
-            operator = operator
-        else:
+        if operator == "":
             operator = "Not found"
 
         line = phonenumbers.number_type(parsed)
@@ -58,10 +57,7 @@ class PhunterBase:
 
         r = requests.get(spamcalls_url, headers={"user-agent": user_agent})
 
-        if r.status_code == 200:
-            spammer = True
-        else:
-            spammer = False
+        spammer = r.status_code == 200
 
         result = {
             "Phone Number": phone_number,

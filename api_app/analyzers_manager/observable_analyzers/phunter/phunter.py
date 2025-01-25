@@ -24,9 +24,7 @@ class Phunter(ObservableAnalyzer):
     def run(self):
         logger.info(f"Running Phunter Analyzer for {self.observable_name}")
 
-        phunter = PhunterBase()
-
-        results = phunter.phunt(phone_number=self.observable_name)
+        results = PhunterBase.phunt(phone_number=self.observable_name)
 
         return results
 

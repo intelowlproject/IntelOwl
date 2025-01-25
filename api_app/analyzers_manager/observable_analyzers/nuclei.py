@@ -7,7 +7,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAna
 class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
     url: str = "http://nuclei_analyzer:4008/run-nuclei"
     template_dirs: list
-    max_tries: int = 25
+    max_tries: int = 40
     poll_distance: int = 30
 
     def run(self):

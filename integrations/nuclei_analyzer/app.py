@@ -108,7 +108,7 @@ def run_nuclei_command(
 
         return True, {
             "success": True,
-            "report": parsed_reports,
+            "result": parsed_reports,
             "scan_status": "COMPLETED",
             "statistics": {"total_findings": len(parsed_reports)},
         }

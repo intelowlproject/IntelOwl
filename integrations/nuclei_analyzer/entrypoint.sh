@@ -8,7 +8,6 @@ echo "Starting Nuclei Analyzer Service..."
 
 # Run the Flask application with Gunicorn
 exec gunicorn --bind 0.0.0.0:4008 \
-              --timeout 600 \
-              --workers 4 \
+              --timeout 1200 \
               --log-level info \
               app:app

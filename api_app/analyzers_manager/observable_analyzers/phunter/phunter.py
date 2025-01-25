@@ -35,7 +35,7 @@ class Phunter(ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch.object(
-                    Phunter,
+                    PhunterBase,
                     "phunt",
                     return_value={
                         "Valid": "true",

@@ -10,6 +10,10 @@ class NucleiAnalyzer(ObservableAnalyzer, DockerBasedAnalyzer):
     max_tries: int = 40
     poll_distance: int = 30
 
+    @classmethod
+    def update(cls) -> bool:
+        pass
+
     def run(self):
         """
         Prepares and executes a Nuclei scan through the Docker-based API.

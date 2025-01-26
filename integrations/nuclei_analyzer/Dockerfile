@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.12.3
 
 # Set environment variables
 ENV PROJECT_PATH=/opt/nuclei-api
@@ -11,19 +11,14 @@ RUN apt-get update && \
     ca-certificates \
     wget \
     unzip && \
-    wget https://github.com/projectdiscovery/nuclei/releases/download/v3.3.7/nuclei_3.3.7_linux_amd64.zip && \
+    wget --progress=dot:giga https://github.com/projectdiscovery/nuclei/releases/download/v3.3.7/nuclei_3.3.7_linux_amd64.zip && \
     unzip nuclei_3.3.7_linux_amd64.zip && \
     mv nuclei /usr/local/bin/ && \
     chmod +x /usr/local/bin/nuclei && \
     rm nuclei_3.3.7_linux_amd64.zip && \
-    nuclei -update-template-dir /opt/nuclei-api/nuclei-templates -update-templates
-
-
-# Create non-root user
-RUN useradd -ms /bin/bash ${USER}
-
-# Create necessary directories
-RUN mkdir -p ${PROJECT_PATH} ${LOG_PATH}
+    nuclei -update-template-dir /opt/nuclei-api/nuclei-templates -update-templates && \
+    useradd -ms /bin/bash ${USER} && \ 
+    mkdir -p ${PROJECT_PATH} ${LOG_PATH}
 
 # Set working directory
 WORKDIR ${PROJECT_PATH}

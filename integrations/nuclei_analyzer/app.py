@@ -84,6 +84,7 @@ def run_nuclei_command(
             stderr=subprocess.PIPE,
             text=True,
             timeout=1200,
+            check=True,
         )
 
         if report.returncode != 0:
@@ -150,95 +151,89 @@ def async_nuclei_scan(task_id: str, url: str, template_dirs: list = None):
         )
 
 
-@app.route("/run-nuclei", methods=["POST", "GET"])
-def run_nuclei():
-    if request.method == "GET":
-        task_id = request.args.get("key")
-        if not task_id:
-            return (
-                jsonify({"success": False, "error": "Missing task key parameter"}),
-                400,
-            )
+@app.route("/run-nuclei", methods=["GET"])
+def get_nuclei_scan_status():
+    task_id = request.args.get("key")
+    if not task_id:
+        return jsonify({"success": False, "error": "Missing task key parameter"}), 400
 
-        if task_id not in task_store:
-            return jsonify({"success": False, "error": "Invalid task key"}), 404
+    if task_id not in task_store:
+        return jsonify({"success": False, "error": "Invalid task key"}), 404
 
-        task_info = task_store[task_id]
+    task_info = task_store[task_id]
 
-        if task_info["status"] == "running":
-            return (
-                jsonify({"status": "running", "started_at": task_info["started_at"]}),
-                200,
-            )
-
+    if task_info["status"] == "running":
         return (
-            jsonify(
-                {
-                    "status": task_info["status"],
-                    "report": task_info.get("report"),
-                    "error": task_info.get("error"),
-                    "started_at": task_info["started_at"],
-                    "completed_at": task_info["completed_at"],
-                }
-            ),
+            jsonify({"status": "running", "started_at": task_info["started_at"]}),
             200,
         )
 
-    # Handle POST request to start new scan
-    else:
-        try:
-            data = request.get_json()
-
-            if not data or "observable" not in data:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "error": "Invalid request, 'observable' field is required",
-                        }
-                    ),
-                    400,
-                )
-
-            obs = data["observable"]
-            template_dirs = data.get("template_dirs", [])
-
-            if not isinstance(template_dirs, list):
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "error": "Invalid request, 'template_dirs' must be a list",
-                        }
-                    ),
-                    400,
-                )
-
-            task_id = str(uuid.uuid4())
-
-            task_store[task_id] = {
-                "status": "running",
-                "started_at": datetime.utcnow().isoformat(),
+    return (
+        jsonify(
+            {
+                "status": task_info["status"],
+                "report": task_info.get("report"),
+                "error": task_info.get("error"),
+                "started_at": task_info["started_at"],
+                "completed_at": task_info["completed_at"],
             }
+        ),
+        200,
+    )
 
-            thread = Thread(
-                target=async_nuclei_scan, args=(task_id, obs, template_dirs)
-            )
-            thread.start()
 
-            return jsonify({"status": "accepted", "key": task_id}), 200
+@app.route("/run-nuclei", methods=["POST"])
+def start_nuclei_scan():
+    try:
+        data = request.get_json()
 
-        except Exception as e:
+        if not data or "observable" not in data:
             return (
                 jsonify(
                     {
                         "success": False,
-                        "error": "An unexpected error occurred",
-                        "details": str(e),
+                        "error": "Invalid request, 'observable' field is required",
                     }
                 ),
-                500,
+                400,
             )
+
+        obs = data["observable"]
+        template_dirs = data.get("template_dirs", [])
+
+        if not isinstance(template_dirs, list):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Invalid request, 'template_dirs' must be a list",
+                    }
+                ),
+                400,
+            )
+
+        task_id = str(uuid.uuid4())
+        task_store[task_id] = {
+            "status": "running",
+            "started_at": datetime.utcnow().isoformat(),
+        }
+
+        thread = Thread(target=async_nuclei_scan, args=(task_id, obs, template_dirs))
+        thread.start()
+
+        return jsonify({"status": "accepted", "key": task_id}), 200
+
+    except Exception as e:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "An unexpected error occurred",
+                    "details": str(e),
+                }
+            ),
+            500,
+        )
 
 
 if __name__ == "__main__":

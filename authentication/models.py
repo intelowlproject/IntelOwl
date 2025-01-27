@@ -35,8 +35,6 @@ class DiscoverFromChoices(models.TextChoices):
     OTHER = "other", "Other"
 
 
-
-
 class UserProfile(models.Model):
     """
     Model representing a user profile.

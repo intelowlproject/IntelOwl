@@ -492,17 +492,19 @@ describe.only("DataModel mapping test", () => {
     const userAction = userEvent.setup();
     const data = {
       mapping_data_model: {
-        'permalink': 'external_references',
-        'data.hostnames': 'resolutions',
+        permalink: "external_references",
+        "data.hostnames": "resolutions",
       },
       type: "observable",
       python_module: "pythonmodule.pythonclass",
-    }
+    };
     const { container } = render(
       <BrowserRouter>
-        <MappingDataModel data={data.mapping_data_model}
-        type={data.type}
-        pythonModule={data.python_module} />
+        <MappingDataModel
+          data={data.mapping_data_model}
+          type={data.type}
+          pythonModule={data.python_module}
+        />
       </BrowserRouter>,
     );
 
@@ -522,12 +524,14 @@ describe.only("DataModel mapping test", () => {
       mapping_data_model: {},
       type: "observable",
       python_module: "pythonmodule.pythonclass",
-    }
+    };
     const { container } = render(
       <BrowserRouter>
-        <MappingDataModel data={data.mapping_data_model}
-        type={data.type}
-        pythonModule={data.python_module} />
+        <MappingDataModel
+          data={data.mapping_data_model}
+          type={data.type}
+          pythonModule={data.python_module}
+        />
       </BrowserRouter>,
     );
 
@@ -535,6 +539,6 @@ describe.only("DataModel mapping test", () => {
       "#mapping-data-model__pythonmodule",
     );
     expect(dataModelMappingIcon).toBeInTheDocument();
-    expect(dataModelMappingIcon.className).toContain("disabled");  
+    expect(dataModelMappingIcon.className).toContain("disabled");
   });
 });

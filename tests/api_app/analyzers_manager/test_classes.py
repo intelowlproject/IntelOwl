@@ -154,7 +154,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                         print(f"skipping {subclass.__name__} cause health check failed")
                         skipped = True
                         continue
-                    jobs = Job.objects.filter(file__mimetype=mimetype)
+                    jobs = Job.objects.filter(analyzable__mimetype=mimetype)
                     if jobs.exists():
                         found_one = True
                     for job in jobs:
@@ -235,7 +235,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
 
         Job.objects.create(
             user=self.superuser,
-            analyzer=an1,
+            analyzable=an1,
             status="reported_without_fails",
         )
         Job.objects.create(

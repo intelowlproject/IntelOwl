@@ -2,14 +2,18 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+import logging
 
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.mixins import AbuseCHMixin
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
+logger = logging.getLogger(__name__)
 
-class ThreatFox(classes.ObservableAnalyzer):
+
+class ThreatFox(AbuseCHMixin, classes.ObservableAnalyzer):
     url: str = "https://threatfox-api.abuse.ch/api/v1/"
     disable: bool = False  # optional
 
@@ -22,7 +26,11 @@ class ThreatFox(classes.ObservableAnalyzer):
 
         payload = {"query": "search_ioc", "search_term": self.observable_name}
 
-        response = requests.post(self.url, data=json.dumps(payload))
+        response = requests.post(
+            self.url,
+            data=json.dumps(payload),
+            headers=self.authentication_header,
+        )
         response.raise_for_status()
 
         result = response.json()

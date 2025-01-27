@@ -20,6 +20,7 @@ import {
   PlaybooksEditButton,
   PluginDeletionButton,
   PluginConfigButton,
+  PlaybookFlowsButton,
 } from "./pluginActionsButtons";
 import { JobTypes } from "../../../constants/jobConst";
 import TableCell from "../../common/TableCell";
@@ -348,6 +349,7 @@ export const playbookTableColumns = [
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
+    maxWidth: 145,
   },
   {
     Header: "Pivots",
@@ -358,6 +360,7 @@ export const playbookTableColumns = [
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
+    maxWidth: 145,
   },
   {
     Header: "Visualizers",
@@ -368,6 +371,7 @@ export const playbookTableColumns = [
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
+    maxWidth: 145,
   },
   {
     Header: "Actions",
@@ -375,7 +379,8 @@ export const playbookTableColumns = [
     accessor: (playbookConfig) => playbookConfig,
     disableSortBy: true,
     Cell: ({ value }) => (
-      <div className="d-flex justify-content-center mx-2">
+      <div className="d-flex flex-wrap justify-content-center mx-2">
+        <PlaybookFlowsButton playbook={value} />
         <OrganizationPluginStateToggle
           pluginName={value?.name}
           disabled={
@@ -396,7 +401,6 @@ export const playbookTableColumns = [
         )}
       </div>
     ),
-    maxWidth: 100,
   },
 ];
 

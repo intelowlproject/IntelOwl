@@ -230,7 +230,6 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         j1 = Job.objects.create(
             analyzable=an,
             user=self.user,
-            md5="72cf478e87b031233091d8c00a38ce00",
             status=Job.STATUSES.REPORTED_WITHOUT_FAILS,
             received_request_time=now() - datetime.timedelta(hours=3),
         )

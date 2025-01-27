@@ -252,7 +252,6 @@ class ObservableAnalyzerTestCase(CustomTestCase):
             user=self.superuser,
             analyzable=an4,
             status="reported_without_fails",
-            md5="3edd95917241e9ef9bbfc805c2c5aff3",
         )
         Job.objects.create(
             user=self.superuser,

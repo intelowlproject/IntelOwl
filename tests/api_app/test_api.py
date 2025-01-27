@@ -575,7 +575,6 @@ class ApiViewTests(CustomViewSetTestCase):
         an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe")
         job = models.Job.objects.create(
             tlp="CLEAR",
-            md5=self.file_md5,
             user=self.user,
             analyzable=an,
             status="reported_without_fails",
@@ -628,7 +627,6 @@ class ApiViewTests(CustomViewSetTestCase):
         an = Analyzable.objects.create(file=self.uploaded_file, name="file.exe")
         job = models.Job.objects.create(
             tlp="CLEAR",
-            md5=self.file_md5,
             user=self.user,
             analyzable=an,
             status="reported_without_fails",

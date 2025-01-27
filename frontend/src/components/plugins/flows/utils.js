@@ -66,9 +66,16 @@ function addNode(
         playbookConfig.id = `${child}`;
         playbookConfig.name = child;
         playbookConfig.description =
-          "The playbook is not enabled or configured for this user. So the pivot will always fail as it cannot find the playbook to execute.";
+          "The playbook is not enabled or configured for this user.";
         playbookConfig.pivots = [];
         playbookConfig.configured = false;
+
+        // set warning in the current pivot, it will always fail
+        const pivotIndex = nodesList.findIndex(
+          (pivotNode) => pivotNode.id === `${nodeType}-${nodeToAdd.id}`,
+        );
+        const pivotNode = nodesList[pivotIndex];
+        pivotNode.data.warning = true;
       } else {
         playbookConfig.configured = true;
       }
@@ -143,7 +150,7 @@ export function getNodesAndEdges(playbook, pivotsStored, playbooksStored) {
       300,
       60,
       50,
-      35,
+      50,
     );
     return [layoutedNodes, layoutedEdges];
   }

@@ -106,4 +106,65 @@ describe("test PlaybookFlows", () => {
     expect(secondPlaybookBadge).toBeInTheDocument();
     expect(secondPlaybookBadge.className).toContain("badge bg-secondary");
   });
+
+  test("PlaybookFlows - playbook + pivot + playbook not configured", () => {
+    mockedUsePluginConfigurationStore.pivots.push({
+      id: 3,
+      name: "TEST_PIVOT_ERROR",
+      description: "pivot: test",
+      python_module: "self_analyzable.SelfAnalyzable",
+      playbooks_choice: ["NO_CONFIGURED_PLAYBOOK"],
+      disabled: false,
+      soft_time_limit: 60,
+      routing_key: "default",
+      health_check_status: true,
+      delay: "00:00:00",
+      health_check_task: null,
+      config: {
+        queue: "default",
+        soft_time_limit: 60,
+      },
+      related_analyzer_configs: ["TEST_ANALYZER"],
+      secrets: {},
+      params: {},
+      verification: {
+        configured: true,
+        details: "Ready to use!",
+        missing_secrets: [],
+      },
+    });
+    mockedPlaybooks.TEST_PLAYBOOK_DOMAIN.pivots = ["TEST_PIVOT_ERROR"];
+
+    const { container } = render(
+      <BrowserRouter>
+        <PlaybookFlows playbook={mockedPlaybooks.TEST_PLAYBOOK_DOMAIN} />
+      </BrowserRouter>,
+    );
+    // Root node (playbook)
+    const rootNode = container.querySelector("#playbook-2");
+    expect(rootNode).toBeInTheDocument();
+    expect(rootNode.textContent).toBe("TEST_PLAYBOOK_DOMAIN");
+    const playbookBadge = screen.getAllByText("Playbook")[0];
+    expect(playbookBadge).toBeInTheDocument();
+    expect(playbookBadge.className).toContain("badge bg-secondary");
+    // pivot node
+    const pivotNode = container.querySelector("#pivot-3");
+    expect(pivotNode).toBeInTheDocument();
+    expect(pivotNode.textContent).toBe("TEST_PIVOT_ERROR");
+    const pivotBadge = screen.getByText("Pivot");
+    expect(pivotBadge).toBeInTheDocument();
+    expect(pivotBadge.className).toContain("bg-advisory badge");
+    const pivotWarningIcon = container.querySelector("#pivot-warning-icon");
+    expect(pivotWarningIcon).toBeInTheDocument();
+    // second playbook
+    const secondPlaybookNode = container.querySelector(
+      "#playbook-NO_CONFIGURED_PLAYBOOK",
+    );
+    expect(secondPlaybookNode).toBeInTheDocument();
+    expect(secondPlaybookNode.textContent).toBe("NO_CONFIGURED_PLAYBOOK");
+    const secondPlaybookBadge = screen.getAllByText("Playbook")[1];
+    expect(secondPlaybookBadge).toBeInTheDocument();
+    expect(secondPlaybookBadge.className).toContain("badge bg-secondary");
+    expect(secondPlaybookBadge).toHaveStyle(`opacity: 0.5`);
+  });
 });

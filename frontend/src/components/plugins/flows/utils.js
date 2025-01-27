@@ -33,6 +33,7 @@ function addNode(
     node.data = {
       ...node.data,
       description: nodeToAdd?.description,
+      configured: nodeToAdd?.configured,
     };
   }
   nodesList.push(node);
@@ -58,9 +59,26 @@ function addNode(
     });
   } else if (nodeToAdd.playbooks_choice) {
     nodeToAdd.playbooks_choice.forEach((child) => {
-      const playbookConfig = playbooksStored.find(
-        (plugin) => plugin.name === child,
-      );
+      let playbookConfig = {};
+      playbookConfig = playbooksStored.find((plugin) => plugin.name === child);
+      if (playbookConfig === undefined) {
+        playbookConfig = {};
+        playbookConfig.id = `${child}`;
+        playbookConfig.name = child;
+        playbookConfig.description =
+          "The playbook is not enabled or configured for this user.";
+        playbookConfig.pivots = [];
+        playbookConfig.configured = false;
+
+        // set warning in the current pivot, it will always fail
+        const pivotIndex = nodesList.findIndex(
+          (pivotNode) => pivotNode.id === `${nodeType}-${nodeToAdd.id}`,
+        );
+        const pivotNode = nodesList[pivotIndex];
+        pivotNode.data.warning = true;
+      } else {
+        playbookConfig.configured = true;
+      }
       addNode(
         nodesList,
         edgesList,
@@ -92,6 +110,7 @@ export function getNodesAndEdges(playbook, pivotsStored, playbooksStored) {
         id: playbook.id,
         label: playbook.name,
         description: playbook.description,
+        configured: true,
       },
       type: "playbookNode",
       draggable: false,
@@ -131,7 +150,7 @@ export function getNodesAndEdges(playbook, pivotsStored, playbooksStored) {
       300,
       60,
       50,
-      35,
+      50,
     );
     return [layoutedNodes, layoutedEdges];
   }

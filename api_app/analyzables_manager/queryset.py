@@ -1,4 +1,8 @@
+import logging
+
 from django.db.models import QuerySet
+
+logger = logging.getLogger(__name__)
 
 
 class AnalyzableQuerySet(QuerySet):
@@ -17,6 +21,10 @@ class AnalyzableQuerySet(QuerySet):
     def create(self, *args, **kwargs):
         obj = self.model(**kwargs)
         self._for_write = True
-        obj.full_clean()
+        try:
+            obj.full_clean()
+        except Exception as e:
+            logger.error(f"Already exists obj {obj.md5}")
+            raise e
         obj.save(force_insert=True, using=self.db)
         return obj

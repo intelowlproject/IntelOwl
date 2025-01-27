@@ -139,3 +139,5 @@ class EngineConfigTestCase(CustomTestCase):
         ip1.delete()
         ip2.delete()
         config.delete()
+        job.delete()
+        an1.delete()
